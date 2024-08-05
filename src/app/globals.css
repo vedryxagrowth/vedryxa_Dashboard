@@ -1,0 +1,340 @@
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+/* 
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+} */
+.container-ad-preview {
+  padding: 10px;
+  /* background-color: #000000; */
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    
+}
+.ad-preview {
+  margin: auto;
+  background-color: #dedddd;
+  border-radius: 5px;
+  padding: 20px;
+  width: 320px;
+  padding: 15px 0;
+  border-radius: 7px;
+  /* box-shadow: 2px 1px 10px 1px #b5b3b3; */
+}
+
+.ad-heading {
+  display: flex;
+  /* background-color: #262626; */
+  padding: 5px;
+}
+.ad-heading img {
+  margin-right: 5px;
+  border-radius: 50%;
+}
+.ad-heading .title {
+  flex-grow: 1;
+}
+.ad-heading .title .main {
+  font-weight: 800;
+  font-size: 17px;
+}
+
+.ad-heading .title .sub {
+  opacity: 0.6;
+  font-size: 12px;
+}
+.ad-heading .close {
+  margin-right: 10px;
+}
+.ad-desc {
+  /* background-color: #262626; */
+  padding: 0 10px;
+  font-weight: 500;
+}
+.ad-image {
+  margin: 5px 0;
+}
+.ad-image img {
+  width: 100%;
+  max-height: 200px;
+}
+.ad-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  word-wrap: break-word;
+}
+.ad-cta .details {
+  max-width: 66%;
+}
+.ad-cta .details .title {
+  font-weight: 700;
+  font-size: 15px;
+}
+.ad-cta .details .link {
+  opacity: 0.8;
+  width: 100%;
+  overflow: hidden;
+  word-wrap: normal;
+}
+.ad-cta .details .desc {
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+.ad-button button {
+  font-size: 14px;
+  font-weight: 400;
+  border-radius: 10px;
+  border: none;
+  padding: 6px 12px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.icons {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 10px 0 5px 0;
+  margin-top: 10px;
+}
+.icons * {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  column-gap: 5px;
+}
+@keyframes blinking {
+  0% { opacity: 1; }
+  50% { opacity: 0.2; }
+  100% { opacity: 1; }
+}
+
+.blinking {
+  animation: blinking 1s infinite;
+}
+/* App.css */
+.custom-carousel .slick-dots li {
+  width: 10px; /* Adjust the width of the pagination points */
+  height: 10px; /* Adjust the height of the pagination points */
+  margin: 0 4px; /* Adjust the margin between pagination points */
+  background-color: rgb(12, 237, 12); /* Set the background color of the pagination points */
+}
+/*  */
+body {
+  background-color: #f5f7fa;
+  font-family: 'Roboto', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+.ant-card {
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+.ant-card-bordered {
+  border: none;
+}
+.ant-btn-primary {
+  background-color: #5a5af2;
+  border-color: #5a5af2;
+}
+.ant-btn-primary:hover {
+  background-color: #4e4ed2;
+  border-color: #4e4ed2;
+}
+
+
+.select-container{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: nowrap; /* Prevent wrapping, keep elements in a single row */
+  overflow-x: auto; /* Enable horizontal scrolling if necessary */
+  gap: 15px; /* Minimum space between select elements */
+  width: 95%; /* Full width of the parent */
+  height: 80px;
+  box-sizing: border-box;
+  margin-left: 20px;
+}
+.select-container .ant-select {
+  flex: 1 1 200px; /* Flex-grow, flex-shrink, flex-basis */
+  min-width: 150px; /* Minimum width of each Select element */
+}
+.select-account{
+  height: 40px;
+  width: 200px;
+  
+}
+.date-class{
+  height: 40px;
+  width: 150px;
+}
+.select-timezone{
+  height: 40px;
+  width: 100px;
+}
+.submit-button{
+  height: 32px;
+  width: 120px;
+  background-color: rgb(104, 106, 218);
+  color: white;
+  border-radius: 8px;
+  border: 0px solid;
+}
+.font-red{
+  color: rgba(245, 8, 8, 0.993);
+}
+.ag-container{
+  height: 490px;
+  /* background-color: #bfbdb6; */
+}
+.ag-grid-Loader{
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.daily-contaier{
+  width: 100px;
+  height: 30px;
+  display: flex;
+  padding-top: 10px;
+  margin-bottom: 10px;
+  justify-content: center;
+  margin-left: 15px;
+  align-items: center;
+}
+.blinking-circle {
+  width: 20px;
+  height: 18px;
+  background-color: green;
+  border-radius: 50%;
+  animation: blink 1s infinite;
+}
+.blinking-circle-1 {
+  width: 18px;
+  height: 18px;
+  background-color:red;
+  border-radius: 50%;
+  animation: blink 1s infinite;
+}
+.blinking-circle-3{
+  width: 18px;
+  height: 18px;
+  background-color:rgb(18, 47, 110);
+  border-radius: 50%;
+  animation: blink 1s infinite;
+
+}
+
+
+@keyframes blink {
+  0%, 100% {
+      opacity: 1;
+  }
+  50% {
+      opacity: 0;
+  }
+}
+
+.ant-carousel .slick-dots li button {
+  background-color: green; /* Change slider dot color */
+  }
+
+.ant-carousel .slick-dots li.slick-active button {
+  background-color: darkgreen; /* Change active slider dot color */
+}
+
+.export-button{
+  width: 100px;
+  height: 30px;
+  background-color: lightcoral;
+  border: solid 0px;
+  border-radius: 5px;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.select-element{
+  width: 200px;
+  height: 30px;
+}
+
+@media (min-width:600px){
+  .select-element{
+    width: 150px;
+    height: 30px;
+  }
+}
+.reports-container {
+  min-height: 100vh;
+  width: 100%;
+  overflow: auto;
+  position: relative;
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: #888 #f1f1f1; /* Optional: Customize scrollbar colors */
+}
+
+/* Custom properties for easy theming */
+/* :root {
+  --scrollbar-width: 2px;
+  --scrollbar-thumb-bg: #888;
+  --scrollbar-thumb-hover-bg: #555;
+  --scrollbar-track-bg: #f1f1f1;
+}
+
+
+.reports-container::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+}
+
+.reports-container::-webkit-scrollbar-track {
+  background: var(--scrollbar-track-bg);
+}
+
+.reports-container::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb-bg);
+  border-radius: 10px; 
+}
+
+.reports-container::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover-bg);
+}
+
+.reports-container {
+  scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg); 
+}
+
+.reports-container::-moz-scrollbar {
+  width: var(--scrollbar-width);
+  background: var(--scrollbar-track-bg);
+}
+.reports-container::-moz-scrollbar-thumb {
+  background: var(--scrollbar-thumb-bg);
+  border-radius: 10px;
+} */
+
