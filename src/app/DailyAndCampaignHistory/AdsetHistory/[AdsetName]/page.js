@@ -1,20 +1,32 @@
 "use client"
 import React from 'react';
-import { Select } from 'antd';
+import axios from 'axios';
+// import { SessionProvider, useSession, signIn, signOut } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
 import 'ag-grid-enterprise';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
+import {useTokenContext} from '../../../components/parent'
 
 export default function AdsetNameAndAccount({params}){
+    
+    const {userdetails} = useTokenContext();
+
+    console.log(userdetails, "userDetails");
+
+    const user = userdetails?.email;
+
+    const [columnDefs, setColumnStructure] = useState([]);
+
     const [isLoading, setLoading] = useState(true);
     const [dailyData, setdailyData] = useState([]);
     const paramsData = ((params.AdsetName).split("-"));
     const decodedString = decodeURIComponent(paramsData[0]);
     const accountNumber = paramsData[1];
     const timeZone = paramsData[2];
+    const network = paramsData[3];
     console.log(decodedString, "decode");
     console.log(accountNumber);
     console.log(timeZone);
@@ -241,11 +253,33 @@ export default function AdsetNameAndAccount({params}){
         return sum;
     }
 
+    const getColumnDefs = (order) => {
+        return order?.map(colKey => columnDefsObject[colKey]);
+    };
+    const token = localStorage.getItem("token")
+
+    const functionCallForUserColumnStructure = async() => {
+        const fetchData = await axios.get(`https://prodapis.adsgoat.in/api/singleUserData?email=${user}`);
+        // const data = await fetchData.json();
+        const mainData = fetchData.data;
+        console.log(mainData.columnStructure, "columnStructure");
+        const filteredData = mainData.columnStructure.filter((each)=> each !== "fb-hour" && each !== "mnet-hour" && each !== "timezone" );
+        console.log(filteredData);
+        setColumnStructure(getColumnDefs(filteredData));
+        // setRowStructure(mainData.rows); 
+    }
+
     const getHistoryData = async() => {
-        const fetchData = await fetch(`http://localhost:8000/MnetAdsetDailyHistory?accountNumber=${accountNumber}&timezone=${timeZone}&adsetName=${decodedString}`);
-        const data = await fetchData.json();
-        const mainData = await data;
-        console.log(mainData.length, "adset");
+        const fetchData = await axios.get(`https://prodapis.adsgoat.in/DailyAdsetHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`, {
+            headers: {
+                Authorization: token,
+            },
+        });
+        // console.log(`https://prodapis.adsgoat.in/LiveAdsetHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`, "url");
+        const url = `http://localhost:8000/MnetLiveCampaignHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}`
+        
+        const mainData = fetchData.data;
+        console.log(mainData, "adset");
         
         const specifiedTimeZone = selectTimezone[timeZone];
         // const sortedArray = mainData?.sort((a, b) => new Date(a[specifiedTimeZone]) - new Date(b[specifiedTimeZone]));
@@ -263,15 +297,16 @@ export default function AdsetNameAndAccount({params}){
             const roi = eachData.spend !== 0 ? `${Math.round((((Revenue - eachData.spend)/eachData.spend)*100)*100)/100}%` : '0%';
             const ctr = eachData.impressions !== 0 ? `${Math.round(((eachData.fbClicks/eachData.impressions)*100)*100)/100}%` : '0%';
             const mainRvenue = ((Math.round(Revenue*100)/100)).toString();
-            const conversions = eachData.conversions !== undefined ? eachData.conversions : '0';
+            const conversions = eachData.conversions !== undefined && eachData.conversions !== null ? eachData.conversions : '0';
+            console.log(conversions, "conversions");
             rpc = !isNaN(rpc) ? rpc : 0;
             ncpl = !isNaN(ncpl) ? ncpl : 0;
             fMargin = !isNaN(fMargin) ? `${fMargin}%`: '0%';
             return(
                 {
-                    // campaignName: eachData.campaign_name,
+                    campaignName: eachData.campaign_name,
                     date: eachData[specifiedTimeZone],
-                    adsetname: eachData.adsetName,
+                    adsetName: eachData.adsetName,
                     spend:(eachData.spend).toString(),
                     revenue: mainRvenue,
                     profit: profit.toString(),
@@ -287,8 +322,8 @@ export default function AdsetNameAndAccount({params}){
                     conversions: conversions.toString(),
                     fmargin: fMargin,
                     ctr: ctr,
-                    adsetid: eachData.adset_id,
-
+                    adsetId: eachData.adset_id,
+                    campaignId: eachData.campaign_id
 
                 }
             )
@@ -299,20 +334,26 @@ export default function AdsetNameAndAccount({params}){
     }
 
     useEffect(()=>{
-        getHistoryData();
-    },[]);
+        if(user !== undefined){
+            const functionCall = async()=>{
+                await functionCallForUserColumnStructure();
+                await getHistoryData();
+            }
+            functionCall();
+        }
+    },[user]);
 
-    const dailyColumns = [
-            // {headerName:'CampaignName', field:'campaignName',
-            //     // rowGroup: true,
-            //     // filter: true,
-            //     // hide: true,
-            //     // resizable: true,
-            //     // enableRowGroup: true,
-            //     // groupDisplayType: 'group',
-            //     width: 450,
-            // },
-            { headerName: 'AdsetName', field: 'adsetname',
+    const columnDefsObject = {
+        campaignName: {headerName:'CampaignName', field:'campaignName',
+                // rowGroup: true,
+                // filter: true,
+                // hide: true,
+                // resizable: true,
+                // enableRowGroup: true,
+                // groupDisplayType: 'group',
+                width: 450,
+            },
+            adsetName: { headerName: 'AdsetName', field: 'adsetName',
             // resizeble: true,
             // sortable: true,
             width: 500,
@@ -324,32 +365,32 @@ export default function AdsetNameAndAccount({params}){
             // enableRowGroup: true,
             // autoHeight: true, 
             },
-            { headerName: 'Date', field: 'date', width: 120 },
-            { headerName: 'Spend', field: 'spend', width: 120,
+            date:{ headerName: 'Date', field: 'date', width: 120, sort: 'asc' },
+            spend:{ headerName: 'Spend', field: 'spend', width: 120,
                 aggFunc: agFunc, 
                 valueFormatter: params => params.value ? Math.round(params.value*100)/100 : '',
             },
-            { headerName: 'Revenue', field: 'revenue', width: 120,
+            revenue:{ headerName: 'Revenue', field: 'revenue', width: 120,
                 aggFunc: agFunc,
                 valueFormatter: params => params.value ? Math.round(params.value*100)/100 : '', 
             },
-            { headerName: 'Profit', field: 'profit', width: 120, cellClassRules:{
+            profit:{ headerName: 'Profit', field: 'profit', width: 120, cellClassRules:{
                 'font-red': p => p.value < 0
                 },
                 aggFunc: agFunc,
                 valueFormatter: params => params.value ? Math.round(params.value*100)/100 : '',
             },
-            { headerName: 'Margin', field: 'margin', valueGetter: getMargin,
+            margin:{ headerName: 'Margin', field: 'margin', valueGetter: getMargin,
                 
             },
-            { headerName: 'Rpc', field: 'rpc', valueGetter: getRpc},
-            { headerName: 'Cpl', field: 'cpl', valueGetter: getCpl},
-            { headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl },
-            { headerName: 'FbLeads', field: 'fbleads', width: 120, aggFunc: agFunc,   },
-            { headerName: 'Conversions', field: 'conversions', width: 120, aggFunc: agFunc,   },
-            { headerName: 'Fmargin', field: 'fmargin', valueGetter: getFmargin},
-            { headerName: 'ROI', field: 'roi', valueGetter: getROI},
-            { headerName: 'cpc', field: 'cpc',
+            rpc:{ headerName: 'Rpc', field: 'rpc', valueGetter: getRpc},
+            cpl:{ headerName: 'Cpl', field: 'cpl', valueGetter: getCpl},
+            ncpl:{ headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl },
+            fbleads:{ headerName: 'FbLeads', field: 'fbleads', width: 120, aggFunc: agFunc,   },
+            conversions:{ headerName: 'Conversions', field: 'conversions', width: 120, aggFunc: agFunc,   },
+            fmargin:{ headerName: 'Fmargin', field: 'fmargin', valueGetter: getFmargin},
+            roi:{ headerName: 'ROI', field: 'roi', valueGetter: getROI},
+            cpc:{ headerName: 'cpc', field: 'cpc',
                 aggFunc: (params) => {
                     const sum = params.values.reduce((sum, value) => sum + parseFloat(value), 0);
                     return sum / params.values.length;
@@ -357,12 +398,15 @@ export default function AdsetNameAndAccount({params}){
                 valueFormatter: params => params.value !== undefined ? Math.round(params.value*100)/100 : '',
 
             },
-            { headerName: 'FbClicks', field: 'fbclicks', width: 120, aggFunc: agFunc,  },
-            { headerName: 'Impressions', field: 'impressions', width: 120, aggFunc: agFunc,   },
-            { headerName: 'Ctr', field: 'ctr', valueGetter: getCtr},
+            fbclicks:{ headerName: 'FbClicks', field: 'fbclicks', width: 120, aggFunc: agFunc,  },
+            impressions:{ headerName: 'Impressions', field: 'impressions', width: 120, aggFunc: agFunc,   },
+            ctr:{ headerName: 'Ctr', field: 'ctr', valueGetter: getCtr},
             
-            { headerName: 'AdsetId', field: 'adsetid' },
-    ];
+            adsetId: { headerName: 'AdsetId', field: 'adsetId' },
+            campaignId: {headerName: "CampaignId", field:'campaignId'}
+        };
+
+    console.log(columnDefs);
 
     return(
         <div>
@@ -385,7 +429,7 @@ export default function AdsetNameAndAccount({params}){
                 <div className="ag-theme-alpine ag-container" >
                     <AgGridReact
                         rowData={dailyData}
-                        columnDefs={dailyColumns}
+                        columnDefs={columnDefs}
                         grandTotalRow = "bottom"
                         // onCellClicked={onCellClicked}
                         // height={520}
@@ -415,7 +459,7 @@ export default function AdsetNameAndAccount({params}){
                         // }}
                     />
                 </div>
-            ) : null}
+            ) : <div><p>No adset history to show</p></div>}
         </div>
     )
 }

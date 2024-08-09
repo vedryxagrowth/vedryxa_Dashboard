@@ -7,10 +7,11 @@ import debounce from 'lodash.debounce';
 import React from 'react';
 import axios from 'axios';
 import moment from 'moment-timezone';
+import dayjs from 'dayjs';
 // import { Select } from 'antd';
-import { Carousel } from 'antd';
+import { Carousel, Input, Button, Pagination } from 'antd';
 // import 'antd/dist/reset.css';
-import { CommentOutlined, CustomerServiceOutlined, MenuOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { CommentOutlined, CustomerServiceOutlined, MenuOutlined, InfoCircleOutlined, DownloadOutlined, SearchOutlined, ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import { FloatButton } from 'antd';
 import Draggable from 'react-draggable';
 // import FormControl from '@mui/material/FormControl';
@@ -112,6 +113,8 @@ const MyTablePage = () => {
     // console.log('userdetails:',userdetails);
 
     // Define your rowData and columnDefs
+    const [initialRowData, setInitialRowData] = useState([]);
+
     const [rowData, setRowData] = useState([]);
 
     const [campaignData, setCampaignData] = useState([]);
@@ -126,11 +129,36 @@ const MyTablePage = () => {
 
     const [dailyData, setdailyData] = useState([]);
 
-    const [startDate, setStartDate] = useState("2024-07-13");
+    const [startDate, setStartDate] = useState(yesterday);
 
-    const [endDate, setEndDate] = useState("2024-07-13");
+    const [endDate, setEndDate] = useState(yesterday);
 
     const [revenuePratner, setRevenuePartner] = useState([networks[0]]);
+
+    const [isSearching, setIsSearching] = useState(false);
+    const [inputValue, setInputValue] = useState('');
+    
+    const handleSearchClick = () => {
+            setIsSearching(true);
+    };
+    
+    const handleBlur = () => {
+            if (inputValue.trim() === '') {
+                setIsSearching(false);
+            }
+    };
+    
+    const handleChangeInput = (e) => {
+            setInputValue(e.target.value);
+            // console.log(e.target.value);
+            // const filteredLiveData = rowData.filter((each)=> each.campaignName.includes(e.target.value));
+            
+            // const filteredDailyData = dailyData.filter((each)=> each.campaignName.includes(e.target.value));
+            // const filteredAllCampaignsData = campaignData.filter((each)=> each.campaignName.includes(e.target.value));
+            // setRowData(filteredLiveData);
+            // setdailyData(filteredDailyData);
+            // setCampaignData(filteredAllCampaignsData);
+    };
 
     // const [rowStructure, setRowStructure] = useState(); 
 
@@ -157,6 +185,8 @@ const MyTablePage = () => {
     const [account, setAccount] = useState(accountsForAccess[0]);
 
     const [time, setTime] = useState('UTC');
+
+    const [pageSize, setPageSize] = useState(1);
     
     // const [fetchvalue, setValue] = useState([]);
 
@@ -176,6 +206,12 @@ const MyTablePage = () => {
 
     const gridRef2 = useRef();
 
+    const filterRef = useRef(null);
+
+    const totalItems = useRef();
+
+    const isInitialLoad = useRef(true);
+
     const onChange1= (currentSlide) => {
         console.log(currentSlide);
     };
@@ -185,11 +221,14 @@ const MyTablePage = () => {
         params.values.forEach((value) => (total += parseFloat(value)));
         var total1 = total.toString()
         var total2 = total1.split(".")
-        if (total2[1] !== undefined && total2[1].length > 2) {
+        if (total2[1] !== undefined && total2[1] !== null && total2[1].length > 2) {
           var total22 = total2[1].slice(0, 2)
           var totalone = total2[0] + '.' + total22
-          return parseFloat(totalone).toFixed(2)
+        //   console.log(parseFloat(totalone).toFixed(2), "totalone");
+        return parseFloat(totalone).toFixed(2)
+          
         }
+        console.log(total, "total");
         return total
     };
 
@@ -474,6 +513,50 @@ const MyTablePage = () => {
     //     );
     // };
 
+    const onFilterChanged = () => {
+        if (gridRef.current) {
+            const filterModel = gridRef.current.api.getFilterModel();
+            const adsetNameFilter = filterModel.adsetName;
+    
+            // Determine if the 'Select All' option is unchecked
+            const isSelectAllUnchecked = !adsetNameFilter || !adsetNameFilter.values || adsetNameFilter.values.length === 0;
+    
+            // Update footer properties based on the 'Select All' option state
+            gridRef.current.api.setGridOptions({
+                groupIncludeTotalFooter: !isSelectAllUnchecked,
+                groupIncludeFooter: !isSelectAllUnchecked
+            });
+    
+            // Show all data if 'Select All' is unchecked, otherwise show filtered data
+            if (isSelectAllUnchecked) {
+                setRowData([...initialRowData]);
+            } else {
+                const filteredData = initialRowData.filter(row =>
+                    adsetNameFilter.values.includes(row.adsetName)
+                );
+                setRowData(filteredData);
+            }
+    
+            // Refresh the grid to apply the changes
+            gridRef.current.api.refreshClientSideRowModel('filter');
+        }
+    };
+    
+    // Call the function when the grid is ready
+    useEffect(() => {
+        if (gridRef.current && gridRef.current.api) {
+            const currentGridApi = gridRef.current.api;
+    
+            currentGridApi.addEventListener('filterChanged', onFilterChanged);
+    
+            // Cleanup function to remove the event listener when the component unmounts
+            return () => {
+                currentGridApi.removeEventListener('filterChanged', onFilterChanged);
+            };
+        }
+    }, [gridRef, initialRowData]);
+    
+
     const defaultColDef = {
         flex: 1,
         minWidth: 150,
@@ -513,7 +596,12 @@ const MyTablePage = () => {
             field: 'adsetName',
             sortable: true,
             minWidth: 400,
-            filter: true,
+            filter: 'agSetColumnFilter',
+            filterParams: {
+              comparator: (a, b) => a.localeCompare(b),
+              suppressAndOrCondition: true,
+            },
+            
             // headerComponent: CustomHeader,
             // headerComponentParams: {
             //     displayName: 'AdsetName',
@@ -1049,15 +1137,16 @@ const MyTablePage = () => {
 
     
     const updatingColumnsStructure = async(updateDataArray) => {
-        // const fetchData = await fetch(`http://localhost:8888/api/singleUserData?id=${userdetails._id}&updateData=${updateData}`);
-        const response = await fetch(`http://localhost:8888/api/updateUserData?email=${userdetails.email}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ updateDataArray })
+        // const fetchData = await fetch(`https://prodapis.adsgoat.in/api/singleUserData?id=${userdetails._id}&updateData=${updateData}`);
+        const response = await axios.put(`https://prodapis.adsgoat.in/api/updateUserData?email=${userdetails.email}`, 
+            { 
+                updateDataArray 
+            }, 
+            {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
         });
-        console.log(await response.json());
         setColumnDefs(getColumnDefs(updateDataArray));
         columnDefs1.current = (getColumnDefs1(updateDataArray));
         columnDefs2.current = (getColumnDefs2(updateDataArray));
@@ -1070,9 +1159,9 @@ const MyTablePage = () => {
     
 
     const functionCallForUserColumnStructure = async() => {
-        const fetchData = await fetch(`http://localhost:8888/api/singleUserData?email=${userdetails.email}`);
-        const data = await fetchData.json();
-        const mainData = await data;
+        const fetchData = await axios.get(`https://prodapis.adsgoat.in/api/singleUserData?email=${userdetails.email}`);
+        // const data = await fetchData.json();
+        const mainData = fetchData.data;
         console.log(mainData.columnStructure, "columnStructure");
         // setRowStructure(mainData.rows); 
         setColumnDefs(getColumnDefs(mainData.columnStructure));
@@ -1099,6 +1188,9 @@ const MyTablePage = () => {
             else if (eachData.estimated_revenue === undefined ){
                 revenueData = '0.00';
             }
+            else if (eachData.estimated_revenue === null ){
+                revenueData = '0.00';
+            }
             else{
                 revenueData = eachData.estimated_revenue;
             }
@@ -1119,7 +1211,7 @@ const MyTablePage = () => {
                 cpl = Math.round((eachData.spend/eachData.fbLeads)*100)/100;
             } 
             const ncpl = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((eachData.spend/eachData.conversions)*100)/100;
-            
+            // console.log(revenueData, "revenueData");
             return(
                 {
                     campaignName: eachData.campaign_name,
@@ -1132,7 +1224,7 @@ const MyTablePage = () => {
                     profit: profit,
                     margin: margin,
                     fbleads: eachData.fbLeads,
-                    conversions: eachData.conversions,
+                    conversions: eachData.conversions !== null && eachData.conversions !== 0 ? eachData.conversions : '0',
                     cpc: eachData.cpc,
                     fbclicks: eachData.fbClicks,
                     impressions: eachData.impressions,
@@ -1147,10 +1239,13 @@ const MyTablePage = () => {
         })
         : null;
         // setValue(mainData);
-        timezone.current = mainData[0].accountTimezone;
-        accountStatus.current = mainData[0].accountStatus;
-        cronStatus.current = mainData[0].cronStatus;
+        if(mainData.length> 1){
+            timezone.current = mainData[0].accountTimezone;
+            accountStatus.current = mainData[0].accountStatus;
+            cronStatus.current = mainData[0].cronStatus;
+        }
         setRowData(filteredData);
+        setInitialRowData(filteredData);
         setTrue(false);
         setLoading(false);
 
@@ -1275,13 +1370,14 @@ const MyTablePage = () => {
     }
 
     const functionCall3 = async() => {
-        const fetchData = await axios.get(`https://prodapis.adsgoat.in/AllCampaigns?accountNumber=${account}&timezone=${time}&network=${newtworkCollections[revenuePratner]}`, {
+        const fetchData = await axios.get(`https://prodapis.adsgoat.in/AllCampaigns?accountNumber=${account}&timezone=${time}&network=${newtworkCollections[revenuePratner]}&page=${pageSize}&limit=100`, {
             headers: {
                 Authorization: token,
             },
         });
-        const mainData = fetchData.data;
+        const mainData = fetchData.data.items;
         
+        const url = `https://prodapis.adsgoat.in/AllCampaigns?accountNumber=${account}&timezone=${time}&network=${newtworkCollections[revenuePratner]}&page=${pageSize}&limit=100`;
         
         const specifiedTimeZone = selectTimezone[time];
         console.log(specifiedTimeZone,"spe");
@@ -1334,7 +1430,7 @@ const MyTablePage = () => {
             )
         })
         : null;
-
+        totalItems.current = fetchData.data.totalItems;
         console.log(mainData);
         setCampaignData(filteredData);
         setTrue(false);
@@ -1343,17 +1439,29 @@ const MyTablePage = () => {
 
     
 
-    useEffect(()=>{
-        const functionCall = async() =>{
-            await functionCallForUserColumnStructure();
-            await functionCall1();
-            await functionCall2();
-            await functionCall3();
-            console.log("11111");
-        }
+    useEffect(() => {
+        const functionCall = async () => {
+            try {
+                // Run these functions only on the initial load
+                if (isInitialLoad.current) {
+                    await functionCallForUserColumnStructure();
+                    await functionCall1();
+                    await functionCall2();
+                    console.log("Initial functions executed successfully.");
+                    isInitialLoad.current = false; // Set to false after initial load
+                }
+
+                // Run this function on initial load and whenever pageSize changes
+                await functionCall3();
+                console.log("functionCall3 executed successfully.");
+            } catch (error) {
+                console.error("Error in function calls:", error);
+                // Optionally, handle the error (e.g., show a notification to the user)
+            }
+        };
+
         functionCall();
-        
-    },[])
+    }, [pageSize]);
 
     useEffect(()=>{
         if (isTrue){
@@ -1366,6 +1474,16 @@ const MyTablePage = () => {
             functionCall();
         }
     },[isTrue])
+
+    // useEffect(()=>{
+    //     if(isTrue){
+    //         const functionCall = async() => {
+    //             await functionCall3();
+    //         }
+    //         functionCall();
+    //     }
+        
+    // }, [isTrue, pageSize]);
 
     // useEffect(()=>{
         
@@ -1425,7 +1543,7 @@ const MyTablePage = () => {
         console.log(url2);
         console.log(startDate,"start");
         console.log(endDate, "end");
-
+        setPageSize(1);
         setTrue(true);
         setRowData([]);
         setTime(time);
@@ -1520,10 +1638,10 @@ const MyTablePage = () => {
         //     const url = `/history/adsetHistory/${params.data.adsetname}-${account}-${time}`;
         //     window.open(url, '_blank');
         // }
-        if (event.colDef.field === 'adsetname') {
+        if (event.colDef.field === 'adsetName') {
             const value = event.value;
             if(value !== undefined){
-                const url = `/DailyAndCampaignHistory/AdsetHistory/${value}-${account}-${time}`;
+                const url = `/DailyAndCampaignHistory/AdsetHistory/${value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
                 window.open(url, '_blank');
                 console.log(`Price clicked: ${value}`);
             }
@@ -1535,7 +1653,7 @@ const MyTablePage = () => {
         if (event.colDef.field === 'adsetName') {
           const value = event.value;
           if (value !== undefined) {
-            const url = `/AllCampaigns/AdsetHistory/${value}-${account}-${time}`;
+            const url = `/AllCampaigns/AdsetHistory/${value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
             window.open(url, '_blank');
             console.log(`Adset clicked: ${value}`);
           }
@@ -1546,7 +1664,7 @@ const MyTablePage = () => {
         if (event.colDef.field === 'adsetName') {
           const value = event.value;
           if (value !== undefined) {
-            const url = `/LiveHistory/LiveAdsetHistory/${value}-${account}-${time}-${revenuePratner}`;
+            const url = `/LiveHistory/LiveAdsetHistory/${value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
             window.open(url, '_blank');
             console.log(`Adset clicked: ${value}`);
           }
@@ -1570,6 +1688,7 @@ const MyTablePage = () => {
         headerName: 'CampaignName',
         minWidth: 400,
         pinned: 'left',
+        
         cellRendererParams: {
           suppressCount: false, // Allow count to be shown
           innerRenderer: (params) => {
@@ -1583,7 +1702,7 @@ const MyTablePage = () => {
               <span
                 onClick={() => {
                     console.log(`Grouped Make clicked: ${params.value}`);
-                    const url = `/LiveHistory/LiveCampaignHistory/${params.value}-${account}-${time}-${revenuePratner}`;
+                    const url = `/LiveHistory/LiveCampaignHistory/${params.value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
                     window.open(url, '_blank');
                 }}
               >
@@ -1654,7 +1773,7 @@ const MyTablePage = () => {
               <span
                 onClick={() => {
                     console.log(`Grouped Make clicked: ${params.value}`);
-                    const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value}-${account}-${time}`;
+                    const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
                     window.open(url, '_blank');
                 }}
               >
@@ -1682,7 +1801,7 @@ const MyTablePage = () => {
               <span
                 onClick={() => {
                   console.log(`Grouped Make clicked: ${params.value}`);
-                  const url = `/AllCampaigns/CampaignHistory/${params.value}-${account}-${time}`;
+                  const url = `/AllCampaigns/CampaignHistory/${params.value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
                   window.open(url, '_blank');
                 }}
               >
@@ -1743,61 +1862,61 @@ const MyTablePage = () => {
     
     const defaultDates = [moment(yesterday, 'YYYY-MM-DD'), moment(yesterday, 'YYYY-MM-DD')];
 
-    const onFilterChanged = (params) => {
-        const allData = params.api.rowModel.rowsToDisplay.map(node => node.data); // Get all row data from the grid
+    // const onFilterChanged = (params) => {
+    //     const allData = params.api.rowModel.rowsToDisplay.map(node => node.data); // Get all row data from the grid
     
-        let filteredData = allData.filter(item => {
-            const campaignNameFilter = params.api.getFilterInstance('campaignName');
-            const adsetNameFilter = params.api.getFilterInstance('adsetName');
-            const dateFilter = params.api.getFilterInstance('date');
-            const fbHourFilter = params.api.getFilterInstance('fb-hour');
-            const mnetHourFilter = params.api.getFilterInstance('mnet-hour');
-            const spendFilter = params.api.getFilterInstance('spend');
-            const revenueFilter = params.api.getFilterInstance('revenue');
-            const profitFilter = params.api.getFilterInstance('profit');
-            const marginFilter = params.api.getFilterInstance('margin');
-            const fbleadsFilter = params.api.getFilterInstance('fbleads');
-            const conversionsFilter = params.api.getFilterInstance('conversions');
-            const cpcFilter = params.api.getFilterInstance('cpc');
-            const fbclicksFilter = params.api.getFilterInstance('fbclicks');
-            const impressionsFilter = params.api.getFilterInstance('impressions');
-            const ctrFilter = params.api.getFilterInstance('ctr');
-            const rpcFilter = params.api.getFilterInstance('rpc');
-            const cplFilter = params.api.getFilterInstance('cpl');
-            const ncplFilter = params.api.getFilterInstance('ncpl');
-            const fmarginFilter = params.api.getFilterInstance('fmargin');
-            const roiFilter = params.api.getFilterInstance('roi');
-            const adsetIdFilter = params.api.getFilterInstance('adsetId');
-            const campaignIdFilter = params.api.getFilterInstance('campaignId');
-            const timezoneFilter = params.api.getFilterInstance('timezone');
+    //     let filteredData = allData.filter(item => {
+    //         const campaignNameFilter = params.api.getFilterInstance('campaignName');
+    //         const adsetNameFilter = params.api.getFilterInstance('adsetName');
+    //         const dateFilter = params.api.getFilterInstance('date');
+    //         const fbHourFilter = params.api.getFilterInstance('fb-hour');
+    //         const mnetHourFilter = params.api.getFilterInstance('mnet-hour');
+    //         const spendFilter = params.api.getFilterInstance('spend');
+    //         const revenueFilter = params.api.getFilterInstance('revenue');
+    //         const profitFilter = params.api.getFilterInstance('profit');
+    //         const marginFilter = params.api.getFilterInstance('margin');
+    //         const fbleadsFilter = params.api.getFilterInstance('fbleads');
+    //         const conversionsFilter = params.api.getFilterInstance('conversions');
+    //         const cpcFilter = params.api.getFilterInstance('cpc');
+    //         const fbclicksFilter = params.api.getFilterInstance('fbclicks');
+    //         const impressionsFilter = params.api.getFilterInstance('impressions');
+    //         const ctrFilter = params.api.getFilterInstance('ctr');
+    //         const rpcFilter = params.api.getFilterInstance('rpc');
+    //         const cplFilter = params.api.getFilterInstance('cpl');
+    //         const ncplFilter = params.api.getFilterInstance('ncpl');
+    //         const fmarginFilter = params.api.getFilterInstance('fmargin');
+    //         const roiFilter = params.api.getFilterInstance('roi');
+    //         const adsetIdFilter = params.api.getFilterInstance('adsetId');
+    //         const campaignIdFilter = params.api.getFilterInstance('campaignId');
+    //         const timezoneFilter = params.api.getFilterInstance('timezone');
     
-            return (campaignNameFilter ? campaignNameFilter.doesFilterPass({ data: item }) : true)
-                && (adsetNameFilter ? adsetNameFilter.doesFilterPass({ data: item }) : true)
-                && (dateFilter ? dateFilter.doesFilterPass({ data: item }) : true)
-                && (fbHourFilter ? fbHourFilter.doesFilterPass({ data: item }) : true)
-                && (mnetHourFilter ? mnetHourFilter.doesFilterPass({ data: item }) : true)
-                && (spendFilter ? spendFilter.doesFilterPass({ data: item }) : true)
-                && (revenueFilter ? revenueFilter.doesFilterPass({ data: item }) : true)
-                && (profitFilter ? profitFilter.doesFilterPass({ data: item }) : true)
-                && (marginFilter ? marginFilter.doesFilterPass({ data: item }) : true)
-                && (fbleadsFilter ? fbleadsFilter.doesFilterPass({ data: item }) : true)
-                && (conversionsFilter ? conversionsFilter.doesFilterPass({ data: item }) : true)
-                && (cpcFilter ? cpcFilter.doesFilterPass({ data: item }) : true)
-                && (fbclicksFilter ? fbclicksFilter.doesFilterPass({ data: item }) : true)
-                && (impressionsFilter ? impressionsFilter.doesFilterPass({ data: item }) : true)
-                && (ctrFilter ? ctrFilter.doesFilterPass({ data: item }) : true)
-                && (rpcFilter ? rpcFilter.doesFilterPass({ data: item }) : true)
-                && (cplFilter ? cplFilter.doesFilterPass({ data: item }) : true)
-                && (ncplFilter ? ncplFilter.doesFilterPass({ data: item }) : true)
-                && (fmarginFilter ? fmarginFilter.doesFilterPass({ data: item }) : true)
-                && (roiFilter ? roiFilter.doesFilterPass({ data: item }) : true)
-                && (adsetIdFilter ? adsetIdFilter.doesFilterPass({ data: item }) : true)
-                && (campaignIdFilter ? campaignIdFilter.doesFilterPass({ data: item }) : true)
-                && (timezoneFilter ? timezoneFilter.doesFilterPass({ data: item }) : true);
-        });
+    //         return (campaignNameFilter ? campaignNameFilter.doesFilterPass({ data: item }) : true)
+    //             && (adsetNameFilter ? adsetNameFilter.doesFilterPass({ data: item }) : true)
+    //             && (dateFilter ? dateFilter.doesFilterPass({ data: item }) : true)
+    //             && (fbHourFilter ? fbHourFilter.doesFilterPass({ data: item }) : true)
+    //             && (mnetHourFilter ? mnetHourFilter.doesFilterPass({ data: item }) : true)
+    //             && (spendFilter ? spendFilter.doesFilterPass({ data: item }) : true)
+    //             && (revenueFilter ? revenueFilter.doesFilterPass({ data: item }) : true)
+    //             && (profitFilter ? profitFilter.doesFilterPass({ data: item }) : true)
+    //             && (marginFilter ? marginFilter.doesFilterPass({ data: item }) : true)
+    //             && (fbleadsFilter ? fbleadsFilter.doesFilterPass({ data: item }) : true)
+    //             && (conversionsFilter ? conversionsFilter.doesFilterPass({ data: item }) : true)
+    //             && (cpcFilter ? cpcFilter.doesFilterPass({ data: item }) : true)
+    //             && (fbclicksFilter ? fbclicksFilter.doesFilterPass({ data: item }) : true)
+    //             && (impressionsFilter ? impressionsFilter.doesFilterPass({ data: item }) : true)
+    //             && (ctrFilter ? ctrFilter.doesFilterPass({ data: item }) : true)
+    //             && (rpcFilter ? rpcFilter.doesFilterPass({ data: item }) : true)
+    //             && (cplFilter ? cplFilter.doesFilterPass({ data: item }) : true)
+    //             && (ncplFilter ? ncplFilter.doesFilterPass({ data: item }) : true)
+    //             && (fmarginFilter ? fmarginFilter.doesFilterPass({ data: item }) : true)
+    //             && (roiFilter ? roiFilter.doesFilterPass({ data: item }) : true)
+    //             && (adsetIdFilter ? adsetIdFilter.doesFilterPass({ data: item }) : true)
+    //             && (campaignIdFilter ? campaignIdFilter.doesFilterPass({ data: item }) : true)
+    //             && (timezoneFilter ? timezoneFilter.doesFilterPass({ data: item }) : true);
+    //     });
     
-        console.log('Filtered Data: ', filteredData);
-    };
+    //     console.log('Filtered Data: ', filteredData);
+    // };
 
     const onBtExport1 = () => {
         // console.log(gridRef.current.api,"in")
@@ -1833,6 +1952,90 @@ const MyTablePage = () => {
           console.error("Grid reference is null");
         }
       };
+
+    // const SearchToggle = () => {
+    //     const [isSearching, setIsSearching] = useState(false);
+    //     const [inputValue, setInputValue] = useState('');
+    
+    //     const handleSearchClick = () => {
+    //         setIsSearching(true);
+    //     };
+    
+    //     const handleBlur = () => {
+    //         if (inputValue.trim() === '') {
+    //             setIsSearching(false);
+    //         }
+    //     };
+    
+    //     const handleChange = (e) => {
+    //         setInputValue(e.target.value);
+    //     };
+    
+    //     return (
+    //         <div>
+    //             {isSearching ? (
+    //                 <Input
+    //                     type="text"
+    //                     autoFocus
+    //                     value={inputValue}
+    //                     style={{width:'200px', height:'25px', borderRadius:'5px'}}
+    //                     onChange={handleChangeInput}
+    //                     onBlur={handleBlur}
+    //                 />
+    //             ) : (
+    //                 <Button
+    //                     icon={<SearchOutlined style={{fontSize:'15px'}} />}
+    //                     onClick={handleSearchClick}
+    //                     style={{width:'25px', height:'25px'}}
+    //                 />
+    //             )}
+    //         </div>
+    //     );
+    // };
+
+    const itemRender = (_, type, originalElement) => {
+        if (type === 'prev') {
+          return <a><ArrowLeftOutlined /></a>;
+        }
+        if (type === 'next') {
+          return <a><ArrowRightOutlined /></a>;
+        }
+        return originalElement;
+    };
+      
+    const handlePageClick = (page, pageSize) => {
+        console.log(`Clicked page: ${page}, Page size: ${pageSize}`);
+        setPageSize(page);
+        // Add your custom onClick functionality here
+    };
+
+    const rangePresets = [
+        {
+          label: 'YesterDay',
+          value: [dayjs().add(-1, 'd'), dayjs().add(-1, 'd')],
+        },
+        {
+          label: 'Last 7 Days',
+          value: [dayjs().add(-7, 'd'), dayjs()],
+        },
+        {
+          label: 'Last 14 Days',
+          value: [dayjs().add(-14, 'd'), dayjs()],
+        },
+        {
+          label: 'Last 30 Days',
+          value: [dayjs().add(-30, 'd'), dayjs()],
+        },
+        {
+          label: 'Last 90 Days',
+          value: [dayjs().add(-90, 'd'), dayjs()],
+        },
+      ];
+
+    console.log(rowData, "rowData");
+    console.log(dailyData, "dailyData");
+    console.log(campaignData, "campaignData");
+
 
     return (
         <div className='reports-container'>
@@ -1897,6 +2100,7 @@ const MyTablePage = () => {
                 </FormControl> */}
                 <Space direction="horizontal" size={12}>
                     <RangePicker
+                        presets={rangePresets}
                         onChange={handleChange} 
                         defaultValue={defaultDates}
                         format="YYYY-MM-DD"
@@ -1924,9 +2128,27 @@ const MyTablePage = () => {
                 <button className='submit-button' type='button' onClick={onClickButton}>Submit</button>
             </div>
             <div>
-                
-                 
-                <Carousel style={{height:'560px'}} afterChange={onChange1} ref={carouselRef}>
+                <div style={{ padding: '10px' }}>
+                    <div>
+                        {isSearching ? (
+                            <Input
+                                type="text"
+                                autoFocus
+                                value={inputValue}
+                                style={{width:'200px', height:'25px', borderRadius:'5px'}}
+                                onChange={handleChangeInput}
+                                onBlur={handleBlur}
+                            />
+                        ) : (
+                            <Button
+                                icon={<SearchOutlined style={{fontSize:'15px'}} />}
+                                onClick={handleSearchClick}
+                                style={{width:'25px', height:'25px'}}
+                            />
+                        )}
+                    </div>
+                </div>
+                <Carousel style={{height:'500px'}} afterChange={onChange1} ref={carouselRef}>
                     <div>
                         <div style={contentStyle}>
                             {isLoading === true ? (
@@ -1943,7 +2165,7 @@ const MyTablePage = () => {
                                         />
                                     </div>
                                 </div>
-                            ) : rowData?.length > 0 ? (
+                            ) : rowData.filter((each)=> each.campaignName.includes(inputValue))?.length > 0 ? (
                                 <div className="ag-theme-alpine ag-container">
                                     <div style={{width:'98%', display:'flex', justifyContent:'space-between', alignItems:'center'  }}>
                                         <div className='daily-contaier'>
@@ -1951,12 +2173,12 @@ const MyTablePage = () => {
                                             <p style={{paddingTop:'10px', paddingLeft:'8px', fontSize:'15px', fontWeight:'600'}}>Live</p>
                                         </div>
                                         <div style={{width: '100%',display: 'flex', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', marginTop: '8px'}}>
-                                            <p style={{fontWeight: '600'}}>AccountNumber: {account}</p>
+                                            <p style={{fontWeight: '600'}}>Acc: {account}</p>
                                             <p style={{fontWeight: '600'}}>Timezone: {timezone.current}</p>
-                                            <p style={{fontWeight: '600'}}>AccountStatus: {accountStatus.current}</p>
-                                            <p style={{fontWeight: '600'}}>CronStatus: {cronStatus.current}</p>
+                                            <p style={{fontWeight: '600'}}>Cron/Acc status: {cronStatus.current} {accountStatus.current}</p>
                                         </div>
-                                        <button className='export-button' onClick={onBtExport1}>Export</button>
+                                        <DownloadOutlined style={{ fontSize: '20px' }} onClick={onBtExport1}/>
+                                        {/* <button className='export-button' onClick={onBtExport1}>Export</button> */}
                                         {/* <Space direction="horizontal" size={12}>
                                             <RangePicker onChange={handleChangeLive} />
                                         </Space> */}
@@ -1964,27 +2186,30 @@ const MyTablePage = () => {
                                     
                                     <AgGridReact
                                         ref={gridRef}
-                                        rowData={rowData ? rowData : []}
+                                        rowData={rowData ? rowData.filter((each)=> each.campaignName.includes(inputValue)) : []}
+                                        rowSelection='multiple'
                                         columnDefs={columnDefs}
                                         defaultColDef={{ ...defaultColDef, suppressMenu: true }}
-                                        height={480}
+                                        height={430}
                                         onCellClicked={onCellClickedLive}
                                         pagination={true}
                                         paginationPageSize={30}
                                         paginationPageSizeSelector={[10, 20, 30]}
                                         suppressAggFuncInHeader={true}
-                                        groupIncludeTotalFooter={true}
-                                        groupIncludeFooter={true}
+                                        groupIncludeTotalFooter={rowData.length > 0 ? true : false}
+                                        groupIncludeFooter={rowData.length > 0 ? true : false}
                                         autoGroupColumnDef={autoGroupColumnDefLive}
                                         onGridReady={(params) => onGridReady(params, 'grid1')}
                                         gridOptions={gridOptions}
                                         frameworkComponents={{ customHeader: CustomHeader }}
                                         groupDisplayType='multipleColumns'
                                         // rowGroupPanelShow='always'
+                                        onFilterChanged={onFilterChanged} // Use the custom filter handler
+                                        onFirstDataRendered={() => gridRef.current.api.sizeColumnsToFit()}
                                     />
 
                                 </div>
-                            ) : null} 
+                            ) : <div><h1>No Live Data for this dates</h1></div>} 
                         </div>
                     </div>
                     <div>
@@ -2003,7 +2228,7 @@ const MyTablePage = () => {
                                         />
                                     </div>
                                 </div>
-                            ) : dailyData?.length > 0 ? (
+                            ) : dailyData.filter((each)=> each.campaignName.includes(inputValue))?.length > 0 ? (
                                 <div className="ag-theme-alpine ag-container" >
                                     <div style={{width:'98%', display:'flex', justifyContent:'space-between', alignItems:'center'  }}>
                                         <div className='daily-contaier'>
@@ -2014,19 +2239,19 @@ const MyTablePage = () => {
                                             <RangePicker onChange={handleChangeDaily} />
                                         </Space> */}
                                         <div style={{width: '100%',display: 'flex', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', marginTop: '8px'}}>
-                                            <p style={{fontWeight: '600'}}>AccountNumber: {account}</p>
+                                            <p style={{fontWeight: '600'}}>Acc: {account}</p>
                                             <p style={{fontWeight: '600'}}>Timezone: {timezone.current}</p>
-                                            <p style={{fontWeight: '600'}}>AccountStatus: {accountStatus.current}</p>
-                                            <p style={{fontWeight: '600'}}>CronStatus: {cronStatus.current}</p>
+                                            <p style={{fontWeight: '600'}}>Cron/Acc status: {cronStatus.current} {accountStatus.current}</p>
                                         </div>
-                                        <button className='export-button' onClick={() => onBtExport(gridRef1)}>Export</button>
+                                        <DownloadOutlined style={{ fontSize: '20px' }} onClick={() => onBtExport(gridRef1)} />
+                                        {/* <button className='export-button' onClick={() => onBtExport(gridRef1)}>Export</button> */}
                                     </div>
                                     <AgGridReact
                                         ref={gridRef1}
-                                        rowData={dailyData}
+                                        rowData={dailyData.filter((each)=> each.campaignName.includes(inputValue))}
                                         columnDefs={columnDefs1.current}
                                         onCellClicked={onCellClicked}
-                                        height={480}
+                                        height={430}
                                         pagination={true}
                                         paginationPageSize={30}
                                         paginationPageSizeSelector={[10,20,30]}
@@ -2042,7 +2267,7 @@ const MyTablePage = () => {
                                         gridOptions={gridOptions1}
                                     />
                                 </div>
-                            ) : null}
+                            ) : <div><h1>No Daily Data for this dates</h1></div>}
                         </div>
                     </div>
                     <div>
@@ -2061,7 +2286,7 @@ const MyTablePage = () => {
                                         />
                                     </div>
                                 </div>
-                            ) : rowData?.length > 0 ? (
+                            ) : campaignData.filter((each)=> each.campaignName.includes(inputValue))?.length > 0 ? (
                                 <div className="ag-theme-alpine ag-container">
                                     <div style={{width:'98%', display:'flex', justifyContent:'space-between', alignItems:'center'  }}>
                                         <div className='daily-contaier'>
@@ -2072,23 +2297,24 @@ const MyTablePage = () => {
                                             <RangePicker onChange={handleChangeAllCampaigns} />
                                         </Space> */}
                                         <div style={{width: '100%',display: 'flex', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', marginTop: '8px'}}>
-                                            <p style={{fontWeight: '600'}}>AccountNumber: {account}</p>
+                                            <p style={{fontWeight: '600'}}>Acc: {account}</p>
                                             <p style={{fontWeight: '600'}}>Timezone: {timezone.current}</p>
-                                            <p style={{fontWeight: '600'}}>AccountStatus: {accountStatus.current}</p>
-                                            <p style={{fontWeight: '600'}}>CronStatus: {cronStatus.current}</p>
+                                            <p style={{fontWeight: '600'}}>Cron/Acc status: {cronStatus.current} {accountStatus.current}</p>
                                         </div>
-                                        <button className='export-button' onClick={() => onBtExport(gridRef2)}>Export</button>
+                                        <DownloadOutlined style={{ fontSize: '20px' }} onClick={() => onBtExport(gridRef2)} />
+                                        {/* <button className='export-button' onClick={() => onBtExport(gridRef2)}>Export</button> */}
                                     </div>
                                     <AgGridReact
                                         ref={gridRef2}
-                                        rowData={campaignData}
+                                        rowData={campaignData.filter((each)=> each.campaignName.includes(inputValue))}
                                         columnDefs={columnDefs2.current}
                                         onCellClicked={onCellClickedAllCampaigns}
+                                        height={430}
                                         autoGroupColumnDef={autoGroupColumnDef2}
-                                        // defaultColDef={defaultColDef}
-                                        pagination={true}
-                                        paginationPageSize={30}
-                                        paginationPageSizeSelector={[10,20,30]}
+                                        // // defaultColDef={defaultColDef}
+                                        // pagination={true}
+                                        // paginationPageSize={50}
+                                        // paginationPageSizeSelector={[10,20,30]}
                                         groupDisplayType='multipleColumns'
                                         suppressAggFuncInHeader={true}
                                         groupIncludeTotalFooter ={true}
@@ -2116,7 +2342,17 @@ const MyTablePage = () => {
                                     />
                                 </div>
                             ) : null}
+                            
                         </div>
+                        <Pagination 
+                            style={{marginBottom: '12px'}}
+                            total={totalItems.current} 
+                            pageSize={100}
+                            itemRender={itemRender} 
+                            showSizeChanger={false} 
+                            showQuickJumper={false} 
+                            onChange={handlePageClick}
+                        />
                     </div>
                     
                 </Carousel>

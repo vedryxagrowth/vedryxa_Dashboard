@@ -3,14 +3,22 @@ import React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
-import { DatePicker, Space } from 'antd';
-const { RangePicker } = DatePicker;
+import axios from 'axios';
 import 'ag-grid-enterprise';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 
+import { useTokenContext } from '../../../components/parent';
 const MnetLiveAdsetHistory = ({params}) => {
     // Define your rowData and columnDefs
+    const {userdetails} = useTokenContext();
+
+    console.log(userdetails, "userDetails");
+
+    const user = userdetails?.email;
+
+    console.log(user, "user");
+
     const [rowData, setRowData] = useState([]);
 
     const [isLoading, setLoading] = useState(true);
@@ -29,6 +37,8 @@ const MnetLiveAdsetHistory = ({params}) => {
 
     const [endDate1, setEndDate1] = useState();
 
+    const [columnDefs, setColumnStructure] = useState([]);
+
     const spender = (params) => {
         var total = 0;
         params.values.forEach((value) => (total += parseFloat(value)));
@@ -37,9 +47,11 @@ const MnetLiveAdsetHistory = ({params}) => {
         if (total2[1] !== undefined && total2[1].length > 2) {
           var total22 = total2[1].slice(0, 2)
           var totalone = total2[0] + '.' + total22
+          console.log(parseFloat(totalone).toFixed(2), "totalone");
           return parseFloat(totalone).toFixed(2)
         }
-        return total;
+        const newTotal = isNaN(total) ? 0 : total;
+        return newTotal;
     };
 
     const newSpender = (params) =>{
@@ -292,19 +304,17 @@ const MnetLiveAdsetHistory = ({params}) => {
         return 0;
     }
 
-    
-
-    
-
-    const columnDefs = [
-        { headerName: 'Date', field: 'date', width: 120,
+    const columnDefsObject = {
+        date: { headerName: 'Date', field: 'date', width: 120,
             minWidth: 450,
             hide: true,
             // // resizable:false,
             rowGroup: true,
             filter: true,
+            pinned: 'left',
+            sort: "asc"
         },
-        { headerName: 'CampaignName', field: 'campaignName',
+        campaignName: { headerName: 'CampaignName', field: 'campaignName',
             // resizeble: true,
             // // sortable: true,
             minWidth: 340,
@@ -317,7 +327,7 @@ const MnetLiveAdsetHistory = ({params}) => {
             // enableRowGroup: true,
             // autoHeight: true, 
         },
-        { headerName: 'AdsetName', field: 'adsetname',resizeble: true,
+        adsetName: { headerName: 'AdsetName', field: 'adsetName',resizeble: true,
         // sortable: true,
             minWidth: 350,
             // hide: true,
@@ -330,52 +340,66 @@ const MnetLiveAdsetHistory = ({params}) => {
         },
         // { headerName: 'FB-Hour', field: 'fb-hour', width: 120 },
         // { headerName: 'MNet-Hour', field: 'mnet-hour', width: 120 },
-        { headerName: 'Spend', field: 'spend', width: 120, aggFunc: spender },
-        { headerName: 'Revenue', field: 'revenue', width: 120, aggFunc: spender },
-        { headerName: 'Profit', field: 'profit', width: 120, aggFunc: spender, cellClassRules:{
+        spend: { headerName: 'Spend', field: 'spend', width: 120, aggFunc: spender },
+        revenue: { headerName: 'Revenue', field: 'revenue', width: 120, aggFunc: spender },
+        profit: { headerName: 'Profit', field: 'profit', width: 120, aggFunc: spender, cellClassRules:{
             'font-red': p => p.value < 0
         }  },
-        { headerName: 'Margin', field: 'margin', valueGetter: getMargin,  },
-        { headerName: 'FbLeads', field: 'fbleads', width: 120, aggFunc: spender  },
-        { headerName: 'Conversions', field: 'conversions', width: 120, aggFunc: newSpender  },
-        { headerName: 'cpc', field: 'cpc', aggFunc: cpcSpender},
-        { headerName: 'FbClicks', field: 'fbclicks', width: 120, aggFunc: spender  },
-        { headerName: 'Impressions', field: 'impressions', width: 120, aggFunc: spender  },
-        { headerName: 'Ctr', field: 'ctr', valueGetter: getCtr},
-        { headerName: 'Rpc', field: 'rpc', valueGetter: getRpc },
-        { headerName: 'Cpl', field: 'cpl', valueGetter: getCpl},
-        { headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl },
-        { headerName: 'Fmargin', field: 'fmargin', valueGetter: getFmargin},
-        { headerName: 'ROI', field: 'roi', valueGetter: getROI},
-        { headerName: 'AdsetId', field: 'adsetid' },
-        { headerName: 'CompaignId', field: 'compaignid' },
-        { headerName: 'TimeZone', field: 'timezone'},
-    ];
+        margin: { headerName: 'Margin', field: 'margin', valueGetter: getMargin,  },
+        fbleads: { headerName: 'FbLeads', field: 'fbleads', width: 120, aggFunc: spender  },
+        conversions: { headerName: 'Conversions', field: 'conversions', width: 120, aggFunc: newSpender  },
+        cpc: { headerName: 'cpc', field: 'cpc', aggFunc: cpcSpender},
+        fbclicks: { headerName: 'FbClicks', field: 'fbclicks', width: 120, aggFunc: spender  },
+        impressions: { headerName: 'Impressions', field: 'impressions', width: 120, aggFunc: spender  },
+        ctr: { headerName: 'Ctr', field: 'ctr', valueGetter: getCtr},
+        rpc: { headerName: 'Rpc', field: 'rpc', valueGetter: getRpc },
+        cpl: { headerName: 'Cpl', field: 'cpl', valueGetter: getCpl},
+        ncpl: { headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl },
+        fmargin: { headerName: 'Fmargin', field: 'fmargin', valueGetter: getFmargin},
+        roi: { headerName: 'ROI', field: 'roi', valueGetter: getROI},
+        adsetId: { headerName: 'AdsetId', field: 'adsetId' },
+        campaignId: { headerName: 'CompaignId', field: 'campaignId' },
+        timezone: { headerName: 'TimeZone', field: 'timezone'},
+    };
 
+    const getColumnDefs = (order) => {
+        return order?.map(colKey => columnDefsObject[colKey]);
+    };
+    const token = localStorage.getItem("token")
 
+    const functionCallForUserColumnStructure = async() => {
+        const fetchData = await axios.get(`https://prodapis.adsgoat.in/api/singleUserData?email=${user}`);
+        // const data = await fetchData.json();
+        const mainData = fetchData.data;
+        console.log(mainData.columnStructure, "columnStructure");
+        const filteredData = mainData.columnStructure.filter((each)=> each !== "fb-hour" && each !== "mnet-hour");
+        console.log(filteredData);
+        setColumnStructure(getColumnDefs(filteredData));
+        // setRowStructure(mainData.rows); 
+    }
 
-
+    
     const functionCall = async() =>{
         const paramsData = ((params.AdsetName).split("-"));
         const decodedString = decodeURIComponent(paramsData[0]);
         const accountNumber = paramsData[1];
         const timeZone = paramsData[2];
         // console.log(paramsData[3], "network");
-        let network;
-        switch(paramsData[3]){
-            case "FB_Mnet":
-                network = "MnetLiveAdsetHistory";
-                break;
-            case "FB_Enki":
-                network = "EnkiLiveAdsetHistory";
-            default:
-                null;
-                break;
-        }
+        let network = paramsData[3];
+        
         console.log(decodedString, "decode");
-        const fetchData = await fetch(`http://localhost:8000/${network}?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}`);
-        const data = await fetchData.json();
-        const mainData = await data;
+        // const fetchData = await fetch(`http://localhost:8000/${network}?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}`);
+        // const data = await fetchData.json();
+        // const mainData = await data;
+        const fetchData = await axios.get(`https://prodapis.adsgoat.in/LiveAdsetHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`, {
+            headers: {
+                Authorization: token,
+            },
+        });
+        // console.log(`https://prodapis.adsgoat.in/LiveAdsetHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`, "url");
+        const url = `http://localhost:8000/MnetLiveCampaignHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}`
+        
+        const mainData = fetchData.data;
         console.log(mainData[0]);
         const filteredData = mainData && mainData.length > 0 ? 
         mainData.map((eachData)=> {
@@ -411,23 +435,23 @@ const MnetLiveAdsetHistory = ({params}) => {
                 {
                     date: eachData.dateStart,
                     campaignName: eachData.campaign_name,
-                    adsetname: eachData.adsetName,
+                    adsetName: eachData.adsetName,
                     // 'fb-hour': eachData.hour,
                     // 'mnet-hour': eachData.updatedHour,
                     spend:eachData.spend,
-                    revenue: revenueData,
+                    revenue: revenueData !== null ? revenueData : '0.00',
                     profit: profit,
                     margin: margin,
                     fbleads: eachData.fbLeads,
-                    conversions: eachData.conversions,
+                    conversions: eachData.conversions !== null ? eachData.conversions : 0,
                     cpc: eachData.cpc,
                     fbclicks: eachData.fbClicks,
                     impressions: eachData.impressions,
                     rpc:rpc,
                     cpl:cpl,
                     ncpl:ncpl,
-                    adsetid: eachData.adset_id,
-                    compaignid: eachData.campaign_id,
+                    adsetId: eachData.adset_id,
+                    campaignId: eachData.campaign_id,
                     timezone: eachData[time],
                 }
             )
@@ -441,10 +465,15 @@ const MnetLiveAdsetHistory = ({params}) => {
     }
 
     useEffect(()=>{
+        if(user !== undefined){
+            const mainFunctionCall = async()=>{
+                await functionCallForUserColumnStructure();
+                await functionCall();
+            }
+            mainFunctionCall();
+        }
         
-        functionCall();
-        
-    },[])
+    },[user])
     console.log(fetchvalue);
     
     // const selectElementData = ['674038077865381', '665204411821465', '364991119488050'];
@@ -475,6 +504,8 @@ const MnetLiveAdsetHistory = ({params}) => {
     //     minWidth: 450,
         
     // };
+
+    console.log(columnDefs);
 
     return (
         <div>

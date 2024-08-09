@@ -178,7 +178,7 @@ body {
   overflow-x: auto; /* Enable horizontal scrolling if necessary */
   gap: 15px; /* Minimum space between select elements */
   width: 95%; /* Full width of the parent */
-  height: 80px;
+  height: 60px;
   box-sizing: border-box;
   margin-left: 20px;
 }
@@ -211,7 +211,9 @@ body {
   color: rgba(245, 8, 8, 0.993);
 }
 .ag-container{
-  height: 490px;
+  height: 430px;
+  margin-bottom: 0px;
+  padding-bottom: 0px;
   /* background-color: #bfbdb6; */
 }
 .ag-grid-Loader{
@@ -293,14 +295,35 @@ body {
     height: 30px;
   }
 }
-.reports-container {
-  min-height: 100vh;
+/* .reports-container {
+  height: 100vh;
   width: 100%;
-  overflow: auto;
-  position: relative;
-  scrollbar-width: thin; /* For Firefox */
-  scrollbar-color: #888 #f1f1f1; /* Optional: Customize scrollbar colors */
+  overflow: hidden;
+  -ms-overflow-style: none; 
+  scrollbar-width: none; 
 }
+.reports-container::-webkit-scrollbar {
+  display: none; 
+} */
+
+.reports-container {
+  height: 100vh;
+  width: 100%;
+  position: relative;
+}
+
+.reports-container::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.reports-container-content {
+  width: 100%;
+  height: 100%;
+  padding-right: 17px; 
+  box-sizing: content-box;
+}
+
 
 /* Custom properties for easy theming */
 /* :root {

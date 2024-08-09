@@ -126,7 +126,7 @@ const LayoutWrapper = ({ children }) => {
         if (sessionStatus === "authenticated" && !initialized) {
             const fetchData = async () => {
                 try {
-                    const userResponse = await axios.get('http://localhost:8888/api/getusersData/');
+                    const userResponse = await axios.get('https://prodapis.adsgoat.in/api/getusersData/');
                     if (userResponse.status === 200) {
                         const fetchedUsersData = userResponse.data;
                         setUsersData(fetchedUsersData);
@@ -149,7 +149,7 @@ const LayoutWrapper = ({ children }) => {
                                       for(let item of MediaBuyerkeysOfAdAccounts){
                                         if (MediaBuyeradAccounts[item][0] === "All"){
                                             console.log("Yes");
-                                            const networkResponse = await axios.get(`http://localhost:8000/network/Accounts?network=${item}`);
+                                            const networkResponse = await axios.get(`https://prodapis.adsgoat.in/network/Accounts?network=${item}`);
                                             MediaBuyernewObject[item] = await networkResponse.data;
                                             // console.log(await networkResponse.data);
                                         }
@@ -170,7 +170,7 @@ const LayoutWrapper = ({ children }) => {
                                       for(let item of SpecialUserkeysOfAdAccounts){
                                         if (SpecialUseradAccounts[item][0] === "All"){
                                             console.log("Yes");
-                                            const networkResponse = await axios.get(`http://localhost:8000/network/Accounts?network=${item}`);
+                                            const networkResponse = await axios.get(`https://prodapis.adsgoat.in/network/Accounts?network=${item}`);
                                             SpecialUsernewObject[item] = await networkResponse.data;
                                             // console.log(await networkResponse.data);
                                         }
@@ -191,7 +191,7 @@ const LayoutWrapper = ({ children }) => {
                                       for(let item of ManagerkeysOfAdAccounts){
                                         if (ManageradAccounts[item][0] === "All"){
                                             console.log("Yes");
-                                            const networkResponse = await axios.get(`http://localhost:8000/network/Accounts?network=${item}`);
+                                            const networkResponse = await axios.get(`https://prodapis.adsgoat.in/network/Accounts?network=${item}`);
                                             ManagernewObject[item] = await networkResponse.data;
                                             // console.log(await networkResponse.data);
                                         }
@@ -205,7 +205,7 @@ const LayoutWrapper = ({ children }) => {
                                     //   setuserdetails({ ...matchedUser, extraInfo: "Manager Specific Info" });
                                       break;
                                     case 'Admin':
-                                      const AllAccountsData = await axios.get(`http://localhost:8000/All/Accounts/`);
+                                      const AllAccountsData = await axios.get(`https://prodapis.adsgoat.in/All/Accounts/`);
                                       const responseData = await AllAccountsData.data;
                                       setuserdetails({...matchedUser, adAccounts: responseData});
                                     //   const adAccounts = matchedUser.adAccounts;
