@@ -1,4 +1,4 @@
-// File: D:\networkreporting\src\app\Reports\page.js
+// File: C:\Adsgoat_Dashboard\src\app\Reports\page.js
 import * as entry from '../../../../src/app/Reports/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

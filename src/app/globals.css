@@ -208,7 +208,7 @@ body {
   color: rgba(245, 8, 8, 0.993);
 }
 .ag-container{
-  height: 430px;
+  height:500px;
   margin-bottom: 0px;
   padding-bottom: 0px;
   /* background-color: #bfbdb6; */
@@ -304,7 +304,7 @@ body {
 } */
 
 .reports-container {
-  height: 100vh;
+  height: 97vh;
   width: 100%;
   position: relative;
 }
