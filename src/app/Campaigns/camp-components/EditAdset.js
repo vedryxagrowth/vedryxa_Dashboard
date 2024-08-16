@@ -1,0 +1,976 @@
+"use client";
+import {
+  CheckOutlined,
+  CloseOutlined,
+  CommentOutlined,
+  GlobalOutlined,
+  LikeOutlined,
+  MoreOutlined,
+  ShareAltOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
+import {
+  Button,
+  Card,
+  ConfigProvider,
+  DatePicker,
+  Form,
+  Input,
+  Modal,
+  Select,
+  Space,
+  Tabs,
+  Upload,
+  message,
+  theme
+} from "antd";
+import TextArea from "antd/es/input/TextArea";
+import axios from "axios";
+import moment from "moment-timezone";
+import { useEffect, useRef, useState } from "react";
+const { Option } = Select;
+const { TabPane } = Tabs;
+
+const publisherOptions = [
+  { label: 'Facebook', value: 'facebook' },
+  { label: 'Instagram', value: 'instagram' },
+  { label: 'Messenger', value: 'messenger' },
+  { label: 'Audience Network', value: 'audience_network' }
+];
+
+const positionOptions = {
+  facebook: [
+    { key: "feed", label: "Facebook Feed" },
+    { key: "marketplace", label: "Facebook Marketplace" },
+    { key: "video_feeds", label: "Facebook Video Feeds" },
+    { key: "instream_video", label: "Facebook In-Stream Videos" },
+    { key: "facebook_reels", label: "Facebook Reels" },
+    { key: "profile_feed", label: "Facebook Profile Feed" },
+    { key: "search", label: "Facebook search" }
+  ],
+  instagram: [
+    { key: "stream", label: "Instagram Stream" },
+    { key: "story", label: "Instagram Story" },
+    { key: "explore", label: "Instagram Explore" },
+    { key: "explore_home", label: "Instagram Explore Home" },
+    { key: "reels", label: "Instagram Reels" },
+    { key: "profile_feed", label: "Instagram Profile Feed" },
+    { key: "ig_search", label: "Instagram Search" },
+    { key: "profile_reels", label: "Instagram Profile Reels" }
+  ],
+  messenger: [
+    { key: "messenger_home", label: "Messenger Home" },
+    { key: "story", label: "Messenger Story" }
+  ],
+  audience_network: [
+    { key: "classic", label: "Audience Network Classic" },
+    { key: "rewarded_video", label: "Audience Network Rewarded Video" }
+  ]
+};
+
+const localesdata = [
+  {
+    "name": "English (US)",
+    "key": 6
+  },
+  {
+    "name": "Catalan",
+    "key": 1
+  },
+  {
+    "name": "Czech",
+    "key": 2
+  },
+  {
+    "name": "Cebuano",
+    "key": 56
+  },
+  {
+    "name": "Welsh",
+    "key": 3
+  },
+  {
+    "name": "Danish",
+    "key": 4
+  },
+  {
+    "name": "German",
+    "key": 5
+  },
+  {
+    "name": "Basque",
+    "key": 59
+  },
+  {
+    "name": "Spanish",
+    "key": 23
+  },
+  {
+    "name": "Spanish (Spain)",
+    "key": 7
+  },
+  {
+    "name": "Guarani",
+    "key": 66
+  },
+  {
+    "name": "Finnish",
+    "key": 8
+  },
+  {
+    "name": "French (France)",
+    "key": 9
+  },
+  {
+    "name": "Galician",
+    "key": 65
+  },
+  {
+    "name": "Hungarian",
+    "key": 30
+  },
+  {
+    "name": "Italian",
+    "key": 10
+  },
+  {
+    "name": "Japanese",
+    "key": 11
+  },
+  {
+    "name": "Korean",
+    "key": 12
+  },
+  {
+    "name": "Norwegian (bokmal)",
+    "key": 13
+  },
+  {
+    "name": "Norwegian (nynorsk)",
+    "key": 84
+  },
+  {
+    "name": "Dutch",
+    "key": 14
+  },
+  {
+    "name": "Frisian",
+    "key": 63
+  },
+  {
+    "name": "Polish",
+    "key": 15
+  },
+  {
+    "name": "Portuguese (Brazil)",
+    "key": 16
+  },
+  {
+    "name": "Portuguese (Portugal)",
+    "key": 31
+  },
+  {
+    "name": "Romanian",
+    "key": 32
+  },
+  {
+    "name": "Russian",
+    "key": 17
+  },
+  {
+    "name": "Slovak",
+    "key": 33
+  },
+  {
+    "name": "Slovenian",
+    "key": 34
+  },
+  {
+    "name": "Swedish",
+    "key": 18
+  },
+  {
+    "name": "Thai",
+    "key": 35
+  },
+  {
+    "name": "Turkish",
+    "key": 19
+  },
+  {
+    "name": "Northern Kurdish (Kurmanji)",
+    "key": 76
+  },
+  {
+    "name": "Simplified Chinese (China)",
+    "key": 20
+  },
+  {
+    "name": "Traditional Chinese (Hong Kong)",
+    "key": 21
+  },
+  {
+    "name": "Traditional Chinese (Taiwan)",
+    "key": 22
+  },
+  {
+    "name": "Afrikaans",
+    "key": 36
+  },
+  {
+    "name": "Albanian",
+    "key": 87
+  },
+  {
+    "name": "Armenian",
+    "key": 68
+  },
+  {
+    "name": "Azerbaijani",
+    "key": 53
+  },
+  {
+    "name": "Belarusian",
+    "key": 54
+  },
+  {
+    "name": "Bengali",
+    "key": 45
+  },
+  {
+    "name": "Bosnian",
+    "key": 55
+  },
+  {
+    "name": "Bulgarian",
+    "key": 37
+  },
+  {
+    "name": "Croatian",
+    "key": 38
+  },
+  {
+    "name": "Flemish",
+    "key": 83
+  },
+  {
+    "name": "English (UK)",
+    "key": 24
+  },
+  {
+    "name": "Esperanto",
+    "key": 57
+  },
+  {
+    "name": "Estonian",
+    "key": 58
+  },
+  {
+    "name": "Faroese",
+    "key": 62
+  },
+  {
+    "name": "French (Canada)",
+    "key": 44
+  },
+  {
+    "name": "Georgian",
+    "key": 72
+  },
+  {
+    "name": "Greek",
+    "key": 39
+  },
+  {
+    "name": "Gujarati",
+    "key": 67
+  },
+  {
+    "name": "Hindi",
+    "key": 46
+  },
+  {
+    "name": "Icelandic",
+    "key": 69
+  },
+  {
+    "name": "Indonesian",
+    "key": 25
+  },
+  {
+    "name": "Irish",
+    "key": 64
+  },
+  {
+    "name": "Javanese",
+    "key": 71
+  },
+  {
+    "name": "Kannada",
+    "key": 75
+  },
+  {
+    "name": "Kazakh",
+    "key": 73
+  },
+  {
+    "name": "Latvian",
+    "key": 78
+  },
+  {
+    "name": "Lithuanian",
+    "key": 40
+  },
+  {
+    "name": "Macedonian",
+    "key": 79
+  },
+  {
+    "name": "Malay",
+    "key": 41
+  },
+  {
+    "name": "Marathi",
+    "key": 81
+  },
+  {
+    "name": "Mongolian",
+    "key": 80
+  },
+  {
+    "name": "Nepali",
+    "key": 82
+  },
+  {
+    "name": "Punjabi",
+    "key": 47
+  },
+  {
+    "name": "Serbian",
+    "key": 42
+  },
+  {
+    "name": "Swahili",
+    "key": 88
+  },
+  {
+    "name": "Filipino",
+    "key": 26
+  },
+  {
+    "name": "Tamil",
+    "key": 48
+  },
+  {
+    "name": "Telugu",
+    "key": 49
+  },
+  {
+    "name": "Malayalam",
+    "key": 50
+  },
+  {
+    "name": "Ukrainian",
+    "key": 52
+  },
+  {
+    "name": "Uzbek",
+    "key": 91
+  },
+  {
+    "name": "Vietnamese",
+    "key": 27
+  },
+  {
+    "name": "Khmer",
+    "key": 74
+  },
+  {
+    "name": "Tajik",
+    "key": 89
+  },
+  {
+    "name": "Arabic",
+    "key": 28
+  },
+  {
+    "name": "Hebrew",
+    "key": 29
+  },
+  {
+    "name": "Urdu",
+    "key": 90
+  },
+  {
+    "name": "Persian",
+    "key": 60
+  },
+  {
+    "name": "Pashto",
+    "key": 85
+  },
+  {
+    "name": "Sinhala",
+    "key": 86
+  },
+  {
+    "name": "Japanese (Kansai)",
+    "key": 70
+  },
+  {
+    "name": "English (All)",
+    "key": 1001
+  },
+  {
+    "name": "Spanish (All)",
+    "key": 1002
+  },
+  {
+    "name": "French (All)",
+    "key": 1003
+  },
+  {
+    "name": "Chinese (All)",
+    "key": 1004
+  },
+  {
+    "name": "Portuguese (All)",
+    "key": 1005
+  }
+]
+export default function Editadset({ selectedRow, onClose, editadsetlevel, changeRRefrst, rerender }) {
+  const [form] = Form.useForm();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [formData, setFormData] = useState(null);
+  const [selectedPublishers, setSelectedPublishers] = useState([]);
+  const [selectedPositions, setSelectedPositions] = useState(["feed"]);
+
+  useEffect(() => {
+    if (editadsetlevel) {
+      setSelectedPublishers(editadsetlevel.publisher_platforms || []);
+      setSelectedPositions(editadsetlevel.position || ["feed"]);
+      form.setFieldsValue({
+        positions: editadsetlevel.position || ["feed"]
+      });
+    }
+  }, [editadsetlevel, form]);
+
+  const handlePublisherChange = (value) => {
+    setSelectedPublishers(value);
+    // setSelectedPositions(["feed"]); // Set default positions to "feed"
+    // form.resetFields(['positions']); // Reset positions field
+  };
+
+  const handlePositionChange = (value) => {
+    setSelectedPositions(value);
+  };
+
+  const getPositionOptions = () => {
+    if (!Array.isArray(selectedPublishers) || selectedPublishers.length === 0) {
+      return [];
+    }
+
+    const allPositions = selectedPublishers.reduce((acc, publisher) => {
+      return acc.concat(positionOptions[publisher] || []);
+    }, []);
+    return [...new Set(allPositions)]; // Remove duplicates
+  };
+
+  var token = localStorage.getItem("token")
+  // console.log(selectedRow, "selectedRow")
+
+  const handleSubmit = () => {
+    form
+      .validateFields()
+      .then((values) => {
+        const selectedPlatforms = selectedPublishers.reduce((acc, publisher) => {
+          acc[publisher + '_positions'] = values.positions.filter(position =>
+            positionOptions[publisher].map(option => option.key).includes(position)
+          );
+          return acc;
+        }, {});
+        console.log({
+          publisher_platforms: values.publisher_platforms,
+          ...selectedPlatforms, ...values
+        });
+
+        // setIsModalVisible(true);
+        setFormData({
+          publisher_platforms: values.publisher_platforms,
+          ...selectedPlatforms,
+          ...values
+        });
+        // setFormData(values);
+        setIsModalVisible(true);
+      })
+      .catch((errorInfo) => {
+        console.log('Validation failed:', errorInfo);
+      });
+  };
+
+  const handleClear = () => {
+    form.resetFields();
+  };
+
+  const handleModalOk = async () => {
+    setIsModalVisible(false);
+    if (formData) {
+      try {
+        await postData(formData);
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    }
+    message.success("Adset Edited successfully");
+    console.log('Modal ok clicked');
+    rerender()
+    onClose()
+
+  };
+
+  const handleModalCancel = () => {
+    setIsModalVisible(false);
+    console.log('Modal cancel clicked');
+  };
+  const currentDate = moment();
+  var initialValue = {
+    AdsetName: editadsetlevel?.AdsetName,
+    optimization_goal: editadsetlevel?.optimization_goal,
+    billing_event: editadsetlevel?.billing_event,
+    // start_time: editadsetlevel?.start_time,
+    action_source: editadsetlevel?.action_source,
+    custom_event_type: editadsetlevel?.custom_event_type,
+    pixel_id: editadsetlevel?.pixel_id,
+    bid_amount: (editadsetlevel?.bid_amount) / 100,
+    countries: editadsetlevel?.countries,
+    Min_Age: editadsetlevel?.Min_Age,
+    Max_Age: editadsetlevel?.Max_Age,
+    Gender: editadsetlevel?.Gender,
+    publisher_platforms: editadsetlevel?.publisher_platforms,
+    device_platforms: editadsetlevel?.device_platforms,
+    Language: editadsetlevel?.locales
+    // Facebook_positions: editadsetlevel?.Facebook_positions,
+  }
+  const postData = async (values) => {
+    try {
+      const data1 = {
+        adsetlevel: {
+          AdsetName: values.AdsetName,
+          optimization_goal: values.optimization_goal,
+          billing_event: values.billing_event,
+          start_time: moment(values.DatePicker).utc().format("YYYY-MM-DDTHH:mm:ssZ"),
+          action_source: values.action_source,
+          custom_event_type: values.custom_event_type,
+          pixel_id: values.pixel_id,
+          bid_amount: values.bid_amount ? parseFloat(values.bid_amount) * 100 : 0,
+          countries: values.countries,
+          Min_Age: values.Min_Age,
+          Max_Age: values.Max_Age,
+          Gender: parseInt(values.Gender),
+          publisher_platforms: values.publisher_platforms,
+          Facebook_positions: values.facebook_positions || [],
+          instagram_positions: values.instagram_positions || [],
+          audience_network_positions: values.audience_network_positions || [],
+          messenger_positions: values.messenger_positions || [],
+          position: values.positions,
+          locales: values.Language,
+          device_platforms: values.device_platforms,
+          buying_type: "AUCTION"
+        }
+      }
+      const response = await fetch(`https://www.testapi.adsgoat.in/api/Editedadset/${selectedRow.identifier}`, {
+        method: 'PUT',
+        headers: {
+
+          'Content-Type': 'application/json',
+          Authorization: token
+        },
+        body: JSON.stringify(data1)
+      });
+
+      if (response.ok) {
+        console.log('Form data submitted successfully');
+        // onClose(); // Close the drawer or perform any other action
+      } else {
+        console.error('Failed to submit form data');
+      }
+    } catch (error) {
+      console.error('Error submitting form data:', error);
+    }
+  }
+
+  return (
+    <>
+      <h3>{editadsetlevel?.AdsetName}</h3>
+      <Card style={{ width: '100%' }} className="editcard">
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleSubmit}
+          initialValues={initialValue}
+        >
+          <div style={{ display: "flex" }}>
+            <Form.Item
+              name="AdsetName"
+              label={<span style={{ color: "#B4B4B4" }}>Adset name</span>}
+              rules={[
+                {
+                  required: true,
+                  message: "Please select an option!",
+                },
+              ]}
+              style={{ flex: 0.25 }}>
+              <Input
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
+            <Form.Item
+              name="optimization_goal"
+              label={<span style={{ color: "#B4B4B4" }}>Optimiz goal</span>}
+              rules={[
+                {
+                  required: true,
+                  message: "Please select an option!",
+                },
+              ]}
+              style={{ flex: 0.1, marginLeft: "2%" }}>
+              <Select
+
+                variant="filled"
+                options={[
+                  { value: "OFFSITE_CONVERSIONS", label: "Conversions" },
+                  { value: "LINK_CLICKS", label: "Clicks" },
+                  { value: "REACH", label: "Reach" },
+                  { value: "VALUE", label: "Value" }
+                ]}
+              />
+            </Form.Item>
+            <Form.Item
+              name="billing_event"
+              label={<span style={{ color: "#B4B4B4" }}>Billing event</span>}
+              rules={[
+                {
+                  required: true,
+                  message: "Please select an option!",
+                },
+              ]}
+              style={{ flex: 0.1, marginLeft: "2%" }}>
+              <Select
+
+                variant="filled"
+                options={[
+                  { value: "IMPRESSIONS", label: "Impressions" },
+                  { value: "VALUE", label: "Value" }
+                ]}
+              />
+            </Form.Item>
+            <Form.Item
+              name="DatePicker"
+              label={<span style={{ color: "#B4B4B4" }}>Start Time</span>}
+              rules={[
+                {
+                  required: true,
+                  message: 'Please input!',
+                },
+              ]}
+              style={{ flex: 0.1, marginLeft: "2%" }}
+              initialValue={currentDate}
+
+            >
+              <DatePicker />
+            </Form.Item>
+            <Form.Item
+              name="action_source"
+              label={<span style={{ color: "#B4B4B4" }}>Action source</span>}
+              rules={[
+                {
+                  required: true,
+                  message: "Please select an option!",
+                },
+              ]}
+              style={{ flex: 0.1, marginLeft: "2%" }}>
+              <Select
+
+                variant="filled"
+                options={[
+                  { value: "website", label: "Website" },
+                  { value: "email", label: "Email" },
+                  { value: "app", label: "App" },
+                  { value: "phone_call", label: "Phone Call" }
+                ]}
+              />
+            </Form.Item>
+            <Form.Item
+              name="custom_event_type"
+              label={<span style={{ color: "#B4B4B4" }}>Event type</span>}
+              rules={[
+                {
+                  required: true,
+                  message: "Please select an option!",
+                },
+              ]}
+              style={{ flex: 0.1, marginLeft: "2%" }}>
+              <Select
+
+                variant="filled"
+                options={[
+                  { value: "LEAD", label: "Lead" },
+                  { value: "PURCHASE", label: "Purchase" },
+                  { value: "SEARCH", label: "Search" },
+                  { value: "CONTACT", label: "Contact" },
+                ]}
+              />
+            </Form.Item>
+            <Form.Item
+              name="pixel_id"
+              // initialValue={pixelids}
+              label={<span style={{ color: "#B4B4B4" }}>Pixel id</span>}
+              rules={[
+                {
+                  required: true,
+                  message: "Please select an option!",
+                },
+              ]}
+              style={{ flex: 0.15, marginLeft: "2%" }}>
+              <Input
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
+            {/* {showBidAmount && ( */}
+            <Form.Item
+              name="bid_amount"
+              label={<span style={{ color: "#B4B4B4" }}>Bid_amount</span>}
+              rules={[
+                {
+                  required: true,
+                  message: "Please enter a bid amount!",
+                },
+                {
+                  validator: (_, value) =>
+                    value && !isNaN(value) && parseFloat(value) > 0
+                      ? Promise.resolve()
+                      : Promise.reject(new Error("Please enter a valid float value!")),
+                },
+              ]}
+              style={{ flex: 0.1, marginLeft: "2%" }}>
+              <Input
+                type="number"
+                placeholder="$"
+                onKeyPress={(event) => {
+                  const charCode = event.charCode;
+                  const charStr = String.fromCharCode(charCode);
+                  const regex = /^[0-9]*\.?[0-9]*$/;
+                  if (!regex.test(charStr)) {
+                    event.preventDefault();
+                  }
+                }}
+              />
+            </Form.Item>
+            {/* )} */}
+
+
+          </div>
+          <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "green" }}>Targeting</span>
+          <div style={{ display: "flex" }}>
+            <Form.Item
+              name="countries"
+              label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
+              rules={[
+                {
+                  required: true,
+                  message: "Please select an option!",
+                },
+              ]}
+              style={{ flex: 0.12 }}>
+              <Select
+                variant="filled"
+
+                options={[
+                  { value: "US", label: "United States" },
+                  { value: "GB", label: "United Kingdom" },
+                  { value: "AU", label: "Australia" },
+                  { value: "IN", label: "India" },
+                  { value: "AE", label: "United Arab Emirates" },
+                ]}
+              />
+            </Form.Item>
+            <Form.Item
+              name="Min_Age"
+              label={<span style={{ color: "#B4B4B4" }}>Min Age</span>}
+              rules={[
+                {
+                  required: true,
+                  message: "Please select an option!",
+                },
+              ]}
+              style={{ marginLeft: "2%" }}>
+              <Select
+                variant="filled"
+                options={[
+                  { value: "18", label: "18" },
+                  { value: "25", label: "25" },
+                  { value: "35", label: "35" },
+                  { value: "40", label: "40", disabled: true },
+                ]}
+              />
+            </Form.Item>
+            <Form.Item
+              name="Max_Age"
+              label={<span style={{ color: "#B4B4B4" }}>Max Age</span>}
+              rules={[
+                {
+                  required: true,
+                  message: "Please select an option!",
+                },
+              ]}
+            >
+              <Select
+                variant="filled"
+                options={[
+                  { value: "20", label: "20" },
+                  { value: "30", label: "30" },
+                  { value: "65", label: "65+" },
+                  { value: "80", label: "80", disabled: true },
+                ]}
+              />
+            </Form.Item>
+            <Form.Item
+              name="Gender"
+              label={<span style={{ color: "#B4B4B4" }}> Gender</span>}
+              rules={[
+                {
+                  required: true,
+                  message: "Please select an option!",
+                },
+              ]}
+              style={{ flex: 0.1, marginLeft: "2%" }}>
+              <Select
+                variant="filled"
+                options={[
+                  { value: "0", label: "All" },
+                  { value: "1", label: "Male" },
+                  { value: "2", label: "Female" },
+                ]}
+              />
+            </Form.Item>
+            <Form.Item
+              name="Language"
+              label={<span style={{ color: "#B4B4B4" }}>Language</span>}
+              rules={[{ required: true, message: "Please select an option!" }]}
+              style={{ flex: 0.1, marginLeft: "2%" }}
+            >
+              <Select
+                mode="multiple"
+                placeholder="Select Language"
+                // onChange={handlePublisherChange}
+                value={editadsetlevel?.locales}
+                style={{ width: 150 }}
+
+              >
+                {localesdata.map(option => (
+                  <Option key={option.key} value={option.key}>
+                    {option.name}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item
+              name="publisher_platforms"
+              label={<span style={{ color: "#B4B4B4" }}>Platforms</span>}
+              rules={[{ required: true, message: "Please select an option!" }]}
+              style={{ flex: 0.1, marginLeft: "2%" }}
+            >
+              <Select
+                mode="multiple"
+                placeholder="Select Publishers"
+                onChange={handlePublisherChange}
+                value={selectedPublishers}
+                style={{ width: 300 }}
+              >
+                {publisherOptions.map(option => (
+                  <Option key={option.value} value={option.value}>
+                    {option.label}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+
+            <Form.Item
+              name="positions"
+              label={<span style={{ color: "#B4B4B4" }}>Positions</span>}
+              rules={[{ required: true, message: "Please select an option!" }]}
+              style={{ flex: 0.1, marginLeft: "2%" }}
+            >
+              <Select
+                mode="multiple"
+                placeholder="Select Positions"
+                value={selectedPositions}
+                onChange={handlePositionChange}
+                style={{ width: 400 }}
+              >
+                {selectedPublishers && selectedPublishers.length > 0 ? (
+                  getPositionOptions().map(position => (
+                    <Option key={`${position.key}_${position.label}`} value={position.key}>
+                      {position.label}
+                    </Option>
+                  ))
+                ) : (
+                  <Option value="">Empty</Option>
+                )}
+
+              </Select>
+            </Form.Item>
+            <Form.Item
+              name="device_platforms"
+              label={<span style={{ color: "#B4B4B4" }}>Device</span>}
+              rules={[
+                {
+                  required: true,
+                  message: "Please select an option!",
+                },
+              ]}
+              style={{ flex: 0.18, marginLeft: "2%" }}>
+              <Select
+                mode="multiple"
+                variant="filled"
+                allowClear
+                style={{ width: '100%' }}
+                placeholder="Please select"
+                options={[
+                  { value: "mobile", label: "Mobile" },
+                  { value: "desktop", label: "Desktop" }
+                ]}
+              />
+            </Form.Item>
+          </div>
+
+          <Form.Item>
+            <Space>
+              <Button type="primary" htmlType="submit">
+                Submit
+              </Button>
+              <Button onClick={handleClear}>Clear</Button>
+            </Space>
+          </Form.Item>
+        </Form>
+      </Card>
+
+      <Modal
+        title="Form Data"
+        visible={isModalVisible}
+        onOk={handleModalOk}
+        onCancel={handleModalCancel}
+      >
+        {/* Display form data in modal */}
+        {formData && (
+          <pre>{JSON.stringify(formData, null, 2)}</pre>
+        )}
+      </Modal>
+    </>
+  );
+  // return(
+  //     <>
+  //     <h1>hello Editadset ${selectedRow.campaignName}</h1>
+  //     </>
+  // )
+}
