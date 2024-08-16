@@ -8,6 +8,10 @@ import { Add } from '@mui/icons-material';
 const Edituseraccesses = ({ editeddata, visible, onClose }) => {
     // console.log(editeddata, "heyy edit-useraccess page")
     console.log(editeddata, "editeddata");
+    const userAccess = editeddata?.adAccounts;
+    console.log(userAccess, "adAccounts");
+    userAccess !== null && userAccess !== undefined ? Object.keys(userAccess).map(key => ({ network: key, inputs: userAccess[key] })) : [];
+    // console.log(userAccessresult, "userAccessResult");
     let userName;
     if (editeddata !== null){
         userName = editeddata.userName;
@@ -24,16 +28,19 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
     });
     // const userAccessData =  [{network: "Mnet", inputs: ['123456789', '987654321']}, {network: "Enki", inputs: ['123456789', '987654321']}];
 
-    const [additionalAccounts, setAdditionalAccounts] = useState([
-        { network: "Mnet", inputs: ['123456789', '987654321'] },
-        { network: "Enki", inputs: ['123456789', '987654321'] }
-    ]);
+    const [additionalAccounts, setAdditionalAccounts] = useState([]);
     const [formAccounts, setFormAccounts] = useState([]);
     const [selectedNetworks, setSelectedNetworks] = useState([]);
     const [editeddatas, setEditeddatas] = useState(null);
     var token = localStorage.getItem("token")
-
-
+    useEffect(()=>{
+        if(userAccess !== null && userAccess !== undefined){
+            setAdditionalAccounts(Object.keys(userAccess).map(key => ({ network: key, inputs: userAccess[key] })))
+        }
+        else{
+            setAdditionalAccounts([])
+        }
+    }, [userAccess]);
     // const submitForm = async (values) => {
     //     try {
     //         const allAccounts = [
@@ -62,7 +69,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
     //     }
     // };
 
-    let AddAccounts;
+    let AddAccounts ;
 
     useEffect(() => {
         updateSelectedNetworks([...additionalAccounts, ...formAccounts]);
@@ -78,15 +85,49 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
     };
 
     const handleRemoveAccount = (index) => {
-        const updatedAccounts = additionalAccounts.filter((_, accountIndex) => accountIndex !== index);
-        setAdditionalAccounts(updatedAccounts);
-        updateSelectedNetworks([...formAccounts, ...updatedAccounts]);
+        Modal.confirm({
+            title: 'Confirm',
+            content: 'Are you sure you want to delete this Network?',
+            onOk: () => {
+                try {
+                    const updatedAccounts = additionalAccounts.filter((_, accountIndex) => accountIndex !== index);
+                    setAdditionalAccounts(updatedAccounts);
+                    updateSelectedNetworks([...formAccounts, ...updatedAccounts]);
+                } catch (error) {
+                    console.error('Error:', error);
+                    // Handle error, such as showing an error message
+                }
+            },
+            onCancel: () => {
+                console.log('Cancel');
+            },
+        });
+        // const updatedAccounts = additionalAccounts.filter((_, accountIndex) => accountIndex !== index);
+        // setAdditionalAccounts(updatedAccounts);
+        // updateSelectedNetworks([...formAccounts, ...updatedAccounts]);
     };
 
     const handleRemoveAccount1 = (index) => {
-        const updatedFormAccounts = formAccounts.filter((_, accountIndex) => accountIndex !== index);
-        setFormAccounts(updatedFormAccounts);
-        updateSelectedNetworks([...updatedFormAccounts, ...additionalAccounts]);
+        Modal.confirm({
+            title: 'Confirm',
+            content: 'Are you sure you want to delete this Network?',
+            onOk: () => {
+                try {
+                    const updatedFormAccounts = formAccounts.filter((_, accountIndex) => accountIndex !== index);
+                    setFormAccounts(updatedFormAccounts);
+                    updateSelectedNetworks([...updatedFormAccounts, ...additionalAccounts]);
+                } catch (error) {
+                    console.error('Error:', error);
+                    // Handle error, such as showing an error message
+                }
+            },
+            onCancel: () => {
+                console.log('Cancel');
+            },
+        });
+        // const updatedFormAccounts = formAccounts.filter((_, accountIndex) => accountIndex !== index);
+        // setFormAccounts(updatedFormAccounts);
+        // updateSelectedNetworks([...updatedFormAccounts, ...additionalAccounts]);
     };
 
     const handleNetworkChange = (index, value) => {
@@ -161,7 +202,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
     const getAvailableNetworks = (currentNetwork = '') => {
         const allSelectedNetworks = selectedNetworks.filter(network => network !== currentNetwork);
         
-        const data = ["Mnet", "Enki", "Tonic", "Tonic_1"].filter(network => !allSelectedNetworks.includes(network));
+        const data = ["FB_Mnet", "FB_Enki", "FB_Tonic", "FB_System1", "FB_Bodies", "FB_Bodies1", "FB_Rsoc", "FB_DActive"].filter(network => !allSelectedNetworks.includes(network));
         // setNetworks(data);
         AddAccounts = data;
         return data;
@@ -182,41 +223,59 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
     //     setAdditionalAccounts(newAccounts);
     // };
     const submitForm = async (values) => {
-        try {
-            // const allAccounts = [
-            //     ...(editeddata && editeddata.adAccounts ? editeddata.adAccounts : []),
-            //     ...additionalAccounts
-            // ];
-
-            // const formattedData = {
-            //     ...values,
-            //     adAccounts: allAccounts,
-            // };
-            // console.log(additionalAccounts, "additionalAccounts data");
-            console.log(editeddata);
-
-            // const response = await axios.put(`https://www.testapi.adsgoat.in/api/users/${editeddata && editeddata.email}`, formattedData,
-            //     {
-            //         headers: {
-            //             'Authorization': token
-            //         }
-            //     });
-
-            // if (response.status === 200) {
-            //     console.log('User updated successfully');
-            //     message.success("User Edits updated successfully"); // Display success message
-            //     setTimeout(() => {
-            //         window.location.reload();
-            //     }, 1500);
-            //     setIsModalVisible(false); // Close modal after success
-            //     onClose(); // Close drawer
-            // } else {
-            //     console.error('Failed to update user');
-            //     // Handle error, show error message
-            // }
-        } catch (error) {
-            console.error('Error updating user:', error);
-        }
+        Modal.confirm({
+            title: 'Confirmation',
+            content: 'Are you sure you want to submit?',
+            onOk: async() => {
+                try {
+                    // const allAccounts = [
+                    //     ...(editeddata && editeddata.adAccounts ? editeddata.adAccounts : []),
+                    //     ...additionalAccounts
+                    // ];
+                    const singleObject = additionalAccounts.reduce((acc, obj) => {
+                        const key = obj[Object.keys(obj)[0]];
+                        const value = Object.keys(obj)[1];
+                        // console.log() // Get the key from the current object
+                        // console.log(obj, "obj")
+                        acc[key] = obj[value]; // Assign the value to the accumulated object using the key
+                        return acc;
+                    }, {});
+        
+                    const formattedData = {
+                        ...values, adAccounts: singleObject
+                    };
+                    console.log(formattedData);
+                    // console.log(additionalAccounts, "additionalAccounts data");
+                    // console.log(singleObject, ":singleObject");
+        
+                    const response = await axios.put(`https://prodapis.adsgoat.in/api/updateUserTableData/`, {formattedData},
+                        {
+                            headers: {
+                                'Authorization': token
+                            }
+                        });
+        
+                    if (response.status === 200) {
+                        console.log('User updated successfully');
+                        message.success("User Edits updated successfully"); // Display success message
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                        setIsModalVisible(false); // Close modal after success
+                        onClose(); // Close drawer
+                    } else {
+                        console.error('Failed to update user');
+                        // Handle error, show error message
+                    }
+                } catch (error) {
+                    console.error('Error updating user:', error);
+                }
+            },
+            onCancel: () => {
+                console.log('Cancel');
+            },
+        });
+        
     };
 
 
@@ -340,7 +399,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                         </Button>
                     </div>
                 </Form.Item> */}
-                {additionalAccounts.map((account, accountIndex) => (
+                {additionalAccounts?.map((account, accountIndex) => (
                     <div key={accountIndex}>
                         <div style={{ display: 'flex', marginBottom: '8px', width: '100%' }}>
                             <Select

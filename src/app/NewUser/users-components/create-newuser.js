@@ -15,7 +15,7 @@ const Createnewuser = ({ visible, onClose }) => {
     const [additionalAccounts, setAdditionalAccounts] = useState([]);
     const [selectedNetworks, setSelectedNetworks] = useState([]);
     // const [inputsArray, setInputArray] = useState([]);
-    console.log(additionalAccounts, "addition");
+    // console.log(additionalAccounts, "addition");
     // const [data, setData] = useState({});
     // const [inputValue, setInputValue] = useState();
     // const netData = {...data};
@@ -24,7 +24,7 @@ const Createnewuser = ({ visible, onClose }) => {
     // const [accounts, setAccounts] = useState();
     var token = localStorage.getItem("token");
 
-    const availableNetworks = ["Mnet", "Enki", "Tonic", "Tonic_1"].filter(network => !selectedNetworks.includes(network));
+    const availableNetworks = ["FB_Mnet", "FB_Enki", "FB_Tonic", "FB_System1", "FB_Bodies", "FB_Bodies1", "FB_Rsoc", "FB_DActive"].filter(network => !selectedNetworks.includes(network));
     const handleAddAccount = () => {
         if(availableNetworks.length > 0){
             setAdditionalAccounts([...additionalAccounts, { network: '', inputs: [''] }]);
@@ -84,39 +84,49 @@ const Createnewuser = ({ visible, onClose }) => {
     };
 
     const submitForm = async (values) => {
-        try {
-            let data = {};
-            additionalAccounts.map((each)=>{
-                data[each.network] = each.inputs;
-            });
-            
-            const formattedData = {
-                ...values,
-                adAccounts: additionalAccounts.length > 0 ? data : [],
-            };
-            console.log(formattedData, "formatted Data");
-            // const response = await axios.post('https://www.testapi.adsgoat.in/api/users', formattedData,
-            //     {
-            //         headers: {
-            //             'Authorization': token
-            //         }
-            //     });
-
-            // if (response.status === 200) {
-            //     console.log('User created successfully');
-            //     message.success("User created successfully"); // Display success message
-            //     setTimeout(() => {
-            //         window.location.reload();
-            //     }, 1500);
-            //     setIsModalVisible(false); // Close modal after success
-            //     onClose(); // Close drawer
-            // } else {
-            //     console.error('Failed to create user');
-            //     // Handle error, show error message
-            // }
-        } catch (error) {
-            console.error('Error creating user:', error);
-        }
+        Modal.confirm({
+            title: 'Confirmation',
+            content: 'Are you sure you want to create new user?',
+            onOk: async() => {
+                try {
+                    let data = {};
+                    additionalAccounts.map((each)=>{
+                        data[each.network] = each.inputs;
+                    });
+                    
+                    const formattedData = {
+                        ...values,
+                        adAccounts: additionalAccounts.length > 0 ? data : [],
+                    };
+                    console.log(formattedData, "formatted Data");
+                    const response = await axios.post('https://prodapis.adsgoat.in/api/createUser/', {formattedData},
+                        {
+                            headers: {
+                                'Authorization': token
+                            }
+                        });
+                    
+                    if (response.status === 200) {
+                        console.log('User created successfully');
+                        message.success("User created successfully"); // Display success message
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                        setIsModalVisible(false); // Close modal after success
+                        onClose(); // Close drawer
+                    } else {
+                        console.error('Failed to create user');
+                        // Handle error, show error message
+                    }
+                } catch (error) {
+                    console.error('Error creating user:', error);
+                }
+            },
+            onCancel: () => {
+                console.log('Cancel');
+            },
+        });
+        
     };
 
     
@@ -184,7 +194,7 @@ const Createnewuser = ({ visible, onClose }) => {
                                     <div style={{ display: 'flex', marginBottom: '8px', width: '100%' }}>
                                         <Select
                                             placeholder="Select a network"
-                                            style={{ width: '120px', marginRight: '8px' }}
+                                            style={{ width: '150px', marginRight: '8px' }}
                                             value={account.network}
                                             onChange={(value) => handleNetworkChange(accountIndex, value)}
                                         >
