@@ -1,7 +1,7 @@
 "use client"
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
-import { Table, Button, Col, Card, Input, Row, Select, Result, Spin, Space, Modal, message, Menu } from 'antd';
+import { Table, Button, Col, Card, Input, Row, Select, Result, Spin, Space, Modal, message, Menu, Switch } from 'antd';
 import { HighlightOutlined, LeftOutlined, RightOutlined, SearchOutlined, SwapRightOutlined, DownOutlined } from "@ant-design/icons";
 import { Carousel } from 'react-responsive-carousel';
 import { MailOutlined, SettingOutlined } from '@ant-design/icons';
@@ -12,6 +12,17 @@ import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import Createnewuser from './users-components/create-newuser';
 import Newaddaccounts from './users-components/add-newaccount';
 import Edituseraccesses from './users-components/edit-usersaccess';
+const contentStyle = {
+    margin: 0,
+    // height: '800px',
+    color: '#66fc03',
+    lineHeight: '160px',
+    textAlign: 'center',
+    background: '#fbfcfa',
+};
+const roles = ['All', 'Media_Buyer', 'ADMIN', 'MANAGER', 'Special_User'];
+const accountStatus = ['All', 'Active', 'InActive'];
+const availableNetworks = ['All', "MEDIA_DOT_NET", "ENKI", "TONIC", "System1", "Bodies", "Bodies1", "Rsoc", "Domain Active"];
 
 const UsersTable = () => {
     const [usersData, setUsersData] = useState([]);
@@ -25,7 +36,69 @@ const UsersTable = () => {
     const [accountDrawerVisible, setaccountDrawerVisible] = useState(false);
     const [usersaccessDrawerVisible, setusersaccessDrawerVisible] = useState(false);
     const [usersaccessData, setusersaccessData] = useState(null);
+    const [newSearchInput, setNewSearchInput] = useState("");
 
+    const [role, setRole] = useState('');
+    const [status, setStatus] = useState('All');
+    const [revenuePartner, setRevenuePartner] = useState('All');
+    const [isSearching, setIsSearching] = useState(false);
+    const [isSearchingAccount, setIsSearchingAccount] = useState(false);
+
+    const carouselRef = useRef(null);
+    const [currentSlide, setCurrentSlide] = useState(0);
+
+    const handleDotClick = (index) => {
+        if (carouselRef.current) {
+            carouselRef.current.goTo(index);
+            setCurrentSlide(index);
+        }
+    };
+
+    const handleSearchClick = () => {
+        setIsSearching(true);
+    };
+
+    const handleBlur = () => {
+        if (searchInput.trim() === '') {
+            setIsSearching(false);
+        }
+    };
+
+    const handleChangeInput = (e) => {
+        setInputValue(e.target.value);
+        // console.log(e.target.value);
+        // const filteredLiveData = rowData.filter((each)=> each.campaignName.includes(e.target.value));
+
+        // const filteredDailyData = dailyData.filter((each)=> each.campaignName.includes(e.target.value));
+        // const filteredAllCampaignsData = campaignData.filter((each)=> each.campaignName.includes(e.target.value));
+        // setRowData(filteredLiveData);
+        // setdailyData(filteredDailyData);
+        // setCampaignData(filteredAllCampaignsData);
+    };
+
+    const handleSearchClick1 = () => {
+        setIsSearchingAccount(true);
+    };
+
+    const handleBlur1 = () => {
+        if (searchInput.trim() === '') {
+            setIsSearchingAccount(false);
+        }
+    };
+
+    // const handleChangeInput1 = (e) => {
+    //     setInputValue(e.target.value);
+    //     // console.log(e.target.value);
+    //     // const filteredLiveData = rowData.filter((each)=> each.campaignName.includes(e.target.value));
+
+    //     // const filteredDailyData = dailyData.filter((each)=> each.campaignName.includes(e.target.value));
+    //     // const filteredAllCampaignsData = campaignData.filter((each)=> each.campaignName.includes(e.target.value));
+    //     // setRowData(filteredLiveData);
+    //     // setdailyData(filteredDailyData);
+    //     // setCampaignData(filteredAllCampaignsData);
+    // };
+
+    // const [accountsData, setAccountsData] = useState([]);
     //new Added below
     // const [openKeys, setOpenKeys] = useState([]);
     // const [selectedValue, setSelectedValue] = useState(null);
@@ -83,15 +156,18 @@ const UsersTable = () => {
 
     var token = localStorage.getItem("token")
     useEffect(() => {
-        fetchusersData();
-        fetchAccountsData();
+        const functionaCall = async() => {
+            await fetchusersData();
+            await fetchAccountsData();
+        }
+        functionaCall();
     }, []);
     const handleDelete = async (values) => {
         console.log(values, "Delete");
 
         try {
             // Check if values.email exists
-            const url = values.email ? `https://www.testapi.adsgoat.in/api/users/${values.email}` : '';
+            const url = values.email ? `https://prodapis.adsgoat.in/api/deleteUser?email=${values.email}` : '';
 
             if (url) {
                 // Show modal confirmation
@@ -100,16 +176,25 @@ const UsersTable = () => {
                     content: 'Are you sure you want to remove access?',
                     onOk: async () => {
                         try {
-                            const response = await fetch(url, {
-                                method: 'DELETE',
+                            const response = await axios.delete(url,
+                            {
                                 headers: {
-                                    Authorization: token
+                                    'Authorization': token
                                 }
                             });
+                            // const response = await fetch(url, {
+                            //     method: 'DELETE',
+                            //     headers: {
+                            //         Authorization: token
+                            //     }
+                            // });
 
-                            if (response.ok) {
+                            if (response.status === 200) {
                                 console.log('User deleted successfully');
                                 message.success(`${values.userName} User access removed successfully`);
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 1500);
                                 // Handle success, such as updating UI or showing a success message
                             } else {
                                 console.error('Failed to delete user');
@@ -133,11 +218,34 @@ const UsersTable = () => {
             // Handle error, such as showing an error message
         }
     };
-
+    const handleStatusChange = async(accountNumber, checked) => {
+        console.log(checked, "checked");
+        const newData = AccountsData.map((item) => {
+            if (item.accountNumber === accountNumber) {
+                console.log(`Account Number: ${item.accountNumber}`);
+                return {
+                    ...item,
+                    status: checked ? 'Active' : 'InActive',
+                };
+            }
+            return item;
+        });
+        console.log(newData, "newData");
+        const newStatus = checked ? 'Active' : 'InActive';
+        console.log(newStatus, "newStatus");
+        console.log(token, "token");
+        const response = await axios.get(`https://prodapis.adsgoat.in/updateAccount/?accountNumber=${accountNumber}&status=${newStatus}`, {
+                headers: {
+                    Authorization: token
+                }
+        });
+        // console.log(response.data);
+        setAccountsData(newData);
+    };
 
     const fetchusersData = async () => {
         try {
-            const response = await axios.get('http://localhost:8888/get/usersdata/', {
+            const response = await axios.get('https://prodapis.adsgoat.in/get/usersdata/', {
                 headers: {
                     Authorization: token
                 }
@@ -157,11 +265,16 @@ const UsersTable = () => {
 
     const fetchAccountsData = async () => {
         try {
-            const response = await axios.get('https://www.testapi.adsgoat.in/api/getAccountsData', {
+            const response = await axios.get('https://prodapis.adsgoat.in/api/getAccountsData/', {
                 headers: {
                     Authorization: token
                 }
             });
+            // const response = await axios.get('https://www.testapi.adsgoat.in/api/getAccountsData', {
+            //     headers: {
+            //         Authorization: token
+            //     }
+            // });
             if (response.status === 200) {
                 setAccountsData(response.data);
                 console.log(response.data, "accounts data")
@@ -176,9 +289,10 @@ const UsersTable = () => {
     };
     const Accountscolumn = [
         {
-            title: 'External Account ID',
-            dataIndex: 'extAccountId',
-            key: 'extAccountId',
+            title: 'Spend Account ID',
+            dataIndex: 'accountNumber',
+            key: 'accountNumber',
+            width: 160,
         },
         {
             title: 'Time Zone',
@@ -186,9 +300,10 @@ const UsersTable = () => {
             key: 'timeZone',
         },
         {
-            title: 'External Partner',
-            dataIndex: 'extPartner',
-            key: 'extPartner',
+            title: 'Spend Partner',
+            dataIndex: 'spendPartner',
+            key: 'spendPartner',
+            width: 120,
         },
         {
             title: 'Revenue Partner',
@@ -200,11 +315,20 @@ const UsersTable = () => {
             dataIndex: 'mediaBuyerName',
             key: 'mediaBuyerName',
         },
-        // {
-        //     title: 'Status',
-        //     dataIndex: 'status',
-        //     key: 'status',
-        // },
+        {
+            title: 'Status',
+            dataIndex: 'status',
+            key: 'status',
+            render: (text, record) => (
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <span style={{ marginRight: 8 }}>{text}</span>
+                    <Switch
+                        checked={record.status === 'Active'}
+                        onChange={(checked) => handleStatusChange(record.accountNumber, checked)}
+                    />
+                </div>
+            ),
+        },
 
         // {
         //     title: 'Token',
@@ -219,17 +343,27 @@ const UsersTable = () => {
             dataIndex: 'revenueAccountId',
             key: 'revenueAccountId',
         },
+        // {
+        //     title: 'BM ID',
+        //     dataIndex: 'BMId',
+        //     key: 'BMId',
+        // },
+        {
+            title: 'BM Name',
+            dataIndex: 'BMName',
+            key: 'BMName',
+        },
 
-        {
-            title: 'Agency ID',
-            dataIndex: 'agencyId',
-            key: 'agencyId',
-        },
-        {
-            title: 'Agency Name',
-            dataIndex: 'agencyName',
-            key: 'agencyName',
-        },
+        // {
+        //     title: 'Agency ID',
+        //     dataIndex: 'agencyId',
+        //     key: 'agencyId',
+        // },
+        // {
+        //     title: 'Agency Name',
+        //     dataIndex: 'agencyName',
+        //     key: 'agencyName',
+        // },
     ];
 
 
@@ -254,7 +388,7 @@ const UsersTable = () => {
             dataIndex: 'adAccounts',
             key: 'adAccounts',
             render: adAccounts => {
-                console.log(adAccounts, "adding the accounts");
+                // console.log(adAccounts, "adding the accounts");
                 const menuItems = transformData(adAccounts);
                 if(menuItems.length >0){
                     return((
@@ -327,7 +461,7 @@ const UsersTable = () => {
 
     const handleaccountSearchChange = (e) => {
         const searchValue = e.target.value.toLowerCase();
-        setSearchInput(searchValue);
+        setNewSearchInput(searchValue);
         const accfiltered = AccountsData.filter((item) =>
             Object.values(item).some((field) =>
                 typeof field === 'string' && field.toLowerCase().includes(searchValue)
@@ -372,7 +506,37 @@ const UsersTable = () => {
 
     };
 
+    const onChangeRole = (value) => {
+        // if(value === 'All'){
+        //     setRole('');
+        // }
+        setRole(value);
+    }
 
+    const onChangeNetwork = (value) =>{
+        setRevenuePartner(value);
+    }
+
+    const onChangeStatus = (value) => {
+        setStatus(value);
+    }
+
+    const filteredRoleData = role !== 'All' ? usersData?.filter((each)=> each.role.includes(role)) : usersData;
+    console.log(filteredRoleData, "filteredData");
+    // console.log(usersData, "usersData");
+    const filterData = () => {
+        console.log(status, 'status');
+        console.log(revenuePartner, 'revenuePartner');
+        return AccountsData?.filter(item => 
+            // Check if the status matches the selected status
+            (status === 'All' || item.status === status) &&
+            // Check if the revenuePartner matches or is 'All'
+            (revenuePartner === 'All' || item.revenuePartner === revenuePartner)
+        );
+    };
+    
+    const filteredAccountData = filterData();
+    // console.log(filteredAccountData, "filteredAccountData");
 
     return (
         <>
@@ -380,56 +544,69 @@ const UsersTable = () => {
             <Newaddaccounts visible={accountDrawerVisible} onClose={onCloseDrawer} />
             <Edituseraccesses editeddata={usersaccessData} visible={usersaccessDrawerVisible} onClose={onCloseDrawer} />
 
-            <Carousel showThumbs={false}>
+            <Carousel
+                ref={carouselRef}
+                dotPosition="bottom"
+                afterChange={setCurrentSlide}
+                dots={false}
+                // showThumbs={false}
+            >
                 <div>
                     <Card title="Users Access" size="small">
-                        <Row align={"bottom"}>
-                            <Col span={16}>
-                                <Row gutter={10}>
-                                    <Col span={12}>
-                                        <SwapRightOutlined />
-                                        <Input
-                                            placeholder="Search..."
-                                            variant="filled"
-                                            suffix={<SearchOutlined />}
-                                            value={searchInput}
-                                            onChange={handleSearchChange}
+                        <Row align={"bottom"} gutter={[16, 16]}>
+                            <Col xs={24} md={16}>
+                                <Row gutter={[16, 16]}>
+                                    <Col xs={24} sm={12} md={8}>
+                                        <span style={{ color: "#B4B4B4", display: 'block' }}>Search</span>
+                                        <div style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
+                                            {isSearching ? (
+                                                <>
+                                                    <Button icon={<SearchOutlined />} />
+                                                    <Input
+                                                        placeholder="Search here"
+                                                        autoFocus
+                                                        value={searchInput}
+                                                        onChange={handleSearchChange}
+                                                        onBlur={handleBlur}
+                                                        style={{ width: '100%', borderRadius: '5px', marginLeft: '8px' }}
+                                                    />
+                                                </>
+                                            ) : (
+                                                <Button
+                                                    icon={<SearchOutlined />}
+                                                    onClick={handleSearchClick}
+                                                />
+                                            )}
+                                        </div>
+                                    </Col>
+                                    <Col xs={24} sm={12} md={8}>
+                                        <span style={{ color: "#B4B4B4", display: 'block' }}>Role</span>
+                                        <Select
+                                            onChange={onChangeRole}
+                                            defaultValue="All"
+                                            style={{ width: "100%", marginTop: '8px' }}
+                                            options={roles.map((item) => ({
+                                                value: item,
+                                                label: item,
+                                            }))}
                                         />
                                     </Col>
-                                    <Col span={6}>
-                                        <span style={{ color: "#B4B4B4" }}>Status</span>
+                                    <Col xs={24} sm={12} md={8}>
+                                        <span style={{ color: "#B4B4B4", display: 'block' }}>Category</span>
                                         <Select
                                             defaultValue="All"
-                                            variant="filled"
-                                            style={{ width: "100%" }}
-                                            items={[
+                                            style={{ width: "100%", marginTop: '8px' }}
+                                            options={[
                                                 { value: "jack", label: "Jack" },
                                                 { value: "All", label: "All" },
-                                                { value: "Yiminghe", label: "yiminghe" },
-                                                { value: "disabled", label: "Disabled", disabled: true },
-                                            ]}
-                                        />
-                                    </Col>
-                                    <Col span={6}>
-                                        <span style={{ color: "#B4B4B4" }}>Category</span>
-                                        <Select
-                                            defaultValue="All"
-                                            variant="filled"
-                                            style={{ width: "100%" }}
-                                            items={[
-                                                { value: "jack", label: "Jack" },
-                                                { value: "All", label: "All" },
-                                                { value: "Yiminghe", label: "yiminghe" },
+                                                { value: "Yiminghe", label: "Yiminghe" },
                                                 { value: "disabled", label: "Disabled", disabled: true },
                                             ]}
                                         />
                                     </Col>
                                 </Row>
                             </Col>
-                            <Col span={8}>
-                                <Button type="primary" style={{ float: "right", marginLeft: "5%" }} onClick={shownnewaccountdrawar}>
-                                    Add New Account
-                                </Button>
+                            <Col xs={24} md={8}>
                                 <Button type="primary" style={{ float: "right" }} onClick={shownewuserdrawar}>
                                     Create User
                                 </Button>
@@ -440,7 +617,7 @@ const UsersTable = () => {
                         <Spin />
                     ) : usersData.length > 0 ? (
                         <Table
-                            dataSource={searchInput ? filteredData.map((item, index) => ({ ...item, key: index })) : usersData.map((item, index) => ({ ...item, key: index }))}
+                            dataSource={searchInput ? filteredData.map((item, index) => ({ ...item, key: index })) : filteredRoleData.map((item, index) => ({ ...item, key: index }))}
                             columns={columns}
                             pagination={{ pageSize: paginationSize }}
                             scroll={{ y: 'calc(80vh - 200px)' }}
@@ -448,8 +625,7 @@ const UsersTable = () => {
                     ) : (
                         <Result
                             status="404"
-                            title="No Users Data Avilable"
-                            // subTitle="Sorry,This page contains no data."
+                            title="No Users Data Available"
                             extra={<Button type="primary" onClick={shownewuserdrawar}>
                                 Create User
                             </Button>}
@@ -458,56 +634,61 @@ const UsersTable = () => {
                 </div>
                 <div>
                     <Card title="All accounts" size="small">
-                        <Row align={"bottom"}>
-                            <Col span={16}>
-                                <Row gutter={10}>
-                                    <Col span={12}>
-                                        <HighlightOutlined />
-                                        <SwapRightOutlined />
-                                        <Input
-                                            placeholder="Search..."
-                                            variant="filled"
-                                            suffix={<SearchOutlined />}
-                                            value={searchInput}
-                                            onChange={handleaccountSearchChange}
+                        <Row align={"bottom"} gutter={[16, 16]}>
+                            <Col xs={24} md={16}>
+                                <Row gutter={[16, 16]}>
+                                    <Col xs={24} sm={12} md={8}>
+                                        <span style={{ color: "#B4B4B4", display: 'block' }}>Search</span>
+                                        <div style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
+                                            {isSearchingAccount ? (
+                                                <>
+                                                    <Button icon={<SearchOutlined />}  />
+                                                    <Input
+                                                        placeholder="Search here"
+                                                        autoFocus
+                                                        value={newSearchInput}
+                                                        onChange={handleaccountSearchChange}
+                                                        onBlur={handleBlur1}
+                                                        style={{ width: '100%', borderRadius: '5px', marginLeft: '8px' }}
+                                                    />
+                                                </>
+                                            ) : (
+                                                <Button
+                                                    icon={<SearchOutlined />}
+                                                    onClick={handleSearchClick1}
+                                                />
+                                            )}
+                                        </div>
+                                    </Col>
+                                    <Col xs={24} sm={12} md={8}>
+                                        <span style={{ color: "#B4B4B4", display: 'block' }}>Network</span>
+                                        <Select
+                                            onChange={onChangeNetwork}
+                                            defaultValue="All"
+                                            style={{ width: "100%", marginTop: '8px' }}
+                                            options={availableNetworks.map((item) => ({
+                                                value: item,
+                                                label: item,
+                                            }))}
                                         />
                                     </Col>
-                                    {/* <Col span={6}>
-                                        <span style={{ color: "#B4B4B4" }}>Status</span>
+                                    <Col xs={24} sm={12} md={8}>
+                                        <span style={{ color: "#B4B4B4", display: 'block' }}>Status</span>
                                         <Select
+                                            onChange={onChangeStatus}
                                             defaultValue="All"
-                                            variant="filled"
-                                            style={{ width: "100%" }}
-                                            items={[
-                                                { value: "jack", label: "Jack" },
-                                                { value: "All", label: "All" },
-                                                { value: "Yiminghe", label: "yiminghe" },
-                                                { value: "disabled", label: "Disabled", disabled: true },
-                                            ]}
+                                            style={{ width: "100%", marginTop: '8px' }}
+                                            options={accountStatus.map((item) => ({
+                                                value: item,
+                                                label: item,
+                                            }))}
                                         />
                                     </Col>
-                                    <Col span={6}>
-                                        <span style={{ color: "#B4B4B4" }}>Category</span>
-                                        <Select
-                                            defaultValue="All"
-                                            variant="filled"
-                                            style={{ width: "100%" }}
-                                            items={[
-                                                { value: "jack", label: "Jack" },
-                                                { value: "All", label: "All" },
-                                                { value: "Yiminghe", label: "yiminghe" },
-                                                { value: "disabled", label: "Disabled", disabled: true },
-                                            ]}
-                                        />
-                                    </Col> */}
                                 </Row>
                             </Col>
-                            <Col span={8}>
+                            <Col xs={24} md={8}>
                                 <Button type="primary" style={{ float: "right", marginLeft: "5%" }} onClick={shownnewaccountdrawar}>
                                     Add New Account
-                                </Button>
-                                <Button type="primary" style={{ float: "right" }} onClick={shownewuserdrawar}>
-                                    Create User
                                 </Button>
                             </Col>
                         </Row>
@@ -517,7 +698,7 @@ const UsersTable = () => {
                     ) : AccountsData.length > 0 ? (
                         <Table
                             bordered
-                            dataSource={searchInput ? accFilteredData.map((item, index) => ({ ...item, key: index })) : AccountsData.map((item, index) => ({ ...item, key: index }))}
+                            dataSource={newSearchInput ? accFilteredData.map((item, index) => ({ ...item, key: index })) : filteredAccountData.map((item, index) => ({ ...item, key: index }))}
                             columns={Accountscolumn}
                             pagination={{ pageSize: paginationSize }}
                             scroll={{ y: 'calc(70vh - 200px)' }}
@@ -525,8 +706,8 @@ const UsersTable = () => {
                     ) : (
                         <Result
                             status="404"
-                            title="No Accounts Data Avilable"
-                            subTitle="Sorry,This page contains no data."
+                            title="No Accounts Data Available"
+                            subTitle="Sorry, this page contains no data."
                             extra={<Button type="primary" onClick={shownnewaccountdrawar}>
                                 Add New Account
                             </Button>}
@@ -539,3 +720,4 @@ const UsersTable = () => {
 };
 
 export default UsersTable;
+

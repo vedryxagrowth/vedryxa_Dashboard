@@ -207,6 +207,7 @@ const LayoutWrapper = ({ children }) => {
                                     case 'Admin':
                                       const AllAccountsData = await axios.get(`https://prodapis.adsgoat.in/All/Accounts/`);
                                       const responseData = await AllAccountsData.data;
+                                      console.log(responseData, "responseData");
                                       setuserdetails({...matchedUser, adAccounts: responseData});
                                     //   const adAccounts = matchedUser.adAccounts;
                                     //   const keysOfAdAccounts = Object.keys(adAccounts);

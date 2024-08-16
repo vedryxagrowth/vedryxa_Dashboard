@@ -10,9 +10,9 @@ import axios from 'axios';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
 // import { Select } from 'antd';
-import { Carousel, Input, Button, Pagination, Row, Col, Typography } from 'antd';
+import { Carousel, Input, Button, Pagination, Row, Col, Typography, Result } from 'antd';
 // import 'antd/dist/reset.css';
-import { CommentOutlined, CustomerServiceOutlined, MenuOutlined, InfoCircleOutlined, DownloadOutlined, SearchOutlined, ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons';
+import { CommentOutlined, CustomerServiceOutlined, MenuOutlined, InfoCircleOutlined, DownloadOutlined, SearchOutlined, ArrowLeftOutlined, ArrowRightOutlined, SmileOutlined  } from '@ant-design/icons';
 import { FloatButton } from 'antd';
 import Draggable from 'react-draggable';
 // import FormControl from '@mui/material/FormControl';
@@ -81,9 +81,7 @@ const CustomHeader = (props) => {
 // export default CustomHeader;
 
 // Function to filter menu items and show only filter option
-const getMainMenuItems = (params) => {
-    return ['filterMenuTab'];
-};
+
 
 const newtworkCollections = {
     "FB_Mnet": "Facebook_Mnet",
@@ -117,6 +115,32 @@ const MyTablePage = () => {
     // console.log('userdetails:',userdetails);
 
     // Define your rowData and columnDefs
+    const columnStructure = [
+        "date",
+        "spend",
+        "revenue",
+        "profit",
+        "campaignName",
+        "margin",
+        "fbleads",
+        "conversions",
+        "fbclicks",
+        "impressions",
+        "cpl",
+        "ncpl",
+        "rpc",
+        "cpc",
+        "ctr",
+        "roi",
+        "fmargin",
+        "adsetName",
+        "fb-hour",
+        "mnet-hour",
+        "adsetId",
+        "campaignId",
+        "timezone"
+    ];
+
     const [initialRowData, setInitialRowData] = useState([]);
 
     const [rowData, setRowData] = useState([]);
@@ -235,6 +259,31 @@ const MyTablePage = () => {
     //     console.log(total, "total");
     //     return total
     // };
+    const getMainMenuItems = (params) => {
+        const defaultItems = params.defaultItems.slice();
+        
+        // Find and override the "Reset Columns" option
+        const resetColumnsItemIndex = defaultItems.findIndex(item => item === 'resetColumns');
+        if (resetColumnsItemIndex > -1) {
+            defaultItems[resetColumnsItemIndex] = {
+                name: 'Reset Columns (Custom)',
+                action: () => {
+                    // Your custom logic here
+                    console.log('Custom Reset Columns logic');
+                    updatingColumnsStructure(columnStructure)
+                    // setTimeout(() => {
+                    //     window.location.reload();
+                    // }, 2000);
+                    // Example: Reset column order to default
+                    // params.columnApi.resetColumnState();
+                }
+            };
+        }
+    
+        return defaultItems;
+    };
+
+
     const spender = (params) => {
         if (!params.values || params.values.length === 0) {
             return 0; // Return 0 or any fallback value if there are no values to aggregate
@@ -1555,6 +1604,8 @@ const MyTablePage = () => {
         console.log(accountsForAccess[0], "accountFor Access");
 
         const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
+
+        // console.log(accountsAccess, "accountsAccess");
         setNetworksData(accountsAccess);
         setRevenuePartner([value]);
         switch (value) {
@@ -2056,6 +2107,10 @@ const MyTablePage = () => {
 
     const rangePresets = [
         {
+            label: 'ToDay',
+            value: [dayjs().add(0, 'd'), dayjs().add(0, 'd')],
+        },
+        {
             label: 'YesterDay',
             value: [dayjs().add(-1, 'd'), dayjs().add(-1, 'd')],
         },
@@ -2072,8 +2127,23 @@ const MyTablePage = () => {
             value: [dayjs().add(-30, 'd'), dayjs()],
         },
         {
+            label: 'Last 60 Days',
+            value: [dayjs().add(-60, 'd'), dayjs()],
+        },
+        {
             label: 'Last 90 Days',
             value: [dayjs().add(-90, 'd'), dayjs()],
+        },
+        {
+          label: 'This Month',
+          value: [dayjs().startOf('month'), dayjs()],
+        },
+        {
+          label: 'Last Month',
+          value: [
+            dayjs().subtract(1, 'month').startOf('month'),
+            dayjs().subtract(1, 'month').endOf('month'),
+          ],
         },
     ];
 
@@ -2246,10 +2316,21 @@ const MyTablePage = () => {
                                         // rowGroupPanelShow='always'
                                         onFilterChanged={onFilterChanged} // Use the custom filter handler
                                         onFirstDataRendered={() => gridRef.current.api.sizeColumnsToFit()}
+                                        getMainMenuItems={getMainMenuItems}
                                     />
 
                                 </div>
-                            ) : <div><h1>No Live Data for this dates</h1></div>}
+                            ) : <div>
+                                {startDate !== endDate ? <Result
+                                    icon={<SmileOutlined  />}
+                                    title={`No LiveData for ${account} from ${startDate} to ${endDate}`}
+                                    // extra={<Button type="primary">Next</Button>}
+                                />: <Result
+                                icon={<SmileOutlined  />}
+                                title={`No LiveData for ${account} to ${startDate}`}
+                                // extra={<Button type="primary">Next</Button>}
+                                />}
+                            </div>}
                         </div>
                     </div>
                     <div>
@@ -2313,9 +2394,20 @@ const MyTablePage = () => {
                                         onGridReady={(params) => onGridReady(params, 'grid2')}
                                         // onColumnMoved={debouncedHandleColumnMove1}
                                         gridOptions={gridOptions1}
+                                        getMainMenuItems={getMainMenuItems}
                                     />
                                 </div>
-                            ) : <div><h1>No Daily Data for this dates</h1></div>}
+                            ) : <div>
+                                    {startDate !== endDate ? <Result
+                                    icon={<SmileOutlined  />}
+                                    title={`No DailyData for ${account} from ${startDate} to ${endDate}`}
+                                    // extra={<Button type="primary">Next</Button>}
+                                    />: <Result
+                                    icon={<SmileOutlined  />}
+                                    title={`No DailyData for ${account} to ${startDate}`}
+                                    // extra={<Button type="primary">Next</Button>}
+                                    />}
+                                </div>}
                         </div>
                     </div>
                     <div>
@@ -2353,43 +2445,58 @@ const MyTablePage = () => {
                                         {/* <button className='export-button' onClick={() => onBtExport(gridRef2)}>Export</button> */}
                                     </div>
 
-                                    <AgGridReact
-                                        ref={gridRef2}
-                                        rowData={campaignData.filter((each) => each.campaignName.includes(inputValue))}
-                                        columnDefs={columnDefs2.current}
-                                        onCellClicked={onCellClickedAllCampaigns}
-                                        autoGroupColumnDef={autoGroupColumnDef2}
-                                        // // defaultColDef={defaultColDef}
-                                        // pagination={true}
-                                        // paginationPageSize={50}
-                                        // paginationPageSizeSelector={[10,20,30]}
-                                        groupDisplayType='multipleColumns'
-                                        suppressAggFuncInHeader={true}
-                                        groupIncludeTotalFooter={true}
-                                        // rowGroupPanelShow='always'
-                                        groupIncludeFooter={true}
-                                        groupRowRenderer={GroupRowRenderer}
-                                        onGridReady={(params) => onGridReady(params, 'grid3')}
-                                        // onColumnMoved={debouncedHandleColumnMove2}
-                                        gridOptions={gridOptions2}
-                                        suppressMenuHide={true}
-                                    // onFirstDataRendered = {(params) => {
-                                    //     params.api.sizeColumnsToFit(100);
-                                    //   }}
-                                    // groupMultiAutoColumn={true}
-                                    // autoGroupColumnDef={autoGroupColumnDef}
-                                    // groupDefaultExpanded={-1} // Expand all groups by default
-                                    // animateRows={true}
-                                    // domLayout="autoHeight"
-                                    // autoGroupColumnDef={{
-                                    //     headerName: 'Group',
-                                    //     cellRendererParams: {
-                                    //         suppressCount: true,
-                                    //     },
-                                    // }}
-                                    />
+                                    <div style={{height: '90%'}}>
+                                        <AgGridReact
+                                            ref={gridRef2}
+                                            rowData={campaignData.filter((each) => each.campaignName.includes(inputValue))}
+                                            columnDefs={columnDefs2.current}
+                                            onCellClicked={onCellClickedAllCampaigns}
+                                            autoGroupColumnDef={autoGroupColumnDef2}
+                                            // // defaultColDef={defaultColDef}
+                                            // pagination={true}
+                                            // paginationPageSize={50}
+                                            // paginationPageSizeSelector={[10,20,30]}
+                                            groupDisplayType='multipleColumns'
+                                            suppressAggFuncInHeader={true}
+                                            groupIncludeTotalFooter={true}
+                                            // rowGroupPanelShow='always'
+                                            groupIncludeFooter={true}
+                                            groupRowRenderer={GroupRowRenderer}
+                                            onGridReady={(params) => onGridReady(params, 'grid3')}
+                                            // onColumnMoved={debouncedHandleColumnMove2}
+                                            gridOptions={gridOptions2}
+                                            suppressMenuHide={true}
+                                            getMainMenuItems={getMainMenuItems}
+                                        // onFirstDataRendered = {(params) => {
+                                        //     params.api.sizeColumnsToFit(100);
+                                        //   }}
+                                        // groupMultiAutoColumn={true}
+                                        // autoGroupColumnDef={autoGroupColumnDef}
+                                        // groupDefaultExpanded={-1} // Expand all groups by default
+                                        // animateRows={true}
+                                        // domLayout="autoHeight"
+                                        // autoGroupColumnDef={{
+                                        //     headerName: 'Group',
+                                        //     cellRendererParams: {
+                                        //         suppressCount: true,
+                                        //     },
+                                        // }}
+                                        />
+                                    </div>
                                 </div>
-                            ) : null}
+                            ) : <div>
+                            <div>
+                                {startDate !== endDate ? <Result
+                                    icon={<SmileOutlined  />}
+                                    title={`No CampaignData for ${account} from ${startDate} to ${endDate}`}
+                                    // extra={<Button type="primary">Next</Button>}
+                                />: <Result
+                                icon={<SmileOutlined  />}
+                                title={`No CampaignData for ${account} to ${startDate}`}
+                                // extra={<Button type="primary">Next</Button>}
+                                />}
+                            </div>
+                            </div>}
 
                         </div>
                         <Pagination

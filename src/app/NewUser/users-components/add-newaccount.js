@@ -1,24 +1,78 @@
 "use client"
 import { useState } from 'react';
-import { Form, Input, Button, Drawer, Modal, message } from 'antd';
+import { Form, Input, Button, Drawer, Modal, message, Select } from 'antd';
 import axios from 'axios';
+
+const { Option } = Select;
 import { CloseOutlined } from '@ant-design/icons';
+
+const timezones = [
+    'UTC',
+    'EEST',
+    'EDT',
+    'CST',
+    'PDT',
+    'IST',
+    'BST',
+    'GMT',
+    'MST',
+    'CDT',
+    'AST',
+    'DST'
+];
+
+const timeZoneFullNames = {
+    'EDT': 'America/New_York',
+    'UTC': 'Atlantic/Azores',
+    'EEST': 'Europe/Athens',
+    'CEST':"Europe/Paris",
+    'CST':'America/Mexico_City',
+    'PDT':'America/Los_Angeles',
+    'BST':'Europe/London',
+    'GMT':'Africa/Accra',
+    'IST':'Asia/Kolkata',
+    'MST':'America/Dawson',
+    'CDT':'America/Chicago',
+    'AST':'America/Puerto_Rico',
+    'DST':'Asia/Dubai',
+    'HST':'Pacific/Honolulu',
+    'EST':'America/Toronto'
+};
+
+
+const availableNetworks = ["MEDIA_DOT_NET", "ENKI", "TONIC", "System1", "Bodies", "Bodies1", "Rsoc", "Domain Active"];
 
 const Newaddaccounts = ({ visible, onClose }) => {
     const [form] = Form.useForm();
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [timeZone, setTimeZone] = useState('UTC');
+    const [status, setStatus] = useState('Active');
+    const [spendPartner, setSpendPartner] = useState("Facebook");
+    const [revenuePartner, setRevenuePartner] = useState("MEDIA_DOT_NET");
+    const [BMName, setBMName] = useState("Winkleads Search");
+    const [accountNumber, setAccountNumber] = useState();
     var token = localStorage.getItem("token")
 
     const onFinish = async (values) => {
         try {
-            const response = await axios.post('https://www.testapi.adsgoat.in/api/newaddaccount', values,
+            // console.log(values, "values");
+            // const response = await axios.post('https://www.testapi.adsgoat.in/api/newaddaccount', values,
+            //     {
+            //         headers: {
+            //             'Authorization': token
+            //         }
+            //     });
+            const newValues = {...values, timeZone: timeZoneFullNames[values.timeZone]}
+            console.log(newValues, "newValues");
+            const response = await axios.post('https://prodapis.adsgoat.in/createNewAccount/', {newAccount: newValues},
                 {
                     headers: {
                         'Authorization': token
                     }
-                });
+            });
+            // console.log(response.data);
             if (response.status === 200) {
-                console.log('User created successfully');
+                console.log('Account created successfully');
                 message.success('Account created successfully');
                 form.resetFields();
                 onClose(); // Close the drawer after successful submission
@@ -39,6 +93,31 @@ const Newaddaccounts = ({ visible, onClose }) => {
         setIsModalVisible(true);
     };
 
+    const onChangeTimeZone = (value) => {
+        setTimeZone(value);
+    }
+
+    const onChangeAccountNumber = (event) => {
+        setAccountNumber(event.target.value);
+        console.log(event.target.value);
+    }
+
+    const onChangeSpendPartner = (value)=>{
+        setSpendPartner(value);
+    }
+
+    const onChangeBMName = (value)=>{
+        setBMName(value);
+    }
+
+    const onChangeStatus = (value)=>{
+        setStatus(value);
+    }
+
+    const onChangeRevenuePartner = (value)=>{
+        setRevenuePartner(value);
+    }
+
     return (
         <>
             <Drawer
@@ -48,37 +127,71 @@ const Newaddaccounts = ({ visible, onClose }) => {
                 width="60%"
                 closeIcon={<CloseOutlined />}
             >
-                <Form form={form} onFinish={onFinish} layout="vertical" style={{ width: "80%" }}>
-                    <Form.Item label="External Partner" name="extPartner" rules={[{ required: true, message: 'Please input the external partner!' }]}>
-                        <Input />
+                <Form form={form} onFinish={onFinish} layout="vertical" style={{ width: "80%" }} initialValues={{ status: status, spendPartner: spendPartner, revenuePartner: revenuePartner, BMName: BMName, timeZone: timeZone }} >
+                    <Form.Item label="Spend Partner" name="spendPartner" value={spendPartner}>
+                        <Select placeholder="Select a status" 
+                            defaultValue="Facebook" onChange={onChangeSpendPartner}>
+                            <Option value="Facebook" defaultValue>Facebook</Option>
+                            <Option value="Google">Google</Option>
+                        </Select>
                     </Form.Item>
-                    <Form.Item label="External Account ID" name="extAccountId" rules={[{ required: true, message: 'Please input the external account ID!' }]}>
-                        <Input />
+                    <Form.Item label="Spend Account ID" name="accountNumber" rules={[{ required: true, message: 'Please input the Spend Account ID!' }]}>
+                        <Input value={accountNumber} onChange={onChangeAccountNumber} />
                     </Form.Item>
-                    <Form.Item label="Token" name="token" rules={[{ required: true, message: 'Please input the token!' }]}>
-                        <Input />
+                    <Form.Item label="BM Name" name="BMName" value={BMName}>
+                        <Select placeholder="Select a status" 
+                            defaultValue="Winkleads Search" onChange={onChangeBMName}>
+                            <Option value="Winkleads Search" defaultValue>Winkleads Search</Option>
+                            <Option value="MODO LEO BM X1">MODO LEO BM X1</Option>
+                        </Select>
                     </Form.Item>
-                    <Form.Item label="Time Zone" name="timeZone" rules={[{ required: true, message: 'Please input the time zone!' }]}>
-                        <Input />
+                    <Form.Item label="Time Zone" name="timeZone" value={timeZone}>
+                        <Select
+                            showSearch
+                            onChange={onChangeTimeZone}
+                            style={{ width: '100%' }}
+                            placeholder="Select Timezone"
+                            optionFilterProp="label"
+                            defaultValue="UTC"
+                            options={timezones.map((item) => ({
+                                value: item,
+                                label: item,
+                            }))}
+                        />
                     </Form.Item>
-                    <Form.Item label="Status" name="status" rules={[{ required: true, message: 'Please input the status!' }]}>
-                        <Input />
+                    <Form.Item label="Status" name="status" value={status}>
+                        <Select placeholder="Select a status"
+                            defaultValue="Active" onChange={onChangeStatus}>
+                            <Option value="Active">Active</Option>
+                            <Option value="InActive">Inactive</Option>
+                        </Select>
                     </Form.Item>
-                    <Form.Item label="Revenue Partner" name="revenuePartner" rules={[{ required: true, message: 'Please input the revenue partner!' }]}>
-                        <Input />
+                    <Form.Item label="Revenue Partner" name="revenuePartner" value={revenuePartner} >
+                        <Select
+                            showSearch
+                            onChange={onChangeRevenuePartner}
+                            style={{ width: '100%' }}
+                            placeholder="Select RevenuePartner"
+                            optionFilterProp="label"
+                            defaultValue="MEDIA_DOT_NET"
+                            options={availableNetworks.map((item) => ({
+                                value: item,
+                                label: item,
+                            }))}
+                        />
                     </Form.Item>
-                    <Form.Item label="Revenue Account ID" name="revenueAccountId" rules={[{ required: true, message: 'Please input the revenue account ID!' }]}>
+                    {/* <Form.Item label="Revenue Account ID" name="revenueAccountId" rules={[{ required: true, message: 'Please input the revenue account ID!' }]}>
                         <Input />
-                    </Form.Item>
-                    <Form.Item label="Media Buyer Name" name="mediaBuyerName" rules={[{ required: true, message: 'Please input the media buyer name!' }]}>
+                    </Form.Item> */}
+                    {/* <Form.Item label="Media Buyer Name" name="mediaBuyerName" rules={[{ required: true, message: 'Please input the media buyer name!' }]}>
                         <Input />
-                    </Form.Item>
-                    <Form.Item label="Agency ID" name="agencyId" rules={[{ required: true, message: 'Please input the agency ID!' }]}>
+                    </Form.Item> */}
+                    {/* <Form.Item label="Agency ID" name="agencyId" rules={[{ required: true, message: 'Please input the agency ID!' }]}>
                         <Input />
-                    </Form.Item>
-                    <Form.Item label="Agency Name" name="agencyName" rules={[{ required: true, message: 'Please input the agency name!' }]}>
+                    </Form.Item> */}
+                    {/* <Form.Item label="Agency Name" name="agencyName" rules={[{ required: true, message: 'Please input the agency name!' }]}>
                         <Input />
-                    </Form.Item>                    
+                    </Form.Item>                     */}
                     <Form.Item>
                         <Button type="primary" onClick={showModal}>Submit</Button>
                     </Form.Item>
