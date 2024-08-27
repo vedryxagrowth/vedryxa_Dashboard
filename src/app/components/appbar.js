@@ -30,7 +30,7 @@ const menuItems = [
     getItem('Reports', '/Reports', <DatabaseOutlined />),
     getItem('Creatives', '/Creatives', <PieChartOutlined />),
     getItem('Campaigns', '/Campaigns', <DesktopOutlined />),
-    getItem('Users', '/Users', <ContainerOutlined />),
+    // getItem('Users', '/Users', <ContainerOutlined />),
     getItem('NewUser', '/NewUser', <UserOutlined />),
     getItem('Setting', '/setting', <SettingOutlined />),
     getItem('Password', '/password', <LockOutlined />),

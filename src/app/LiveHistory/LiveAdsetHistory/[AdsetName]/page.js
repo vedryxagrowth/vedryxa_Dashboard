@@ -307,14 +307,16 @@ const MnetLiveAdsetHistory = ({params}) => {
     const columnDefsObject = {
         date: { headerName: 'Date', field: 'date', width: 120,
             minWidth: 450,
+            resizable: true,
+            sortable: true,
+            // width: 500,
             hide: true,
-            // // resizable:false,
             rowGroup: true,
-            filter: true,
+            enableRowGroup: true,
             pinned: 'left',
             sort: "asc"
         },
-        campaignName: { headerName: 'CampaignName', field: 'campaignName',
+        campaignname: { headerName: 'CampaignName', field: 'campaignName',
             // resizeble: true,
             // // sortable: true,
             minWidth: 340,
@@ -327,7 +329,7 @@ const MnetLiveAdsetHistory = ({params}) => {
             // enableRowGroup: true,
             // autoHeight: true, 
         },
-        adsetName: { headerName: 'AdsetName', field: 'adsetName',resizeble: true,
+        adsetname: { headerName: 'AdsetName', field: 'adsetName',resizeble: true,
         // sortable: true,
             minWidth: 350,
             // hide: true,
@@ -357,8 +359,8 @@ const MnetLiveAdsetHistory = ({params}) => {
         ncpl: { headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl },
         fmargin: { headerName: 'Fmargin', field: 'fmargin', valueGetter: getFmargin},
         roi: { headerName: 'ROI', field: 'roi', valueGetter: getROI},
-        adsetId: { headerName: 'AdsetId', field: 'adsetId' },
-        campaignId: { headerName: 'CompaignId', field: 'campaignId' },
+        adsetid: { headerName: 'AdsetId', field: 'adsetId' },
+        campaignid: { headerName: 'CompaignId', field: 'campaignId' },
         timezone: { headerName: 'TimeZone', field: 'timezone'},
     };
 
@@ -433,7 +435,7 @@ const MnetLiveAdsetHistory = ({params}) => {
             
             return(
                 {
-                    date: eachData.dateStart,
+                    date: eachData[time].split(" ")[0],
                     campaignName: eachData.campaign_name,
                     adsetName: eachData.adsetName,
                     // 'fb-hour': eachData.hour,
