@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { Table, Button, Col, Card, Input, Row, Select, Result, Spin, Space, Modal, message, Menu, Switch } from 'antd';
-import { HighlightOutlined, LeftOutlined, RightOutlined, SearchOutlined, SwapRightOutlined, DownOutlined } from "@ant-design/icons";
+import { HighlightOutlined, LeftOutlined, RightOutlined, SearchOutlined, SwapRightOutlined, DownOutlined, EditOutlined } from "@ant-design/icons";
 import { Carousel } from 'react-responsive-carousel';
 import { MailOutlined, SettingOutlined } from '@ant-design/icons';
 // import { , Select } from 'antd';
@@ -12,6 +12,7 @@ import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import Createnewuser from './users-components/create-newuser';
 import Newaddaccounts from './users-components/add-newaccount';
 import Edituseraccesses from './users-components/edit-usersaccess';
+
 const contentStyle = {
     margin: 0,
     // height: '800px',
@@ -320,13 +321,31 @@ const UsersTable = () => {
             dataIndex: 'status',
             key: 'status',
             render: (text, record) => (
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <span style={{ marginRight: 8 }}>{text}</span>
-                    <Switch
-                        checked={record.status === 'Active'}
-                        onChange={(checked) => handleStatusChange(record.accountNumber, checked)}
-                    />
-                </div>
+                <Row
+                    gutter={[8, 8]}
+                    align="middle"
+                    wrap
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        flexWrap: 'wrap',
+                        width: '100%',
+                        justifyContent:'center'
+                    }}
+                >
+                    <Col flex="1 1 auto">
+                        <span>{text}</span>
+                    </Col>
+                    <Col flex="1 1 auto">
+                        <Switch
+                            checked={record.status === 'Active'}
+                            onChange={(checked) => handleStatusChange(record.accountNumber, checked)}
+                        />
+                    </Col>
+                    <Col flex="1 1 auto">
+                        <EditOutlined style={{ fontSize: '20px' }} />
+                    </Col>
+                </Row>
             ),
         },
 
@@ -499,6 +518,13 @@ const UsersTable = () => {
         setusersaccessData(values)
         console.log(values, "Edit")
     }
+
+    const handleEditAccount = (values) => {
+        // setusersaccessDrawerVisible(true)
+        // setusersaccessData(values)
+        console.log(values, "Edit")
+    }
+
     const onCloseDrawer = () => {
         setDrawerVisible(false);
         setaccountDrawerVisible(false)

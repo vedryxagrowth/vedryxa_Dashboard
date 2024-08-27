@@ -47,7 +47,7 @@ const MnetLiveCampaignHistory = ({params}) => {
         if (total2[1] !== undefined && total2[1].length > 2) {
           var total22 = total2[1].slice(0, 2)
           var totalone = total2[0] + '.' + total22
-          return parseFloat(totalone).toFixed(2)
+          return totalone ? parseFloat(totalone).toFixed(2) : 0;
         }
         return total;
     };
@@ -309,12 +309,15 @@ const MnetLiveCampaignHistory = ({params}) => {
     const columnDefsObject = {
         date: { headerName: 'Date', field: 'date', width: 120,
             minWidth: 450,
+            resizable: true,
+            sortable: true,
+            // width: 500,
             hide: true,
-            // // resizable:false,
             rowGroup: true,
-            filter: true, 
+            enableRowGroup: true,
+            pinned: 'left',
         },
-        campaignName: { headerName: 'CampaignName', field: 'campaignName',resizeble: true,
+        campaignname: { headerName: 'CampaignName', field: 'campaignName',resizeble: true,
             // sortable: true,
             minWidth: 400,
             // hide: true,
@@ -326,7 +329,7 @@ const MnetLiveCampaignHistory = ({params}) => {
             // enableRowGroup: true,
             // autoHeight: true, 
         },
-        adsetName: { headerName: 'AdsetName', field: 'adsetName',
+        adsetname: { headerName: 'AdsetName', field: 'adsetName',
             // resizeble: true,
             // // sortable: true,
             minWidth: 350,
@@ -357,8 +360,8 @@ const MnetLiveCampaignHistory = ({params}) => {
         ncpl: { headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl },
         fmargin: { headerName: 'Fmargin', field: 'fmargin', valueGetter: getFmargin},
         roi: { headerName: 'ROI', field: 'roi', valueGetter: getROI},
-        adsetId: { headerName: 'AdsetId', field: 'adsetId' },
-        campaignId: { headerName: 'CampaignId', field: 'campaignId' },
+        adsetid: { headerName: 'AdsetId', field: 'adsetId' },
+        campaignid: { headerName: 'CampaignId', field: 'campaignId' },
         timezone: { headerName: 'TimeZone', field: 'timezone'},
     };
 
@@ -396,7 +399,7 @@ const MnetLiveCampaignHistory = ({params}) => {
         });
         const url = `http://localhost:8000/MnetLiveCampaignHistory?campaignName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}`
         
-        const mainData = fetchData.data;
+        const mainData = fetchData?.data;
         console.log(mainData[0]);
         const filteredData = mainData && mainData.length > 0 ? 
         mainData.map((eachData)=> {
@@ -433,7 +436,7 @@ const MnetLiveCampaignHistory = ({params}) => {
             
             return(
                 {
-                    date: eachData.dateStart,
+                    date: eachData[time].split(" ")[0],
                     campaignName: eachData.campaign_name,
                     adsetName: eachData.adsetName,
                     // 'fb-hour': eachData.hour,

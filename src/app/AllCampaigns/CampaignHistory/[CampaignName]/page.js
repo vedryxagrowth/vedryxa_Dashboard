@@ -346,7 +346,7 @@ export default function CampaignAndAccount({params}){
     },[user]);
 
     const columnDefsObject = {
-        campaignName: {headerName:'CampaignName', field:'campaignName',
+        campaignname: {headerName:'CampaignName', field:'campaignName',
                 // rowGroup: true,
                 // filter: true,
                 // hide: true,
@@ -391,7 +391,7 @@ export default function CampaignAndAccount({params}){
         fbclicks: { headerName: 'FbClicks', field: 'fbclicks', width: 120, aggFunc: agFunc,  },
         impressions: { headerName: 'Impressions', field: 'impressions', width: 120, aggFunc: agFunc,   },
         ctr: { headerName: 'Ctr', field: 'ctr', valueGetter: getCtr},
-        adsetName: { headerName: 'AdsetName', field: 'adsetName',
+        adsetname: { headerName: 'AdsetName', field: 'adsetName',
             // resizeble: true,
             // sortable: true,
             width: 500,
@@ -403,8 +403,8 @@ export default function CampaignAndAccount({params}){
             // enableRowGroup: true,
             // autoHeight: true, 
         },
-        adsetId: { headerName: 'AdsetId', field: 'adsetId' },
-        campaignId: {headerName: 'CampaignId', field: 'campaignId'}
+        adsetid: { headerName: 'AdsetId', field: 'adsetId' },
+        campaignid: {headerName: 'CampaignId', field: 'campaignId'}
     };
 
     return(

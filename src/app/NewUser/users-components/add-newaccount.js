@@ -51,6 +51,9 @@ const Newaddaccounts = ({ visible, onClose }) => {
     const [revenuePartner, setRevenuePartner] = useState("MEDIA_DOT_NET");
     const [BMName, setBMName] = useState("Winkleads Search");
     const [accountNumber, setAccountNumber] = useState();
+    const [pixelId, setPixelId] = useState('');
+    const [pageName, setPageName] = useState('');
+    const [pageId, setPageId] = useState('');
     var token = localStorage.getItem("token")
 
     const onFinish = async (values) => {
@@ -62,8 +65,8 @@ const Newaddaccounts = ({ visible, onClose }) => {
             //             'Authorization': token
             //         }
             //     });
-            const newValues = {...values, timeZone: timeZoneFullNames[values.timeZone]}
-            console.log(newValues, "newValues");
+            const newValues = {...values, timeZone: timeZoneFullNames[values.timeZone], pageName: values.pageName ? values.pageName : '', pageId: values.pageId ? values.pageId : '' , pixelId: values.pixelId ? values.pixelId : ''}
+            // console.log(newValues, "newValues");
             const response = await axios.post('https://prodapis.adsgoat.in/createNewAccount/', {newAccount: newValues},
                 {
                     headers: {
@@ -99,7 +102,19 @@ const Newaddaccounts = ({ visible, onClose }) => {
 
     const onChangeAccountNumber = (event) => {
         setAccountNumber(event.target.value);
-        console.log(event.target.value);
+        // console.log(event.target.value);
+    }
+    const onChangePagelId = (event) => {
+        setPageId(event.target.value);
+        // console.log(event.target.value);
+    }
+    const onChangePageName = (event) => {
+        setPageName(event.target.value);
+        // console.log(event.target.value);
+    }
+    const onChangePixelId = (event) => {
+        setPixelId(event.target.value);
+        // console.log(event.target.value);
     }
 
     const onChangeSpendPartner = (value)=>{
@@ -137,6 +152,15 @@ const Newaddaccounts = ({ visible, onClose }) => {
                     </Form.Item>
                     <Form.Item label="Spend Account ID" name="accountNumber" rules={[{ required: true, message: 'Please input the Spend Account ID!' }]}>
                         <Input value={accountNumber} onChange={onChangeAccountNumber} />
+                    </Form.Item>
+                    <Form.Item label="Pixel ID" name="pixelId">
+                        <Input value={pixelId} onChange={onChangePixelId}/>
+                    </Form.Item>
+                    <Form.Item label="Page ID" name="pageId">
+                        <Input value={pageId} onChange={onChangePagelId} />
+                    </Form.Item>
+                    <Form.Item label="Page Name" name="pageName">
+                        <Input value={pageName} onChange={onChangePageName} />
                     </Form.Item>
                     <Form.Item label="BM Name" name="BMName" value={BMName}>
                         <Select placeholder="Select a status" 

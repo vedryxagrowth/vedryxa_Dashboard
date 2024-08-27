@@ -344,7 +344,7 @@ export default function AdsetNameAndAccount({params}){
     },[user]);
 
     const columnDefsObject = {
-        campaignName: {headerName:'CampaignName', field:'campaignName',
+        campaignname: {headerName:'CampaignName', field:'campaignName',
                 // rowGroup: true,
                 // filter: true,
                 // hide: true,
@@ -353,7 +353,7 @@ export default function AdsetNameAndAccount({params}){
                 // groupDisplayType: 'group',
                 width: 450,
             },
-            adsetName: { headerName: 'AdsetName', field: 'adsetName',
+            adsetname: { headerName: 'AdsetName', field: 'adsetName',
             // resizeble: true,
             // sortable: true,
             width: 500,
@@ -402,8 +402,8 @@ export default function AdsetNameAndAccount({params}){
             impressions:{ headerName: 'Impressions', field: 'impressions', width: 120, aggFunc: agFunc,   },
             ctr:{ headerName: 'Ctr', field: 'ctr', valueGetter: getCtr},
             
-            adsetId: { headerName: 'AdsetId', field: 'adsetId' },
-            campaignId: {headerName: "CampaignId", field:'campaignId'}
+            adsetid: { headerName: 'AdsetId', field: 'adsetId' },
+            campaignid: {headerName: "CampaignId", field:'campaignId'}
         };
 
     console.log(columnDefs);
