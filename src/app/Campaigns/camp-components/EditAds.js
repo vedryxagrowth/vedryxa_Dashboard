@@ -58,7 +58,7 @@ export default function Editads({ selectedRow, editdata }) {
   };
   var initialValue = {
     AddName: editdata?.AddName,
-    // filename: editdata?.filename,
+    filename: editdata?.filename,
     page_id: editdata?.page_id,
     message: editdata?.message,
     headline: editdata?.headline,
@@ -224,7 +224,7 @@ export default function Editads({ selectedRow, editdata }) {
               />
             </Form.Item>
           </div>
-          <div style={{ flex: "30%" }}>
+          {/* <div style={{ flex: "30%" }}>
             {editdata?.filename && (
               <div className="container-ad-preview">
                 <div className="ad-preview">
@@ -256,6 +256,106 @@ export default function Editads({ selectedRow, editdata }) {
                       src={editdata?.filename}
                     />
                   </div>
+                  <div className="ad-image" style={{ width: '100%', height: '300px' }}>
+                    {editdata.fileType === 'image' ? (
+                      <img
+                        src={editdata.filename}
+                        alt="ad content"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <video
+                        controls
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      >
+                        <source src={editdata.filename} type="video/mp4" />
+                        Your browser does not support the video tag.
+                      </video>
+                    )}
+                  </div>
+                  <div className="ad-cta">
+                    <div className="details">
+                      <div className="link">{"adCaption"}</div>
+                      <div className="title">{"adName"}</div>
+                      <div className="desc">{"adDesc"}</div>
+                    </div>
+                    <div className="ad-button">
+                      <button type="button">Learn More</button>
+                    </div>
+                  </div>
+                  <div className="icons">
+                    <div className="like">
+                      <LikeOutlined style={{ fontSize: "20px" }} />
+                      Like
+                    </div>
+                    <div className="comment">
+                      <CommentOutlined style={{ fontSize: "20px" }} />
+                      Comment
+                    </div>
+                    <div className="share">
+                      <ShareAltOutlined style={{ fontSize: "20px" }} />
+                      Share
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div> */}
+          <div style={{ flex: "30%" }}>
+            {editdata?.filename && (
+              <div className="container-ad-preview">
+                <div className="ad-preview">
+                  <div className="ad-heading">
+                    <div className="img">
+                      {editdata.fileType === 'image' ? (
+                        <img
+                          src={editdata?.filename}
+                          alt="page id"
+                          width="40"
+                          height="40"
+                        />
+                      ) : (
+                        <video
+                          controls
+                          width="40"
+                          height="40"
+                        >
+                          <source src={editdata?.filename} type="video/mp4" />
+                          Your browser does not support the video tag.
+                        </video>
+                      )}
+                    </div>
+                    <div className="title">
+                      <div className="main">{"Facebook Page"}</div>
+                      <div className="sub">
+                        Sponsored <GlobalOutlined style={{ opacity: "0.6" }} />
+                      </div>
+                    </div>
+                    <div className="close">
+                      <CloseOutlined style={{ fontSize: "20px" }} />
+                    </div>
+                    <div className="moreoptions">
+                      <MoreOutlined style={{ fontSize: "20px" }} />
+                    </div>
+                  </div>
+                  <div className="ad-desc">{"adMessage"}</div>
+                  <div className="ad-image" style={{ width: '100%', height: '300px' }}>
+                    {editdata.fileType === 'image' ? (
+                      <img
+                        src={editdata.filename}
+                        alt="ad content"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <video
+                        controls
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      >
+                        <source src={editdata.filename} type="video/mp4" />
+                        Your browser does not support the video tag.
+                      </video>
+                    )}
+                  </div>
                   <div className="ad-cta">
                     <div className="details">
                       <div className="link">{"adCaption"}</div>
@@ -284,6 +384,7 @@ export default function Editads({ selectedRow, editdata }) {
               </div>
             )}
           </div>
+
 
         </div>
         <Form.Item>

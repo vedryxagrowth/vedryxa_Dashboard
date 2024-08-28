@@ -179,7 +179,7 @@ export default function Createads({ selectedRow }) {
       key: 'action',
       render: (_, record) => (
         <Space>
-          <Button icon={<EditOutlined />} onClick={() => handleadsEdit(record)}>Edit</Button>
+          {/* <Button icon={<EditOutlined />} onClick={() => handleadsEdit(record)}>Edit</Button> */}
           <Button icon={<EyeOutlined />} onClick={() => handleadsView(record)}>View</Button>
           <Button type="primary" onClick={() => handleadsdelete(record)}>Delete</Button>
         </Space>

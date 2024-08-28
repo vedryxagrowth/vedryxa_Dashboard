@@ -16,7 +16,9 @@ import {
     Modal,
     Typography,
     message,
-    Alert
+    Alert,
+    Row,
+    Col
 } from "antd";
 import axios from 'axios';
 const { TabPane } = Tabs;
@@ -130,51 +132,48 @@ const ViewDrawer = ({ rowData, visible, onClose }) => {
 
             <Flex>
                 <div style={{ flexGrow: 1 }}>
-                    <Card
-                        style={{
-                            width: "95%"
-                        }}>
-                        <div style={{ display: "flex", justifyContent: "space-around" }}>
-                            <div style={{ flex: 1, marginRight: "20px" }}>
+
+                    <Card style={{ width: "100%", margin: "20px 0" }}>
+                        <Row gutter={[16, 16]} wrap={false} justify="space-between">
+                            <Col flex="auto" style={{ maxWidth: '150px' }}>
                                 <Text type="secondary">Name</Text>
-                                <Title level={3} style={{ margin: "2px 0" }}>
+                                <Title level={4} style={{ margin: "2px 0" }}>
                                     {viewCampaignData?.camapaignlevel?.Name}
                                 </Title>
-                            </div>
-                            <div style={{ flex: 1, marginRight: "20px" }}>
+                            </Col>
+                            <Col flex="auto" style={{ maxWidth: '150px' }}>
                                 <Text type="secondary">Objectives</Text>
                                 <Title level={5} style={{ margin: "2px 0" }}>
                                     {viewCampaignData?.camapaignlevel?.Objectives}
                                 </Title>
-                            </div>
-                            <div style={{ flex: 1, marginRight: "20px" }}>
-                                <Text type="secondary">Special_categories</Text>
+                            </Col>
+                            <Col flex="auto" style={{ maxWidth: '150px' }}>
+                                <Text type="secondary">Special Categories</Text>
                                 <Title level={5} style={{ margin: "2px 0" }}>
                                     {viewCampaignData?.camapaignlevel?.Special_categories}
                                 </Title>
-                            </div>
-                            <div style={{ flex: 1, marginRight: "20px" }}>
-                                <Text type="secondary">Bid_strategy</Text>
+                            </Col>
+                            <Col flex="auto" style={{ maxWidth: '150px' }}>
+                                <Text type="secondary">Bid Strategy</Text>
                                 <Title level={5} style={{ margin: "2px 0" }}>
                                     {viewCampaignData?.camapaignlevel?.Bid_strategy}
                                 </Title>
-                            </div>
-                            <div style={{ flex: 1, marginRight: "20px" }}>
-                                <Text type="secondary">dailyBudget</Text>
+                            </Col>
+                            <Col flex="auto" style={{ maxWidth: '150px' }}>
+                                <Text type="secondary">Daily Budget</Text>
                                 <Title level={5} style={{ margin: "2px 0" }}>
                                     {(viewCampaignData?.camapaignlevel?.Daily_amount) / 100}
                                 </Title>
-                            </div>
-                            <div style={{ flex: 1 }}>
+                            </Col>
+                            <Col flex="auto" style={{ maxWidth: '150px' }}>
                                 <Text type="secondary">Status</Text>
                                 <Title level={5} style={{ margin: "2px 0" }}>
                                     {viewCampaignData?.camapaignlevel?.Status}
                                 </Title>
-                            </div>
-                        </div>
-
+                            </Col>
+                        </Row>
                     </Card>
-                    <Card
+                    {/* <Card
                         style={{
                             width: "95%"
 
@@ -265,144 +264,181 @@ const ViewDrawer = ({ rowData, visible, onClose }) => {
                                 </Title>
                             </div>
                         </div>
-                    </Card>
-                    {viewCampaignData && viewCampaignData.addlevel && viewCampaignData.addlevel.map((item, index) => (
-                        <div style={{ border: "1px dotted green" }}>
-                            <div style={{ display: "flex" }}>
-                                <div style={{ flex: "70%" }}>
-                                    <Card
-                                        style={{
-                                            width: "100%"
-                                        }}>
-                                        <div style={{ marginRight: "20px" }}>
-                                            <div style={{ width: "30px", height: "30px", borderRadius: "50%", backgroundColor: "#e6f7ff", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                                <h3 style={{ margin: 0 }}>{index + 1}</h3>
-                                            </div>
-                                        </div>
-                                        <div style={{ flex: 1, marginRight: "20px" }}>
-                                            <Text type="secondary">AddName</Text>
-                                            <Title level={3} style={{ margin: "2px 0" }}>
-                                                {item?.AddName}
-                                            </Title>
-                                        </div>
-
-                                        <div style={{ display: "flex", flexWrap: "wrap" }}>
-
-
-                                            <div style={{ flex: 1, marginRight: "20px" }}>
-                                                <Text type="secondary">page_id</Text>
-                                                <Title level={5} style={{ margin: "2px 0" }}>
-                                                    {item?.page_id}
-                                                </Title>
-                                            </div>
-                                            <div style={{ flex: 1, marginRight: "20px" }}>
-                                                <Text type="secondary">message</Text>
-                                                <Title level={5} style={{ margin: "2px 0" }}>
-                                                    {item?.message}
-                                                </Title>
-                                            </div>
-                                            <div style={{ flex: 1, marginRight: "20px" }}>
-                                                <Text type="secondary">headline</Text>
-                                                <Title level={5} style={{ margin: "2px 0" }}>
-                                                    {item?.headline}
-                                                </Title>
-                                            </div>
-                                            <div style={{ flex: 1, marginRight: "20px" }}>
-                                                <Text type="secondary">Description</Text>
-                                                <Title level={5} style={{ margin: "2px 0" }}>
-                                                    {item?.Description}
-                                                </Title>
-                                            </div>
-                                            <div style={{ flex: 1 }}>
-                                                <Text type="secondary">Caption</Text>
-                                                <Title level={5} style={{ margin: "2px 0" }}>
-                                                    {item?.Caption}
-                                                </Title>
-                                            </div>
-                                        </div>
-
-
-
-                                        {/* <div style={{ display: "flex", marginTop: "1%" }}> */}
-                                        <div style={{ flex: 1, padding: "2%", border: "2px dotted green" }}>
-                                            <Text type="secondary">Website_URL</Text>
-                                            <Title level={5} style={{ margin: "2px 0" }}>
-                                                {item?.Website_URL}
-                                            </Title>
-                                        </div>
-                                        <div style={{ flex: 1, padding: "2%", border: "2px dotted green" }}>
-                                            <Text type="secondary">urlParameters</Text>
-                                            <Title level={5} style={{ margin: "2px 0" }}>
-                                                {item?.urlParameters}
-                                            </Title>
-                                        </div>
-                                        {/* </div> */}
-
-                                    </Card>
-                                </div>
-                                <div style={{ flex: "30%" }}>
-                                    {item?.filename && (
-                                        <div className="container-ad-preview">
-                                            <div className="ad-preview">
-                                                <div className="ad-heading">
-                                                    <div className="img">
-                                                        <img
-                                                            src={item?.filename}
-                                                            alt="page id"
-                                                            width="40"
-                                                            height="40"
-                                                        />
-                                                    </div>
-                                                    <div className="title">
-                                                        <div className="main">{"Facebook Page"}</div>
-                                                        <div className="sub">
-                                                            Sponsored <GlobalOutlined style={{ opacity: "0.6" }} />
-                                                        </div>
-                                                    </div>
-                                                    <div className="close">
-                                                        <CloseOutlined style={{ fontSize: "20px" }} />
-                                                    </div>
-                                                    <div className="moreoptions">
-                                                        <MoreOutlined style={{ fontSize: "20px" }} />
-                                                    </div>
-                                                </div>
-                                                <div className="ad-desc">{item?.message}</div>
-                                                <div className="ad-image">
-                                                    <img
-                                                        src={item?.filename}
-                                                    />
-                                                </div>
-                                                <div className="ad-cta">
-                                                    <div className="details">
-                                                        <div className="link">{item?.Caption}</div>
-                                                        <div className="title">{item?.AddName}</div>
-                                                        <div className="desc">{item?.Description}</div>
-                                                    </div>
-                                                    <div className="ad-button">
-                                                        <button type="button">Learn More</button>
-                                                    </div>
-                                                </div>
-                                                <div className="icons">
-                                                    <div className="like">
-                                                        <LikeOutlined style={{ fontSize: "20px" }} />
-                                                        Like
-                                                    </div>
-                                                    <div className="comment">
-                                                        <CommentOutlined style={{ fontSize: "20px" }} />
-                                                        Comment
-                                                    </div>
-                                                    <div className="share">
-                                                        <ShareAltOutlined style={{ fontSize: "20px" }} />
-                                                        Share
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
+                    </Card> */}
+                    <Card style={{ width: "100%", margin: "20px 0" }}>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
+                            <div style={{ flex: "1 1 200px", minWidth: "200px" }}>
+                                <Text type="secondary">Adset Name</Text>
+                                <Title level={4} style={{ margin: "2px 0" }}>
+                                    {viewCampaignData?.adsetlevel?.AdsetName}
+                                </Title>
+                            </div>
+                            <div style={{ flex: "1 1 200px", minWidth: "200px" }}>
+                                <Text type="secondary">Optimization Goal</Text>
+                                <Title level={5} style={{ margin: "2px 0" }}>
+                                    {viewCampaignData?.adsetlevel?.optimization_goal}
+                                </Title>
+                            </div>
+                            <div style={{ flex: "1 1 200px", minWidth: "200px" }}>
+                                <Text type="secondary">Billing Event</Text>
+                                <Title level={5} style={{ margin: "2px 0" }}>
+                                    {viewCampaignData?.adsetlevel?.billing_event}
+                                </Title>
+                            </div>
+                            <div style={{ flex: "1 1 200px", minWidth: "200px" }}>
+                                <Text type="secondary">Action Source</Text>
+                                <Title level={5} style={{ margin: "2px 0" }}>
+                                    {viewCampaignData?.adsetlevel?.action_source}
+                                </Title>
+                            </div>
+                            <div style={{ flex: "1 1 200px", minWidth: "200px" }}>
+                                <Text type="secondary">Custom Event Type</Text>
+                                <Title level={5} style={{ margin: "2px 0" }}>
+                                    {viewCampaignData?.adsetlevel?.custom_event_type}
+                                </Title>
+                            </div>
+                            {/* <div style={{ flex: "1 1 200px", minWidth: "200px" }}>
+                                <Text type="secondary">Pixel ID</Text>
+                                <Title level={5} style={{ margin: "2px 0" }}>
+                                    {viewCampaignData?.adsetlevel?.pixel_id}
+                                </Title>
+                            </div> */}
+                            <div style={{ flex: "1 1 200px", minWidth: "200px" }}>
+                                <Text type="secondary">Bid Amount</Text>
+                                <Title level={5} style={{ margin: "2px 0" }}>
+                                    {viewCampaignData?.adsetlevel?.bid_amount}
+                                </Title>
                             </div>
                         </div>
-                    ))}
+
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: "16px", marginTop: "20px" }}>
+                            {/* <div style={{ flex: "1 1 200px", minWidth: "200px" }}>
+                                <Text type="secondary">Bid Amount</Text>
+                                <Title level={5} style={{ margin: "2px 0" }}>
+                                    {viewCampaignData?.adsetlevel?.bid_amount}
+                                </Title>
+                            </div> */}
+                            <div style={{ flex: "1 1 200px", minWidth: "200px" }}>
+                                <Text type="secondary">Countries</Text>
+                                <Title level={5} style={{ margin: "2px 0" }}>
+                                    {viewCampaignData?.adsetlevel?.countries}
+                                </Title>
+                            </div>
+                            <div style={{ flex: "1 1 200px", minWidth: "200px" }}>
+                                <Text type="secondary">Age</Text>
+                                <Title level={5} style={{ margin: "2px 0" }}>
+                                    {viewCampaignData?.adsetlevel?.Min_Age}-{viewCampaignData?.adsetlevel?.Max_Age}
+                                </Title>
+                            </div>
+                            <div style={{ flex: "1 1 200px", minWidth: "200px" }}>
+                                <Text type="secondary">Gender</Text>
+                                <Title level={5} style={{ margin: "2px 0" }}>
+                                    {viewCampaignData?.adsetlevel?.Gender === 1 ? "Male" : viewCampaignData?.adsetlevel?.Gender === 2 ? "Female" : viewCampaignData?.adsetlevel?.Gender === 0 ? "All" : ""}
+                                </Title>
+                            </div>
+                            <div style={{ flex: "1 1 200px", minWidth: "200px" }}>
+                                <Text type="secondary">Publisher Platforms</Text>
+                                <Title level={5} style={{ margin: "2px 0" }}>
+                                    {viewCampaignData?.adsetlevel?.publisher_platforms?.join(', ')}
+                                </Title>
+                            </div>
+                            <div style={{ flex: "1 1 200px", minWidth: "200px" }}>
+                                <Text type="secondary">Device Platforms</Text>
+                                <Title level={5} style={{ margin: "2px 0" }}>
+                                    {viewCampaignData?.adsetlevel?.device_platforms?.join(', ')}
+                                </Title>
+                            </div>
+                            <div style={{ flex: "1 1 200px", minWidth: "200px" }}>
+                                <Text type="secondary">Buying Type</Text>
+                                <Title level={5} style={{ margin: "2px 0" }}>
+                                    {viewCampaignData?.adsetlevel?.buying_type}
+                                </Title>
+                            </div>
+                        </div>
+                    </Card>
+
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "3px", justifyContent: "space-between" }}>
+                        {viewCampaignData && viewCampaignData.addlevel && viewCampaignData.addlevel.map((item, index) => (
+                            <div key={index} style={{ flex: "0 1 20%", border: "1px solid #ccc", borderRadius: "8px", padding: "5px", backgroundColor: "#f9f9f9", boxShadow: "0 2px 4px rgba(0,0,0,0.1)" }}>
+                                <div className="container-ad-preview">
+                                    <div className="ad-preview">
+                                        <div className="ad-heading" style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
+                                            <div className="img" style={{ marginRight: "10px" }}>
+                                                {item?.filename?.toLowerCase().endsWith('.mp4') ? (
+                                                    <video
+                                                        src={item?.filename}
+                                                        width="40"
+                                                        height="40"
+                                                        controls
+                                                        style={{ objectFit: 'cover', borderRadius: '50%' }}
+                                                    />
+                                                ) : (
+                                                    <img
+                                                        src={item?.filename}
+                                                        alt="page id"
+                                                        style={{ width: "40px", height: "40px", borderRadius: "50%", objectFit: "cover" }}
+                                                    />
+                                                )}
+                                            </div>
+
+                                            <div className="title" style={{ flex: "1" }}>
+                                                <div className="main" style={{ fontWeight: "bold" }}>{"Consumer finds"}</div>
+                                                <div className="sub" style={{ fontSize: "12px", color: "#888" }}>
+                                                    Sponsored <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="ad-desc" style={{ fontSize: "14px", color: "#333", marginBottom: "10px" }}>{item?.message}</div>
+                                        <div className="ad-image" style={{ width: '100%', height: '200px', marginBottom: "10px" }}>
+                                            {item?.filename?.toLowerCase().endsWith('.mp4') ? (
+                                                <video
+                                                    controls
+                                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                >
+                                                    <source src={item?.filename} type="video/mp4" />
+                                                    Your browser does not support the video tag.
+                                                </video>
+                                            ) : (
+                                                <img
+                                                    src={item?.filename}
+                                                    alt="ad content"
+                                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                />
+                                            )}
+                                        </div>
+
+                                        <div className="ad-cta">
+                                            <div className="details" style={{ marginBottom: "10px" }}>
+                                                <div className="link" style={{ fontSize: "12px", color: "#888" }}>{item?.Caption}</div>
+                                                <div className="title" style={{ fontSize: "16px", fontWeight: "bold", color: "#333" }}>{item?.AddName}</div>
+                                                <div className="desc" style={{ fontSize: "12px", color: "#888" }}>{item?.Description}</div>
+                                            </div>
+                                            <div className="ad-button" style={{ textAlign: "center" }}>
+                                                <button type="button" style={{ padding: "10px 15px", borderRadius: "20px", backgroundColor: "#007BFF", color: "#fff", border: "none", cursor: "pointer" }}>
+                                                    Learn More
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="icons" style={{ display: "flex", justifyContent: "space-between", marginTop: "10px" }}>
+                                            <div className="like">
+                                                <LikeOutlined style={{ fontSize: "20px" }} />
+                                                Like
+                                            </div>
+                                            <div className="comment">
+                                                <CommentOutlined style={{ fontSize: "20px" }} />
+                                                Comment
+                                            </div>
+                                            <div className="share">
+                                                <ShareAltOutlined style={{ fontSize: "20px" }} />
+                                                Share
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
                     <div style={{ display: "flex", marginTop: "1%" }}>
                         <div style={{ flex: 1 }}>
                             <Button onClick={handleCancel}>Cancel</Button>

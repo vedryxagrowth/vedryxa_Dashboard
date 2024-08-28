@@ -130,6 +130,7 @@ const App = () => {
                 ? allCampaigns.filter(campaign => campaign.Account_Number === accountNumber)
                 : allCampaigns.filter(campaign => userdetails?.adAccounts[selectedKey]?.includes(campaign.Account_Number));
 
+            setcreatecamselectedacc(accountNumber)
 
             setCampaignData(filteredCampaignData);
         } catch (error) {
@@ -158,16 +159,6 @@ const App = () => {
             fetchData(selectedValue);
         }
     }, [refrst, selectedValue]);
-
-    // Function to handle ad account change
-    const handleAdAccountChange = (value) => {
-        console.log(value, "handleAdAccountChange");
-        setcreatecamselectedacc(value)
-        // setSelectedAccount(value);
-        fetchData(value); // Fetch data based on the selected account
-    };
-
-
 
     useEffect(() => {
         const handleResize = () => {
@@ -465,7 +456,7 @@ const App = () => {
             title: "Account Number",
             dataIndex: "Account_Number",
             key: "Account_Number",
-            width: "10%",
+            width: "12%",
             align: "center",
 
         },

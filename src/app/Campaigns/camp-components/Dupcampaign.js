@@ -419,7 +419,7 @@ const localesdata = [
     }
 ]
 const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst }) => {
-    const [selectedFile, setSelectedFile] = useState(null);
+    const [selectedFiles, setSelectedFiles] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [imageshow, setimageshow] = useState(null);
     const [formValues, setFormValues] = useState(null);
@@ -442,6 +442,14 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
 
     const [selectedPublishers, setSelectedPublishers] = useState([]);
     const [selectedPositions, setSelectedPositions] = useState(["feed"]);
+    const [addName, setAddName] = useState('');
+    const [primaryText, setPrimaryText] = useState('');
+    const [caption, setCaption] = useState('');
+    const [headline, setHeadline] = useState('');
+    const [description, setDescription] = useState('');
+    const [websiteURL, setWebsiteURL] = useState('');
+    const [loading, setLoading] = useState(false);
+
 
     useEffect(() => {
         if (DuplicatedampaignData) {
@@ -483,8 +491,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
         const fetchData = async () => {
             try {
                 if (selectedRow) {
-                    const response = await axios.get(`https://www.testapi.adsgoat.in/api/viecampaigndata/${selectedRow.identifier}`
-                        ,
+                    const response = await axios.get(`https://www.testapi.adsgoat.in/api/viecampaigndata/${selectedRow.identifier}`,
                         {
                             headers: {
                                 Authorization: token,
@@ -524,7 +531,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
                 }
             );
             console.log("siddu account data", response.data);
-            setimagehash(response.data)
+            setimagehash(...response?.data)
         } catch (error) {
             console.error("Error fetching campaign data:", error);
             // Handle error
@@ -535,11 +542,11 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
         try {
             // Make the GET request to the Facebook Graph API
             const Pixeldata = await axios.get(
-                `https://graph.facebook.com/v19.0/act_${imagehash[0]?.extAccountId}/adspixels`,
+                `https://graph.facebook.com/v19.0/act_${imagehash.accountNumber}/adspixels`,
                 {
                     params: {
                         fields: 'id,name',
-                        access_token: imagehash[0]?.token
+                        access_token: imagehash?.token
                     }
                 }
             );
@@ -555,11 +562,11 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
         try {
             // Make the GET request to the Facebook Graph API
             const pageiddata = await axios.get(
-                `https://graph.facebook.com/v19.0/act_${imagehash[0]?.extAccountId}/adcreatives`,
+                `https://graph.facebook.com/v19.0/act_${imagehash.accountNumber}/adcreatives`,
                 {
                     params: {
                         fields: 'object_story_spec{page_id}',
-                        access_token: imagehash[0]?.token,
+                        access_token: imagehash?.token,
                     }
                 }
             );
@@ -579,94 +586,193 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
         setIsFormComplete(isComplete);
     };
 
-    let s3UrlPath = "";
-    let hashid = "";
+    // let s3UrlPath = "";
+    // let hashid = "";
+    const customRequest = async (onSuccess, onError) => {
+        if (!imagehash || imagehash.length === 0) {
+            onError("Image hash data not loaded");
+            return [];
+        }
 
-    const customRequest = async (imageshow, imagehash, onSuccess, onError) => {
-        var token = imagehash[0].token
-        var account = imagehash[0].extAccountId
+        const token = imagehash?.token;
+        const account = imagehash?.accountNumber;
 
+        // Create an array of upload promises
+        const uploadPromises = selectedFiles.map(async (file) => {
+            const formData = new FormData();
+            formData.append("file", file);
 
+            try {
+                let response, fbResponse;
+
+                if (file.type.startsWith('image/')) {
+                    // Upload image
+                    response = await axios.post("/api/uploadImage", formData, {
+                        headers: { "Content-Type": "multipart/form-data" },
+                    });
+
+                    formData.append('filename', file.name);
+                    formData.append('access_token', token);
+
+                    fbResponse = await axios.post(`https://graph.facebook.com/v19.0/act_${account}/adimages`, formData, {
+                        headers: { 'Content-Type': 'multipart/form-data' }
+                    });
+
+                    if (response.status === 200 && fbResponse.status === 200) {
+                        onSuccess("ok", response);
+                        return {
+                            filename: response.data.imageUrl,
+                            imag_hash: fbResponse.data?.images?.[file.name]?.hash,
+                        };
+                    } else {
+                        onError("error", response);
+                        throw new Error("Image upload failed");
+                    }
+
+                } else if (file.type.startsWith('video/')) {
+                    // Upload video
+                    response = await axios.post("https://www.testapi.adsgoat.in/upload", formData, {
+                        headers: { 'Authorization': localStorage.getItem("token"), "Content-Type": "multipart/form-data" },
+                    });
+
+                    if (response.status !== 200) {
+                        onError("error", response);
+                        throw new Error("Video upload to custom API failed");
+                    }
+
+                    formData.append('access_token', token);
+
+                    // Upload video to Facebook
+                    fbResponse = await axios.post(`https://graph.facebook.com/v19.0/act_${account}/advideos`, formData, {
+                        headers: { 'Content-Type': 'multipart/form-data' }
+                    });
+
+                    if (fbResponse.status === 200) {
+                        const videoid = fbResponse?.data?.id;
+                        await new Promise(resolve => setTimeout(resolve, 10000));
+
+                        // Get thumbnail URL
+                        const thumbnailResponse = await axios.get(`https://graph.facebook.com/v19.0/${videoid}`, {
+                            params: {
+                                access_token: token,
+                                fields: 'thumbnails',
+                                is_preferred: true
+                            }
+                        });
+
+                        const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
+                        const uri = preferredThumbnail ? preferredThumbnail.uri : "";
+
+                        onSuccess("ok", fbResponse);
+
+                        return {
+                            filename: response.data.imageUrl,
+                            videoid: videoid,
+                            thambnailurl: uri,
+                        };
+                    } else {
+                        onError("error", fbResponse);
+                        throw new Error("Video upload to Facebook failed");
+                    }
+                }
+            } catch (error) {
+                console.error("Error uploading file:", error);
+                onError("error", error);
+                throw error;
+            }
+        });
 
         try {
-            const response = await axios.post("/api/uploadImage", imageshow, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
-            const formData = new FormData();
-            formData.append('filename', filesof);
-            formData.append('access_token', token);
-
-            const hasrespons = await axios.post(`https://graph.facebook.com/v19.0/act_${account}/adimages`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data' // Ensure to set Content-Type to multipart/form-data
-                }
-            })
-
-
-            if (response.status === 200 && hasrespons.status === 200) {
-                onSuccess("ok", response);
-                console.log(response);
-                hashid = hasrespons.data?.images?.[filesof.name]?.hash;
-                console.log("hashid is", hashid);
-                // setS3Url(response.data);
-                s3UrlPath = response.data.imageUrl;
-            } else {
-                onError("error", response);
-            }
+            const mediaHashArray = await Promise.all(uploadPromises);
+            return mediaHashArray;
         } catch (error) {
-            console.error("Error uploading file:", error);
-            onError("error", error);
+            return [];
         }
     };
 
     const handleBeforeUpload = (file) => {
-        setfilesof(file)
+        setfilesof(file);
         const formData = new FormData();
         formData.append("file", file);
         setimageshow(formData);
 
-        return false;
+        return false; // Prevent auto-upload
     };
 
     const handleOk = async () => {
+        setLoading(true); // Start the spinner
         setIsModalVisible(false); // Close the modal
 
         if (formValues) {
             const onSuccess = (status, response) => {
                 console.log("Upload success:", response);
-                // Add any success handling logic here
             };
 
             const onError = (status, error) => {
                 console.error("Upload error:", error);
-                // Add any error handling logic here
             };
 
             try {
-                await customRequest(imageshow, imagehash, onSuccess, onError);
-                await postData(formValues);
-                changeRRefrst()
+                const mediaHashArray = await customRequest(onSuccess, onError);
+
+                if (mediaHashArray.length > 0) {
+                    // Create addlevel objects based on uploaded media
+                    const addLevelData = mediaHashArray.map((media) => {
+                        if (media.imag_hash) {
+                            return {
+                                id: uuidv4(), // Unique ID for each ad
+                                AddName: formValues.AddName,
+                                filename: media.filename,
+                                imag_hash: media.imag_hash,
+                                page_id: formValues.page_id,
+                                message: formValues.message,
+                                headline: formValues.headline,
+                                Description: formValues.Description,
+                                Caption: formValues.Caption,
+                                Website_URL: formValues.Website_URL,
+                                // urlParameters: formValues.urlParameters,
+                            };
+                        } else if (media.videoid) {
+                            return {
+                                id: uuidv4(), // Unique ID for each ad
+                                AddName: formValues.AddName,
+                                filename: media.filename,
+                                videoid: media.videoid,
+                                thambnailurl: media.thambnailurl,
+                                page_id: formValues.page_id,
+                                message: formValues.message,
+                                headline: formValues.headline,
+                                Description: formValues.Description,
+                                Caption: formValues.Caption,
+                                Website_URL: formValues.Website_URL,
+                                // urlParameters: formValues.urlParameters,
+                            };
+                        }
+                    });
+
+                    // Proceed with posting data, including the addLevelData
+                    await postData({ ...formValues, addlevel: addLevelData });
+                    changeRRefrst();
+                    message.success("Campaign created successfully");
+                } else {
+                    message.error("Failed to upload one or more files. Campaign creation aborted.");
+                }
             } catch (error) {
-                console.error("Error:", error);
+                message.error("An error occurred during the campaign creation process.");
+            } finally {
+                setLoading(false); // Stop the spinner after the process is complete
             }
-        }
 
-        // Reset form fields
-        if (formRef.current) {
-            formRef.current.resetFields();
         }
-
-        // message.success("Campaign created successfully");
-        // setTimeout(() => {
-        //     window.location.reload();
-        // }, 2000);
+        else {
+            setLoading(false); // Stop the spinner if no form data
+        }
     };
 
     const handleCancel = () => {
         setIsModalVisible(false);
     };
+
     const onFinish = () => {
         form
             .validateFields()
@@ -677,32 +783,22 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
                     );
                     return acc;
                 }, {});
-                console.log({
-                    publisher_platforms: values.publisher_platforms,
-                    ...selectedPlatforms, ...values
-                });
-
-                // setIsModalVisible(true);
                 setFormValues({
                     publisher_platforms: values.publisher_platforms,
                     ...selectedPlatforms,
                     ...values
                 });
-                // setFormData(values);
-                setIsModalVisible(true)
+                setIsModalVisible(true);
             })
             .catch((errorInfo) => {
                 console.log('Validation failed:', errorInfo);
             });
     };
-    // const onFinish = (values) => {
-    //     setIsModalVisible(true)
-    //     console.log("Form values:", values);
-    //     setFormValues(values);
-    // };
+
     const postData = async (values) => {
+        setLoading(true); // Start the spinner
         try {
-            const data1 = {
+            const dataToSubmit = {
                 campaign_name: values.Name,
                 Account_Number: values.Account_Number,
                 Approval: "PENDING_APPROVAL",
@@ -713,8 +809,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
                     Objectives: values.Objectives,
                     Special_categories: values.Special_categories,
                     Bid_strategy: values.Bid_strategy,
-                    Daily_amount: (parseInt(values.Daily_amount) * 100),
-                    Status: values.Status
+                    Daily_amount: parseInt(values.Daily_amount) * 100,
+                    Status: values.Status,
                 },
                 adsetlevel: {
                     AdsetName: values.AdsetName,
@@ -737,53 +833,245 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
                     position: values.positions,
                     locales: values.Language,
                     device_platforms: values.device_platforms,
-                    buying_type: "AUCTION"
+                    buying_type: "AUCTION",
                 },
-                addlevel: [{
-                    id: uuidv4(),
-                    AddName: values.AddName,
-                    filename: s3UrlPath,
-                    imag_hash: hashid,
-                    page_id: values.page_id,
-                    message: values.message,
-                    headline: values.headline,
-                    Description: values.Description,
-                    Caption: values.Caption,
-                    Website_URL: values.Website_URL,
-                    urlParameters: values.urlParameters
-                }]
+                addlevel: values.addlevel, // Use the addlevel array created in handleOk
             };
-            console.log(data1, "from UI")
+
             const response = await fetch('https://www.testapi.adsgoat.in/api/submitFormData', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: token
+                    Authorization: token,
                 },
-                body: JSON.stringify(data1)
+                body: JSON.stringify(dataToSubmit),
             });
 
-            // Check if the request was successful
             if (response.ok) {
                 console.log('Form data submitted successfully');
                 onClose(); // Close the drawer or perform any other action
-                message("campaign was created")
-
+                message.success("Campaign was created");
             } else {
                 console.error('Failed to submit form data');
             }
         } catch (error) {
             console.error('Error submitting form data:', error);
+        } finally {
+            setLoading(false); // Stop the spinner after the process is complete
         }
+
     };
+
+
+    // const customRequest = async (onSuccess, onError) => {
+    //     if (!imagehash || imagehash.length === 0) {
+    //         onError("Image hash data not loaded");
+    //         return [];
+    //     }
+
+    //     const token = imagehash[0].token;
+    //     const account = imagehash[0].extAccountId;
+
+    //     // Create an array of upload promises
+    //     const uploadPromises = selectedFiles.map(async (file) => {
+    //         const formData = new FormData();
+    //         formData.append("file", file);
+
+    //         try {
+    //             const response = await axios.post("/api/uploadImage", formData, {
+    //                 headers: { "Content-Type": "multipart/form-data" },
+    //             });
+
+    //             formData.append('filename', file);
+    //             formData.append('access_token', token);
+
+    //             const hasrespons = await axios.post(`https://graph.facebook.com/v19.0/act_${account}/adimages`, formData, {
+    //                 headers: { 'Content-Type': 'multipart/form-data' }
+    //             });
+
+    //             if (response.status === 200 && hasrespons.status === 200) {
+    //                 onSuccess("ok", response);
+    //                 return {
+    //                     filename: response.data.imageUrl,
+    //                     imag_hash: hasrespons.data?.images?.[file.name]?.hash,
+    //                 };
+    //             } else {
+    //                 onError("error", response);
+    //                 throw new Error("Image upload failed");
+    //             }
+    //         } catch (error) {
+    //             console.error("Error uploading file:", error);
+    //             onError("error", error);
+    //             throw error;
+    //         }
+    //     });
+
+    //     try {
+    //         const imageHashArray = await Promise.all(uploadPromises);
+    //         return imageHashArray;
+    //     } catch (error) {
+    //         return [];
+    //     }
+    // };
+
+
+    // const handleBeforeUpload = (file) => {
+    //     setfilesof(file)
+    //     const formData = new FormData();
+    //     formData.append("file", file);
+    //     setimageshow(formData);
+
+    //     return false;
+    // };
+
+    // const handleOk = async () => {
+    //     setIsModalVisible(false); // Close the modal
+
+    //     if (formValues) {
+    //         const onSuccess = (status, response) => {
+    //             console.log("Upload success:", response);
+    //         };
+
+    //         const onError = (status, error) => {
+    //             console.error("Upload error:", error);
+    //         };
+
+    //         try {
+    //             const imageHashArray = await customRequest(onSuccess, onError);
+
+    //             if (imageHashArray.length > 0) {
+    //                 // Create addlevel objects based on uploaded images
+    //                 const addLevelData = imageHashArray.map((image) => ({
+    //                     id: uuidv4(), // Unique ID for each ad
+    //                     AddName: formValues.AddName,
+    //                     filename: image.filename, // This changes per image
+    //                     imag_hash: image.imag_hash, // This changes per image
+    //                     page_id: formValues.page_id,
+    //                     message: formValues.message,
+    //                     headline: formValues.headline,
+    //                     Description: formValues.Description,
+    //                     Caption: formValues.Caption,
+    //                     Website_URL: formValues.Website_URL,
+    //                     urlParameters: formValues.urlParameters,
+    //                 }));
+
+    //                 // Proceed with posting data, including the addLevelData
+    //                 await postData({ ...formValues, addlevel: addLevelData });
+    //                 changeRRefrst();
+    //                 message.success("Campaign duplicated successfully");
+    //             } else {
+    //                 message.error("Failed to upload one or more images. Duplication aborted.");
+    //             }
+    //         } catch (error) {
+    //             message.error("An error occurred during the duplication process.");
+    //         }
+    //     }
+    // };
+
+
+    // const handleCancel = () => {
+    //     setIsModalVisible(false);
+    // };
+    // const onFinish = () => {
+    //     form
+    //         .validateFields()
+    //         .then((values) => {
+    //             const selectedPlatforms = selectedPublishers.reduce((acc, publisher) => {
+    //                 acc[publisher + '_positions'] = values.positions.filter(position =>
+    //                     positionOptions[publisher].map(option => option.key).includes(position)
+    //                 );
+    //                 return acc;
+    //             }, {});
+    //             console.log({
+    //                 publisher_platforms: values.publisher_platforms,
+    //                 ...selectedPlatforms, ...values
+    //             });
+
+    //             // setIsModalVisible(true);
+    //             setFormValues({
+    //                 publisher_platforms: values.publisher_platforms,
+    //                 ...selectedPlatforms,
+    //                 ...values
+    //             });
+    //             // setFormData(values);
+    //             setIsModalVisible(true)
+    //         })
+    //         .catch((errorInfo) => {
+    //             console.log('Validation failed:', errorInfo);
+    //         });
+    // };
+    // // const onFinish = (values) => {
+    // //     setIsModalVisible(true)
+    // //     console.log("Form values:", values);
+    // //     setFormValues(values);
+    // // };
+    // const postData = async (values) => {
+    //     try {
+    //         const dataToSubmit = {
+    //             campaign_name: values.Name,
+    //             Account_Number: values.Account_Number,
+    //             Approval: "PENDING_APPROVAL",
+    //             fbstatus: "No-Live",
+    //             camapaignlevel: {
+    //                 createdby: session?.user?.name,
+    //                 Name: values.Name,
+    //                 Objectives: values.Objectives,
+    //                 Special_categories: values.Special_categories,
+    //                 Bid_strategy: values.Bid_strategy,
+    //                 Daily_amount: parseInt(values.Daily_amount) * 100,
+    //                 Status: values.Status,
+    //             },
+    //             adsetlevel: {
+    //                 AdsetName: values.AdsetName,
+    //                 optimization_goal: values.optimization_goal,
+    //                 billing_event: values.billing_event,
+    //                 start_time: moment(values.DatePicker.$d).utc().format("YYYY-MM-DDTHH:mm:ssZ"),
+    //                 action_source: values.action_source,
+    //                 custom_event_type: values.custom_event_type,
+    //                 pixel_id: values.pixel_id,
+    //                 bid_amount: values.bid_amount ? parseFloat(values.bid_amount) * 100 : 0,
+    //                 countries: values.countries,
+    //                 Min_Age: values.Min_Age,
+    //                 Max_Age: values.Max_Age,
+    //                 Gender: parseInt(values.Gender),
+    //                 publisher_platforms: values.publisher_platforms,
+    //                 Facebook_positions: values.facebook_positions || [],
+    //                 instagram_positions: values.instagram_positions || [],
+    //                 audience_network_positions: values.audience_network_positions || [],
+    //                 messenger_positions: values.messenger_positions || [],
+    //                 position: values.positions,
+    //                 locales: values.Language,
+    //                 device_platforms: values.device_platforms,
+    //                 buying_type: "AUCTION",
+    //             },
+    //             addlevel: values.addlevel, // Use the addlevel array created in handleOk
+    //         };
+
+    //         const response = await fetch('https://www.testapi.adsgoat.in/api/submitFormData', {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //                 Authorization: token,
+    //             },
+    //             body: JSON.stringify(dataToSubmit),
+    //         });
+
+    //         if (response.ok) {
+    //             console.log('Form data submitted successfully');
+    //             onClose(); // Close the drawer or perform any other action
+    //             message.success("Campaign was created");
+    //         } else {
+    //             console.error('Failed to submit form data');
+    //         }
+    //     } catch (error) {
+    //         console.error('Error submitting form data:', error);
+    //     }
+    // };
+
     const handleChange = (info) => {
-        if (info.fileList.length > 0) {
-            // Update the selected file
-            setSelectedFile(info.fileList[0].originFileObj);
-        } else {
-            setSelectedFile(null); // Clear the selected file if fileList is empty
-        }
+        setSelectedFiles(info.fileList.map(file => file.originFileObj));
     };
+
     const currentDate = moment();
     const initialValues = {
         Account_Number: DuplicatedampaignData?.Account_Number,
@@ -819,7 +1107,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
         Description: DuplicatedampaignData?.addlevel[0]?.Description,
         Caption: DuplicatedampaignData?.addlevel[0]?.Caption,
         Website_URL: DuplicatedampaignData?.addlevel[0]?.Website_URL,
-        urlParameters: DuplicatedampaignData?.addlevel[0]?.urlParameters,
+        // urlParameters: DuplicatedampaignData?.addlevel[0]?.urlParameters,
 
     };
     // useEffect(() => {
@@ -835,276 +1123,307 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
             onClose={onClose}
         >
             {DuplicatedampaignData?.identifier === selectedRow?.identifier ? (
-                <Form layout="vertical" form={form} onFinish={onFinish} onValuesChange={handleFormChange} initialValues={initialValues}>
-                    <Collapse accordion defaultActiveKey={['1']} >
-                        <Panel header="CAMPAIGN LEVEL" key="1">
-                            <div style={{ display: "flex" }}>
-                                <Form.Item
-                                    name="Account_Number"
-                                    label={<span style={{ color: "#B4B4B4" }}>Account Number</span>}
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: "Please select an option!",
-                                        },
-                                    ]}
-                                    style={{ flex: 0.2 }}>
-                                    <Input />
-                                </Form.Item>
-                                <Form.Item
-                                    name="Name"
-                                    label={<span style={{ color: "#B4B4B4" }}>Campaign name</span>}
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: "Please select an option!",
-                                        },
-                                    ]}
-                                    style={{ flex: 0.25 }}>
-                                    <Input onChange={handleNameChange}
-                                        style={{ width: "100%", marginLeft: "3%" }}
-                                    />
-                                </Form.Item>
-                                <Form.Item
-                                    name="Objectives"
-                                    label={<span style={{ color: "#B4B4B4" }}>Objectives</span>}
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: "Please select an option!",
-                                        },
-                                    ]}
-                                    style={{ flex: 0.1, marginLeft: "2%" }}>
-                                    <Select onChange={getpixelandpageid}
-
-                                        variant="filled"
-                                        options={[
-                                            { value: "OUTCOME_LEADS", label: "Leads" },
-                                            { value: "OUTCOME_SALES", label: "Sales" },
-                                            { value: "OUTCOME_ENGAGEMENT", label: "Engagement" },
-                                            { value: "OUTCOME_AWARENESS", label: "Awareness" },
-                                            { value: "OUTCOME_TRAFFIC", label: "Traffic" },
-                                            { value: "OUTCOME_APP_PROMOTION", label: "App promotion" }
-
-                                        ]}
-
-                                    />
-                                </Form.Item>
-                                <Form.Item
-                                    name="Special_categories"
-                                    label={<span style={{ color: "#B4B4B4" }}>Categories</span>}
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: "Please select an option!",
-                                        },
-                                    ]}
-                                    style={{ flex: 0.1, marginLeft: "2%" }}>
-                                    <Select
-
-                                        variant="filled"
-                                        mode="multiple"
-                                        allowClear
-                                        options={[
-                                            { value: "HOUSING", label: "Housing" },
-                                            { value: "CREDIT", label: "Credit" },
-                                            { value: "EMPLOYMENT", label: "Employment" },
-                                            { value: "ISSUES_ELECTIONS_POLITICS", label: "Politics" },
-                                            { value: "NONE", label: "None" }
-
-                                        ]}
-                                    />
-                                </Form.Item>
-                                <Form.Item
-                                    name="Bid_strategy"
-                                    label={<span style={{ color: "#B4B4B4" }}>Bid strategy</span>}
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: "Please select an option!",
-                                        },
-                                    ]}
-                                    style={{ flex: 0.1, marginLeft: "2%" }}>
-                                    <Select
-
-                                        variant="filled"
-                                        options={[
-                                            { value: "LOWEST_COST_WITHOUT_CAP", label: "Highest Volume" },
-                                            { value: "LOWEST_COST_WITH_BID_CAP", label: "Bid Cap" },
-                                            { value: "COST_CAP", label: "Cost Cap" },
-                                            { value: "LOWEST_COST_WITH_MIN_ROAS", label: "ROAS Goal" }
-                                        ]}
-                                        onChange={handleBidStrategyChange}
-                                    />
-                                </Form.Item>
-                                <Form.Item
-                                    name="Daily_amount"
-                                    label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: "Please select an option!",
-                                        },
-                                    ]}
-                                    style={{ flex: 0.1, marginLeft: "2%" }}>
-                                    <Input
-                                        type="number"
-                                        placeholder="$"
-
-                                    />
-                                </Form.Item>
-                                <Form.Item
-                                    name="Status"
-                                    label={<span style={{ color: "#B4B4B4" }}>Status</span>}
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: "Please select an option!",
-                                        },
-                                    ]}
-                                    style={{ flex: 0.1, marginLeft: "2%" }}>
-                                    <Select
-                                        variant="filled"
-                                        options={[
-                                            { value: "ACTIVE", label: "ACTIVE" },
-                                            { value: "PAUSED", label: "PAUSED" },
-
-                                        ]}
-                                    />
-                                </Form.Item>
-
-                            </div>
-                        </Panel>
-                        <Panel header="ADSET LEVEL" key="2">
-                            <div style={{ display: "flex" }}>
-                                <Form.Item
-                                    name="AdsetName"
-                                    label={<span style={{ color: "#B4B4B4" }}>Adset name</span>}
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: "Please select an option!",
-                                        },
-                                    ]}
-                                    style={{ flex: 0.25 }}>
-                                    <Input
-                                        style={{ width: "100%" }}
-                                    />
-                                </Form.Item>
-                                <Form.Item
-                                    name="optimization_goal"
-                                    label={<span style={{ color: "#B4B4B4" }}>Optimiz goal</span>}
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: "Please select an option!",
-                                        },
-                                    ]}
-                                    style={{ flex: 0.1, marginLeft: "2%" }}>
-                                    <Select
-
-                                        variant="filled"
-                                        options={[
-                                            { value: "OFFSITE_CONVERSIONS", label: "Conversions" },
-                                            { value: "LINK_CLICKS", label: "Clicks" },
-                                            { value: "REACH", label: "Reach" },
-                                            { value: "VALUE", label: "Value" }
-                                        ]}
-                                    />
-                                </Form.Item>
-                                <Form.Item
-                                    name="billing_event"
-                                    label={<span style={{ color: "#B4B4B4" }}>Billing event</span>}
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: "Please select an option!",
-                                        },
-                                    ]}
-                                    style={{ flex: 0.1, marginLeft: "2%" }}>
-                                    <Select
-
-                                        variant="filled"
-                                        options={[
-                                            { value: "IMPRESSIONS", label: "Impressions" },
-                                            { value: "VALUE", label: "Value" }
-                                        ]}
-                                    />
-                                </Form.Item>
-                                <Form.Item
-                                    name="DatePicker"
-                                    label={<span style={{ color: "#B4B4B4" }}>Start Time</span>}
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: 'Please input!',
-                                        },
-                                    ]}
-                                    style={{ flex: 0.1, marginLeft: "2%" }}
-                                    initialValue={currentDate}
-
-                                >
-                                    <DatePicker />
-                                </Form.Item>
-                                <Form.Item
-                                    name="action_source"
-                                    label={<span style={{ color: "#B4B4B4" }}>Action source</span>}
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: "Please select an option!",
-                                        },
-                                    ]}
-                                    style={{ flex: 0.1, marginLeft: "2%" }}>
-                                    <Select
-
-                                        variant="filled"
-                                        options={[
-                                            { value: "website", label: "Website" },
-                                            { value: "email", label: "Email" },
-                                            { value: "app", label: "App" },
-                                            { value: "phone_call", label: "Phone Call" }
-                                        ]}
-                                    />
-                                </Form.Item>
-                                <Form.Item
-                                    name="custom_event_type"
-                                    label={<span style={{ color: "#B4B4B4" }}>Event type</span>}
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: "Please select an option!",
-                                        },
-                                    ]}
-                                    style={{ flex: 0.1, marginLeft: "2%" }}>
-                                    <Select
-
-                                        variant="filled"
-                                        options={[
-                                            { value: "LEAD", label: "Lead" },
-                                            { value: "PURCHASE", label: "Purchase" },
-                                            { value: "SEARCH", label: "Search" },
-                                            { value: "CONTACT", label: "Contact" },
-                                        ]}
-                                    />
-                                </Form.Item>
-                                <Form.Item
-                                    name="pixel_id"
-                                    initialValue={pixelids}
-                                    label={<span style={{ color: "#B4B4B4" }}>Pixel id</span>}
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: "Please select an option!",
-                                        },
-                                    ]}
-                                    style={{ flex: 0.15, marginLeft: "2%" }}>
-                                    <Input
-                                        style={{ width: "100%" }}
-                                    />
-                                </Form.Item>
-                                {(DuplicatedampaignData?.camapaignlevel?.Bid_strategy === "LOWEST_COST_WITH_BID_CAP") ? (
+                <Spin spinning={loading}>
+                    <Form layout="vertical" form={form} onFinish={onFinish} onValuesChange={handleFormChange} initialValues={initialValues}>
+                        <Collapse accordion defaultActiveKey={['1']} >
+                            <Panel header="CAMPAIGN LEVEL" key="1">
+                                <div style={{ display: "flex" }}>
                                     <Form.Item
+                                        name="Account_Number"
+                                        label={<span style={{ color: "#B4B4B4" }}>Account Number</span>}
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Please select an option!",
+                                            },
+                                        ]}
+                                        style={{ flex: 0.2 }}>
+                                        <Input />
+                                    </Form.Item>
+                                    <Form.Item
+                                        name="Name"
+                                        label={<span style={{ color: "#B4B4B4" }}>Campaign name</span>}
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Please select an option!",
+                                            },
+                                        ]}
+                                        style={{ flex: 0.25 }}>
+                                        <Input onChange={handleNameChange}
+                                            style={{ width: "100%", marginLeft: "3%" }}
+                                        />
+                                    </Form.Item>
+                                    <Form.Item
+                                        name="Objectives"
+                                        label={<span style={{ color: "#B4B4B4" }}>Objectives</span>}
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Please select an option!",
+                                            },
+                                        ]}
+                                        style={{ flex: 0.1, marginLeft: "2%" }}>
+                                        <Select onChange={getpixelandpageid}
+
+                                            variant="filled"
+                                            options={[
+                                                { value: "OUTCOME_LEADS", label: "Leads" },
+                                                { value: "OUTCOME_SALES", label: "Sales" },
+                                                { value: "OUTCOME_ENGAGEMENT", label: "Engagement" },
+                                                { value: "OUTCOME_AWARENESS", label: "Awareness" },
+                                                { value: "OUTCOME_TRAFFIC", label: "Traffic" },
+                                                { value: "OUTCOME_APP_PROMOTION", label: "App promotion" }
+
+                                            ]}
+
+                                        />
+                                    </Form.Item>
+                                    <Form.Item
+                                        name="Special_categories"
+                                        label={<span style={{ color: "#B4B4B4" }}>Categories</span>}
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Please select an option!",
+                                            },
+                                        ]}
+                                        style={{ flex: 0.1, marginLeft: "2%" }}>
+                                        <Select
+
+                                            variant="filled"
+                                            mode="multiple"
+                                            allowClear
+                                            options={[
+                                                { value: "HOUSING", label: "Housing" },
+                                                { value: "CREDIT", label: "Credit" },
+                                                { value: "EMPLOYMENT", label: "Employment" },
+                                                { value: "ISSUES_ELECTIONS_POLITICS", label: "Politics" },
+                                                { value: "NONE", label: "None" }
+
+                                            ]}
+                                        />
+                                    </Form.Item>
+                                    <Form.Item
+                                        name="Bid_strategy"
+                                        label={<span style={{ color: "#B4B4B4" }}>Bid strategy</span>}
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Please select an option!",
+                                            },
+                                        ]}
+                                        style={{ flex: 0.1, marginLeft: "2%" }}>
+                                        <Select
+
+                                            variant="filled"
+                                            options={[
+                                                { value: "LOWEST_COST_WITHOUT_CAP", label: "Highest Volume" },
+                                                { value: "LOWEST_COST_WITH_BID_CAP", label: "Bid Cap" },
+                                                { value: "COST_CAP", label: "Cost Cap" },
+                                                { value: "LOWEST_COST_WITH_MIN_ROAS", label: "ROAS Goal" }
+                                            ]}
+                                            onChange={handleBidStrategyChange}
+                                        />
+                                    </Form.Item>
+                                    <Form.Item
+                                        name="Daily_amount"
+                                        label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Please select an option!",
+                                            },
+                                        ]}
+                                        style={{ flex: 0.1, marginLeft: "2%" }}>
+                                        <Input
+                                            type="number"
+                                            placeholder="$"
+
+                                        />
+                                    </Form.Item>
+                                    <Form.Item
+                                        name="Status"
+                                        label={<span style={{ color: "#B4B4B4" }}>Status</span>}
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Please select an option!",
+                                            },
+                                        ]}
+                                        style={{ flex: 0.1, marginLeft: "2%" }}>
+                                        <Select
+                                            variant="filled"
+                                            options={[
+                                                { value: "ACTIVE", label: "ACTIVE" },
+                                                { value: "PAUSED", label: "PAUSED" },
+
+                                            ]}
+                                        />
+                                    </Form.Item>
+
+                                </div>
+                            </Panel>
+                            <Panel header="ADSET LEVEL" key="2">
+                                <div style={{ display: "flex" }}>
+                                    <Form.Item
+                                        name="AdsetName"
+                                        label={<span style={{ color: "#B4B4B4" }}>Adset name</span>}
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Please select an option!",
+                                            },
+                                        ]}
+                                        style={{ flex: 0.25 }}>
+                                        <Input
+                                            style={{ width: "100%" }}
+                                        />
+                                    </Form.Item>
+                                    <Form.Item
+                                        name="optimization_goal"
+                                        label={<span style={{ color: "#B4B4B4" }}>Optimiz goal</span>}
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Please select an option!",
+                                            },
+                                        ]}
+                                        style={{ flex: 0.1, marginLeft: "2%" }}>
+                                        <Select
+
+                                            variant="filled"
+                                            options={[
+                                                { value: "OFFSITE_CONVERSIONS", label: "Conversions" },
+                                                { value: "LINK_CLICKS", label: "Clicks" },
+                                                { value: "REACH", label: "Reach" },
+                                                { value: "VALUE", label: "Value" }
+                                            ]}
+                                        />
+                                    </Form.Item>
+                                    <Form.Item
+                                        name="billing_event"
+                                        label={<span style={{ color: "#B4B4B4" }}>Billing event</span>}
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Please select an option!",
+                                            },
+                                        ]}
+                                        style={{ flex: 0.1, marginLeft: "2%" }}>
+                                        <Select
+
+                                            variant="filled"
+                                            options={[
+                                                { value: "IMPRESSIONS", label: "Impressions" },
+                                                { value: "VALUE", label: "Value" }
+                                            ]}
+                                        />
+                                    </Form.Item>
+                                    <Form.Item
+                                        name="DatePicker"
+                                        label={<span style={{ color: "#B4B4B4" }}>Start Time</span>}
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: 'Please input!',
+                                            },
+                                        ]}
+                                        style={{ flex: 0.1, marginLeft: "2%" }}
+                                        initialValue={currentDate}
+
+                                    >
+                                        <DatePicker />
+                                    </Form.Item>
+                                    <Form.Item
+                                        name="action_source"
+                                        label={<span style={{ color: "#B4B4B4" }}>Action source</span>}
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Please select an option!",
+                                            },
+                                        ]}
+                                        style={{ flex: 0.1, marginLeft: "2%" }}>
+                                        <Select
+
+                                            variant="filled"
+                                            options={[
+                                                { value: "website", label: "Website" },
+                                                { value: "email", label: "Email" },
+                                                { value: "app", label: "App" },
+                                                { value: "phone_call", label: "Phone Call" }
+                                            ]}
+                                        />
+                                    </Form.Item>
+                                    <Form.Item
+                                        name="custom_event_type"
+                                        label={<span style={{ color: "#B4B4B4" }}>Event type</span>}
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Please select an option!",
+                                            },
+                                        ]}
+                                        style={{ flex: 0.1, marginLeft: "2%" }}>
+                                        <Select
+
+                                            variant="filled"
+                                            options={[
+                                                { value: "LEAD", label: "Lead" },
+                                                { value: "PURCHASE", label: "Purchase" },
+                                                { value: "SEARCH", label: "Search" },
+                                                { value: "CONTACT", label: "Contact" },
+                                            ]}
+                                        />
+                                    </Form.Item>
+                                    <Form.Item
+                                        name="pixel_id"
+                                        initialValue={pixelids}
+                                        label={<span style={{ color: "#B4B4B4" }}>Pixel id</span>}
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Please select an option!",
+                                            },
+                                        ]}
+                                        style={{ flex: 0.15, marginLeft: "2%" }}>
+                                        <Input
+                                            style={{ width: "100%" }}
+                                        />
+                                    </Form.Item>
+                                    {(DuplicatedampaignData?.camapaignlevel?.Bid_strategy === "LOWEST_COST_WITH_BID_CAP") ? (
+                                        <Form.Item
+                                            name="bid_amount"
+                                            label={<span style={{ color: "#B4B4B4" }}>Bid_amount</span>}
+                                            rules={[
+                                                {
+                                                    required: true,
+                                                    message: "Please enter a bid amount!",
+                                                },
+                                                {
+                                                    validator: (_, value) =>
+                                                        value && !isNaN(value) && parseFloat(value) > 0
+                                                            ? Promise.resolve()
+                                                            : Promise.reject(new Error("Please enter a valid float value!")),
+                                                },
+                                            ]}
+                                            style={{ flex: 0.1, marginLeft: "2%" }}
+                                        >
+                                            <Input
+                                                type="number"
+                                                placeholder="$"
+                                                onKeyPress={(event) => {
+                                                    const charCode = event.charCode;
+                                                    const charStr = String.fromCharCode(charCode);
+                                                    const regex = /^[0-9]*\.?[0-9]*$/;
+                                                    if (!regex.test(charStr)) {
+                                                        event.preventDefault();
+                                                    }
+                                                }}
+                                            />
+                                        </Form.Item>
+                                    ) : (showBidAmount && (<Form.Item
                                         name="bid_amount"
                                         label={<span style={{ color: "#B4B4B4" }}>Bid_amount</span>}
                                         rules={[
@@ -1133,263 +1452,57 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
                                                 }
                                             }}
                                         />
-                                    </Form.Item>
-                                ) : (showBidAmount && (<Form.Item
-                                    name="bid_amount"
-                                    label={<span style={{ color: "#B4B4B4" }}>Bid_amount</span>}
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: "Please enter a bid amount!",
-                                        },
-                                        {
-                                            validator: (_, value) =>
-                                                value && !isNaN(value) && parseFloat(value) > 0
-                                                    ? Promise.resolve()
-                                                    : Promise.reject(new Error("Please enter a valid float value!")),
-                                        },
-                                    ]}
-                                    style={{ flex: 0.1, marginLeft: "2%" }}
-                                >
-                                    <Input
-                                        type="number"
-                                        placeholder="$"
-                                        onKeyPress={(event) => {
-                                            const charCode = event.charCode;
-                                            const charStr = String.fromCharCode(charCode);
-                                            const regex = /^[0-9]*\.?[0-9]*$/;
-                                            if (!regex.test(charStr)) {
-                                                event.preventDefault();
-                                            }
-                                        }}
-                                    />
-                                </Form.Item>))}
+                                    </Form.Item>))}
 
 
-                            </div>
-                            <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "green" }}>Targeting</span>
-                            <div style={{ display: "flex" }}>
-                                <Form.Item
-                                    name="countries"
-                                    label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: "Please select an option!",
-                                        },
-                                    ]}
-                                    style={{ flex: 0.12 }}>
-                                    <Select
-                                        variant="filled"
-
-                                        options={[
-                                            { value: "US", label: "United States" },
-                                            { value: "GB", label: "United Kingdom" },
-                                            { value: "AU", label: "Australia" },
-                                            { value: "IN", label: "India" },
-                                            { value: "AE", label: "United Arab Emirates" },
-                                        ]}
-                                    />
-                                </Form.Item>
-                                <Form.Item
-                                    name="Min_Age"
-                                    label={<span style={{ color: "#B4B4B4" }}>Min Age</span>}
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: "Please select an option!",
-                                        },
-                                    ]}
-                                    style={{ marginLeft: "2%" }}>
-                                    <Select
-                                        variant="filled"
-                                        options={[
-                                            { value: "18", label: "18" },
-                                            { value: "25", label: "25" },
-                                            { value: "35", label: "35" },
-                                            { value: "40", label: "40", disabled: true },
-                                        ]}
-                                    />
-                                </Form.Item>
-                                <Form.Item
-                                    name="Max_Age"
-                                    label={<span style={{ color: "#B4B4B4" }}>Max Age</span>}
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: "Please select an option!",
-                                        },
-                                    ]}
-                                >
-                                    <Select
-                                        variant="filled"
-                                        options={[
-                                            { value: "20", label: "20" },
-                                            { value: "30", label: "30" },
-                                            { value: "65", label: "65+" },
-                                            { value: "80", label: "80", disabled: true },
-                                        ]}
-                                    />
-                                </Form.Item>
-                                <Form.Item
-                                    name="Gender"
-                                    label={<span style={{ color: "#B4B4B4" }}> Gender</span>}
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: "Please select an option!",
-                                        },
-                                    ]}
-                                    style={{ flex: 0.1, marginLeft: "2%" }}>
-                                    <Select
-                                        variant="filled"
-                                        options={[
-                                            { value: "0", label: "All" },
-                                            { value: "1", label: "Male" },
-                                            { value: "2", label: "Female" },
-                                        ]}
-                                    />
-                                </Form.Item>
-                                <Form.Item
-                                    name="Language"
-                                    label={<span style={{ color: "#B4B4B4" }}>Language</span>}
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: "Please select an option!",
-                                        },
-                                    ]}
-                                    style={{ flex: 0.18, marginLeft: "2%" }}>
-                                    <Select
-                                        showSearch
-                                        mode="multiple" // or "tags" if you want to allow selecting multiple options
-                                        value={DuplicatedampaignData?.adsetlevel?.locales}
-                                        placeholder="Select language"
-                                        optionFilterProp="children"
-                                    >
-                                        {localesdata.map(option => (
-                                            <Option key={option.key} value={option.key}>
-                                                {option.name}
-                                            </Option>
-                                        ))}
-                                    </Select>
-
-                                </Form.Item>
-                                <Form.Item
-                                    name="publisher_platforms"
-                                    label={<span style={{ color: "#B4B4B4" }}>Platforms</span>}
-                                    rules={[{ required: true, message: "Please select an option!" }]}
-                                    // style={{ marginRight: "10px" }}
-                                    style={{ flex: 0.18, marginLeft: "2%" }}
-                                >
-
-                                    <Select
-                                        mode="multiple"
-                                        placeholder="Select Publishers"
-                                        onChange={handlePublisherChange}
-                                        value={selectedPublishers}
-                                        style={{ width: 300 }}
-                                    >
-                                        {publisherOptions.map(option => (
-                                            <Option key={option.value} value={option.value}>
-                                                {option.label}
-                                            </Option>
-                                        ))}
-                                    </Select>
-                                </Form.Item>
-
-                                <Form.Item
-                                    name="positions"
-                                    label={<span style={{ color: "#B4B4B4" }}>Positions</span>}
-                                    rules={[{ required: true, message: "Please select an option!" }]}
-                                    style={{ flex: 0.18, marginLeft: "2%" }}
-                                // style={{ marginRight: "10px" }}
-                                >
-                                    <Select
-                                        mode="multiple"
-                                        placeholder="Select Positions"
-                                        value={selectedPositions}
-                                        onChange={handlePositionChange}
-                                        style={{ width: 400 }}
-                                    >
-                                        {selectedPublishers && selectedPublishers.length > 0 ? (
-                                            getPositionOptions().map(position => (
-                                                <Option key={`${position.key}_${position.label}`} value={position.key}>
-                                                    {position.label}
-                                                </Option>
-                                            ))
-                                        ) : (
-                                            <Option value="">Empty</Option>
-                                        )}
-
-                                    </Select>
-                                </Form.Item>
-                                <Form.Item
-                                    name="device_platforms"
-                                    label={<span style={{ color: "#B4B4B4" }}>Device</span>}
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: "Please select an option!",
-                                        },
-                                    ]}
-                                    style={{ flex: 0.18, marginLeft: "2%" }}>
-                                    <Select
-                                        mode="multiple"
-                                        variant="filled"
-                                        allowClear
-                                        style={{ width: 200 }}
-                                        placeholder="Please select"
-                                        options={[
-                                            { value: "mobile", label: "Mobile" },
-                                            { value: "desktop", label: "Desktop" }
-                                        ]}
-                                    />
-                                </Form.Item>
-                            </div>
-                        </Panel>
-                        <Panel header="ADD LEVEL" key="3">
-                            <div style={{ display: "flex", justifyContent: "space-between" }}>
-                                <div style={{ flex: "70%", marginRight: "5%" }}>
-                                    <div style={{ display: 'flex', gap: '16px' }}>
-                                        <Form.Item
-                                            name="MediaContent"
-                                            label={<span style={{ color: "#B4B4B4" }}>Upload</span>}
-                                            rules={[
-                                                {
-                                                    required: true,
-                                                    message: "Please select Upload!",
-                                                },
-                                            ]}
-                                            style={{ flex: 1 }}
-                                        >
-                                            <Upload
-                                                beforeUpload={handleBeforeUpload}
-                                                onChange={handleChange}
-                                                maxCount={1}
-                                                accept="image/*, video/*"
-                                            >
-                                                <Button icon={<UploadOutlined />}>Select File</Button>
-                                            </Upload>
-                                        </Form.Item>
-                                        <Form.Item
-                                            name="page_id"
-                                            initialValue={pageid}
-                                            label={<span style={{ color: "#B4B4B4" }}>Page id</span>}
-                                            rules={[
-                                                {
-                                                    required: true,
-                                                    message: "Please select an option!",
-                                                },
-                                            ]}
-                                            style={{ flex: 3, marginLeft: "1%" }}
-                                        >
-                                            <Input style={{ width: "45%" }} />
-                                        </Form.Item>
-                                    </div>
+                                </div>
+                                <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "green" }}>Targeting</span>
+                                <div style={{ display: "flex" }}>
                                     <Form.Item
-                                        name="AddName"
-                                        label={<span style={{ color: "#B4B4B4" }}>Add name</span>}
+                                        name="countries"
+                                        label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Please select an option!",
+                                            },
+                                        ]}
+                                        style={{ flex: 0.12 }}>
+                                        <Select
+                                            variant="filled"
+
+                                            options={[
+                                                { value: "US", label: "United States" },
+                                                { value: "GB", label: "United Kingdom" },
+                                                { value: "AU", label: "Australia" },
+                                                { value: "IN", label: "India" },
+                                                { value: "AE", label: "United Arab Emirates" },
+                                            ]}
+                                        />
+                                    </Form.Item>
+                                    <Form.Item
+                                        name="Min_Age"
+                                        label={<span style={{ color: "#B4B4B4" }}>Min Age</span>}
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Please select an option!",
+                                            },
+                                        ]}
+                                        style={{ marginLeft: "2%" }}>
+                                        <Select
+                                            variant="filled"
+                                            options={[
+                                                { value: "18", label: "18" },
+                                                { value: "25", label: "25" },
+                                                { value: "35", label: "35" },
+                                                { value: "40", label: "40", disabled: true },
+                                            ]}
+                                        />
+                                    </Form.Item>
+                                    <Form.Item
+                                        name="Max_Age"
+                                        label={<span style={{ color: "#B4B4B4" }}>Max Age</span>}
                                         rules={[
                                             {
                                                 required: true,
@@ -1397,96 +1510,281 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
                                             },
                                         ]}
                                     >
-                                        <Input
-                                            style={{ width: "60%" }}
+                                        <Select
+                                            variant="filled"
+                                            options={[
+                                                { value: "20", label: "20" },
+                                                { value: "30", label: "30" },
+                                                { value: "65", label: "65+" },
+                                                { value: "80", label: "80", disabled: true },
+                                            ]}
                                         />
                                     </Form.Item>
                                     <Form.Item
-                                        label="Primary text"
-                                        name="message"
+                                        name="Gender"
+                                        label={<span style={{ color: "#B4B4B4" }}> Gender</span>}
                                         rules={[
                                             {
                                                 required: true,
-                                                message: "Please enter a message!",
+                                                message: "Please select an option!",
                                             },
                                         ]}
-                                        required
-                                        tooltip="This is a required field">
-                                        <TextArea
-                                            placeholder="Primary text"
-                                            autoSize={{ minRows: 2, maxRows: 10 }}
+                                        style={{ flex: 0.1, marginLeft: "2%" }}>
+                                        <Select
+                                            variant="filled"
+                                            options={[
+                                                { value: "0", label: "All" },
+                                                { value: "1", label: "Male" },
+                                                { value: "2", label: "Female" },
+                                            ]}
+                                        />
+                                    </Form.Item>
+                                    <Form.Item
+                                        name="Language"
+                                        label={<span style={{ color: "#B4B4B4" }}>Language</span>}
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Please select an option!",
+                                            },
+                                        ]}
+                                        style={{ flex: 0.18, marginLeft: "2%" }}>
+                                        <Select
+                                            showSearch
+                                            mode="multiple" // or "tags" if you want to allow selecting multiple options
+                                            value={DuplicatedampaignData?.adsetlevel?.locales}
+                                            placeholder="Select language"
+                                            optionFilterProp="children"
+                                        >
+                                            {localesdata.map(option => (
+                                                <Option key={option.key} value={option.key}>
+                                                    {option.name}
+                                                </Option>
+                                            ))}
+                                        </Select>
 
-                                        />
-                                    </Form.Item>
-
-                                    <Form.Item
-                                        label="Headline"
-                                        name="headline"
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message: "Please enter a Name!",
-                                            },
-                                        ]}
-                                        required
-                                        tooltip="This is a required field">
-                                        <TextArea
-                                            placeholder="Headline"
-                                            autoSize={{ minRows: 2, maxRows: 10 }}
-                                        />
-                                    </Form.Item>
-
-                                    <Form.Item
-                                        label="Description"
-                                        name="Description"
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message: "Please enter a Description!",
-                                            },
-                                        ]}
-                                        required
-                                        tooltip="This is a required field">
-                                        <TextArea
-                                            placeholder="Description"
-                                            autoSize={{ minRows: 2, maxRows: 10 }}
-                                        />
                                     </Form.Item>
                                     <Form.Item
-                                        label="Caption"
-                                        name="Caption"
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message: "Please enter a Caption!",
-                                            },
-                                        ]}
-                                        required
-                                        tooltip="This is a required field">
-                                        <TextArea
-                                            placeholder="Caption"
-                                            autoSize={{ minRows: 2, maxRows: 10 }}
-                                        />
-                                    </Form.Item>
-                                    <Form.Item
-                                        label="Website_URL"
-                                        name="Website_URL"
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message: "Please select Website_URL!",
-                                            },
-                                        ]}
-                                        required
-                                        tooltip="This is a required field"
+                                        name="publisher_platforms"
+                                        label={<span style={{ color: "#B4B4B4" }}>Platforms</span>}
+                                        rules={[{ required: true, message: "Please select an option!" }]}
+                                        // style={{ marginRight: "10px" }}
+                                        style={{ flex: 0.18, marginLeft: "2%" }}
                                     >
-                                        <TextArea
-                                            placeholder="Website_URL"
-                                            autoSize={{ minRows: 5, maxRows: 15 }}
 
-                                        />
+                                        <Select
+                                            mode="multiple"
+                                            placeholder="Select Publishers"
+                                            onChange={handlePublisherChange}
+                                            value={selectedPublishers}
+                                            style={{ width: 300 }}
+                                        >
+                                            {publisherOptions.map(option => (
+                                                <Option key={option.value} value={option.value}>
+                                                    {option.label}
+                                                </Option>
+                                            ))}
+                                        </Select>
+                                    </Form.Item>
+
+                                    <Form.Item
+                                        name="positions"
+                                        label={<span style={{ color: "#B4B4B4" }}>Positions</span>}
+                                        rules={[{ required: true, message: "Please select an option!" }]}
+                                        style={{ flex: 0.18, marginLeft: "2%" }}
+                                    // style={{ marginRight: "10px" }}
+                                    >
+                                        <Select
+                                            mode="multiple"
+                                            placeholder="Select Positions"
+                                            value={selectedPositions}
+                                            onChange={handlePositionChange}
+                                            style={{ width: 400 }}
+                                        >
+                                            {selectedPublishers && selectedPublishers.length > 0 ? (
+                                                getPositionOptions().map(position => (
+                                                    <Option key={`${position.key}_${position.label}`} value={position.key}>
+                                                        {position.label}
+                                                    </Option>
+                                                ))
+                                            ) : (
+                                                <Option value="">Empty</Option>
+                                            )}
+
+                                        </Select>
                                     </Form.Item>
                                     <Form.Item
+                                        name="device_platforms"
+                                        label={<span style={{ color: "#B4B4B4" }}>Device</span>}
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Please select an option!",
+                                            },
+                                        ]}
+                                        style={{ flex: 0.18, marginLeft: "2%" }}>
+                                        <Select
+                                            mode="multiple"
+                                            variant="filled"
+                                            allowClear
+                                            style={{ width: 200 }}
+                                            placeholder="Please select"
+                                            options={[
+                                                { value: "mobile", label: "Mobile" },
+                                                { value: "desktop", label: "Desktop" }
+                                            ]}
+                                        />
+                                    </Form.Item>
+                                </div>
+                            </Panel>
+                            <Panel header="ADD LEVEL" key="3">
+                                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                                    <div style={{ flex: "70%", marginRight: "5%" }}>
+                                        <div style={{ display: 'flex', gap: '16px' }}>
+                                            <Form.Item
+                                                name="MediaContent"
+                                                label={<span style={{ color: "#B4B4B4" }}>Upload</span>}
+                                                rules={[
+                                                    {
+                                                        required: true,
+                                                        message: "Please select Upload!",
+                                                    },
+                                                ]}
+                                                style={{ flex: 1 }}
+                                            >
+                                                <Upload
+                                                    beforeUpload={handleBeforeUpload}
+                                                    onChange={handleChange}
+                                                    multiple // Add this line to enable multiple file selection
+                                                    maxCount={10} // Adjust the max count as needed
+                                                    accept="image/*, video/*"
+                                                >
+                                                    <Button icon={<UploadOutlined />}>Select Files</Button>
+                                                </Upload>
+
+                                            </Form.Item>
+                                            <Form.Item
+                                                name="page_id"
+                                                initialValue={pageid}
+                                                label={<span style={{ color: "#B4B4B4" }}>Page id</span>}
+                                                rules={[
+                                                    {
+                                                        required: true,
+                                                        message: "Please select an option!",
+                                                    },
+                                                ]}
+                                                style={{ flex: 3, marginLeft: "1%" }}
+                                            >
+                                                <Input style={{ width: "45%" }} />
+                                            </Form.Item>
+                                        </div>
+                                        <Form.Item
+                                            name="AddName"
+                                            label={<span style={{ color: "#B4B4B4" }}>Add name</span>}
+                                            rules={[
+                                                {
+                                                    required: true,
+                                                    message: "Please select an option!",
+                                                },
+                                            ]}
+                                        >
+                                            <Input
+                                                style={{ width: "60%" }}
+                                                onChange={(e) => setAddName(e.target.value)}
+                                            />
+                                        </Form.Item>
+                                        <Form.Item
+                                            label="Primary text"
+                                            name="message"
+                                            rules={[
+                                                {
+                                                    required: true,
+                                                    message: "Please enter a message!",
+                                                },
+                                            ]}
+                                            required
+                                            tooltip="This is a required field">
+                                            <TextArea
+                                                placeholder="Primary text"
+                                                autoSize={{ minRows: 2, maxRows: 10 }}
+                                                onChange={(e) => setPrimaryText(e.target.value)}
+
+                                            />
+                                        </Form.Item>
+                                        <Form.Item
+                                            label="Caption"
+                                            name="Caption"
+                                            rules={[
+                                                {
+                                                    required: true,
+                                                    message: "Please enter a Caption!",
+                                                },
+                                            ]}
+                                            required
+                                            tooltip="This is a required field">
+                                            <TextArea
+                                                placeholder="Caption"
+                                                autoSize={{ minRows: 2, maxRows: 10 }}
+                                                onChange={(e) => setCaption(e.target.value)}
+                                            />
+                                        </Form.Item>
+
+                                        <Form.Item
+                                            label="Headline"
+                                            name="headline"
+                                            rules={[
+                                                {
+                                                    required: true,
+                                                    message: "Please enter a Name!",
+                                                },
+                                            ]}
+                                            required
+                                            tooltip="This is a required field">
+                                            <TextArea
+                                                placeholder="Headline"
+                                                autoSize={{ minRows: 2, maxRows: 10 }}
+                                                onChange={(e) => setHeadline(e.target.value)}
+                                            />
+                                        </Form.Item>
+
+                                        <Form.Item
+                                            label="Description"
+                                            name="Description"
+                                            rules={[
+                                                {
+                                                    required: true,
+                                                    message: "Please enter a Description!",
+                                                },
+                                            ]}
+                                            required
+                                            tooltip="This is a required field">
+                                            <TextArea
+                                                placeholder="Description"
+                                                autoSize={{ minRows: 2, maxRows: 10 }}
+                                                onChange={(e) => setDescription(e.target.value)}
+                                            />
+                                        </Form.Item>
+
+                                        <Form.Item
+                                            label="Website_URL"
+                                            name="Website_URL"
+                                            rules={[
+                                                {
+                                                    required: true,
+                                                    message: "Please select Website_URL!",
+                                                },
+                                            ]}
+                                            required
+                                            tooltip="This is a required field"
+                                        >
+                                            <TextArea
+                                                placeholder="Website_URL"
+                                                autoSize={{ minRows: 5, maxRows: 15 }}
+                                                onChange={(e) => setWebsiteURL(e.target.value)}
+
+                                            />
+                                        </Form.Item>
+                                        {/* <Form.Item
                                         label="URL Parameters"
                                         name="urlParameters"
                                         tooltip="This is a required field"
@@ -1495,68 +1793,188 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
                                             placeholder="URL Parameters"
                                             autoSize={{ minRows: 5, maxRows: 15 }}
                                         />
-                                    </Form.Item>
-                                </div>
-                                <div style={{ flex: "30%" }}>
-                                    {selectedFile ? (
-                                        <div className="container-ad-preview">
-                                            <div className="ad-preview">
-                                                <div className="ad-heading">
-                                                    <div className="img">
-                                                        <img
-                                                            src={URL.createObjectURL(selectedFile)}
-                                                            alt="page id"
-                                                            width="40"
-                                                            height="40"
-                                                        />
-                                                    </div>
-                                                    <div className="title">
-                                                        <div className="main">{"Facebook Page"}</div>
-                                                        <div className="sub">
-                                                            Sponsored <GlobalOutlined style={{ opacity: "0.6" }} />
+                                    </Form.Item> */}
+                                    </div>
+
+                                    <div style={{ flex: "30%" }}>
+                                        {selectedFiles && selectedFiles.length > 0 ? (
+                                            selectedFiles.map((file, index) => (
+                                                <div key={index} className="container-ad-preview">
+                                                    <div className="ad-preview">
+                                                        <div className="ad-heading">
+                                                            <div className="img">
+                                                                {file.type.startsWith('image/') ? (
+                                                                    <img
+                                                                        src={URL.createObjectURL(file)}
+                                                                        alt="page id"
+                                                                        width="40"
+                                                                        height="40"
+                                                                        style={{ objectFit: 'cover' }}
+                                                                    />
+                                                                ) : (
+                                                                    <video
+                                                                        src={URL.createObjectURL(file)}
+                                                                        alt="page id"
+                                                                        width="40"
+                                                                        height="30"
+                                                                        style={{ objectFit: 'cover' }}
+                                                                        muted // Muted to prevent sound on preview
+                                                                    />
+                                                                )}
+                                                            </div>
+
+                                                            <div className="title">
+                                                                <div className="main" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
+                                                                    {addName}
+                                                                </div>                                                            <div className="sub">
+                                                                    Sponsored <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                                </div>
+                                                            </div>
+                                                            <div className="close">
+                                                                <CloseOutlined style={{ fontSize: "20px" }} />
+                                                            </div>
+                                                            <div className="moreoptions">
+                                                                <MoreOutlined style={{ fontSize: "20px" }} />
+                                                            </div>
+                                                        </div>
+                                                        <div className="ad-desc" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
+                                                            {primaryText}
+                                                        </div>
+                                                        <div className="ad-image" style={{ width: '400px', height: '300px' }}>
+                                                            {file.type.startsWith('image/') ? (
+                                                                <img
+                                                                    src={URL.createObjectURL(file)}
+                                                                    alt="ad content"
+                                                                    style={{ width: '400px', height: '300px', objectFit: 'cover' }}
+                                                                />
+                                                            ) : (
+                                                                <video
+                                                                    controls
+                                                                    style={{ width: '400px', height: '300px', objectFit: 'cover' }}
+                                                                >
+                                                                    <source src={URL.createObjectURL(file)} type={file.type} />
+                                                                    Your browser does not support the video tag.
+                                                                </video>
+                                                            )}
+                                                        </div>
+
+                                                        <div className="ad-cta">
+                                                            <div className="details">
+                                                                <div className="link">{caption}</div>
+                                                                <div className="title">{headline}</div>
+                                                                <div className="desc">{description}</div>
+                                                            </div>
+                                                            <div className="ad-button">
+                                                                <button type="button">Learn More</button>
+                                                            </div>
+                                                        </div>
+                                                        <a href={websiteURL} target="_blank" rel="noopener noreferrer" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: '#0066cc', padding: '10px' }}>
+                                                            {websiteURL}
+                                                        </a>                                                <div className="icons">
+                                                            <div className="like">
+                                                                <LikeOutlined style={{ fontSize: "20px" }} />
+                                                                Like
+                                                            </div>
+                                                            <div className="comment">
+                                                                <CommentOutlined style={{ fontSize: "20px" }} />
+                                                                Comment
+                                                            </div>
+                                                            <div className="share">
+                                                                <ShareAltOutlined style={{ fontSize: "20px" }} />
+                                                                Share
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <div className="close">
-                                                        <CloseOutlined style={{ fontSize: "20px" }} />
-                                                    </div>
-                                                    <div className="moreoptions">
-                                                        <MoreOutlined style={{ fontSize: "20px" }} />
-                                                    </div>
                                                 </div>
-                                                <div className="ad-desc">{"adMessage"}</div>
-                                                <div className="ad-image">
-                                                    <img
-                                                        src={selectedFile && URL.createObjectURL(selectedFile)}
-                                                    />
-                                                </div>
-                                                <div className="ad-cta">
-                                                    <div className="details">
-                                                        <div className="link">{"adCaption"}</div>
-                                                        <div className="title">{"adName"}</div>
-                                                        <div className="desc">{"adDesc"}</div>
-                                                    </div>
-                                                    <div className="ad-button">
-                                                        <button type="button">Learn More</button>
-                                                    </div>
-                                                </div>
-                                                <div className="icons">
-                                                    <div className="like">
-                                                        <LikeOutlined style={{ fontSize: "20px" }} />
-                                                        Like
-                                                    </div>
-                                                    <div className="comment">
-                                                        <CommentOutlined style={{ fontSize: "20px" }} />
-                                                        Comment
-                                                    </div>
-                                                    <div className="share">
-                                                        <ShareAltOutlined style={{ fontSize: "20px" }} />
-                                                        Share
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ) :
-                                        (
+                                                // <div key={index} className="container-ad-preview">
+                                                //     <div className="ad-preview">
+                                                //         <div className="ad-heading">
+                                                //             <div className="img">
+                                                //                 {file.type.startsWith('image/') ? (
+                                                //                     <img
+                                                //                         src={URL.createObjectURL(file)}
+                                                //                         alt="page id"
+                                                //                         width="40"
+                                                //                         height="40"
+                                                //                         onLoad={(e) => URL.revokeObjectURL(e.target.src)} // Revoke URL after loading
+                                                //                     />
+                                                //                 ) : (
+                                                //                     <video
+                                                //                         width="40"
+                                                //                         height="30"
+                                                //                         muted // Ensures no sound plays in preview
+                                                //                         onLoadedData={(e) => URL.revokeObjectURL(e.target.src)} // Revoke URL after loading
+                                                //                         controls={false} // No controls for the small preview
+                                                //                     >
+                                                //                         <source src={URL.createObjectURL(file)} type={file.type} />
+                                                //                         Your browser does not support the video tag.
+                                                //                     </video>
+                                                //                 )}
+                                                //             </div>
+                                                //             <div className="title">
+                                                //                 <div className="main">{addName}</div>
+                                                //                 <div className="sub">
+                                                //                     Sponsored <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                //                 </div>
+                                                //             </div>
+                                                //             <div className="close">
+                                                //                 <CloseOutlined style={{ fontSize: "20px" }} />
+                                                //             </div>
+                                                //             <div className="moreoptions">
+                                                //                 <MoreOutlined style={{ fontSize: "20px" }} />
+                                                //             </div>
+                                                //         </div>
+                                                //         <div className="ad-desc">{primaryText}</div>
+                                                //         <div className="ad-image" style={{ width: '400px', height: '200px' }}>
+                                                //             {file.type.startsWith('image/') ? (
+                                                //                 <img
+                                                //                     src={URL.createObjectURL(file)}
+                                                //                     onLoad={(e) => URL.revokeObjectURL(e.target.src)} // Revoke URL after loading
+                                                //                     style={{ width: '400px', height: '200px', objectFit: 'cover' }}
+                                                //                     alt="ad content"
+                                                //                 />
+                                                //             ) : (
+                                                //                 <video
+                                                //                     style={{ width: '400px', height: '200px', objectFit: 'cover' }}
+                                                //                     controls
+                                                //                     onLoadedData={(e) => URL.revokeObjectURL(e.target.src)} // Revoke URL after loading
+                                                //                 >
+                                                //                     <source src={URL.createObjectURL(file)} type={file.type} />
+                                                //                     Your browser does not support the video tag.
+                                                //                 </video>
+                                                //             )}
+                                                //         </div>
+                                                //         <div className="ad-cta">
+                                                //             <div className="details">
+                                                //                 <div className="link">{caption}</div>
+                                                //                 <div className="title">{headline}</div>
+                                                //                 <div className="desc">{description}</div>
+                                                //             </div>
+                                                //             <div className="ad-button">
+                                                //                 <button type="button">Learn More</button>
+                                                //             </div>
+                                                //         </div>
+                                                //         <a href={websiteURL} target="_blank" rel="noopener noreferrer" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: '#0066cc', padding: '10px' }}>
+                                                //             {websiteURL}
+                                                //         </a>
+                                                //         <div className="icons">
+                                                //             <div className="like">
+                                                //                 <LikeOutlined style={{ fontSize: "20px" }} />
+                                                //                 Like
+                                                //             </div>
+                                                //             <div className="comment">
+                                                //                 <CommentOutlined style={{ fontSize: "20px" }} />
+                                                //                 Comment
+                                                //             </div>
+                                                //             <div className="share">
+                                                //                 <ShareAltOutlined style={{ fontSize: "20px" }} />
+                                                //                 Share
+                                                //             </div>
+                                                //         </div>
+                                                //     </div>
+                                                // </div>
+                                            ))
+                                        ) : (
                                             <div className="container-ad-preview">
                                                 <div className="ad-preview">
                                                     <div className="ad-heading">
@@ -1585,6 +2003,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
                                                     <div className="ad-image">
                                                         <img
                                                             src={initialValues?.filename}
+                                                            alt="ad content"
                                                         />
                                                     </div>
                                                     <div className="ad-cta">
@@ -1613,30 +2032,29 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
                                                     </div>
                                                 </div>
                                             </div>
-                                        )
-                                    }
+                                        )}
+                                    </div>
                                 </div>
 
-                            </div>
 
-
-                        </Panel>
-                    </Collapse>
-                    <Form.Item label=" ">
-                        {isFormComplete && (
-                            <Button type="primary" htmlType="submit" style={{ background: '#21c55d', minWidth: '200px' }}>
-                                Submit
-                            </Button>
-                        )}
-                    </Form.Item>
-                    <Modal
-                        title="Confirmation"
-                        open={isModalVisible}
-                        onOk={handleOk}
-                        onCancel={handleCancel}>
-                        <p>Are you sure you want to submit?</p>
-                    </Modal>
-                </Form>
+                            </Panel>
+                        </Collapse>
+                        <Form.Item label=" ">
+                            {isFormComplete && (
+                                <Button type="primary" htmlType="submit" style={{ background: '#21c55d', minWidth: '200px' }}>
+                                    Submit
+                                </Button>
+                            )}
+                        </Form.Item>
+                        <Modal
+                            title="Confirmation"
+                            open={isModalVisible}
+                            onOk={handleOk}
+                            onCancel={handleCancel}>
+                            <p>Are you sure you want to submit?</p>
+                        </Modal>
+                    </Form>
+                </Spin>
             ) : (
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
                     <Spin size="large" />
