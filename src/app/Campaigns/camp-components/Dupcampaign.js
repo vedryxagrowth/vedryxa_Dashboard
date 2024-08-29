@@ -811,6 +811,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
                     Bid_strategy: values.Bid_strategy,
                     Daily_amount: parseInt(values.Daily_amount) * 100,
                     Status: values.Status,
+                    access_token: imagehash.token
                 },
                 adsetlevel: {
                     AdsetName: values.AdsetName,
@@ -1800,7 +1801,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
                                         {selectedFiles && selectedFiles.length > 0 ? (
                                             selectedFiles.map((file, index) => (
                                                 <div key={index} className="container-ad-preview">
-                                                    <div className="ad-preview">
+                                                    <div className="ad-preview" style={{ width: "350px" }}>
                                                         <div className="ad-heading">
                                                             <div className="img">
                                                                 {file.type.startsWith('image/') ? (
@@ -1840,17 +1841,17 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
                                                         <div className="ad-desc" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
                                                             {primaryText}
                                                         </div>
-                                                        <div className="ad-image" style={{ width: '400px', height: '300px' }}>
+                                                        <div className="ad-image" style={{ width: '350px', height: '200px' }}>
                                                             {file.type.startsWith('image/') ? (
                                                                 <img
                                                                     src={URL.createObjectURL(file)}
                                                                     alt="ad content"
-                                                                    style={{ width: '400px', height: '300px', objectFit: 'cover' }}
+                                                                    style={{ width: '350px', height: '200px', objectFit: 'cover' }}
                                                                 />
                                                             ) : (
                                                                 <video
                                                                     controls
-                                                                    style={{ width: '400px', height: '300px', objectFit: 'cover' }}
+                                                                    style={{ width: '350px', height: '200px', objectFit: 'cover' }}
                                                                 >
                                                                     <source src={URL.createObjectURL(file)} type={file.type} />
                                                                     Your browser does not support the video tag.

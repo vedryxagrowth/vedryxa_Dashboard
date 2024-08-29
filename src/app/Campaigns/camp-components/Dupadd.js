@@ -704,7 +704,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders }) =
                                 //     </div>
                                 // </div>
                                 <div className="container-ad-preview">
-                                    <div className="ad-preview">
+                                    <div className="ad-preview" style={{ width: "350px" }}>
                                         <div className="ad-heading">
                                             <div className="img">
                                                 {selectedFile.type.startsWith('image/') ? (
@@ -744,17 +744,17 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders }) =
                                         <div className="ad-desc" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
                                             {primaryText}
                                         </div>
-                                        <div className="ad-image" style={{ width: '400px', height: '400px' }}>
+                                        <div className="ad-image" style={{ width: '300px', height: '300px' }}>
                                             {selectedFile.type.startsWith('image/') ? (
                                                 <img
                                                     src={URL.createObjectURL(selectedFile)}
                                                     alt="ad content"
-                                                    style={{ width: '400px', height: '400px', objectFit: 'cover' }}
+                                                    style={{ width: '300px', height: '200px', objectFit: 'cover' }}
                                                 />
                                             ) : (
                                                 <video
                                                     controls
-                                                    style={{ width: '400px', height: '400px', objectFit: 'cover' }}
+                                                    style={{ width: '300px', height: '200px', objectFit: 'cover' }}
                                                 >
                                                     <source src={URL.createObjectURL(selectedFile)} type={selectedFile.type} />
                                                     Your browser does not support the video tag.
@@ -792,7 +792,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders }) =
                                 </div>
                             ) :
                                 <div className="container-ad-preview">
-                                    <div className="ad-preview">
+                                    <div className="ad-preview" style={{ width: "350px" }}>
                                         <div className="ad-heading">
                                             <div className="filename" style={{ width: '40px', height: '40px' }}>
                                                 {initialValue.fileType === 'image' ? (
@@ -830,17 +830,17 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders }) =
                                             </div>
                                         </div>
                                         <div className="ad-desc">{"adMessage"}</div>
-                                        <div className="ad-image" style={{ width: '100%', height: '300px' }}>
+                                        <div className="ad-image" style={{ width: '350px', height: '200px' }}>
                                             {initialValue.fileType === 'image' ? (
                                                 <img
                                                     src={initialValue.filename}
                                                     alt="ad content"
-                                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                    style={{ width: '350px', height: '200px', objectFit: 'cover' }}
                                                 />
                                             ) : (
                                                 <video
                                                     controls
-                                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                    style={{ width: '350px', height: '200px', objectFit: 'cover' }}
                                                 >
                                                     <source src={initialValue.filename} type="video/mp4" />
                                                     Your browser does not support the video tag.
