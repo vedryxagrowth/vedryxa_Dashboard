@@ -259,7 +259,8 @@ const App = () => {
             const token = localStorage.getItem("token");
             console.log('Token:', token);
 
-            const response = await fetch(`https://www.testapi.adsgoat.in/api/status/${record?.identifier}`, {
+            // Update status on your backend
+            const backendResponse = await fetch(`https://www.testapi.adsgoat.in/api/status/${record?.identifier}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -268,23 +269,65 @@ const App = () => {
                 body: JSON.stringify({ Status: checked ? 'ACTIVE' : 'PAUSED' }),
             });
 
-            const responseData = await response.json();
-            console.log('Response status:', response.status);
-            console.log('Response data:', responseData);
+            const responseData = await backendResponse.json();
+            console.log('Backend response status:', backendResponse.status);
+            console.log('Backend response data:', responseData);
 
-            if (response.ok) {
-                message.success("Status updated successfully");
+            if (backendResponse.ok) {
+                // If campaignId is available, update the Facebook campaign status
+                if (record.campaignid) {
 
-                // Update the state to reflect the change in UI
-                setCampaignData(prevCampaigns =>
-                    prevCampaigns.map(campaign =>
-                        campaign.identifier === record.identifier
-                            ? { ...campaign, Status: checked ? 'ACTIVE' : 'PAUSED' }
-                            : campaign
-                    )
-                );
+                    try {
+                        const fbResponse = await axios.post(
+                            `https://graph.facebook.com/v20.0/${record.campaignid}`,
+                            null,
+                            {
+                                params: {
+                                    status: checked ? 'ACTIVE' : 'PAUSED',
+                                    access_token: record.access_token,
+                                },
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                }
+                            }
+                        );
+
+                        console.log('Facebook API response:', fbResponse.data);
+
+                        if (fbResponse.status === 200) {
+                            message.success("Status updated successfully");
+
+                            // Update the state to reflect the change in UI
+                            setCampaignData(prevCampaigns =>
+                                prevCampaigns.map(campaign =>
+                                    campaign.identifier === record.identifier
+                                        ? { ...campaign, Status: checked ? 'ACTIVE' : 'PAUSED' }
+                                        : campaign
+                                )
+                            );
+                        } else {
+                            console.error('Failed to update Facebook status:', fbResponse.data);
+                            message.error(`Failed to update Facebook status: ${fbResponse.data.error.message}`);
+                        }
+                    } catch (fbError) {
+                        console.error('Error updating Facebook status:', fbError);
+                        message.error(`Error updating Facebook status: ${fbError.response?.data?.error?.message || fbError.message}`);
+                    }
+                } else {
+                    // If no campaignId is available, only update the backend
+                    message.success("Status updated successfully on backend");
+
+                    // Update the state to reflect the change in UI
+                    setCampaignData(prevCampaigns =>
+                        prevCampaigns.map(campaign =>
+                            campaign.identifier === record.identifier
+                                ? { ...campaign, Status: checked ? 'ACTIVE' : 'PAUSED' }
+                                : campaign
+                        )
+                    );
+                }
             } else {
-                console.error('Failed to update status:', responseData);
+                console.error('Failed to update backend status:', responseData);
                 message.error(`Failed to update status: ${responseData.message || 'Unknown error'}`);
             }
         } catch (error) {
@@ -292,37 +335,7 @@ const App = () => {
             message.error("Error updating status");
         }
     };
-
-
-    // const onToggleStatus = async (record, checked) => {
-    //     try {
-    //         const response = await fetch(`https://www.testapi.adsgoat.in/api/status/${record?.identifier}`, {
-    //             method: 'PUT',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //                 'Authorization': localStorage.getItem("token"),
-    //             },
-    //             body: JSON.stringify({ Status: checked ? 'ACTIVE' : 'PAUSED' }),
-    //         });
-
-    //         if (response.ok) {
-    //             const data = await response.json();
-    //             console.log(data);
-    //             message.success("status confirmed");
-    //             await fetchData()
-    //             // setTimeout(() => {
-    //             //     window.location.reload();
-    //             // }, 2000);
-    //         } else {
-    //             console.error('Failed to update status');
-    //             // Handle failure
-    //         }
-    //     } catch (error) {
-    //         console.error('Error updating status:', error);
-    //         // Handle error
-    //     }
-    // };
-    const EditableField = ({ value, record, dataIndex, updateTableRow }) => {
+    const EditableField = ({ value, record, dataIndex, updateTableRow, changeRRefrst }) => {
         const [editing, setEditing] = useState(false);
         const [inputValue, setInputValue] = useState(value);
 
@@ -333,11 +346,13 @@ const App = () => {
         const handleEdit = () => {
             setEditing(true);
         };
+
         const handleSave = async () => {
             if (record && inputValue) {
                 try {
-                    const budgets = inputValue * 100; // Convert input value to the required format
+                    const budgets = inputValue * 100; // Convert input value to the required format (cents)
 
+                    // Step 1: Update the daily budget in your backend
                     const response = await fetch(`https://www.testapi.adsgoat.in/api/dailyBudget/${record?.identifier}`, {
                         method: 'PUT',
                         headers: {
@@ -348,17 +363,55 @@ const App = () => {
                     });
 
                     if (response.ok) {
-                        console.log("Daily amount updated successfully");
+                        console.log("Daily amount updated successfully in backend");
 
-                        // Update the table row data with the new daily amount
-                        updateTableRow({ ...record, Daily_amount: budgets });
+                        // Step 2: If campaignId is available, update the budget on Facebook
+                        if (record.campaignid) {
+                            try {
+                                const fbResponse = await axios.post(
+                                    `https://graph.facebook.com/v20.0/${record.campaignid}`,
+                                    null,
+                                    {
+                                        params: {
+                                            daily_budget: budgets,
+                                            access_token: record.access_token,
+                                        },
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                        }
+                                    }
+                                );
 
-                        message.success("Daily amount updated successfully");
+                                if (fbResponse.status === 200) {
+                                    console.log("Daily budget updated successfully on Facebook");
+                                    message.success("Daily amount updated successfully on both backend and Facebook");
 
-                        changeRRefrst()
+                                    // Update the table row data with the new daily amount
+                                    updateTableRow({ ...record, Daily_amount: budgets });
+
+                                    // Trigger a refresh or any other necessary updates
+                                    changeRRefrst();
+                                } else {
+                                    console.error("Failed to update daily amount on Facebook");
+                                    // message.error(`Failed to update daily amount on Facebook: ${fbResponse.data.error.message}`);
+                                }
+                            } catch (fbError) {
+                                console.error("Error updating daily amount on Facebook:", fbError);
+                                // message.error(`Error updating daily amount on Facebook: ${fbError.response?.data?.error?.message || fbError.message}`);
+                            }
+                        } else {
+                            // If no campaignId, just update the backend
+                            message.success("Daily amount updated successfully");
+
+                            // Update the table row data with the new daily amount
+                            updateTableRow({ ...record, Daily_amount: budgets });
+
+                            // Trigger a refresh or any other necessary updates
+                            changeRRefrst();
+                        }
                     } else {
-                        console.error("Failed to update daily amount");
-                        message.error("Failed to update daily amount");
+                        console.error("Failed to update daily amount in backend");
+                        message.error("Failed to update daily amount in backend");
                     }
                 } catch (error) {
                     console.error("Error updating daily amount:", error);
@@ -388,6 +441,114 @@ const App = () => {
             </div>
         );
     };
+    // const onToggleStatus = async (record, checked) => {
+    //     console.log(record, campaignData, "all datata")
+    //     try {
+    //         const token = localStorage.getItem("token");
+    //         console.log('Token:', token);
+
+    //         const response = await fetch(`https://www.testapi.adsgoat.in/api/status/${record?.identifier}`, {
+    //             method: 'PUT',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //                 'Authorization': token,
+    //             },
+    //             body: JSON.stringify({ Status: checked ? 'ACTIVE' : 'PAUSED' }),
+    //         });
+
+    //         const responseData = await response.json();
+    //         console.log('Response status:', response.status);
+    //         console.log('Response data:', responseData);
+
+    //         if (response.ok) {
+    //             message.success("Status updated successfully");
+
+    //             // Update the state to reflect the change in UI
+    //             setCampaignData(prevCampaigns =>
+    //                 prevCampaigns.map(campaign =>
+    //                     campaign.identifier === record.identifier
+    //                         ? { ...campaign, Status: checked ? 'ACTIVE' : 'PAUSED' }
+    //                         : campaign
+    //                 )
+    //             );
+    //         } else {
+    //             console.error('Failed to update status:', responseData);
+    //             message.error(`Failed to update status: ${responseData.message || 'Unknown error'}`);
+    //         }
+    //     } catch (error) {
+    //         console.error('Error updating status:', error);
+    //         message.error("Error updating status");
+    //     }
+    // };
+
+
+
+    // const EditableField = ({ value, record, dataIndex, updateTableRow }) => {
+    //     const [editing, setEditing] = useState(false);
+    //     const [inputValue, setInputValue] = useState(value);
+
+    //     const handleInputChange = (e) => {
+    //         setInputValue(e.target.value);
+    //     };
+
+    //     const handleEdit = () => {
+    //         setEditing(true);
+    //     };
+    //     const handleSave = async () => {
+    //         if (record && inputValue) {
+    //             try {
+    //                 const budgets = inputValue * 100; // Convert input value to the required format
+
+    //                 const response = await fetch(`https://www.testapi.adsgoat.in/api/dailyBudget/${record?.identifier}`, {
+    //                     method: 'PUT',
+    //                     headers: {
+    //                         'Content-Type': 'application/json',
+    //                         'Authorization': localStorage.getItem("token"),
+    //                     },
+    //                     body: JSON.stringify({ Daily_amount: budgets }),
+    //                 });
+
+    //                 if (response.ok) {
+    //                     console.log("Daily amount updated successfully");
+
+    //                     // Update the table row data with the new daily amount
+    //                     updateTableRow({ ...record, Daily_amount: budgets });
+
+    //                     message.success("Daily amount updated successfully");
+
+    //                     changeRRefrst()
+    //                 } else {
+    //                     console.error("Failed to update daily amount");
+    //                     message.error("Failed to update daily amount");
+    //                 }
+    //             } catch (error) {
+    //                 console.error("Error updating daily amount:", error);
+    //                 message.error("Error updating daily amount");
+    //             }
+    //         }
+
+    //         setEditing(false);
+    //     };
+
+    //     return (
+    //         <div>
+    //             {editing ? (
+    //                 <Input
+    //                     value={inputValue}
+    //                     onChange={handleInputChange}
+    //                     onPressEnter={handleSave}
+    //                     onBlur={handleSave}
+    //                     autoFocus
+    //                 />
+    //             ) : (
+    //                 <div onClick={handleEdit}>
+    //                     {value}
+    //                     <EditOutlined style={{ marginLeft: "5px", cursor: "pointer" }} />
+    //                 </div>
+    //             )}
+    //         </div>
+    //     );
+    // };
     const updateTablebudget = (updatedRecord) => {
         setCampaignData(prevCampaigns =>
             prevCampaigns.map(campaign =>
