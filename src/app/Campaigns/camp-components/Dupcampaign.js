@@ -815,6 +815,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
                 },
                 adsetlevel: {
                     AdsetName: values.AdsetName,
+                    Daily_amount: values.DailyAdd_amount ? parseInt(values.DailyAdd_amount) * 100 : null,
                     optimization_goal: values.optimization_goal,
                     billing_event: values.billing_event,
                     start_time: moment(values.DatePicker.$d).utc().format("YYYY-MM-DDTHH:mm:ssZ"),
@@ -1084,6 +1085,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
         Daily_amount: (DuplicatedampaignData?.camapaignlevel?.Daily_amount) / 100,
         Status: DuplicatedampaignData?.camapaignlevel?.Status,
         AdsetName: DuplicatedampaignData?.adsetlevel?.AdsetName,
+        DailyAdd_amount: DuplicatedampaignData?.adsetlevel?.Daily_amount ? (DuplicatedampaignData?.adsetlevel?.Daily_amount) / 100 : null,
         optimization_goal: DuplicatedampaignData?.adsetlevel?.optimization_goal,
         billing_event: DuplicatedampaignData?.adsetlevel?.billing_event,
         // start_time: DuplicatedampaignData?.adsetlevel?.start_time,
@@ -1230,12 +1232,6 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
                                     <Form.Item
                                         name="Daily_amount"
                                         label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message: "Please select an option!",
-                                            },
-                                        ]}
                                         style={{ flex: 0.1, marginLeft: "2%" }}>
                                         <Input
                                             type="number"
@@ -1391,6 +1387,16 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
                                         style={{ flex: 0.15, marginLeft: "2%" }}>
                                         <Input
                                             style={{ width: "100%" }}
+                                        />
+                                    </Form.Item>
+                                    <Form.Item
+                                        name="DailyAdd_amount"
+                                        label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
+                                        style={{ flex: 0.15, marginLeft: "2%" }}>
+                                        <Input style={{ width: "100%" }}
+                                            type="number"
+                                            placeholder="$"
+
                                         />
                                     </Form.Item>
                                     {(DuplicatedampaignData?.camapaignlevel?.Bid_strategy === "LOWEST_COST_WITH_BID_CAP") ? (

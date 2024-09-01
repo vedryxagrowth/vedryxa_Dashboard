@@ -892,6 +892,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis }) =>
                 },
                 adsetlevel: {
                     AdsetName: values.AdsetName,
+                    Daily_amount: values.DailyAdd_amount ? parseInt(values.DailyAdd_amount) * 100 : '',
                     optimization_goal: values.optimization_goal,
                     billing_event: values.billing_event,
                     start_time: moment(values.DatePicker.$d).utc().format("YYYY-MM-DDTHH:mm:ssZ"),
@@ -1092,12 +1093,6 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis }) =>
                                 <Form.Item
                                     name="Daily_amount"
                                     label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: "Please select an option!",
-                                        },
-                                    ]}
                                     style={{ flex: 0.1, marginLeft: "2%" }}>
                                     <Input
                                         type="number"
@@ -1125,338 +1120,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis }) =>
                                 </Form.Item>
                             </div>
                         </Panel>
-                        {/* <Panel header="ADSET LEVEL" key="2">
-                        <div style={{ display: "flex" }}>
-                            <Form.Item
-                                name="AdsetName"
-                                label={<span style={{ color: "#B4B4B4" }}>Adset name</span>}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: "Please select an option!",
-                                    },
-                                ]}
-                                style={{ flex: 0.25 }}>
-                                <Input
-                                    style={{ width: "100%" }}
-                                />
-                            </Form.Item>
-                            <Form.Item
-                                name="optimization_goal"
-                                label={<span style={{ color: "#B4B4B4" }}>Optimiz goal</span>}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: "Please select an option!",
-                                    },
-                                ]}
-                                style={{ flex: 0.1, marginLeft: "2%" }}>
-                                <Select
 
-                                    variant="filled"
-                                    options={[
-                                        { value: "OFFSITE_CONVERSIONS", label: "Conversions" },
-                                        { value: "LINK_CLICKS", label: "Clicks" },
-                                        { value: "REACH", label: "Reach" },
-                                        { value: "VALUE", label: "Value" }
-                                    ]}
-                                />
-                            </Form.Item>
-                            <Form.Item
-                                name="billing_event"
-                                label={<span style={{ color: "#B4B4B4" }}>Billing event</span>}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: "Please select an option!",
-                                    },
-                                ]}
-                                style={{ flex: 0.1, marginLeft: "2%" }}>
-                                <Select
-
-                                    variant="filled"
-                                    options={[
-                                        { value: "IMPRESSIONS", label: "Impressions" },
-                                        { value: "VALUE", label: "Value" }
-                                    ]}
-                                />
-                            </Form.Item>
-                            <Form.Item
-                                name="DatePicker"
-                                label={<span style={{ color: "#B4B4B4" }}>Start Time</span>}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: 'Please input!',
-                                    },
-                                ]}
-                                style={{ flex: 0.1, marginLeft: "2%" }}
-                                initialValue={currentDate}
-
-                            >
-                                <DatePicker />
-                            </Form.Item>
-                            <Form.Item
-                                name="action_source"
-                                label={<span style={{ color: "#B4B4B4" }}>Action source</span>}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: "Please select an option!",
-                                    },
-                                ]}
-                                style={{ flex: 0.1, marginLeft: "2%" }}>
-                                <Select
-
-                                    variant="filled"
-                                    options={[
-                                        { value: "website", label: "Website" },
-                                        { value: "email", label: "Email" },
-                                        { value: "app", label: "App" },
-                                        { value: "phone_call", label: "Phone Call" }
-                                    ]}
-                                />
-                            </Form.Item>
-                            <Form.Item
-                                name="custom_event_type"
-                                label={<span style={{ color: "#B4B4B4" }}>Event type</span>}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: "Please select an option!",
-                                    },
-                                ]}
-                                style={{ flex: 0.1, marginLeft: "2%" }}>
-                                <Select
-
-                                    variant="filled"
-                                    options={[
-                                        { value: "LEAD", label: "Lead" },
-                                        { value: "PURCHASE", label: "Purchase" },
-                                        { value: "SEARCH", label: "Search" },
-                                        { value: "CONTACT", label: "Contact" },
-                                    ]}
-                                />
-                            </Form.Item>
-                            <Form.Item
-                                name="pixel_id"
-                                initialValue={imagehash?.pixelID}
-                                label={<span style={{ color: "#B4B4B4" }}>Pixel id</span>}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: "Please select an option!",
-                                    },
-                                ]}
-                                style={{ flex: 0.15, marginLeft: "2%" }}>
-                                <Input
-                                    style={{ width: "100%" }}
-                                />
-                            </Form.Item>
-                            {showBidAmount && (
-                                <Form.Item
-                                    name="bid_amount"
-                                    label={<span style={{ color: "#B4B4B4" }}>Bid_amount</span>}
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: "Please enter a bid amount!",
-                                        },
-                                        {
-                                            validator: (_, value) =>
-                                                value && !isNaN(value) && parseFloat(value) > 0
-                                                    ? Promise.resolve()
-                                                    : Promise.reject(new Error("Please enter a valid float value!")),
-                                        },
-                                    ]}
-                                    style={{ flex: 0.1, marginLeft: "2%" }}>
-                                    <Input
-                                        type="number"
-                                        placeholder="$"
-                                        onKeyPress={(event) => {
-                                            const charCode = event.charCode;
-                                            const charStr = String.fromCharCode(charCode);
-                                            const regex = /^[0-9]*\.?[0-9]*$/;
-                                            if (!regex.test(charStr)) {
-                                                event.preventDefault();
-                                            }
-                                        }}
-                                    />
-                                </Form.Item>
-                            )}
-
-
-
-                        </div>
-                        <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "green" }}>Targeting</span>
-                        <div style={{ display: "flex" }}>
-                            <Form.Item
-                                name="countries"
-                                label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: "Please select an option!",
-                                    },
-                                ]}
-                                style={{ flex: 0.12 }}>
-                                <Select
-                                    variant="filled"
-
-                                    options={[
-                                        { value: "US", label: "United States" },
-                                        { value: "GB", label: "United Kingdom" },
-                                        { value: "AU", label: "Australia" },
-                                        { value: "IN", label: "India" },
-                                        { value: "AE", label: "United Arab Emirates" },
-                                    ]}
-                                />
-                            </Form.Item>
-                            <Form.Item
-                                name="Min_Age"
-                                label={<span style={{ color: "#B4B4B4" }}>Min Age</span>}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: "Please select an option!",
-                                    },
-                                ]}
-                                style={{ marginLeft: "2%" }}>
-                                <Select
-                                    variant="filled"
-                                    options={[
-                                        { value: "18", label: "18" },
-                                        { value: "25", label: "25" },
-                                        { value: "35", label: "35" },
-                                        { value: "40", label: "40", disabled: true },
-                                    ]}
-                                />
-                            </Form.Item>
-                            <Form.Item
-                                name="Max_Age"
-                                label={<span style={{ color: "#B4B4B4" }}>Max Age</span>}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: "Please select an option!",
-                                    },
-                                ]}
-                            >
-                                <Select
-                                    variant="filled"
-                                    options={[
-                                        { value: "20", label: "20" },
-                                        { value: "30", label: "30" },
-                                        { value: "65", label: "65+" },
-                                        { value: "80", label: "80", disabled: true },
-                                    ]}
-                                />
-                            </Form.Item>
-                            <Form.Item
-                                name="Gender"
-                                label={<span style={{ color: "#B4B4B4" }}> Gender</span>}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: "Please select an option!",
-                                    },
-                                ]}
-                                style={{ flex: 0.1, marginLeft: "2%" }}>
-                                <Select
-                                    variant="filled"
-                                    options={[
-                                        { value: "0", label: "All" },
-                                        { value: "1", label: "Male" },
-                                        { value: "2", label: "Female" },
-                                    ]}
-                                />
-                            </Form.Item>
-                            <Form.Item
-                                name="Language"
-                                label={<span style={{ color: "#B4B4B4" }}>Language</span>}
-                                rules={[{ required: true, message: "Please select an option!" }]}
-                                style={{ flex: 0.1, marginLeft: "2%" }}
-                            >
-                                <Select
-                                    mode="multiple"
-                                    placeholder="Select Language"
-                                    // onChange={handlePublisherChange}
-                                    // value={selectedPublishers}
-                                    style={{ width: 150 }}
-                                >
-                                    {localesdata.map(option => (
-                                        <Option key={option.key} value={option.key}>
-                                            {option.name}
-                                        </Option>
-                                    ))}
-                                </Select>
-                            </Form.Item>
-                            <Form.Item
-                                name="publisher_platforms"
-                                label={<span style={{ color: "#B4B4B4" }}>Platforms</span>}
-                                rules={[{ required: true, message: "Please select an option!" }]}
-                                style={{ flex: 0.1, marginLeft: "2%" }}
-                            >
-                                <Select
-                                    mode="multiple"
-                                    placeholder="Select Publishers"
-                                    onChange={handlePublisherChange}
-                                    value={selectedPublishers}
-                                    style={{ width: 300 }}
-                                >
-                                    {publisherOptions.map(option => (
-                                        <Option key={option.value} value={option.value}>
-                                            {option.label}
-                                        </Option>
-                                    ))}
-                                </Select>
-                            </Form.Item>
-
-                            <Form.Item
-                                name="positions"
-                                label={<span style={{ color: "#B4B4B4" }}>Positions</span>}
-                                rules={[{ required: true, message: "Please select an option!" }]}
-                                style={{ flex: 0.1, marginLeft: "2%" }}
-                            >
-                                <Select
-                                    mode="multiple"
-                                    placeholder="Select Positions"
-                                    value={selectedPositions}
-                                    onChange={handlePositionChange}
-                                    // disabled={selectedPublishers.length === 0}
-                                    style={{ width: 400 }}
-                                >
-                                    {selectedPublishers.length > 0 && getPositionOptions().map(position => (
-                                        <Option key={`${position.key}_${position.label}`} value={position.key}>
-                                            {position.label}
-                                        </Option>
-                                    ))}
-                                </Select>
-                            </Form.Item>
-                            <Form.Item
-                                name="device_platforms"
-                                label={<span style={{ color: "#B4B4B4" }}>Device</span>}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: "Please select an option!",
-                                    },
-                                ]}
-                                style={{ flex: 0.18, marginLeft: "2%" }}>
-                                <Select
-                                    mode="multiple"
-                                    variant="filled"
-                                    allowClear
-                                    style={{ width: '100%' }}
-                                    placeholder="Please select"
-                                    options={[
-                                        { value: "mobile", label: "Mobile" },
-                                        { value: "desktop", label: "Desktop" }
-                                    ]}
-                                />
-                            </Form.Item>
-                        </div>
-                    </Panel> */}
                         <Panel header="ADSET LEVEL" key="2">
                             <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
                                 <Form.Item
@@ -1577,6 +1241,15 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis }) =>
                                     style={{ flex: '1 1 200px' }}
                                 >
                                     <Input />
+                                </Form.Item>
+                                <Form.Item
+                                    name="DailyAdd_amount"
+                                    label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
+                                    style={{ flex: '1 1 200px' }}>
+                                    <Input
+                                        type="number"
+                                        placeholder="$"
+                                    />
                                 </Form.Item>
                                 {showBidAmount && (
                                     <Form.Item

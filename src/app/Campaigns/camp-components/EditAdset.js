@@ -537,6 +537,7 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
     AdsetName: editadsetlevel?.AdsetName,
     optimization_goal: editadsetlevel?.optimization_goal,
     billing_event: editadsetlevel?.billing_event,
+    DailyAdd_amount: editadsetlevel?.Daily_amount ? (editadsetlevel?.Daily_amount) / 100 : null,
     // start_time: editadsetlevel?.start_time,
     action_source: editadsetlevel?.action_source,
     custom_event_type: editadsetlevel?.custom_event_type,
@@ -556,6 +557,7 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
       const data1 = {
         adsetlevel: {
           AdsetName: values.AdsetName,
+          Daily_amount: parseInt(values.DailyAdd_amount) * 100,
           optimization_goal: values.optimization_goal,
           billing_event: values.billing_event,
           start_time: moment(values.DatePicker).utc().format("YYYY-MM-DDTHH:mm:ssZ"),
@@ -738,6 +740,48 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
             </Form.Item>
             {/* {showBidAmount && ( */}
             <Form.Item
+              name="DailyAdd_amount"
+              label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
+              style={{ flex: 0.15, marginLeft: "2%" }}>
+              <Input style={{ width: "100%" }}
+                type="number"
+                placeholder="$"
+
+              />
+            </Form.Item>
+            {initialValue.bid_amount > 0 && (
+              <Form.Item
+                name="bid_amount"
+                label={<span style={{ color: "#B4B4B4" }}>Bid_amount</span>}
+                rules={[
+                  {
+                    required: true,
+                    message: "Please enter a bid amount!",
+                  },
+                  {
+                    validator: (_, value) =>
+                      value && !isNaN(value) && parseFloat(value) > 0
+                        ? Promise.resolve()
+                        : Promise.reject(new Error("Please enter a valid float value!")),
+                  },
+                ]}
+                style={{ flex: 0.1, marginLeft: "2%" }}
+              >
+                <Input
+                  type="number"
+                  placeholder="$"
+                  onKeyPress={(event) => {
+                    const charCode = event.charCode;
+                    const charStr = String.fromCharCode(charCode);
+                    const regex = /^[0-9]*\.?[0-9]*$/;
+                    if (!regex.test(charStr)) {
+                      event.preventDefault();
+                    }
+                  }}
+                />
+              </Form.Item>
+            )}
+            {/* <Form.Item
               name="bid_amount"
               label={<span style={{ color: "#B4B4B4" }}>Bid_amount</span>}
               rules={[
@@ -765,7 +809,7 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
                   }
                 }}
               />
-            </Form.Item>
+            </Form.Item> */}
             {/* )} */}
 
 

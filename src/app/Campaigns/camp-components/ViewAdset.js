@@ -39,6 +39,7 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
 
     const initialValue = {
         AdsetName: viewadsetlevel?.AdsetName,
+        DailyAdd_amount: viewadsetlevel?.Daily_amount ? (viewadsetlevel?.Daily_amount) / 100 : null,
         optimization_goal: viewadsetlevel?.optimization_goal,
         billing_event: viewadsetlevel?.billing_event,
         action_source: viewadsetlevel?.action_source,
@@ -60,6 +61,16 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
             <Card style={{ width: "100%" }} className="editcard">
                 <Form form={form} layout="vertical" initialValues={initialValue}>
                     <div style={{ display: "flex" }}>
+                        <Form.Item
+                            name="DailyAdd_amount"
+                            label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
+                            style={{ flex: 0.15, marginLeft: "2%" }}>
+                            <Input disabled style={{ width: "100%" }}
+                                type="number"
+                                placeholder="$"
+
+                            />
+                        </Form.Item>
                         <Form.Item
                             name="AdsetName"
                             label={<span style={{ color: "#B4B4B4" }}>Adset name</span>}

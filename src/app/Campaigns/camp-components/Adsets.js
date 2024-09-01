@@ -29,7 +29,8 @@ import {
   Table,
   message,
   theme,
-  Select
+  Select,
+  Spin
 } from "antd";
 import axios from "axios";
 import moment from "moment-timezone";
@@ -55,13 +56,16 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst }) {
   const [campaignDetails, setCampaignDetails] = useState([]);
   const [ovrallcampdetal, setovrallcampdetal] = useState({});
   const [twoor, settwoor] = useState(false)
+  const [loading, setLoading] = useState(false);  // Add loading state
+
+
 
   const rerender = () => {
     settwoor((els) => !els)
   }
   var token = localStorage.getItem("token");
-  console.log(selectedRow, "selectedRow")
-  // console.log(campaignDetails, "campaignDetails")
+  // console.log(selectedRow, "selectedRow")
+  console.log(campaignDetails, "campaignDetails")
   // console.log(campaignDetails,"campaignDetails")
   // var id=selectedRow.id
 
@@ -77,6 +81,7 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst }) {
         setCampaignDetails(response?.data[0].adsetlevel);
       } catch (error) {
         console.error("Error fetching campaign details:", error);
+        setCampaignDetails([])
       }
     };
 
@@ -115,6 +120,135 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst }) {
     setviewadsetsDrawerVisible(true)
     // console.log(record)
   }
+  const EditableField = ({ value, record, dataIndex, updateTableRow, changeRRefrst }) => {
+    const [editing, setEditing] = useState(false);
+    const [inputValue, setInputValue] = useState(value);
+
+    const handleInputChange = (e) => {
+      setInputValue(e.target.value);
+    };
+
+    const handleEdit = () => {
+      setEditing(true);
+    };
+
+    const handleSave = async () => {
+      if (record && inputValue) {
+        setLoading(true);  // Start loading
+        try {
+          const budgets = inputValue * 100; // Convert input value to cents
+
+          // Step 1: Update the daily budget in your backend
+          const response = await fetch(`https://www.testapi.adsgoat.in/api/adsetdailyBudget/${selectedRow.identifier}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': localStorage.getItem("token"),
+            },
+            body: JSON.stringify({ Daily_amount: budgets }),
+          });
+
+          if (response.ok) {
+
+            console.log("Daily amount updated successfully in backend");
+
+            // Step 2: If campaignId is available, update the budget on Facebook
+            if (campaignDetails.Adsetid) {
+              try {
+                const fbResponse = await axios.post(
+                  `https://graph.facebook.com/v20.0/${campaignDetails.Adsetid}`,
+                  null,
+                  {
+                    params: {
+                      daily_budget: budgets,
+                      access_token: selectedRow.access_token,
+                    },
+                    headers: {
+                      'Content-Type': 'application/json',
+                    }
+                  }
+                );
+
+                if (fbResponse.status === 200) {
+                  console.log("Daily budget updated successfully on Facebook");
+                  message.success("Daily amount updated successfully on both backend and Facebook");
+
+                  // Update the table row data with the new daily amount
+                  updateTableRow({ ...record, Daily_amount: budgets });
+
+                  // Trigger a refresh or any other necessary updates
+                  rerender()
+                } else {
+                  console.error("Failed to update daily amount on Facebook");
+                  message.error(`Failed to update daily amount on Facebook: ${fbResponse.data.error.message}`);
+                }
+              } catch (fbError) {
+                console.error("Error updating daily amount on Facebook:", fbError);
+                message.error(`Error updating daily amount on Facebook: ${fbError.response?.data?.error?.message || fbError.message}`);
+              }
+            } else {
+              // If no campaignId, just update the backend
+              message.success("Daily amount updated successfully");
+
+              // Update the table row data with the new daily amount
+              updateTableRow({ ...record, Daily_amount: budgets });
+
+              // Trigger a refresh or any other necessary updates
+              rerender()
+            }
+          } else {
+            console.error("Failed to update daily amount in backend");
+            message.error("Failed to update daily amount in backend");
+          }
+        } catch (error) {
+          console.error("Error updating daily amount:", error);
+          message.error("Error updating daily amount");
+        } finally {
+          setLoading(false);  // End loading
+        }
+      }
+
+      setEditing(false);
+    };
+
+    return (
+      <div>
+        {editing ? (
+          <Input
+            value={inputValue}
+            onChange={handleInputChange}
+            onPressEnter={handleSave}
+            onBlur={handleSave}
+            autoFocus
+          />
+        ) : (
+          loading ? (
+            <Spin />
+          ) : (
+            value !== 0 && value !== '' && (
+              <div onClick={handleEdit}>
+                {value}
+                <EditOutlined style={{ marginLeft: "5px", cursor: "pointer" }} />
+              </div>
+            )
+          )
+        )}
+      </div>
+    );
+  };
+
+  const updateTablebudget = (updatedRecord) => {
+    setCampaignDetails(prevDetails =>
+      Array.isArray(prevDetails)
+        ? prevDetails.map(adset =>
+          adset.identifier === updatedRecord.identifier
+            ? { ...adset, Daily_amount: updatedRecord.Daily_amount }
+            : adset
+        )
+        : [] // If prevDetails is not an array, return an empty array (or handle this case appropriately)
+    );
+  };
+
 
   // console.log(selectedRow)
   const data = [campaignDetails]
@@ -141,6 +275,27 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst }) {
       ),
     },
     {
+      title: "Daily Amount",
+      dataIndex: "Daily_amount",
+      width: "5%",
+      render: (Daily_amount, record) => (
+        <>
+          {loading ? (
+            <Spin />
+          ) : (
+            record?.Daily_amount !== undefined && (
+              <EditableField
+                value={record.Daily_amount / 100}
+                record={record}
+                dataIndex="Daily_amount"
+                updateTableRow={updateTablebudget}
+              />
+            )
+          )}
+        </>
+      ),
+    },
+    {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
@@ -149,20 +304,6 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst }) {
       title: 'Action',
       key: 'action',
       render: (_, record) => (
-        // <Dropdown trigger={['click']} overlay={
-        //   <Menu>
-        //     <Menu.Item key="edit" onClick={() => handleadsetsEdit(record)}>
-        //       <EditOutlined />
-        //       Edit
-        //     </Menu.Item>
-        //     <Menu.Item key="view" onClick={() => handleadsetsView(record)}>
-        //       <EyeOutlined />
-        //       View
-        //     </Menu.Item>
-        //   </Menu>
-        // }>
-        //   <Button>...</Button>
-        // </Dropdown>
         <div style={{ display: 'flex', gap: '10px' }}>
           <Button onClick={() => handleadsetsEdit(record)} icon={<EditOutlined />}>
             Edit
@@ -201,6 +342,7 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst }) {
           // onChange={handleSearchChange}
           />
         </Col>
+
         <Col span={4}>
           {<span style={{ color: "#B4B4B4" }}>Status</span>}
           <Select

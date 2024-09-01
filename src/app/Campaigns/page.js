@@ -270,6 +270,13 @@ const App = () => {
             });
 
             const responseData = await backendResponse.json();
+            setCampaignData(prevCampaigns =>
+                prevCampaigns.map(campaign =>
+                    campaign.identifier === record.identifier
+                        ? { ...campaign, Status: checked ? 'ACTIVE' : 'PAUSED' }
+                        : campaign
+                )
+            );
             console.log('Backend response status:', backendResponse.status);
             console.log('Backend response data:', responseData);
 
@@ -433,12 +440,15 @@ const App = () => {
                         autoFocus
                     />
                 ) : (
-                    <div onClick={handleEdit}>
-                        {value}
-                        <EditOutlined style={{ marginLeft: "5px", cursor: "pointer" }} />
-                    </div>
+                    value !== 0 && value !== '' && (
+                        <div onClick={handleEdit}>
+                            {value}
+                            <EditOutlined style={{ marginLeft: "5px", cursor: "pointer" }} />
+                        </div>
+                    )
                 )}
             </div>
+
         );
     };
     // const onToggleStatus = async (record, checked) => {
