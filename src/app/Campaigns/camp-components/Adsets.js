@@ -30,7 +30,8 @@ import {
   message,
   theme,
   Select,
-  Spin
+  Spin,
+  Tooltip
 } from "antd";
 import axios from "axios";
 import moment from "moment-timezone";
@@ -291,6 +292,22 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst }) {
                 updateTableRow={updateTablebudget}
               />
             )
+          )}
+        </>
+      ),
+    },
+    {
+      title: "Error",
+      dataIndex: "error",
+      width: "10%",
+      render: (text, record) => (
+        <>
+          {record?.error ? (
+            <Tooltip title={record.error} placement="top" color="red">
+              <span style={{ color: 'red', cursor: 'pointer' }}>Error</span>
+            </Tooltip>
+          ) : (
+            <span>No Error</span>
           )}
         </>
       ),
