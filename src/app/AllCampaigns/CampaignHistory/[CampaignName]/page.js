@@ -7,11 +7,14 @@ import { Audio } from 'react-loader-spinner';
 import 'ag-grid-enterprise';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
-import {useTokenContext} from '../../../components/parent'
+import { useTokenContext } from '../../../components/parent'
+import { Line } from 'react-chartjs-2';
+import { Chart, registerables } from 'chart.js';
+Chart.register(...registerables);
 
-export default function CampaignAndAccount({params}){
-    
-    const {userdetails} = useTokenContext();
+export default function CampaignAndAccount({ params }) {
+
+    const { userdetails } = useTokenContext();
 
     console.log(userdetails, "userDetails");
 
@@ -21,6 +24,8 @@ export default function CampaignAndAccount({params}){
 
     const [isLoading, setLoading] = useState(true);
     const [dailyData, setdailyData] = useState([]);
+    const [chartData, setChartData] = useState({ dates: [], spend: [], revenue: [], profit: [], margin: [] });
+
     const paramsData = ((params.CampaignName).split("-"));
     const decodedString = decodeURIComponent(paramsData[0]);
     const accountNumber = paramsData[1];
@@ -44,205 +49,205 @@ export default function CampaignAndAccount({params}){
         DST: 'DSTDate'
     };
 
-    const getMargin = (params) =>{
+    const getMargin = (params) => {
         if (params.data !== undefined) {
-            const { revenue, spend} = params.data;
-            
+            const { revenue, spend } = params.data;
+
             if (revenue !== "0.00" || revenue !== undefined) {
-              const RPC = ((revenue - spend) / revenue)*100;
-              if(RPC === Infinity || isNaN(RPC) || RPC === -Infinity){
-                return `0%`;
-              }
-              return `${Math.round(RPC*100)/100}%`;
-              
+                const RPC = ((revenue - spend) / revenue) * 100;
+                if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
+                    return `0%`;
+                }
+                return `${Math.round(RPC * 100) / 100}%`;
+
             }
         }
         if (params.node.aggData !== undefined) {
-            const { revenue, spend} = params.node.aggData;
+            const { revenue, spend } = params.node.aggData;
             if (revenue !== "0.00" || revenue !== undefined) {
-                const RPC = ((revenue - spend) / revenue)*100;
-                if(RPC === Infinity || isNaN(RPC) || RPC === -Infinity){
-                  return `0%`;
+                const RPC = ((revenue - spend) / revenue) * 100;
+                if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
+                    return `0%`;
                 }
-                return `${Math.round(RPC*100)/100}%`;
-                
+                return `${Math.round(RPC * 100) / 100}%`;
+
             }
         }
-          
+
         return 0;
     }
 
     const getCpl = (params) => {
         if (params.data !== undefined) {
-          const { fbleads, spend } = params.data;
-          
-          if (fbleads !== 0) {
-            const CPL = spend / fbleads;
-            if(CPL === Infinity){
-                return 0;
+            const { fbleads, spend } = params.data;
+
+            if (fbleads !== 0) {
+                const CPL = spend / fbleads;
+                if (CPL === Infinity) {
+                    return 0;
+                }
+                return Number(CPL.toFixed(2));
+
             }
-            return Number(CPL.toFixed(2));
-            
-          }
         }
         if (params.node.aggData !== undefined) {
-          const { fbleads, spend } = params.node.aggData;
-          if (fbleads !== 0) {
-            const CPL = spend / fbleads;
-            return Number(CPL.toFixed(2));
-          }
+            const { fbleads, spend } = params.node.aggData;
+            if (fbleads !== 0) {
+                const CPL = spend / fbleads;
+                return Number(CPL.toFixed(2));
+            }
         }
-        
+
         return 0;
     };
 
     const getRpc = (params) => {
         if (params.data !== undefined) {
-            const { revenue, conversions} = params.data;
+            const { revenue, conversions } = params.data;
             if (conversions !== 0) {
-              const RPC = revenue / conversions;
-              if(RPC === Infinity || isNaN(RPC)){
-                  return 0;
-              }
-              return Number(RPC.toFixed(2));
-              
+                const RPC = revenue / conversions;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return Number(RPC.toFixed(2));
+
             }
         }
         if (params.node.aggData !== undefined) {
-            const { revenue, conversions} = params.node.aggData;
+            const { revenue, conversions } = params.node.aggData;
             if (conversions !== 0) {
-              const RPC = revenue / conversions;
-              return Number(RPC.toFixed(2));
+                const RPC = revenue / conversions;
+                return Number(RPC.toFixed(2));
             }
         }
-          
+
         return 0;
     }
 
-    const getCtr = (params) =>{
+    const getCtr = (params) => {
         if (params.data !== undefined) {
-            const { impressions, fbclicks} = params.data;
+            const { impressions, fbclicks } = params.data;
             if (impressions !== 0) {
-              const RPC = (fbclicks / impressions)*100;
-              if(RPC === Infinity || isNaN(RPC)){
-                  return 0;
-              }
-              return `${Number(RPC.toFixed(2))}%`;
-              
+                const RPC = (fbclicks / impressions) * 100;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return `${Number(RPC.toFixed(2))}%`;
+
             }
         }
         if (params.node.aggData !== undefined) {
-            const { impressions, fbclicks} = params.node.aggData;
+            const { impressions, fbclicks } = params.node.aggData;
             if (impressions !== 0) {
-              const RPC = (fbclicks / impressions)*100;
-              return `${Number(RPC.toFixed(2))}%`;
+                const RPC = (fbclicks / impressions) * 100;
+                return `${Number(RPC.toFixed(2))}%`;
             }
         }
-          
+
         return 0;
     }
 
-    const getDev = (params) =>{
+    const getDev = (params) => {
         const rpc = getRpc(params);
         if (params.data !== undefined) {
             const { fbleads } = params.data;
-            
+
             if (fbleads !== 0) {
-              const CPL = rpc * fbleads;
-              if(CPL === Infinity){
-                  return 0;
-              }
-              return CPL;
-              
+                const CPL = rpc * fbleads;
+                if (CPL === Infinity) {
+                    return 0;
+                }
+                return CPL;
+
             }
         }
         if (params.node.aggData !== undefined) {
             const { fbleads } = params.node.aggData;
             if (fbleads !== 0) {
-              const CPL = rpc * fbleads;
-              return CPL;
+                const CPL = rpc * fbleads;
+                return CPL;
             }
         }
-          
+
         return 0;
 
     }
 
-    const getFmargin = (params) =>{
+    const getFmargin = (params) => {
         const revenue = getDev(params);
         if (params.data !== undefined) {
             const { profit } = params.data;
             if (revenue !== 0) {
-              const RPC = (profit / revenue)*100;
-              if(RPC === Infinity || isNaN(RPC) || RPC === -Infinity){
-                  return 0;
-              }
-              return `${Number(RPC.toFixed(2))}%`;
-              
+                const RPC = (profit / revenue) * 100;
+                if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
+                    return 0;
+                }
+                return `${Number(RPC.toFixed(2))}%`;
+
             }
         }
         if (params.node.aggData !== undefined) {
             const { profit } = params.node.aggData;
             if (revenue !== 0) {
-              const RPC = (profit / revenue)*100;
-              return `${Number(RPC.toFixed(2))}%`;
+                const RPC = (profit / revenue) * 100;
+                return `${Number(RPC.toFixed(2))}%`;
             }
         }
-          
+
         return 0;
     }
-    
+
 
     const getNcpl = (params) => {
         if (params.data !== undefined) {
-            const { spend, conversions} = params.data;
+            const { spend, conversions } = params.data;
             if (conversions !== 0) {
-              const RPC = spend / conversions;
-              if(RPC === Infinity || isNaN(RPC)){
-                return 0;
-              }
-              return Number(RPC.toFixed(2));
-              
+                const RPC = spend / conversions;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return Number(RPC.toFixed(2));
+
             }
         }
         if (params.node.aggData !== undefined) {
-            const { spend, conversions} = params.node.aggData;
+            const { spend, conversions } = params.node.aggData;
             if (conversions !== 0) {
-              const RPC = spend / conversions;
-              return Number(RPC.toFixed(2));
+                const RPC = spend / conversions;
+                return Number(RPC.toFixed(2));
             }
         }
-          
+
         return 0;
     }
 
-    
 
-    const getROI = (params) =>{
+
+    const getROI = (params) => {
         if (params.data !== undefined) {
-            const { revenue, spend} = params.data;
-            
+            const { revenue, spend } = params.data;
+
             if (revenue !== "0.00" || revenue !== undefined) {
-              const RPC = ((revenue - spend) / spend)*100;
-              if(RPC === Infinity || isNaN(RPC) || RPC === -Infinity){
-                return `0%`;
-              }
-              return `${Math.round(RPC*100)/100}%`;
-              
+                const RPC = ((revenue - spend) / spend) * 100;
+                if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
+                    return `0%`;
+                }
+                return `${Math.round(RPC * 100) / 100}%`;
+
             }
         }
         if (params.node.aggData !== undefined) {
-            const { revenue, spend} = params.node.aggData;
+            const { revenue, spend } = params.node.aggData;
             if (revenue !== "0.00" || revenue !== undefined) {
-                const RPC = ((revenue - spend) / spend)*100;
-                if(RPC === Infinity || isNaN(RPC) || RPC === -Infinity){
-                  return `0%`;
+                const RPC = ((revenue - spend) / spend) * 100;
+                if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
+                    return `0%`;
                 }
-                return `${Math.round(RPC*100)/100}%`;
-                
+                return `${Math.round(RPC * 100) / 100}%`;
+
             }
         }
-          
+
         return 0;
     }
 
@@ -255,21 +260,21 @@ export default function CampaignAndAccount({params}){
     const getColumnDefs = (order) => {
         return order?.map(colKey => columnDefsObject[colKey]);
     };
-    
+
     const token = localStorage.getItem("token")
 
-    const functionCallForUserColumnStructure = async() => {
+    const functionCallForUserColumnStructure = async () => {
         const fetchData = await axios.get(`https://prodapis.adsgoat.in/api/singleUserData?email=${user}`);
         // const data = await fetchData.json();
         const mainData = fetchData.data;
         console.log(mainData.columnStructure, "columnStructure");
-        const filteredData = mainData.columnStructure.filter((each)=> each !== "fb-hour" && each !== "mnet-hour" && each !== "timezone" );
+        const filteredData = mainData.columnStructure.filter((each) => each !== "fb-hour" && each !== "mnet-hour" && each !== "timezone");
         console.log(filteredData);
         setColumnStructure(getColumnDefs(filteredData));
         // setRowStructure(mainData.rows); 
     }
 
-    const getHistoryData = async() => {
+    const getHistoryData = async () => {
         // const fetchData = await fetch(`http://localhost:8000/MnetCampaignDailyHistory?accountNumber=${accountNumber}&timezone=${timeZone}&campaignName=${decodedString}`);
         // const data = await fetchData.json();
         // const mainData = await data;
@@ -280,118 +285,157 @@ export default function CampaignAndAccount({params}){
         });
         // console.log(`https://prodapis.adsgoat.in/LiveAdsetHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`, "url");
         const url = `http://localhost:8000/MnetLiveCampaignHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}`
-        
+
         const mainData = fetchData.data;
         console.log(mainData);
         const specifiedTimeZone = selectTimezone[timeZone];
         // const sortedArray = mainData?.sort((a, b) => new Date(a[specifiedTimeZone]) - new Date(b[specifiedTimeZone]));
         // console.log(sortedArray, "sort");
-        const filteredData = mainData && mainData.length > 0 ? 
-        mainData.map(eachData=>{
-            const Revenue = eachData.estimated_revenue !== undefined ? (eachData.estimated_revenue) : 0;
-            const profit = Math.round((Revenue - eachData.spend)*100)/100;
-            const margin = Revenue !== 0 ? `${Math.round((((Revenue-eachData.spend)/eachData.estimated_revenue)*100)*100)/100}%`: '0%'
-            let rpc = eachData.conversions !== 0  ? (Math.round((Revenue/eachData.conversions)*100)/100): 0;
-            const revenue = ((eachData.estimated_revenue-eachData.spend)/(eachData.fbLeads * rpc))*100;
-            let fMargin = revenue !== 0  ? Math.round(((profit/revenue)*100)*100)/100 : 0;
-            const cpl = eachData.fbLeads !== 0 ? Math.round((eachData.spend/eachData.fbLeads)*100)/100 : 0;
-            let ncpl = eachData.conversions !== 0 ? Math.round((eachData.spend/eachData.conversions)*100)/100 : 0;
-            const roi = eachData.spend !== 0 ? `${Math.round((((Revenue - eachData.spend)/eachData.spend)*100)*100)/100}%` : '0%';
-            const ctr = eachData.impressions !== 0 ? `${Math.round(((eachData.fbClicks/eachData.impressions)*100)*100)/100}%` : '0%';
-            const mainRvenue = ((Math.round(Revenue*100)/100)).toString();
-            const conversions = eachData.conversions !== undefined && eachData.conversions !== null ? eachData.conversions : '0';
-            rpc = !isNaN(rpc) ? rpc : 0;
-            ncpl = !isNaN(ncpl) ? ncpl : 0;
-            fMargin = !isNaN(fMargin) ? `${fMargin}%`: '0%';
-            return(
-                {
-                    campaignName: eachData.campaign_name,
-                    date: eachData[specifiedTimeZone],
-                    adsetName: eachData.adsetName,
-                    spend:(eachData.spend).toString(),
-                    revenue: mainRvenue,
-                    profit: profit.toString(),
-                    margin: margin,
-                    rpc:rpc.toString(),
-                    cpl:cpl.toString(),
-                    ncpl:ncpl.toString(),
-                    roi: roi,
-                    cpc: (eachData.cpc).toString(),
-                    fbleads: (eachData.fbLeads).toString(),
-                    fbclicks: (eachData.fbClicks).toString(),
-                    impressions: (eachData.impressions).toString(),
-                    conversions: conversions.toString(),
-                    fmargin: fMargin,
-                    ctr: ctr,
-                    adsetId: eachData.adset_id,
-                    campaignId: eachData.campaign_id,
+        const filteredData = mainData && mainData.length > 0 ?
+            mainData.map(eachData => {
+                const Revenue = eachData.estimated_revenue !== undefined ? (eachData.estimated_revenue) : 0;
+                const profit = Math.round((Revenue - eachData.spend) * 100) / 100;
+                const margin = Revenue !== 0 ? `${Math.round((((Revenue - eachData.spend) / eachData.estimated_revenue) * 100) * 100) / 100}%` : '0%'
+                let rpc = eachData.conversions !== 0 ? (Math.round((Revenue / eachData.conversions) * 100) / 100) : 0;
+                const revenue = ((eachData.estimated_revenue - eachData.spend) / (eachData.fbLeads * rpc)) * 100;
+                let fMargin = revenue !== 0 ? Math.round(((profit / revenue) * 100) * 100) / 100 : 0;
+                const cpl = eachData.fbLeads !== 0 ? Math.round((eachData.spend / eachData.fbLeads) * 100) / 100 : 0;
+                let ncpl = eachData.conversions !== 0 ? Math.round((eachData.spend / eachData.conversions) * 100) / 100 : 0;
+                const roi = eachData.spend !== 0 ? `${Math.round((((Revenue - eachData.spend) / eachData.spend) * 100) * 100) / 100}%` : '0%';
+                const ctr = eachData.impressions !== 0 ? `${Math.round(((eachData.fbClicks / eachData.impressions) * 100) * 100) / 100}%` : '0%';
+                const mainRvenue = ((Math.round(Revenue * 100) / 100)).toString();
+                const conversions = eachData.conversions !== undefined && eachData.conversions !== null ? eachData.conversions : '0';
+                rpc = !isNaN(rpc) ? rpc : 0;
+                ncpl = !isNaN(ncpl) ? ncpl : 0;
+                fMargin = !isNaN(fMargin) ? `${fMargin}%` : '0%';
+                return (
+                    {
+                        campaignName: eachData.campaign_name,
+                        date: eachData[specifiedTimeZone],
+                        adsetName: eachData.adsetName,
+                        spend: (eachData.spend).toString(),
+                        revenue: mainRvenue,
+                        profit: profit.toString(),
+                        margin: margin,
+                        rpc: rpc.toString(),
+                        cpl: cpl.toString(),
+                        ncpl: ncpl.toString(),
+                        roi: roi,
+                        cpc: (eachData.cpc).toString(),
+                        fbleads: (eachData.fbLeads).toString(),
+                        fbclicks: (eachData.fbClicks).toString(),
+                        impressions: (eachData.impressions).toString(),
+                        conversions: conversions.toString(),
+                        fmargin: fMargin,
+                        ctr: ctr,
+                        adsetId: eachData.adset_id,
+                        campaignId: eachData.campaign_id,
 
 
-                }
-            )
-        })
-        : null;
+                    }
+                )
+            })
+            : null;
         setdailyData(filteredData);
         setLoading(false);
+        const dates = filteredData.map(d => d.date);
+        const spend = filteredData.map(d => d.spend);
+        const revenue = filteredData.map(d => d.revenue);
+        const profit = filteredData.map(d => d.profit);
+        const rpc = filteredData.map(d => d.rpc);
+        const cpl = filteredData.map(d => d.cpl);
+
+        const margin = filteredData.map(d => parseFloat(d.margin));
+
+        setChartData({ dates, spend, revenue, profit, margin, rpc, cpl });
     }
 
-    useEffect(()=>{
-        if(user !== undefined){
-            const functionCall = async()=>{
+    useEffect(() => {
+        if (user !== undefined) {
+            const functionCall = async () => {
                 await functionCallForUserColumnStructure();
                 await getHistoryData();
             }
             functionCall();
         }
-    },[user]);
+    }, [user]);
+    const pinnedBottomRowData = [
+        {
+            campaignName: 'Total',
+            spend: dailyData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0),
+            revenue: dailyData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0),
+            profit: dailyData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0),
+            margin: `${(dailyData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / dailyData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)}%`,
+            rpc: dailyData.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / dailyData.length,
+            cpl: dailyData.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / dailyData.length,
+            ncpl: dailyData.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / dailyData.length,
+            fbleads: dailyData.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0),
+            conversions: dailyData.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0),
+            fmargin: `${(dailyData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / dailyData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)}%`,
+            roi: `${(dailyData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - dailyData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / dailyData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100}%`,
+            cpc: dailyData.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / dailyData.length,
+            fbclicks: dailyData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0),
+            impressions: dailyData.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0),
+            ctr: `${(dailyData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / dailyData.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)}%`
+        }
+    ];
+
+
 
     const columnDefsObject = {
-        campaignname: {headerName:'CampaignName', field:'campaignName',
-                // rowGroup: true,
-                // filter: true,
-                // hide: true,
-                // resizable: true,
-                // enableRowGroup: true,
-                // groupDisplayType: 'group',
-                width: 400,
-            },
-        date:{ headerName: 'Date', field: 'date', width: 120, sort: 'asc' },
-        spend:{ headerName: 'Spend', field: 'spend', width: 120,
-                aggFunc: agFunc, 
-                valueFormatter: params => params.value ? Math.round(params.value*100)/100 : '',
-            },
-        revenue:{ headerName: 'Revenue', field: 'revenue', width: 120,
-                aggFunc: agFunc,
-                valueFormatter: params => params.value ? Math.round(params.value*100)/100 : '', 
+        campaignname: {
+            headerName: 'CampaignName', field: 'campaignName',
+            // rowGroup: true,
+            // filter: true,
+            // hide: true,
+            // resizable: true,
+            // enableRowGroup: true,
+            // groupDisplayType: 'group',
+            width: 400,
         },
-        profit:{ headerName: 'Profit', field: 'profit', width: 120, cellClassRules:{
+        date: { headerName: 'Date', field: 'date', width: 120, sort: 'asc' },
+        spend: {
+            headerName: 'Spend', field: 'spend', width: 120,
+            aggFunc: agFunc,
+            valueFormatter: params => params.value ? Math.round(params.value * 100) / 100 : '',
+        },
+        revenue: {
+            headerName: 'Revenue', field: 'revenue', width: 120,
+            aggFunc: agFunc,
+            valueFormatter: params => params.value ? Math.round(params.value * 100) / 100 : '',
+        },
+        profit: {
+            headerName: 'Profit', field: 'profit', width: 120, cellClassRules: {
                 'font-red': p => p.value < 0
-                },
-                aggFunc: agFunc,
-                valueFormatter: params => params.value ? Math.round(params.value*100)/100 : '',
+            },
+            aggFunc: agFunc,
+            valueFormatter: params => params.value ? Math.round(params.value * 100) / 100 : '',
         },
-        margin: { headerName: 'Margin', field: 'margin', valueGetter: getMargin, width: 120
-                
-        },
-        rpc:{ headerName: 'Rpc', field: 'rpc', valueGetter: getRpc, width: 120},
-        cpl:{ headerName: 'Cpl', field: 'cpl', valueGetter: getCpl, width: 120},
-        ncpl:{ headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl, width: 120 },
-        fbleads:{ headerName: 'FbLeads', field: 'fbleads', width: 120, aggFunc: agFunc,   },
-        conversions:{ headerName: 'Conversions', field: 'conversions', width: 120, aggFunc: agFunc,   },
-        fmargin:{ headerName: 'Fmargin', field: 'fmargin', valueGetter: getFmargin},
-        roi:{ headerName: 'ROI', field: 'roi', valueGetter: getROI, width: 120},
-        cpc: { headerName: 'cpc', width: 120, field: 'cpc',
-                aggFunc: (params) => {
-                    const sum = params.values.reduce((sum, value) => sum + parseFloat(value), 0);
-                    return sum / params.values.length;
-                },
-                valueFormatter: params => params.value !== undefined ? Math.round(params.value*100)/100 : '',
+        margin: {
+            headerName: 'Margin', field: 'margin', valueGetter: getMargin, width: 120
 
         },
-        fbclicks: { headerName: 'FbClicks', field: 'fbclicks', width: 120, aggFunc: agFunc,  },
-        impressions: { headerName: 'Impressions', field: 'impressions', width: 120, aggFunc: agFunc,   },
-        ctr: { headerName: 'Ctr', field: 'ctr', valueGetter: getCtr},
-        adsetname: { headerName: 'AdsetName', field: 'adsetName',
+        rpc: { headerName: 'Rpc', field: 'rpc', valueGetter: getRpc, width: 120 },
+        cpl: { headerName: 'Cpl', field: 'cpl', valueGetter: getCpl, width: 120 },
+        ncpl: { headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl, width: 120 },
+        fbleads: { headerName: 'FbLeads', field: 'fbleads', width: 120, aggFunc: agFunc, },
+        conversions: { headerName: 'Conversions', field: 'conversions', width: 120, aggFunc: agFunc, },
+        fmargin: { headerName: 'Fmargin', field: 'fmargin', valueGetter: getFmargin },
+        roi: { headerName: 'ROI', field: 'roi', valueGetter: getROI, width: 120 },
+        cpc: {
+            headerName: 'cpc', width: 120, field: 'cpc',
+            aggFunc: (params) => {
+                const sum = params.values.reduce((sum, value) => sum + parseFloat(value), 0);
+                return sum / params.values.length;
+            },
+            valueFormatter: params => params.value !== undefined ? Math.round(params.value * 100) / 100 : '',
+
+        },
+        fbclicks: { headerName: 'FbClicks', field: 'fbclicks', width: 120, aggFunc: agFunc, },
+        impressions: { headerName: 'Impressions', field: 'impressions', width: 120, aggFunc: agFunc, },
+        ctr: { headerName: 'Ctr', field: 'ctr', valueGetter: getCtr },
+        adsetname: {
+            headerName: 'AdsetName', field: 'adsetName',
             // resizeble: true,
             // sortable: true,
             width: 500,
@@ -404,58 +448,181 @@ export default function CampaignAndAccount({params}){
             // autoHeight: true, 
         },
         adsetid: { headerName: 'AdsetId', field: 'adsetId' },
-        campaignid: {headerName: 'CampaignId', field: 'campaignId'}
+        campaignid: { headerName: 'CampaignId', field: 'campaignId' }
     };
 
-    return(
+    return (
         <div>
             {/* <h1>{params.campaignAndAccount}hi</h1> */}
+            <div style={{ height: '400px', width: "99%", marginBottom: '10px' }}> {/* Container with fixed height */}
+                <Line
+                    data={{
+                        labels: chartData.dates,
+                        datasets: [
+                            {
+                                label: 'Spend',
+                                data: chartData.spend,
+                                borderColor: 'rgba(75, 192, 192, 1)',        // Teal
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',   // Light Teal
+                                fill: true,
+                                hidden: true
+                            },
+                            {
+                                label: 'Revenue',
+                                data: chartData.revenue,
+                                borderColor: 'rgba(54, 162, 235, 1)',        // Blue
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',   // Light Blue
+                                fill: true,
+                                hidden: true
+
+                            },
+                            {
+                                label: 'RPC',
+                                data: chartData.rpc,
+                                borderColor: 'rgba(255, 99, 132, 1)',        // Red
+                                backgroundColor: 'rgba(255, 99, 132, 0.2)',   // Light Red
+                                fill: true,
+                                hidden: true
+
+                            },
+                            {
+                                label: 'CPL',
+                                data: chartData.cpl,
+                                borderColor: 'rgba(255, 159, 64, 1)',        // Orange
+                                backgroundColor: 'rgba(255, 159, 64, 0.2)',   // Light Orange
+                                fill: true,
+                                hidden: true
+
+                            },
+                            {
+                                label: 'Profit',
+                                data: chartData.profit,
+                                borderColor: 'rgba(255, 206, 86, 1)',        // Yellow
+                                backgroundColor: 'rgba(255, 206, 86, 0.2)',   // Light Yellow
+                                fill: true,
+
+                            },
+                            {
+                                label: 'Margin',
+                                data: chartData.margin,
+                                borderColor: 'rgba(153, 102, 255, 1)',       // Purple
+                                backgroundColor: 'rgba(153, 102, 255, 0.2)',  // Light Purple
+                                fill: true,
+                                hidden: true
+
+                            }
+                        ],
+
+                    }}
+                    options={{
+                        responsive: true,
+                        maintainAspectRatio: false, // Allow the chart to take the full height of its container
+                        scales: {
+                            x: {
+                                ticks: {
+                                    // autoSkip: false,
+                                    // maxRotation: 0, // Keep labels horizontal
+                                    padding: 30, // Increase padding between labels and the axis
+                                },
+                            },
+                            y: {
+                                beginAtZero: true, // Ensure the y-axis starts at zero
+                            },
+                        },
+                    }}
+                    height={350} // Set the height of the chart
+                />
+            </div>
+            <div style={{ display: 'flex', width: '100%', marginLeft: '2%' }}>
+                {/* Top 5 Dates with RPC */}
+                <div style={{ width: '20%' }}>
+                    <h3>Top 5 Dates with RPC</h3>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                            <tr>
+                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Date</th>
+                                <th style={{ border: '1px solid #ddd', padding: '2px' }}>RPC</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {chartData.dates
+                                .map((date, index) => ({
+                                    date: date.split(" ")[0], // Get the date part only
+                                    rpc: chartData.rpc[index],
+                                }))
+                                .sort((a, b) => b.rpc - a.rpc) // Sort by RPC descending
+                                .slice(0, 5) // Take top 5 dates
+                                .map((item, index) => (
+                                    <tr key={index}>
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.date}</td>
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.rpc}</td>
+                                    </tr>
+                                ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Top 5 Dates with Margin */}
+                <div style={{ marginLeft: "1%", width: '20%' }}>
+                    <h3>Top 5 Dates with Margin</h3>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                            <tr>
+                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Date</th>
+                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Margin</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {chartData.dates
+                                .map((date, index) => ({
+                                    date: date.split(" ")[0], // Get the date part only
+                                    margin: chartData.margin[index],
+                                }))
+                                .sort((a, b) => b.margin - a.margin) // Sort by Margin descending
+                                .slice(0, 5) // Take top 5 dates
+                                .map((item, index) => (
+                                    <tr key={index}>
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.date}</td>
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.margin}</td>
+                                    </tr>
+                                ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             {isLoading === true ? (
                 <div className="loader-container ag-container">
                     <div className="ag-grid-Loader">
                         <Audio
-                        height="80"
-                        width="80"
-                        radius="9"
-                        color="green"
-                        ariaLabel="loading"
-                        wrapperStyle
-                        wrapperClass
+                            height="80"
+                            width="80"
+                            radius="9"
+                            color="green"
+                            ariaLabel="loading"
+                            wrapperStyle
+                            wrapperClass
                         />
                     </div>
                 </div>
             ) : dailyData?.length > 0 ? (
-                <div className="ag-theme-alpine ag-container" >
+                <div className="ag-theme-alpine ag-container"  >
                     <AgGridReact
                         rowData={dailyData}
                         columnDefs={columnDefs}
-                        grandTotalRow = "bottom"
-                        // onCellClicked={onCellClicked}
-                        // height={520}
-                        // pagination={true}
-                        // paginationPageSize={30}
-                        // paginationPageSizeSelector={[10,20,30]}
-                        groupDisplayType='multipleColumns'
-                        suppressAggFuncInHeader={true}
-                        groupSuppressBlankHeader ={true}
-                        groupIncludeTotalFooter ={true}
+                        pinnedBottomRowData={pinnedBottomRowData} // Add this line to pin the total row at the bottom
+                        getRowStyle={params => {
+                            if (params.node.rowPinned) {
+                                return {
+                                    fontWeight: 'bold',
+                                    backgroundColor: '#f4f4f4' // Highlight the footer row
+                                };
+                            }
+                            return null;
+                        }}
+                        // getRowClass={params => params.node.rowPinned ? 'sticky-footer' : ''}
+                        // groupIncludeTotalFooter={true}
                         rowGroupPanelShow='always'
-                        groupIncludeFooter={true}
-                        // autoGroupColumnDef={autoGroupColumnDef}
-                        // statusBar={{
-                        //     statusPanels: [
-                        //       {
-                        //         statusPanel: 'agTotalAndFilteredRowCountComponent',
-                        //         align: 'left',
-                        //       },
-                        //       {
-                        //         statusPanel: 'agAggregationComponent',
-                        //         statusPanelParams: {
-                        //           aggFuncs: ['sum', 'avg'],
-                        //         },
-                        //       },
-                        //     ],
-                        // }}
+                    // groupIncludeFooter={true}
                     />
                 </div>
             ) : null}

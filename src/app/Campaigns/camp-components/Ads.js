@@ -185,12 +185,23 @@ export default function Createads({ selectedRow }) {
         </Space>
       ),
     },
-    // {
-    //   title: "Delete",
-    //   render: (record) => (
-    //     <Button onClick={() => handleadsdelete(record)}>delete</Button>
-    //   )
-    // }
+    {
+      title: "Error",
+      dataIndex: "error",
+      width: "10%",
+      render: (text, record) => (
+        <>
+          {record?.error ? (
+            <Tooltip title={record.error} placement="top" color="red">
+              <span style={{ color: 'red', cursor: 'pointer' }}>Error</span>
+            </Tooltip>
+          ) : (
+            <span>No Error</span>
+          )}
+        </>
+      ),
+    },
+
   ];
   return (
     <>
@@ -204,9 +215,6 @@ export default function Createads({ selectedRow }) {
           <Button type="primary" onClick={createnewads} style={{ marginRight: '10px' }}>
             Create Ads
           </Button>
-          {/* <Button type="primary" onClick={showDrawer} style={{ marginLeft: '10px' }}>
-    Create Campaign
-  </Button> */}
         </div>
 
       </Flex>

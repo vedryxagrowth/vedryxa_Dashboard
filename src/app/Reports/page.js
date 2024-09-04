@@ -10,9 +10,9 @@ import axios from 'axios';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
 // import { Select } from 'antd';
-import { Carousel, Input, Button, Pagination, Row, Col, Typography, Result, Modal, message  } from 'antd';
+import { Carousel, Input, Button, Pagination, Row, Col, Typography, Result, Modal, message } from 'antd';
 // import 'antd/dist/reset.css';
-import { CommentOutlined, CustomerServiceOutlined, MenuOutlined, InfoCircleOutlined, DownloadOutlined, SearchOutlined, ArrowLeftOutlined, ArrowRightOutlined, SmileOutlined, ReloadOutlined,CopyOutlined, StarOutlined, StarFilled, EditOutlined } from '@ant-design/icons';
+import { CommentOutlined, CustomerServiceOutlined, MenuOutlined, InfoCircleOutlined, DownloadOutlined, SearchOutlined, ArrowLeftOutlined, ArrowRightOutlined, SmileOutlined, ReloadOutlined, CopyOutlined, StarOutlined, StarFilled, EditOutlined } from '@ant-design/icons';
 import { FloatButton, Tooltip } from 'antd';
 import Draggable from 'react-draggable';
 // import FormControl from '@mui/material/FormControl';
@@ -261,16 +261,16 @@ const MyTablePage = () => {
         setIsModalOpen(true);
     };
 
-    
+
 
     const handleOk = () => {
         if (!newColumnName || !formula) {
             message.error('Please fill in all fields.');
             return;
         }
-    
+
         const lowerCaseFormula = formula.toLowerCase();
-    
+
         try {
             // Define the new column definition
             const newColumnDef = {
@@ -282,19 +282,19 @@ const MyTablePage = () => {
                         const originalKeys = Object.keys(params.data);
                         const sanitizedKeys = originalKeys.map(key => key.replace(/[^a-zA-Z_$0-9]/g, '_'));
                         const values = Object.values(params.data);
-    
+
                         // Log the sanitized keys
                         console.log('Original Keys:', originalKeys);
                         console.log('Sanitized Keys:', sanitizedKeys);
-    
+
                         const keyMapping = {};
                         sanitizedKeys.forEach((key, index) => {
                             keyMapping[key] = originalKeys[index];
                         });
-    
+
                         // Constructing the function safely using sanitized keys
                         const func = new Function(...sanitizedKeys, `return ${lowerCaseFormula}`);
-    
+
                         // Map the values back to their original keys for function execution
                         const mappedValues = sanitizedKeys.map(key => params.data[keyMapping[key]]);
                         return func(...mappedValues);
@@ -310,15 +310,15 @@ const MyTablePage = () => {
                     try {
                         // Extract all the values in the group for this column
                         const values = params.values;
-    
+
                         // Log the values to be aggregated
                         console.log('Values to aggregate:', values);
-    
+
                         // Define how you want to aggregate these values.
                         // Example: You might want to sum them, average them, etc.
                         // Here, we'll sum the values for demonstration purposes.
                         const sum = values.reduce((acc, value) => acc + (value || 0), 0);
-    
+
                         return sum; // Replace with other aggregation logic if needed
                     } catch (error) {
                         console.error('Error in aggregation function:', error);
@@ -328,12 +328,12 @@ const MyTablePage = () => {
                 cellStyle: { backgroundColor: 'skyblue' },
                 headerCellStyle: { backgroundColor: 'skyblue', color: 'black' }
             };
-    
+
             // Update the column definitions
             setColumnDefs((prevDefs) => [...prevDefs, newColumnDef]);
             columnDefs1.current = [...columnDefs1.current, newColumnDef];
             columnDefs2.current = [...columnDefs2.current, newColumnDef];
-    
+
             // Common function to update data
             const updateData = (prevData) => {
                 return prevData.map((row) => {
@@ -343,12 +343,12 @@ const MyTablePage = () => {
                         const sanitizedKeys = originalKeys.map(key => key.replace(/[^a-zA-Z_$0-9]/g, '_'));
                         const values = Object.values(row);
                         console.log(values, "values1");
-    
+
                         const keyMapping = {};
                         sanitizedKeys.forEach((key, index) => {
                             keyMapping[key] = originalKeys[index];
                         });
-    
+
                         const func = new Function(...sanitizedKeys, `return ${lowerCaseFormula}`);
                         const mappedValues = sanitizedKeys.map(key => row[keyMapping[key]]);
                         updatedRow[newColumnName.toLowerCase()] = func(...mappedValues);
@@ -359,12 +359,12 @@ const MyTablePage = () => {
                     return updatedRow;
                 });
             };
-    
+
             // Update data with the new column
             setRowData((prevData) => updateData(prevData));
             setdailyData((prevData) => updateData(prevData));
             setCampaignData((prevData) => updateData(prevData));
-    
+
         } catch (error) {
             console.error('Error adding column:', error);
         }
@@ -372,14 +372,14 @@ const MyTablePage = () => {
         setFormula('');
         setIsModalOpen(false);
     };
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
     const handleCancel = () => {
         setIsModalOpen(false);
     };
@@ -401,7 +401,7 @@ const MyTablePage = () => {
     // };
     const getMainMenuItems = (params) => {
         const defaultItems = params.defaultItems.slice();
-        
+
         // Find and override the "Reset Columns" option
         const resetColumnsItemIndex = defaultItems.findIndex(item => item === 'resetColumns');
         if (resetColumnsItemIndex > -1) {
@@ -425,7 +425,7 @@ const MyTablePage = () => {
                 cssClasses: ['custom-new-item'], // Assign a custom class for skyblue background
             });
         }
-    
+
         return defaultItems;
     };
 
@@ -799,7 +799,7 @@ const MyTablePage = () => {
 
     const CopyableCell = ({ value }) => {
         const [tooltipText, setTooltipText] = useState("Copy to clipboard");
-    
+
         const copyToClipboard = () => {
             navigator.clipboard.writeText(value).then(() => {
                 setTooltipText("Copied!");
@@ -808,7 +808,7 @@ const MyTablePage = () => {
                 alert('Failed to copy!');
             });
         };
-    
+
         return (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                 <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flexGrow: 1 }}>
@@ -823,19 +823,19 @@ const MyTablePage = () => {
             </div>
         );
     };
-    
+
     const campaignNameRenderer = (params) => {
         const cell = document.createElement('div');
         ReactDOM.render(<CopyableCell value={params.value} />, cell);
         return cell;
     };
-    
+
 
     // const handleAddColumn = () => {
     //     if (newColumnName && formula) {
     //         // Convert the formula to lowercase
     //         const lowerCaseFormula = formula.toLowerCase();
-    
+
     //         // Add new column definition
     //         const newColumnDef = {
     //             headerName: newColumnName,
@@ -852,9 +852,9 @@ const MyTablePage = () => {
     //                 }
     //             }
     //         };
-    
+
     //         setColumnDefs((prevDefs) => [...prevDefs, newColumnDef]);
-    
+
     //         // Update row data with new column values
     //         setRowData((prevData) =>
     //             prevData.map((row) => ({
@@ -869,13 +869,13 @@ const MyTablePage = () => {
     //                 })()
     //             }))
     //         );
-    
+
     //         // Clear input fields
     //         setNewColumnName('');
     //         setFormula('');
     //     }
     // };
-    
+
 
     const columnDefsObject = {
         campaignname: {
@@ -1229,7 +1229,7 @@ const MyTablePage = () => {
 
     const columnDefsObject1 = {
         campaignname: {
-            headerName: 'CampaignName', 
+            headerName: 'CampaignName',
             field: 'campaignname',
             resizable: true,
             sortable: true,
@@ -1247,7 +1247,7 @@ const MyTablePage = () => {
             },
             cellRenderer: campaignNameRenderer,
         },
-        
+
         adsetname: {
             headerName: 'AdsetName', field: 'adsetname',
             // resizeble: true,
@@ -1340,7 +1340,7 @@ const MyTablePage = () => {
         ncpl: { headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter' },
         fmargin: { headerName: 'Fmargin(%)', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: true },
         roi: { headerName: 'ROI(%)', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: 'Profit/Spend', filter: true, },
-        adsetid: { headerName: 'AdsetId', field: 'adsetid', sortable: true, filter: "agTextColumnFilter",hide: false },
+        adsetid: { headerName: 'AdsetId', field: 'adsetid', sortable: true, filter: "agTextColumnFilter", hide: false },
         campaignid: { headerName: 'CampaignId', field: 'campaignid', sortable: true, filter: "agTextColumnFilter", },
         timezone: { headerName: 'TimeZone', field: 'timezone', sortable: true, hide: true, filter: "agTextColumnFilter", },
     };
@@ -2036,9 +2036,9 @@ const MyTablePage = () => {
                 // const count = params.node.allChildrenCount; // Get the count of children
                 const firstColumnValue = params.node.key;  // This should give you the campaign name
                 const valueWithCount = `${firstColumnValue}`;
-    
+
                 const [tooltipText, setTooltipText] = useState("Click to Copy");
-    
+
                 const copyToClipboard = () => {
                     navigator.clipboard.writeText(firstColumnValue)
                         .then(() => {
@@ -2052,12 +2052,12 @@ const MyTablePage = () => {
 
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                        <StarOutlined/>
-                        <EditOutlined style={{marginLeft:'10px'}}/>
+                        <StarOutlined />
+                        <EditOutlined style={{ marginLeft: '10px' }} />
                         <Tooltip title={tooltipText}>
                             <CopyOutlined
                                 onClick={copyToClipboard}
-                                style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight:'10px' }}
+                                style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight: '10px' }}
                             />
                         </Tooltip>
                         <span
@@ -2128,13 +2128,13 @@ const MyTablePage = () => {
                 if (params.node.footer) {
                     return 'Total'; // Custom footer label
                 }
-    
+
                 // Get the group key or value (campaign name in this case)
                 const firstColumnValue = params.node.key;  // This should give you the campaign name
                 const valueWithCount = `${firstColumnValue}`;
-    
+
                 const [tooltipText, setTooltipText] = useState("Click to Copy");
-    
+
                 const copyToClipboard = () => {
                     navigator.clipboard.writeText(firstColumnValue)
                         .then(() => {
@@ -2145,15 +2145,15 @@ const MyTablePage = () => {
                             console.error('Failed to copy to clipboard');
                         });
                 };
-    
+
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                        <StarOutlined/>
-                        <EditOutlined style={{marginLeft:'10px'}} />
+                        <StarOutlined />
+                        <EditOutlined style={{ marginLeft: '10px' }} />
                         <Tooltip title={tooltipText}>
                             <CopyOutlined
                                 onClick={copyToClipboard}
-                                style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight:'10px' }}
+                                style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight: '10px' }}
                             />
                         </Tooltip>
                         <span
@@ -2165,15 +2165,15 @@ const MyTablePage = () => {
                         >
                             {valueWithCount}
                         </span>
-                        
+
                     </div>
                 );
             }
         }
     };
-    
-    
-    
+
+
+
 
     const autoGroupColumnDef2 = {
         headerName: 'CampaignName',
@@ -2188,9 +2188,9 @@ const MyTablePage = () => {
                 // const count = params.node.allChildrenCount; // Get the count of children
                 const firstColumnValue = params.node.key;  // This should give you the campaign name
                 const valueWithCount = `${firstColumnValue}`;
-    
+
                 const [tooltipText, setTooltipText] = useState("Click to Copy");
-    
+
                 const copyToClipboard = () => {
                     navigator.clipboard.writeText(firstColumnValue)
                         .then(() => {
@@ -2204,12 +2204,12 @@ const MyTablePage = () => {
 
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                        <StarOutlined/>
-                        <EditOutlined style={{marginLeft:'10px'}} />
+                        <StarOutlined />
+                        <EditOutlined style={{ marginLeft: '10px' }} />
                         <Tooltip title={tooltipText}>
                             <CopyOutlined
                                 onClick={copyToClipboard}
-                                style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight:'10px' }}
+                                style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight: '10px' }}
                             />
                         </Tooltip>
                         <span
@@ -2221,9 +2221,9 @@ const MyTablePage = () => {
                         >
                             {valueWithCount}
                         </span>
-                        
+
                     </div>
-                    
+
                 );
             }
         }
@@ -2247,7 +2247,7 @@ const MyTablePage = () => {
         const newFieldOrder = fieldOrder.filter(item => item !== 'ag-Grid-AutoColumn-campaignname' && item !== 'ag-Grid-AutoColumn' && columnStructure.includes(item));
         localStorage.setItem('columnState', JSON.stringify(newFieldOrder));
         updatingColumnsStructure(newFieldOrder);
-        console.log(`Updating columns structure for grid: ${gridId}`); 
+        console.log(`Updating columns structure for grid: ${gridId}`);
     };
 
     const debouncedHandleColumnMove = useCallback(debounce((params, gridId) => handleColumnMove(params, gridId), 600), []);
@@ -2457,15 +2457,15 @@ const MyTablePage = () => {
             value: [dayjs().add(-90, 'd'), dayjs()],
         },
         {
-          label: 'This Month',
-          value: [dayjs().startOf('month'), dayjs()],
+            label: 'This Month',
+            value: [dayjs().startOf('month'), dayjs()],
         },
         {
-          label: 'Last Month',
-          value: [
-            dayjs().subtract(1, 'month').startOf('month'),
-            dayjs().subtract(1, 'month').endOf('month'),
-          ],
+            label: 'Last Month',
+            value: [
+                dayjs().subtract(1, 'month').startOf('month'),
+                dayjs().subtract(1, 'month').endOf('month'),
+            ],
         },
     ];
 
@@ -2478,7 +2478,7 @@ const MyTablePage = () => {
     // console.log(campaignData, "campaignData");
 
     const refreshGrid = (gridRef) => {
-        
+
         setLoading(true);
         if (gridRef.current) {
             const gridApi = gridRef.current.api;
@@ -2530,7 +2530,7 @@ const MyTablePage = () => {
             setCampaignData([]); // Temporarily clear the data
             setTimeout(() => setCampaignData(newCampaignData.current), 0); // Reset the data
             setTimeout(() => setLoading2(false), 1500);
-            
+
             // Force refresh the grid cells and redraw the rows
             gridApi.refreshCells({ force: true });
             gridApi.redrawRows();
@@ -2545,12 +2545,12 @@ const MyTablePage = () => {
         refreshGrid2(gridRef2); // Refresh gridRef2
     };
 
-    
-    
+
+
 
     const GroupCellRenderer = (props) => {
         const [tooltipText, setTooltipText] = useState("Copy to clipboard");
-    
+
         const copyToClipboard = () => {
             navigator.clipboard.writeText(props.node.key).then(() => {
                 setTooltipText("Copied!");
@@ -2558,11 +2558,11 @@ const MyTablePage = () => {
             }).catch(() => {
                 alert('Failed to copy!');
             });
-    };
+        };
 
-    
 
-    
+
+
         return (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                 <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flexGrow: 1 }}>
@@ -2578,7 +2578,7 @@ const MyTablePage = () => {
         );
     };
 
-    
+
     return (
         <div className='reports-container'>
             {/* className='select-container' */}
@@ -2648,8 +2648,8 @@ const MyTablePage = () => {
                 </Row>
             </Space>
             <div >
-                <Row style={{ padding: '10px',paddingRight: '30px', display:'flex', justifyContent: 'flex-end', alignItems:'center'}}>
-                    <Col style={{marginRight:'15px'}}>
+                <Row style={{ padding: '10px', paddingRight: '30px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                    <Col style={{ marginRight: '15px' }}>
                         {/* {isSearching ? (
                             <Row gutter={8}>
                                 <Col>
@@ -2675,25 +2675,25 @@ const MyTablePage = () => {
                             />
                         )} */}
                         <Row gutter={8}>
-                                <Col>
-                                    <Input
-                                        placeholder="Search here"
-                                        // autoFocus
-                                        value={inputValue}
-                                        onChange={handleChangeInput}
-                                        onBlur={handleBlur}
-                                        style={{ width: '100%', borderRadius: '5px' }}
-                                    />
-                                </Col>
-                                <Col>
-                                    <Button icon={<SearchOutlined />} />
-                                </Col>
-                                
+                            <Col>
+                                <Input
+                                    placeholder="Search here"
+                                    // autoFocus
+                                    value={inputValue}
+                                    onChange={handleChangeInput}
+                                    onBlur={handleBlur}
+                                    style={{ width: '100%', borderRadius: '5px' }}
+                                />
+                            </Col>
+                            <Col>
+                                <Button icon={<SearchOutlined />} />
+                            </Col>
+
                         </Row>
                     </Col>
                     <Col>
                         <Tooltip title="Click to Refresh Tables">
-                            <Button type="primary" icon={<ReloadOutlined />}  onClick={onClickRefresh}/>
+                            <Button type="primary" icon={<ReloadOutlined />} onClick={onClickRefresh} />
                         </Tooltip>
                     </Col>
                 </Row>
@@ -2766,7 +2766,7 @@ const MyTablePage = () => {
                                         groupDisplayType='multipleColumns'
                                         // rowGroupPanelShow='always'
                                         onFilterChanged={onFilterChanged} // Use the custom filter handler
-                                        const onFirstDataRendered = {(params) => {
+                                        const onFirstDataRendered={(params) => {
                                             params.api.forEachNode(node => {
                                                 if (node.rowPinned === 'bottom') { // Assuming the total footer is pinned to the bottom
                                                     node.columnApi.getAllDisplayedColumns().forEach(col => {
@@ -2779,20 +2779,20 @@ const MyTablePage = () => {
                                                 }
                                             });
                                         }}
-                                        
-                                       
+
+
                                         getMainMenuItems={getMainMenuItems}
                                     />
 
                                 </div>
                             ) : <div>
                                 {startDate !== endDate ? <Result
-                                    icon={<SmileOutlined  />}
+                                    icon={<SmileOutlined />}
                                     title={`No LiveData for ${account} from ${startDate} to ${endDate}`}
-                                    // extra={<Button type="primary">Next</Button>}
-                                />: <Result
-                                icon={<SmileOutlined  />}
-                                title={`No LiveData for ${account} to ${startDate}`}
+                                // extra={<Button type="primary">Next</Button>}
+                                /> : <Result
+                                    icon={<SmileOutlined />}
+                                    title={`No LiveData for ${account} to ${startDate}`}
                                 // extra={<Button type="primary">Next</Button>}
                                 />}
                             </div>}
@@ -2838,9 +2838,9 @@ const MyTablePage = () => {
                                             </Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
-                                        <Tooltip title="Export to CSV">
-                                            <Button type="primary" icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef1)} />
-                                        </Tooltip>
+                                            <Tooltip title="Export to CSV">
+                                                <Button type="primary" icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef1)} />
+                                            </Tooltip>
                                         </Col>
                                     </Row>
                                     <AgGridReact
@@ -2863,16 +2863,16 @@ const MyTablePage = () => {
                                     />
                                 </div>
                             ) : <div>
-                                    {startDate !== endDate ? <Result
-                                    icon={<SmileOutlined  />}
+                                {startDate !== endDate ? <Result
+                                    icon={<SmileOutlined />}
                                     title={`No DailyData for ${account} from ${startDate} to ${endDate}`}
-                                    // extra={<Button type="primary">Next</Button>}
-                                    />: <Result
-                                    icon={<SmileOutlined  />}
+                                // extra={<Button type="primary">Next</Button>}
+                                /> : <Result
+                                    icon={<SmileOutlined />}
                                     title={`No DailyData for ${account} to ${startDate}`}
-                                    // extra={<Button type="primary">Next</Button>}
-                                    />}
-                                </div>}
+                                // extra={<Button type="primary">Next</Button>}
+                                />}
+                            </div>}
                         </div>
                     </div>
                     <div>
@@ -2895,9 +2895,9 @@ const MyTablePage = () => {
                                 <div className="ag-theme-alpine ag-container">
                                     <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap' }}>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
-                                            <Space align="center" className='daily-contaier' style={{width:'150px'}}>
+                                            <Space align="center" className='daily-contaier' style={{ width: '150px' }}>
                                                 <div class="blinking-circle-3"></div>
-                                                <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600', width:'100px' }}>Campaigns</Text>
+                                                <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600', width: '100px' }}>Campaigns</Text>
                                             </Space>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
@@ -2920,9 +2920,9 @@ const MyTablePage = () => {
                                             </Tooltip>
                                         </Col>
                                     </Row>
-                                    
 
-                                    <div style={{height: '90%'}}>
+
+                                    <div style={{ height: '90%' }}>
                                         <AgGridReact
                                             ref={gridRef2}
                                             rowData={campaignData.filter((each) => each.campaignname.includes(inputValue))}
@@ -2962,17 +2962,17 @@ const MyTablePage = () => {
                                     </div>
                                 </div>
                             ) : <div>
-                            <div>
-                                {startDate !== endDate ? <Result
-                                    icon={<SmileOutlined  />}
-                                    title={`No CampaignData for ${account} from ${startDate} to ${endDate}`}
+                                <div>
+                                    {startDate !== endDate ? <Result
+                                        icon={<SmileOutlined />}
+                                        title={`No CampaignData for ${account} from ${startDate} to ${endDate}`}
                                     // extra={<Button type="primary">Next</Button>}
-                                />: <Result
-                                icon={<SmileOutlined  />}
-                                title={`No CampaignData for ${account} to ${startDate}`}
-                                // extra={<Button type="primary">Next</Button>}
-                                />}
-                            </div>
+                                    /> : <Result
+                                        icon={<SmileOutlined />}
+                                        title={`No CampaignData for ${account} to ${startDate}`}
+                                    // extra={<Button type="primary">Next</Button>}
+                                    />}
+                                </div>
                             </div>}
 
                         </div>
@@ -3009,16 +3009,16 @@ const MyTablePage = () => {
                 </FloatButton.Group>
             </Draggable>
 
-            <Modal 
-                title="Basic Modal" 
-                open={isModalOpen} 
-                onOk={handleOk} 
+            <Modal
+                title="Basic Modal"
+                open={isModalOpen}
+                onOk={handleOk}
                 onCancel={handleCancel}
                 okText="Add"
                 cancelText="Cancel"
             >
-                <Input value={newColumnName} placeholder='Enter Column Name' style={{marginBottom:'10px'}} onChange={(e) => setNewColumnName(e.target.value)}/>
-                <Input value={formula} placeholder='Enter Formula' style={{marginBottom:'10px'}} onChange={(e) => setFormula(e.target.value)} />
+                <Input value={newColumnName} placeholder='Enter Column Name' style={{ marginBottom: '10px' }} onChange={(e) => setNewColumnName(e.target.value)} />
+                <Input value={formula} placeholder='Enter Formula' style={{ marginBottom: '10px' }} onChange={(e) => setFormula(e.target.value)} />
             </Modal>
 
         </div>
