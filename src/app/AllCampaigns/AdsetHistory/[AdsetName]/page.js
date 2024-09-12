@@ -343,6 +343,27 @@ export default function AdsetNameAndAccount({params}){
         }
     },[user]);
 
+    const pinnedBottomRowData = [
+        {
+            campaignName: 'Total',
+            spend: dailyData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0),
+            revenue: dailyData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0),
+            profit: dailyData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0),
+            margin: `${(dailyData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / dailyData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)}%`,
+            rpc: dailyData.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / dailyData.length,
+            cpl: dailyData.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / dailyData.length,
+            ncpl: dailyData.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / dailyData.length,
+            fbleads: dailyData.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0),
+            conversions: dailyData.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0),
+            fmargin: `${(dailyData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / dailyData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)}%`,
+            roi: `${(dailyData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - dailyData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / dailyData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100}%`,
+            cpc: dailyData.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / dailyData.length,
+            fbclicks: dailyData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0),
+            impressions: dailyData.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0),
+            ctr: `${(dailyData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / dailyData.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)}%`
+        }
+    ];
+
     const columnDefsObject = {
         campaignname: {headerName:'CampaignName', field:'campaignName',
                 // rowGroup: true,
@@ -439,9 +460,19 @@ export default function AdsetNameAndAccount({params}){
                         groupDisplayType='multipleColumns'
                         suppressAggFuncInHeader={true}
                         groupSuppressBlankHeader ={true}
-                        groupIncludeTotalFooter ={true}
-                        rowGroupPanelShow='always'
-                        groupIncludeFooter={true}
+                        pinnedBottomRowData={pinnedBottomRowData}
+                        getRowStyle={params => {
+                                if (params.node.rowPinned) {
+                                    return {
+                                        fontWeight: 'bold',
+                                        backgroundColor: '#f4f4f4' // Highlight the footer row
+                                    };
+                                }
+                                return null;
+                        }}
+                        // groupIncludeTotalFooter ={true}
+                        // rowGroupPanelShow='always'
+                        // groupIncludeFooter={true}
                         // autoGroupColumnDef={autoGroupColumnDef}
                         // statusBar={{
                         //     statusPanels: [

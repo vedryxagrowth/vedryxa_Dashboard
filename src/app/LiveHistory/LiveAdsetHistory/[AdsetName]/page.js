@@ -304,6 +304,27 @@ const MnetLiveAdsetHistory = ({params}) => {
         return 0;
     }
 
+    const pinnedBottomRowData = [
+        {
+            campaignName: 'Total',
+            spend: rowData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0),
+            revenue: rowData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0),
+            profit: rowData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0),
+            margin: `${(rowData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / rowData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)}%`,
+            rpc: rowData.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / rowData.length,
+            cpl: rowData.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / rowData.length,
+            ncpl: rowData.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / rowData.length,
+            fbleads: rowData.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0),
+            conversions: rowData.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0),
+            fmargin: `${(rowData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / rowData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)}%`,
+            roi: `${(rowData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - rowData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / rowData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100}%`,
+            cpc: rowData.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / rowData.length,
+            fbclicks: rowData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0),
+            impressions: rowData.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0),
+            ctr: `${(rowData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / rowData.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)}%`
+        }
+    ];
+
     const columnDefsObject = {
         date: { headerName: 'Date', field: 'date', width: 120,
             minWidth: 450,
@@ -537,10 +558,20 @@ const MnetLiveAdsetHistory = ({params}) => {
                         paginationPageSizeSelector={[10,20,30]}
                         suppressAggFuncInHeader={true}
                         groupDisplayType='multipleColumns'
-                        groupIncludeTotalFooter ={true}
-                        rowGroupPanelShow='always'
-                        groupIncludeFooter={true}
+                        // groupIncludeTotalFooter ={true}
+                        // rowGroupPanelShow='always'
+                        // groupIncludeFooter={true}
                         // autoGroupColumnDef={autoGroupColumnDef}
+                        pinnedBottomRowData={pinnedBottomRowData}
+                        getRowStyle={params => {
+                                if (params.node.rowPinned) {
+                                    return {
+                                        fontWeight: 'bold',
+                                        backgroundColor: '#f4f4f4' // Highlight the footer row
+                                    };
+                                }
+                                return null;
+                        }}
                     />
                 </div>
             ) : null}

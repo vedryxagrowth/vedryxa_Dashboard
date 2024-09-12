@@ -368,3 +368,56 @@ body {
   border-radius: 10px;
 } */
 
+.ag-menu-option.custom-reset-columns-item .ag-menu-option-text {
+  background-color: rgb(105, 105, 164);
+  color: white;
+}
+.ag-menu-option.custom-reset-columns-item:hover .ag-menu-option-text {
+  background-color: darkblue;
+}
+.ag-menu-option.custom-new-item .ag-menu-option-text {
+  background-color: skyblue;
+  margin-top: 5px;
+  color: black;
+}
+.ag-menu-option.custom-new-item:hover .ag-menu-option-text {
+  background-color: deepskyblue;
+  margin-top: 5px;
+}
+
+.ag-theme-alpine .ag-row.ag-footer {
+  background-color: lightblue;
+  color: black;
+}
+
+/* Specific styling for total footer if needed */
+.ag-theme-alpine .ag-row.ag-footer.ag-row-level-0 { /* Assuming level 0 is the total footer */
+  background-color: darkblue;
+  color: white;
+}
+
+
+.custom-carousel .slick-dots {
+  bottom: -30px; /* Position the dots at the bottom */
+}
+
+.custom-carousel .slick-dots li {
+  width: 40px; /* Width of each dot */
+  height: 10px; /* Height of each dot */
+  margin: 0 5px; /* Space between dots */
+}
+
+.custom-carousel .slick-dots li button {
+  background-color: #d4edda; /* Background color for unselected dots */
+  border-radius: 5px; /* Rounded corners for dots */
+  height: 10px; /* Dot height */
+  width: 40px; /* Dot width */
+}
+
+.custom-carousel .slick-dots li.slick-active button {
+  background-color: #28a745; /* Background color for selected dot (bright green) */
+}
+
+.custom-carousel .slick-slide {
+  padding: 0 10px; /* Adjust this value to increase/decrease the gap */
+}

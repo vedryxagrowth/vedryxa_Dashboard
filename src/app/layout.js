@@ -19,9 +19,9 @@ export default function RootLayout({ children }) {
         <SessionProvider>
           <TokenProvider>
             <LayoutWrapper>
-              <Appbar>
-                {children}
-              </Appbar>
+                  <Appbar>
+                    {children}
+                  </Appbar>
             </LayoutWrapper>
           </TokenProvider>
         </SessionProvider>

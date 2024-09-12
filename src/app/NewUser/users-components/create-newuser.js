@@ -179,10 +179,10 @@ const Createnewuser = ({ visible, onClose }) => {
                     ]}
                 >
                     <Select>
-                        <Select.Option value="MEDIA_BUYER">MEDIA_BUYER</Select.Option>
-                        <Select.Option value="SPECIAL_USER">SPECIAL_USER</Select.Option>
-                        <Select.Option value="ADMIN">ADMIN</Select.Option>
-                        <Select.Option value="MANAGER">MANAGER</Select.Option>
+                        <Select.Option value="Media_Buyer">Media_Buyer</Select.Option>
+                        <Select.Option value="Special_User">Special_User</Select.Option>
+                        <Select.Option value="Admin">Admin</Select.Option>
+                        <Select.Option value="Manager">Manager</Select.Option>
                     </Select>
                 </Form.Item>
 
