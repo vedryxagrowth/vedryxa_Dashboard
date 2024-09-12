@@ -10,9 +10,10 @@ import axios from 'axios';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
 // import { Select } from 'antd';
-import { Carousel, Input, Button, Pagination, Row, Col, Typography, Result, Modal, message } from 'antd';
+import { Carousel, Input, Button, Pagination, Row, Col, Typography, Result, Modal, message, ConfigProvider  } from 'antd';
+
 // import 'antd/dist/reset.css';
-import { CommentOutlined, CustomerServiceOutlined, MenuOutlined, InfoCircleOutlined, DownloadOutlined, SearchOutlined, ArrowLeftOutlined, ArrowRightOutlined, SmileOutlined, ReloadOutlined, CopyOutlined, StarOutlined, StarFilled, EditOutlined } from '@ant-design/icons';
+import { CommentOutlined, CustomerServiceOutlined, MenuOutlined, InfoCircleOutlined, DownloadOutlined, SearchOutlined, ArrowLeftOutlined, ArrowRightOutlined, SmileOutlined, ReloadOutlined,CopyOutlined, StarOutlined, StarFilled, EditOutlined, CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
 import { FloatButton, Tooltip } from 'antd';
 import Draggable from 'react-draggable';
 // import FormControl from '@mui/material/FormControl';
@@ -27,6 +28,8 @@ import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 // import {useTokenContext}  from '..parent.js'
 // import { useContext } from 'react';
+// import 'antd/dist/antd.css';
+import locale from 'antd/es/date-picker/locale/en_US';
 import { useTokenContext } from '../components/parent'
 import { RiLiveFill } from 'react-icons/ri';
 import { FaDailymotion } from 'react-icons/fa';
@@ -86,7 +89,12 @@ const CustomHeader = (props) => {
 const newtworkCollections = {
     "FB_Mnet": "Facebook_Mnet",
     "FB_Enki": "Facebook_Enki",
-    "FB_System1": 'Facebook_System1'
+    "FB_System1": 'Facebook_System1',
+    "FB_Rsoc": 'Facebook_Rsoc',
+    "FB_Tonic": 'Facebook_Tonic',
+    "FB_DomainActive": "Facebook_DomainActive",
+    "FB_Bodies": "Facebook_Bodies",
+    "FB_Bodies1": "Facebook_Bodies1"
 }
 
 const MyTablePage = () => {
@@ -147,6 +155,8 @@ const MyTablePage = () => {
     const [rowData, setRowData] = useState([]);
 
     const [campaignData, setCampaignData] = useState([]);
+
+    // const [defaultTimezone] = useState('UTC');
 
     // const [mainComponent, setMainComponent] = useState(false);
 
@@ -211,7 +221,7 @@ const MyTablePage = () => {
 
     const [isTrue, setTrue] = useState(false);
 
-    const [account, setAccount] = useState(accountsForAccess[0]);
+    const [account, setAccount] = useState(typeof accountsForAccess[0] === 'string' ? accountsForAccess[0] : accountsForAccess[0].accountNumber);
 
     const [time, setTime] = useState('UTC');
 
@@ -235,6 +245,8 @@ const MyTablePage = () => {
 
     const gridRef2 = useRef();
 
+    const [gridKey, setGridKey] = useState(0);
+
     const filterRef = useRef(null);
 
     const totalItems = useRef();
@@ -245,7 +257,8 @@ const MyTablePage = () => {
     const newDailyData = useRef();
 
     const newCampaignData = useRef();
-
+    
+    const [fixedFooter, setFixedFooter] = useState([]);
 
     const isInitialLoad = useRef(true);
     //Modal States
@@ -261,16 +274,16 @@ const MyTablePage = () => {
         setIsModalOpen(true);
     };
 
-
+    
 
     const handleOk = () => {
         if (!newColumnName || !formula) {
             message.error('Please fill in all fields.');
             return;
         }
-
+    
         const lowerCaseFormula = formula.toLowerCase();
-
+    
         try {
             // Define the new column definition
             const newColumnDef = {
@@ -282,19 +295,19 @@ const MyTablePage = () => {
                         const originalKeys = Object.keys(params.data);
                         const sanitizedKeys = originalKeys.map(key => key.replace(/[^a-zA-Z_$0-9]/g, '_'));
                         const values = Object.values(params.data);
-
+    
                         // Log the sanitized keys
                         console.log('Original Keys:', originalKeys);
                         console.log('Sanitized Keys:', sanitizedKeys);
-
+    
                         const keyMapping = {};
                         sanitizedKeys.forEach((key, index) => {
                             keyMapping[key] = originalKeys[index];
                         });
-
+    
                         // Constructing the function safely using sanitized keys
                         const func = new Function(...sanitizedKeys, `return ${lowerCaseFormula}`);
-
+    
                         // Map the values back to their original keys for function execution
                         const mappedValues = sanitizedKeys.map(key => params.data[keyMapping[key]]);
                         return func(...mappedValues);
@@ -310,15 +323,15 @@ const MyTablePage = () => {
                     try {
                         // Extract all the values in the group for this column
                         const values = params.values;
-
+    
                         // Log the values to be aggregated
                         console.log('Values to aggregate:', values);
-
+    
                         // Define how you want to aggregate these values.
                         // Example: You might want to sum them, average them, etc.
                         // Here, we'll sum the values for demonstration purposes.
                         const sum = values.reduce((acc, value) => acc + (value || 0), 0);
-
+    
                         return sum; // Replace with other aggregation logic if needed
                     } catch (error) {
                         console.error('Error in aggregation function:', error);
@@ -328,12 +341,12 @@ const MyTablePage = () => {
                 cellStyle: { backgroundColor: 'skyblue' },
                 headerCellStyle: { backgroundColor: 'skyblue', color: 'black' }
             };
-
+    
             // Update the column definitions
             setColumnDefs((prevDefs) => [...prevDefs, newColumnDef]);
             columnDefs1.current = [...columnDefs1.current, newColumnDef];
             columnDefs2.current = [...columnDefs2.current, newColumnDef];
-
+    
             // Common function to update data
             const updateData = (prevData) => {
                 return prevData.map((row) => {
@@ -343,12 +356,12 @@ const MyTablePage = () => {
                         const sanitizedKeys = originalKeys.map(key => key.replace(/[^a-zA-Z_$0-9]/g, '_'));
                         const values = Object.values(row);
                         console.log(values, "values1");
-
+    
                         const keyMapping = {};
                         sanitizedKeys.forEach((key, index) => {
                             keyMapping[key] = originalKeys[index];
                         });
-
+    
                         const func = new Function(...sanitizedKeys, `return ${lowerCaseFormula}`);
                         const mappedValues = sanitizedKeys.map(key => row[keyMapping[key]]);
                         updatedRow[newColumnName.toLowerCase()] = func(...mappedValues);
@@ -359,12 +372,12 @@ const MyTablePage = () => {
                     return updatedRow;
                 });
             };
-
+    
             // Update data with the new column
             setRowData((prevData) => updateData(prevData));
             setdailyData((prevData) => updateData(prevData));
             setCampaignData((prevData) => updateData(prevData));
-
+    
         } catch (error) {
             console.error('Error adding column:', error);
         }
@@ -372,14 +385,14 @@ const MyTablePage = () => {
         setFormula('');
         setIsModalOpen(false);
     };
-
-
-
-
-
-
-
-
+    
+    
+    
+    
+    
+    
+    
+    
     const handleCancel = () => {
         setIsModalOpen(false);
     };
@@ -401,7 +414,7 @@ const MyTablePage = () => {
     // };
     const getMainMenuItems = (params) => {
         const defaultItems = params.defaultItems.slice();
-
+        
         // Find and override the "Reset Columns" option
         const resetColumnsItemIndex = defaultItems.findIndex(item => item === 'resetColumns');
         if (resetColumnsItemIndex > -1) {
@@ -425,8 +438,17 @@ const MyTablePage = () => {
                 cssClasses: ['custom-new-item'], // Assign a custom class for skyblue background
             });
         }
-
+    
         return defaultItems;
+    };
+
+    const liveSpender = (params) => {
+        const total = params.values.reduce((acc, value) => acc + parseFloat(value || 0), 0);
+        return Math.round(total * 100) / 100; // Round to 2 decimal places
+    };
+    
+    const currencyFormatter = (params) => {
+        return `$${parseFloat(params.value || 0).toFixed(2)}`; // Ensure 2 decimal places in currency format
     };
 
 
@@ -799,7 +821,7 @@ const MyTablePage = () => {
 
     const CopyableCell = ({ value }) => {
         const [tooltipText, setTooltipText] = useState("Copy to clipboard");
-
+    
         const copyToClipboard = () => {
             navigator.clipboard.writeText(value).then(() => {
                 setTooltipText("Copied!");
@@ -808,7 +830,7 @@ const MyTablePage = () => {
                 alert('Failed to copy!');
             });
         };
-
+    
         return (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                 <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flexGrow: 1 }}>
@@ -823,19 +845,19 @@ const MyTablePage = () => {
             </div>
         );
     };
-
+    
     const campaignNameRenderer = (params) => {
         const cell = document.createElement('div');
         ReactDOM.render(<CopyableCell value={params.value} />, cell);
         return cell;
     };
-
+    
 
     // const handleAddColumn = () => {
     //     if (newColumnName && formula) {
     //         // Convert the formula to lowercase
     //         const lowerCaseFormula = formula.toLowerCase();
-
+    
     //         // Add new column definition
     //         const newColumnDef = {
     //             headerName: newColumnName,
@@ -852,9 +874,9 @@ const MyTablePage = () => {
     //                 }
     //             }
     //         };
-
+    
     //         setColumnDefs((prevDefs) => [...prevDefs, newColumnDef]);
-
+    
     //         // Update row data with new column values
     //         setRowData((prevData) =>
     //             prevData.map((row) => ({
@@ -869,13 +891,18 @@ const MyTablePage = () => {
     //                 })()
     //             }))
     //         );
-
+    
     //         // Clear input fields
     //         setNewColumnName('');
     //         setFormula('');
     //     }
     // };
 
+    // function currencyFormatter(params) {
+    //     const value = params.value || 0; // Ensure value is defined and default to 0
+    //     return `$${value}`; // Format the value as currency
+    // }
+    
 
     const columnDefsObject = {
         campaignname: {
@@ -986,9 +1013,10 @@ const MyTablePage = () => {
             headerName: 'Spend($)',
             field: 'spend',
             width: 120,
-            aggFunc: spender,
+            aggFunc: liveSpender,
             sortable: true,
             filter: "agTextColumnFilter",
+            valueFormatter:currencyFormatter
             // filterParams: {
             //     textCustomComparator: customTextFilterFunction,
             // },
@@ -1003,9 +1031,10 @@ const MyTablePage = () => {
             headerName: 'Revenue($)',
             field: 'revenue',
             width: 120,
-            aggFunc: spender,
+            aggFunc: liveSpender,
             sortable: true,
             filter: "agNumberColumnFilter",
+            valueFormatter:currencyFormatter
             // headerComponent: CustomHeader,
             // headerComponentParams: {
             //     displayName: 'Revenue',
@@ -1018,11 +1047,12 @@ const MyTablePage = () => {
             field: 'profit',
             width: 120,
             sortable: true,
-            aggFunc: spender,
+            aggFunc: liveSpender,
             cellClassRules: {
                 'font-red': p => p.value < 0
             },
             filter: "agNumberColumnFilter",
+            valueFormatter:currencyFormatter
             // headerComponent: CustomHeader,
             // headerComponentParams: {
             //     displayName: 'Profit',
@@ -1047,7 +1077,7 @@ const MyTablePage = () => {
             headerName: 'FbLeads',
             field: 'fbleads',
             width: 120,
-            aggFunc: spender,
+            aggFunc: newSpender,
             sortable: true,
             filter: "agNumberColumnFilter",
             // headerComponent: CustomHeader,
@@ -1088,7 +1118,7 @@ const MyTablePage = () => {
             headerName: 'FbClicks',
             field: 'fbclicks',
             width: 120,
-            aggFunc: spender,
+            aggFunc: newSpender,
             sortable: true,
             filter: "agNumberColumnFilter",
             // headerComponent: CustomHeader,
@@ -1102,7 +1132,7 @@ const MyTablePage = () => {
             headerName: 'Impressions',
             field: 'impressions',
             width: 120,
-            aggFunc: spender,
+            aggFunc: newSpender,
             sortable: true,
             filter: "agNumberColumnFilter",
             // headerComponent: CustomHeader,
@@ -1229,7 +1259,7 @@ const MyTablePage = () => {
 
     const columnDefsObject1 = {
         campaignname: {
-            headerName: 'CampaignName',
+            headerName: 'CampaignName', 
             field: 'campaignname',
             resizable: true,
             sortable: true,
@@ -1247,7 +1277,7 @@ const MyTablePage = () => {
             },
             cellRenderer: campaignNameRenderer,
         },
-
+        
         adsetname: {
             headerName: 'AdsetName', field: 'adsetname',
             // resizeble: true,
@@ -1300,28 +1330,28 @@ const MyTablePage = () => {
         spend: {
             headerName: 'Spend($)', field: 'spend', width: 150,
             aggFunc: spender,
-            valueFormatter: params => params.value ? Math.round(params.value * 100) / 100 : '', sortable: true,
+            valueFormatter: params => params.value ? `$${Math.round(params.value * 100) / 100}` : '', sortable: true,
             filter: 'agNumberColumnFilter'
         },
         revenue: {
             headerName: 'Revenue($)', field: 'revenue', width: 150,
             aggFunc: spender,
-            valueFormatter: params => params.value ? Math.round(params.value * 100) / 100 : '', sortable: true, filter: 'agNumberColumnFilter'
+            valueFormatter: params => params.value ? `$${Math.round(params.value * 100) / 100}` : '', sortable: true, filter: 'agNumberColumnFilter'
         },
         profit: {
             headerName: 'Profit($)', field: 'profit', width: 150, cellClassRules: {
                 'font-red': p => p.value < 0
             },
             aggFunc: spender,
-            valueFormatter: params => params.value ? Math.round(params.value * 100) / 100 : '', sortable: true,
+            valueFormatter: params => params.value ? `$${Math.round(params.value * 100) / 100}` : '', sortable: true,
             headerTooltip: 'Revenue - Spend', filter: 'agNumberColumnFilter'
         },
         margin: {
             headerName: 'Margin(%)', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: 'Profit/Revenue', filter: 'agNumberColumnFilter'
 
         },
-        fbleads: { headerName: 'FbLeads', field: 'fbleads', width: 120, aggFunc: spender, sortable: true, filter: 'agNumberColumnFilter' },
-        conversions: { headerName: 'Conversions', field: 'conversions', width: 120, aggFunc: spender, sortable: true, filter: 'agNumberColumnFilter' },
+        fbleads: { headerName: 'FbLeads', field: 'fbleads', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
+        conversions: { headerName: 'Conversions', field: 'conversions', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
         cpc: {
             headerName: 'cpc', field: 'cpc',
             aggFunc: (params) => {
@@ -1332,15 +1362,15 @@ const MyTablePage = () => {
             sortable: true, filter: 'agNumberColumnFilter'
 
         },
-        fbclicks: { headerName: 'FbClicks', field: 'fbclicks', width: 120, aggFunc: spender, sortable: true, filter: 'agNumberColumnFilter' },
-        impressions: { headerName: 'Impressions', field: 'impressions', width: 120, aggFunc: spender, sortable: true, filter: 'agNumberColumnFilter' },
+        fbclicks: { headerName: 'FbClicks', field: 'fbclicks', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
+        impressions: { headerName: 'Impressions', field: 'impressions', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
         ctr: { headerName: 'Ctr', field: 'ctr', valueGetter: getCtr, sortable: true, },
         rpc: { headerName: 'Rpc', field: 'rpc', valueGetter: getRpc, sortable: true, filter: 'agNumberColumnFilter' },
         cpl: { headerName: 'Cpl', field: 'cpl', valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter' },
         ncpl: { headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter' },
         fmargin: { headerName: 'Fmargin(%)', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: true },
         roi: { headerName: 'ROI(%)', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: 'Profit/Spend', filter: true, },
-        adsetid: { headerName: 'AdsetId', field: 'adsetid', sortable: true, filter: "agTextColumnFilter", hide: false },
+        adsetid: { headerName: 'AdsetId', field: 'adsetid', sortable: true, filter: "agTextColumnFilter",hide: false },
         campaignid: { headerName: 'CampaignId', field: 'campaignid', sortable: true, filter: "agTextColumnFilter", },
         timezone: { headerName: 'TimeZone', field: 'timezone', sortable: true, hide: true, filter: "agTextColumnFilter", },
     };
@@ -1363,12 +1393,19 @@ const MyTablePage = () => {
                 console.log(event);
                 // const url = `/history/${event}-${account}-${time}`;
                 // window.open(url, '_blank');
+            
             },
             width: 450,
             pinned: 'left',// Using the group cell renderer
             // cellRenderer: 'agGroupCellRenderer',
             // cellRendererParams: {
             //     innerRendererFramework: GroupCellRenderer // Use a React component to render the cell content
+            // }
+            // valueGetter: (params) => {
+            //     if (params.node.rowPinned) {
+            //         return 'Total';  // Display "Total" for the pinned row
+            //     }
+            //     return params.data?.campaignName; // Display regular campaign name for normal rows
             // }
         },
         adsetname: {
@@ -1391,7 +1428,7 @@ const MyTablePage = () => {
 
         },
         date: {
-            headerName: 'Date', field: 'date', sortable: true,
+            headerName: 'Date', field: 'date', sort: 'asc', sortable: true,
             filter: "agDateColumnFilter",
             filterParams: {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
@@ -1419,19 +1456,22 @@ const MyTablePage = () => {
                 },
             },
         },
-        spend: { headerName: 'Spend($)', field: 'spend', width: 150, aggFunc: spender, sortable: true, filter: 'agNumberColumnFilter' },
-        revenue: { headerName: 'Revenue($)', field: 'revenue', width: 150, aggFunc: spender, sortable: true, filter: 'agNumberColumnFilter' },
+        spend: { headerName: 'Spend($)', field: 'spend', width: 150, aggFunc: spender, sortable: true, filter: 'agNumberColumnFilter', 
+        valueFormatter:currencyFormatter },
+        revenue: { headerName: 'Revenue($)', field: 'revenue', width: 150, aggFunc: spender, sortable: true, filter: 'agNumberColumnFilter',
+        valueFormatter:currencyFormatter },
         profit: {
             headerName: 'Profit($)', field: 'profit', width: 150, aggFunc: spender, cellClassRules: {
                 'font-red': p => p.value < 0
-            }, sortable: true, headerTooltip: 'Revenue - Spend', filter: 'agNumberColumnFilter'
+            }, sortable: true, headerTooltip: 'Revenue - Spend', filter: 'agNumberColumnFilter',
+            valueFormatter:currencyFormatter
         },
         margin: { headerName: 'Margin(%)', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: 'Profit/Revenue', filter: true },
-        fbleads: { headerName: 'FbLeads', field: 'fbleads', width: 120, aggFunc: spender, sortable: true, filter: 'agNumberColumnFilter' },
+        fbleads: { headerName: 'FbLeads', field: 'fbleads', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
         conversions: { headerName: 'Conversions', field: 'conversions', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
         cpc: { headerName: 'cpc', field: 'cpc', aggFunc: cpcSpender, sortable: true, filter: 'agNumberColumnFilter' },
-        fbclicks: { headerName: 'FbClicks', field: 'fbclicks', width: 120, aggFunc: spender, sortable: true, filter: 'agNumberColumnFilter' },
-        impressions: { headerName: 'Impressions', field: 'impressions', width: 120, aggFunc: spender, sortable: true, filter: 'agNumberColumnFilter' },
+        fbclicks: { headerName: 'FbClicks', field: 'fbclicks', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
+        impressions: { headerName: 'Impressions', field: 'impressions', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
         ctr: { headerName: 'Ctr', field: 'ctr', valueGetter: getCtr, sortable: true, filter: 'agNumberColumnFilter' },
         rpc: { headerName: 'Rpc', field: 'rpc', valueGetter: getRpc, sortable: true, filter: 'agNumberColumnFilter' },
         cpl: { headerName: 'Cpl', field: 'cpl', valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter' },
@@ -1709,6 +1749,7 @@ const MyTablePage = () => {
                 Authorization: token,
             },
         });
+        console.log(fetchData, "f1");
         const mainData = fetchData.data.items;
 
         const url = `https://prodapis.adsgoat.in/AllCampaigns?accountNumber=${account}&timezone=${time}&network=${newtworkCollections[revenuePratner]}&page=${pageSize}&limit=100`;
@@ -1768,6 +1809,26 @@ const MyTablePage = () => {
         totalItems.current = fetchData.data.totalItems;
         console.log(mainData);
         setCampaignData(filteredData);
+        setFixedFooter([
+            {
+                campaignName: 'Total',
+                spend: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0).toFixed(2)),
+                revenue: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0).toFixed(2)),
+                profit: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0).toFixed(2)),
+                margin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
+                rpc: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / filteredData?.length).toFixed(2)),
+                cpl: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / filteredData?.length).toFixed(2)),
+                ncpl: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / filteredData?.length).toFixed(2)),
+                fbleads: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0).toFixed(2)),
+                conversions: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0).toFixed(2)),
+                fmargin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+                roi: parseFloat(((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+                cpc: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / filteredData?.length).toFixed(2)),
+                fbclicks: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
+                impressions: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
+                ctr: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
+            }
+        ]);
         newCampaignData.current = filteredData;
         setTrue(false);
         setLoading2(false);
@@ -1811,6 +1872,11 @@ const MyTablePage = () => {
         }
     }, [isTrue])
 
+    useEffect(() => {
+        // Update the grid key to force a re-render when fixedFooter changes
+        setGridKey((prevKey) => prevKey + 1);
+    }, [fixedFooter]);
+
     // useEffect(()=>{
     //     if(isTrue){
     //         const functionCall = async() => {
@@ -1849,22 +1915,9 @@ const MyTablePage = () => {
 
         // console.log(accountsAccess, "accountsAccess");
         setNetworksData(accountsAccess);
-        setRevenuePartner([value]);
-        switch (value) {
-            case "FB_Mnet":
-                setUrl1("FbMnetUI");
-                setUrl2("FbMnetDailyUI");
-                setUrl3("MnetAllCampaigns");
-                break;
-            case "FB_Enki":
-                setUrl1("FbEnkiUI");
-                setUrl2("FbEnkiDailyUI");
-                setUrl3("EnkiAllCampaigns");
-                break;
-            default:
-                null
-                break;
-        }
+        setRevenuePartner(value);
+        value ==="FB_Tonic" ? console.log("PDT") : null;
+        value === "FB_Rsoc" || value === "FB_Tonic" || value === "FB_DomainActive" ? setTime('PDT') : setTime('UTC')
     }
     const onChangeSelect = (value) => {
         setAccount(value);
@@ -2036,9 +2089,9 @@ const MyTablePage = () => {
                 // const count = params.node.allChildrenCount; // Get the count of children
                 const firstColumnValue = params.node.key;  // This should give you the campaign name
                 const valueWithCount = `${firstColumnValue}`;
-
+    
                 const [tooltipText, setTooltipText] = useState("Click to Copy");
-
+    
                 const copyToClipboard = () => {
                     navigator.clipboard.writeText(firstColumnValue)
                         .then(() => {
@@ -2052,12 +2105,12 @@ const MyTablePage = () => {
 
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                        <StarOutlined />
-                        <EditOutlined style={{ marginLeft: '10px' }} />
+                        <StarOutlined/>
+                        <EditOutlined style={{marginLeft:'10px'}}/>
                         <Tooltip title={tooltipText}>
                             <CopyOutlined
                                 onClick={copyToClipboard}
-                                style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight: '10px' }}
+                                style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight:'10px' }}
                             />
                         </Tooltip>
                         <span
@@ -2128,13 +2181,13 @@ const MyTablePage = () => {
                 if (params.node.footer) {
                     return 'Total'; // Custom footer label
                 }
-
+    
                 // Get the group key or value (campaign name in this case)
                 const firstColumnValue = params.node.key;  // This should give you the campaign name
                 const valueWithCount = `${firstColumnValue}`;
-
+    
                 const [tooltipText, setTooltipText] = useState("Click to Copy");
-
+    
                 const copyToClipboard = () => {
                     navigator.clipboard.writeText(firstColumnValue)
                         .then(() => {
@@ -2145,15 +2198,15 @@ const MyTablePage = () => {
                             console.error('Failed to copy to clipboard');
                         });
                 };
-
+    
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                        <StarOutlined />
-                        <EditOutlined style={{ marginLeft: '10px' }} />
+                        <StarOutlined/>
+                        <EditOutlined style={{marginLeft:'10px'}} />
                         <Tooltip title={tooltipText}>
                             <CopyOutlined
                                 onClick={copyToClipboard}
-                                style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight: '10px' }}
+                                style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight:'10px' }}
                             />
                         </Tooltip>
                         <span
@@ -2165,15 +2218,15 @@ const MyTablePage = () => {
                         >
                             {valueWithCount}
                         </span>
-
+                        
                     </div>
                 );
             }
         }
     };
-
-
-
+    
+    
+    
 
     const autoGroupColumnDef2 = {
         headerName: 'CampaignName',
@@ -2188,9 +2241,9 @@ const MyTablePage = () => {
                 // const count = params.node.allChildrenCount; // Get the count of children
                 const firstColumnValue = params.node.key;  // This should give you the campaign name
                 const valueWithCount = `${firstColumnValue}`;
-
+    
                 const [tooltipText, setTooltipText] = useState("Click to Copy");
-
+    
                 const copyToClipboard = () => {
                     navigator.clipboard.writeText(firstColumnValue)
                         .then(() => {
@@ -2204,12 +2257,12 @@ const MyTablePage = () => {
 
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                        <StarOutlined />
-                        <EditOutlined style={{ marginLeft: '10px' }} />
+                        <StarOutlined/>
+                        <EditOutlined style={{marginLeft:'10px'}} />
                         <Tooltip title={tooltipText}>
                             <CopyOutlined
                                 onClick={copyToClipboard}
-                                style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight: '10px' }}
+                                style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight:'10px' }}
                             />
                         </Tooltip>
                         <span
@@ -2221,9 +2274,9 @@ const MyTablePage = () => {
                         >
                             {valueWithCount}
                         </span>
-
+                        
                     </div>
-
+                    
                 );
             }
         }
@@ -2247,7 +2300,7 @@ const MyTablePage = () => {
         const newFieldOrder = fieldOrder.filter(item => item !== 'ag-Grid-AutoColumn-campaignname' && item !== 'ag-Grid-AutoColumn' && columnStructure.includes(item));
         localStorage.setItem('columnState', JSON.stringify(newFieldOrder));
         updatingColumnsStructure(newFieldOrder);
-        console.log(`Updating columns structure for grid: ${gridId}`);
+        console.log(`Updating columns structure for grid: ${gridId}`); 
     };
 
     const debouncedHandleColumnMove = useCallback(debounce((params, gridId) => handleColumnMove(params, gridId), 600), []);
@@ -2423,6 +2476,7 @@ const MyTablePage = () => {
 
     const handlePageClick = (page, pageSize) => {
         console.log(`Clicked page: ${page}, Page size: ${pageSize}`);
+        setLoading2(true);
         setPageSize(page);
         // Add your custom onClick functionality here
     };
@@ -2457,15 +2511,15 @@ const MyTablePage = () => {
             value: [dayjs().add(-90, 'd'), dayjs()],
         },
         {
-            label: 'This Month',
-            value: [dayjs().startOf('month'), dayjs()],
+          label: 'This Month',
+          value: [dayjs().startOf('month'), dayjs()],
         },
         {
-            label: 'Last Month',
-            value: [
-                dayjs().subtract(1, 'month').startOf('month'),
-                dayjs().subtract(1, 'month').endOf('month'),
-            ],
+          label: 'Last Month',
+          value: [
+            dayjs().subtract(1, 'month').startOf('month'),
+            dayjs().subtract(1, 'month').endOf('month'),
+          ],
         },
     ];
 
@@ -2478,7 +2532,7 @@ const MyTablePage = () => {
     // console.log(campaignData, "campaignData");
 
     const refreshGrid = (gridRef) => {
-
+        
         setLoading(true);
         if (gridRef.current) {
             const gridApi = gridRef.current.api;
@@ -2530,7 +2584,7 @@ const MyTablePage = () => {
             setCampaignData([]); // Temporarily clear the data
             setTimeout(() => setCampaignData(newCampaignData.current), 0); // Reset the data
             setTimeout(() => setLoading2(false), 1500);
-
+            
             // Force refresh the grid cells and redraw the rows
             gridApi.refreshCells({ force: true });
             gridApi.redrawRows();
@@ -2545,12 +2599,12 @@ const MyTablePage = () => {
         refreshGrid2(gridRef2); // Refresh gridRef2
     };
 
-
-
+    
+    
 
     const GroupCellRenderer = (props) => {
         const [tooltipText, setTooltipText] = useState("Copy to clipboard");
-
+    
         const copyToClipboard = () => {
             navigator.clipboard.writeText(props.node.key).then(() => {
                 setTooltipText("Copied!");
@@ -2558,11 +2612,11 @@ const MyTablePage = () => {
             }).catch(() => {
                 alert('Failed to copy!');
             });
-        };
+    };
 
+    
 
-
-
+    
         return (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                 <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flexGrow: 1 }}>
@@ -2578,6 +2632,103 @@ const MyTablePage = () => {
         );
     };
 
+    const disabledDate = (current) => {
+        // Disable dates after today
+        return current && current > Date.now();
+    };
+
+    console.log(revenuePratner);
+    console.log(time);
+
+    const createOption = (account) => {
+        
+        if (typeof account === 'string') {
+            return{
+                value: account,
+                label: account,
+            }
+        } else {
+            return {
+                value: account.accountNumber,
+                label: (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>{account.accountNumber}</span>
+                    <span>{account.status === "Active" ? <CheckCircleFilled style={{ color: 'green', fontSize: '15px' }} /> : <CloseCircleFilled style={{ color: 'red', fontSize: '15px' }} />}</span>
+                  </div>
+                ),
+                text: account.accountNumber, // Adding a text property for sorting and filtering
+            };
+        }
+          
+        
+    };
+
+    const pinnedBottomRowData1 = [
+        {
+            campaignName: 'Total',
+            spend: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0).toFixed(2)),
+            revenue: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0).toFixed(2)),
+            profit: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0).toFixed(2)),
+            margin: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
+            rpc: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / rowData?.length).toFixed(2)),
+            cpl: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / rowData?.length).toFixed(2)),
+            ncpl: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / rowData?.length).toFixed(2)),
+            fbleads: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0).toFixed(2)),
+            conversions: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0).toFixed(2)),
+            fmargin: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+            roi: parseFloat(((rowData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - rowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+            cpc: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / rowData?.length).toFixed(2)),
+            fbclicks: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
+            impressions: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
+            ctr: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
+        }
+    ];
+    
+    const pinnedBottomRowData2 = [
+        {
+            campaignName: 'Total',
+            spend: parseFloat(dailyData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0).toFixed(2)),
+            revenue: parseFloat(dailyData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0).toFixed(2)),
+            profit: parseFloat(dailyData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0).toFixed(2)),
+            margin: parseFloat((dailyData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / dailyData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
+            rpc: parseFloat((dailyData.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / dailyData.length).toFixed(2)),
+            cpl: parseFloat((dailyData.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / dailyData.length).toFixed(2)),
+            ncpl: parseFloat((dailyData.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / dailyData.length).toFixed(2)),
+            fbleads: parseFloat(dailyData.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0).toFixed(2)),
+            conversions: parseFloat(dailyData.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0).toFixed(2)),
+            fmargin: parseFloat((dailyData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / dailyData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+            roi: parseFloat(((dailyData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - dailyData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / dailyData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+            cpc: parseFloat((dailyData.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / dailyData.length).toFixed(2)),
+            fbclicks: parseFloat(dailyData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
+            impressions: parseFloat(dailyData.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
+            ctr: parseFloat((dailyData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / dailyData.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
+        }
+    ];
+
+    // const pinnedBottomRowData3 = (campaignData) =>{
+    //     return([
+    //         {
+    //             campaignName: 'Total',
+    //             spend: campaignData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0),
+    //             revenue: campaignData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0),
+    //             profit: campaignData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0),
+    //             margin: `${(campaignData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / campaignData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)}%`,
+    //             rpc: campaignData.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / campaignData.length,
+    //             cpl: campaignData.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / campaignData.length,
+    //             ncpl: campaignData.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / campaignData.length,
+    //             fbleads: campaignData.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0),
+    //             conversions: campaignData.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0),
+    //             fmargin: `${(campaignData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / campaignData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)}%`,
+    //             roi: `${(campaignData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - campaignData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / campaignData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100}%`,
+    //             cpc: campaignData.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / campaignData.length,
+    //             fbclicks: campaignData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0),
+    //             impressions: campaignData.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0),
+    //             ctr: `${(campaignData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / campaignData.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)}%`
+    //         }
+    //     ]);
+    // };
+
+    // console.log(fixedFooter, "fixed");
 
     return (
         <div className='reports-container'>
@@ -2605,24 +2756,24 @@ const MyTablePage = () => {
                             showSearch
                             onChange={onChangeSelect}
                             style={{ width: '100%' }}
-                            placeholder="Select Network"
+                            placeholder="Select Account"
                             optionFilterProp="label"
-                            defaultValue={networksData[0]}
-                            options={accountsAccess.map((item) => ({
-                                value: item,
-                                label: item,
-                            }))}
+                            defaultValue={typeof networksData[0] === 'string' ? networksData[0] : networksData[0].accountNumber}
+                            options={accountsAccess.map((item) => createOption(item))}
                         />
                     </Col>
 
                     <Col xs={24} sm={24} md={15} lg={6}>
-                        <RangePicker
-                            presets={rangePresets}
-                            onChange={handleChange}
-                            defaultValue={defaultDates}
-                            format="YYYY-MM-DD"
-                            style={{ width: '100%' }}
-                        />
+                        <ConfigProvider locale={locale}>
+                            <RangePicker
+                                presets={rangePresets}
+                                onChange={handleChange}
+                                disabledDate={disabledDate}
+                                defaultValue={defaultDates}
+                                format="YYYY-MM-DD"
+                                style={{ width: '100%' }}
+                            />
+                        </ConfigProvider>
                     </Col>
 
                     <Col xs={24} sm={12} md={3}>
@@ -2632,24 +2783,24 @@ const MyTablePage = () => {
                             style={{ width: '100%' }}
                             placeholder="Select Timezone"
                             optionFilterProp="label"
-                            defaultValue="UTC"
+                            value={time}
                             options={timezones.map((item) => ({
                                 value: item,
                                 label: item,
-                            }))}
+                        }))}
                         />
                     </Col>
 
                     <Col xs={24} sm={12} md={2}>
-                        <Button className='submit-button' type='primary' onClick={onClickButton} block>
+                        <Button className='submit-button' type='primary' style={{backgroundColor:'#C7F39A', border:'solid 0px', color:'black', fontWeight:'600'}} onClick={onClickButton} block>
                             Submit
                         </Button>
                     </Col>
                 </Row>
             </Space>
             <div >
-                <Row style={{ padding: '10px', paddingRight: '30px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-                    <Col style={{ marginRight: '15px' }}>
+                <Row style={{ padding: '10px',paddingRight: '30px', display:'flex', justifyContent: 'flex-end', alignItems:'center'}}>
+                    <Col style={{marginRight:'15px'}}>
                         {/* {isSearching ? (
                             <Row gutter={8}>
                                 <Col>
@@ -2675,31 +2826,31 @@ const MyTablePage = () => {
                             />
                         )} */}
                         <Row gutter={8}>
-                            <Col>
-                                <Input
-                                    placeholder="Search here"
-                                    // autoFocus
-                                    value={inputValue}
-                                    onChange={handleChangeInput}
-                                    onBlur={handleBlur}
-                                    style={{ width: '100%', borderRadius: '5px' }}
-                                />
-                            </Col>
-                            <Col>
-                                <Button icon={<SearchOutlined />} />
-                            </Col>
-
+                                <Col>
+                                    <Input
+                                        placeholder="Search here"
+                                        // autoFocus
+                                        value={inputValue}
+                                        onChange={handleChangeInput}
+                                        onBlur={handleBlur}
+                                        style={{ width: '100%', borderRadius: '5px' }}
+                                    />
+                                </Col>
+                                <Col>
+                                    <Button style={{backgroundColor:'#C7F39A', border:'solid 0px', color:'black'}} icon={<SearchOutlined />} />
+                                </Col>
+                                
                         </Row>
                     </Col>
                     <Col>
                         <Tooltip title="Click to Refresh Tables">
-                            <Button type="primary" icon={<ReloadOutlined />} onClick={onClickRefresh} />
+                            <Button type="primary" style={{backgroundColor:'#C7F39A', border:'solid 0px', color:'black'}} icon={<ReloadOutlined />}  onClick={onClickRefresh}/>
                         </Tooltip>
                     </Col>
                 </Row>
 
                 <Carousel afterChange={onChange1} ref={carouselRef}>
-                    <div style={{ height: "100%" }}>
+                    <div style={{ height: "100%", marginBottom:'20px' }}>
                         <div style={contentStyle}>
                             {isLoading === true ? (
                                 <div className="loader-container ag-container">
@@ -2740,7 +2891,7 @@ const MyTablePage = () => {
                                         </Col>
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                             <Tooltip title="Export to CSV">
-                                                <Button type="primary" icon={<DownloadOutlined />} onClick={onBtExport1} />
+                                                <Button type="primary" style={{backgroundColor:'#C7F39A', border:'solid 0px', color:'black'}} icon={<DownloadOutlined />} onClick={onBtExport1} />
                                             </Tooltip>
                                         </Col>
                                     </Row>
@@ -2757,8 +2908,8 @@ const MyTablePage = () => {
                                         paginationPageSize={100}
                                         paginationPageSizeSelector={[20, 40, 60, 80, 100]}
                                         suppressAggFuncInHeader={true}
-                                        groupIncludeTotalFooter={rowData.length > 0 ? true : false}
-                                        groupIncludeFooter={rowData.length > 0 ? true : false}
+                                        // groupIncludeTotalFooter={rowData.length > 0 ? true : false}
+                                        // groupIncludeFooter={rowData.length > 0 ? true : false}
                                         autoGroupColumnDef={autoGroupColumnDefLive}
                                         onGridReady={(params) => onGridReady(params, 'grid1', gridRef)}
                                         gridOptions={gridOptions}
@@ -2766,33 +2917,43 @@ const MyTablePage = () => {
                                         groupDisplayType='multipleColumns'
                                         // rowGroupPanelShow='always'
                                         onFilterChanged={onFilterChanged} // Use the custom filter handler
-                                        const onFirstDataRendered={(params) => {
-                                            params.api.forEachNode(node => {
-                                                if (node.rowPinned === 'bottom') { // Assuming the total footer is pinned to the bottom
-                                                    node.columnApi.getAllDisplayedColumns().forEach(col => {
-                                                        const cell = params.api.getDisplayedCellForColumn(node, col);
-                                                        if (cell) {
-                                                            cell.eGui.style.backgroundColor = 'lightblue';
-                                                            cell.eGui.style.color = 'white';
-                                                        }
-                                                    });
-                                                }
-                                            });
+                                        pinnedBottomRowData={rowData.length > 0 ? pinnedBottomRowData1 : []}
+                                        getRowStyle={params => {
+                                            if (params.node.rowPinned) {
+                                                return {
+                                                    fontWeight: 'bold',
+                                                    backgroundColor: '#f4f4f4' // Highlight the footer row
+                                                };
+                                            }
+                                            return null;
                                         }}
-
-
+                                        // const onFirstDataRendered = {(params) => {
+                                        //     params.api.forEachNode(node => {
+                                        //         if (node.rowPinned === 'bottom') { // Assuming the total footer is pinned to the bottom
+                                        //             node.columnApi.getAllDisplayedColumns().forEach(col => {
+                                        //                 const cell = params.api.getDisplayedCellForColumn(node, col);
+                                        //                 if (cell) {
+                                        //                     cell.eGui.style.backgroundColor = 'lightblue';
+                                        //                     cell.eGui.style.color = 'white';
+                                        //                 }
+                                        //             });
+                                        //         }
+                                        //     });
+                                        // }}
+                                        
+                                       
                                         getMainMenuItems={getMainMenuItems}
                                     />
 
                                 </div>
                             ) : <div>
                                 {startDate !== endDate ? <Result
-                                    icon={<SmileOutlined />}
+                                    icon={<SmileOutlined  />}
                                     title={`No LiveData for ${account} from ${startDate} to ${endDate}`}
-                                // extra={<Button type="primary">Next</Button>}
-                                /> : <Result
-                                    icon={<SmileOutlined />}
-                                    title={`No LiveData for ${account} to ${startDate}`}
+                                    // extra={<Button type="primary">Next</Button>}
+                                />: <Result
+                                icon={<SmileOutlined  />}
+                                title={`No LiveData for ${account} to ${startDate}`}
                                 // extra={<Button type="primary">Next</Button>}
                                 />}
                             </div>}
@@ -2838,9 +2999,9 @@ const MyTablePage = () => {
                                             </Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
-                                            <Tooltip title="Export to CSV">
-                                                <Button type="primary" icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef1)} />
-                                            </Tooltip>
+                                        <Tooltip title="Export to CSV">
+                                            <Button type="primary" style={{backgroundColor:'#C7F39A', border:'solid 0px', color:'black'}} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef1)} />
+                                        </Tooltip>
                                         </Col>
                                     </Row>
                                     <AgGridReact
@@ -2854,25 +3015,35 @@ const MyTablePage = () => {
                                         groupDisplayType='multipleColumns'
                                         suppressAggFuncInHeader={true}
                                         groupSuppressBlankHeader={true}
-                                        groupIncludeFooter={true}
-                                        groupIncludeTotalFooter={true}
+                                        // groupIncludeFooter={true}
+                                        // groupIncludeTotalFooter={true}
                                         autoGroupColumnDef={autoGroupColumnDef}
                                         onGridReady={(params) => onGridReady(params, 'grid2', gridRef1)}
                                         gridOptions={gridOptions1}
                                         getMainMenuItems={getMainMenuItems}
+                                        pinnedBottomRowData={dailyData.length > 0 ? pinnedBottomRowData2 : []}
+                                        getRowStyle={params => {
+                                            if (params.node.rowPinned) {
+                                                return {
+                                                    fontWeight: 'bold',
+                                                    backgroundColor: '#f4f4f4' // Highlight the footer row
+                                                };
+                                            }
+                                            return null;
+                                        }}
                                     />
                                 </div>
                             ) : <div>
-                                {startDate !== endDate ? <Result
-                                    icon={<SmileOutlined />}
+                                    {startDate !== endDate ? <Result
+                                    icon={<SmileOutlined  />}
                                     title={`No DailyData for ${account} from ${startDate} to ${endDate}`}
-                                // extra={<Button type="primary">Next</Button>}
-                                /> : <Result
-                                    icon={<SmileOutlined />}
+                                    // extra={<Button type="primary">Next</Button>}
+                                    />: <Result
+                                    icon={<SmileOutlined  />}
                                     title={`No DailyData for ${account} to ${startDate}`}
-                                // extra={<Button type="primary">Next</Button>}
-                                />}
-                            </div>}
+                                    // extra={<Button type="primary">Next</Button>}
+                                    />}
+                                </div>}
                         </div>
                     </div>
                     <div>
@@ -2895,9 +3066,9 @@ const MyTablePage = () => {
                                 <div className="ag-theme-alpine ag-container">
                                     <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap' }}>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
-                                            <Space align="center" className='daily-contaier' style={{ width: '150px' }}>
+                                            <Space align="center" className='daily-contaier' style={{width:'150px'}}>
                                                 <div class="blinking-circle-3"></div>
-                                                <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600', width: '100px' }}>Campaigns</Text>
+                                                <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600', width:'100px' }}>Campaigns</Text>
                                             </Space>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
@@ -2916,14 +3087,15 @@ const MyTablePage = () => {
                                         </Col>
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                             <Tooltip title="Export to CSV">
-                                                <Button type="primary" icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef2)} />
+                                                <Button type="primary" style={{backgroundColor:'#C7F39A', border:'solid 0px', color:'black'}} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef2)} />
                                             </Tooltip>
                                         </Col>
                                     </Row>
+                                    
 
-
-                                    <div style={{ height: '90%' }}>
+                                    <div style={{height: '90%'}}>
                                         <AgGridReact
+                                            key={gridKey}
                                             ref={gridRef2}
                                             rowData={campaignData.filter((each) => each.campaignname.includes(inputValue))}
                                             columnDefs={columnDefs2.current}
@@ -2935,15 +3107,25 @@ const MyTablePage = () => {
                                             // paginationPageSizeSelector={[10,20,30]}
                                             groupDisplayType='multipleColumns'
                                             suppressAggFuncInHeader={true}
-                                            groupIncludeTotalFooter={true}
-                                            // rowGroupPanelShow='always'
-                                            groupIncludeFooter={true}
+                                            // groupIncludeTotalFooter={true}
+                                            // // rowGroupPanelShow='always'
+                                            // groupIncludeFooter={true}
                                             groupRowRenderer={GroupRowRenderer}
                                             onGridReady={(params) => onGridReady(params, 'grid3', gridRef2)}
                                             // onColumnMoved={debouncedHandleColumnMove2}
                                             gridOptions={gridOptions2}
                                             suppressMenuHide={true}
                                             getMainMenuItems={getMainMenuItems}
+                                            pinnedBottomRowData={campaignData.length > 0 ? fixedFooter : []}
+                                            getRowStyle={params => {
+                                                if (params.node.rowPinned) {
+                                                    return {
+                                                        fontWeight: 'bold',
+                                                        backgroundColor: '#f4f4f4' // Highlight the footer row
+                                                    };
+                                                }
+                                                return null;
+                                            }}
                                         // onFirstDataRendered = {(params) => {
                                         //     params.api.sizeColumnsToFit(100);
                                         //   }}
@@ -2962,17 +3144,17 @@ const MyTablePage = () => {
                                     </div>
                                 </div>
                             ) : <div>
-                                <div>
-                                    {startDate !== endDate ? <Result
-                                        icon={<SmileOutlined />}
-                                        title={`No CampaignData for ${account} from ${startDate} to ${endDate}`}
+                            <div>
+                                {startDate !== endDate ? <Result
+                                    icon={<SmileOutlined  />}
+                                    title={`No CampaignData for ${account} from ${startDate} to ${endDate}`}
                                     // extra={<Button type="primary">Next</Button>}
-                                    /> : <Result
-                                        icon={<SmileOutlined />}
-                                        title={`No CampaignData for ${account} to ${startDate}`}
-                                    // extra={<Button type="primary">Next</Button>}
-                                    />}
-                                </div>
+                                />: <Result
+                                icon={<SmileOutlined  />}
+                                title={`No CampaignData for ${account} to ${startDate}`}
+                                // extra={<Button type="primary">Next</Button>}
+                                />}
+                            </div>
                             </div>}
 
                         </div>
@@ -2983,6 +3165,7 @@ const MyTablePage = () => {
                             itemRender={itemRender}
                             showSizeChanger={false}
                             showQuickJumper={false}
+                            current={pageSize}
                             onChange={handlePageClick}
                         />
                     </div>
@@ -3009,16 +3192,16 @@ const MyTablePage = () => {
                 </FloatButton.Group>
             </Draggable>
 
-            <Modal
-                title="Basic Modal"
-                open={isModalOpen}
-                onOk={handleOk}
+            <Modal 
+                title="Basic Modal" 
+                open={isModalOpen} 
+                onOk={handleOk} 
                 onCancel={handleCancel}
                 okText="Add"
                 cancelText="Cancel"
             >
-                <Input value={newColumnName} placeholder='Enter Column Name' style={{ marginBottom: '10px' }} onChange={(e) => setNewColumnName(e.target.value)} />
-                <Input value={formula} placeholder='Enter Formula' style={{ marginBottom: '10px' }} onChange={(e) => setFormula(e.target.value)} />
+                <Input value={newColumnName} placeholder='Enter Column Name' style={{marginBottom:'10px'}} onChange={(e) => setNewColumnName(e.target.value)}/>
+                <Input value={formula} placeholder='Enter Formula' style={{marginBottom:'10px'}} onChange={(e) => setFormula(e.target.value)} />
             </Modal>
 
         </div>

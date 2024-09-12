@@ -1,6 +1,32 @@
 // pages/dashboard.js
 "use client"
+import { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 // pages/index.js
+import React from 'react';
+import axios from 'axios';
+import { Select,Tag } from 'antd';
+import moment from 'moment-timezone';
+import debounce from 'lodash.debounce';
+import { Line } from 'react-chartjs-2';
+import { Chart, registerables } from 'chart.js';
+Chart.register(...registerables);
+// const options = [];
+// for (let i = 10; i < 36; i++) {
+//   options.push({
+//     value: i.toString(36) + i,
+//     label: i.toString(36) + i,
+//   });
+// }
+
+import { DatePicker, Space, ConfigProvider, Flex, Spin, Skeleton } from 'antd';
+const { RangePicker } = DatePicker;
+import locale from 'antd/es/date-picker/locale/en_US';
+const yesterday = moment.tz('UTC').subtract(15, 'days').format('YYYY-MM-DD');
+const defaultDates = [moment(yesterday, 'YYYY-MM-DD'), moment(yesterday, 'YYYY-MM-DD')];
+const handleChange = (value) => {
+  console.log(`selected ${value}`);
+};
+
 import {
     Card,
     Row,
@@ -11,6 +37,7 @@ import {
     Avatar,
     Divider,
     Typography,
+    Checkbox
 } from 'antd';
 import {
     TrophyOutlined,
@@ -22,189 +49,1107 @@ import {
     SmileOutlined,
 } from '@ant-design/icons';
 
+import { useTokenContext } from '../components/parent';
+import { AgGridReact } from "ag-grid-react";
+import 'ag-grid-enterprise';
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-alpine.css";
+
+
+
 const { Title } = Typography;
 
+const timezones = [
+    'UTC',
+    'EEST',
+    'EDT',
+    'CST',
+    'PDT',
+    'IST',
+    'BST',
+    'GMT',
+    'MST',
+    'CDT',
+    'AST',
+    'DST'
+];
+
+const initialData = {
+    Fruits: ['Apple', 'Banana', 'Orange'],
+    Vegetables: ['Carrot', 'Broccoli', 'Spinach'],
+    Grains: ['Rice', 'Wheat', 'Oats'],
+};
+
 const Dashboard = () => {
+    const { userdetails } = useTokenContext();
+    console.log(userdetails);
+    // console.log(userdetails?.adAccounts, "f1");
+    // const { adAccounts } = userdetails;
+
+    if (!userdetails?.adAccounts) {
+        return <div style={{width:'100%', height:'100vh', display:'flex', justifyContent:'center', alignItems:'center'}}>
+            <Flex align="center" gap="middle">
+                {/* <Spin size="small" />
+                <Spin /> */}
+                <Spin size="large" />
+            </Flex>
+        </div>;
+    }
+
+    const transformData = (data) => {
+        return Object.fromEntries(
+          Object.entries(data).map(([key, value]) => {
+            // Check if the value is an array and if it contains objects
+            if (Array.isArray(value) && value.length > 0 && typeof value[0] === 'object') {
+              // Convert array of objects to array of accountNumbers
+              return [key, value.map(obj => obj.accountNumber)];
+            }
+            // If it's not an array of objects, keep it as is
+            return [key, value];
+          })
+        );
+    };
+
+    const transformedData = transformData(userdetails?.adAccounts);
+    // console.log(transformedData, "1");
+
+
+    const defaultCategory = Object.keys(transformedData)[0];
+
+    const [skeletonLoading, setSkeletonLoading] = useState(true);
+
+    const [startDate, setStartDate] = useState(yesterday);
+
+    const [endDate, setEndDate] = useState(yesterday);
+
+    const [data, setData] = useState([]);
+    
+    const [time, setTime] = useState('UTC');
+
+    const onChangeTime = (value) => {
+        setSkeletonLoading(true);
+        setTime(value);
+    }
+
+    const revenue1 = useRef(0);
+    const spend1 = useRef(0);
+    const profit1 = useRef(0);
+    const leads1 = useRef(0);
+    const conversions1 = useRef(0);
+    const cpc1 = useRef(0);
+    const ncpl1 = useRef(0);
+    const cpl1 = useRef(0);
+    const ctr1 = useRef(0);
+    const rpc1 = useRef(0);
+
+      // State for the first Select element (categories)
+    const [firstSelectValues, setFirstSelectValues] = useState([defaultCategory]);
+      
+      // State for the second Select element (selected items within categories)
+    const [selectedItems, setSelectedItems] = useState({
+          [defaultCategory]: transformedData[defaultCategory], // Default all items in the first category
+      });
+    
+    const [chartData, setChartData] = useState({ dates: [], spend: [], revenue: [], profit: [], margin: [] }); 
+
+    const [rowData, setRowData] = useState([]);
+
+    // const functionalCall = (data) => {
+    //     setData(data);
+    // }
+
+    const handleChangeDates = (dates) => {
+        if (dates && dates.length === 2) {
+            setSkeletonLoading(true);
+            const [start, end] = dates;
+            console.log('Start Date:', start.format('YYYY-MM-DD'));
+            console.log('End Date:', end.format('YYYY-MM-DD'));
+            setStartDate(start.format('YYYY-MM-DD'));
+            setEndDate(end.format('YYYY-MM-DD'));
+        }
+    };
+
+    function getTotalEstimatedRevenue(fullData) {
+        const total = fullData.reduce((sum, item) => {
+            // Check if 'estimated_revenue' exists in the object and is a number
+            if (item.estimated_revenue && typeof item.estimated_revenue === 'number') {
+                return sum + item.estimated_revenue;
+            }
+            return sum;
+        }, 0); // Start the sum at 0
+    
+        // Round the final total to 2 decimal places
+        return Math.round(total * 100) / 100;
+    }
+
+
+    // function getTotalEstimatedSpend(fullData) {
+    //     return fullData.reduce((total, item) => {
+    //         // Check if 'estimated_revenue' exists in the object and is a number
+    //         if (item.spend) {
+    //             return total + parseFloat(item.spend);
+    //         }
+    //         // console.log(typeof total);
+    //         return Math.round(total * 100) / 100;
+    //     }, 0); // Start the total at 0
+    // }getTotalEstimatedProfit
+
+    function getTotalEstimatedSpend(fullData) {
+        const total = fullData.reduce((sum, item) => {
+            // Check if 'estimated_revenue' exists in the object and is a number
+            if (item.spend) {
+                return sum + parseFloat(item.spend);
+            }
+            return sum;
+        }, 0); // Start the sum at 0
+    
+        // Round the final total to 2 decimal places
+        return Math.round(total * 100) / 100;
+    }
+
+    function getTotalEstimatedProfit(fullData) {
+        return Math.round((getTotalEstimatedRevenue(fullData)-getTotalEstimatedSpend(fullData)) * 100) / 100 ;
+    }
+
+    function getTotalLeads(fullData) {
+        const total = fullData.reduce((sum, item) => {
+            // Check if 'estimated_revenue' exists in the object and is a number
+            if (item.fbLeads) {
+                return sum + parseInt(item.fbLeads);
+            }
+            return sum;
+        }, 0); // Start the sum at 0
+    
+        // Round the final total to 2 decimal places
+        return total;
+    }
+
+    function getTotalConversions(fullData) {
+        const total = fullData.reduce((sum, item) => {
+            // Check if 'estimated_revenue' exists in the object and is a number
+            if (item.conversions) {
+                return sum + parseInt(item.conversions);
+            }
+            return sum;
+        }, 0); // Start the sum at 0
+    
+        // Round the final total to 2 decimal places
+        return total;
+    }
+
+    function getAverageEstimatedCpc(fullData) {
+        // Filter items that have a valid 'cpc' value
+        const validCpcItems = fullData.filter(item => item.cpc);
+    
+        // Calculate the total sum of 'cpc'
+        const total = validCpcItems.reduce((sum, item) => {
+            return sum + parseFloat(item.cpc);
+        }, 0);
+    
+        // Calculate the average, and round to 2 decimal places
+        const average = validCpcItems.length > 0 ? (total / validCpcItems.length) : 0;
+        
+        return Math.round(average * 100) / 100;
+    }
+
+    function getTotalFbClicks(fullData) {
+        const total = fullData.reduce((sum, item) => {
+            // Check if 'estimated_revenue' exists in the object and is a number
+            if (item.fbLeads) {
+                return sum + parseInt(item.fbLeads);
+            }
+            return sum;
+        }, 0); // Start the sum at 0
+    
+        // Round the final total to 2 decimal places
+        return total;
+    }
+
+    function getTotalImpressions(fullData) {
+        const total = fullData.reduce((sum, item) => {
+            // Check if 'estimated_revenue' exists in the object and is a number
+            if (item.impressions) {
+                return sum + parseInt(item.impressions);
+            }
+            return sum;
+        }, 0); // Start the sum at 0
+    
+        // Round the final total to 2 decimal places
+        return total;
+    }
+
+    function getTotalNcpl(fullData) {
+        return Math.round((getTotalEstimatedSpend(fullData)/getTotalConversions(fullData)) * 100) / 100 ;
+    }
+
+    function getTotalRpc(fullData) {
+        return Math.round((getTotalEstimatedRevenue(fullData)/getTotalConversions(fullData)) * 100) / 100 ;
+    }
+
+    function getTotalCpl(fullData) {
+        return Math.round((getTotalEstimatedSpend(fullData)/getTotalLeads(fullData)) * 100) / 100 ;
+    }
+
+    function getTotalCtr(fullData) {
+        return Math.round(((getTotalFbClicks(fullData)/getTotalImpressions(fullData))*100) * 100) / 100 ;
+    }
+
+    const functionCallForResponse = debounce(async (data)=>{
+        const transformObjectKeys = (obj) => {
+            const transformedObject = {};
+          
+            Object.keys(obj).forEach((key) => {
+              // Split the key by underscore
+              const splitKey = key.split('_');
+              
+              // Add "Facebook_" to the first index
+            //   splitKey[0] = "Facebook_" + splitKey[1];
+              
+              // Join the array back into a string
+              const newKey = "Facebook_" + splitKey[1];
+              
+              // Assign the value to the new key in the transformed object
+              transformedObject[newKey] = obj[key];
+            });
+          
+            return transformedObject;
+        };
+          
+          // Example usage
+        // const originalObject = {
+        //     ad_campaign_2023: "active",
+        //     ad_set_2023: "paused",
+        // };
+          
+        const transformedObject = transformObjectKeys(data);
+        // console.log(transformedObject);
+        const response = await axios.post(`https://prodapis.adsgoat.in/Dashboard?timezone=${time}&start_date=${startDate}&end_date=${endDate}`, {formattedData: [transformedObject]});
+        const responseData = response.data;
+        const functionForDetailsUpdate = async() => {
+            revenue1.current = getTotalEstimatedRevenue(responseData);
+            spend1.current = getTotalEstimatedSpend(responseData);
+            profit1.current = getTotalEstimatedProfit(responseData);
+            leads1.current = getTotalLeads(responseData);
+            conversions1.current = getTotalConversions(responseData);
+            cpc1.current = getAverageEstimatedCpc(responseData);
+            ncpl1.current = getTotalNcpl(responseData);
+            cpl1.current = getTotalCpl(responseData);
+            rpc1.current = getTotalRpc(responseData);
+            ctr1.current = getTotalCtr(responseData);
+            
+            setData(responseData);
+        }
+        functionForDetailsUpdate();
+
+        function groupByAccountNumber(data) {
+            return data.reduce((acc, obj) => {
+              const key = obj.accountNumber;
+          
+              // Find if the accountNumber already exists in the accumulator array
+              let account = acc.find(item => item.accountNumber === key);
+          
+              if (!account) {
+                // If not found, create a new entry for this accountNumber
+                acc.push({
+                  accountNumber: obj.accountNumber,
+                  spend: obj.spend ? parseFloat(obj.spend) : 0, // Initialize with current object values
+                  estimated_revenue: obj.estimated_revenue ? parseFloat(obj.estimated_revenue) : 0,
+                  fbLeads: obj.fbLeads ? parseInt(obj.fbLeads) : 0,
+                  conversions: obj.conversions ? parseInt(obj.conversions) : 0,
+                  revenuePartner: obj.revenuePartner,
+                  mediaBuyerName: obj.MediaBuyerName,
+                  holder: obj.Holder,
+                });
+              } else {
+                // If found, sum the respective fields
+                account.spend += obj.spend !== null && obj.spend !== undefined ? parseFloat(obj.spend) : 0;
+                account.estimated_revenue += obj.estimated_revenue !== null && obj.estimated_revenue !== undefined ? parseFloat(obj.estimated_revenue) : 0;
+                account.fbLeads += obj.fbLeads !== null && obj.fbLeads !== undefined ? parseInt(obj.fbLeads) : 0;
+                account.conversions += obj.conversions !== null && obj.conversions !== undefined ? parseInt(obj.conversions) : 0;
+              }
+          
+              return acc;
+            }, []).map(account => {
+              // Calculate profit after grouping
+              account.profit = account.estimated_revenue - account.spend;
+              return account;
+            });
+          }
+          
+          const groupedData = groupByAccountNumber(responseData);
+          setRowData(groupedData);
+          
+
+        console.log(groupedData);
+        
+        const dates = groupedData.map(d => d.accountNumber.slice(-4));
+        const spend = groupedData.map(d => Math.round((d.spend)*100)/100);
+        const revenue = groupedData.map(d => (Math.round(d.estimated_revenue)*100)/100);
+        const profit = groupedData.map(d => Math.round((d.estimated_revenue - d.spend)*100)/100);
+        const rpc = groupedData.map(d => Math.round((d.estimated_revenue/d.conversions)*100)/100);
+        const cpl = groupedData.map(d => Math.round(((d.spend/d.fbLeads)*100)*100)/100);
+
+        const margin = groupedData.map(d => Math.round((((d.estimated_revenue-d.spend)/d.estimated_revenue)*100)*100)/100);
+
+        setChartData({ dates, spend, revenue, profit, margin, rpc, cpl });
+        console.log(responseData.length);
+        setSkeletonLoading(false);
+    }, 1500);;
+      
+    useEffect(()=>{
+        // if(selectedItems.length > 0){
+            functionCallForResponse(selectedItems);
+        // }
+    }, [selectedItems, time, startDate, endDate])
+       
+  
+    useEffect(() => {
+        let selectedCategoryValues = null;
+      
+        // Log the default state on component mount (runs only once)
+        if (Object.keys(selectedItems).length === 0) {
+          console.log('First Select - Default Selected Categories:', [defaultCategory]);
+          console.log('Second Select - Default Selected Items:', { [defaultCategory]: transformedData[defaultCategory] });
+        }
+      
+        // Only process selectedItems if it's populated
+        if (Object.keys(selectedItems).length > 0) {
+          selectedCategoryValues = Object.entries(selectedItems).reduce((result, [category, values]) => {
+            if (values.length > 0) {
+              result[category] = values;
+            }
+            return result;
+          }, {});
+      
+          console.log('Second Select - Current Selected Items:', selectedCategoryValues);
+          
+      
+          // Ensure functionalCall is not triggering state updates
+        //   if (selectedCategoryValues) {
+        //     // Make sure functionalCall doesn't trigger updates that cause rerenders
+        //     functionalCall([selectedCategoryValues]);
+        //   }
+        }
+        
+      }, [selectedItems, defaultCategory, transformedData]); 
+    //   useEffect(() => {
+    //     console.log(`Second Select - Current Selected Items for ${defaultCategory}:`, selectedItems[defaultCategory]);
+    //   }, [selectedItems[defaultCategory]]); 
+  
+      // Handle change in the first select (category select)
+      const handleFirstSelectChange = (newCategories) => {
+        // Automatically select all items for newly added categories
+        setSkeletonLoading(true);
+        setFirstSelectValues(newCategories);
+      
+        setSelectedItems((prevSelected) => {
+          const updatedSelectedItems = { ...prevSelected };
+      
+          // Remove categories that are deselected
+          Object.keys(prevSelected).forEach((category) => {
+            if (!newCategories.includes(category)) {
+              delete updatedSelectedItems[category]; // Remove deselected categories
+            }
+          });
+      
+          // For any new category, select all items by default
+          newCategories.forEach((category) => {
+            if (!prevSelected[category] && transformedData[category]) {
+              updatedSelectedItems[category] = transformedData[category]; // Select all items by default
+            }
+          });
+      
+          return updatedSelectedItems;
+        });
+      };
+  
+      // Handle change in the second select (category items select)
+       // This runs whenever `selectedItems` changes
+      
+      // Example state updating functions from previous example for reference:
+      
+      const debouncedUpdateSelectedItems = useCallback(
+        debounce((category, checkedValues) => {
+          setSelectedItems((prevSelected) => ({
+            ...prevSelected,
+            [category]: checkedValues,
+          }));
+        //   setSkeletonLoading(false); // Optionally stop loading
+        }, 1000), // Adjust debounce time (1000ms in this example)
+        []
+      );
+    
+      const handleGroupChange = (checkedValues, category) => {
+        setSkeletonLoading(true);
+        // Call the debounced function to update the state
+        debouncedUpdateSelectedItems(category, checkedValues);
+      };
+    
+      const handleSelectAllChange = (isChecked, category) => {
+        setSkeletonLoading(true);
+        const newSelectedValues = isChecked ? transformedData[category] : [];
+        setSelectedItems((prevSelected) => ({
+          ...prevSelected,
+          [category]: newSelectedValues,
+        }));
+        // setSkeletonLoading(false); // Optionally stop loading
+      };
+  
+      // Render checkboxes for categories dynamically based on the first Select values
+      const renderInnerSelects = () => {
+        return firstSelectValues.map((category) => {
+          const allSelected = transformedData[category]?.length === selectedItems[category]?.length;
+      
+          return (
+            <div key={category}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Divider>
+                    {category}
+                    <Checkbox
+                        checked={allSelected}
+                        onChange={(e) => handleSelectAllChange(e.target.checked, category)}
+                        style={{marginLeft:'15px'}}
+                    >
+                    </Checkbox>
+                </Divider>
+                
+              </div>
+              <Checkbox.Group
+                options={transformedData[category]}
+                value={selectedItems[category] || []} // Keep the previously selected items
+                onChange={(checkedValues) => handleGroupChange(checkedValues, category)}
+              />
+            </div>
+          );
+        });
+      };
+
+
+
+
+    // const newNetworks = userdetails?.adAccounts.map((each)=>)
+
+    const networks = Object.keys(userdetails?.adAccounts);
+    console.log(networks, "net");
+
+    const options = networks.map(each => ({
+        value: each,
+        label: each,
+    }));
+
+    const disabledDate = (current) => {
+        // Disable dates after today
+        return current && current > Date.now();
+    };
+
+    const spender = (params) => {
+        const total = params.values.reduce((acc, value) => acc + parseFloat(value || 0), 0);
+        return Math.round(total * 100) / 100; // Round to 2 decimal places
+    };
+    
+    const currencyFormatter = (params) => {
+        return `$${parseFloat(params.value || 0).toFixed(2)}`; // Ensure 2 decimal places in currency format
+    };
+
+      const [columnDefs] = useState([
+        { field: "revenuePartner", 
+            resizable: true,
+            sortable: true,
+            // width: 500,
+            hide: true,
+            rowGroup: true,
+            enableRowGroup: true,
+        }, // Group by Network
+        { field: "holder",
+        resizable: true,
+        sortable: true,
+        hide: true, // Hide column as it's grouped
+        rowGroup: true, 
+        enableRowGroup: true,  }, // Group by Holder
+        {
+          field: "mediaBuyerName",// Group by MediaBuyerName
+        }, // Display Media Buyer name
+        {
+          field: "spend",
+          aggFunc: spender,
+          valueFormatter: currencyFormatter,
+        }, // Summing Spend column
+        {
+            headerName: 'Revenue',
+          field: "estimated_revenue",
+          aggFunc: spender,
+          valueFormatter: currencyFormatter,
+        }, // Summing Revenue column
+        {
+          field: "profit",
+          aggFunc: spender,
+          cellClassRules: {
+            'font-red': p => p.value < 0
+          },
+          valueFormatter: currencyFormatter,
+        }, // Custom aggregation for Profit
+      ]);
+
+      const [columnDefs1] = useState([
+        { field: "accountNumber", 
+            
+        }, // Group by Network
+        {
+          field: "spend",
+          aggFunc: spender,
+          valueFormatter: currencyFormatter,
+        }, // Summing Spend column
+        {  
+          headerName: 'Revenue',
+          field: "estimated_revenue",
+          aggFunc: spender,
+          valueFormatter: currencyFormatter,
+        }, // Summing Revenue column
+        {
+          field: "profit",
+          aggFunc: spender,
+          sort: 'desc',
+          cellClassRules: {
+            'font-red': p => p.value < 0
+          },
+          valueFormatter: currencyFormatter,
+        },
+        { field: "revenuePartner",
+        }, // Group by Holder
+        {
+          field: "holder",// Group by MediaBuyerName
+        },
+        {
+            field: "mediaBuyerName",// Group by MediaBuyerName
+        },
+      ]);
+
+    //   const [columnDefs2] = useState([
+    //     { field: "revenuePartner", 
+    //         resizable: true,
+    //         sortable: true,
+    //         // width: 500,
+    //         hide: true,
+    //         rowGroup: true,
+    //         enableRowGroup: true,
+    //     }, // Group by Network
+    //     { field: "holder",
+    //     resizable: true,
+    //     sortable: true,
+    //     hide: true, // Hide column as it's grouped
+    //     rowGroup: true, 
+    //     enableRowGroup: true,  }, // Group by Holder
+    //     {
+    //       field: "mediaBuyerName",// Group by MediaBuyerName
+    //     }, // Display Media Buyer name
+    //     {
+    //       field: "spend",
+    //       aggFunc: spender,
+    //     //   valueFormatter: currencyFormatter,
+    //     }, // Summing Spend column
+    //     {
+    //       field: "estimated_revenue",
+    //       aggFunc: spender,
+    //     //   valueFormatter: currencyFormatter,
+    //     }, // Summing Revenue column
+    //     {
+    //       field: "profit",
+    //       aggFunc: spender,
+    //     //   valueFormatter: currencyFormatter,
+    //     }, // Custom aggregation for Profit
+    //   ]);
+    
+      const [defaultColDef] = useState({
+        flex: 1, // Flex for responsiveness
+        sortable: true, // Enable sorting
+        filter: true, // Enable filtering
+        resizable: true,
+        enableRowGroup: true, // Enable row grouping
+      });
+    
+    //   function currencyFormatter(params) {
+    //     const value = params.value || 0; // Ensure value is defined and default to 0
+    //     return `$${value}`; // Format the value as currency
+    //   }
+
+    
+    // console.log(rowData?.map(each=> each.profit > 0));
+    console.log(chartData, "data");
     return (
         <div style={{ padding: '20px' }}>
-            <Row gutter={16}>
-                <Col span={8}>
-                    <Card>
-                        <Statistic
-                            title="Congratulations John!"
-                            value="$42.8k"
-                            prefix={<TrophyOutlined />}
-                        />
-                        <p>Best seller of the month</p>
-                    </Card>
+        <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ width: '40%' }}>
+            <h1 style={{ color: '#384551', fontSize: '22px', textAlign: 'start' }}>
+                Welcome, {userdetails?.userName} !
+            </h1>
+            </div>
+            <div style={{ width: '60%', display: 'flex', justifyContent: 'flex-end', height: '50px' }}>
+            <Row style={{ width: '100%', height: '100px', display: 'flex', justifyContent: 'space-between' }}>
+                <Col span={5}>
+                <Select
+                    mode="tags"
+                    style={{
+                    width: '100%',
+                    maxHeight: '40px',
+                    overflowY: 'auto',
+                    }}
+                    placeholder="Select Categories"
+                    value={firstSelectValues}
+                    onChange={handleFirstSelectChange}
+                    maxTagCount="responsive"
+                    dropdownRender={(menu) => (
+                    <div
+                        style={{
+                        maxHeight: '200px',
+                        overflowY: 'auto',
+                        overflowX: 'hidden',
+                        padding: '8px',
+                        }}
+                    >
+                        {menu}
+                    </div>
+                    )}
+                    options={Object.keys(transformedData).map((category) => ({
+                    value: category,
+                    label: category,
+                    }))}
+                />
                 </Col>
-                <Col span={8}>
-                    <Card>
-                        <Statistic title="Total Earnings" value={24895} prefix="$" />
-                        <p>Best seller of the month</p>
-                        {/* <div>10% increase compared to last year</div> */}
-                    </Card>
+
+                <Col span={6}>
+                <Select
+                    mode="multiple"
+                    style={{ width: '100%' }}
+                    placeholder="Select items"
+                    value={[]} // This should be updated to reflect `selectedItems` based on the selected categories
+                    dropdownRender={() => (
+                    <div
+                        style={{
+                        maxHeight: '300px',
+                        overflowY: 'auto',
+                        padding: '8px',
+                        }}
+                    >
+                        {renderInnerSelects()}
+                    </div>
+                    )}
+                />
                 </Col>
+
+                <Col span={3}>
+                <Select
+                    showSearch
+                    onChange={onChangeTime}
+                    style={{ width: '100%' }}
+                    placeholder="Select Timezone"
+                    optionFilterProp="label"
+                    value={time}
+                    options={timezones.map((item) => ({
+                    value: item,
+                    label: item,
+                    }))}
+                />
+                </Col>
+
                 <Col span={8}>
-                    <Card>
-                        <Statistic
-                            title="Total Profit"
-                            value={25600}
-                            prefix="$"
-                            suffix={<ArrowUpOutlined />}
-                            valueStyle={{ color: '#3f8600' }}
-                        />
-                        <p>Best seller of the month</p>
-                    </Card>
+                <ConfigProvider locale={locale}>
+                    <RangePicker
+                    onChange={handleChangeDates}
+                    defaultValue={defaultDates}
+                    format="YYYY-MM-DD"
+                    style={{ width: '100%' }}
+                    />
+                </ConfigProvider>
                 </Col>
             </Row>
-
-            <Row gutter={16} style={{ marginTop: '20px' }}>
-                <Col span={8}>
-                    <Card style={{ marginBottom: '16px' }}>
-                        <Statistic title="Weekly Overview" value="45%" />
-                        <Progress percent={45} status="active" />
-                    </Card>
-                    <Card>
-                        <Statistic
-                            title="New Projects"
-                            value={862}
-                            suffix={<ArrowDownOutlined />}
-                            valueStyle={{ color: '#cf1322' }}
-                        />
-                        <div>Yearly Project</div>
-                    </Card>
-                </Col>
-
-                <Col span={8}>
-                    <Card title="Total Earning">
-                        <List
-                            itemLayout="horizontal"
-                            dataSource={[
-                                {
-                                    title: 'Zipcar',
-                                    description: 'Vue.js, React & HTML',
-                                    amount: '$24,895.65',
-                                },
-                                {
-                                    title: 'Bitbank',
-                                    description: 'Sketch, Figma & XD',
-                                    amount: '$8,650.20',
-                                },
-                                {
-                                    title: 'Aviato',
-                                    description: 'HTML & Angular',
-                                    amount: '$1,245.80',
-                                },
-                            ]}
-                            renderItem={item => (
-                                <List.Item>
-                                    <List.Item.Meta
-                                        avatar={<Avatar>{item.title[0]}</Avatar>}
-                                        title={item.title}
-                                        description={item.description}
-                                    />
-                                    <div>{item.amount}</div>
-                                </List.Item>
-                            )}
-                        />
-                    </Card>
-                </Col>
-                <Col span={8}>
-                    <Card style={{ marginBottom: '16px' }}>
-                        <Statistic title="Weekly Overview" value="45%" />
-                        <Progress percent={45} status="active" />
-                    </Card>
-                    <Card>
-                        <Statistic
-                            title="New Projects"
-                            value={862}
-                            suffix={<ArrowDownOutlined />}
-                            valueStyle={{ color: '#cf1322' }}
-                        />
-                        <div>Yearly Project</div>
-                    </Card>
-                </Col>
-
-            </Row>
-
-            <Row gutter={16} style={{ marginTop: '20px' }}>
-                <Col span={12}>
-                    <Card title="Sales by Countries">
-                        <List
-                            itemLayout="horizontal"
-                            dataSource={[
-                                { country: 'USA', sales: '$8,656k', growth: '25.8%', flag: '🇺🇸' },
-                                { country: 'UK', sales: '$2,415k', growth: '6.2%', flag: '🇬🇧' },
-                                { country: 'India', sales: '$865k', growth: '12.4%', flag: '🇮🇳' },
-                                { country: 'Japan', sales: '$745k', growth: '11.9%', flag: '🇯🇵' },
-                                { country: 'Korea', sales: '$45k', growth: '16.2%', flag: '🇰🇷' },
-                            ]}
-                            renderItem={item => (
-                                <List.Item>
-                                    <List.Item.Meta
-                                        avatar={<Avatar>{item.flag}</Avatar>}
-                                        title={item.country}
-                                        description={item.sales}
-                                    />
-                                    <div>{item.growth}</div>
-                                </List.Item>
-                            )}
-                        />
-                    </Card>
-                </Col>
-                <Col span={12}>
-                    <Card title="Deposit and Withdraw">
-                        <Row>
-                            <Col span={12}>
-                                <Title level={5}>Deposit</Title>
-                                <List
-                                    itemLayout="horizontal"
-                                    dataSource={[
-                                        { source: 'Gumroad Account', amount: '+$4,650' },
-                                        { source: 'Mastercard', amount: '+$92,705' },
-                                        { source: 'Stripe Account', amount: '+$957' },
-                                        { source: 'American Bank', amount: '+$6,837' },
-                                        { source: 'Bank Account', amount: '+$446' },
-                                    ]}
-                                    renderItem={item => (
-                                        <List.Item>
-                                            <List.Item.Meta
-                                                avatar={<Avatar icon={<DollarOutlined />} />}
-                                                title={item.source}
-                                            />
-                                            <div style={{ color: 'green' }}>{item.amount}</div>
-                                        </List.Item>
-                                    )}
-                                />
-                            </Col>
-                            <Col span={12}>
-                                <Title level={5}>Withdraw</Title>
-                                <List
-                                    itemLayout="horizontal"
-                                    dataSource={[
-                                        { source: 'Google Adsense', amount: '-$145' },
-                                        { source: 'Github Enterprise', amount: '-$1,870' },
-                                        { source: 'Upgrade Slack Plan', amount: '-$450' },
-                                        { source: 'Digital Ocean', amount: '-$50' },
-                                        { source: 'AWS Account', amount: '-$21' },
-                                    ]}
-                                    renderItem={item => (
-                                        <List.Item>
-                                            <List.Item.Meta
-                                                avatar={<Avatar icon={<ShoppingOutlined />} />}
-                                                title={item.source}
-                                            />
-                                            <div style={{ color: 'red' }}>{item.amount}</div>
-                                        </List.Item>
-                                    )}
-                                />
-                            </Col>
-                        </Row>
-                    </Card>
-                </Col>
-            </Row>
+            </div>
         </div>
+
+        {skeletonLoading ? (
+            <Skeleton active paragraph={{ rows: 18 }} />
+        ) : (
+            <div style={{ height: '100%', paddingBottom:'40px'}}>
+                <Row gutter={24} style={{ marginTop: '20px' }} justify="space-between">
+                    <Col flex="1">
+                    <Card>
+                        <Statistic
+                        title={
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <span
+                                style={{
+                                display: 'inline-block',
+                                height: '12px',
+                                width: '12px',
+                                backgroundColor: '#A3F254',
+                                borderRadius: '50%',
+                                marginRight: '8px',
+                                }}
+                            ></span>
+                            <span style={{ color: '#A3F254', fontWeight: 600 }}>Revenue</span>
+                            </div>
+                        }
+                        value={data.length > 0 ? revenue1.current : 0}
+                        prefix="$"
+                        valueStyle={{ color: '#3f8600' }}
+                        />
+                    </Card>
+                    </Col>
+
+                    <Col flex="1">
+                    <Card>
+                        <Statistic
+                        title={
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <span
+                                style={{
+                                display: 'inline-block',
+                                height: '12px',
+                                width: '12px',
+                                backgroundColor: '#EC7117',
+                                borderRadius: '50%',
+                                marginRight: '8px',
+                                }}
+                            ></span>
+                            <span style={{ color: '#EC7117', fontWeight: 600 }}>Profit</span>
+                            </div>
+                        }
+                        value={data.length > 0 ? profit1.current : 0}
+                        prefix="$"
+                        valueStyle={{ color: '#3f8600' }}
+                        />
+                    </Card>
+                    </Col>
+
+                    <Col flex="1">
+                    <Card>
+                        <Statistic
+                        title={
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <span
+                                style={{
+                                display: 'inline-block',
+                                height: '12px',
+                                width: '12px',
+                                backgroundColor: '#5C58EE',
+                                borderRadius: '50%',
+                                marginRight: '8px',
+                                }}
+                            ></span>
+                            <span style={{ color: '#5C58EE', fontWeight: 600 }}>Spend</span>
+                            </div>
+                        }
+                        value={data.length > 0 ? spend1.current : 0}
+                        prefix="$"
+                        valueStyle={{ color: '#3f8600' }}
+                        />
+                    </Card>
+                    </Col>
+
+                    <Col flex="1">
+                    <Card>
+                        <Statistic
+                        title={
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <span
+                                style={{
+                                display: 'inline-block',
+                                height: '12px',
+                                width: '12px',
+                                backgroundColor: '#EC7117',
+                                borderRadius: '50%',
+                                marginRight: '8px',
+                                }}
+                            ></span>
+                            <span style={{ color: '#EC7117', fontWeight: 600 }}>Leads</span>
+                            </div>
+                        }
+                        value={data.length > 0 ? leads1.current : 0}
+                        valueStyle={{ color: '#3f8600' }}
+                        />
+                    </Card>
+                    </Col>
+
+                    <Col flex="1">
+                    <Card>
+                        <Statistic
+                        title={
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <span
+                                style={{
+                                display: 'inline-block',
+                                height: '12px',
+                                width: '12px',
+                                backgroundColor: '#5C58EE',
+                                borderRadius: '50%',
+                                marginRight: '8px',
+                                }}
+                            ></span>
+                            <span style={{ color: '#5C58EE', fontWeight: 600 }}>Conversions</span>
+                            </div>
+                        }
+                        value={data.length > 0 ? conversions1.current : 0}
+                        valueStyle={{ color: '#3f8600' }}
+                        />
+                    </Card>
+                    </Col>
+                </Row>
+
+                <Row gutter={24} style={{ marginTop: '20px' }} justify="space-between">
+                    <Col flex="1">
+                    <Card>
+                        <Statistic
+                        title={
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <span
+                                style={{
+                                display: 'inline-block',
+                                height: '12px',
+                                width: '12px',
+                                backgroundColor: '#A3F254',
+                                borderRadius: '50%',
+                                marginRight: '8px',
+                                }}
+                            ></span>
+                            <span style={{ color: '#A3F254', fontWeight: 600 }}>NCPL</span>
+                            </div>
+                        }
+                        value={data.length > 0 ? ncpl1.current : 0}
+                        valueStyle={{ color: '#3f8600' }}
+                        />
+                    </Card>
+                    </Col>
+
+                    <Col flex="1">
+                    <Card>
+                        <Statistic
+                        title={
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <span
+                                style={{
+                                display: 'inline-block',
+                                height: '12px',
+                                width: '12px',
+                                backgroundColor: '#EC7117',
+                                borderRadius: '50%',
+                                marginRight: '8px',
+                                }}
+                            ></span>
+                            <span style={{ color: '#EC7117', fontWeight: 600 }}>CPL</span>
+                            </div>
+                        }
+                        value={data.length > 0 ? cpl1.current : 0}
+                        valueStyle={{ color: '#3f8600' }}
+                        />
+                    </Card>
+                    </Col>
+
+                    <Col flex="1">
+                    <Card>
+                        <Statistic
+                        title={
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <span
+                                style={{
+                                display: 'inline-block',
+                                height: '12px',
+                                width: '12px',
+                                backgroundColor: '#5C58EE',
+                                borderRadius: '50%',
+                                marginRight: '8px',
+                                }}
+                            ></span>
+                            <span style={{ color: '#5C58EE', fontWeight: 600 }}>CTR</span>
+                            </div>
+                        }
+                        value={data.length > 0 ? ctr1.current : 0}
+                        valueStyle={{ color: '#3f8600' }}
+                        />
+                    </Card>
+                    </Col>
+
+                    <Col flex="1">
+                    <Card>
+                        <Statistic
+                        title={
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <span
+                                style={{
+                                display: 'inline-block',
+                                height: '12px',
+                                width: '12px',
+                                backgroundColor: '#EC7117',
+                                borderRadius: '50%',
+                                marginRight: '8px',
+                                }}
+                            ></span>
+                            <span style={{ color: '#EC7117', fontWeight: 600 }}>CPC</span>
+                            </div>
+                        }
+                        value={data.length > 0 ? cpc1.current : 0}
+                        valueStyle={{ color: '#3f8600' }}
+                        />
+                    </Card>
+                    </Col>
+
+                    <Col flex="1">
+                    <Card>
+                        <Statistic
+                        title={
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <span
+                                style={{
+                                display: 'inline-block',
+                                height: '12px',
+                                width: '12px',
+                                backgroundColor: '#5C58EE',
+                                borderRadius: '50%',
+                                marginRight: '8px',
+                                }}
+                            ></span>
+                            <span style={{ color: '#5C58EE', fontWeight: 600 }}>RPC</span>
+                            </div>
+                        }
+                        value={data.length > 0 ? rpc1.current : 0}
+                        valueStyle={{ color: '#3f8600' }}
+                        />
+                    </Card>
+                    </Col>
+                </Row>
+
+                <Row style={{ height: '400px', marginBottom: '10px', marginTop: '25px', padding: '0px', marginLeft:'0px', marginRight:'0px' }}>
+                    <Line
+                    data={{
+                        labels: chartData.dates,
+                        datasets: [
+                        {
+                            label: 'Spend',
+                            data: chartData.spend,
+                            borderColor: 'rgba(44, 144, 192, 1)',
+                            backgroundColor: 'rgba(44, 144, 192, 0.2)',
+                            fill: true,
+                            hidden: true,
+                        },
+                        {
+                            label: 'Revenue',
+                            data: chartData.revenue,
+                            borderColor: 'rgba(99, 200, 99, 1)',
+                            backgroundColor: 'rgba(99, 200, 99, 0.2)',
+                            fill: true,
+                            hidden: true,
+                        },
+                        {
+                            label: 'RPC',
+                            data: chartData.rpc,
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            fill: true,
+                            hidden: true,
+                        },
+                        {
+                            label: 'CPL',
+                            data: chartData.cpl,
+                            borderColor: 'rgba(255, 159, 64, 1)',
+                            backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                            fill: true,
+                            hidden: true,
+                        },
+                        {
+                            label: 'Profit',
+                            data: chartData.profit,
+                            borderColor: 'rgba(255, 206, 86, 1)',
+                            backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                            fill: true,
+                        },
+                        {
+                            label: 'Margin',
+                            data: chartData.margin,
+                            borderColor: 'rgba(153, 102, 255, 1)',
+                            backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                            fill: true,
+                            hidden: true,
+                        },
+                        ],
+                    }}
+                    options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                        x: {
+                            ticks: {
+                            padding: 30,
+                            },
+                        },
+                        y: {
+                            beginAtZero: true,
+                        },
+                        },
+                    }}
+                    height={350}
+                    />
+                </Row>
+                <Row style={{display:'flex', flexDirection:'column'}}>
+                    <Col>
+                        <h2>Over All Report</h2>
+                    </Col>
+                    <Col>
+                        <div className="ag-theme-alpine" style={{ width: '100%', height: '400px' }}>
+                            
+                            <AgGridReact
+                            rowData={rowData}
+                            columnDefs={columnDefs}
+                            defaultColDef={defaultColDef}
+                            rowGroupPanelShow="always"
+                            suppressAggFuncInHeader={true}
+                            groupIncludeFooter={true}
+                            groupIncludeTotalFooter={true}
+                            />
+                        </div>
+                    </Col>
+                </Row>
+                <Row style={{display:'flex', flexDirection:'column'}}>
+                    <Col>
+                        <h2>Profit Accounts</h2>
+                    </Col>
+                    <Col>
+                        <div className="ag-theme-alpine" style={{ width: '100%', height: '400px' }}>
+                            <AgGridReact
+                            rowData={rowData?.filter((each) => each.profit > 0)}
+                            columnDefs={columnDefs1}
+                            defaultColDef={defaultColDef}
+                            rowGroupPanelShow="always"
+                            suppressAggFuncInHeader={true}
+                            groupIncludeFooter={true}
+                            groupIncludeTotalFooter={true}
+                            />
+                        </div>
+                    </Col>
+                </Row>
+                <Row style={{display:'flex', flexDirection:'column'}}>
+                    <Col>
+                        <h2>Loss Accounts</h2>
+                    </Col>
+                    <Col>
+                        <div className="ag-theme-alpine" style={{ width: '100%', height: '400px' }}>
+                            <AgGridReact
+                                rowData={rowData?.filter(each => each.profit < 0)}
+                                columnDefs={columnDefs1}
+                                defaultColDef={defaultColDef}
+                                rowGroupPanelShow="always"
+                                suppressAggFuncInHeader={true}
+                                groupIncludeFooter={true}
+                                groupIncludeTotalFooter={true}
+                            />
+                        </div>
+                    </Col>
+                </Row>
+                <Row></Row>
+
+            
+            </div>
+        )}
+        </div>
+
+
     );
 };
 

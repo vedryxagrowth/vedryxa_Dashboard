@@ -342,6 +342,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
             rowGroup: true,
             enableRowGroup: true,
             pinned: 'left',
+            sort: 'asc' 
         },
         campaignname: {
             headerName: 'CampaignName', field: 'campaignName', resizeble: true,
