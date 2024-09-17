@@ -101,17 +101,29 @@ const App = () => {
     }, []);
 
     // Populate value options in the second dropdown based on selected key
+    // useEffect(() => {
+    //     if (userdetails) {
+    //         const values = userdetails?.adAccounts[selectedKey] || [];
+    //         setValueOptions(values.map(value => ({
+    //             value,
+    //             label: value
+    //         })));
+    //     } else {
+    //         setValueOptions([]);
+    //     }
+    // }, [selectedKey]);
     useEffect(() => {
-        if (userdetails) {
-            const values = userdetails?.adAccounts[selectedKey] || [];
-            setValueOptions(values.map(value => ({
-                value,
-                label: value
-            })));
+        if (selectedKey && userdetails?.adAccounts) {
+            // Mapping over the accounts based on the selected key
+            const accountNumbers = userdetails.adAccounts[selectedKey]?.map(account => ({
+                value: account.accountNumber,  // Set value as accountNumber
+                label: account.accountNumber,  // Set label as accountNumber
+            }));
+            setValueOptions(accountNumbers);  // Update valueOptions with account numbers
         } else {
             setValueOptions([]);
         }
-    }, [selectedKey]);
+    }, [selectedKey, userdetails]);
 
     // Fetch campaign data based on selected value
     const fetchData = async (accountNumber = null) => {
