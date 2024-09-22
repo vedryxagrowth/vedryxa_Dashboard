@@ -628,7 +628,7 @@ export default function CampaignAndAccount({ params }) {
                         suppressAggFuncInHeader={true}
                         groupSuppressBlankHeader={true}
                         // groupIncludeTotalFooter={true}
-                        rowGroupPanelShow='always'
+                        // rowGroupPanelShow='always'
                     // groupIncludeFooter={true}
                     // autoGroupColumnDef={autoGroupColumnDef}
                     // statusBar={{

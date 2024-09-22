@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
-import { Table, Button, Col, Card, Input, Row, Select, Result, Spin, Space, Modal, message, Menu, Switch } from 'antd';
+import { Table, Button, Col, Card, Input, Row, Select, Result, Spin, Space, Modal, message, Menu, Switch, Search } from 'antd';
 import { HighlightOutlined, LeftOutlined, RightOutlined, SearchOutlined, SwapRightOutlined, DownOutlined, EditOutlined } from "@ant-design/icons";
 import { Carousel } from 'react-responsive-carousel';
 import { MailOutlined, SettingOutlined } from '@ant-design/icons';
@@ -21,7 +21,7 @@ const contentStyle = {
     textAlign: 'center',
     background: '#fbfcfa',
 };
-const roles = ['All', 'Media_Buyer', 'ADMIN', 'MANAGER', 'Special_User'];
+const roles = ['All', 'Media_Buyer', 'Admin', 'Manager', 'Special_User'];
 const accountStatus = ['All', 'Active', 'InActive'];
 const availableNetworks = ['All', "MEDIA_DOT_NET", "ENKI", "TONIC", "System1", "Bodies", "Bodies1", "Rsoc", "Domain Active"];
 
@@ -82,7 +82,7 @@ const UsersTable = () => {
     };
 
     const handleBlur1 = () => {
-        if (searchInput.trim() === '') {
+        if (newSearchInput.trim() === '') {
             setIsSearchingAccount(false);
         }
     };
@@ -313,8 +313,8 @@ const UsersTable = () => {
         },
         {
             title: 'Media Buyer Name',
-            dataIndex: 'mediaBuyerName',
-            key: 'mediaBuyerName',
+            dataIndex: 'MediaBuyerName',
+            key: 'MediaBuyerName',
         },
         {
             title: 'Status',
@@ -371,6 +371,11 @@ const UsersTable = () => {
             title: 'BM Name',
             dataIndex: 'BMName',
             key: 'BMName',
+        },
+        {
+            title: 'Holder',
+            dataIndex: 'Holder',
+            key: 'Holder',
         },
 
         // {
@@ -562,6 +567,14 @@ const UsersTable = () => {
     };
     
     const filteredAccountData = filterData();
+
+    // const rowStyle = {
+    //     backgroundColor: '#e3f2fd', // Light blue background color
+    // };
+    
+    // const rowHoverStyle = {
+    //     backgroundColor: '#bbdefb', // Slightly darker blue for hover effect
+    // };
     // console.log(filteredAccountData, "filteredAccountData");
 
     return (
@@ -571,21 +584,23 @@ const UsersTable = () => {
             <Edituseraccesses editeddata={usersaccessData} visible={usersaccessDrawerVisible} onClose={onCloseDrawer} />
 
             <Carousel
+                // className="custom-carousel"
+                
                 ref={carouselRef}
                 dotPosition="bottom"
                 afterChange={setCurrentSlide}
                 dots={false}
-                // showThumbs={false}
+                showThumbs={false}
             >
-                <div>
+                <div style={{width:'100%'}}>
                     <Card title="Users Access" size="small">
                         <Row align={"bottom"} gutter={[16, 16]}>
                             <Col xs={24} md={16}>
                                 <Row gutter={[16, 16]}>
-                                    <Col xs={24} sm={12} md={8}>
+                                <Col xs={24} sm={12} md={8}>
                                         <span style={{ color: "#B4B4B4", display: 'block' }}>Search</span>
                                         <div style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
-                                            {isSearching ? (
+                                            {/* {isSearching ? ( */}
                                                 <>
                                                     <Button icon={<SearchOutlined />} />
                                                     <Input
@@ -597,12 +612,12 @@ const UsersTable = () => {
                                                         style={{ width: '100%', borderRadius: '5px', marginLeft: '8px' }}
                                                     />
                                                 </>
-                                            ) : (
+                                            {/* ) : (
                                                 <Button
                                                     icon={<SearchOutlined />}
                                                     onClick={handleSearchClick}
                                                 />
-                                            )}
+                                            )} */}
                                         </div>
                                     </Col>
                                     <Col xs={24} sm={12} md={8}>
@@ -630,6 +645,7 @@ const UsersTable = () => {
                                             ]}
                                         />
                                     </Col>
+                                    
                                 </Row>
                             </Col>
                             <Col xs={24} md={8}>
@@ -647,6 +663,8 @@ const UsersTable = () => {
                             columns={columns}
                             pagination={{ pageSize: paginationSize }}
                             scroll={{ y: 'calc(80vh - 200px)' }}
+                            // style={{backgroundColor:'skyblue'}}
+                            
                         />
                     ) : (
                         <Result
@@ -663,27 +681,19 @@ const UsersTable = () => {
                         <Row align={"bottom"} gutter={[16, 16]}>
                             <Col xs={24} md={16}>
                                 <Row gutter={[16, 16]}>
+                                    
                                     <Col xs={24} sm={12} md={8}>
                                         <span style={{ color: "#B4B4B4", display: 'block' }}>Search</span>
                                         <div style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
-                                            {isSearchingAccount ? (
-                                                <>
-                                                    <Button icon={<SearchOutlined />}  />
-                                                    <Input
-                                                        placeholder="Search here"
-                                                        autoFocus
-                                                        value={newSearchInput}
-                                                        onChange={handleaccountSearchChange}
-                                                        onBlur={handleBlur1}
-                                                        style={{ width: '100%', borderRadius: '5px', marginLeft: '8px' }}
-                                                    />
-                                                </>
-                                            ) : (
-                                                <Button
-                                                    icon={<SearchOutlined />}
-                                                    onClick={handleSearchClick1}
-                                                />
-                                            )}
+                                            <Button icon={<SearchOutlined />} onClick={handleSearchClick1} />
+                                            <Input
+                                                placeholder="Search here"
+                                                autoFocus={isSearchingAccount}  // Only autofocus when searching
+                                                value={newSearchInput}
+                                                onChange={handleaccountSearchChange}
+                                                onBlur={handleBlur1}
+                                                style={{ width: '100%', borderRadius: '5px', marginLeft:'8px' }} // Adjust input width and margin dynamically
+                                            />
                                         </div>
                                     </Col>
                                     <Col xs={24} sm={12} md={8}>
@@ -710,6 +720,7 @@ const UsersTable = () => {
                                             }))}
                                         />
                                     </Col>
+                                    
                                 </Row>
                             </Col>
                             <Col xs={24} md={8}>
@@ -727,7 +738,7 @@ const UsersTable = () => {
                             dataSource={newSearchInput ? accFilteredData.map((item, index) => ({ ...item, key: index })) : filteredAccountData.map((item, index) => ({ ...item, key: index }))}
                             columns={Accountscolumn}
                             pagination={{ pageSize: paginationSize }}
-                            scroll={{ y: 'calc(70vh - 200px)' }}
+                            scroll={{ y: 'calc(80vh - 200px)' }}
                         />
                     ) : (
                         <Result

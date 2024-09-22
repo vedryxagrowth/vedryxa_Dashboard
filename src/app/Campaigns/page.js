@@ -134,7 +134,6 @@ const App = () => {
         }
     }, [selectedKey, userdetails]);
 
-
     // Fetch campaign data based on selected value
     const fetchData = async (accountNumber = null) => {
         setLoading(true);
