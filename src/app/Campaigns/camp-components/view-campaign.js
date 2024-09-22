@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import {
+    CheckOutlined,
     CloseOutlined,
     CommentOutlined,
+    DeleteOutlined,
+    EditOutlined,
     GlobalOutlined,
     LikeOutlined,
     MoreOutlined,
@@ -18,7 +21,8 @@ import {
     message,
     Alert,
     Row,
-    Col
+    Col,
+    Tooltip
 } from "antd";
 import axios from 'axios';
 const { TabPane } = Tabs;
@@ -109,7 +113,15 @@ const ViewDrawer = ({ rowData, visible, onClose }) => {
 
     };
 
+    const isVideo = (filename) => {
+        const videoExtensions = ['.mp4', '.mov', '.avi', '.webm'];
+        return videoExtensions.some(ext => filename?.toLowerCase().endsWith(ext));
+    };
 
+    const isImage = (filename) => {
+        const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp'];
+        return imageExtensions.some(ext => filename?.toLowerCase().endsWith(ext));
+    };
 
     return (
         <Drawer
@@ -357,96 +369,177 @@ const ViewDrawer = ({ rowData, visible, onClose }) => {
                         </div>
                     </Card>
 
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "3px", justifyContent: "space-between" }}>
-                        {viewCampaignData && viewCampaignData.addlevel && viewCampaignData.addlevel.map((item, index) => (
-                            <div key={index} style={{ flex: "0 1 20%", border: "1px solid #ccc", borderRadius: "8px", padding: "5px", backgroundColor: "#f9f9f9", boxShadow: "0 2px 4px rgba(0,0,0,0.1)" }}>
-                                <div className="container-ad-preview">
-                                    <div className="ad-preview">
-                                        <div className="ad-heading" style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
-                                            <div className="img" style={{ marginRight: "10px" }}>
-                                                {item?.filename?.toLowerCase().endsWith('.mp4') ? (
+                    <Row gutter={[16, 16]} style={{ display: "flex", flexWrap: "nowrap", overflowX: "auto" }}>
+                        {viewCampaignData.addlevel && viewCampaignData.addlevel.map((item, index) => (
+                            <Col key={index} flex="0 0 340px">
+                                <Card
+                                    title={null}
+                                    bordered={false}
+                                    style={{
+                                        width: '100%',
+                                        maxWidth: '340px',
+                                        borderRadius: '8px',
+                                        overflow: 'hidden',
+                                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                                    }}
+                                    bodyStyle={{ padding: '0' }}
+                                >
+                                    <div style={{ padding: '10px 16px' }}>
+                                        <div style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
+                                            <div style={{ marginRight: "10px" }}>
+                                                {isImage(item.filename) ? (
+                                                    <img
+                                                        src={item?.filename}
+                                                        alt="page id"
+                                                        style={{
+                                                            width: "40px",
+                                                            height: "40px",
+                                                            borderRadius: "50%",
+                                                            objectFit: "cover",
+                                                        }}
+                                                    />
+                                                ) : isVideo(item.filename) ? (
                                                     <video
                                                         src={item?.filename}
                                                         width="40"
                                                         height="40"
                                                         controls
-                                                        style={{ objectFit: 'cover', borderRadius: '50%' }}
+                                                        style={{
+                                                            objectFit: 'cover',
+                                                            borderRadius: '50%',
+                                                        }}
                                                     />
                                                 ) : (
-                                                    <img
-                                                        src={item?.filename}
-                                                        alt="page id"
-                                                        style={{ width: "40px", height: "40px", borderRadius: "50%", objectFit: "cover" }}
-                                                    />
+                                                    <div>No media available</div>
                                                 )}
                                             </div>
 
-                                            <div className="title" style={{ flex: "1" }}>
-                                                <div className="main" style={{ fontWeight: "bold" }}>{"Consumer finds"}</div>
-                                                <div className="sub" style={{ fontSize: "12px", color: "#888" }}>
-                                                    Sponsored <GlobalOutlined style={{ opacity: "0.6" }} />
+                                            <div style={{ flex: "1" }}>
+                                                <div style={{ fontWeight: "bold", fontSize: "14px" }}>
+                                                    {item?.AddName || 'Consumer finds'}
+                                                </div>
+                                                <div style={{ fontSize: "12px", color: "#888" }}>
+                                                    Sponsored <GlobalOutlined style={{ opacity: "0.6", marginLeft: "4px" }} />
                                                 </div>
                                             </div>
+                                            <Tooltip title="More Options">
+                                                <MoreOutlined style={{ fontSize: '16px', cursor: 'pointer' }} />
+                                            </Tooltip>
                                         </div>
-                                        <div className="ad-desc" style={{ fontSize: "14px", color: "#333", marginBottom: "10px" }}>{item?.message}</div>
-                                        <div className="ad-image" style={{ width: '100%', height: '200px', marginBottom: "10px" }}>
-                                            {item?.filename?.toLowerCase().endsWith('.mp4') ? (
-                                                <video
-                                                    controls
-                                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                                >
-                                                    <source src={item?.filename} type="video/mp4" />
-                                                    Your browser does not support the video tag.
-                                                </video>
-                                            ) : (
-                                                <img
-                                                    src={item?.filename}
-                                                    alt="ad content"
-                                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                                />
-                                            )}
-                                        </div>
-
-                                        <div className="ad-cta">
-                                            <div className="details" style={{ marginBottom: "10px" }}>
-                                                <div className="link" style={{ fontSize: "12px", color: "#888" }}>{item?.Caption}</div>
-                                                <div className="title" style={{ fontSize: "16px", fontWeight: "bold", color: "#333" }}>{item?.AddName}</div>
-                                                <div className="desc" style={{ fontSize: "12px", color: "#888" }}>{item?.Description}</div>
-                                            </div>
-                                            <div className="ad-button" style={{ textAlign: "center" }}>
-                                                <button type="button" style={{ padding: "10px 15px", borderRadius: "20px", backgroundColor: "#007BFF", color: "#fff", border: "none", cursor: "pointer" }}>
-                                                    Learn More
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div className="icons" style={{ display: "flex", justifyContent: "space-between", marginTop: "10px" }}>
-                                            <div className="like">
-                                                <LikeOutlined style={{ fontSize: "20px" }} />
-                                                Like
-                                            </div>
-                                            <div className="comment">
-                                                <CommentOutlined style={{ fontSize: "20px" }} />
-                                                Comment
-                                            </div>
-                                            <div className="share">
-                                                <ShareAltOutlined style={{ fontSize: "20px" }} />
-                                                Share
-                                            </div>
+                                        <div style={{ fontSize: "14px", color: "#333", marginBottom: "10px" }}>
+                                            {item?.message}
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
 
-                    <div style={{ display: "flex", marginTop: "1%" }}>
-                        <div style={{ flex: 1 }}>
-                            <Button onClick={handleCancel}>Cancel</Button>
+                                    <div style={{ width: '100%', height: '200px', marginBottom: "10px" }}>
+                                        {isVideo(item?.filename) ? (
+                                            <video
+                                                controls
+                                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                            >
+                                                <source src={item?.filename} type="video/mp4" />
+                                                Your browser does not support the video tag.
+                                            </video>
+                                        ) : isImage(item?.filename) ? (
+                                            <img
+                                                src={item?.filename}
+                                                alt="content"
+                                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                            />
+                                        ) : (
+                                            <div style={{ textAlign: "center", padding: "50px" }}>
+                                                No media available
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div style={{ padding: '10px 16px' }}>
+                                        <div style={{ fontSize: "16px", fontWeight: "bold", color: "#333" }}>
+                                            {item?.headline}
+                                        </div>
+                                        <div style={{ fontSize: "14px", color: "#333", marginBottom: "10px" }}>
+                                            {item?.Description}
+                                        </div>
+                                        <div style={{ display: "flex", justifyContent: "space-between" }}>
+                                            <div style={{ fontSize: "12px", color: "#888", marginBottom: "10px" }}>
+                                                {item?.Caption}
+                                            </div>
+                                            <button
+                                                type="button"
+                                                style={{
+                                                    padding: "8px 12px",
+                                                    borderRadius: "20px",
+                                                    backgroundColor: "#007BFF",
+                                                    color: "#fff",
+                                                    border: "none",
+                                                    cursor: "pointer",
+                                                    flexShrink: 0,
+                                                }}
+                                                onClick={() => console.log('Learn More clicked:', item)}
+                                            >
+                                                Learn More
+                                            </button>
+                                        </div>
+
+                                        {/* Website URL */}
+                                        <div style={{ fontSize: "12px", color: "#888", wordWrap: "break-word", marginBottom: "10px" }}>
+                                            <GlobalOutlined />{" "}
+                                            <a href={item?.Website_URL} target="_blank" rel="noopener noreferrer" style={{ color: "blue" }}>
+                                                {item?.Website_URL}
+                                            </a>
+                                        </div>
+
+                                        {/* Like, Comment, Share */}
+                                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                            <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => handleLike(item)}>
+                                                <LikeOutlined style={{ fontSize: "18px", marginRight: "5px" }} />
+                                                <span style={{ fontSize: "14px" }}>Like</span>
+                                            </div>
+                                            <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => handleComment(item)}>
+                                                <CommentOutlined style={{ fontSize: "18px", marginRight: "5px" }} />
+                                                <span style={{ fontSize: "14px" }}>Comment</span>
+                                            </div>
+                                            <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => handleShare(item)}>
+                                                <ShareAltOutlined style={{ fontSize: "18px", marginRight: "5px" }} />
+                                                <span style={{ fontSize: "14px" }}>Share</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Approve/Reject, Edit/Delete */}
+                                        {/* <div style={{ marginTop: "20px", display: "flex", justifyContent: "space-between" }}>
+                                            <div style={{ display: "flex", gap: "10px" }}>
+                                                <Button type="primary" icon={<CheckOutlined />} style={{ backgroundColor: 'green', borderColor: 'green' }} onClick={() => handleApprove(item)}>
+                                                    Approve
+                                                </Button>
+                                                <Button type="primary" danger icon={<CloseOutlined />} onClick={() => handleReject(item)}>
+                                                    Reject
+                                                </Button>
+                                            </div>
+                                            <div style={{ display: "flex", gap: "10px" }}>
+                                                <Tooltip title="Edit">
+                                                    <EditOutlined style={{ fontSize: "18px", cursor: "pointer" }} onClick={() => handleEdit(item)} />
+                                                </Tooltip>
+                                                <Tooltip title="Delete">
+                                                    <DeleteOutlined style={{ fontSize: "18px", color: "red", cursor: "pointer" }} onClick={() => handleDelete(item)} />
+                                                </Tooltip>
+                                            </div>
+                                        </div> */}
+                                    </div>
+                                </Card>
+                            </Col>
+                        ))}
+                    </Row>
+                    {viewCampaignData.Approval !== "Approved" && ( // Only render buttons if not approved
+                        <div style={{ display: "flex", marginTop: "1%" }}>
+                            <div style={{ flex: 1 }}>
+                                <Button onClick={handleCancel}>Cancel</Button>
+                            </div>
+                            <div style={{ flex: 1 }}>
+                                <Button type="primary" onClick={handleApproval}>Approval</Button>
+                            </div>
                         </div>
-                        <div style={{ flex: 1 }}>
-                            <Button type="primary" onClick={handleApproval}>Approval</Button>
-                        </div>
-                    </div>
+                    )}
+
                     <Modal
                         title="Approval Confirmation"
                         open={isModalVisible}
