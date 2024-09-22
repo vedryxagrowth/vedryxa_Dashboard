@@ -1,4 +1,4 @@
-// File: E:\Main Project\Updated_Adsgoat_Dashboard\Adsgoat_Dashboard\src\app\Dashboard\page.js
+// File: C:\Adsgoat_Dashboard\src\app\Dashboard\page.js
 import * as entry from '../../../../src/app/Dashboard/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

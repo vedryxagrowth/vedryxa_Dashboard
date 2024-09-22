@@ -1,7 +1,7 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import { Table, Tag, Button, Col, Card, Drawer, Dropdown, Flex, Input, Row, Select, Spin, Menu, Space, Modal, message, Switch, Tooltip } from 'antd';
-import { EditOutlined, EyeOutlined, SearchOutlined, CloseOutlined, SwapRightOutlined, PlusOutlined, CopyOutlined } from "@ant-design/icons";
+import { EditOutlined, EyeOutlined, SearchOutlined, CloseOutlined, SwapRightOutlined, PlusOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, ExclamationCircleFilled } from "@ant-design/icons";
 import CreateCampaignDrawer from './camp-components/create_camapaign';
 import ViewDrawer from './camp-components/view-campaign';
 import axios from 'axios';
@@ -12,6 +12,8 @@ import Editcampaign from './camp-components/EditCampaign';
 import Editcam from './camp-components/EditCampaign';
 import DuplicateCampaignDrawer from './camp-components/Dupcampaign';
 import { redirect } from 'next/navigation';
+import ExpandedRowContent from './camp-components/expandcreatives';
+import moment from 'moment-timezone';
 
 const App = () => {
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -45,6 +47,13 @@ const App = () => {
         // console.log("hi");
     }
     // const [selectedAccount, setSelectedAccount] = useState('All');
+    const restrictedEmails = [
+        "creatives@adsgoat.in",
+        "mnetadmin@winkleads.com",
+        "creativeteam@winkleads.com",
+        "shravan.k@winkleads.com",
+        "abhynay.k@winkleads.com",
+    ];
 
 
     // Function to handle click on campaign name
@@ -215,7 +224,11 @@ const App = () => {
                     'Content-Type': 'application/json',
                     'Authorization': localStorage.getItem("token"),
                 },
-                body: JSON.stringify({ Approval: newApprovalValue }),
+                body: JSON.stringify({
+                    Approval: newApprovalValue,   // New approval value
+                    Approved: userdetails?.userName,  // Username of the person who approved it
+                    datetime: moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm [IST]') // Current datetime in IST
+                }),
             });
 
             if (response.ok) {
@@ -463,114 +476,7 @@ const App = () => {
 
         );
     };
-    // const onToggleStatus = async (record, checked) => {
-    //     console.log(record, campaignData, "all datata")
-    //     try {
-    //         const token = localStorage.getItem("token");
-    //         console.log('Token:', token);
 
-    //         const response = await fetch(`https://www.testapi.adsgoat.in/api/status/${record?.identifier}`, {
-    //             method: 'PUT',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //                 'Authorization': token,
-    //             },
-    //             body: JSON.stringify({ Status: checked ? 'ACTIVE' : 'PAUSED' }),
-    //         });
-
-    //         const responseData = await response.json();
-    //         console.log('Response status:', response.status);
-    //         console.log('Response data:', responseData);
-
-    //         if (response.ok) {
-    //             message.success("Status updated successfully");
-
-    //             // Update the state to reflect the change in UI
-    //             setCampaignData(prevCampaigns =>
-    //                 prevCampaigns.map(campaign =>
-    //                     campaign.identifier === record.identifier
-    //                         ? { ...campaign, Status: checked ? 'ACTIVE' : 'PAUSED' }
-    //                         : campaign
-    //                 )
-    //             );
-    //         } else {
-    //             console.error('Failed to update status:', responseData);
-    //             message.error(`Failed to update status: ${responseData.message || 'Unknown error'}`);
-    //         }
-    //     } catch (error) {
-    //         console.error('Error updating status:', error);
-    //         message.error("Error updating status");
-    //     }
-    // };
-
-
-
-    // const EditableField = ({ value, record, dataIndex, updateTableRow }) => {
-    //     const [editing, setEditing] = useState(false);
-    //     const [inputValue, setInputValue] = useState(value);
-
-    //     const handleInputChange = (e) => {
-    //         setInputValue(e.target.value);
-    //     };
-
-    //     const handleEdit = () => {
-    //         setEditing(true);
-    //     };
-    //     const handleSave = async () => {
-    //         if (record && inputValue) {
-    //             try {
-    //                 const budgets = inputValue * 100; // Convert input value to the required format
-
-    //                 const response = await fetch(`https://www.testapi.adsgoat.in/api/dailyBudget/${record?.identifier}`, {
-    //                     method: 'PUT',
-    //                     headers: {
-    //                         'Content-Type': 'application/json',
-    //                         'Authorization': localStorage.getItem("token"),
-    //                     },
-    //                     body: JSON.stringify({ Daily_amount: budgets }),
-    //                 });
-
-    //                 if (response.ok) {
-    //                     console.log("Daily amount updated successfully");
-
-    //                     // Update the table row data with the new daily amount
-    //                     updateTableRow({ ...record, Daily_amount: budgets });
-
-    //                     message.success("Daily amount updated successfully");
-
-    //                     changeRRefrst()
-    //                 } else {
-    //                     console.error("Failed to update daily amount");
-    //                     message.error("Failed to update daily amount");
-    //                 }
-    //             } catch (error) {
-    //                 console.error("Error updating daily amount:", error);
-    //                 message.error("Error updating daily amount");
-    //             }
-    //         }
-
-    //         setEditing(false);
-    //     };
-
-    //     return (
-    //         <div>
-    //             {editing ? (
-    //                 <Input
-    //                     value={inputValue}
-    //                     onChange={handleInputChange}
-    //                     onPressEnter={handleSave}
-    //                     onBlur={handleSave}
-    //                     autoFocus
-    //                 />
-    //             ) : (
-    //                 <div onClick={handleEdit}>
-    //                     {value}
-    //                     <EditOutlined style={{ marginLeft: "5px", cursor: "pointer" }} />
-    //                 </div>
-    //             )}
-    //         </div>
-    //     );
-    // };
     const updateTablebudget = (updatedRecord) => {
         setCampaignData(prevCampaigns =>
             prevCampaigns.map(campaign =>
@@ -581,21 +487,7 @@ const App = () => {
         );
     };
 
-    // const updateTablebudget = (updatedRecord) => {
-    //     // Find the index of the updated record in the campaignList
-    //     const updatedIndex = campaignData.findIndex(
-    //         (item) => item.identifier === updatedRecord.identifier
-    //     );
 
-    //     // If the updated record is found, update it in the campaignList
-    //     if (updatedIndex !== -1) {
-    //         setCampaignData((prevCampaigns) => [
-    //             ...prevCampaigns.slice(0, updatedIndex),
-    //             updatedRecord,
-    //             ...prevCampaigns.slice(updatedIndex + 1),
-    //         ]);
-    //     }
-    // };
     const duplicatenewcampaign = (record) => {
         console.log(record, "duplicate camapaign")
         setDrawerVisible(true);
@@ -607,14 +499,14 @@ const App = () => {
             title: '',
             dataIndex: 'fbstatus',
             key: 'fbstatus',
-            width: '3%',
+            width: '5%',  // Adjust width
             align: 'center',
             render: (text, record) => (
                 <>
                     {record.fbstatus === 'Live' ? (
-                        <Tag color="green-inverse"> + </Tag>
+                        <CheckCircleFilled style={{ color: 'green' }} />
                     ) : (
-                        <Tag color="red-inverse"> - </Tag>
+                        <CloseCircleFilled style={{ color: 'red' }} />
                     )}
                 </>
             ),
@@ -623,43 +515,89 @@ const App = () => {
             title: "Campaign Name",
             dataIndex: "campaign_name",
             key: "campaign_name",
+            width: '20%', // Adjust width
+            align: 'left',  // Left align to keep names readable
             render: (text, record) => (
+
                 <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
                     <span onClick={() => handleCampaignNameClick(record)}>{text}</span>
-                    <span style={{ width: '50px', height: '50px', borderRadius: '50%', backgroundColor: '#e6f7ff', marginLeft: '5px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Tooltip title="Clone">
-                            <CopyOutlined style={{ color: 'red' }} onClick={() => duplicatenewcampaign(record)} />
-                        </Tooltip>
-                    </span>
+                    {!restrictedEmails.includes(userdetails.email) && (
+                        <span style={{
+                            width: '24px',
+                            height: '24px',
+                            borderRadius: '50%',
+                            backgroundColor: '#e6f7ff',
+                            marginLeft: '5px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}>
+                            <Tooltip title="Clone">
+                                <CopyOutlined style={{ color: 'red' }} onClick={() => duplicatenewcampaign(record)} />
+                            </Tooltip>
+                        </span>
+                    )}
                 </div>
             ),
         },
-
         {
-            title: "Account Number",
+            title: "Account Number & Creatives Status",
             dataIndex: "Account_Number",
             key: "Account_Number",
-            width: "12%",
-            align: "center",
+            width: '15%',  // Adjust width
+            align: 'center',  // Center align since it's numeric
+            render: (text, record) => (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    {/* Account Number */}
+                    <div>{record.Account_Number}</div>
 
+                    {/* Approved, Rejected, Pending - stacked vertically */}
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2px' }}>
+                        {/* Approved */}
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: '15px' }}>
+                            <Tooltip title="Approved">
+                                <span style={{ color: 'green', fontWeight: 'bold' }}>{record.approvedCount}</span>
+                            </Tooltip>
+                        </div>
+
+                        {/* Rejected */}
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: '15px' }}>
+                            <Tooltip title="Rejected">
+                                <span style={{ color: 'red', fontWeight: 'bold' }}>{record.rejectedCount}</span>
+                            </Tooltip>
+                        </div>
+
+                        {/* Pending */}
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            <Tooltip title="Pending">
+                                <span className="blinking" style={{ color: 'orange', fontWeight: 'bold' }}>{record.pendingCount}</span>
+                            </Tooltip>
+                        </div>
+                    </div>
+                </div>
+            ),
         },
         {
             title: "Platform",
             dataIndex: "Platform",
             key: "Platform",
-            width: "8%",
-            align: "center",
+            width: '10%',  // Adjust width
+            align: 'center',
         },
+
         {
-            title: "createdby",
+            title: "Created By",
             dataIndex: "createdby",
             key: "createdby",
-            width: "12%",
+            width: '12%',  // Adjust width
+            align: 'center',
         },
         {
             title: "Daily Amount",
             dataIndex: "Daily_amount",
-            width: "5%",
+            key: "Daily_amount",
+            width: '10%',  // Adjust width
+            align: 'center',
             render: (Daily_amount, record) => (
                 <>
                     {loading ? (
@@ -677,12 +615,11 @@ const App = () => {
                 </>
             ),
         },
-
         {
             title: "Status",
             dataIndex: "Status",
             key: "Status",
-            width: "11%",
+            width: '10%',
             align: "center",
             render: (text, record) => (
                 <Switch
@@ -693,50 +630,84 @@ const App = () => {
                 />
             )
         },
-
         {
-            title: "Approval",
+            title: "Approval status",
             dataIndex: "Approval",
             key: "Approval",
-            width: "10%",
-            align: "center",
-            render: (text) => {
-                let color;
+            width: '10%',
+            align: 'center',
+            render: (text, record) => {
+                console.log(record, "recordeddata")
+                let color = 'black';
                 if (text === "PENDING_APPROVAL") {
-                    color = "red";
+                    color = 'red';
                 } else if (text === "Approved") {
-                    color = "green";
-                } else {
-                    color = "black"; // Set default color or handle other cases
+                    color = 'green';
                 }
-                return <span style={{ color }}>{text}</span>;
+
+                // Accessing the Approved by field from the record
+                const approvedBy = record?.Approvedby || "N/A"; // Replace 'Approved' with actual field name if needed
+
+                return (
+                    <div>
+                        <span style={{ color }}>{`${text} By`}</span>
+                        {text === "Approved" && (
+                            <>
+                                <br />
+                                <small style={{ color: 'gray' }}> {approvedBy}</small>
+                            </>
+                        )}
+                    </div>
+                );
             },
         },
+
+        // {
+        //     title: "Approval status",
+        //     dataIndex: "Approval",
+        //     key: "Approval",
+        //     width: '10%',
+        //     align: 'center',
+        //     render: (text) => {
+        //         let color = 'black';
+        //         if (text === "PENDING_APPROVAL") {
+        //             color = 'red';
+        //         } else if (text === "Approved") {
+        //             color = 'green';
+        //         }
+        //         return <span style={{ color }}>{text}</span>;
+        //     },
+        // },
         {
             title: 'Action',
             dataIndex: 'Action',
-            // width: "50%",
             align: "center",
-            render: (_, record) => (
-                <Space size="middle">
-                    <Button icon={<EyeOutlined />} onClick={() => handleViewClick(record)}>View</Button>
-                    {record.Approval === 'PENDING_APPROVAL' && (
-                        <Button type="primary" onClick={() => handleApproval(record)}>Approve</Button>
-                    )}
-                    {record.Approval === 'Approved' && (
-                        <Tag color="green">APPROVED</Tag>
-                    )}
-                    <Modal
-                        title="Confirm Approval"
-                        visible={isModalVisible}
-                        onOk={handleOk}
-                        onCancel={handleCancel}
-                    >
-                        <p>Are you sure you want to approve?</p>
-                    </Modal>
-                </Space>
-            ),
+            render: (_, record) => {
+                if (record.Approval === 'Approved') {
+                    return (
+                        <Button icon={<EyeOutlined />} onClick={() => handleViewClick(record)}>View</Button>
+                    )
+                }
+
+                return (
+                    <Space size="middle">
+                        <Button icon={<EyeOutlined />} onClick={() => handleViewClick(record)}>View</Button>
+                        {record.Approval === 'PENDING_APPROVAL' && (
+                            <Button type="primary" onClick={() => handleApproval(record)}>Approve</Button>
+                        )}
+                        <Modal
+                            title="Confirm Approval"
+                            visible={isModalVisible}
+                            onOk={handleOk}
+                            onCancel={handleCancel}
+                        >
+                            <p>Are you sure you want to approve?</p>
+                        </Modal>
+                    </Space>
+                );
+            }
         }
+
     ];
 
     return (
@@ -762,10 +733,11 @@ const App = () => {
                 onClose={() => setEditcamapaignDrawerVisible(false)}
             /> */}
             <Card title="Campaigns" size="small">
-                <Row justify="space-between" align="middle">
+                <Row justify="start" align="middle" gutter={[16, 16]}>
                     <Col span={3}>
                         <Select
-                            placeholder="Select Key"
+                            showSearch
+                            placeholder="Select Network"
                             style={{ width: '100%' }}
                             onChange={handleKeyChange}
                             value={selectedKey}
@@ -777,8 +749,8 @@ const App = () => {
                     </Col>
                     {/* <button onClick={changeRRefrst}>Test Refresh</button> */}
                     <Col span={4}>
-                        <Select
-                            placeholder="Select Value"
+                        {/* <Select
+                            placeholder="Select Account"
                             style={{ width: '100%' }}
                             onChange={handleValueChange}
                             disabled={!selectedKey}
@@ -787,7 +759,28 @@ const App = () => {
                             {valueOptions.map(option => (
                                 <Option key={option.value} value={option.value}>{option.label}</Option>
                             ))}
+                        </Select> */}
+                        <Select
+                            showSearch
+                            placeholder="Select Account"
+                            style={{ width: '100%' }}
+                            onChange={handleValueChange}
+                            disabled={!selectedKey}
+                            value={selectedValue}
+                            optionFilterProp="children" // Use this to filter on the option label
+                            filterOption={(input, option) => {
+                                // Only allow numbers as input and filter options by their value
+                                return /^[0-9]*$/.test(input) && option?.value.toString().includes(input);
+                            }}
+                        >
+                            {valueOptions.map(option => (
+                                <Option key={option.value} value={option.value}>
+                                    {option.label}
+                                </Option>
+                            ))}
                         </Select>
+
+
                     </Col>
                     <Col span={4}>
 
@@ -798,26 +791,55 @@ const App = () => {
                             onChange={handleSearchChange}
                         />
                     </Col>
-                    <Col>
-                        <Button type="primary" onClick={showDrawer} icon={<PlusOutlined />}>
-                            Create Campaign
-                        </Button>
-                    </Col>
+                    {!restrictedEmails.includes(userdetails.email) && (
+                        <Col>
+                            <Button type="primary" onClick={showDrawer} icon={<PlusOutlined />}>
+                                Create Campaign
+                            </Button>
+                        </Col>
+                    )}
 
                 </Row>
             </Card>
-
-
             <Table
-                style={{ marginTop: "1%" }}
-                rowSelection={{ selectedRowKeys, onChange: onSelectChange }}
+                style={{ width: "100%" }}  // Ensures table takes full available width
                 columns={columns}
-                dataSource={searchInput ? filteredData.map((item, index) => ({ ...item, key: index })).reverse() : campaignData.map((item, index) => ({ ...item, key: index })).reverse()}
+                dataSource={
+                    searchInput
+                        ? filteredData.map((item, index) => ({ ...item, key: index })).reverse()
+                        : campaignData.map((item, index) => ({ ...item, key: index })).reverse()
+                }
                 pagination={{ pageSize: paginationSize }}
-                scroll={{ y: 'calc(80vh - 200px)' }}
+                scroll={{
+                    x: 'max-content',  // Enable horizontal scroll if needed
+                    y: 'calc(87vh - 200px)',  // Vertical scroll for overflow
+                }}
+                expandable={{
+                    expandedRowRender: (record) => (
+                        <ExpandedRowContent
+                            record={record}
+                            changeRRefrst={changeRRefrst} // Ensure this prop is passed
+                        />
+                    ),
+                    rowExpandable: (record) => !!record,
+                }}
             />
 
-            <Drawer
+
+            {!restrictedEmails.includes(userdetails.email) && (
+                <Drawer
+                    title={adsetcampaigndata?.campaign_name || ''}
+                    placement="right"
+                    onClose={onCloseDrawer}
+                    open={adsetsdrawerVisible}
+                    width="90%" // Adjust width as needed
+                >
+                    <Adsets selectedRow={adsetcampaigndata} onClose={onCloseDrawer} changeRRefrst={changeRRefrst} />
+                </Drawer>
+            )}
+
+
+            {/* <Drawer
                 title={adsetcampaigndata?.campaign_name || ''}
                 placement="right"
                 onClose={onCloseDrawer}
@@ -825,16 +847,8 @@ const App = () => {
                 width="90%" // Adjust width as needed
             >
                 <Adsets selectedRow={adsetcampaigndata} onClose={onCloseDrawer} changeRRefrst={changeRRefrst} />
-            </Drawer>
-            {/* <Drawer
-                title={adsetcampaigndata?.campaign_name || ''}
-                placement="right"
-                onClose={onCloseDrawer}
-                open={EditcamapaignDrawerVisible}
-                width="90%" // Adjust width as needed
-            >
-                <Editcam selectedRow={selectedEditCampaign} onClose={onCloseDrawer} />
             </Drawer> */}
+
         </div>
 
     )
