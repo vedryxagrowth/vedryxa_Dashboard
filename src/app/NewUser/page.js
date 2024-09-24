@@ -23,7 +23,7 @@ const contentStyle = {
 };
 const roles = ['All', 'Media_Buyer', 'Admin', 'Manager', 'Special_User'];
 const accountStatus = ['All', 'Active', 'InActive'];
-const availableNetworks = ['All', "MEDIA_DOT_NET", "ENKI", "TONIC", "System1", "Bodies", "Bodies1", "Rsoc", "Domain Active"];
+const availableNetworks = ['All', "MEDIA_DOT_NET", "MEDIA_DOT_NET_BING", "ENKI", "TONIC", "System1", "Bodies", "Bodies1", "Rsoc", "Domain Active"];
 
 const UsersTable = () => {
     const [usersData, setUsersData] = useState([]);

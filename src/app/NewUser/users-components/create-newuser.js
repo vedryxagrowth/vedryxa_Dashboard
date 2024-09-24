@@ -24,7 +24,7 @@ const Createnewuser = ({ visible, onClose }) => {
     // const [accounts, setAccounts] = useState();
     var token = localStorage.getItem("token");
 
-    const availableNetworks = ["FB_Mnet", "FB_Enki", "FB_Tonic", "FB_System1", "FB_Bodies", "FB_Bodies1", "FB_Rsoc", "FB_DActive"].filter(network => !selectedNetworks.includes(network));
+    const availableNetworks = ["FB_Mnet", "FB_MnetBing", "FB_Enki", "FB_Tonic", "FB_System1", "FB_Bodies", "FB_Bodies1", "FB_Rsoc", "FB_DomainActive"].filter(network => !selectedNetworks.includes(network));
     const handleAddAccount = () => {
         if(availableNetworks.length > 0){
             setAdditionalAccounts([...additionalAccounts, { network: '', inputs: [''] }]);
@@ -189,12 +189,12 @@ const Createnewuser = ({ visible, onClose }) => {
                 <Form.Item label="Ad Accounts" name="adAccounts">
                     <div>
                         <div>
-                            {additionalAccounts.map((account, accountIndex) => (
+                        {additionalAccounts.map((account, accountIndex) => (
                                 <div key={accountIndex}>
                                     <div style={{ display: 'flex', marginBottom: '8px', width: '100%' }}>
                                         <Select
                                             placeholder="Select a network"
-                                            style={{ width: '150px', marginRight: '8px' }}
+                                            style={{ maxWidth: '120px', height: '30px', marginRight:'8px' }}
                                             value={account.network}
                                             onChange={(value) => handleNetworkChange(accountIndex, value)}
                                         >
@@ -206,34 +206,47 @@ const Createnewuser = ({ visible, onClose }) => {
                                         </Select>
                                         <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
                                             {account.inputs.map((input, inputIndex) => (
-                                                <div key={inputIndex} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', width: '100%' }}>
+                                                <div key={inputIndex} style={{ 
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    marginBottom: '8px',
+                                                    width: '100%',
+                                                    height: '30px',
+                                                    justifyContent: 'center',
+                                                 }}>
                                                     <Input
                                                         value={input}
                                                         onChange={(e) => handleInputChange(accountIndex, inputIndex, e.target.value)}
                                                         placeholder="Enter ad input"
                                                         style={{ width: '100%', marginRight: '8px' }}
                                                     />
-                                                    {inputIndex !== 0 && (
+                                                    {account.inputs.length === 1 && inputIndex === 0 && (
+                                                        <Button
+                                                            style={{ marginTop: '8px', marginBottom: '8px' }}
+                                                            type="default"
+                                                            onClick={() => handleRemoveAccount(accountIndex)}
+                                                        >
+                                                            Remove
+                                                        </Button>
+                                                    )}
+                                                    {account.inputs.length > 1 && inputIndex !== 0 && (
                                                         <DeleteOutlined
                                                             style={{ cursor: 'pointer' }}
                                                             onClick={() => handleRemoveInput(accountIndex, inputIndex)}
                                                         />
                                                     )}
-                                                    <PlusOutlined
-                                                        style={{ cursor: 'pointer', marginLeft: '8px' }}
-                                                        onClick={() => handleAddInput(accountIndex)}
-                                                    />
+                                                    {inputIndex === account.inputs.length - 1 && (
+                                                        <PlusOutlined
+                                                            style={{ cursor: 'pointer', marginLeft: '8px' }}
+                                                            onClick={() => handleAddInput(accountIndex)}
+                                                        />
+                                                    )}
+                                                    
                                                 </div>
                                             ))}
                                         </div>
                                     </div>
-                                    <Button
-                                        style={{ marginTop: '8px', marginBottom: '8px' }}
-                                        type="default"
-                                        onClick={() => handleRemoveAccount(accountIndex)}
-                                    >
-                                        Remove
-                                    </Button>
+                                    
                                 </div>
                             ))}
                         </div>

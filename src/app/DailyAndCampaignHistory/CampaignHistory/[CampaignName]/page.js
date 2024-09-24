@@ -56,9 +56,9 @@ export default function CampaignAndAccount({ params }) {
             if (revenue !== "0.00" || revenue !== undefined) {
                 const RPC = ((revenue - spend) / revenue) * 100;
                 if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
-                    return `0%`;
+                    return `0`;
                 }
-                return `${Math.round(RPC * 100) / 100}%`;
+                return `${Math.round(RPC * 100) / 100}`;
 
             }
         }
@@ -67,9 +67,9 @@ export default function CampaignAndAccount({ params }) {
             if (revenue !== "0.00" || revenue !== undefined) {
                 const RPC = ((revenue - spend) / revenue) * 100;
                 if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
-                    return `0%`;
+                    return `0`;
                 }
-                return `${Math.round(RPC * 100) / 100}%`;
+                return `${Math.round(RPC * 100) / 100}`;
 
             }
         }
@@ -132,7 +132,7 @@ export default function CampaignAndAccount({ params }) {
                 if (RPC === Infinity || isNaN(RPC)) {
                     return 0;
                 }
-                return `${Number(RPC.toFixed(2))}%`;
+                return `${Number(RPC.toFixed(2))}`;
 
             }
         }
@@ -140,7 +140,7 @@ export default function CampaignAndAccount({ params }) {
             const { impressions, fbclicks } = params.node.aggData;
             if (impressions !== 0) {
                 const RPC = (fbclicks / impressions) * 100;
-                return `${Number(RPC.toFixed(2))}%`;
+                return `${Number(RPC.toFixed(2))}`;
             }
         }
 
@@ -182,7 +182,7 @@ export default function CampaignAndAccount({ params }) {
                 if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
                     return 0;
                 }
-                return `${Number(RPC.toFixed(2))}%`;
+                return `${Number(RPC.toFixed(2))}`;
 
             }
         }
@@ -190,7 +190,7 @@ export default function CampaignAndAccount({ params }) {
             const { profit } = params.node.aggData;
             if (revenue !== 0) {
                 const RPC = (profit / revenue) * 100;
-                return `${Number(RPC.toFixed(2))}%`;
+                return `${Number(RPC.toFixed(2))}`;
             }
         }
 
@@ -230,9 +230,9 @@ export default function CampaignAndAccount({ params }) {
             if (revenue !== "0.00" || revenue !== undefined) {
                 const RPC = ((revenue - spend) / spend) * 100;
                 if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
-                    return `0%`;
+                    return `0`;
                 }
-                return `${Math.round(RPC * 100) / 100}%`;
+                return `${Math.round(RPC * 100) / 100}`;
 
             }
         }
@@ -241,9 +241,9 @@ export default function CampaignAndAccount({ params }) {
             if (revenue !== "0.00" || revenue !== undefined) {
                 const RPC = ((revenue - spend) / spend) * 100;
                 if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
-                    return `0%`;
+                    return `0`;
                 }
-                return `${Math.round(RPC * 100) / 100}%`;
+                return `${Math.round(RPC * 100) / 100}`;
 
             }
         }
@@ -380,6 +380,25 @@ export default function CampaignAndAccount({ params }) {
         }
     ];
 
+    const defaultComparator = (valueA, valueB) => {
+        if (valueA == null && valueB == null) return 0;
+        if (valueA == null) return -1;
+        if (valueB == null) return 1;
+
+        const numA = parseFloat(valueA);
+        const numB = parseFloat(valueB);
+        if (!isNaN(numA) && !isNaN(numB)) {
+            return numA - numB;
+        }
+        return valueA.localeCompare(valueB);
+    };
+
+    const defaultColDef = {
+        comparator: defaultComparator, // Use the universal comparator for sorting
+        sortable: true,  // Enable sorting for all columns
+        filter: true,    // Enable filtering for all columns
+    };
+
     const columnDefsObject = {
         campaignname: {
             headerName: 'CampaignName', field: 'campaignName',
@@ -391,16 +410,35 @@ export default function CampaignAndAccount({ params }) {
             // groupDisplayType: 'group',
             width: 400,
         },
-        date: { headerName: 'Date', field: 'date', width: 120, sort: 'asc' },
+        date: { headerName: 'Date', field: 'date', width: 120, sort: 'asc',
+        comparator: (valueA, valueB) => {
+            if (valueA == null && valueB == null) return 0;
+            if (valueA == null) return -1;
+            if (valueB == null) return 1;
+
+            const dateA = new Date(valueA);
+            const dateB = new Date(valueB);
+
+            // Compare valid dates
+            if (!isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) {
+                return dateA - dateB;
+            }
+
+            // Fallback for invalid dates (compare as strings)
+            return valueA.toString().localeCompare(valueB.toString());
+        }
+         },
         spend: {
             headerName: 'Spend', field: 'spend', width: 120,
             aggFunc: agFunc,
             valueFormatter: params => params.value ? Math.round(params.value * 100) / 100 : '',
+            
         },
         revenue: {
             headerName: 'Revenue', field: 'revenue', width: 120,
             aggFunc: agFunc,
             valueFormatter: params => params.value ? Math.round(params.value * 100) / 100 : '',
+            
         },
         profit: {
             headerName: 'Profit', field: 'profit', width: 120, cellClassRules: {
@@ -408,18 +446,37 @@ export default function CampaignAndAccount({ params }) {
             },
             aggFunc: agFunc,
             valueFormatter: params => params.value ? Math.round(params.value * 100) / 100 : '',
+            
         },
         margin: {
-            headerName: 'Margin', field: 'margin', valueGetter: getMargin, width: 120
+            headerName: 'Margin', field: 'margin', valueGetter: getMargin, width: 120,
+            
+            valueFormatter: (params) => `${params.value}%`,
 
         },
-        rpc: { headerName: 'Rpc', field: 'rpc', valueGetter: getRpc, width: 120 },
-        cpl: { headerName: 'Cpl', field: 'cpl', valueGetter: getCpl, width: 120 },
-        ncpl: { headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl, width: 120 },
-        fbleads: { headerName: 'FbLeads', field: 'fbleads', width: 120, aggFunc: agFunc, },
-        conversions: { headerName: 'Conversions', field: 'conversions', width: 120, aggFunc: agFunc, },
-        fmargin: { headerName: 'Fmargin', field: 'fmargin', valueGetter: getFmargin },
-        roi: { headerName: 'ROI', field: 'roi', valueGetter: getROI, width: 120 },
+        rpc: { headerName: 'Rpc', field: 'rpc', valueGetter: getRpc, width: 120,
+            
+         },
+        cpl: { headerName: 'Cpl', field: 'cpl', valueGetter: getCpl, width: 120,
+            
+         },
+        ncpl: { headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl, width: 120,
+            
+         },
+        fbleads: { headerName: 'FbLeads', field: 'fbleads', width: 150, aggFunc: agFunc,
+            
+         },
+        conversions: { headerName: 'Conversions', field: 'conversions', width: 150, aggFunc: agFunc,
+            
+         },
+        fmargin: { headerName: 'Fmargin', field: 'fmargin', valueGetter: getFmargin,
+            
+            valueFormatter: (params) => `${params.value}%`,
+         },
+        roi: { headerName: 'ROI', field: 'roi', valueGetter: getROI, width: 120,
+            
+            valueFormatter: (params) => `${params.value}%`,
+         },
         cpc: {
             headerName: 'cpc', width: 120, field: 'cpc',
             aggFunc: (params) => {
@@ -427,11 +484,29 @@ export default function CampaignAndAccount({ params }) {
                 return sum / params.values.length;
             },
             valueFormatter: params => params.value !== undefined ? Math.round(params.value * 100) / 100 : '',
+            
 
         },
-        fbclicks: { headerName: 'FbClicks', field: 'fbclicks', width: 120, aggFunc: agFunc, },
-        impressions: { headerName: 'Impressions', field: 'impressions', width: 120, aggFunc: agFunc, },
-        ctr: { headerName: 'Ctr', field: 'ctr', valueGetter: getCtr },
+        fbclicks: { headerName: 'FbClicks', field: 'fbclicks', width: 150, aggFunc: agFunc, 
+        comparator: (valueA, valueB) => {
+            // Default comparator for handling null or undefined values
+            if (valueA == null) return -1;
+            if (valueB == null) return 1;
+            return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
+        },
+        },
+        impressions: { headerName: 'Impressions', field: 'impressions', width: 150, aggFunc: agFunc, 
+        comparator: (valueA, valueB) => {
+            // Default comparator for handling null or undefined values
+            if (valueA == null) return -1;
+            if (valueB == null) return 1;
+            return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
+        },
+        },
+        ctr: { headerName: 'Ctr', field: 'ctr', valueGetter: getCtr,
+            
+            valueFormatter: (params) => `${params.value}%`,
+         },
         adsetname: {
             headerName: 'AdsetName', field: 'adsetName',
             // resizeble: true,
@@ -444,9 +519,14 @@ export default function CampaignAndAccount({ params }) {
             // pinned: 'left',
             // enableRowGroup: true,
             // autoHeight: true, 
+            
         },
-        adsetid: { headerName: 'AdsetId', field: 'adsetId' },
-        campaignid: { headerName: 'CampaignId', field: 'campaignId' }
+        adsetid: { headerName: 'AdsetId', field: 'adsetId',
+        
+         },
+        campaignid: { headerName: 'CampaignId', field: 'campaignId',
+        
+         }
     };
 
     return (
@@ -608,6 +688,7 @@ export default function CampaignAndAccount({ params }) {
                     <AgGridReact
                         rowData={dailyData}
                         columnDefs={columnDefs}
+                        defaultColDef={defaultColDef}
                         // grandTotalRow="bottom"
                         pinnedBottomRowData={pinnedBottomRowData}
                         getRowStyle={params => {
