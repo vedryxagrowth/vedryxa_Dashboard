@@ -25,7 +25,9 @@ export default function CampaignAndAccount({ params }) {
     const [isLoading, setLoading] = useState(true);
     const [dailyData, setdailyData] = useState([]);
     const [chartData, setChartData] = useState({ dates: [], spend: [], revenue: [], profit: [], margin: [] });
-
+    const { theme } = useTokenContext();
+    const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
+    const [darkMode, setDarkMode] = useState(false);
     const paramsData = ((params.CampaignName).split("-"));
     const decodedString = decodeURIComponent(paramsData[0]);
     const accountNumber = paramsData[1];
@@ -604,7 +606,8 @@ export default function CampaignAndAccount({ params }) {
                     </div>
                 </div>
             ) : dailyData?.length > 0 ? (
-                <div className="ag-theme-alpine ag-container" >
+                // <div className="ag-theme-alpine ag-container" >
+                     <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
                     <AgGridReact
                         rowData={dailyData}
                         columnDefs={columnDefs}
@@ -614,7 +617,8 @@ export default function CampaignAndAccount({ params }) {
                             if (params.node.rowPinned) {
                                 return {
                                     fontWeight: 'bold',
-                                    backgroundColor: '#f4f4f4' // Highlight the footer row
+                                    backgroundColor: darkMode ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
+                                    color: darkMode ? '#fff' : '#000',           // Text color should contrast with the background
                                 };
                             }
                             return null;

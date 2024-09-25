@@ -11,8 +11,11 @@ import { useTokenContext } from './parent';
 import moment from 'moment-timezone';
 import ContactForm from './mail';
 import { PlusOutlined } from '@ant-design/icons';
+import { Moon, Sun } from 'lucide-react';
 
-const items = (setUserDetails, router) => [
+
+
+const items = (setuserdetails, router) => [
     {
         key: "1",
         label: (
@@ -55,64 +58,152 @@ const items = (setUserDetails, router) => [
     },
 ];
 
-const Topbar = ({ session, darkMode, toggleTheme, setUserDetails }) => {
+// const Topbar = ({ session, darkMode, toggleTheme, setUserDetails }) => {
 
-    const router = useRouter();
-    const dropdownItems = items(setUserDetails, router);
+//     const router = useRouter();
+//     const dropdownItems = items(setUserDetails, router);
 
-    return (
-        <div style={{ backgroundColor: darkMode ? '#333' : '#f0f2f5', padding: '0 20px' }}>
-            <div
-                style={{
-                    position: "sticky",
-                    top: 0,
-                    zIndex: 1,
-                    width: "100%",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    color: darkMode ? '#fff' : '#000'
-                }}
-            >
-                <Image
-                    src="/Ads.png"
-                    width={150}
-                    height={60}
-                    priority={true}
-                    alt="Logo"
-                    style={{ maxWidth: "8rem", maxHeight: "4rem" }}
-                />
+//     return (
+//         <div style={{ backgroundColor: darkMode ? '#333' : '#fff', padding: '0 20px',margin:"10px" }}>
+//             <div>
+               
+//                 <div
+//                     style={{
+//                         display: "flex",
+//                         flexDirection: "row",
+//                         alignItems: "center",
+//                         gap: "1em",
+//                         height :"60px",
+//                         justifyContent:"end"
+//                     }}>
+//                     <h2 style={{ color: darkMode ? '#fff' : '#000', margin: 0, fontSize: '1.2rem' }}>Hi {session ? session.user.name : ""}</h2>
+//                     <Dropdown
+//                         menu={{
+//                             items: dropdownItems
+//                         }}
+//                         placement="bottomLeft"
+//                         arrow={{ pointAtCenter: true }}>
+//                         <Avatar
+//                             size="large"
+//                             style={{
+//                                 background: "#ebebeb",
+//                                 fontSize: "1.8em",
+//                             }}>
+//                         </Avatar>
+//                     </Dropdown>
+//                     <Switch checked={darkMode} onChange={toggleTheme} />
+//                     <span>{darkMode ? 'Dark Mode' : 'Light Mode'}</span>
+//                 </div>
+//             </div>
+//         </div>
+//     );
+// };
+const Topbar = ({  }) => {
+    const { darkMode, toggleTheme } = useTokenContext();
+  const router = useRouter();
+  const { data: session } = useSession();
+//   const [darkMode, setDarkMode] = React.useState(false);
 
-                <div
-                    style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        alignItems: "center",
-                        gap: "1em",
-                    }}>
-                    <h2 style={{ color: darkMode ? '#fff' : '#000', margin: 0, fontSize: '1.2rem' }}>Hi {session ? session.user.name : ""}</h2>
-                    <Dropdown
-                        menu={{
-                            items: dropdownItems
-                        }}
-                        placement="bottomLeft"
-                        arrow={{ pointAtCenter: true }}>
-                        <Avatar
-                            size="large"
-                            style={{
-                                background: "white",
-                                fontSize: "1.8em",
-                            }}>
-                        </Avatar>
-                    </Dropdown>
-                    <Switch checked={darkMode} onChange={toggleTheme} />
-                    <span>{darkMode ? 'Dark Mode' : 'Light Mode'}</span>
-                </div>
-            </div>
-        </div>
-    );
+//   const toggleTheme = () => {
+//     setDarkMode(!darkMode);
+//   };
+
+  const dropdownItems = [
+    {
+      key: '1',
+      label: (
+        <a href="/api/auth/signin">Sign in</a>
+      ),
+    },
+    {
+      key: '2',
+      label: (
+        <a
+          onClick={() => {
+            localStorage.clear();
+            localStorage.setItem('redirectUrl', router.asPath);
+            router.push('/api/auth/signout');
+          }}
+        >
+          Sign Out
+        </a>
+      ),
+    },
+  ];
+
+  return (
+    <div
+      style={{
+        backgroundColor: darkMode ? '#333' : '#fff',
+        padding: '0 20px',
+        margin: '10px',
+        // transition: 'background-color 0.3s ease',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: '1em',
+          height: '60px',
+          justifyContent: 'flex-end',
+        }}
+      >
+        <h2
+          style={{
+            color: darkMode ? '#fff' : '#000',
+            margin: 0,
+            fontSize: '1.2rem',
+            transition: 'color 0.3s ease',
+          }}
+        >
+          Hi {session?.user?.name || ''}
+        </h2>
+        <Dropdown
+          menu={{
+            items: dropdownItems,
+          }}
+          placement="bottomLeft"
+          arrow={{ pointAtCenter: true }}
+        >
+          <Avatar
+            size="large"
+            style={{
+              background: darkMode ? '#555' : '#ebebeb',
+              fontSize: '1.8em',
+              transition: 'background 0.3s ease',
+            }}
+          />
+        </Dropdown>
+        
+        {/* <Button
+  onClick={toggleTheme}
+  style={{
+    backgroundColor: darkMode ? '#333' : '#f0f0f0',
+    color: darkMode ? '#fff' : '#000',
+    transition: 'background-color 0.3s ease, color 0.3s ease',
+  }}
+>
+  {darkMode ? '🌙 Dark Mode' : '☀️ Light Mode'}
+</Button> */}
+<button
+  onClick={toggleTheme}
+  className={`theme-toggle-btn ${darkMode ? 'dark-mode' : 'light-mode'}`}
+>
+  {darkMode ? (
+    <Sun className="icon sun-icon" />
+  ) : (
+    <Moon className="icon moon-icon" />
+  )}
+</button>
+
+
+
+      </div>
+    </div>
+  );
 };
-
 const LayoutWrapper = ({ children }) => {
     const router = useRouter();
     const [darkMode, setDarkMode] = useState(false);
@@ -276,10 +367,14 @@ const LayoutWrapper = ({ children }) => {
                         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
                             <Spin size="large" />
                         </div>
-                    ) : (
+                    ) 
+                    : (
+                        // React.Children.map(children, child => {
+                        //     return React.cloneElement(child, { darkMode: darkMode });
+                        // })
                         React.Children.map(children, child => {
-                            return React.cloneElement(child, { darkMode: darkMode });
-                        })
+                          return React.cloneElement(child, { darkMode });
+                      })
                     )
                 ) : (
                     <div style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'hidden' }}>

@@ -40,6 +40,10 @@ const App = () => {
     const [selectedValue, setSelectedValue] = useState(null);
     const [valueOptions, setValueOptions] = useState([]);
     const [error, setError] = useState(null);
+    const [darkMode, setDarkMode] = useState(false);
+    const { theme } = useTokenContext();
+    const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
+
     if (userdetails === null) {
         redirect("/Dashboard");
         // console.log("hi");
@@ -761,7 +765,8 @@ const App = () => {
                 visible={EditcamapaignDrawerVisible}
                 onClose={() => setEditcamapaignDrawerVisible(false)}
             /> */}
-            <Card title="Campaigns" size="small">
+            
+            <Card title="Campaigns" size="small" >
                 <Row justify="space-between" align="middle">
                     <Col span={3}>
                         <Select
@@ -807,17 +812,17 @@ const App = () => {
                 </Row>
             </Card>
 
-
-            <Table
-                style={{ marginTop: "1%" }}
+          
+            <Table className={`${gridThemeClass}`}
+                style={{ marginTop: "1%", }}
                 rowSelection={{ selectedRowKeys, onChange: onSelectChange }}
                 columns={columns}
                 dataSource={searchInput ? filteredData.map((item, index) => ({ ...item, key: index })).reverse() : campaignData.map((item, index) => ({ ...item, key: index })).reverse()}
                 pagination={{ pageSize: paginationSize }}
-                scroll={{ y: 'calc(80vh - 200px)' }}
+                // scroll={{ y: 'calc(80vh - 200px)' }}
             />
 
-            <Drawer
+            <Drawer     
                 title={adsetcampaigndata?.campaign_name || ''}
                 placement="right"
                 onClose={onCloseDrawer}

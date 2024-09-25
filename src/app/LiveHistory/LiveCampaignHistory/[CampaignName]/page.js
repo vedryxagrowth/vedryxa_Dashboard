@@ -10,6 +10,7 @@ import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { useTokenContext } from '../../../components/parent'
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
+import { color } from 'chart.js/helpers';
 Chart.register(...registerables);
 
 const MnetLiveCampaignHistory = ({ params }) => {
@@ -41,9 +42,13 @@ const MnetLiveCampaignHistory = ({ params }) => {
     const [endDate1, setEndDate1] = useState();
 
     const [columnDefs, setColumnStructure] = useState([]);
-
+    const [darkMode, setDarkMode] = useState(false);
     const [chartData, setChartData] = useState({ dates: [], spend: [], revenue: [], profit: [], margin: [] });
-
+    // const { userdetails } = useTokenContext();
+    // const router = useRouter();
+    
+    const { theme } = useTokenContext();
+    const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
 
     const spender = (params) => {
         var total = 0;
@@ -873,7 +878,8 @@ const MnetLiveCampaignHistory = ({ params }) => {
                         </div>
                     </div>
                 ) : rowData?.length > 0 ? (
-                    <div className="ag-theme-alpine ag-container">
+                    // <div className="ag-theme-alpine ag-container">
+                         <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
                         <AgGridReact
                             rowData={rowData}
                             columnDefs={columnDefs}
@@ -883,9 +889,11 @@ const MnetLiveCampaignHistory = ({ params }) => {
                                 if (params.node.rowPinned) {
                                     return {
                                         fontWeight: 'bold',
-                                        backgroundColor: '#f4f4f4' // Highlight the footer row
+                                        backgroundColor: darkMode ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
+                                        color: darkMode ? '#fff' : '#000',           // Text color should contrast with the background
                                     };
                                 }
+                                
                                 return null;
                             }}
                             pagination={true}

@@ -16,7 +16,9 @@ import { Layout, Menu, Button, theme } from 'antd';
 import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 const { Content, Sider } = Layout;
-
+import Image from "next/image";
+import LayoutWrapper from './topbar';
+import { useTokenContext } from './parent';
 function getItem(label, key, icon) {
     return {
         key,
@@ -24,7 +26,7 @@ function getItem(label, key, icon) {
         label,
     };
 }
-<UserOutlined />
+{/* <UserOutlined /> */}
 const menuItems = [
     getItem('Dashboard', '/Dashboard', <HomeOutlined />),
     getItem('Reports', '/Reports', <DatabaseOutlined />),
@@ -37,12 +39,11 @@ const menuItems = [
     getItem('Sign Out', '/signout', <LogoutOutlined />),
 ].filter(Boolean);
 
-const Appbar = ({ children, darkMode, toggleTheme }) => {
-    const { token: { colorBgContainer } } = theme.useToken();
+const Appbar = ({ children }) => {
+    const { darkMode, toggleTheme } = useTokenContext();
     const [collapsed, setCollapsed] = useState(true);
     const router = useRouter();
     const pathname = usePathname();
-
     const [height, setHeight] = useState(0);
 
     useEffect(() => {
@@ -67,17 +68,20 @@ const Appbar = ({ children, darkMode, toggleTheme }) => {
     };
 
     return (
-        <Layout style={{ minHeight: height, background: darkMode ? '#333' : colorBgContainer }}>
+        <Layout style={{ minHeight: height, backgroundColor: darkMode ? '#333' : '#fff' }}>
+            
             <Sider
                 collapsible
                 collapsed={collapsed}
                 trigger={null}
                 width={220}
                 style={{
-                    background: '#39ac39',
+                    backgroundColor: darkMode ? '#333' : '#fff' ,
+                    color: darkMode ? '#fff' : '#000',
                     borderRadius: '5px',
                     overflow: 'hidden',
                     height: '100vh',
+                   
                 }}
             >
                 <div
@@ -88,27 +92,35 @@ const Appbar = ({ children, darkMode, toggleTheme }) => {
                         width: '100%',
                     }}
                 >
-                    <div style={{ marginTop: '10px' }}>
-                        <Button
+                    <div style={{ marginTop: '1.6rem',position:"absolute",left:"auto",right:"20px",zIndex:"999 !important", }}>
+                        <Button 
                             type="primary"
                             icon={collapsed ? <DoubleRightOutlined /> : <DoubleLeftOutlined />}
                             onClick={toggleCollapsed}
                             style={{
                                 borderRadius: '50%',
-                                width: '40px',
-                                height: '40px',
-                                border: 'none',
-                                background: '#fff',
-                                color: '#007BFF',
+                                width: '30px',
+                                height: '30px',
+                                // border: 'none',
+                                // background: '#fff',
+                                // color: '#007BFF',
+                                background: "rgb(199 243 154)",
+                                color: "rgb(56 102 121)",
+                                border: `solid 5px ${darkMode ? '#282628' : '#384551'}`,
+
+                                position: "fixed",
+                                zIndex:"999"
                             }}
                         />
                     </div>
                 </div>
-                <Menu
+
+                {/* <Menu
+                
                     mode="inline"
                     selectedKeys={[pathname]}
                     style={{
-                        background: '#39ac39',
+                        background: '',
                         color: '#007BFF',
                         fontSize: '16px',
                         borderRight: 'none',
@@ -117,20 +129,54 @@ const Appbar = ({ children, darkMode, toggleTheme }) => {
                     onClick={(e) => handleMenuItemClick(e.key)}
                 >
                     {menuItems.map(item => (
-                        <Menu.Item key={item.key} icon={item.icon} style={{ borderRadius: '8px', margin: '5px 0', color: '#fff' }}>
+                        <Menu.Item key={item.key} icon={item.icon} style={{ borderRadius: '8px', margin: '5px 0', color: '#384551', fontWeight:"500", fontSize:"16px " }}>
+                            {item.label}
+                        </Menu.Item>
+                    ))}
+                </Menu> */}
+                <Menu
+                    mode="inline"
+                    selectedKeys={[pathname]}
+                    style={{
+                        backgroundColor: darkMode ? '#333' : '#fff' ,
+                        color: darkMode ? '#007BFF' : '#000',
+                        // color: '#007BFF',
+                        fontSize: '16px',
+                        borderRight: 'none',
+                        marginTop: '10px',
+                       
+                    }}
+                    onClick={(e) => handleMenuItemClick(e.key)}
+                >
+                    <Image
+                        src="/Ads.png"
+                        width={150}
+                        height={60}
+                        priority={true}
+                        alt="Logo"
+                        // style={{ maxWidth: "8rem", maxHeight: "4rem", marginBottom: '10px', margin:"0px 20px"}} // Optional margin for spacing
+                        style={{ margin:"0px 20px"}} // Optional margin for spacing
+                    />
+                    {menuItems.map(item => (
+                        <Menu.Item key={item.key} icon={item.icon} style={{ borderRadius: '8px', margin: '5px 0',  color: darkMode ? '#fff' : '#000', fontWeight: "500", fontSize: "16px" }}>
                             {item.label}
                         </Menu.Item>
                     ))}
                 </Menu>
+
             </Sider>
-            <Layout style={{ marginLeft: collapsed ? 0 : 0, transition: 'margin-left 0.2s' }}>
-                <Content style={{ margin: "2px", background: darkMode ? '#333' : colorBgContainer }}>
-                    <div style={{ border: "2px solid green", borderRadius: "8px", height: "100vh", overflow: "auto" }}>
+           
+            <Layout style={{ marginLeft: collapsed ? 0 : 0, transition: 'margin-left 0.2s', backgroundColor: darkMode ? '#262426d6' : '#f5f5f5'  }}>
+                 <LayoutWrapper/>
+               
+                    <div style={{ border: "", margin:"0px 10px", borderRadius: "", height: "100vh", overflow: "auto",  backgroundColor: darkMode ? '#333' : '#fff' ,scrollbarWidth:"thin "}}>
+                   
+
                         {React.Children.map(children, child => {
                             return React.cloneElement(child, { darkMode });
                         })}
                     </div>
-                </Content>
+               
             </Layout>
         </Layout>
     );

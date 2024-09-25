@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 // pages/index.js
 import React from 'react';
 import axios from 'axios';
-import { Select,Tag } from 'antd';
+import { Select,Tag, theme } from 'antd';
 import moment from 'moment-timezone';
 import debounce from 'lodash.debounce';
 import { Line } from 'react-chartjs-2';
@@ -51,9 +51,9 @@ import {
 
 import { useTokenContext } from '../components/parent';
 import { AgGridReact } from "ag-grid-react";
-import 'ag-grid-enterprise';
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
+import 'ag-grid-enterprise';
 
 
 
@@ -82,6 +82,8 @@ const initialData = {
 
 const Dashboard = () => {
     const { userdetails } = useTokenContext();
+    const { theme } = useTokenContext();
+    const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
     console.log(userdetails);
     // console.log(userdetails?.adAccounts, "f1");
     // const { adAccounts } = userdetails;
@@ -121,9 +123,11 @@ const Dashboard = () => {
     const [startDate, setStartDate] = useState(yesterday);
 
     const [endDate, setEndDate] = useState(yesterday);
-
+    const [darkMode, setDarkMode] = useState(false);
     const [data, setData] = useState([]);
-    
+    // const toggleTheme = () => {
+    //     setDarkMode(!darkMode);
+    // };
     const [time, setTime] = useState('UTC');
 
     const onChangeTime = (value) => {
@@ -679,7 +683,7 @@ const Dashboard = () => {
         <div style={{ padding: '20px' }}>
         <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ width: '40%' }}>
-            <h1 style={{ color: '#384551', fontSize: '22px', textAlign: 'start' }}>
+            <h1 style={{  color: darkMode ? '#007BFF' : '#fff', fontSize: '22px', textAlign: 'start' }}>
                 Welcome, {userdetails?.userName} !
             </h1>
             </div>
@@ -1016,7 +1020,7 @@ const Dashboard = () => {
                     </Col>
                 </Row>
 
-                <Row style={{ height: '400px', marginBottom: '10px', marginTop: '25px', padding: '0px', marginLeft:'0px', marginRight:'0px' }}>
+                {/* <Row style={{ height: '400px', marginBottom: '10px', marginTop: '25px', padding: '0px', marginLeft:'0px', marginRight:'0px' }}>
                     <Line
                     data={{
                         labels: chartData.dates,
@@ -1086,12 +1090,113 @@ const Dashboard = () => {
                     }}
                     height={350}
                     />
-                </Row>
+                </Row> */}
+                        <Row
+                            style={{
+                                height: '400px',
+                                marginBottom: '10px',
+                                marginTop: '25px',
+                                padding: '0px',
+                                marginLeft: '0px',
+                                marginRight: '0px',
+                            }}
+                        >
+                            <Line
+                                data={{
+                                    labels: chartData.dates,
+                                    datasets: [
+                                        {
+                                            label: 'Spend',
+                                            data: chartData.spend,
+                                            borderColor: 'rgba(44, 144, 192, 1)',
+                                            backgroundColor: 'rgba(44, 144, 192, 0.2)',
+                                            fill: true,
+                                            hidden: true,
+                                        },
+                                        {
+                                            label: 'Revenue',
+                                            data: chartData.revenue,
+                                            borderColor: 'rgba(99, 200, 99, 1)',
+                                            backgroundColor: 'rgba(99, 200, 99, 0.2)',
+                                            fill: true,
+                                            hidden: true,
+                                        },
+                                        {
+                                            label: 'RPC',
+                                            data: chartData.rpc,
+                                            borderColor: 'rgba(255, 99, 132, 1)',
+                                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                            fill: true,
+                                            hidden: true,
+                                        },
+                                        {
+                                            label: 'CPL',
+                                            data: chartData.cpl,
+                                            borderColor: 'rgba(255, 159, 64, 1)',
+                                            backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                                            fill: true,
+                                            hidden: true,
+                                        },
+                                        {
+                                            label: 'Profit',
+                                            data: chartData.profit,
+                                            borderColor: 'rgba(255, 206, 86, 1)',
+                                            backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                                            fill: true,
+                                        },
+                                        {
+                                            label: 'Margin',
+                                            data: chartData.margin,
+                                            borderColor: 'rgba(153, 102, 255, 1)',
+                                            backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                                            fill: true,
+                                            hidden: true,
+                                        },
+                                    ],
+                                }}
+                                options={{
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    scales: {
+                                        x: {
+                                            ticks: {
+                                                padding: 30,
+                                                color: darkMode ? '#fff' : '#000', // Change tick color based on mode
+                                            },
+                                            grid: {
+                                                color: darkMode ? '#444' : '#e0e0e0', // Change grid color based on mode
+                                            },
+                                        },
+                                        y: {
+                                            beginAtZero: true,
+                                            ticks: {
+                                                color: darkMode ? '#fff' : '#000', // Change tick color based on mode
+                                            },
+                                            grid: {
+                                                color: darkMode ? '#444' : '#e0e0e0', // Change grid color based on mode
+                                            },
+                                        },
+                                    },
+                                    plugins: {
+                                        legend: {
+                                            labels: {
+                                                color: darkMode ? '#fff' : '#000', // Change legend color based on mode
+                                            },
+                                        },
+                                    },
+                                }}
+                                height={350}
+                            />
+                        </Row>
+
                 <Row style={{display:'flex', flexDirection:'column'}}>
                     <Col>
-                        <h2>Over All Report</h2>
+                    <h2 >
+                    Over All Report
+                    </h2>
+
                     </Col>
-                    <Col>
+                    {/* <Col>
                         <div className="ag-theme-alpine" style={{ width: '100%', height: '400px' }}>
                             
                             <AgGridReact
@@ -1104,33 +1209,58 @@ const Dashboard = () => {
                             groupIncludeTotalFooter={true}
                             />
                         </div>
+                    </Col> */}
+                    <Col>
+                    <div
+                        className={`ag-theme-alpine ${gridThemeClass}`}
+                        style={{ width: '100%', height: '400px' }}
+                        >
+                        <AgGridReact
+                        rowData={rowData}
+                        columnDefs={columnDefs}
+                        defaultColDef={defaultColDef}
+                        rowGroupPanelShow="always"
+                        suppressAggFuncInHeader={true}
+                        groupIncludeFooter={true}
+                        groupIncludeTotalFooter={true}
+                        />
+                    </div>
                     </Col>
+
                 </Row>
+                
                 <Row style={{display:'flex', flexDirection:'column'}}>
                     <Col>
                         <h2>Profit Accounts</h2>
                     </Col>
+                    
                     <Col>
-                        <div className="ag-theme-alpine" style={{ width: '100%', height: '400px' }}>
-                            <AgGridReact
-                            rowData={rowData?.filter((each) => each.profit > 0)}
-                            columnDefs={columnDefs1}
-                            defaultColDef={defaultColDef}
-                            rowGroupPanelShow="always"
-                            suppressAggFuncInHeader={true}
-                            groupIncludeFooter={true}
-                            groupIncludeTotalFooter={true}
-                            />
-                        </div>
-                    </Col>
+                    <div
+                    className={`ag-theme-alpine ${gridThemeClass}`}
+                    style={{ width: '100%', height: '400px' }}
+                    >
+                    <AgGridReact
+                        rowData={rowData?.filter((each) => each.profit > 0)}
+                        columnDefs={columnDefs1}
+                        defaultColDef={defaultColDef}
+                        rowGroupPanelShow="always"
+                        suppressAggFuncInHeader={true}
+                        groupIncludeFooter={true}
+                        groupIncludeTotalFooter={true}
+                    />
+                    </div>
+                </Col>
+                    
                 </Row>
                 <Row style={{display:'flex', flexDirection:'column'}}>
                     <Col>
                         <h2>Loss Accounts</h2>
                     </Col>
                     <Col>
-                        <div className="ag-theme-alpine" style={{ width: '100%', height: '400px' }}>
-                            <AgGridReact
+                    <div
+                        className={`ag-theme-alpine ${gridThemeClass}`}
+                        style={{ width: '100%', height: '400px' }}
+                        >             <AgGridReact
                                 rowData={rowData?.filter(each => each.profit < 0)}
                                 columnDefs={columnDefs1}
                                 defaultColDef={defaultColDef}

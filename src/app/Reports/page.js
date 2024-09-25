@@ -10,7 +10,7 @@ import axios from 'axios';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
 // import { Select } from 'antd';
-import { Carousel, Input, Button, Pagination, Row, Col, Typography, Result, Modal, message, ConfigProvider  } from 'antd';
+import { Carousel, Input, Button, Pagination, Row, Col, Typography, Result, Modal, message, ConfigProvider, theme  } from 'antd';
 
 // import 'antd/dist/reset.css';
 import { CommentOutlined, CustomerServiceOutlined, MenuOutlined, InfoCircleOutlined, DownloadOutlined, SearchOutlined, ArrowLeftOutlined, ArrowRightOutlined, SmileOutlined, ReloadOutlined,CopyOutlined, StarOutlined, StarFilled, EditOutlined, CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
@@ -100,13 +100,15 @@ const newtworkCollections = {
 const MyTablePage = () => {
     const { userdetails } = useTokenContext();
     // const router = useRouter();
-
+    
+    const { theme } = useTokenContext();
+    const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
     if (userdetails === null) {
         redirect("/Dashboard");
         // console.log("hi");
     }
     console.log(userdetails, "userDetails");
-
+    const [darkMode, setDarkMode] = useState(false);
     // console.log(userdetails._id, "id");
 
     const { adAccounts } = userdetails;
@@ -2867,7 +2869,9 @@ const MyTablePage = () => {
                                     </div>
                                 </div>
                             ) : rowData?.filter((each) => each.campaignname.includes(inputValue))?.length > 0 ? (
-                                <div className="ag-theme-alpine ag-container">
+                               
+                                    <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
+                                    
                                     <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap' }}>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
                                             <Space align="center">
@@ -2922,7 +2926,8 @@ const MyTablePage = () => {
                                             if (params.node.rowPinned) {
                                                 return {
                                                     fontWeight: 'bold',
-                                                    backgroundColor: '#f4f4f4' // Highlight the footer row
+                                        backgroundColor: darkMode ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
+                                        color: darkMode ? '#fff' : '#000',           // Text color should contrast with the background
                                                 };
                                             }
                                             return null;
@@ -2976,7 +2981,7 @@ const MyTablePage = () => {
                                     </div>
                                 </div>
                             ) : dailyData.filter((each) => each.campaignname.includes(inputValue))?.length > 0 ? (
-                                <div className="ag-theme-alpine ag-container" >
+                                <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
                                     <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap' }}>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
                                             <Space align="center" className='daily-contaier'>
@@ -3026,7 +3031,8 @@ const MyTablePage = () => {
                                             if (params.node.rowPinned) {
                                                 return {
                                                     fontWeight: 'bold',
-                                                    backgroundColor: '#f4f4f4' // Highlight the footer row
+                                                    backgroundColor: darkMode ? '#000' : '#fff', 
+                                                    color: darkMode ? '#fff' : '#000', 
                                                 };
                                             }
                                             return null;
@@ -3063,7 +3069,7 @@ const MyTablePage = () => {
                                     </div>
                                 </div>
                             ) : campaignData.filter((each) => each.campaignname.includes(inputValue))?.length > 0 ? (
-                                <div className="ag-theme-alpine ag-container">
+                                <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
                                     <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap' }}>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
                                             <Space align="center" className='daily-contaier' style={{width:'150px'}}>
@@ -3121,7 +3127,8 @@ const MyTablePage = () => {
                                                 if (params.node.rowPinned) {
                                                     return {
                                                         fontWeight: 'bold',
-                                                        backgroundColor: '#f4f4f4' // Highlight the footer row
+                                                        backgroundColor: darkMode ? '#000' : '#fff',
+                                                        color: darkMode ? '#fff' : '#000',         
                                                     };
                                                 }
                                                 return null;
