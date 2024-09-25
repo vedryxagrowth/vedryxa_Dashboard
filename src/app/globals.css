@@ -150,6 +150,8 @@ a {
 
 .blinking {
   animation: blinking 1s infinite;
+  /* color: white;
+  background-color:rgb(148, 53, 53); */
 }
 /* App.css */
 .custom-carousel .slick-dots li {
@@ -377,6 +379,30 @@ body {
   background: var(--scrollbar-thumb-bg);
   border-radius: 10px;
 } */
+/* .container-ad-preview::-webkit-scrollbar {
+  height: 6px;
+}
+
+.container-ad-preview::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+}
+
+.container-ad-preview::-webkit-scrollbar-track {
+  background-color: transparent;
+} */
+.container-ad-preview::-webkit-scrollbar {
+  height: 6px;
+}
+
+.container-ad-preview::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+}
+
+.container-ad-preview::-webkit-scrollbar-track {
+  background-color: transparent;
+}
 
 .ag-menu-option.custom-reset-columns-item .ag-menu-option-text {
   background-color: rgb(105, 105, 164);
@@ -431,6 +457,7 @@ body {
 .custom-carousel .slick-slide {
   padding: 0 10px; /* Adjust this value to increase/decrease the gap */
 }
+<<<<<<< HEAD
 
 
 
@@ -609,3 +636,5 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 
 
 
+=======
+>>>>>>> master

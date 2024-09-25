@@ -239,7 +239,6 @@ const LayoutWrapper = ({ children }) => {
                                         console.log(MediaBuyerkeysOfAdAccounts, "keys");
                                         for (let item of MediaBuyerkeysOfAdAccounts) {
                                             if (MediaBuyeradAccounts[item][0] === "All") {
-                                                console.log("Yes");
                                                 const networkResponse = await axios.get(`https://prodapis.adsgoat.in/network/Accounts?network=${item}`);
                                                 MediaBuyernewObject[item] = await networkResponse.data;
                                                 // console.log(await networkResponse.data);
@@ -249,8 +248,8 @@ const LayoutWrapper = ({ children }) => {
                                             }
                                         };
                                         setuserdetails({ ...matchedUser, adAccounts: MediaBuyernewObject });
-                                        console.log("New Object", MediaBuyernewObject);
-                                        console.log("Matched User:", matchedUser);
+                                        // console.log("New Object", MediaBuyernewObject);
+                                        // console.log("Matched User:", matchedUser);
                                         //   setuserdetails({ ...matchedUser, extraInfo: "Media Buyer Specific Info" });
                                         break;
                                     case 'Special_User':
@@ -260,18 +259,17 @@ const LayoutWrapper = ({ children }) => {
                                         console.log(SpecialUserkeysOfAdAccounts, "keys");
                                         for (let item of SpecialUserkeysOfAdAccounts) {
                                             if (SpecialUseradAccounts[item][0] === "All") {
-                                                console.log("Yes");
                                                 const networkResponse = await axios.get(`https://prodapis.adsgoat.in/network/Accounts?network=${item}`);
                                                 SpecialUsernewObject[item] = await networkResponse.data;
-                                                // console.log(await networkResponse.data);
+                                                console.log(await networkResponse.data);
                                             }
                                             else {
                                                 SpecialUsernewObject[item] = SpecialUseradAccounts[item];
                                             }
                                         };
                                         setuserdetails({ ...matchedUser, adAccounts: SpecialUsernewObject });
-                                        console.log("New Object", SpecialUsernewObject);
-                                        console.log("Matched User:", matchedUser);
+                                        // console.log("New Object", SpecialUsernewObject);
+                                        // console.log("Matched User:", matchedUser);
                                         //   setuserdetails({ ...matchedUser, extraInfo: "Special User Specific Info" });
                                         break;
                                     case 'Manager':
@@ -281,7 +279,6 @@ const LayoutWrapper = ({ children }) => {
                                         console.log(ManagerkeysOfAdAccounts, "keys");
                                         for (let item of ManagerkeysOfAdAccounts) {
                                             if (ManageradAccounts[item][0] === "All") {
-                                                console.log("Yes");
                                                 const networkResponse = await axios.get(`https://prodapis.adsgoat.in/network/Accounts?network=${item}`);
                                                 ManagernewObject[item] = await networkResponse.data;
                                                 // console.log(await networkResponse.data);
@@ -291,8 +288,8 @@ const LayoutWrapper = ({ children }) => {
                                             }
                                         };
                                         setuserdetails({ ...matchedUser, adAccounts: ManagernewObject });
-                                        console.log("New Object", ManagernewObject);
-                                        console.log("Matched User:", matchedUser);
+                                        // console.log("New Object", ManagernewObject);
+                                        // console.log("Matched User:", matchedUser);
                                         //   setuserdetails({ ...matchedUser, extraInfo: "Manager Specific Info" });
                                         break;
                                     case 'Admin':

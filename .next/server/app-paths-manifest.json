@@ -1,3 +1,8 @@
 {
+<<<<<<< HEAD
   "/NewUser/page": "app/NewUser/page.js"
+=======
+  "/Dashboard/page": "app/Dashboard/page.js",
+  "/Reports/page": "app/Reports/page.js"
+>>>>>>> master
 }

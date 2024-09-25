@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
 import axios from 'axios';
+import moment from 'moment-timezone';
 import 'ag-grid-enterprise';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
@@ -42,6 +43,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
     const [endDate1, setEndDate1] = useState();
 
     const [columnDefs, setColumnStructure] = useState([]);
+<<<<<<< HEAD
     const [darkMode, setDarkMode] = useState(false);
     const [chartData, setChartData] = useState({ dates: [], spend: [], revenue: [], profit: [], margin: [] });
     // const { userdetails } = useTokenContext();
@@ -49,6 +51,11 @@ const MnetLiveCampaignHistory = ({ params }) => {
     
     const { theme } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
+=======
+
+    const [chartData, setChartData] = useState({ dates: [], sortedData: [], sortedMarginData: [], rpcDate:[], hoursDate:[], hours: [], spend: [], revenue: [], profit: [], margin: [] });
+
+>>>>>>> master
 
     const spender = (params) => {
         var total = 0;
@@ -168,7 +175,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                 if (RPC === Infinity || isNaN(RPC)) {
                     return 0;
                 }
-                return `${Number(RPC.toFixed(2))}%`;
+                return `${Number(RPC.toFixed(2))}`;
 
             }
         }
@@ -176,7 +183,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
             const { impressions, fbclicks } = params.node.aggData;
             if (impressions !== 0) {
                 const RPC = (fbclicks / impressions) * 100;
-                return `${Number(RPC.toFixed(2))}%`;
+                return `${Number(RPC.toFixed(2))}`;
             }
         }
 
@@ -218,7 +225,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                 if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
                     return 0;
                 }
-                return `${Number(RPC.toFixed(2))}%`;
+                return `${Number(RPC.toFixed(2))}`;
 
             }
         }
@@ -226,7 +233,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
             const { profit } = params.node.aggData;
             if (revenue !== 0) {
                 const RPC = (profit / revenue) * 100;
-                return `${Number(RPC.toFixed(2))}%`;
+                return `${Number(RPC.toFixed(2))}`;
             }
         }
 
@@ -264,9 +271,9 @@ const MnetLiveCampaignHistory = ({ params }) => {
             if (revenue !== "0.00" || revenue !== undefined) {
                 const RPC = ((revenue - spend) / revenue) * 100;
                 if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
-                    return `0%`;
+                    return `0`;
                 }
-                return `${Math.round(RPC * 100) / 100}%`;
+                return `${Math.round(RPC * 100) / 100}`;
 
             }
         }
@@ -275,9 +282,9 @@ const MnetLiveCampaignHistory = ({ params }) => {
             if (revenue !== "0.00" || revenue !== undefined) {
                 const RPC = ((revenue - spend) / revenue) * 100;
                 if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
-                    return `0%`;
+                    return `0`;
                 }
-                return `${Math.round(RPC * 100) / 100}%`;
+                return `${Math.round(RPC * 100) / 100}`;
 
             }
         }
@@ -292,9 +299,9 @@ const MnetLiveCampaignHistory = ({ params }) => {
             if (revenue !== "0.00" || revenue !== undefined) {
                 const RPC = ((revenue - spend) / spend) * 100;
                 if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
-                    return `0%`;
+                    return `0`;
                 }
-                return `${Math.round(RPC * 100) / 100}%`;
+                return `${Math.round(RPC * 100) / 100}`;
 
             }
         }
@@ -303,9 +310,9 @@ const MnetLiveCampaignHistory = ({ params }) => {
             if (revenue !== "0.00" || revenue !== undefined) {
                 const RPC = ((revenue - spend) / spend) * 100;
                 if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
-                    return `0%`;
+                    return `0`;
                 }
-                return `${Math.round(RPC * 100) / 100}%`;
+                return `${Math.round(RPC * 100) / 100}`;
 
             }
         }
@@ -319,23 +326,44 @@ const MnetLiveCampaignHistory = ({ params }) => {
     const pinnedBottomRowData = [
         {
             campaignName: 'Total',
-            spend: rowData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0),
-            revenue: rowData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0),
-            profit: rowData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0),
-            margin: `${(rowData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / rowData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)}%`,
-            rpc: rowData.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / rowData.length,
-            cpl: rowData.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / rowData.length,
-            ncpl: rowData.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / rowData.length,
-            fbleads: rowData.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0),
-            conversions: rowData.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0),
-            fmargin: `${(rowData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / rowData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)}%`,
-            roi: `${(rowData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - rowData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / rowData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100}%`,
-            cpc: rowData.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / rowData.length,
-            fbclicks: rowData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0),
-            impressions: rowData.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0),
-            ctr: `${(rowData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / rowData.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)}%`
+            spend: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0).toFixed(2)),
+            revenue: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0).toFixed(2)),
+            profit: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0).toFixed(2)),
+            margin: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
+            rpc: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / rowData?.length).toFixed(2)),
+            cpl: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / rowData?.length).toFixed(2)),
+            ncpl: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / rowData?.length).toFixed(2)),
+            fbleads: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0).toFixed(2)),
+            conversions: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0).toFixed(2)),
+            fmargin: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+            roi: parseFloat(((rowData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - rowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+            cpc: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / rowData?.length).toFixed(2)),
+            fbclicks: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
+            impressions: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
+            ctr: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
         }
     ];
+
+    const defaultComparator = (valueA, valueB) => {
+        if (valueA == null && valueB == null) return 0; // Both values are null/undefined
+        if (valueA == null) return 1;  // Treat null as larger (sorted last)
+        if (valueB == null) return -1;
+
+        // Compare numbers
+        if (typeof valueA === 'number' && typeof valueB === 'number') {
+            return valueA - valueB;
+        }
+
+        // Compare strings
+        if (typeof valueA === 'string' && typeof valueB === 'string') {
+            return valueA.localeCompare(valueB); // Locale aware comparison
+        }
+
+        // Default comparison for other data types
+        return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
+    };
+
+
     const columnDefsObject = {
         date: {
             headerName: 'Date', field: 'date', width: 120,
@@ -377,28 +405,67 @@ const MnetLiveCampaignHistory = ({ params }) => {
         },
         // { headerName: 'FB-Hour', field: 'fb-hour', width: 120 },
         // { headerName: 'MNet-Hour', field: 'mnet-hour', width: 120 },
-        spend: { headerName: 'Spend', field: 'spend', width: 120, aggFunc: spender },
-        revenue: { headerName: 'Revenue', field: 'revenue', width: 120, aggFunc: spender },
+        spend: { headerName: 'Spend', field: 'spend', width: 120, aggFunc: spender,
+            comparator: defaultComparator,
+         },
+        revenue: { headerName: 'Revenue', field: 'revenue', width: 120, aggFunc: spender,
+            comparator: defaultComparator,
+         },
         profit: {
             headerName: 'Profit', field: 'profit', width: 120, aggFunc: spender, cellClassRules: {
                 'font-red': p => p.value < 0
-            }
+            },
+            comparator: defaultComparator,
         },
-        margin: { headerName: 'Margin', field: 'margin', valueGetter: getMargin, },
-        fbleads: { headerName: 'FbLeads', field: 'fbleads', width: 120, aggFunc: spender },
-        conversions: { headerName: 'Conversions', field: 'conversions', width: 120, aggFunc: newSpender },
-        cpc: { headerName: 'cpc', field: 'cpc', aggFunc: cpcSpender },
-        fbclicks: { headerName: 'FbClicks', field: 'fbclicks', width: 120, aggFunc: spender },
-        impressions: { headerName: 'Impressions', field: 'impressions', width: 120, aggFunc: spender },
-        ctr: { headerName: 'Ctr', field: 'ctr', valueGetter: getCtr },
-        rpc: { headerName: 'Rpc', field: 'rpc', valueGetter: getRpc },
-        cpl: { headerName: 'Cpl', field: 'cpl', valueGetter: getCpl },
-        ncpl: { headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl },
-        fmargin: { headerName: 'Fmargin', field: 'fmargin', valueGetter: getFmargin },
-        roi: { headerName: 'ROI', field: 'roi', valueGetter: getROI },
-        adsetid: { headerName: 'AdsetId', field: 'adsetId' },
-        campaignid: { headerName: 'CampaignId', field: 'campaignId' },
-        timezone: { headerName: 'TimeZone', field: 'timezone' },
+        margin: { headerName: 'Margin', field: 'margin', valueGetter: getMargin,
+            comparator: defaultComparator,
+            valueFormatter: (params) => `${params.value}%`,
+         },
+        fbleads: { headerName: 'FbLeads', field: 'fbleads', width: 120, aggFunc: spender,
+            comparator: defaultComparator,
+         },
+        conversions: { headerName: 'Conversions', field: 'conversions', width: 120, aggFunc: newSpender,
+            comparator: defaultComparator,
+         },
+        cpc: { headerName: 'cpc', field: 'cpc', aggFunc: cpcSpender,
+            comparator: defaultComparator,
+         },
+        fbclicks: { headerName: 'FbClicks', field: 'fbclicks', width: 120, aggFunc: spender,
+            comparator: defaultComparator,
+         },
+        impressions: { headerName: 'Impressions', field: 'impressions', width: 120, aggFunc: spender,
+            comparator: defaultComparator,
+         },
+        ctr: { headerName: 'Ctr', field: 'ctr', valueGetter: getCtr,
+            comparator: defaultComparator,
+            valueFormatter: (params) => `${params.value}%`,
+         },
+        rpc: { headerName: 'Rpc', field: 'rpc', valueGetter: getRpc,
+            comparator: defaultComparator,
+         },
+        cpl: { headerName: 'Cpl', field: 'cpl', valueGetter: getCpl,
+            comparator: defaultComparator,
+         },
+        ncpl: { headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl,
+            comparator: defaultComparator,
+         },
+        fmargin: { headerName: 'Fmargin', field: 'fmargin', valueGetter: getFmargin ,
+            comparator: defaultComparator,
+            valueFormatter: (params) => `${params.value}%`,
+        },
+        roi: { headerName: 'ROI', field: 'roi', valueGetter: getROI,
+            comparator: defaultComparator,
+            valueFormatter: (params) => `${params.value}%`,
+         },
+        adsetid: { headerName: 'AdsetId', field: 'adsetId',
+            comparator: defaultComparator,
+         },
+        campaignid: { headerName: 'CampaignId', field: 'campaignId',
+            comparator: defaultComparator,
+         },
+        timezone: { headerName: 'TimeZone', field: 'timezone',
+            comparator: defaultComparator,
+         },
     };
 
     const getColumnDefs = (order) => {
@@ -572,12 +639,98 @@ const MnetLiveCampaignHistory = ({ params }) => {
         const spend = filteredData.map(d => d.spend);
         const revenue = filteredData.map(d => d.revenue);
         const profit = filteredData.map(d => d.profit);
-        const rpc = filteredData.map(d => d.rpc);
+        const rpc = filteredData.map(d => d.rpc ? d.rpc : 0);
         const cpl = filteredData.map(d => d.cpl);
 
         const margin = filteredData.map(d => parseFloat(d.margin));
+            
+        const hoursDate = filteredData.map(d => ({date: d.date, hour: d.hour, margin: parseFloat(d.margin)}));
+        const today = moment.tz('UTC').format('YYYY-MM-DD');
 
-        setChartData({ dates, spend, revenue, profit, margin, rpc, cpl });
+        console.log(filteredData);
+        // Filter, map, sort, and slice the data
+        const result = filteredData
+          .filter(item => item.date === today) // Filter to only today's data
+          .map(item => ({
+            date: item.date,
+            hour: item.timezone.split(" ")[1].split(":")[0],
+            margin: parseFloat(item.margin), // Ensure margin is a number
+          }))
+          .sort((a, b) => b.margin - a.margin) // Sort by margin in descending order
+          .slice(0, 5); // Get top 5 margins
+
+        const result1 = filteredData
+          .filter(item => item.date === today) // Filter to only today's data
+          .map(item => ({
+            date: item.date,
+            hour: item.timezone.split(" ")[1].split(":")[0],
+            rpc: (item.rpc ? item.rpc : 0), // Ensure margin is a number
+          }))
+          .sort((a, b) => b.rpc - a.rpc) // Sort by margin in descending order
+          .slice(0, 5); // Get top 5 margins
+        console.log(result, "result");
+
+        const newDates = filteredData.map(d => ({date: d.timezone, rpc: d.rpc}));
+
+        const filteredArray = filteredData
+            .map(item => ({
+                date: moment(item.timezone, "YYYY-MM-DD HH:mm:ss").format("YYYY-MM-DD"),
+                hour: moment(item.timezone, "YYYY-MM-DD HH:mm:ss").format("HH"),
+                rpc: isNaN(item.rpc) ? 0 : item.rpc  // Ensure rpc is a number, otherwise default to 0
+            }))
+            .filter(item => {
+                const today = moment();
+                const tenDaysAgo = today.clone().subtract(10, 'days');
+                return moment(item.date).isBetween(tenDaysAgo, today, null, '[]');
+            });
+
+        const aggregatedData = filteredArray.reduce((acc, item) => {
+            const key = item.hour; // Group by hour only
+            if (!acc[key]) {
+                acc[key] = { ...item, count: 0, totalRpc: 0 };
+            }
+            acc[key].count += 1;
+            acc[key].totalRpc += isNaN(item.rpc) ? 0 : item.rpc; // Sum the RPC values, default to 0 if rpc is invalid
+            return acc;
+        }, {});
+
+        // Sort by frequency (count) and filter out any invalid data before taking the top 5
+        const sortedData = Object.values(aggregatedData)
+            .filter(item => !isNaN(item.totalRpc) && item.count > 0)  // Filter out invalid data (NaN or zero count)
+            .sort((a, b) => b.count - a.count) // Sort by frequency (count) descending
+            .slice(0, 5); // Take top 5
+
+        const filteredArrayForMargin = filteredData
+            .map(item => ({
+                date: moment(item.timezone, "YYYY-MM-DD HH:mm:ss").format("YYYY-MM-DD"),
+                hour: moment(item.timezone, "YYYY-MM-DD HH:mm:ss").format("HH"),
+                margin: typeof item.margin === 'string' && item.margin.includes('%')
+                    ? parseFloat(item.margin.replace('%', '')) // Remove % and convert to number
+                    : isNaN(item.margin) ? 0 : item.margin  // Fallback to 0 if margin is invalid
+            }))
+            .filter(item => {
+                const today = moment();
+                const tenDaysAgo = today.clone().subtract(10, 'days');
+                return moment(item.date).isBetween(tenDaysAgo, today, null, '[]');
+            });
+        
+        const aggregatedMarginData = filteredArrayForMargin.reduce((acc, item) => {
+            const key = item.hour; // Group by hour only
+            if (!acc[key]) {
+                acc[key] = { ...item, count: 0, totalMargin: 0 };
+            }
+            acc[key].count += 1;
+            acc[key].totalMargin += isNaN(item.margin) ? 0 : item.margin;  // Sum the margin values
+            return acc;
+        }, {});
+        
+        // Sort Margin data and take top 5
+        const sortedMarginData = Object.values(aggregatedMarginData)
+            .filter(item => !isNaN(item.totalMargin) && item.count > 0)  // Filter out invalid data
+            .sort((a, b) => b.count - a.count) // Sort by frequency (count) descending
+            .slice(0, 5); // Take top 5
+
+        setChartData({ dates, sortedData, sortedMarginData, rpcDate: result1, hoursDate: result,  spend, revenue, profit, margin, rpc, cpl });
 
         console.log(filteredData, "filter");
         setTrue(false);
@@ -614,9 +767,17 @@ const MnetLiveCampaignHistory = ({ params }) => {
         'DST'
     ];
 
-    const defaultColDef = useMemo(() => ({
+    
+    
+      // Default column definition with the updated comparator
+      const defaultColDef = useMemo(() => ({
+        sortable: true,
+        resizable: true,
         filter: true,
         floatingFilter: true,
+        flex: 1,
+        minWidth: 150,
+        comparator: defaultComparator, // Use consistent comparator across columns
     }), []);
 
     // const autoGroupColumnDef = {
@@ -710,31 +871,28 @@ const MnetLiveCampaignHistory = ({ params }) => {
             </div>
             <div style={{ display: 'flex', width: '100%', marginLeft: '2%' }}>
                 {/* Left Table: Top 5 RPC Today */}
-                <div style={{ width: '20%' }}>
-                    <h3>Top 5 RPC Today</h3>
+                <div style={{ marginLeft: "1%", width: '20%' }}>
+                    <h3>Top 5 Rpc Today</h3>
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
-                            <tr>
-                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Hour</th>
-                                <th style={{ border: '1px solid #ddd', padding: '2px' }}>RPC</th>
-                            </tr>
+                        <tr>
+                            <th style={{ border: '1px solid #ddd', padding: '3px' }}>Hour</th>
+                            <th style={{ border: '1px solid #ddd', padding: '3px' }}>Rpc</th>
+                        </tr>
                         </thead>
                         <tbody>
-                            {chartData.dates
-                                .map((date, index) => ({
-                                    date: date,
-                                    rpc: chartData.rpc[index],
-                                }))
-                                .filter(item => item.date === "2024-08-26")
-                                // new Date().toISOString().split('T')[0]) // Filter for today
-                                .sort((a, b) => b.rpc - a.rpc) // Sort by RPC descending
-                                .slice(0, 5) // Take top 5
-                                .map((item, index) => (
-                                    <tr key={index}>
-                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.date}</td>
-                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.rpc}</td>
-                                    </tr>
-                                ))}
+                        {chartData.rpcDate
+                            .filter(item => 
+                            item.date === moment.tz('UTC').format('YYYY-MM-DD') // Today's date
+                            )
+                            .sort((a, b) => b.rpc - a.rpc) // Sort by Margin descending
+                            .slice(0, 5) // Take top 5
+                            .map((item, index) => (
+                            <tr key={index}>
+                                <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.hour}</td> {/* Access item.hour */}
+                                <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.rpc}</td>
+                            </tr>
+                            ))}
                         </tbody>
                     </table>
                 </div>
@@ -742,26 +900,24 @@ const MnetLiveCampaignHistory = ({ params }) => {
                     <h3>Top 5 Margin Today</h3>
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
-                            <tr>
-                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Hour</th>
-                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Margin</th>
-                            </tr>
+                        <tr>
+                            <th style={{ border: '1px solid #ddd', padding: '3px' }}>Hour</th>
+                            <th style={{ border: '1px solid #ddd', padding: '3px' }}>Margin</th>
+                        </tr>
                         </thead>
                         <tbody>
-                            {chartData.dates
-                                .map((date, index) => ({
-                                    date: date,
-                                    margin: chartData.margin[index],
-                                }))
-                                .filter(item => item.date === "2024-08-26")
-                                .sort((a, b) => b.margin - a.margin) // Sort by Margin descending
-                                .slice(0, 5) // Take top 5
-                                .map((item, index) => (
-                                    <tr key={index}>
-                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.date}</td>
-                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.margin}</td>
-                                    </tr>
-                                ))}
+                        {chartData.hoursDate
+                            .filter(item => 
+                            item.date === moment.tz('UTC').format('YYYY-MM-DD') // Today's date
+                            )
+                            .sort((a, b) => b.margin - a.margin) // Sort by Margin descending
+                            .slice(0, 5) // Take top 5
+                            .map((item, index) => (
+                            <tr key={index}>
+                                <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.hour}</td> {/* Access item.hour */}
+                                <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.margin}</td>
+                            </tr>
+                            ))}
                         </tbody>
                     </table>
                 </div>
@@ -777,37 +933,20 @@ const MnetLiveCampaignHistory = ({ params }) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {Object.values(chartData.dates
-                                .map((date, index) => ({
-                                    date: date.split(" ")[0], // Get the date part only
-                                    hour: new Date(date).getHours(), // Extract hour from date
-                                    rpc: chartData.rpc[index],
-                                }))
-                                .filter(item => {
-                                    const today = new Date();
-                                    const itemDate = new Date(item.date);
-                                    return itemDate >= new Date(today.setDate(today.getDate() - 10)); // Filter for last 10 days
-                                })
-                                .reduce((acc, item) => {
-                                    const key = `${item.date}-${item.hour}`;
-                                    if (!acc[key]) {
-                                        acc[key] = { ...item, count: 0, totalRpc: 0 };
-                                    }
-                                    acc[key].count += 1;
-                                    acc[key].totalRpc += item.rpc; // Sum the RPC values for the same hour
-                                    return acc;
-                                }, {}))
-                                .filter(item => item.count > 1) // Only take hours that repeated more than once
-                                .sort((a, b) => b.count - a.count) // Sort by frequency (count) descending
-                                .slice(0, 20) // Take top 5
-                                .map((item, index) => (
-                                    <tr key={index}>
-                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.hour}:00</td>
-                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{(item.totalRpc / item.count).toFixed(2)}</td> {/* Average RPC for that hour */}
-                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.count}</td>
-                                    </tr>
-                                ))
-                            }
+                        {chartData.sortedData.map((item, index) => {
+                            const totalRpc = item.totalRpc || 0;  // Default to 0 if totalRpc is undefined or null
+                            const count = item.count || 1;        // Default to 1 if count is undefined or 0 to avoid division by zero
+
+                            return (
+                                <tr key={index}>
+                                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.hour}:00</td>
+                                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>
+                                        {count > 0 ? (totalRpc / count).toFixed(2) : 'N/A'}  {/* Avoid division by zero */}
+                                    </td>
+                                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.count}</td>
+                                </tr>
+                            );
+                        })}
                         </tbody>
                     </table>
                 </div>
@@ -822,39 +961,23 @@ const MnetLiveCampaignHistory = ({ params }) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {Object.values(chartData.dates
-                                .map((date, index) => ({
-                                    date: date.split(" ")[0], // Get the date part only
-                                    hour: new Date(date).getHours(), // Extract hour from date
-                                    margin: chartData.margin[index],
-                                }))
-                                .filter(item => {
-                                    const today = new Date();
-                                    const itemDate = new Date(item.date);
-                                    return itemDate >= new Date(today.setDate(today.getDate() - 10)); // Filter for last 10 days
-                                })
-                                .reduce((acc, item) => {
-                                    const key = `${item.date}-${item.hour}`;
-                                    if (!acc[key]) {
-                                        acc[key] = { ...item, count: 0, totalMargin: 0 };
-                                    }
-                                    acc[key].count += 1;
-                                    acc[key].totalMargin += item.margin; // Sum the margin values for the same hour
-                                    return acc;
-                                }, {}))
-                                .filter(item => item.count > 1) // Only take hours that repeated more than once
-                                .sort((a, b) => b.count - a.count) // Sort by frequency (count) descending
-                                .slice(0, 5) // Take top 5
-                                .map((item, index) => (
-                                    <tr key={index}>
-                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.hour}:00</td>
-                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{(item.totalMargin / item.count).toFixed(2)}</td> {/* Average Margin for that hour */}
-                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.count}</td>
-                                    </tr>
-                                ))
-                            }
+                        {chartData.sortedMarginData.map((item, index) => {
+                            const totalMargin = item.totalMargin || 0;  // Default to 0 if totalMargin is undefined or null
+                            const count = item.count || 1;        // Default to 1 if count is undefined or 0 to avoid division by zero
+
+                            return (
+                                <tr key={index}>
+                                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.hour}:00</td>
+                                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>
+                                        {count > 0 ? (totalMargin / count).toFixed(2) : 'N/A'}  {/* Avoid division by zero */}
+                                    </td>
+                                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.count}</td>
+                                </tr>
+                            );
+                        })}
                         </tbody>
                     </table>
+                    
                 </div>
 
 

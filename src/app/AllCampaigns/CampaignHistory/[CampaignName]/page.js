@@ -396,7 +396,24 @@ export default function CampaignAndAccount({ params }) {
             // groupDisplayType: 'group',
             width: 400,
         },
-        date: { headerName: 'Date', field: 'date', width: 120, sort: 'asc' },
+        date: { headerName: 'Date', field: 'date', width: 120, sort: 'asc',
+        comparator: (valueA, valueB) => {
+            if (valueA == null && valueB == null) return 0;
+            if (valueA == null) return -1;
+            if (valueB == null) return 1;
+
+            const dateA = new Date(valueA);
+            const dateB = new Date(valueB);
+
+            // Compare valid dates
+            if (!isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) {
+                return dateA - dateB;
+            }
+
+            // Fallback for invalid dates (compare as strings)
+            return valueA.toString().localeCompare(valueB.toString());
+        }
+         },
         spend: {
             headerName: 'Spend', field: 'spend', width: 120,
             aggFunc: agFunc,
@@ -452,6 +469,24 @@ export default function CampaignAndAccount({ params }) {
         },
         adsetid: { headerName: 'AdsetId', field: 'adsetId' },
         campaignid: { headerName: 'CampaignId', field: 'campaignId' }
+    };
+    const defaultComparator = (valueA, valueB) => {
+        if (valueA == null && valueB == null) return 0;
+        if (valueA == null) return -1;
+        if (valueB == null) return 1;
+
+        const numA = parseFloat(valueA);
+        const numB = parseFloat(valueB);
+        if (!isNaN(numA) && !isNaN(numB)) {
+            return numA - numB;
+        }
+        return valueA.localeCompare(valueB);
+    };
+
+    const defaultColDef = {
+        comparator: defaultComparator, // Use the universal comparator for sorting
+        sortable: true,  // Enable sorting for all columns
+        filter: true,    // Enable filtering for all columns
     };
 
     return (
@@ -613,6 +648,7 @@ export default function CampaignAndAccount({ params }) {
                     <AgGridReact
                         rowData={dailyData}
                         columnDefs={columnDefs}
+                        defaultColDef={defaultColDef}
                         pinnedBottomRowData={pinnedBottomRowData} // Add this line to pin the total row at the bottom
                         getRowStyle={params => {
                             if (params.node.rowPinned) {

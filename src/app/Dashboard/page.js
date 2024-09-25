@@ -6,6 +6,7 @@ import React from 'react';
 import axios from 'axios';
 import { Select,Tag, theme } from 'antd';
 import moment from 'moment-timezone';
+import dayjs from 'dayjs';
 import debounce from 'lodash.debounce';
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
@@ -21,10 +22,11 @@ Chart.register(...registerables);
 import { DatePicker, Space, ConfigProvider, Flex, Spin, Skeleton } from 'antd';
 const { RangePicker } = DatePicker;
 import locale from 'antd/es/date-picker/locale/en_US';
-const yesterday = moment.tz('UTC').subtract(15, 'days').format('YYYY-MM-DD');
-const defaultDates = [moment(yesterday, 'YYYY-MM-DD'), moment(yesterday, 'YYYY-MM-DD')];
-const handleChange = (value) => {
-  console.log(`selected ${value}`);
+const yesterday = dayjs().subtract(1, 'days').format('YYYY-MM-DD');
+const defaultDates = [dayjs(yesterday), dayjs(yesterday)];
+const disabledDate = (current) => {
+    // Disable dates after today
+    return current && current > dayjs().endOf('day');
 };
 
 import {
@@ -39,15 +41,15 @@ import {
     Typography,
     Checkbox
 } from 'antd';
-import {
-    TrophyOutlined,
-    ArrowUpOutlined,
-    ArrowDownOutlined,
-    DollarOutlined,
-    UserOutlined,
-    ShoppingOutlined,
-    SmileOutlined,
-} from '@ant-design/icons';
+// import {
+//     TrophyOutlined,
+//     ArrowUpOutlined,
+//     ArrowDownOutlined,
+//     DollarOutlined,
+//     UserOutlined,
+//     ShoppingOutlined,
+//     SmileOutlined,
+// } from '@ant-design/icons';
 
 import { useTokenContext } from '../components/parent';
 import { AgGridReact } from "ag-grid-react";
@@ -74,11 +76,47 @@ const timezones = [
     'DST'
 ];
 
-const initialData = {
-    Fruits: ['Apple', 'Banana', 'Orange'],
-    Vegetables: ['Carrot', 'Broccoli', 'Spinach'],
-    Grains: ['Rice', 'Wheat', 'Oats'],
-};
+const rangePresets = [
+    {
+        label: 'ToDay',
+        value: [dayjs().add(0, 'd'), dayjs().add(0, 'd')],
+    },
+    {
+        label: 'YesterDay',
+        value: [dayjs().add(-1, 'd'), dayjs().add(-1, 'd')],
+    },
+    {
+        label: 'Last 7 Days',
+        value: [dayjs().add(-7, 'd'), dayjs()],
+    },
+    {
+        label: 'Last 14 Days',
+        value: [dayjs().add(-14, 'd'), dayjs()],
+    },
+    {
+        label: 'Last 30 Days',
+        value: [dayjs().add(-30, 'd'), dayjs()],
+    },
+    {
+        label: 'Last 60 Days',
+        value: [dayjs().add(-60, 'd'), dayjs()],
+    },
+    {
+        label: 'Last 90 Days',
+        value: [dayjs().add(-90, 'd'), dayjs()],
+    },
+    {
+      label: 'This Month',
+      value: [dayjs().startOf('month'), dayjs()],
+    },
+    {
+      label: 'Last Month',
+      value: [
+        dayjs().subtract(1, 'month').startOf('month'),
+        dayjs().subtract(1, 'month').endOf('month'),
+      ],
+    },
+];
 
 const Dashboard = () => {
     const { userdetails } = useTokenContext();
@@ -465,7 +503,15 @@ const Dashboard = () => {
       
           return updatedSelectedItems;
         });
+      
+        // Check if only 'FB_Tonic' is selected and update the timezone
+        if (newCategories.length === 1 && newCategories[0] === 'FB_Tonic') {
+          setTime('PDT'); // Change to PDT when FB_Tonic is selected
+        } else {
+          setTime('UTC'); // Default to UTC otherwise
+        }
       };
+      
   
       // Handle change in the second select (category items select)
        // This runs whenever `selectedItems` changes
@@ -569,10 +615,13 @@ const Dashboard = () => {
         sortable: true,
         hide: true, // Hide column as it's grouped
         rowGroup: true, 
-        enableRowGroup: true,  }, // Group by Holder
+        enableRowGroup: true,
+          }, // Group by Holder
         {
-          field: "mediaBuyerName",// Group by MediaBuyerName
+          field: "mediaBuyerName",
+          
         }, // Display Media Buyer name
+        {field: 'accountNumber', headerName:'AccountNumber'},
         {
           field: "spend",
           aggFunc: spender,
@@ -756,14 +805,16 @@ const Dashboard = () => {
                 </Col>
 
                 <Col span={8}>
-                <ConfigProvider locale={locale}>
-                    <RangePicker
-                    onChange={handleChangeDates}
-                    defaultValue={defaultDates}
-                    format="YYYY-MM-DD"
-                    style={{ width: '100%' }}
-                    />
-                </ConfigProvider>
+                    <ConfigProvider locale={locale}>
+                        <RangePicker
+                            presets={rangePresets}
+                            onChange={handleChangeDates}
+                            defaultValue={defaultDates}
+                            disabledDate={disabledDate}
+                            format="YYYY-MM-DD"
+                            style={{ width: '100%' }}
+                        />
+                    </ConfigProvider>
                 </Col>
             </Row>
             </div>
@@ -1032,6 +1083,7 @@ const Dashboard = () => {
                             backgroundColor: 'rgba(44, 144, 192, 0.2)',
                             fill: true,
                             hidden: true,
+                            tension: 0.3
                         },
                         {
                             label: 'Revenue',
@@ -1040,6 +1092,7 @@ const Dashboard = () => {
                             backgroundColor: 'rgba(99, 200, 99, 0.2)',
                             fill: true,
                             hidden: true,
+                            tension: 0.3
                         },
                         {
                             label: 'RPC',
@@ -1048,6 +1101,7 @@ const Dashboard = () => {
                             backgroundColor: 'rgba(255, 99, 132, 0.2)',
                             fill: true,
                             hidden: true,
+                            tension: 0.3
                         },
                         {
                             label: 'CPL',
@@ -1056,6 +1110,7 @@ const Dashboard = () => {
                             backgroundColor: 'rgba(255, 159, 64, 0.2)',
                             fill: true,
                             hidden: true,
+                            tension: 0.3
                         },
                         {
                             label: 'Profit',
@@ -1063,6 +1118,7 @@ const Dashboard = () => {
                             borderColor: 'rgba(255, 206, 86, 1)',
                             backgroundColor: 'rgba(255, 206, 86, 0.2)',
                             fill: true,
+                            tension: 0.3
                         },
                         {
                             label: 'Margin',
@@ -1071,6 +1127,7 @@ const Dashboard = () => {
                             backgroundColor: 'rgba(153, 102, 255, 0.2)',
                             fill: true,
                             hidden: true,
+                            tension: 0.3
                         },
                         ],
                     }}

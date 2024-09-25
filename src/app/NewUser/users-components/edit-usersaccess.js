@@ -202,7 +202,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
     const getAvailableNetworks = (currentNetwork = '') => {
         const allSelectedNetworks = selectedNetworks.filter(network => network !== currentNetwork);
         
-        const data = ["FB_Mnet", "FB_Enki", "FB_Tonic", "FB_System1", "FB_Bodies", "FB_Bodies1", "FB_Rsoc", "FB_DActive"].filter(network => !allSelectedNetworks.includes(network));
+        const data = ["FB_Mnet", "FB_MnetBing", "FB_Enki", "FB_Tonic", "FB_System1", "FB_Bodies", "FB_Bodies1", "FB_Rsoc", "FB_DomainActive"].filter(network => !allSelectedNetworks.includes(network));
         // setNetworks(data);
         AddAccounts = data;
         return data;
@@ -263,7 +263,8 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                         }, 1500);
                         setIsModalVisible(false); // Close modal after success
                         onClose(); // Close drawer
-                    } else {
+                    }
+                     else {
                         console.error('Failed to update user');
                         // Handle error, show error message
                     }
@@ -320,6 +321,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                 layout="vertical"
                 onFinish={submitForm}
                 initialValues={initialValues}
+                key={initialValues?.userName} 
             >
                 <Form.Item
                     label="UserName"
@@ -331,7 +333,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                         },
                     ]}
                 >
-                    <Input />
+                    <Input  disabled  style={{backgroundColor:'transparent', color: 'black'}}/>
                 </Form.Item>
 
                 <Form.Item
@@ -344,7 +346,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                         },
                     ]}
                 >
-                    <Input />
+                    <Input  disabled  style={{backgroundColor:'transparent', color: 'black'}}/>
                 </Form.Item>
 
                 <Form.Item
@@ -358,10 +360,10 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                     ]}
                 >
                     <Select>
-                        <Select.Option value="MEDIA_BUYER">MEDIA_BUYER</Select.Option>
-                        <Select.Option value="SPECIAL_USER">SPECIAL_USER</Select.Option>
-                        <Select.Option value="ADMIN">ADMIN</Select.Option>
-                        <Select.Option value="MANAGER">MANAGER</Select.Option>
+                        <Select.Option value="Media_Buyer">Media_Buyer</Select.Option>
+                        <Select.Option value="Special_User">Special_User</Select.Option>
+                        <Select.Option value="Admin">Admin</Select.Option>
+                        <Select.Option value="Manager">Manager</Select.Option>
                     </Select>
                 </Form.Item>
                 {/* <Form.Item label="Ad Accounts" name="adAccounts">
@@ -404,7 +406,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                         <div style={{ display: 'flex', marginBottom: '8px', width: '100%' }}>
                             <Select
                                 placeholder="Select a network"
-                                style={{ width: '120px', marginRight: '8px' }}
+                                style={{ width: '145px', height: '30px', marginRight:'8px' }}
                                 value={account.network}
                                 onChange={(value) => handleNetworkChange(accountIndex, value)}
                             >
@@ -414,40 +416,73 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                                     </Select.Option>
                                 ))}
                             </Select>
-                            <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    width: '100%',
+                                    marginTop: '0px',
+                                    paddingTop: '0px',
+                                }}
+                            >
                                 {account.inputs.map((input, inputIndex) => (
-                                    <div key={inputIndex} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', width: '100%' }}>
-                                        <Input
-                                            value={input}
-                                            onChange={(e) => handleInputChange(accountIndex, inputIndex, e.target.value)}
-                                            placeholder="Enter ad input"
-                                            style={{ width: '100%', marginRight: '8px' }}
+                                    <div
+                                    key={inputIndex}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        marginBottom: '8px',
+                                        width: '100%',
+                                        height: '30px',
+                                        justifyContent: 'center',
+                                    }}
+                                    >
+                                    <Input
+                                        value={input}
+                                        onChange={(e) =>
+                                        handleInputChange(accountIndex, inputIndex, e.target.value)
+                                        }
+                                        placeholder="Enter ad input"
+                                        style={{ width: '100%', marginRight: '8px' }}
+                                    />
+                                    
+                                    {/* Show DeleteOutlined only if there is more than one input */}
+                                    {account.inputs.length > 1 && inputIndex !== 0 && (
+                                        <DeleteOutlined
+                                        style={{ cursor: 'pointer' }}
+                                        onClick={() => handleRemoveInput(accountIndex, inputIndex)}
                                         />
-                                        {inputIndex !== 0 && (
-                                            <DeleteOutlined
-                                                style={{ cursor: 'pointer' }}
-                                                onClick={() => handleRemoveInput(accountIndex, inputIndex)}
-                                            />
-                                        )}
+                                    )}
+
+                                    {/* Show Remove button only if there is exactly one input */}
+                                    {account.inputs.length === 1 && inputIndex === 0 && (
+                                        <Button
+                                        style={{ marginTop: '8px', marginBottom: '8px' }}
+                                        type="default"
+                                        onClick={() => handleRemoveAccount(accountIndex)}
+                                        >
+                                        Remove
+                                        </Button>
+                                    )}
+                                    
+                                    {/* Show PlusOutlined only for the last input */}
+                                    {inputIndex === account.inputs.length - 1 && (
                                         <PlusOutlined
-                                            style={{ cursor: 'pointer', marginLeft: '8px' }}
-                                            onClick={() => handleAddInput(accountIndex)}
+                                        style={{ cursor: 'pointer', marginLeft: '8px' }}
+                                        onClick={() => handleAddInput(accountIndex)}
                                         />
+                                    )}
                                     </div>
                                 ))}
                             </div>
+
+
                         </div>
-                        <Button
-                            style={{ marginTop: '8px', marginBottom: '8px' }}
-                            type="default"
-                            onClick={() => handleRemoveAccount(accountIndex)}
-                        >
-                            Remove
-                        </Button>
+                        
                     </div>
                 ))}
 
-                <Form.Item label="Ad Accounts" name="adAccounts">
+                <Form.Item name="adAccounts">
                     <div>
                         {formAccounts.map((account, accountIndex) => (
                             <div key={accountIndex}>
