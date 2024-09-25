@@ -9,6 +9,9 @@ import 'ag-grid-enterprise';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import {useTokenContext} from '../../../components/parent'
+import { Line } from 'react-chartjs-2';
+import { Chart, registerables } from 'chart.js';
+Chart.register(...registerables);
 
 export default function AdsetNameAndAccount({params}){
     
@@ -22,6 +25,8 @@ export default function AdsetNameAndAccount({params}){
 
     const [isLoading, setLoading] = useState(true);
     const [dailyData, setdailyData] = useState([]);
+    const [chartData, setChartData] = useState({ dates: [], spend: [], revenue: [], profit: [], margin: [] });
+
     const paramsData = ((params.AdsetName).split("-"));
     const decodedString = decodeURIComponent(paramsData[0]);
     const accountNumber = paramsData[1];
@@ -331,6 +336,16 @@ export default function AdsetNameAndAccount({params}){
         : null;
         setdailyData(filteredData);
         setLoading(false);
+        const dates = filteredData.map(d => d.date);
+        const spend = filteredData.map(d => d.spend);
+        const revenue = filteredData.map(d => d.revenue);
+        const profit = filteredData.map(d => d.profit);
+        const rpc = filteredData.map(d => d.rpc);
+        const cpl = filteredData.map(d => d.cpl);
+
+        const margin = filteredData.map(d => parseFloat(d.margin));
+
+        setChartData({ dates, spend, revenue, profit, margin, rpc, cpl });
     }
 
     useEffect(()=>{
@@ -386,7 +401,24 @@ export default function AdsetNameAndAccount({params}){
             // enableRowGroup: true,
             // autoHeight: true, 
             },
-            date:{ headerName: 'Date', field: 'date', width: 120, sort: 'asc' },
+            date:{ headerName: 'Date', field: 'date', width: 120, sort: 'asc',
+                comparator: (valueA, valueB) => {
+                    if (valueA == null && valueB == null) return 0;
+                    if (valueA == null) return -1;
+                    if (valueB == null) return 1;
+        
+                    const dateA = new Date(valueA);
+                    const dateB = new Date(valueB);
+        
+                    // Compare valid dates
+                    if (!isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) {
+                        return dateA - dateB;
+                    }
+        
+                    // Fallback for invalid dates (compare as strings)
+                    return valueA.toString().localeCompare(valueB.toString());
+                }
+             },
             spend:{ headerName: 'Spend', field: 'spend', width: 120,
                 aggFunc: agFunc, 
                 valueFormatter: params => params.value ? Math.round(params.value*100)/100 : '',
@@ -429,8 +461,163 @@ export default function AdsetNameAndAccount({params}){
 
     console.log(columnDefs);
 
+    const defaultComparator = (valueA, valueB) => {
+        if (valueA == null && valueB == null) return 0;
+        if (valueA == null) return -1;
+        if (valueB == null) return 1;
+
+        const numA = parseFloat(valueA);
+        const numB = parseFloat(valueB);
+        if (!isNaN(numA) && !isNaN(numB)) {
+            return numA - numB;
+        }
+        return valueA.localeCompare(valueB);
+    };
+
+    const defaultColDef = {
+        comparator: defaultComparator, // Use the universal comparator for sorting
+        sortable: true,  // Enable sorting for all columns
+        filter: true,    // Enable filtering for all columns
+    };
+
     return(
         <div>
+            <div style={{ height: '400px', marginBottom: '10px' }}> {/* Container with fixed height */}
+                <Line
+                    data={{
+                        labels: chartData.dates,
+                        datasets: [
+                            {
+                                label: 'Spend',
+                                data: chartData.spend,
+                                borderColor: 'rgba(75, 192, 192, 1)',        // Teal
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',   // Light Teal
+                                fill: true,
+                                hidden: true
+                            },
+                            {
+                                label: 'Revenue',
+                                data: chartData.revenue,
+                                borderColor: 'rgba(54, 162, 235, 1)',        // Blue
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',   // Light Blue
+                                fill: true,
+                                hidden: true
+
+                            },
+                            {
+                                label: 'RPC',
+                                data: chartData.rpc,
+                                borderColor: 'rgba(255, 99, 132, 1)',        // Red
+                                backgroundColor: 'rgba(255, 99, 132, 0.2)',   // Light Red
+                                fill: true,
+                                hidden: true
+
+                            },
+                            {
+                                label: 'CPL',
+                                data: chartData.cpl,
+                                borderColor: 'rgba(255, 159, 64, 1)',        // Orange
+                                backgroundColor: 'rgba(255, 159, 64, 0.2)',   // Light Orange
+                                fill: true,
+                                hidden: true
+
+                            },
+                            {
+                                label: 'Profit',
+                                data: chartData.profit,
+                                borderColor: 'rgba(255, 206, 86, 1)',        // Yellow
+                                backgroundColor: 'rgba(255, 206, 86, 0.2)',   // Light Yellow
+                                fill: true,
+
+                            },
+                            {
+                                label: 'Margin',
+                                data: chartData.margin,
+                                borderColor: 'rgba(153, 102, 255, 1)',       // Purple
+                                backgroundColor: 'rgba(153, 102, 255, 0.2)',  // Light Purple
+                                fill: true,
+                                hidden: true
+
+                            }
+                        ],
+
+                    }}
+                    options={{
+                        responsive: true,
+                        maintainAspectRatio: false, // Allow the chart to take the full height of its container
+                        scales: {
+                            x: {
+                                ticks: {
+                                    // autoSkip: false,
+                                    // maxRotation: 0, // Keep labels horizontal
+                                    padding: 30, // Increase padding between labels and the axis
+                                },
+                            },
+                            y: {
+                                beginAtZero: true, // Ensure the y-axis starts at zero
+                            },
+                        },
+                    }}
+                    height={350} // Set the height of the chart
+                />
+            </div>
+            <div style={{ display: 'flex', width: '100%', marginLeft: '2%' }}>
+                {/* Top 5 Dates with RPC */}
+                <div style={{ width: '20%' }}>
+                    <h3>Top 5 Dates with RPC</h3>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                            <tr>
+                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Date</th>
+                                <th style={{ border: '1px solid #ddd', padding: '2px' }}>RPC</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {chartData.dates
+                                .map((date, index) => ({
+                                    date: date.split(" ")[0], // Get the date part only
+                                    rpc: chartData.rpc[index],
+                                }))
+                                .sort((a, b) => b.rpc - a.rpc) // Sort by RPC descending
+                                .slice(0, 5) // Take top 5 dates
+                                .map((item, index) => (
+                                    <tr key={index}>
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.date}</td>
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.rpc}</td>
+                                    </tr>
+                                ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Top 5 Dates with Margin */}
+                <div style={{ marginLeft: "1%", width: '20%' }}>
+                    <h3>Top 5 Dates with Margin</h3>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                            <tr>
+                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Date</th>
+                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Margin</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {chartData.dates
+                                .map((date, index) => ({
+                                    date: date.split(" ")[0], // Get the date part only
+                                    margin: chartData.margin[index],
+                                }))
+                                .sort((a, b) => b.margin - a.margin) // Sort by Margin descending
+                                .slice(0, 5) // Take top 5 dates
+                                .map((item, index) => (
+                                    <tr key={index}>
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.date}</td>
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.margin}</td>
+                                    </tr>
+                                ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             {/* <h1>{params.campaignAndAccount}hi</h1> */}
             {isLoading === true ? (
                 <div className="loader-container ag-container">
@@ -451,12 +638,13 @@ export default function AdsetNameAndAccount({params}){
                     <AgGridReact
                         rowData={dailyData}
                         columnDefs={columnDefs}
-                        grandTotalRow = "bottom"
+                        // grandTotalRow = "bottom"
                         // onCellClicked={onCellClicked}
                         // height={520}
                         // pagination={true}
                         // paginationPageSize={30}
                         // paginationPageSizeSelector={[10,20,30]}
+                        defaultColDef={defaultColDef}
                         groupDisplayType='multipleColumns'
                         suppressAggFuncInHeader={true}
                         groupSuppressBlankHeader ={true}

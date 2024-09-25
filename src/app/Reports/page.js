@@ -88,6 +88,7 @@ const CustomHeader = (props) => {
 
 const newtworkCollections = {
     "FB_Mnet": "Facebook_Mnet",
+    "FB_MnetBing": "Facebook_MnetBing",
     "FB_Enki": "Facebook_Enki",
     "FB_System1": 'Facebook_System1',
     "FB_Rsoc": 'Facebook_Rsoc',
@@ -115,7 +116,7 @@ const MyTablePage = () => {
 
     const networks = Object.keys(adAccounts);
 
-    const yesterday = moment.tz('UTC').subtract(1, 'days').format('YYYY-MM-DD');
+    const yesterday = dayjs().subtract(1, 'days').format('YYYY-MM-DD');
     console.log('Yesterday\'s date:', yesterday);
 
 
@@ -236,6 +237,10 @@ const MyTablePage = () => {
     const accountStatus = useRef();
 
     const carouselRef = useRef();
+
+    const maxHour = useRef();
+
+    const maxNetworkHour = useRef();
 
     // const columnApiRef = useRef(null);
 
@@ -570,7 +575,7 @@ const MyTablePage = () => {
                 if (RPC === Infinity || isNaN(RPC)) {
                     return 0;
                 }
-                return `${Number(RPC.toFixed(2))}%`;
+                return `${Number(RPC.toFixed(2))}`;
 
             }
         }
@@ -578,7 +583,7 @@ const MyTablePage = () => {
             const { impressions, fbclicks } = params.node.aggData;
             if (impressions !== 0) {
                 const RPC = (fbclicks / impressions) * 100;
-                return `${Number(RPC.toFixed(2))}%`;
+                return `${Number(RPC.toFixed(2))}`;
             }
         }
 
@@ -620,7 +625,7 @@ const MyTablePage = () => {
                 if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
                     return 0;
                 }
-                return `${Number(RPC.toFixed(2))}%`;
+                return `${Number(RPC.toFixed(2))}`;
 
             }
         }
@@ -628,7 +633,7 @@ const MyTablePage = () => {
             const { profit } = params.node.aggData;
             if (revenue !== 0) {
                 const RPC = (profit / revenue) * 100;
-                return `${Number(RPC.toFixed(2))}%`;
+                return `${Number(RPC.toFixed(2))}`;
             }
         }
 
@@ -666,9 +671,9 @@ const MyTablePage = () => {
             if (revenue !== "0.00" || revenue !== undefined) {
                 const RPC = ((revenue - spend) / revenue) * 100;
                 if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
-                    return `0%`;
+                    return `0`;
                 }
-                return `${Math.round(RPC * 100) / 100}%`;
+                return `${Math.round(RPC * 100) / 100}`;
 
             }
         }
@@ -677,9 +682,9 @@ const MyTablePage = () => {
             if (revenue !== "0.00" || revenue !== undefined) {
                 const RPC = ((revenue - spend) / revenue) * 100;
                 if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
-                    return `0%`;
+                    return `0`;
                 }
-                return `${Math.round(RPC * 100) / 100}%`;
+                return `${Math.round(RPC * 100) / 100}`;
 
             }
         }
@@ -694,9 +699,9 @@ const MyTablePage = () => {
             if (revenue !== "0.00" || revenue !== undefined) {
                 const RPC = ((revenue - spend) / spend) * 100;
                 if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
-                    return `0%`;
+                    return `0`;
                 }
-                return `${Math.round(RPC * 100) / 100}%`;
+                return `${Math.round(RPC * 100) / 100}`;
 
             }
         }
@@ -705,9 +710,9 @@ const MyTablePage = () => {
             if (revenue !== "0.00" || revenue !== undefined) {
                 const RPC = ((revenue - spend) / spend) * 100;
                 if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
-                    return `0%`;
+                    return `0`;
                 }
-                return `${Math.round(RPC * 100) / 100}%`;
+                return `${Math.round(RPC * 100) / 100}`;
 
             }
         }
@@ -805,6 +810,15 @@ const MyTablePage = () => {
 
 
     const defaultColDef = {
+        comparator: (valueA, valueB) => {
+            // Default comparator for handling null or undefined values
+            if (valueA == null) return -1;
+            if (valueB == null) return 1;
+            return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
+        },
+        sortable: true,  // Enable sorting for all columns by default
+        // filter: true,    // Enable filtering for all columns by default
+        resizable: true,
         flex: 1,
         minWidth: 150,
         filter: true, // Enable default filtering
@@ -1066,6 +1080,13 @@ const MyTablePage = () => {
             valueGetter: getMargin,
             sortable: true,
             filter: "agTextColumnFilter",
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+              },
+            valueFormatter: (params) => `${params.value}%`,
             // headerComponent: CustomHeader,
             // headerComponentParams: {
             //     displayName: 'Margin',
@@ -1148,6 +1169,13 @@ const MyTablePage = () => {
             valueGetter: getCtr,
             sortable: true,
             filter: "agTextColumnFilter",
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+              },
+            valueFormatter: (params) => `${params.value}%`,
             // headerComponent: CustomHeader,
             // headerComponentParams: {
             //     displayName: 'CTR',
@@ -1200,6 +1228,13 @@ const MyTablePage = () => {
             valueGetter: getFmargin,
             sortable: true,
             filter: "agTextColumnFilter",
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+              },
+            valueFormatter: (params) => `${params.value}%`,
             // headerComponent: CustomHeader,
             // headerComponentParams: {
             //     displayName: 'Fmargin',
@@ -1212,6 +1247,13 @@ const MyTablePage = () => {
             field: 'roi',
             valueGetter: getROI,
             filter: "agNumberColumnFilter",
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+              },
+            valueFormatter: (params) => `${params.value}%`,
             // headerComponent: CustomHeader,
             // headerComponentParams: {
             //     displayName: 'ROI',
@@ -1347,7 +1389,14 @@ const MyTablePage = () => {
             headerTooltip: 'Revenue - Spend', filter: 'agNumberColumnFilter'
         },
         margin: {
-            headerName: 'Margin(%)', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: 'Profit/Revenue', filter: 'agNumberColumnFilter'
+            headerName: 'Margin(%)', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: 'Profit/Revenue', filter: 'agNumberColumnFilter',
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+              },
+            valueFormatter: (params) => `${params.value}%`,
 
         },
         fbleads: { headerName: 'FbLeads', field: 'fbleads', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
@@ -1364,12 +1413,36 @@ const MyTablePage = () => {
         },
         fbclicks: { headerName: 'FbClicks', field: 'fbclicks', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
         impressions: { headerName: 'Impressions', field: 'impressions', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
-        ctr: { headerName: 'Ctr', field: 'ctr', valueGetter: getCtr, sortable: true, },
+        ctr: { headerName: 'Ctr', field: 'ctr', valueGetter: getCtr, sortable: true,
+        comparator: (valueA, valueB) => {
+            // Handle sorting based on the computed margin value
+            if (valueA == null) return -1;
+            if (valueB == null) return 1;
+            return valueA - valueB;
+          },
+        valueFormatter: (params) => `${params.value}%`,
+         },
         rpc: { headerName: 'Rpc', field: 'rpc', valueGetter: getRpc, sortable: true, filter: 'agNumberColumnFilter' },
         cpl: { headerName: 'Cpl', field: 'cpl', valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter' },
         ncpl: { headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter' },
-        fmargin: { headerName: 'Fmargin(%)', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: true },
-        roi: { headerName: 'ROI(%)', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: 'Profit/Spend', filter: true, },
+        fmargin: { headerName: 'Fmargin(%)', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: true,
+        comparator: (valueA, valueB) => {
+            // Handle sorting based on the computed margin value
+            if (valueA == null) return -1;
+            if (valueB == null) return 1;
+            return valueA - valueB;
+          },
+        valueFormatter: (params) => `${params.value}%`,
+         },
+        roi: { headerName: 'ROI(%)', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: 'Profit/Spend', filter: true,
+        comparator: (valueA, valueB) => {
+            // Handle sorting based on the computed margin value
+            if (valueA == null) return -1;
+            if (valueB == null) return 1;
+            return valueA - valueB;
+          },
+        valueFormatter: (params) => `${params.value}%`,
+         },
         adsetid: { headerName: 'AdsetId', field: 'adsetid', sortable: true, filter: "agTextColumnFilter",hide: false },
         campaignid: { headerName: 'CampaignId', field: 'campaignid', sortable: true, filter: "agTextColumnFilter", },
         timezone: { headerName: 'TimeZone', field: 'timezone', sortable: true, hide: true, filter: "agTextColumnFilter", },
@@ -1466,18 +1539,50 @@ const MyTablePage = () => {
             }, sortable: true, headerTooltip: 'Revenue - Spend', filter: 'agNumberColumnFilter',
             valueFormatter:currencyFormatter
         },
-        margin: { headerName: 'Margin(%)', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: 'Profit/Revenue', filter: true },
+        margin: { headerName: 'Margin(%)', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: 'Profit/Revenue', filter: true,
+        comparator: (valueA, valueB) => {
+            // Handle sorting based on the computed margin value
+            if (valueA == null) return -1;
+            if (valueB == null) return 1;
+            return valueA - valueB;
+          },
+          valueFormatter: (params) => `${params.value}%`,
+         },
         fbleads: { headerName: 'FbLeads', field: 'fbleads', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
         conversions: { headerName: 'Conversions', field: 'conversions', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
         cpc: { headerName: 'cpc', field: 'cpc', aggFunc: cpcSpender, sortable: true, filter: 'agNumberColumnFilter' },
         fbclicks: { headerName: 'FbClicks', field: 'fbclicks', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
         impressions: { headerName: 'Impressions', field: 'impressions', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
-        ctr: { headerName: 'Ctr', field: 'ctr', valueGetter: getCtr, sortable: true, filter: 'agNumberColumnFilter' },
+        ctr: { headerName: 'Ctr', field: 'ctr', valueGetter: getCtr, sortable: true, filter: 'agNumberColumnFilter',
+        comparator: (valueA, valueB) => {
+            // Handle sorting based on the computed margin value
+            if (valueA == null) return -1;
+            if (valueB == null) return 1;
+            return valueA - valueB;
+          },
+        valueFormatter: (params) => `${params.value}%`,
+         },
         rpc: { headerName: 'Rpc', field: 'rpc', valueGetter: getRpc, sortable: true, filter: 'agNumberColumnFilter' },
         cpl: { headerName: 'Cpl', field: 'cpl', valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter' },
         ncpl: { headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter' },
-        fmargin: { headerName: 'Fmargin(%)', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: true },
-        roi: { headerName: 'ROI(%)', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: 'Profit/Spend', filter: true },
+        fmargin: { headerName: 'Fmargin(%)', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: true,
+        comparator: (valueA, valueB) => {
+            // Handle sorting based on the computed margin value
+            if (valueA == null) return -1;
+            if (valueB == null) return 1;
+            return valueA - valueB;
+          },
+        valueFormatter: (params) => `${params.value}%`,
+         },
+        roi: { headerName: 'ROI(%)', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: 'Profit/Spend', filter: true,
+        comparator: (valueA, valueB) => {
+            // Handle sorting based on the computed margin value
+            if (valueA == null) return -1;
+            if (valueB == null) return 1;
+            return valueA - valueB;
+          },
+        valueFormatter: (params) => `${params.value}%`,
+         },
         campaignid: { headerName: 'CampaignId', field: 'campaignid', sortable: true, filter: "agTextColumnFilter", },
         adsetid: { headerName: 'AdsetId', field: 'adsetid', sortable: true, filter: "agTextColumnFilter", },
         timezone: { headerName: 'TimeZone', field: 'timezone', sortable: true, hide: true, filter: "agTextColumnFilter", },
@@ -1527,6 +1632,28 @@ const MyTablePage = () => {
         // console.log(mainData.rows, "rows");
         // // setRowStructure(mainData.rows); 
         // setColumnDefs(getColumnDefs(mainData.rows));
+    }
+
+    function findMaxHour(data) {
+        // Use reduce to find the maximum value of the 'hour' key
+        const maxHour = data.reduce((max, obj) => {
+          // Convert the 'hour' value to a number before comparison
+          const hourAsNumber = parseInt(obj.hour, 10);
+          return hourAsNumber > max ? hourAsNumber : max;
+        }, -Infinity);  // Initialize with -Infinity to ensure proper comparison
+      
+        console.log("Maximum hour:", String(maxHour).padStart(2, '0'));  // Format it back to string with leading zero if necessary
+        return String(maxHour).padStart(2, '0');  // Return the max hour as a string with leading zero
+    }
+
+    function getMaxHour(data) {
+        // Extract hour from "HH:MM" format if updatedHour exists and convert it to a number
+        const hours = data
+          .filter(item => item.updatedHour) // Filter out objects without updatedHour
+          .map(item => parseInt(item.updatedHour.split(":")[0], 10));
+      
+        // Return the maximum hour, or null if no valid updatedHour found
+        return hours.length > 0 ? Math.max(...hours) : null;
     }
 
 
@@ -1615,6 +1742,8 @@ const MyTablePage = () => {
             timezone.current = mainData[0].accountTimezone;
             accountStatus.current = mainData[0].accountStatus;
             cronStatus.current = mainData[0].cronStatus;
+            maxHour.current = findMaxHour(mainData);
+            maxNetworkHour.current = getMaxHour(mainData);
         }
         setRowData(filteredData);
         newRowData.current = filteredData;
@@ -2331,7 +2460,8 @@ const MyTablePage = () => {
     console.log(columnDefs2);
 
 
-    const defaultDates = [moment(yesterday, 'YYYY-MM-DD'), moment(yesterday, 'YYYY-MM-DD')];
+    
+    const defaultDates = [dayjs(yesterday), dayjs(yesterday)];
 
     // const onFilterChanged = (params) => {
     //     const allData = params.api.rowModel.rowsToDisplay.map(node => node.data); // Get all row data from the grid
@@ -2634,7 +2764,7 @@ const MyTablePage = () => {
 
     const disabledDate = (current) => {
         // Disable dates after today
-        return current && current > Date.now();
+        return current && current > dayjs().endOf('day');
     };
 
     console.log(revenuePratner);
@@ -2730,6 +2860,8 @@ const MyTablePage = () => {
 
     // console.log(fixedFooter, "fixed");
 
+    
+
     return (
         <div className='reports-container'>
             {/* className='select-container' */}
@@ -2757,9 +2889,12 @@ const MyTablePage = () => {
                             onChange={onChangeSelect}
                             style={{ width: '100%' }}
                             placeholder="Select Account"
-                            optionFilterProp="label"
+                            optionFilterProp="value" // Make sure the option has a 'label' property
                             defaultValue={typeof networksData[0] === 'string' ? networksData[0] : networksData[0].accountNumber}
                             options={accountsAccess.map((item) => createOption(item))}
+                            // filterOption={(input, option) =>
+                            //     option?.text.toLowerCase().includes(input.toLowerCase())  // Custom filter logic for case-insensitive search
+                            // }
                         />
                     </Col>
 
@@ -2880,6 +3015,9 @@ const MyTablePage = () => {
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ fontWeight: '600' }}>Timezone: {timezone.current}</Text>
+                                        </Col>
+                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                            <Text style={{ fontWeight: '600' }}>F/N Hour: {maxHour.current}:00 / {maxNetworkHour.current}:00</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ fontWeight: '600' }}>
@@ -3015,6 +3153,7 @@ const MyTablePage = () => {
                                         groupDisplayType='multipleColumns'
                                         suppressAggFuncInHeader={true}
                                         groupSuppressBlankHeader={true}
+                                        defaultColDef={defaultColDef}
                                         // groupIncludeFooter={true}
                                         // groupIncludeTotalFooter={true}
                                         autoGroupColumnDef={autoGroupColumnDef}
@@ -3101,7 +3240,7 @@ const MyTablePage = () => {
                                             columnDefs={columnDefs2.current}
                                             onCellClicked={onCellClickedAllCampaigns}
                                             autoGroupColumnDef={autoGroupColumnDef2}
-                                            // // defaultColDef={defaultColDef}
+                                            defaultColDef={defaultColDef}
                                             // pagination={true}
                                             // paginationPageSize={50}
                                             // paginationPageSizeSelector={[10,20,30]}

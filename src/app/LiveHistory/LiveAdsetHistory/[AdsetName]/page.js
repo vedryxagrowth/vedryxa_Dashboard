@@ -4,9 +4,13 @@ import { useEffect, useMemo, useState } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
 import axios from 'axios';
+import moment from 'moment-timezone';
 import 'ag-grid-enterprise';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
+import { Line } from 'react-chartjs-2';
+import { Chart, registerables } from 'chart.js';
+Chart.register(...registerables);
 
 import { useTokenContext } from '../../../components/parent';
 const MnetLiveAdsetHistory = ({params}) => {
@@ -38,6 +42,8 @@ const MnetLiveAdsetHistory = ({params}) => {
     const [endDate1, setEndDate1] = useState();
 
     const [columnDefs, setColumnStructure] = useState([]);
+
+    const [chartData, setChartData] = useState({ dates: [], rpcDate:[], hoursDate:[], spend: [], revenue: [], profit: [], margin: [] });
 
     const spender = (params) => {
         var total = 0;
@@ -307,21 +313,21 @@ const MnetLiveAdsetHistory = ({params}) => {
     const pinnedBottomRowData = [
         {
             campaignName: 'Total',
-            spend: rowData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0),
-            revenue: rowData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0),
-            profit: rowData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0),
-            margin: `${(rowData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / rowData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)}%`,
-            rpc: rowData.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / rowData.length,
-            cpl: rowData.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / rowData.length,
-            ncpl: rowData.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / rowData.length,
-            fbleads: rowData.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0),
-            conversions: rowData.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0),
-            fmargin: `${(rowData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / rowData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)}%`,
-            roi: `${(rowData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - rowData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / rowData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100}%`,
-            cpc: rowData.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / rowData.length,
-            fbclicks: rowData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0),
-            impressions: rowData.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0),
-            ctr: `${(rowData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / rowData.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)}%`
+            spend: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0).toFixed(2)),
+            revenue: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0).toFixed(2)),
+            profit: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0).toFixed(2)),
+            margin: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
+            rpc: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / rowData?.length).toFixed(2)),
+            cpl: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / rowData?.length).toFixed(2)),
+            ncpl: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / rowData?.length).toFixed(2)),
+            fbleads: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0).toFixed(2)),
+            conversions: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0).toFixed(2)),
+            fmargin: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+            roi: parseFloat(((rowData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - rowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+            cpc: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / rowData?.length).toFixed(2)),
+            fbclicks: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
+            impressions: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
+            ctr: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
         }
     ];
 
@@ -485,6 +491,41 @@ const MnetLiveAdsetHistory = ({params}) => {
         setLoading(false);
         setTrue(false);
 
+        const dates = filteredData.map(d => d.date);
+        const spend = filteredData.map(d => d.spend);
+        const revenue = filteredData.map(d => d.revenue);
+        const profit = filteredData.map(d => d.profit);
+        const rpc = filteredData.map(d => d.rpc);
+        const cpl = filteredData.map(d => d.cpl);
+
+        const margin = filteredData.map(d => parseFloat(d.margin));const hoursDate = filteredData.map(d => ({date: d.date, hour: d.hour, margin: parseFloat(d.margin)}));
+        const today = moment.tz('UTC').format('YYYY-MM-DD');
+
+        console.log(filteredData);
+        // Filter, map, sort, and slice the data
+        const result = filteredData
+          .filter(item => item.date === today) // Filter to only today's data
+          .map(item => ({
+            date: item.date,
+            hour: item.timezone.split(" ")[1].split(":")[0],
+            margin: parseFloat(item.margin), // Ensure margin is a number
+          }))
+          .sort((a, b) => b.margin - a.margin) // Sort by margin in descending order
+          .slice(0, 5); // Get top 5 margins
+
+        const result1 = filteredData
+          .filter(item => item.date === today) // Filter to only today's data
+          .map(item => ({
+            date: item.date,
+            hour: item.timezone.split(" ")[1].split(":")[0],
+            rpc: (item.rpc ? item.rpc : 0), // Ensure margin is a number
+          }))
+          .sort((a, b) => b.rpc - a.rpc) // Sort by margin in descending order
+          .slice(0, 5); // Get top 5 margins
+        console.log(result, "result");
+
+        setChartData({ dates, rpcDate: result1, hoursDate: result,  spend, revenue, profit, margin, rpc, cpl });
+
     }
 
     useEffect(()=>{
@@ -532,7 +573,233 @@ const MnetLiveAdsetHistory = ({params}) => {
 
     return (
         <div>
-            
+            <div style={{ height: '400px', marginBottom: '10px' }}> {/* Container with fixed height */}
+                <Line
+                    data={{
+                        labels: chartData.dates,
+                        datasets: [
+                            {
+                                label: 'Spend',
+                                data: chartData.spend,
+                                borderColor: 'rgba(75, 192, 192, 1)',        // Teal
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',   // Light Teal
+                                fill: true,
+                                hidden: true
+                            },
+                            {
+                                label: 'Revenue',
+                                data: chartData.revenue,
+                                borderColor: 'rgba(54, 162, 235, 1)',        // Blue
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',   // Light Blue
+                                fill: true,
+                                hidden: true
+
+                            },
+                            {
+                                label: 'RPC',
+                                data: chartData.rpc,
+                                borderColor: 'rgba(255, 99, 132, 1)',        // Red
+                                backgroundColor: 'rgba(255, 99, 132, 0.2)',   // Light Red
+                                fill: true,
+                                hidden: true
+
+                            },
+                            {
+                                label: 'CPL',
+                                data: chartData.cpl,
+                                borderColor: 'rgba(255, 159, 64, 1)',        // Orange
+                                backgroundColor: 'rgba(255, 159, 64, 0.2)',   // Light Orange
+                                fill: true,
+                                hidden: true
+
+                            },
+                            {
+                                label: 'Profit',
+                                data: chartData.profit,
+                                borderColor: 'rgba(255, 206, 86, 1)',        // Yellow
+                                backgroundColor: 'rgba(255, 206, 86, 0.2)',   // Light Yellow
+                                fill: true,
+
+                            },
+                            {
+                                label: 'Margin',
+                                data: chartData.margin,
+                                borderColor: 'rgba(153, 102, 255, 1)',       // Purple
+                                backgroundColor: 'rgba(153, 102, 255, 0.2)',  // Light Purple
+                                fill: true,
+                                hidden: true
+
+                            }
+                        ],
+
+                    }}
+                    options={{
+                        responsive: true,
+                        maintainAspectRatio: false, // Allow the chart to take the full height of its container
+                        scales: {
+                            x: {
+                                ticks: {
+                                    // autoSkip: false,
+                                    // maxRotation: 0, // Keep labels horizontal
+                                    padding: 30, // Increase padding between labels and the axis
+                                },
+                            },
+                            y: {
+                                beginAtZero: true, // Ensure the y-axis starts at zero
+                            },
+                        },
+                    }}
+                    height={350} // Set the height of the chart
+                />
+            </div>
+            <div style={{ display: 'flex', width: '100%', marginLeft: '2%' }}>
+                {/* Left Table: Top 5 RPC Today */}
+                <div style={{ marginLeft: "1%", width: '20%' }}>
+                    <h3>Top 5 Rpc Today</h3>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                        <tr>
+                            <th style={{ border: '1px solid #ddd', padding: '3px' }}>Hour</th>
+                            <th style={{ border: '1px solid #ddd', padding: '3px' }}>Rpc</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {chartData.rpcDate
+                            .filter(item => 
+                            item.date === moment.tz('UTC').format('YYYY-MM-DD') // Today's date
+                            )
+                            .sort((a, b) => b.rpc - a.rpc) // Sort by Margin descending
+                            .slice(0, 5) // Take top 5
+                            .map((item, index) => (
+                            <tr key={index}>
+                                <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.hour}</td> {/* Access item.hour */}
+                                <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.rpc}</td>
+                            </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+                <div style={{ marginLeft: "1%", width: '20%' }}>
+                    <h3>Top 5 Margin Today</h3>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                        <tr>
+                            <th style={{ border: '1px solid #ddd', padding: '3px' }}>Hour</th>
+                            <th style={{ border: '1px solid #ddd', padding: '3px' }}>Margin</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {chartData.hoursDate
+                            .filter(item => 
+                            item.date === moment.tz('UTC').format('YYYY-MM-DD') // Today's date
+                            )
+                            .sort((a, b) => b.margin - a.margin) // Sort by Margin descending
+                            .slice(0, 5) // Take top 5
+                            .map((item, index) => (
+                            <tr key={index}>
+                                <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.hour}</td> {/* Access item.hour */}
+                                <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.margin}</td>
+                            </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style={{ marginLeft: "1%", width: '25%' }}>
+                    <h3>Top 5 Repeated Hours with RPC (Last 10 Days)</h3>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                            <tr>
+                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Hour</th>
+                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>RPC</th>
+                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Times Repeated</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {Object.values(chartData.dates
+                                .map((date, index) => ({
+                                    date: date.split(" ")[0], // Get the date part only
+                                    hour: new Date(date).getHours(), // Extract hour from date
+                                    rpc: chartData.rpc[index],
+                                }))
+                                .filter(item => {
+                                    const today = new Date();
+                                    const itemDate = new Date(item.date);
+                                    return itemDate >= new Date(today.setDate(today.getDate() - 10)); // Filter for last 10 days
+                                })
+                                .reduce((acc, item) => {
+                                    const key = `${item.date}-${item.hour}`;
+                                    if (!acc[key]) {
+                                        acc[key] = { ...item, count: 0, totalRpc: 0 };
+                                    }
+                                    acc[key].count += 1;
+                                    acc[key].totalRpc += item.rpc; // Sum the RPC values for the same hour
+                                    return acc;
+                                }, {}))
+                                .filter(item => item.count > 1) // Only take hours that repeated more than once
+                                .sort((a, b) => b.count - a.count) // Sort by frequency (count) descending
+                                .slice(0, 20) // Take top 5
+                                .map((item, index) => (
+                                    <tr key={index}>
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.hour}:00</td>
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.totalRpc ? (item.totalRpc / item.count).toFixed(2): 0}</td> {/* Average RPC for that hour */}
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.count}</td>
+                                    </tr>
+                                ))
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div style={{ marginLeft: "1%", width: '25%' }}>
+                    <h3>Top 5 Repeated Hours Margin (Last 10 Days)</h3>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                            <tr>
+                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Hour</th>
+                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Average Margin</th>
+                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Times Repeated</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {Object.values(chartData.dates
+                                .map((date, index) => ({
+                                    date: date.split(" ")[0], // Get the date part only
+                                    hour: new Date(date).getHours(), // Extract hour from date
+                                    margin: chartData.margin[index],
+                                }))
+                                .filter(item => {
+                                    const today = new Date();
+                                    const itemDate = new Date(item.date);
+                                    return itemDate >= new Date(today.setDate(today.getDate() - 10)); // Filter for last 10 days
+                                })
+                                .reduce((acc, item) => {
+                                    const key = `${item.date}-${item.hour}`;
+                                    if (!acc[key]) {
+                                        acc[key] = { ...item, count: 0, totalMargin: 0 };
+                                    }
+                                    acc[key].count += 1;
+                                    acc[key].totalMargin += item.margin; // Sum the margin values for the same hour
+                                    return acc;
+                                }, {}))
+                                .filter(item => item.count > 1) // Only take hours that repeated more than once
+                                .sort((a, b) => b.count - a.count) // Sort by frequency (count) descending
+                                .slice(0, 5) // Take top 5
+                                .map((item, index) => (
+                                    <tr key={index}>
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.hour}:00</td>
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{(item.totalMargin / item.count).toFixed(2)}</td> {/* Average Margin for that hour */}
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.count}</td>
+                                    </tr>
+                                ))
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+
+
+
+            </div>
             {isLoading === true ? (
                 <div className="loader-container ag-container">
                     <div className="ag-grid-Loader">
