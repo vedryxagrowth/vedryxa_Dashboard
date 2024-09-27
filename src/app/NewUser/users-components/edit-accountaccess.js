@@ -101,7 +101,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
 
       // Simulate API call with newValues
       const response = await axios.post(
-        "http://localhost:8000/updateAccount/",
+        "https://prodapis.adsgoat.in/updateAccount/",
         { newAccount: newValues },
         {
           headers: {
