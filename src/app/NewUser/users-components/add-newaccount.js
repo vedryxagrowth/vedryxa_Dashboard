@@ -70,7 +70,7 @@ const Newaddaccounts = ({ visible, onClose }) => {
             //     });
             const newValues = {...values, timeZone: timeZoneFullNames[values.timeZone], pageName: values.pageName ? values.pageName : '', pageID: values.pageID ? values.pageID : '' , pixelID: values.pixelID ? values.pixelID : ''}
             console.log(newValues, "newValues");
-            const response = await axios.post('http://localhost:8000/createNewAccount/', {newAccount: newValues},
+            const response = await axios.post('https://prodapis.adsgoat.in/createNewAccount/', {newAccount: newValues},
                 {
                     headers: {
                         'Authorization': token
