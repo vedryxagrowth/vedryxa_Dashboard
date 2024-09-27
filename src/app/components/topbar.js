@@ -126,7 +126,7 @@ const LayoutWrapper = ({ children }) => {
         if (sessionStatus === "authenticated" && !initialized) {
             const fetchData = async () => {
                 try {
-                    const userResponse = await axios.get('https://prodapis.adsgoat.in/api/getusersData/');
+                    const userResponse = await axios.get(`https://prodapis.adsgoat.in/api/getusersData?email=${session.user.email}`);
                     if (userResponse.status === 200) {
                         const fetchedUsersData = userResponse.data;
                         setUsersData(fetchedUsersData);
@@ -145,7 +145,7 @@ const LayoutWrapper = ({ children }) => {
                                         const MediaBuyeradAccounts = matchedUser.adAccounts;
                                         const MediaBuyerkeysOfAdAccounts = Object.keys(MediaBuyeradAccounts);
                                         const MediaBuyernewObject = {};
-                                        console.log(MediaBuyerkeysOfAdAccounts, "keys");
+                                        // console.log(MediaBuyerkeysOfAdAccounts, "keys");
                                         for (let item of MediaBuyerkeysOfAdAccounts) {
                                             if (MediaBuyeradAccounts[item][0] === "All") {
                                                 const networkResponse = await axios.get(`https://prodapis.adsgoat.in/network/Accounts?network=${item}`);
@@ -165,12 +165,12 @@ const LayoutWrapper = ({ children }) => {
                                         const SpecialUseradAccounts = matchedUser.adAccounts;
                                         const SpecialUserkeysOfAdAccounts = Object.keys(SpecialUseradAccounts);
                                         const SpecialUsernewObject = {};
-                                        console.log(SpecialUserkeysOfAdAccounts, "keys");
+                                        // console.log(SpecialUserkeysOfAdAccounts, "keys");
                                         for (let item of SpecialUserkeysOfAdAccounts) {
                                             if (SpecialUseradAccounts[item][0] === "All") {
                                                 const networkResponse = await axios.get(`https://prodapis.adsgoat.in/network/Accounts?network=${item}`);
                                                 SpecialUsernewObject[item] = await networkResponse.data;
-                                                console.log(await networkResponse.data);
+                                                // console.log(await networkResponse.data);
                                             }
                                             else {
                                                 SpecialUsernewObject[item] = SpecialUseradAccounts[item];
@@ -185,7 +185,7 @@ const LayoutWrapper = ({ children }) => {
                                         const ManageradAccounts = matchedUser.adAccounts;
                                         const ManagerkeysOfAdAccounts = Object.keys(ManageradAccounts);
                                         const ManagernewObject = {};
-                                        console.log(ManagerkeysOfAdAccounts, "keys");
+                                        // console.log(ManagerkeysOfAdAccounts, "keys");
                                         for (let item of ManagerkeysOfAdAccounts) {
                                             if (ManageradAccounts[item][0] === "All") {
                                                 const networkResponse = await axios.get(`https://prodapis.adsgoat.in/network/Accounts?network=${item}`);
@@ -204,7 +204,7 @@ const LayoutWrapper = ({ children }) => {
                                     case 'Admin':
                                         const AllAccountsData = await axios.get(`https://prodapis.adsgoat.in/All/Accounts/`);
                                         const responseData = await AllAccountsData.data;
-                                        console.log(responseData, "responseData");
+                                        // console.log(responseData, "responseData");
                                         setuserdetails({ ...matchedUser, adAccounts: responseData });
                                         //   const adAccounts = matchedUser.adAccounts;
                                         //   const keysOfAdAccounts = Object.keys(adAccounts);
@@ -238,7 +238,8 @@ const LayoutWrapper = ({ children }) => {
                             if (!localStorage.getItem("token")) {
                                 localStorage.setItem("token", token);
                             } else {
-                                console.log("Token is already stored:", localStorage.getItem("token"));
+                                // console.log("Token is already stored:", localStorage.getItem("token"));
+                                console.log("Token is already stored");
                             }
                         } else {
                             console.error('Invalid user data or user email mismatch');
