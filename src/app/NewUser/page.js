@@ -12,6 +12,7 @@ import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import Createnewuser from './users-components/create-newuser';
 import Newaddaccounts from './users-components/add-newaccount';
 import Edituseraccesses from './users-components/edit-usersaccess';
+import EditAccountAccess from './users-components/edit-accountaccess';
 
 const contentStyle = {
     margin: 0,
@@ -36,7 +37,9 @@ const UsersTable = () => {
     const [drawerVisible, setDrawerVisible] = useState(false);
     const [accountDrawerVisible, setaccountDrawerVisible] = useState(false);
     const [usersaccessDrawerVisible, setusersaccessDrawerVisible] = useState(false);
+    const [accountaccessDrawerVisible, setaccountaccessDrawerVisible ] = useState(false);
     const [usersaccessData, setusersaccessData] = useState(null);
+    const [accountaccessData, setaccountaccessData] = useState(null);
     const [newSearchInput, setNewSearchInput] = useState("");
 
     const [role, setRole] = useState('');
@@ -164,7 +167,7 @@ const UsersTable = () => {
         functionaCall();
     }, []);
     const handleDelete = async (values) => {
-        console.log(values, "Delete");
+        // console.log(values, "Delete");
 
         try {
             // Check if values.email exists
@@ -191,7 +194,7 @@ const UsersTable = () => {
                             // });
 
                             if (response.status === 200) {
-                                console.log('User deleted successfully');
+                                // console.log('User deleted successfully');
                                 message.success(`${values.userName} User access removed successfully`);
                                 setTimeout(() => {
                                     window.location.reload();
@@ -220,10 +223,10 @@ const UsersTable = () => {
         }
     };
     const handleStatusChange = async(accountNumber, checked) => {
-        console.log(checked, "checked");
+        // console.log(checked, "checked");
         const newData = AccountsData.map((item) => {
             if (item.accountNumber === accountNumber) {
-                console.log(`Account Number: ${item.accountNumber}`);
+                // console.log(`Account Number: ${item.accountNumber}`);
                 return {
                     ...item,
                     status: checked ? 'Active' : 'InActive',
@@ -231,10 +234,10 @@ const UsersTable = () => {
             }
             return item;
         });
-        console.log(newData, "newData");
+        // console.log(newData, "newData");
         const newStatus = checked ? 'Active' : 'InActive';
-        console.log(newStatus, "newStatus");
-        console.log(token, "token");
+        // console.log(newStatus, "newStatus");
+        // console.log(token, "token");
         const response = await axios.get(`https://prodapis.adsgoat.in/updateAccount/?accountNumber=${accountNumber}&status=${newStatus}`, {
                 headers: {
                     Authorization: token
@@ -253,7 +256,7 @@ const UsersTable = () => {
             });
             if (response.status === 200) {
                 setUsersData(response.data);
-                console.log(response.data, "users")
+                // console.log(response.data, "users")
             } else {
                 console.error('Failed to fetch users data');
             }
@@ -278,7 +281,7 @@ const UsersTable = () => {
             // });
             if (response.status === 200) {
                 setAccountsData(response.data);
-                console.log(response.data, "accounts data")
+                // console.log(response.data, "accounts data")
             } else {
                 console.error('Failed to fetch users data');
             }
@@ -343,7 +346,7 @@ const UsersTable = () => {
                         />
                     </Col>
                     <Col flex="1 1 auto">
-                        <EditOutlined style={{ fontSize: '20px' }} />
+                        <EditOutlined style={{ fontSize: '20px' }} onClick={()=> handleEditAccount(record)} />
                     </Col>
                 </Row>
             ),
@@ -521,19 +524,20 @@ const UsersTable = () => {
     const handleEdit = (values) => {
         setusersaccessDrawerVisible(true)
         setusersaccessData(values)
-        console.log(values, "Edit")
+        // console.log(values, "Edit")
     }
 
     const handleEditAccount = (values) => {
-        // setusersaccessDrawerVisible(true)
-        // setusersaccessData(values)
-        console.log(values, "Edit")
+        setaccountaccessDrawerVisible(true)
+        setaccountaccessData(values)
+        // console.log(values, "Edit")
     }
 
     const onCloseDrawer = () => {
         setDrawerVisible(false);
         setaccountDrawerVisible(false)
         setusersaccessDrawerVisible(false)
+        setaccountaccessDrawerVisible(false)
 
     };
 
@@ -553,11 +557,11 @@ const UsersTable = () => {
     }
 
     const filteredRoleData = role !== 'All' ? usersData?.filter((each)=> each.role.includes(role)) : usersData;
-    console.log(filteredRoleData, "filteredData");
+    // console.log(filteredRoleData, "filteredData");
     // console.log(usersData, "usersData");
     const filterData = () => {
-        console.log(status, 'status');
-        console.log(revenuePartner, 'revenuePartner');
+        // console.log(status, 'status');
+        // console.log(revenuePartner, 'revenuePartner');
         return AccountsData?.filter(item => 
             // Check if the status matches the selected status
             (status === 'All' || item.status === status) &&
@@ -582,6 +586,7 @@ const UsersTable = () => {
             <Createnewuser visible={drawerVisible} onClose={onCloseDrawer} />
             <Newaddaccounts visible={accountDrawerVisible} onClose={onCloseDrawer} />
             <Edituseraccesses editeddata={usersaccessData} visible={usersaccessDrawerVisible} onClose={onCloseDrawer} />
+            <EditAccountAccess editeddata={accountaccessData} visible={accountaccessDrawerVisible} onClose={onCloseDrawer} />
 
             <Carousel
                 // className="custom-carousel"

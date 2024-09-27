@@ -7,19 +7,22 @@ const { Option } = Select;
 import { CloseOutlined } from '@ant-design/icons';
 
 const timezones = [
-    'UTC',
-    'EEST',
-    'EDT',
-    'CST',
-    'PDT',
-    'IST',
-    'BST',
-    'GMT',
-    'MST',
-    'CDT',
-    'AST',
-    'DST'
-];
+    "UTC",
+    "EEST",
+    "CEST",
+    "EDT",
+    "CST",
+    "PDT",
+    "IST",
+    "BST",
+    "GMT",
+    "MST",
+    "CDT",
+    "AST",
+    "DST",
+    "HST",
+    "EST",
+  ];
 
 const timeZoneFullNames = {
     'EDT': 'America/New_York',
@@ -40,7 +43,7 @@ const timeZoneFullNames = {
 };
 
 
-const availableNetworks = ["MEDIA_DOT_NET", "ENKI", "TONIC", "System1", "Bodies", "Bodies1", "Rsoc", "Domain Active"];
+const availableNetworks = ["MEDIA_DOT_NET", "MEDIA_DOT_NET_BING", "ENKI", "TONIC", "System1", "Bodies", "Bodies1", "Rsoc", "Domain Active"];
 
 const Newaddaccounts = ({ visible, onClose }) => {
     const [form] = Form.useForm();
@@ -65,9 +68,9 @@ const Newaddaccounts = ({ visible, onClose }) => {
             //             'Authorization': token
             //         }
             //     });
-            const newValues = {...values, timeZone: timeZoneFullNames[values.timeZone], pageName: values.pageName ? values.pageName : '', pageId: values.pageId ? values.pageId : '' , pixelId: values.pixelId ? values.pixelId : ''}
-            // console.log(newValues, "newValues");
-            const response = await axios.post('https://prodapis.adsgoat.in/createNewAccount/', {newAccount: newValues},
+            const newValues = {...values, timeZone: timeZoneFullNames[values.timeZone], pageName: values.pageName ? values.pageName : '', pageID: values.pageID ? values.pageID : '' , pixelID: values.pixelID ? values.pixelID : ''}
+            console.log(newValues, "newValues");
+            const response = await axios.post('http://localhost:8000/createNewAccount/', {newAccount: newValues},
                 {
                     headers: {
                         'Authorization': token
@@ -75,7 +78,7 @@ const Newaddaccounts = ({ visible, onClose }) => {
             });
             // console.log(response.data);
             if (response.status === 200) {
-                console.log('Account created successfully');
+                // console.log('Account created successfully');
                 message.success('Account created successfully');
                 form.resetFields();
                 onClose(); // Close the drawer after successful submission
@@ -153,10 +156,10 @@ const Newaddaccounts = ({ visible, onClose }) => {
                     <Form.Item label="Spend Account ID" name="accountNumber" rules={[{ required: true, message: 'Please input the Spend Account ID!' }]}>
                         <Input value={accountNumber} onChange={onChangeAccountNumber} />
                     </Form.Item>
-                    <Form.Item label="Pixel ID" name="pixelId">
+                    <Form.Item label="Pixel ID" name="pixelID">
                         <Input value={pixelId} onChange={onChangePixelId}/>
                     </Form.Item>
-                    <Form.Item label="Page ID" name="pageId">
+                    <Form.Item label="Page ID" name="pageID">
                         <Input value={pageId} onChange={onChangePagelId} />
                     </Form.Item>
                     <Form.Item label="Page Name" name="pageName">

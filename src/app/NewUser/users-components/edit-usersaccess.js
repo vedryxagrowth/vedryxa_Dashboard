@@ -7,16 +7,16 @@ import { Add } from '@mui/icons-material';
 
 const Edituseraccesses = ({ editeddata, visible, onClose }) => {
     // console.log(editeddata, "heyy edit-useraccess page")
-    console.log(editeddata, "editeddata");
+    // console.log(editeddata, "editeddata");
     const userAccess = editeddata?.adAccounts;
-    console.log(userAccess, "adAccounts");
+    // console.log(userAccess, "adAccounts");
     userAccess !== null && userAccess !== undefined ? Object.keys(userAccess).map(key => ({ network: key, inputs: userAccess[key] })) : [];
     // console.log(userAccessresult, "userAccessResult");
     let userName;
     if (editeddata !== null){
         userName = editeddata.userName;
     }
-    console.log(userName, "userName");
+    // console.log(userName, "userName");
     const [isModalVisible, setIsModalVisible] = useState(false);
     
 
@@ -76,7 +76,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
     }, [additionalAccounts, formAccounts]);
 
     const handleAddAccount = () => {
-        console.log(AddAccounts, "AddAccounts");
+        // console.log(AddAccounts, "AddAccounts");
         if(AddAccounts.length > 1){
             const newAccount = { network: '', inputs: [''] };
             // setFormAccounts(prevFormAccounts => [...prevFormAccounts, newAccount]);
@@ -244,7 +244,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                     const formattedData = {
                         ...values, adAccounts: singleObject
                     };
-                    console.log(formattedData);
+                    // console.log(formattedData);
                     // console.log(additionalAccounts, "additionalAccounts data");
                     // console.log(singleObject, ":singleObject");
         
@@ -256,7 +256,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                         });
         
                     if (response.status === 200) {
-                        console.log('User updated successfully');
+                        // console.log('User updated successfully');
                         message.success("User Edits updated successfully"); // Display success message
                         setTimeout(() => {
                             window.location.reload();

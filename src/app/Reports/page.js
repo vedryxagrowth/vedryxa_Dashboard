@@ -106,18 +106,18 @@ const MyTablePage = () => {
         redirect("/Dashboard");
         // console.log("hi");
     }
-    console.log(userdetails, "userDetails");
+    // console.log(userdetails, "userDetails");
 
     // console.log(userdetails._id, "id");
 
     const { adAccounts } = userdetails;
 
-    console.log(adAccounts, "addAccounts");
+    // console.log(adAccounts, "addAccounts");
 
     const networks = Object.keys(adAccounts);
 
     const yesterday = dayjs().subtract(1, 'days').format('YYYY-MM-DD');
-    console.log('Yesterday\'s date:', yesterday);
+    // console.log('Yesterday\'s date:', yesterday);
 
 
     // console.log(networks,"networks");
@@ -207,8 +207,8 @@ const MyTablePage = () => {
 
 
     const accountsForAccess = adAccounts[revenuePratner];
-    console.log(accountsForAccess, "accounts Access");
-    console.log(accountsForAccess[0], "accountFor Access");
+    // console.log(accountsForAccess, "accounts Access");
+    // console.log(accountsForAccess[0], "accountFor Access");
 
     const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
 
@@ -302,8 +302,8 @@ const MyTablePage = () => {
                         const values = Object.values(params.data);
     
                         // Log the sanitized keys
-                        console.log('Original Keys:', originalKeys);
-                        console.log('Sanitized Keys:', sanitizedKeys);
+                        // console.log('Original Keys:', originalKeys);
+                        // console.log('Sanitized Keys:', sanitizedKeys);
     
                         const keyMapping = {};
                         sanitizedKeys.forEach((key, index) => {
@@ -330,7 +330,7 @@ const MyTablePage = () => {
                         const values = params.values;
     
                         // Log the values to be aggregated
-                        console.log('Values to aggregate:', values);
+                        // console.log('Values to aggregate:', values);
     
                         // Define how you want to aggregate these values.
                         // Example: You might want to sum them, average them, etc.
@@ -360,7 +360,7 @@ const MyTablePage = () => {
                         const originalKeys = Object.keys(row);
                         const sanitizedKeys = originalKeys.map(key => key.replace(/[^a-zA-Z_$0-9]/g, '_'));
                         const values = Object.values(row);
-                        console.log(values, "values1");
+                        // console.log(values, "values1");
     
                         const keyMapping = {};
                         sanitizedKeys.forEach((key, index) => {
@@ -427,7 +427,7 @@ const MyTablePage = () => {
                 name: 'Reset Columns (Custom)',
                 action: () => {
                     // Your custom logic here
-                    console.log('Custom Reset Columns logic');
+                    // console.log('Custom Reset Columns logic');
                     updatingColumnsStructure(columnStructure)
                     // setTimeout(() => {
                     //     window.location.reload();
@@ -1311,9 +1311,9 @@ const MyTablePage = () => {
             pinned: 'left',
             enableRowGroup: true,
             onClick: (event) => {
-                console.log(event, "event");
-                console.log('Group row clicked:', event);
-                console.log(event);
+                // console.log(event, "event");
+                // console.log('Group row clicked:', event);
+                // console.log(event);
                 const url = `/history/${event}-${account}-${time}`;
                 window.open(url, '_blank');
             },
@@ -1461,9 +1461,9 @@ const MyTablePage = () => {
             // lockposition: true,
             enableRowGroup: true,
             onClick: (event) => {
-                console.log(event, "event");
-                console.log('Group row clicked:', event);
-                console.log(event);
+                // console.log(event, "event");
+                // console.log('Group row clicked:', event);
+                // console.log(event);
                 // const url = `/history/${event}-${account}-${time}`;
                 // window.open(url, '_blank');
             
@@ -1642,7 +1642,7 @@ const MyTablePage = () => {
           return hourAsNumber > max ? hourAsNumber : max;
         }, -Infinity);  // Initialize with -Infinity to ensure proper comparison
       
-        console.log("Maximum hour:", String(maxHour).padStart(2, '0'));  // Format it back to string with leading zero if necessary
+        // console.log("Maximum hour:", String(maxHour).padStart(2, '0'));  // Format it back to string with leading zero if necessary
         return String(maxHour).padStart(2, '0');  // Return the max hour as a string with leading zero
     }
 
@@ -1661,7 +1661,7 @@ const MyTablePage = () => {
         const fetchData = await axios.get(`https://prodapis.adsgoat.in/api/singleUserData?email=${userdetails.email}`);
         // const data = await fetchData.json();
         const mainData = fetchData.data;
-        console.log(mainData.columnStructure, "columnStructure");
+        // console.log(mainData.columnStructure, "columnStructure");
         // setRowStructure(mainData.rows); 
         setColumnDefs(getColumnDefs(mainData.columnStructure));
         columnDefs1.current = getColumnDefs2(mainData.columnStructure);
@@ -1676,7 +1676,7 @@ const MyTablePage = () => {
             },
         });
         const mainData = fetchData.data;
-        console.log(mainData, "maindata of functinCall1");
+        // console.log(mainData, "maindata of functinCall1");
         const specifiedTimeZone = selectTimezone[time];
         const filteredData = mainData && mainData.length > 0 ?
             mainData.map((eachData) => {
@@ -1761,7 +1761,7 @@ const MyTablePage = () => {
                 },
             });
             const mainData = fetchData.data;
-            console.log(mainData, "mainData of functionCall2");
+            // console.log(mainData, "mainData of functionCall2");
             let totalSpend = 0;
             let totalRevenue = 0;
             let totalProfit = 0;
@@ -1771,7 +1771,7 @@ const MyTablePage = () => {
             let totalImpressions = 0;
             let totalConversions = 0;
             const specifiedTimeZone = selectTimezone[time];
-            console.log(mainData[0], "one");
+            // console.log(mainData[0], "one");
             const totalRow = mainData && mainData.length > 0 ?
                 mainData.map((eachData) => {
                     const Revenue = eachData.estimated_revenue !== undefined ? (eachData.estimated_revenue) : 0;
@@ -1826,7 +1826,7 @@ const MyTablePage = () => {
                     ncpl = !isNaN(ncpl) ? ncpl : 0;
                     fMargin = !isNaN(fMargin) ? `${fMargin}%` : '0%';
 
-                    console.log(eachData.campaign_name, "campaign_name");
+                    // console.log(eachData.campaign_name, "campaign_name");
                     return (
                         {
                             campaignname: eachData.campaign_name,
@@ -1857,10 +1857,10 @@ const MyTablePage = () => {
                     )
                 }) : null;
             // console.log(filteredData[0],"one");
-            console.log(filteredData, "filter");
+            // console.log(filteredData, "filter");
 
             const fullData = filteredData?.length > 0 ? [...filteredData] : [];
-            console.log(fullData, "full");
+            // console.log(fullData, "full");
 
             // setDailyColumn(columnDefs);
             setdailyData(fullData);
@@ -1878,14 +1878,14 @@ const MyTablePage = () => {
                 Authorization: token,
             },
         });
-        console.log(fetchData, "f1");
+        // console.log(fetchData, "f1");
         const mainData = fetchData.data.items;
 
         const url = `https://prodapis.adsgoat.in/AllCampaigns?accountNumber=${account}&timezone=${time}&network=${newtworkCollections[revenuePratner]}&page=${pageSize}&limit=100`;
 
         const specifiedTimeZone = selectTimezone[time];
-        console.log(specifiedTimeZone, "spe");
-        console.log(mainData, "maindata of functionCall3");
+        // console.log(specifiedTimeZone, "spe");
+        // console.log(mainData, "maindata of functionCall3");
         const filteredData = mainData && mainData.length > 0 ?
             mainData.map((eachData) => {
                 let revenueData;
@@ -1936,7 +1936,7 @@ const MyTablePage = () => {
             })
             : null;
         totalItems.current = fetchData.data.totalItems;
-        console.log(mainData);
+        // console.log(mainData);
         setCampaignData(filteredData);
         setFixedFooter([
             {
@@ -1973,13 +1973,13 @@ const MyTablePage = () => {
                     await functionCallForUserColumnStructure();
                     await functionCall1();
                     await functionCall2();
-                    console.log("Initial functions executed successfully.");
+                    // console.log("Initial functions executed successfully.");
                     isInitialLoad.current = false; // Set to false after initial load
                 }
 
                 // Run this function on initial load and whenever pageSize changes
                 await functionCall3();
-                console.log("functionCall3 executed successfully.");
+                // console.log("functionCall3 executed successfully.");
             } catch (error) {
                 console.error("Error in function calls:", error);
                 // Optionally, handle the error (e.g., show a notification to the user)
@@ -2037,15 +2037,15 @@ const MyTablePage = () => {
 
     const onChangeSelectRevenue = (value) => {
         const accountsForAccess = adAccounts[value];
-        console.log(accountsForAccess, "accounts Access");
-        console.log(accountsForAccess[0], "accountFor Access");
+        // console.log(accountsForAccess, "accounts Access");
+        // console.log(accountsForAccess[0], "accountFor Access");
 
         const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
 
         // console.log(accountsAccess, "accountsAccess");
         setNetworksData(accountsAccess);
         setRevenuePartner(value);
-        value ==="FB_Tonic" ? console.log("PDT") : null;
+        // value ==="FB_Tonic" ? console.log("PDT") : null;
         value === "FB_Rsoc" || value === "FB_Tonic" || value === "FB_DomainActive" ? setTime('PDT') : setTime('UTC')
     }
     const onChangeSelect = (value) => {
@@ -2057,12 +2057,12 @@ const MyTablePage = () => {
     }
 
     const onClickButton = () => {
-        console.log(account, "account");
-        console.log(time, "time");
-        console.log(url1);
-        console.log(url2);
-        console.log(startDate, "start");
-        console.log(endDate, "end");
+        // console.log(account, "account");
+        // console.log(time, "time");
+        // console.log(url1);
+        // console.log(url2);
+        // console.log(startDate, "start");
+        // console.log(endDate, "end");
         setPageSize(1);
         setTrue(true);
         setRowData([]);
@@ -2121,25 +2121,25 @@ const MyTablePage = () => {
     }
 
     const handleCustomerServiceClick = () => {
-        console.log('Customer Service button clicked');
+        // console.log('Customer Service button clicked');
         carouselRef.current.goTo(1); // Change to the first slide
     };
 
     const handleCommentClick = () => {
-        console.log('Comment button clicked');
+        // console.log('Comment button clicked');
         carouselRef.current.goTo(0); // Change to the second slide
     };
 
     const handleCommentClick1 = () => {
-        console.log('Comment button clicked');
+        // console.log('Comment button clicked');
         carouselRef.current.goTo(2);
     }
 
     const handleChange = (dates) => {
         if (dates && dates.length === 2) {
             const [start, end] = dates;
-            console.log('Start Date:', start.format('YYYY-MM-DD'));
-            console.log('End Date:', end.format('YYYY-MM-DD'));
+            // console.log('Start Date:', start.format('YYYY-MM-DD'));
+            // console.log('End Date:', end.format('YYYY-MM-DD'));
             setStartDate(start.format('YYYY-MM-DD'));
             setEndDate(end.format('YYYY-MM-DD'));
         }
@@ -2163,7 +2163,7 @@ const MyTablePage = () => {
             if (value !== undefined) {
                 const url = `/DailyAndCampaignHistory/AdsetHistory/${value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
                 window.open(url, '_blank');
-                console.log(`Price clicked: ${value}`);
+                // console.log(`Price clicked: ${value}`);
             }
         }
 
@@ -2175,7 +2175,7 @@ const MyTablePage = () => {
             if (value !== undefined) {
                 const url = `/AllCampaigns/AdsetHistory/${value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
                 window.open(url, '_blank');
-                console.log(`Adset clicked: ${value}`);
+                // console.log(`Adset clicked: ${value}`);
             }
         }
     };
@@ -2186,7 +2186,7 @@ const MyTablePage = () => {
             if (value !== undefined) {
                 const url = `/LiveHistory/LiveAdsetHistory/${value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
                 window.open(url, '_blank');
-                console.log(`Adset clicked: ${value}`);
+                // console.log(`Adset clicked: ${value}`);
             }
         }
     };
@@ -2244,7 +2244,7 @@ const MyTablePage = () => {
                         </Tooltip>
                         <span
                             onClick={() => {
-                                console.log(`Grouped Make clicked: ${params.value}`);
+                                // console.log(`Grouped Make clicked: ${params.value}`);
                                 const url = `/LiveHistory/LiveCampaignHistory/${params.value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
                                 window.open(url, '_blank');
                             }}
@@ -2340,7 +2340,7 @@ const MyTablePage = () => {
                         </Tooltip>
                         <span
                             onClick={() => {
-                                console.log(`Grouped Make clicked: ${params.value}`);
+                                // console.log(`Grouped Make clicked: ${params.value}`);
                                 const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
                                 window.open(url, '_blank');
                             }}
@@ -2396,7 +2396,7 @@ const MyTablePage = () => {
                         </Tooltip>
                         <span
                             onClick={() => {
-                                console.log(`Grouped Make clicked: ${params.value}`);
+                                // console.log(`Grouped Make clicked: ${params.value}`);
                                 const url = `/AllCampaigns/CampaignHistory/${params.value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
                                 window.open(url, '_blank');
                             }}
@@ -2424,12 +2424,12 @@ const MyTablePage = () => {
 
     const handleColumnMove = (params, gridId) => {
         const columnState = params.api.getColumnState();
-        console.log('Column moved in grid:', gridId);
+        // console.log('Column moved in grid:', gridId);
         const fieldOrder = columnState.map(col => col.colId);
         const newFieldOrder = fieldOrder.filter(item => item !== 'ag-Grid-AutoColumn-campaignname' && item !== 'ag-Grid-AutoColumn' && columnStructure.includes(item));
         localStorage.setItem('columnState', JSON.stringify(newFieldOrder));
         updatingColumnsStructure(newFieldOrder);
-        console.log(`Updating columns structure for grid: ${gridId}`); 
+        // console.log(`Updating columns structure for grid: ${gridId}`); 
     };
 
     const debouncedHandleColumnMove = useCallback(debounce((params, gridId) => handleColumnMove(params, gridId), 600), []);
@@ -2455,9 +2455,9 @@ const MyTablePage = () => {
         onColumnMoved: (params) => debouncedHandleColumnMove(params, 'grid3'),
     };
 
-    console.log(columnDefs);
-    console.log(columnDefs1);
-    console.log(columnDefs2);
+    // console.log(columnDefs);
+    // console.log(columnDefs1);
+    // console.log(columnDefs2);
 
 
     
@@ -2605,7 +2605,7 @@ const MyTablePage = () => {
     };
 
     const handlePageClick = (page, pageSize) => {
-        console.log(`Clicked page: ${page}, Page size: ${pageSize}`);
+        // console.log(`Clicked page: ${page}, Page size: ${pageSize}`);
         setLoading2(true);
         setPageSize(page);
         // Add your custom onClick functionality here
@@ -2653,9 +2653,9 @@ const MyTablePage = () => {
         },
     ];
 
-    console.log(rowData, "rowData");
-    console.log(dailyData, "dailyData");
-    console.log(campaignData, "campaignData");
+    // console.log(rowData, "rowData");
+    // console.log(dailyData, "dailyData");
+    // console.log(campaignData, "campaignData");
 
     // console.log(rowData, "rowData");
     // console.log(dailyData, "dailyData");
@@ -2767,8 +2767,8 @@ const MyTablePage = () => {
         return current && current > dayjs().endOf('day');
     };
 
-    console.log(revenuePratner);
-    console.log(time);
+    // console.log(revenuePratner);
+    // console.log(time);
 
     const createOption = (account) => {
         
