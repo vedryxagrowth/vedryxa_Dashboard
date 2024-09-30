@@ -757,6 +757,9 @@ const Dashboard = () => {
                         overflowY: 'auto',
                         overflowX: 'hidden',
                         padding: '8px',
+                        width:'100%',
+                        scrollbarWidth: 'none', // For Firefox
+                        msOverflowStyle: 'none', // For Internet Explorer and Edge
                         }}
                     >
                         {menu}

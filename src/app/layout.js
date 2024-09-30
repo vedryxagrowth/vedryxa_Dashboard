@@ -1,6 +1,7 @@
 // Layout.js
 "use client"
 import "./globals.css";
+import axios from 'axios';
 import { Inter } from "next/font/google";
 import Appbar from "./components/appbar";
 import Topbar from "./components/topbar";
@@ -28,18 +29,30 @@ const BodyWrapper = ({ children }) => {
 const ContentWrapper = ({ children }) => {
   const [darkMode, setDarkMode] = useState(false);
   const { data: session, status } = useSession(); // useSession to check login status
+  const [usersDataForLogin, setusersDataForLogin] = useState([])
+
+  console.log(session?.user?.email);
+
+  // useEffect(async()=>{
+  //   const userResponse = await axios.get(`https://prodapis.adsgoat.in/api/getusersData?email=${session?.user?.email}`);
+  //   setusersDataForLogin(userResponse.data);
+  // },[session?.user?.email]);
 
   const toggleTheme = () => {
     setDarkMode(!darkMode);
   };
 
+  console.log(usersDataForLogin, "usersLogin");
+
   return (
     <>
       {/* Conditionally hide Topbar when the user is logged in */}
       {status !== "authenticated" && <Topbar />}
-      <Appbar darkMode={darkMode} toggleTheme={toggleTheme}>
-        {children}
-      </Appbar>
+      {status === "authenticated" && (
+        <Appbar darkMode={darkMode} toggleTheme={toggleTheme}>
+          {children}
+        </Appbar>
+      )}
     </>
   );
 };

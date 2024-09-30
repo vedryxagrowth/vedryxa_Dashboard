@@ -15,6 +15,7 @@ import {
 import { Layout, Menu, Button, theme } from 'antd';
 import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { SessionProvider, useSession } from 'next-auth/react';
 const { Content, Sider } = Layout;
 import Image from "next/image";
 import LayoutWrapper from './topbar';
@@ -41,10 +42,14 @@ const menuItems = [
 
 const Appbar = ({ children }) => {
     const { darkMode, toggleTheme } = useTokenContext();
+    const { session, status } = useSession(); // useSession to check login status
     const [collapsed, setCollapsed] = useState(true);
     const router = useRouter();
     const pathname = usePathname();
     const [height, setHeight] = useState(0);
+    console.log(session?.user?.email)
+    const { userdetails } = useTokenContext();
+    console.log(userdetails);
 
     useEffect(() => {
         const handleResize = () => {
@@ -58,6 +63,11 @@ const Appbar = ({ children }) => {
             window.removeEventListener("resize", handleResize); // Clean up event listener
         };
     }, []);
+
+//     useEffect(async()=>{
+//     const userResponse = await axios.get(`https://prodapis.adsgoat.in/api/getusersData?email=${session?.user?.email}`);
+//     setusersDataForLogin(userResponse.data);
+//   },[session?.user?.email]);
 
     const toggleCollapsed = () => {
         setCollapsed(!collapsed);

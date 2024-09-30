@@ -43,19 +43,9 @@ const MnetLiveCampaignHistory = ({ params }) => {
     const [endDate1, setEndDate1] = useState();
 
     const [columnDefs, setColumnStructure] = useState([]);
-<<<<<<< HEAD
-    const [darkMode, setDarkMode] = useState(false);
-    const [chartData, setChartData] = useState({ dates: [], spend: [], revenue: [], profit: [], margin: [] });
-    // const { userdetails } = useTokenContext();
-    // const router = useRouter();
-    
-    const { theme } = useTokenContext();
-    const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
-=======
 
     const [chartData, setChartData] = useState({ dates: [], sortedData: [], sortedMarginData: [], rpcDate:[], hoursDate:[], hours: [], spend: [], revenue: [], profit: [], margin: [] });
 
->>>>>>> master
 
     const spender = (params) => {
         var total = 0;

@@ -736,14 +736,8 @@ const App = () => {
                 visible={EditcamapaignDrawerVisible}
                 onClose={() => setEditcamapaignDrawerVisible(false)}
             /> */}
-<<<<<<< HEAD
-            
-            <Card title="Campaigns" size="small" >
-                <Row justify="space-between" align="middle">
-=======
             <Card title="Campaigns" size="small">
                 <Row justify="start" align="middle" gutter={[16, 16]}>
->>>>>>> master
                     <Col span={3}>
                         <Select
                             showSearch
@@ -811,16 +805,8 @@ const App = () => {
 
                 </Row>
             </Card>
-<<<<<<< HEAD
-
-          
-            <Table className={`${gridThemeClass}`}
-                style={{ marginTop: "1%", }}
-                rowSelection={{ selectedRowKeys, onChange: onSelectChange }}
-=======
             <Table
                 style={{ width: "100%" }}  // Ensures table takes full available width
->>>>>>> master
                 columns={columns}
                 dataSource={
                     searchInput
@@ -828,12 +814,6 @@ const App = () => {
                         : campaignData.map((item, index) => ({ ...item, key: index })).reverse()
                 }
                 pagination={{ pageSize: paginationSize }}
-<<<<<<< HEAD
-                // scroll={{ y: 'calc(80vh - 200px)' }}
-            />
-
-            <Drawer     
-=======
                 scroll={{
                     x: 'max-content',  // Enable horizontal scroll if needed
                     y: 'calc(87vh - 200px)',  // Vertical scroll for overflow
@@ -864,7 +844,6 @@ const App = () => {
 
 
             {/* <Drawer
->>>>>>> master
                 title={adsetcampaigndata?.campaign_name || ''}
                 placement="right"
                 onClose={onCloseDrawer}

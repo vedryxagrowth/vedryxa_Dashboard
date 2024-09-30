@@ -12,8 +12,10 @@ import moment from 'moment-timezone';
 import ContactForm from './mail';
 import { PlusOutlined } from '@ant-design/icons';
 import { Moon, Sun } from 'lucide-react';
+import { getSession } from 'next-auth/react';
+import debounce from 'lodash.debounce';
 
-
+var myArray = [];
 
 const items = (setuserdetails, router) => [
     {
@@ -101,7 +103,7 @@ const items = (setuserdetails, router) => [
 const Topbar = ({  }) => {
     const { darkMode, toggleTheme } = useTokenContext();
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 //   const [darkMode, setDarkMode] = React.useState(false);
 
 //   const toggleTheme = () => {
@@ -135,11 +137,28 @@ const Topbar = ({  }) => {
     <div
       style={{
         backgroundColor: darkMode ? '#333' : '#fff',
-        padding: '0 20px',
+        // width:'100%',
+        paddingRight: '20px',
         margin: '10px',
+        display:'flex',
+        justifyContent:"space-between",
+        alignItems:'center'
         // transition: 'background-color 0.3s ease',
       }}
     >
+      <div>
+        {status !== "authenticated" && (
+          <Image
+            src="/Ads.png"
+            width={150}
+            height={60}
+            priority={true}
+            alt="Logo"
+            // style={{ maxWidth: "8rem", maxHeight: "4rem", marginBottom: '10px', margin:"0px 20px"}} // Optional margin for spacing
+            style={{ margin:"0px 20px"}} // Optional margin for spacing
+          />
+        )}
+      </div>
       <div
         style={{
           display: 'flex',
@@ -178,25 +197,25 @@ const Topbar = ({  }) => {
         </Dropdown>
         
         {/* <Button
-  onClick={toggleTheme}
-  style={{
-    backgroundColor: darkMode ? '#333' : '#f0f0f0',
-    color: darkMode ? '#fff' : '#000',
-    transition: 'background-color 0.3s ease, color 0.3s ease',
-  }}
->
-  {darkMode ? '🌙 Dark Mode' : '☀️ Light Mode'}
-</Button> */}
-<button
-  onClick={toggleTheme}
-  className={`theme-toggle-btn ${darkMode ? 'dark-mode' : 'light-mode'}`}
->
-  {darkMode ? (
-    <Sun className="icon sun-icon" />
-  ) : (
-    <Moon className="icon moon-icon" />
-  )}
-</button>
+        onClick={toggleTheme}
+        style={{
+          backgroundColor: darkMode ? '#333' : '#f0f0f0',
+          color: darkMode ? '#fff' : '#000',
+          transition: 'background-color 0.3s ease, color 0.3s ease',
+        }}
+      >
+        {darkMode ? '🌙 Dark Mode' : '☀️ Light Mode'}
+      </Button> */}
+      <button
+        onClick={toggleTheme}
+        className={`theme-toggle-btn ${darkMode ? 'dark-mode' : 'light-mode'}`}
+      >
+        {darkMode ? (
+          <Sun className="icon sun-icon" />
+        ) : (
+          <Moon className="icon moon-icon" />
+        )}
+      </button>
 
 
 
@@ -214,150 +233,173 @@ const LayoutWrapper = ({ children }) => {
     const { setuserdetails } = useTokenContext();
 
     useEffect(() => {
-        if (sessionStatus === "authenticated" && !initialized) {
-            const fetchData = async () => {
-                try {
-                    const userResponse = await axios.get('https://prodapis.adsgoat.in/api/getusersData/');
-                    if (userResponse.status === 200) {
-                        const fetchedUsersData = userResponse.data;
-                        setUsersData(fetchedUsersData);
+      const fetchData = async () => {
+          try {
+              console.log("Session Status: ", sessionStatus);
+              console.log("Session Data: ", session);
+              if(session?.user?.email){
+                
+                const userResponse = await axios.get(`https://prodapis.adsgoat.in/api/getusersData?email=${session?.user?.email}`);
+                if (userResponse.status === 200) {
+                    const fetchedUsersData = userResponse.data;
+                    myArray = userResponse?.data;
+                    // console.log(myArray);
+                    setUsersData(fetchedUsersData);
 
-                        if (fetchedUsersData.length > 0 &&
-                            session && session.user && session.user.email &&
-                            fetchedUsersData.some(user => user.email.toLowerCase() === session.user.email.toLowerCase())) {
-                            const matchedUser = fetchedUsersData.find(
-                                user => user.email.toLowerCase() === session.user.email.toLowerCase()
-                            );
+                    if (fetchedUsersData.length > 0 &&
+                        session && session.user && session.user.email &&
+                        fetchedUsersData.some(user => user.email.toLowerCase() === session.user.email.toLowerCase())) {
+                        const matchedUser = fetchedUsersData.find(
+                            user => user.email.toLowerCase() === session.user.email.toLowerCase()
+                        );
 
-                            if (matchedUser) {
-                                // setuserdetails(matchedUser);
-                                switch (matchedUser.role) {
-                                    case 'Media_Buyer':
-                                        const MediaBuyeradAccounts = matchedUser.adAccounts;
-                                        const MediaBuyerkeysOfAdAccounts = Object.keys(MediaBuyeradAccounts);
-                                        const MediaBuyernewObject = {};
-                                        console.log(MediaBuyerkeysOfAdAccounts, "keys");
-                                        for (let item of MediaBuyerkeysOfAdAccounts) {
-                                            if (MediaBuyeradAccounts[item][0] === "All") {
-                                                const networkResponse = await axios.get(`https://prodapis.adsgoat.in/network/Accounts?network=${item}`);
-                                                MediaBuyernewObject[item] = await networkResponse.data;
-                                                // console.log(await networkResponse.data);
-                                            }
-                                            else {
-                                                MediaBuyernewObject[item] = MediaBuyeradAccounts[item];
-                                            }
-                                        };
-                                        setuserdetails({ ...matchedUser, adAccounts: MediaBuyernewObject });
-                                        // console.log("New Object", MediaBuyernewObject);
-                                        // console.log("Matched User:", matchedUser);
-                                        //   setuserdetails({ ...matchedUser, extraInfo: "Media Buyer Specific Info" });
-                                        break;
-                                    case 'Special_User':
-                                        const SpecialUseradAccounts = matchedUser.adAccounts;
-                                        const SpecialUserkeysOfAdAccounts = Object.keys(SpecialUseradAccounts);
-                                        const SpecialUsernewObject = {};
-                                        console.log(SpecialUserkeysOfAdAccounts, "keys");
-                                        for (let item of SpecialUserkeysOfAdAccounts) {
-                                            if (SpecialUseradAccounts[item][0] === "All") {
-                                                const networkResponse = await axios.get(`https://prodapis.adsgoat.in/network/Accounts?network=${item}`);
-                                                SpecialUsernewObject[item] = await networkResponse.data;
-                                                console.log(await networkResponse.data);
-                                            }
-                                            else {
-                                                SpecialUsernewObject[item] = SpecialUseradAccounts[item];
-                                            }
-                                        };
-                                        setuserdetails({ ...matchedUser, adAccounts: SpecialUsernewObject });
-                                        // console.log("New Object", SpecialUsernewObject);
-                                        // console.log("Matched User:", matchedUser);
-                                        //   setuserdetails({ ...matchedUser, extraInfo: "Special User Specific Info" });
-                                        break;
-                                    case 'Manager':
-                                        const ManageradAccounts = matchedUser.adAccounts;
-                                        const ManagerkeysOfAdAccounts = Object.keys(ManageradAccounts);
-                                        const ManagernewObject = {};
-                                        console.log(ManagerkeysOfAdAccounts, "keys");
-                                        for (let item of ManagerkeysOfAdAccounts) {
-                                            if (ManageradAccounts[item][0] === "All") {
-                                                const networkResponse = await axios.get(`https://prodapis.adsgoat.in/network/Accounts?network=${item}`);
-                                                ManagernewObject[item] = await networkResponse.data;
-                                                // console.log(await networkResponse.data);
-                                            }
-                                            else {
-                                                ManagernewObject[item] = ManageradAccounts[item];
-                                            }
-                                        };
-                                        setuserdetails({ ...matchedUser, adAccounts: ManagernewObject });
-                                        // console.log("New Object", ManagernewObject);
-                                        // console.log("Matched User:", matchedUser);
-                                        //   setuserdetails({ ...matchedUser, extraInfo: "Manager Specific Info" });
-                                        break;
-                                    case 'Admin':
-                                        const AllAccountsData = await axios.get(`https://prodapis.adsgoat.in/All/Accounts/`);
-                                        const responseData = await AllAccountsData.data;
-                                        console.log(responseData, "responseData");
-                                        setuserdetails({ ...matchedUser, adAccounts: responseData });
-                                        //   const adAccounts = matchedUser.adAccounts;
-                                        //   const keysOfAdAccounts = Object.keys(adAccounts);
-                                        //   const newObject ={};
-                                        //   console.log(keysOfAdAccounts, "keys");
-                                        //   for(let item of keysOfAdAccounts){
-                                        //     if (adAccounts[item][0] === "All"){
-                                        //         console.log("Yes");
-                                        //         const networkResponse = await axios.get(`http://localhost:8080/network/Accounts?network=${item}`);
-                                        //         newObject[item] = await networkResponse.data;
-                                        //         // console.log(await networkResponse.data);
-                                        //     }
-                                        //     else{
-                                        //         newObject[item] = adAccounts[item];
-                                        //     }
-                                        //   };
-                                        //   setuserdetails({...matchedUser, adAccounts: newObject});
-                                        //   console.log("New Object",newObject);
-                                        //   console.log("Matched User:", matchedUser);
-                                        //   setuserdetails({ ...matchedUser, extraInfo: "Admin Specific Info" });
-                                        break;
-                                    default:
-                                        setuserdetails(matchedUser);
-                                }
+                        if (matchedUser) {
+                            // setuserdetails(matchedUser);
+                            switch (matchedUser.role) {
+                                case 'Media_Buyer':
+                                    const MediaBuyeradAccounts = matchedUser.adAccounts;
+                                    const MediaBuyerkeysOfAdAccounts = Object.keys(MediaBuyeradAccounts);
+                                    const MediaBuyernewObject = {};
+                                    console.log(MediaBuyerkeysOfAdAccounts, "keys");
+                                    for (let item of MediaBuyerkeysOfAdAccounts) {
+                                        if (MediaBuyeradAccounts[item][0] === "All") {
+                                            const networkResponse = await axios.get(`https://prodapis.adsgoat.in/network/Accounts?network=${item}`);
+                                            MediaBuyernewObject[item] = await networkResponse.data;
+                                            // console.log(await networkResponse.data);
+                                        }
+                                        else {
+                                            MediaBuyernewObject[item] = MediaBuyeradAccounts[item];
+                                        }
+                                    };
+                                    setuserdetails({ ...matchedUser, adAccounts: MediaBuyernewObject });
+                                    // console.log("New Object", MediaBuyernewObject);
+                                    // console.log("Matched User:", matchedUser);
+                                    //   setuserdetails({ ...matchedUser, extraInfo: "Media Buyer Specific Info" });
+                                    break;
+                                case 'Special_User':
+                                    const SpecialUseradAccounts = matchedUser.adAccounts;
+                                    const SpecialUserkeysOfAdAccounts = Object.keys(SpecialUseradAccounts);
+                                    const SpecialUsernewObject = {};
+                                    console.log(SpecialUserkeysOfAdAccounts, "keys");
+                                    for (let item of SpecialUserkeysOfAdAccounts) {
+                                        if (SpecialUseradAccounts[item][0] === "All") {
+                                            const networkResponse = await axios.get(`https://prodapis.adsgoat.in/network/Accounts?network=${item}`);
+                                            SpecialUsernewObject[item] = await networkResponse.data;
+                                            console.log(await networkResponse.data);
+                                        }
+                                        else {
+                                            SpecialUsernewObject[item] = SpecialUseradAccounts[item];
+                                        }
+                                    };
+                                    setuserdetails({ ...matchedUser, adAccounts: SpecialUsernewObject });
+                                    // console.log("New Object", SpecialUsernewObject);
+                                    // console.log("Matched User:", matchedUser);
+                                    //   setuserdetails({ ...matchedUser, extraInfo: "Special User Specific Info" });
+                                    break;
+                                case 'Manager':
+                                    const ManageradAccounts = matchedUser.adAccounts;
+                                    const ManagerkeysOfAdAccounts = Object.keys(ManageradAccounts);
+                                    const ManagernewObject = {};
+                                    console.log(ManagerkeysOfAdAccounts, "keys");
+                                    for (let item of ManagerkeysOfAdAccounts) {
+                                        if (ManageradAccounts[item][0] === "All") {
+                                            const networkResponse = await axios.get(`https://prodapis.adsgoat.in/network/Accounts?network=${item}`);
+                                            ManagernewObject[item] = await networkResponse.data;
+                                            // console.log(await networkResponse.data);
+                                        }
+                                        else {
+                                            ManagernewObject[item] = ManageradAccounts[item];
+                                        }
+                                    };
+                                    setuserdetails({ ...matchedUser, adAccounts: ManagernewObject });
+                                    // console.log("New Object", ManagernewObject);
+                                    // console.log("Matched User:", matchedUser);
+                                    //   setuserdetails({ ...matchedUser, extraInfo: "Manager Specific Info" });
+                                    break;
+                                case 'Admin':
+                                    const AllAccountsData = await axios.get(`https://prodapis.adsgoat.in/All/Accounts/`, {
+                                      timeout: 10000, // Timeout set to 10 seconds
+                                    });
+                                    const responseData = await AllAccountsData.data;
+                                    console.log(responseData, "responseData");
+                                    setuserdetails({ ...matchedUser, adAccounts: responseData });
+                                    //   const adAccounts = matchedUser.adAccounts;
+                                    //   const keysOfAdAccounts = Object.keys(adAccounts);
+                                    //   const newObject ={};
+                                    //   console.log(keysOfAdAccounts, "keys");
+                                    //   for(let item of keysOfAdAccounts){
+                                    //     if (adAccounts[item][0] === "All"){
+                                    //         console.log("Yes");
+                                    //         const networkResponse = await axios.get(`http://localhost:8080/network/Accounts?network=${item}`);
+                                    //         newObject[item] = await networkResponse.data;
+                                    //         // console.log(await networkResponse.data);
+                                    //     }
+                                    //     else{
+                                    //         newObject[item] = adAccounts[item];
+                                    //     }
+                                    //   };
+                                    //   setuserdetails({...matchedUser, adAccounts: newObject});
+                                    //   console.log("New Object",newObject);
+                                    //   console.log("Matched User:", matchedUser);
+                                    //   setuserdetails({ ...matchedUser, extraInfo: "Admin Specific Info" });
+                                    break;
+                                default:
+                                    setuserdetails(matchedUser);
                             }
+                        }
 
-                            const email = session.user.email;
-                            const tokenResponse = await axios.post('/api/auth/jwt', { email });
-                            const token = tokenResponse.data.token;
+                        const email = session.user.email;
+                        const tokenResponse = await axios.post('https://prodapis.adsgoat.in/generate-token', { email });
+                        const token = tokenResponse.data.token;
 
-                            if (!localStorage.getItem("token")) {
-                                localStorage.setItem("token", token);
-                            } else {
-                                console.log("Token is already stored:", localStorage.getItem("token"));
-                            }
+                        if (!localStorage.getItem("token")) {
+                            localStorage.setItem("token", token);
                         } else {
-                            console.error('Invalid user data or user email mismatch');
-                            localStorage.removeItem("token");
+                            console.log("Token is already stored:", localStorage.getItem("token"));
                         }
                     } else {
-                        console.error('Failed to fetch users data');
+                        console.error('Invalid user data or user email mismatch');
+                        localStorage.removeItem("token");
                     }
-                } catch (error) {
-                    console.error('Error:', error);
-                } finally {
-                    setLoading(false);
-                    setInitialized(true);
+                } else {
+                    console.error('Failed to fetch users data');
                 }
-            };
+              }
+          } catch (error) {
+              console.error('Error:', error);
+          } finally {
+              setLoading(false);
+              setInitialized(true);
+          }
+      };
+      const debouncedFetchData = debounce(fetchData, 2000);
+      if (sessionStatus === "authenticated" && session?.user?.email && !initialized) {
+        debouncedFetchData();
 
-            fetchData();
-        }
+
+      } else if (sessionStatus === 'authenticated' && !session?.user?.email) {
+        console.log("Authenticated but session.user.email is undefined or not available.");
+      }
     }, [session, sessionStatus, initialized]);
+
+    // useEffect(() => {
+    //   // Reload page if session has just become authenticated to avoid session delay issues
+    //   if (sessionStatus === 'authenticated' && !usersData) {
+    //     router.reload();  // Force reload to ensure session is fully loaded
+    //   }
+    // }, [sessionStatus, usersData, router]);
 
     const toggleTheme = () => {
         setDarkMode(!darkMode);
     };
+    
+    console.log(usersData, "user");
 
     return (
         <>
             <Topbar session={session} darkMode={darkMode} toggleTheme={toggleTheme} />
-            {session && usersData && usersData.length > 0 &&
+            {/* {usersData.length === 0 && redirect("/")} */}
+            {/* {session && usersData && usersData.length > 0 &&
                 session.user && session.user.email ? (
                 usersData.some(user => user.email.toLowerCase() === session.user.email.toLowerCase()) ? (
                     loading ? (
@@ -372,6 +414,7 @@ const LayoutWrapper = ({ children }) => {
                         React.Children.map(children, child => {
                           return React.cloneElement(child, { darkMode });
                       })
+                      // <p>Hello</p>
                     )
                 ) : (
                     <div style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'hidden' }}>
@@ -391,7 +434,8 @@ const LayoutWrapper = ({ children }) => {
                     </div>
 
                 )
-            ) : (
+            ) : 
+            ( sessionStatus !== "authenticated" ? (
                 <img
                     style={{
                         width: '100%',
@@ -402,10 +446,109 @@ const LayoutWrapper = ({ children }) => {
                     alt="img"
                     as="image"
                 />
-            )}
+              ):
+                <p style={{height:'0px', margin:'0px', padding:'0px'}}></p>
+            )
+          } */}
+            {sessionStatus === "authenticated" && usersData?.length === 0 && loading === false ? (
+                    <div style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'hidden' }}>
+                        <img
+                            style={{
+                                width: '100%',
+                                height: 'auto',
+                                maxHeight: '90vh',
+                            }}
+                            src="/hope.png"
+                            alt="img"
+                        />
+                        <div style={{ position: 'absolute', top: 40, right: 4, zIndex: 2, border: "2px dotted green", padding: "1%" }}>
+                            <h3>You are not Authorized {session.user.email}`</h3>
+                            <ContactForm />
+                        </div>
+                    </div>
 
-        </>
-    );
+                )
+            
+            : 
+            ( sessionStatus !== "authenticated" ? (
+              <img
+                  style={{
+                      width: '100%',
+                      height: 'auto',
+                      maxHeight: '90vh',
+                  }}
+                  src="/hope.png"
+                  alt="img"
+                  as="image"
+              />
+            ):
+              <p style={{height:'0px', margin:'0px', padding:'0px'}}></p>
+          )            }
+          {/* {session && session.user && session.user.email ? (
+            usersData && usersData.length > 0 ? (
+                usersData.some(user => user.email.toLowerCase() === session.user.email.toLowerCase()) ? (
+                    loading ? (
+                        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+                            <Spin size="large" />
+                        </div>
+                    ) : (
+                        React.Children.map(children, child => {
+                            return React.cloneElement(child, { darkMode: darkMode });
+                        })
+                    )
+                ) : (
+                    <div style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'hidden' }}>
+                        <img
+                            style={{
+                                width: '100%',
+                                height: 'auto',
+                                maxHeight: '90vh',
+                            }}
+                            src="/hope.png"
+                            alt="img"
+                        />
+                        <div style={{ position: 'absolute', top: 40, right: 4, zIndex: 2, border: "2px dotted green", padding: "1%" }}>
+                            <h3>You are not Authorized {session.user.email}</h3>
+                            <ContactForm />
+                        </div>
+                    </div>
+                )
+            ) : (
+                // Case where usersData is empty, show ContactForm
+                <div style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'hidden' }}>
+                    <img
+                        style={{
+                            width: '100%',
+                            height: 'auto',
+                            maxHeight: '90vh',
+                        }}
+                        src="/hope.png"
+                        alt="img"
+                    />
+                    <div style={{ position: 'absolute', top: 40, right: 4, zIndex: 2, border: "2px dotted green", padding: "1%" }}>
+                        <h3>No users found in the system. Please contact support.</h3>
+                        <ContactForm />
+                    </div>
+                </div>
+            )
+        ) : (
+            // Case where session or session.user is not available
+            <img
+                style={{
+                    width: '100%',
+                    height: 'auto',
+                    maxHeight: '90vh',
+                }}
+                src="/hope.png"
+                alt="img"
+                as="image"
+            />
+        )} */}
+
+                </>
+            );
 };
+
+console.log(myArray, "myarray");
 
 export default LayoutWrapper;
