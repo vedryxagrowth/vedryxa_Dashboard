@@ -126,16 +126,16 @@ const LayoutWrapper = ({ children }) => {
         if (sessionStatus === "authenticated" && !initialized) {
             const fetchData = async () => {
                 try {
-                    const userResponse = await axios.get(`https://prodapis.adsgoat.in/api/getusersData?email=${session.user.email}`);
+                    const userResponse = await axios.get(`https://prodapis.adsgoat.in/api/getusersData?email=${session?.user?.email}`);
                     if (userResponse.status === 200) {
-                        const fetchedUsersData = userResponse.data;
+                        const fetchedUsersData = userResponse?.data;
                         setUsersData(fetchedUsersData);
 
-                        if (fetchedUsersData.length > 0 &&
-                            session && session.user && session.user.email &&
-                            fetchedUsersData.some(user => user.email.toLowerCase() === session.user.email.toLowerCase())) {
+                        if (fetchedUsersData?.length > 0 &&
+                            session && session?.user && session?.user?.email &&
+                            fetchedUsersData.some(user => user?.email.toLowerCase() === session?.user?.email.toLowerCase())) {
                             const matchedUser = fetchedUsersData.find(
-                                user => user.email.toLowerCase() === session.user.email.toLowerCase()
+                                user => user?.email.toLowerCase() === session?.user?.email.toLowerCase()
                             );
 
                             if (matchedUser) {
@@ -232,7 +232,7 @@ const LayoutWrapper = ({ children }) => {
                             }
 
                             const email = session.user.email;
-                            const tokenResponse = await axios.post('/api/auth/jwt', { email });
+                            const tokenResponse = await axios.post('https://prodapis.adsgoat.in/generate-token', { email });
                             const token = tokenResponse.data.token;
 
                             if (!localStorage.getItem("token")) {
