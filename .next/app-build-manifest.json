@@ -31,29 +31,22 @@
       "static/chunks/3021-0f3b593fe4c6afaf.js",
       "static/chunks/9197-c16fcb296a86ff65.js",
       "static/chunks/4595-c5313f6ba0aa0ff4.js",
-      "static/chunks/2713-c5f1e8143aa623d1.js",
-      "static/chunks/app/layout-7bdd689b06f06e73.js"
+      "static/chunks/2713-b6b08ab393994327.js",
+      "static/chunks/app/layout-ae1ada68d4c25d40.js"
     ],
     "/AllCampaigns/AdsetHistory/page": [
       "static/chunks/webpack-fed78e0a2e440c34.js",
       "static/chunks/fd9d1056-e8bb78c3d6f96093.js",
       "static/chunks/7023-f6d36bfb0e0215dc.js",
       "static/chunks/main-app-c0bb6bd17e13252e.js",
-      "static/chunks/app/AllCampaigns/AdsetHistory/page-677c66f035adf880.js"
-    ],
-    "/AllCampaigns/CampaignHistory/page": [
-      "static/chunks/webpack-fed78e0a2e440c34.js",
-      "static/chunks/fd9d1056-e8bb78c3d6f96093.js",
-      "static/chunks/7023-f6d36bfb0e0215dc.js",
-      "static/chunks/main-app-c0bb6bd17e13252e.js",
-      "static/chunks/app/AllCampaigns/CampaignHistory/page-8a31749892697f96.js"
+      "static/chunks/app/AllCampaigns/AdsetHistory/page-e8cbb48feed3cb72.js"
     ],
     "/AllCampaigns/page": [
       "static/chunks/webpack-fed78e0a2e440c34.js",
       "static/chunks/fd9d1056-e8bb78c3d6f96093.js",
       "static/chunks/7023-f6d36bfb0e0215dc.js",
       "static/chunks/main-app-c0bb6bd17e13252e.js",
-      "static/chunks/app/AllCampaigns/page-01a016ccdd70995e.js"
+      "static/chunks/app/AllCampaigns/page-fadf80b4fb25f746.js"
     ],
     "/AllCampaigns/AdsetHistory/[AdsetName]/page": [
       "static/chunks/webpack-fed78e0a2e440c34.js",
@@ -91,6 +84,13 @@
       "static/chunks/9465-3ae00bb5a5c82404.js",
       "static/chunks/app/AllCampaigns/CampaignHistory/[CampaignName]/page-593a555515054c19.js"
     ],
+    "/AllCampaigns/CampaignHistory/page": [
+      "static/chunks/webpack-fed78e0a2e440c34.js",
+      "static/chunks/fd9d1056-e8bb78c3d6f96093.js",
+      "static/chunks/7023-f6d36bfb0e0215dc.js",
+      "static/chunks/main-app-c0bb6bd17e13252e.js",
+      "static/chunks/app/AllCampaigns/CampaignHistory/page-4c8ddd354d1e8af2.js"
+    ],
     "/Campaigns/page": [
       "static/chunks/webpack-fed78e0a2e440c34.js",
       "static/chunks/fd9d1056-e8bb78c3d6f96093.js",
@@ -123,19 +123,30 @@
       "static/chunks/8467-8c930ff64cfaf85d.js",
       "static/chunks/app/Campaigns/page-5bcf8b5691c9f4f7.js"
     ],
+    "/DailyAndCampaignHistory/AdsetHistory/[AdsetName]/page": [
+      "static/chunks/webpack-fed78e0a2e440c34.js",
+      "static/chunks/fd9d1056-e8bb78c3d6f96093.js",
+      "static/chunks/7023-f6d36bfb0e0215dc.js",
+      "static/chunks/main-app-c0bb6bd17e13252e.js",
+      "static/css/45189b0d594be98c.css",
+      "static/css/e39cb851c1b7befd.css",
+      "static/chunks/473d9b3e-f9e20747d25d5e3b.js",
+      "static/chunks/32ea55aa-b2b96d5ca2aa789d.js",
+      "static/chunks/29b981c0-b12ac80ff4cb6727.js",
+      "static/chunks/ca377847-575f38def39adea5.js",
+      "static/chunks/160b575a-bbb916e5d5899656.js",
+      "static/chunks/3367-d6df8f9599461676.js",
+      "static/chunks/5578-76873c5886f92fdb.js",
+      "static/chunks/5746-7139f02c0a732449.js",
+      "static/chunks/9465-3ae00bb5a5c82404.js",
+      "static/chunks/app/DailyAndCampaignHistory/AdsetHistory/[AdsetName]/page-698bb78abbe97a36.js"
+    ],
     "/DailyAndCampaignHistory/AdsetHistory/page": [
       "static/chunks/webpack-fed78e0a2e440c34.js",
       "static/chunks/fd9d1056-e8bb78c3d6f96093.js",
       "static/chunks/7023-f6d36bfb0e0215dc.js",
       "static/chunks/main-app-c0bb6bd17e13252e.js",
-      "static/chunks/app/DailyAndCampaignHistory/AdsetHistory/page-e560c1f2795fbca7.js"
-    ],
-    "/DailyAndCampaignHistory/CampaignHistory/page": [
-      "static/chunks/webpack-fed78e0a2e440c34.js",
-      "static/chunks/fd9d1056-e8bb78c3d6f96093.js",
-      "static/chunks/7023-f6d36bfb0e0215dc.js",
-      "static/chunks/main-app-c0bb6bd17e13252e.js",
-      "static/chunks/app/DailyAndCampaignHistory/CampaignHistory/page-9acc080735eb220b.js"
+      "static/chunks/app/DailyAndCampaignHistory/AdsetHistory/page-a80f5e2fc5e85efa.js"
     ],
     "/Creatives/page": [
       "static/chunks/webpack-fed78e0a2e440c34.js",
@@ -157,7 +168,14 @@
       "static/chunks/2973-c318131759679101.js",
       "static/chunks/app/Creatives/page-5d61a13112d84fdf.js"
     ],
-    "/DailyAndCampaignHistory/AdsetHistory/[AdsetName]/page": [
+    "/DailyAndCampaignHistory/CampaignHistory/page": [
+      "static/chunks/webpack-fed78e0a2e440c34.js",
+      "static/chunks/fd9d1056-e8bb78c3d6f96093.js",
+      "static/chunks/7023-f6d36bfb0e0215dc.js",
+      "static/chunks/main-app-c0bb6bd17e13252e.js",
+      "static/chunks/app/DailyAndCampaignHistory/CampaignHistory/page-853c66f6078db902.js"
+    ],
+    "/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page": [
       "static/chunks/webpack-fed78e0a2e440c34.js",
       "static/chunks/fd9d1056-e8bb78c3d6f96093.js",
       "static/chunks/7023-f6d36bfb0e0215dc.js",
@@ -173,14 +191,14 @@
       "static/chunks/5578-76873c5886f92fdb.js",
       "static/chunks/5746-7139f02c0a732449.js",
       "static/chunks/9465-3ae00bb5a5c82404.js",
-      "static/chunks/app/DailyAndCampaignHistory/AdsetHistory/[AdsetName]/page-698bb78abbe97a36.js"
+      "static/chunks/app/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page-f69d7d5571debac5.js"
     ],
-    "/DailyAndCampaignHistory/page": [
+    "/LiveHistory/LiveAdsetHistory/page": [
       "static/chunks/webpack-fed78e0a2e440c34.js",
       "static/chunks/fd9d1056-e8bb78c3d6f96093.js",
       "static/chunks/7023-f6d36bfb0e0215dc.js",
       "static/chunks/main-app-c0bb6bd17e13252e.js",
-      "static/chunks/app/DailyAndCampaignHistory/page-c9d1621181facf4e.js"
+      "static/chunks/app/LiveHistory/LiveAdsetHistory/page-123633fbac702fcf.js"
     ],
     "/Dashboard/page": [
       "static/chunks/webpack-fed78e0a2e440c34.js",
@@ -206,29 +224,69 @@
       "static/chunks/2973-c318131759679101.js",
       "static/chunks/9677-bf59590e65773c3e.js",
       "static/chunks/4331-22882adca2e72c6e.js",
-      "static/chunks/1805-5ea742022e12fa1d.js",
-      "static/chunks/app/Dashboard/page-9aa9e30fe4e90339.js"
+      "static/chunks/1805-b2c2f6bae30db3af.js",
+      "static/chunks/app/Dashboard/page-fab6f5778b068c62.js"
     ],
-    "/LiveHistory/LiveAdsetHistory/page": [
+    "/DailyAndCampaignHistory/page": [
       "static/chunks/webpack-fed78e0a2e440c34.js",
       "static/chunks/fd9d1056-e8bb78c3d6f96093.js",
       "static/chunks/7023-f6d36bfb0e0215dc.js",
       "static/chunks/main-app-c0bb6bd17e13252e.js",
-      "static/chunks/app/LiveHistory/LiveAdsetHistory/page-80e9e2248f622a1a.js"
+      "static/chunks/app/DailyAndCampaignHistory/page-dbd079ceb670812b.js"
     ],
     "/LiveHistory/LiveCampaignHistory/page": [
       "static/chunks/webpack-fed78e0a2e440c34.js",
       "static/chunks/fd9d1056-e8bb78c3d6f96093.js",
       "static/chunks/7023-f6d36bfb0e0215dc.js",
       "static/chunks/main-app-c0bb6bd17e13252e.js",
-      "static/chunks/app/LiveHistory/LiveCampaignHistory/page-8669445b02132bda.js"
+      "static/chunks/app/LiveHistory/LiveCampaignHistory/page-fdfc37995b3ea128.js"
+    ],
+    "/LiveHistory/LiveCampaignHistory/[CampaignName]/page": [
+      "static/chunks/webpack-fed78e0a2e440c34.js",
+      "static/chunks/fd9d1056-e8bb78c3d6f96093.js",
+      "static/chunks/7023-f6d36bfb0e0215dc.js",
+      "static/chunks/main-app-c0bb6bd17e13252e.js",
+      "static/css/45189b0d594be98c.css",
+      "static/css/e39cb851c1b7befd.css",
+      "static/chunks/473d9b3e-f9e20747d25d5e3b.js",
+      "static/chunks/32ea55aa-b2b96d5ca2aa789d.js",
+      "static/chunks/29b981c0-b12ac80ff4cb6727.js",
+      "static/chunks/ca377847-575f38def39adea5.js",
+      "static/chunks/160b575a-bbb916e5d5899656.js",
+      "static/chunks/2626716e-b496a3b36b79551a.js",
+      "static/chunks/13b76428-5a68792917164904.js",
+      "static/chunks/3367-d6df8f9599461676.js",
+      "static/chunks/5578-76873c5886f92fdb.js",
+      "static/chunks/5746-7139f02c0a732449.js",
+      "static/chunks/9465-3ae00bb5a5c82404.js",
+      "static/chunks/app/LiveHistory/LiveCampaignHistory/[CampaignName]/page-5ff4342d83acc7bd.js"
+    ],
+    "/LiveHistory/LiveAdsetHistory/[AdsetName]/page": [
+      "static/chunks/webpack-fed78e0a2e440c34.js",
+      "static/chunks/fd9d1056-e8bb78c3d6f96093.js",
+      "static/chunks/7023-f6d36bfb0e0215dc.js",
+      "static/chunks/main-app-c0bb6bd17e13252e.js",
+      "static/css/45189b0d594be98c.css",
+      "static/css/e39cb851c1b7befd.css",
+      "static/chunks/473d9b3e-f9e20747d25d5e3b.js",
+      "static/chunks/32ea55aa-b2b96d5ca2aa789d.js",
+      "static/chunks/29b981c0-b12ac80ff4cb6727.js",
+      "static/chunks/ca377847-575f38def39adea5.js",
+      "static/chunks/160b575a-bbb916e5d5899656.js",
+      "static/chunks/2626716e-b496a3b36b79551a.js",
+      "static/chunks/13b76428-5a68792917164904.js",
+      "static/chunks/3367-d6df8f9599461676.js",
+      "static/chunks/5578-76873c5886f92fdb.js",
+      "static/chunks/5746-7139f02c0a732449.js",
+      "static/chunks/9465-3ae00bb5a5c82404.js",
+      "static/chunks/app/LiveHistory/LiveAdsetHistory/[AdsetName]/page-e4062089dd4191e4.js"
     ],
     "/LiveHistory/page": [
       "static/chunks/webpack-fed78e0a2e440c34.js",
       "static/chunks/fd9d1056-e8bb78c3d6f96093.js",
       "static/chunks/7023-f6d36bfb0e0215dc.js",
       "static/chunks/main-app-c0bb6bd17e13252e.js",
-      "static/chunks/app/LiveHistory/page-7abb5a6e4c5f7f7e.js"
+      "static/chunks/app/LiveHistory/page-fbb8047c1c38ffd6.js"
     ],
     "/NewUser/page": [
       "static/chunks/webpack-fed78e0a2e440c34.js",
@@ -252,45 +310,7 @@
       "static/chunks/702-ffb25bea879da62b.js",
       "static/chunks/5318-428aafb913ff947e.js",
       "static/chunks/2922-211d4b6a670b936b.js",
-      "static/chunks/app/NewUser/page-15a1ea3de5c2a7bd.js"
-    ],
-    "/LiveHistory/LiveAdsetHistory/[AdsetName]/page": [
-      "static/chunks/webpack-fed78e0a2e440c34.js",
-      "static/chunks/fd9d1056-e8bb78c3d6f96093.js",
-      "static/chunks/7023-f6d36bfb0e0215dc.js",
-      "static/chunks/main-app-c0bb6bd17e13252e.js",
-      "static/css/45189b0d594be98c.css",
-      "static/css/e39cb851c1b7befd.css",
-      "static/chunks/473d9b3e-f9e20747d25d5e3b.js",
-      "static/chunks/32ea55aa-b2b96d5ca2aa789d.js",
-      "static/chunks/29b981c0-b12ac80ff4cb6727.js",
-      "static/chunks/ca377847-575f38def39adea5.js",
-      "static/chunks/160b575a-bbb916e5d5899656.js",
-      "static/chunks/2626716e-b496a3b36b79551a.js",
-      "static/chunks/13b76428-5a68792917164904.js",
-      "static/chunks/3367-d6df8f9599461676.js",
-      "static/chunks/5578-76873c5886f92fdb.js",
-      "static/chunks/5746-7139f02c0a732449.js",
-      "static/chunks/9465-3ae00bb5a5c82404.js",
-      "static/chunks/app/LiveHistory/LiveAdsetHistory/[AdsetName]/page-ebe38d39c4ca5263.js"
-    ],
-    "/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page": [
-      "static/chunks/webpack-fed78e0a2e440c34.js",
-      "static/chunks/fd9d1056-e8bb78c3d6f96093.js",
-      "static/chunks/7023-f6d36bfb0e0215dc.js",
-      "static/chunks/main-app-c0bb6bd17e13252e.js",
-      "static/css/45189b0d594be98c.css",
-      "static/css/e39cb851c1b7befd.css",
-      "static/chunks/473d9b3e-f9e20747d25d5e3b.js",
-      "static/chunks/32ea55aa-b2b96d5ca2aa789d.js",
-      "static/chunks/29b981c0-b12ac80ff4cb6727.js",
-      "static/chunks/ca377847-575f38def39adea5.js",
-      "static/chunks/160b575a-bbb916e5d5899656.js",
-      "static/chunks/3367-d6df8f9599461676.js",
-      "static/chunks/5578-76873c5886f92fdb.js",
-      "static/chunks/5746-7139f02c0a732449.js",
-      "static/chunks/9465-3ae00bb5a5c82404.js",
-      "static/chunks/app/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page-f69d7d5571debac5.js"
+      "static/chunks/app/NewUser/page-b090a6c37c72ed1e.js"
     ],
     "/page": [
       "static/chunks/webpack-fed78e0a2e440c34.js",
@@ -299,26 +319,6 @@
       "static/chunks/main-app-c0bb6bd17e13252e.js",
       "static/chunks/4595-c5313f6ba0aa0ff4.js",
       "static/chunks/app/page-b23605aa76f64b76.js"
-    ],
-    "/LiveHistory/LiveCampaignHistory/[CampaignName]/page": [
-      "static/chunks/webpack-fed78e0a2e440c34.js",
-      "static/chunks/fd9d1056-e8bb78c3d6f96093.js",
-      "static/chunks/7023-f6d36bfb0e0215dc.js",
-      "static/chunks/main-app-c0bb6bd17e13252e.js",
-      "static/css/45189b0d594be98c.css",
-      "static/css/e39cb851c1b7befd.css",
-      "static/chunks/473d9b3e-f9e20747d25d5e3b.js",
-      "static/chunks/32ea55aa-b2b96d5ca2aa789d.js",
-      "static/chunks/29b981c0-b12ac80ff4cb6727.js",
-      "static/chunks/ca377847-575f38def39adea5.js",
-      "static/chunks/160b575a-bbb916e5d5899656.js",
-      "static/chunks/2626716e-b496a3b36b79551a.js",
-      "static/chunks/13b76428-5a68792917164904.js",
-      "static/chunks/3367-d6df8f9599461676.js",
-      "static/chunks/5578-76873c5886f92fdb.js",
-      "static/chunks/5746-7139f02c0a732449.js",
-      "static/chunks/9465-3ae00bb5a5c82404.js",
-      "static/chunks/app/LiveHistory/LiveCampaignHistory/[CampaignName]/page-5ff4342d83acc7bd.js"
     ],
     "/Users/page": [
       "static/chunks/webpack-fed78e0a2e440c34.js",
@@ -373,8 +373,8 @@
       "static/chunks/2973-c318131759679101.js",
       "static/chunks/4331-22882adca2e72c6e.js",
       "static/chunks/702-ffb25bea879da62b.js",
-      "static/chunks/428-51fb15cd35f9037a.js",
-      "static/chunks/app/Reports/page-ed9e018f4ff00cc1.js"
+      "static/chunks/2050-52b3b956106b9b5a.js",
+      "static/chunks/app/Reports/page-c4c2eea22cd63a5a.js"
     ]
   }
 }

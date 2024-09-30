@@ -35,7 +35,7 @@ const Createnewuser = ({ visible, onClose }) => {
         const updatedAccounts = additionalAccounts.filter((_, accountIndex) => accountIndex !== index);
         setAdditionalAccounts(updatedAccounts);
         setSelectedNetworks(updatedAccounts.map(account => account.network));
-        console.log(index, "remove");
+        // console.log(index, "remove");
     };
 
     const handleNetworkChange = (index, value) => {
@@ -52,15 +52,15 @@ const Createnewuser = ({ visible, onClose }) => {
     };
 
     const handleRemoveInput = (accountIndex, inputIndex) => {
-        console.log(inputIndex, "inputIndex");
-        console.log(accountIndex, "accountIndex");
+        // console.log(inputIndex, "inputIndex");
+        // console.log(accountIndex, "accountIndex");
         const updatedAccounts = [...additionalAccounts];
         
         updatedAccounts[accountIndex].inputs = updatedAccounts[accountIndex].inputs.filter((_, i) => i !== inputIndex);
         const indexes = updatedAccounts[accountIndex].inputs.length;
-        console.log(indexes, "length of inputs");
+        // console.log(indexes, "length of inputs");
         if(indexes === 0){
-            console.log(accountIndex, "index index");
+            // console.log(accountIndex, "index index");
             handleRemoveAccount(accountIndex);
         }
         setAdditionalAccounts(updatedAccounts);
@@ -98,7 +98,7 @@ const Createnewuser = ({ visible, onClose }) => {
                         ...values,
                         adAccounts: additionalAccounts.length > 0 ? data : [],
                     };
-                    console.log(formattedData, "formatted Data");
+                    // console.log(formattedData, "formatted Data");
                     const response = await axios.post('https://prodapis.adsgoat.in/api/createUser/', {formattedData},
                         {
                             headers: {
@@ -107,7 +107,7 @@ const Createnewuser = ({ visible, onClose }) => {
                         });
                     
                     if (response.status === 200) {
-                        console.log('User created successfully');
+                        // console.log('User created successfully');
                         message.success("User created successfully"); // Display success message
                         setTimeout(() => {
                             window.location.reload();

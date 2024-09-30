@@ -43,7 +43,7 @@ const MnetLiveAdsetHistory = ({params}) => {
 
     const [columnDefs, setColumnStructure] = useState([]);
 
-    const [chartData, setChartData] = useState({ dates: [], rpcDate:[], hoursDate:[], spend: [], revenue: [], profit: [], margin: [] });
+    const [chartData, setChartData] = useState({ dates: [], sortedData: [], sortedMarginData: [], rpcDate:[], hoursDate:[], hours: [], spend: [], revenue: [], profit: [], margin: [] });
 
     const spender = (params) => {
         var total = 0;
@@ -524,7 +524,65 @@ const MnetLiveAdsetHistory = ({params}) => {
           .slice(0, 5); // Get top 5 margins
         console.log(result, "result");
 
-        setChartData({ dates, rpcDate: result1, hoursDate: result,  spend, revenue, profit, margin, rpc, cpl });
+        const filteredArray = filteredData
+            .map(item => ({
+                date: moment(item.timezone, "YYYY-MM-DD HH:mm:ss").format("YYYY-MM-DD"),
+                hour: moment(item.timezone, "YYYY-MM-DD HH:mm:ss").format("HH"),
+                rpc: isNaN(item.rpc) ? 0 : item.rpc  // Ensure rpc is a number, otherwise default to 0
+            }))
+            .filter(item => {
+                const today = moment();
+                const tenDaysAgo = today.clone().subtract(10, 'days');
+                return moment(item.date).isBetween(tenDaysAgo, today, null, '[]');
+            });
+
+        const aggregatedData = filteredArray.reduce((acc, item) => {
+            const key = item.hour; // Group by hour only
+            if (!acc[key]) {
+                acc[key] = { ...item, count: 0, totalRpc: 0 };
+            }
+            acc[key].count += 1;
+            acc[key].totalRpc += isNaN(item.rpc) ? 0 : item.rpc; // Sum the RPC values, default to 0 if rpc is invalid
+            return acc;
+        }, {});
+
+        // Sort by frequency (count) and filter out any invalid data before taking the top 5
+        const sortedData = Object.values(aggregatedData)
+            .filter(item => !isNaN(item.totalRpc) && item.count > 0)  // Filter out invalid data (NaN or zero count)
+            .sort((a, b) => b.count - a.count) // Sort by frequency (count) descending
+            .slice(0, 5); // Take top 5
+
+        const filteredArrayForMargin = filteredData
+            .map(item => ({
+                date: moment(item.timezone, "YYYY-MM-DD HH:mm:ss").format("YYYY-MM-DD"),
+                hour: moment(item.timezone, "YYYY-MM-DD HH:mm:ss").format("HH"),
+                margin: typeof item.margin === 'string' && item.margin.includes('%')
+                    ? parseFloat(item.margin.replace('%', '')) // Remove % and convert to number
+                    : isNaN(item.margin) ? 0 : item.margin  // Fallback to 0 if margin is invalid
+            }))
+            .filter(item => {
+                const today = moment();
+                const tenDaysAgo = today.clone().subtract(10, 'days');
+                return moment(item.date).isBetween(tenDaysAgo, today, null, '[]');
+            });
+        
+        const aggregatedMarginData = filteredArrayForMargin.reduce((acc, item) => {
+            const key = item.hour; // Group by hour only
+            if (!acc[key]) {
+                acc[key] = { ...item, count: 0, totalMargin: 0 };
+            }
+            acc[key].count += 1;
+            acc[key].totalMargin += isNaN(item.margin) ? 0 : item.margin;  // Sum the margin values
+            return acc;
+        }, {});
+        
+        // Sort Margin data and take top 5
+        const sortedMarginData = Object.values(aggregatedMarginData)
+            .filter(item => !isNaN(item.totalMargin) && item.count > 0)  // Filter out invalid data
+            .sort((a, b) => b.count - a.count) // Sort by frequency (count) descending
+            .slice(0, 5); // Take top 5
+
+        setChartData({ dates, sortedData, sortedMarginData, rpcDate: result1, hoursDate: result,  spend, revenue, profit, margin, rpc, cpl });
 
     }
 
@@ -716,37 +774,20 @@ const MnetLiveAdsetHistory = ({params}) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {Object.values(chartData.dates
-                                .map((date, index) => ({
-                                    date: date.split(" ")[0], // Get the date part only
-                                    hour: new Date(date).getHours(), // Extract hour from date
-                                    rpc: chartData.rpc[index],
-                                }))
-                                .filter(item => {
-                                    const today = new Date();
-                                    const itemDate = new Date(item.date);
-                                    return itemDate >= new Date(today.setDate(today.getDate() - 10)); // Filter for last 10 days
-                                })
-                                .reduce((acc, item) => {
-                                    const key = `${item.date}-${item.hour}`;
-                                    if (!acc[key]) {
-                                        acc[key] = { ...item, count: 0, totalRpc: 0 };
-                                    }
-                                    acc[key].count += 1;
-                                    acc[key].totalRpc += item.rpc; // Sum the RPC values for the same hour
-                                    return acc;
-                                }, {}))
-                                .filter(item => item.count > 1) // Only take hours that repeated more than once
-                                .sort((a, b) => b.count - a.count) // Sort by frequency (count) descending
-                                .slice(0, 20) // Take top 5
-                                .map((item, index) => (
-                                    <tr key={index}>
-                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.hour}:00</td>
-                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.totalRpc ? (item.totalRpc / item.count).toFixed(2): 0}</td> {/* Average RPC for that hour */}
-                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.count}</td>
-                                    </tr>
-                                ))
-                            }
+                        {chartData.sortedData.map((item, index) => {
+                            const totalRpc = item.totalRpc || 0;  // Default to 0 if totalRpc is undefined or null
+                            const count = item.count || 1;        // Default to 1 if count is undefined or 0 to avoid division by zero
+
+                            return (
+                                <tr key={index}>
+                                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.hour}:00</td>
+                                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>
+                                        {count > 0 ? (totalRpc / count).toFixed(2) : 'N/A'}  {/* Avoid division by zero */}
+                                    </td>
+                                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.count}</td>
+                                </tr>
+                            );
+                        })}
                         </tbody>
                     </table>
                 </div>
@@ -761,39 +802,23 @@ const MnetLiveAdsetHistory = ({params}) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {Object.values(chartData.dates
-                                .map((date, index) => ({
-                                    date: date.split(" ")[0], // Get the date part only
-                                    hour: new Date(date).getHours(), // Extract hour from date
-                                    margin: chartData.margin[index],
-                                }))
-                                .filter(item => {
-                                    const today = new Date();
-                                    const itemDate = new Date(item.date);
-                                    return itemDate >= new Date(today.setDate(today.getDate() - 10)); // Filter for last 10 days
-                                })
-                                .reduce((acc, item) => {
-                                    const key = `${item.date}-${item.hour}`;
-                                    if (!acc[key]) {
-                                        acc[key] = { ...item, count: 0, totalMargin: 0 };
-                                    }
-                                    acc[key].count += 1;
-                                    acc[key].totalMargin += item.margin; // Sum the margin values for the same hour
-                                    return acc;
-                                }, {}))
-                                .filter(item => item.count > 1) // Only take hours that repeated more than once
-                                .sort((a, b) => b.count - a.count) // Sort by frequency (count) descending
-                                .slice(0, 5) // Take top 5
-                                .map((item, index) => (
-                                    <tr key={index}>
-                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.hour}:00</td>
-                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{(item.totalMargin / item.count).toFixed(2)}</td> {/* Average Margin for that hour */}
-                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.count}</td>
-                                    </tr>
-                                ))
-                            }
+                        {chartData.sortedMarginData.map((item, index) => {
+                            const totalMargin = item.totalMargin || 0;  // Default to 0 if totalMargin is undefined or null
+                            const count = item.count || 1;        // Default to 1 if count is undefined or 0 to avoid division by zero
+
+                            return (
+                                <tr key={index}>
+                                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.hour}:00</td>
+                                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>
+                                        {count > 0 ? (totalMargin / count).toFixed(2) : 'N/A'}  {/* Avoid division by zero */}
+                                    </td>
+                                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.count}</td>
+                                </tr>
+                            );
+                        })}
                         </tbody>
                     </table>
+                    
                 </div>
 
 

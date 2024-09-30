@@ -120,9 +120,7 @@ const rangePresets = [
 
 const Dashboard = () => {
     const { userdetails } = useTokenContext();
-    const { theme } = useTokenContext();
-    const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
-    console.log(userdetails);
+    // console.log(userdetails);
     // console.log(userdetails?.adAccounts, "f1");
     // const { adAccounts } = userdetails;
 
@@ -204,8 +202,8 @@ const Dashboard = () => {
         if (dates && dates.length === 2) {
             setSkeletonLoading(true);
             const [start, end] = dates;
-            console.log('Start Date:', start.format('YYYY-MM-DD'));
-            console.log('End Date:', end.format('YYYY-MM-DD'));
+            // console.log('Start Date:', start.format('YYYY-MM-DD'));
+            // console.log('End Date:', end.format('YYYY-MM-DD'));
             setStartDate(start.format('YYYY-MM-DD'));
             setEndDate(end.format('YYYY-MM-DD'));
         }
@@ -422,7 +420,7 @@ const Dashboard = () => {
           setRowData(groupedData);
           
 
-        console.log(groupedData);
+        // console.log(groupedData);
         
         const dates = groupedData.map(d => d.accountNumber.slice(-4));
         const spend = groupedData.map(d => Math.round((d.spend)*100)/100);
@@ -434,7 +432,7 @@ const Dashboard = () => {
         const margin = groupedData.map(d => Math.round((((d.estimated_revenue-d.spend)/d.estimated_revenue)*100)*100)/100);
 
         setChartData({ dates, spend, revenue, profit, margin, rpc, cpl });
-        console.log(responseData.length);
+        // console.log(responseData.length);
         setSkeletonLoading(false);
     }, 1500);;
       
@@ -450,8 +448,9 @@ const Dashboard = () => {
       
         // Log the default state on component mount (runs only once)
         if (Object.keys(selectedItems).length === 0) {
-          console.log('First Select - Default Selected Categories:', [defaultCategory]);
-          console.log('Second Select - Default Selected Items:', { [defaultCategory]: transformedData[defaultCategory] });
+            console.log("Select");
+        //   console.log('First Select - Default Selected Categories:', [defaultCategory]);
+        //   console.log('Second Select - Default Selected Items:', { [defaultCategory]: transformedData[defaultCategory] });
         }
       
         // Only process selectedItems if it's populated
@@ -463,7 +462,7 @@ const Dashboard = () => {
             return result;
           }, {});
       
-          console.log('Second Select - Current Selected Items:', selectedCategoryValues);
+        //   console.log('Second Select - Current Selected Items:', selectedCategoryValues);
           
       
           // Ensure functionalCall is not triggering state updates
@@ -580,7 +579,7 @@ const Dashboard = () => {
     // const newNetworks = userdetails?.adAccounts.map((each)=>)
 
     const networks = Object.keys(userdetails?.adAccounts);
-    console.log(networks, "net");
+    // console.log(networks, "net");
 
     const options = networks.map(each => ({
         value: each,
@@ -727,7 +726,7 @@ const Dashboard = () => {
 
     
     // console.log(rowData?.map(each=> each.profit > 0));
-    console.log(chartData, "data");
+    // console.log(chartData, "data");
     return (
         <div style={{ padding: '20px' }}>
         <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -753,13 +752,13 @@ const Dashboard = () => {
                     dropdownRender={(menu) => (
                     <div
                         style={{
-                        maxHeight: '200px',
-                        overflowY: 'auto',
-                        overflowX: 'hidden',
-                        padding: '8px',
-                        width:'100%',
-                        scrollbarWidth: 'none', // For Firefox
-                        msOverflowStyle: 'none', // For Internet Explorer and Edge
+                            width:'100%',
+                            maxHeight: '200px',
+                            overflowY: 'auto',
+                            overflowX: 'hidden',
+                            padding: '8px',
+                            scrollbarWidth: 'none', // For Firefox
+                            msOverflowStyle: 'none', // For Internet Explorer and Edge
                         }}
                     >
                         {menu}
