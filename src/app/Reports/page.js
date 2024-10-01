@@ -10,10 +10,10 @@ import axios from 'axios';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
 // import { Select } from 'antd';
-import { Carousel, Input, Button, Pagination, Row, Col, Typography, Result, Modal, message, ConfigProvider, theme  } from 'antd';
+import { Carousel, Input, Button, Pagination, Row, Col, Typography, Result, Modal, message, ConfigProvider, theme } from 'antd';
 
 // import 'antd/dist/reset.css';
-import { CommentOutlined, CustomerServiceOutlined, MenuOutlined, InfoCircleOutlined, DownloadOutlined, SearchOutlined, ArrowLeftOutlined, ArrowRightOutlined, SmileOutlined, ReloadOutlined,CopyOutlined, StarOutlined, StarFilled, EditOutlined, CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
+import { CommentOutlined, CustomerServiceOutlined, MenuOutlined, InfoCircleOutlined, DownloadOutlined, SearchOutlined, ArrowLeftOutlined, ArrowRightOutlined, SmileOutlined, ReloadOutlined, CopyOutlined, StarOutlined, StarFilled, EditOutlined, CheckCircleFilled, CloseCircleFilled, MessageOutlined } from '@ant-design/icons';
 import { FloatButton, Tooltip } from 'antd';
 import Draggable from 'react-draggable';
 // import FormControl from '@mui/material/FormControl';
@@ -101,7 +101,7 @@ const newtworkCollections = {
 const MyTablePage = () => {
     const { userdetails } = useTokenContext();
     // const router = useRouter();
-    
+
     const { theme } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
     if (userdetails === null) {
@@ -264,7 +264,7 @@ const MyTablePage = () => {
     const newDailyData = useRef();
 
     const newCampaignData = useRef();
-    
+
     const [fixedFooter, setFixedFooter] = useState([]);
 
     const isInitialLoad = useRef(true);
@@ -281,16 +281,16 @@ const MyTablePage = () => {
         setIsModalOpen(true);
     };
 
-    
+
 
     const handleOk = () => {
         if (!newColumnName || !formula) {
             message.error('Please fill in all fields.');
             return;
         }
-    
+
         const lowerCaseFormula = formula.toLowerCase();
-    
+
         try {
             // Define the new column definition
             const newColumnDef = {
@@ -302,19 +302,19 @@ const MyTablePage = () => {
                         const originalKeys = Object.keys(params.data);
                         const sanitizedKeys = originalKeys.map(key => key.replace(/[^a-zA-Z_$0-9]/g, '_'));
                         const values = Object.values(params.data);
-    
+
                         // Log the sanitized keys
                         console.log('Original Keys:', originalKeys);
                         console.log('Sanitized Keys:', sanitizedKeys);
-    
+
                         const keyMapping = {};
                         sanitizedKeys.forEach((key, index) => {
                             keyMapping[key] = originalKeys[index];
                         });
-    
+
                         // Constructing the function safely using sanitized keys
                         const func = new Function(...sanitizedKeys, `return ${lowerCaseFormula}`);
-    
+
                         // Map the values back to their original keys for function execution
                         const mappedValues = sanitizedKeys.map(key => params.data[keyMapping[key]]);
                         return func(...mappedValues);
@@ -330,15 +330,15 @@ const MyTablePage = () => {
                     try {
                         // Extract all the values in the group for this column
                         const values = params.values;
-    
+
                         // Log the values to be aggregated
                         console.log('Values to aggregate:', values);
-    
+
                         // Define how you want to aggregate these values.
                         // Example: You might want to sum them, average them, etc.
                         // Here, we'll sum the values for demonstration purposes.
                         const sum = values.reduce((acc, value) => acc + (value || 0), 0);
-    
+
                         return sum; // Replace with other aggregation logic if needed
                     } catch (error) {
                         console.error('Error in aggregation function:', error);
@@ -348,12 +348,12 @@ const MyTablePage = () => {
                 cellStyle: { backgroundColor: 'skyblue' },
                 headerCellStyle: { backgroundColor: 'skyblue', color: 'black' }
             };
-    
+
             // Update the column definitions
             setColumnDefs((prevDefs) => [...prevDefs, newColumnDef]);
             columnDefs1.current = [...columnDefs1.current, newColumnDef];
             columnDefs2.current = [...columnDefs2.current, newColumnDef];
-    
+
             // Common function to update data
             const updateData = (prevData) => {
                 return prevData.map((row) => {
@@ -363,12 +363,12 @@ const MyTablePage = () => {
                         const sanitizedKeys = originalKeys.map(key => key.replace(/[^a-zA-Z_$0-9]/g, '_'));
                         const values = Object.values(row);
                         console.log(values, "values1");
-    
+
                         const keyMapping = {};
                         sanitizedKeys.forEach((key, index) => {
                             keyMapping[key] = originalKeys[index];
                         });
-    
+
                         const func = new Function(...sanitizedKeys, `return ${lowerCaseFormula}`);
                         const mappedValues = sanitizedKeys.map(key => row[keyMapping[key]]);
                         updatedRow[newColumnName.toLowerCase()] = func(...mappedValues);
@@ -379,12 +379,12 @@ const MyTablePage = () => {
                     return updatedRow;
                 });
             };
-    
+
             // Update data with the new column
             setRowData((prevData) => updateData(prevData));
             setdailyData((prevData) => updateData(prevData));
             setCampaignData((prevData) => updateData(prevData));
-    
+
         } catch (error) {
             console.error('Error adding column:', error);
         }
@@ -392,14 +392,14 @@ const MyTablePage = () => {
         setFormula('');
         setIsModalOpen(false);
     };
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
     const handleCancel = () => {
         setIsModalOpen(false);
     };
@@ -421,7 +421,7 @@ const MyTablePage = () => {
     // };
     const getMainMenuItems = (params) => {
         const defaultItems = params.defaultItems.slice();
-        
+
         // Find and override the "Reset Columns" option
         const resetColumnsItemIndex = defaultItems.findIndex(item => item === 'resetColumns');
         if (resetColumnsItemIndex > -1) {
@@ -445,7 +445,7 @@ const MyTablePage = () => {
                 cssClasses: ['custom-new-item'], // Assign a custom class for skyblue background
             });
         }
-    
+
         return defaultItems;
     };
 
@@ -453,7 +453,7 @@ const MyTablePage = () => {
         const total = params.values.reduce((acc, value) => acc + parseFloat(value || 0), 0);
         return Math.round(total * 100) / 100; // Round to 2 decimal places
     };
-    
+
     const currencyFormatter = (params) => {
         return `$${parseFloat(params.value || 0).toFixed(2)}`; // Ensure 2 decimal places in currency format
     };
@@ -837,7 +837,7 @@ const MyTablePage = () => {
 
     const CopyableCell = ({ value }) => {
         const [tooltipText, setTooltipText] = useState("Copy to clipboard");
-    
+
         const copyToClipboard = () => {
             navigator.clipboard.writeText(value).then(() => {
                 setTooltipText("Copied!");
@@ -846,7 +846,7 @@ const MyTablePage = () => {
                 alert('Failed to copy!');
             });
         };
-    
+
         return (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                 <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flexGrow: 1 }}>
@@ -861,19 +861,19 @@ const MyTablePage = () => {
             </div>
         );
     };
-    
+
     const campaignNameRenderer = (params) => {
         const cell = document.createElement('div');
         ReactDOM.render(<CopyableCell value={params.value} />, cell);
         return cell;
     };
-    
+
 
     // const handleAddColumn = () => {
     //     if (newColumnName && formula) {
     //         // Convert the formula to lowercase
     //         const lowerCaseFormula = formula.toLowerCase();
-    
+
     //         // Add new column definition
     //         const newColumnDef = {
     //             headerName: newColumnName,
@@ -890,9 +890,9 @@ const MyTablePage = () => {
     //                 }
     //             }
     //         };
-    
+
     //         setColumnDefs((prevDefs) => [...prevDefs, newColumnDef]);
-    
+
     //         // Update row data with new column values
     //         setRowData((prevData) =>
     //             prevData.map((row) => ({
@@ -907,7 +907,7 @@ const MyTablePage = () => {
     //                 })()
     //             }))
     //         );
-    
+
     //         // Clear input fields
     //         setNewColumnName('');
     //         setFormula('');
@@ -918,7 +918,7 @@ const MyTablePage = () => {
     //     const value = params.value || 0; // Ensure value is defined and default to 0
     //     return `$${value}`; // Format the value as currency
     // }
-    
+
 
     const columnDefsObject = {
         campaignname: {
@@ -1032,7 +1032,7 @@ const MyTablePage = () => {
             aggFunc: liveSpender,
             sortable: true,
             filter: "agTextColumnFilter",
-            valueFormatter:currencyFormatter
+            valueFormatter: currencyFormatter
             // filterParams: {
             //     textCustomComparator: customTextFilterFunction,
             // },
@@ -1050,7 +1050,7 @@ const MyTablePage = () => {
             aggFunc: liveSpender,
             sortable: true,
             filter: "agNumberColumnFilter",
-            valueFormatter:currencyFormatter
+            valueFormatter: currencyFormatter
             // headerComponent: CustomHeader,
             // headerComponentParams: {
             //     displayName: 'Revenue',
@@ -1068,7 +1068,7 @@ const MyTablePage = () => {
                 'font-red': p => p.value < 0
             },
             filter: "agNumberColumnFilter",
-            valueFormatter:currencyFormatter
+            valueFormatter: currencyFormatter
             // headerComponent: CustomHeader,
             // headerComponentParams: {
             //     displayName: 'Profit',
@@ -1087,7 +1087,7 @@ const MyTablePage = () => {
                 if (valueA == null) return -1;
                 if (valueB == null) return 1;
                 return valueA - valueB;
-              },
+            },
             valueFormatter: (params) => `${params.value}%`,
             // headerComponent: CustomHeader,
             // headerComponentParams: {
@@ -1176,7 +1176,7 @@ const MyTablePage = () => {
                 if (valueA == null) return -1;
                 if (valueB == null) return 1;
                 return valueA - valueB;
-              },
+            },
             valueFormatter: (params) => `${params.value}%`,
             // headerComponent: CustomHeader,
             // headerComponentParams: {
@@ -1235,7 +1235,7 @@ const MyTablePage = () => {
                 if (valueA == null) return -1;
                 if (valueB == null) return 1;
                 return valueA - valueB;
-              },
+            },
             valueFormatter: (params) => `${params.value}%`,
             // headerComponent: CustomHeader,
             // headerComponentParams: {
@@ -1254,7 +1254,7 @@ const MyTablePage = () => {
                 if (valueA == null) return -1;
                 if (valueB == null) return 1;
                 return valueA - valueB;
-              },
+            },
             valueFormatter: (params) => `${params.value}%`,
             // headerComponent: CustomHeader,
             // headerComponentParams: {
@@ -1303,7 +1303,7 @@ const MyTablePage = () => {
 
     const columnDefsObject1 = {
         campaignname: {
-            headerName: 'CampaignName', 
+            headerName: 'CampaignName',
             field: 'campaignname',
             resizable: true,
             sortable: true,
@@ -1321,7 +1321,7 @@ const MyTablePage = () => {
             },
             cellRenderer: campaignNameRenderer,
         },
-        
+
         adsetname: {
             headerName: 'AdsetName', field: 'adsetname',
             // resizeble: true,
@@ -1397,7 +1397,7 @@ const MyTablePage = () => {
                 if (valueA == null) return -1;
                 if (valueB == null) return 1;
                 return valueA - valueB;
-              },
+            },
             valueFormatter: (params) => `${params.value}%`,
 
         },
@@ -1415,37 +1415,40 @@ const MyTablePage = () => {
         },
         fbclicks: { headerName: 'FbClicks', field: 'fbclicks', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
         impressions: { headerName: 'Impressions', field: 'impressions', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
-        ctr: { headerName: 'Ctr', field: 'ctr', valueGetter: getCtr, sortable: true,
-        comparator: (valueA, valueB) => {
-            // Handle sorting based on the computed margin value
-            if (valueA == null) return -1;
-            if (valueB == null) return 1;
-            return valueA - valueB;
-          },
-        valueFormatter: (params) => `${params.value}%`,
-         },
+        ctr: {
+            headerName: 'Ctr', field: 'ctr', valueGetter: getCtr, sortable: true,
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+        },
         rpc: { headerName: 'Rpc', field: 'rpc', valueGetter: getRpc, sortable: true, filter: 'agNumberColumnFilter' },
         cpl: { headerName: 'Cpl', field: 'cpl', valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter' },
         ncpl: { headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter' },
-        fmargin: { headerName: 'Fmargin(%)', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: true,
-        comparator: (valueA, valueB) => {
-            // Handle sorting based on the computed margin value
-            if (valueA == null) return -1;
-            if (valueB == null) return 1;
-            return valueA - valueB;
-          },
-        valueFormatter: (params) => `${params.value}%`,
-         },
-        roi: { headerName: 'ROI(%)', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: 'Profit/Spend', filter: true,
-        comparator: (valueA, valueB) => {
-            // Handle sorting based on the computed margin value
-            if (valueA == null) return -1;
-            if (valueB == null) return 1;
-            return valueA - valueB;
-          },
-        valueFormatter: (params) => `${params.value}%`,
-         },
-        adsetid: { headerName: 'AdsetId', field: 'adsetid', sortable: true, filter: "agTextColumnFilter",hide: false },
+        fmargin: {
+            headerName: 'Fmargin(%)', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: true,
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+        },
+        roi: {
+            headerName: 'ROI(%)', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: 'Profit/Spend', filter: true,
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+        },
+        adsetid: { headerName: 'AdsetId', field: 'adsetid', sortable: true, filter: "agTextColumnFilter", hide: false },
         campaignid: { headerName: 'CampaignId', field: 'campaignid', sortable: true, filter: "agTextColumnFilter", },
         timezone: { headerName: 'TimeZone', field: 'timezone', sortable: true, hide: true, filter: "agTextColumnFilter", },
     };
@@ -1468,7 +1471,7 @@ const MyTablePage = () => {
                 console.log(event);
                 // const url = `/history/${event}-${account}-${time}`;
                 // window.open(url, '_blank');
-            
+
             },
             width: 450,
             pinned: 'left',// Using the group cell renderer
@@ -1531,60 +1534,68 @@ const MyTablePage = () => {
                 },
             },
         },
-        spend: { headerName: 'Spend($)', field: 'spend', width: 150, aggFunc: spender, sortable: true, filter: 'agNumberColumnFilter', 
-        valueFormatter:currencyFormatter },
-        revenue: { headerName: 'Revenue($)', field: 'revenue', width: 150, aggFunc: spender, sortable: true, filter: 'agNumberColumnFilter',
-        valueFormatter:currencyFormatter },
+        spend: {
+            headerName: 'Spend($)', field: 'spend', width: 150, aggFunc: spender, sortable: true, filter: 'agNumberColumnFilter',
+            valueFormatter: currencyFormatter
+        },
+        revenue: {
+            headerName: 'Revenue($)', field: 'revenue', width: 150, aggFunc: spender, sortable: true, filter: 'agNumberColumnFilter',
+            valueFormatter: currencyFormatter
+        },
         profit: {
             headerName: 'Profit($)', field: 'profit', width: 150, aggFunc: spender, cellClassRules: {
                 'font-red': p => p.value < 0
             }, sortable: true, headerTooltip: 'Revenue - Spend', filter: 'agNumberColumnFilter',
-            valueFormatter:currencyFormatter
+            valueFormatter: currencyFormatter
         },
-        margin: { headerName: 'Margin(%)', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: 'Profit/Revenue', filter: true,
-        comparator: (valueA, valueB) => {
-            // Handle sorting based on the computed margin value
-            if (valueA == null) return -1;
-            if (valueB == null) return 1;
-            return valueA - valueB;
-          },
-          valueFormatter: (params) => `${params.value}%`,
-         },
+        margin: {
+            headerName: 'Margin(%)', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: 'Profit/Revenue', filter: true,
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+        },
         fbleads: { headerName: 'FbLeads', field: 'fbleads', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
         conversions: { headerName: 'Conversions', field: 'conversions', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
         cpc: { headerName: 'cpc', field: 'cpc', aggFunc: cpcSpender, sortable: true, filter: 'agNumberColumnFilter' },
         fbclicks: { headerName: 'FbClicks', field: 'fbclicks', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
         impressions: { headerName: 'Impressions', field: 'impressions', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
-        ctr: { headerName: 'Ctr', field: 'ctr', valueGetter: getCtr, sortable: true, filter: 'agNumberColumnFilter',
-        comparator: (valueA, valueB) => {
-            // Handle sorting based on the computed margin value
-            if (valueA == null) return -1;
-            if (valueB == null) return 1;
-            return valueA - valueB;
-          },
-        valueFormatter: (params) => `${params.value}%`,
-         },
+        ctr: {
+            headerName: 'Ctr', field: 'ctr', valueGetter: getCtr, sortable: true, filter: 'agNumberColumnFilter',
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+        },
         rpc: { headerName: 'Rpc', field: 'rpc', valueGetter: getRpc, sortable: true, filter: 'agNumberColumnFilter' },
         cpl: { headerName: 'Cpl', field: 'cpl', valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter' },
         ncpl: { headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter' },
-        fmargin: { headerName: 'Fmargin(%)', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: true,
-        comparator: (valueA, valueB) => {
-            // Handle sorting based on the computed margin value
-            if (valueA == null) return -1;
-            if (valueB == null) return 1;
-            return valueA - valueB;
-          },
-        valueFormatter: (params) => `${params.value}%`,
-         },
-        roi: { headerName: 'ROI(%)', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: 'Profit/Spend', filter: true,
-        comparator: (valueA, valueB) => {
-            // Handle sorting based on the computed margin value
-            if (valueA == null) return -1;
-            if (valueB == null) return 1;
-            return valueA - valueB;
-          },
-        valueFormatter: (params) => `${params.value}%`,
-         },
+        fmargin: {
+            headerName: 'Fmargin(%)', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: true,
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+        },
+        roi: {
+            headerName: 'ROI(%)', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: 'Profit/Spend', filter: true,
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+        },
         campaignid: { headerName: 'CampaignId', field: 'campaignid', sortable: true, filter: "agTextColumnFilter", },
         adsetid: { headerName: 'AdsetId', field: 'adsetid', sortable: true, filter: "agTextColumnFilter", },
         timezone: { headerName: 'TimeZone', field: 'timezone', sortable: true, hide: true, filter: "agTextColumnFilter", },
@@ -1639,11 +1650,11 @@ const MyTablePage = () => {
     function findMaxHour(data) {
         // Use reduce to find the maximum value of the 'hour' key
         const maxHour = data.reduce((max, obj) => {
-          // Convert the 'hour' value to a number before comparison
-          const hourAsNumber = parseInt(obj.hour, 10);
-          return hourAsNumber > max ? hourAsNumber : max;
+            // Convert the 'hour' value to a number before comparison
+            const hourAsNumber = parseInt(obj.hour, 10);
+            return hourAsNumber > max ? hourAsNumber : max;
         }, -Infinity);  // Initialize with -Infinity to ensure proper comparison
-      
+
         console.log("Maximum hour:", String(maxHour).padStart(2, '0'));  // Format it back to string with leading zero if necessary
         return String(maxHour).padStart(2, '0');  // Return the max hour as a string with leading zero
     }
@@ -1651,9 +1662,9 @@ const MyTablePage = () => {
     function getMaxHour(data) {
         // Extract hour from "HH:MM" format if updatedHour exists and convert it to a number
         const hours = data
-          .filter(item => item.updatedHour) // Filter out objects without updatedHour
-          .map(item => parseInt(item.updatedHour.split(":")[0], 10));
-      
+            .filter(item => item.updatedHour) // Filter out objects without updatedHour
+            .map(item => parseInt(item.updatedHour.split(":")[0], 10));
+
         // Return the maximum hour, or null if no valid updatedHour found
         return hours.length > 0 ? Math.max(...hours) : null;
     }
@@ -1670,15 +1681,34 @@ const MyTablePage = () => {
         columnDefs2.current = (getColumnDefs2(mainData.columnStructure))
     }
 
-
     const functionCall1 = async () => {
+        if (!token) {
+            console.error("Token not available. Please log in.");
+            return;  // Stop execution if token is missing
+        }
         const fetchData = await axios.get(`https://prodapis.adsgoat.in/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${account}&timezone=${time}&network=${newtworkCollections[revenuePratner]}`, {
             headers: {
                 Authorization: token,
             },
         });
         const mainData = fetchData.data;
-        console.log(mainData, "maindata of functinCall1");
+        let campaignComments = [];
+        if (fetchData.status === 200) {
+            try {
+                const commentFetch = await axios.get(`https://prodapis.adsgoat.in/Comments/${account}`, {
+                    headers: {
+                        Authorization: token,
+                    },
+                });
+                campaignComments = commentFetch.data; // Set comments only if fetched successfully
+            } catch (error) {
+                console.error('Error fetching comments:', error); // Log any errors fetching comments
+            }
+        } else {
+            console.error('Error fetching comments:', error);
+        }
+        setCampaignComments(campaignComments);
+        // console.log(mainData, "maindata of functinCall1");
         const specifiedTimeZone = selectTimezone[time];
         const filteredData = mainData && mainData.length > 0 ?
             mainData.map((eachData) => {
@@ -1713,7 +1743,9 @@ const MyTablePage = () => {
                 }
                 const ncpl = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((eachData.spend / eachData.conversions) * 100) / 100;
                 // console.log(revenueData, "revenueData");
+                const relatedComment = campaignComments.find(comment => comment.campaignname === eachData.campaign_name);
                 return (
+
                     {
                         campaignname: eachData.campaign_name,
                         adsetname: eachData.adsetName,
@@ -1735,6 +1767,7 @@ const MyTablePage = () => {
                         adsetid: eachData.adset_id,
                         campaignid: eachData.campaign_id,
                         timezone: eachData[time],
+                        comment: relatedComment ? relatedComment.comment : null
                     }
                 )
             })
@@ -1754,6 +1787,89 @@ const MyTablePage = () => {
         setLoading(false);
 
     }
+    // const functionCall1 = async () => {
+    //     const fetchData = await axios.get(`https://prodapis.adsgoat.in/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${account}&timezone=${time}&network=${newtworkCollections[revenuePratner]}`, {
+    //         headers: {
+    //             Authorization: token,
+    //         },
+    //     });
+    //     const mainData = fetchData.data;
+    //     console.log(mainData, "maindata of functinCall1");
+    //     const specifiedTimeZone = selectTimezone[time];
+    //     const filteredData = mainData && mainData.length > 0 ?
+    //         mainData.map((eachData) => {
+    //             let revenueData;
+    //             if (eachData.estimated_revenue === 0 || isNaN(eachData.estimated_revenue)) {
+    //                 revenueData = 0;
+    //             }
+    //             else if (eachData.estimated_revenue === undefined) {
+    //                 revenueData = 0;
+    //             }
+    //             else if (eachData.estimated_revenue === null) {
+    //                 revenueData = 0;
+    //             }
+    //             else {
+    //                 revenueData = eachData.estimated_revenue;
+    //             }
+    //             const profit = (revenueData - eachData.spend).toFixed(2);
+    //             let margin;
+    //             if (revenueData === 0) {
+    //                 margin = "0";
+    //             }
+    //             else {
+    //                 margin = `${Math.round((((revenueData - eachData.spend) / revenueData) * 100) * 100) / 100}%`;
+    //             }
+    //             const rpc = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((revenueData / eachData.conversions) * 100) / 100;
+
+    //             let cpl;
+    //             if (eachData.fbLeads == 0) {
+    //                 cpl = 0;
+    //             } else {
+    //                 cpl = Math.round((eachData.spend / eachData.fbLeads) * 100) / 100;
+    //             }
+    //             const ncpl = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((eachData.spend / eachData.conversions) * 100) / 100;
+    //             // console.log(revenueData, "revenueData");
+    //             return (
+    //                 {
+    //                     campaignname: eachData.campaign_name,
+    //                     adsetname: eachData.adsetName,
+    //                     date: eachData[specifiedTimeZone],
+    //                     'fb-hour': eachData.hour,
+    //                     'mnet-hour': eachData.updatedHour,
+    //                     spend: parseFloat(eachData.spend),
+    //                     revenue: revenueData ? revenueData : 0,
+    //                     profit: parseFloat(profit),
+    //                     margin: margin,
+    //                     fbleads: parseInt(eachData.fbLeads),
+    //                     conversions: eachData.conversions !== null && eachData.conversions !== 0 ? parseInt(eachData.conversions) : 0,
+    //                     cpc: parseFloat(eachData.cpc),
+    //                     fbclicks: parseInt(eachData.fbClicks),
+    //                     impressions: parseInt(eachData.impressions),
+    //                     rpc: parseFloat(rpc),
+    //                     cpl: parseFloat(cpl),
+    //                     ncpl: parseFloat(ncpl),
+    //                     adsetid: eachData.adset_id,
+    //                     campaignid: eachData.campaign_id,
+    //                     timezone: eachData[time],
+    //                 }
+    //             )
+    //         })
+    //         : null;
+    //     // setValue(mainData);
+    //     if (mainData.length > 1) {
+    //         timezone.current = mainData[0].accountTimezone;
+    //         accountStatus.current = mainData[0].accountStatus;
+    //         cronStatus.current = mainData[0].cronStatus;
+    //         maxHour.current = findMaxHour(mainData);
+    //         maxNetworkHour.current = getMaxHour(mainData);
+    //     }
+    //     setRowData(filteredData);
+    //     newRowData.current = filteredData;
+    //     setInitialRowData(filteredData);
+    //     setTrue(false);
+    //     setLoading(false);
+
+    // }
 
     const functionCall2 = async () => {
         try {
@@ -2047,7 +2163,7 @@ const MyTablePage = () => {
         // console.log(accountsAccess, "accountsAccess");
         setNetworksData(accountsAccess);
         setRevenuePartner(value);
-        value ==="FB_Tonic" ? console.log("PDT") : null;
+        value === "FB_Tonic" ? console.log("PDT") : null;
         value === "FB_Rsoc" || value === "FB_Tonic" || value === "FB_DomainActive" ? setTime('PDT') : setTime('UTC')
     }
     const onChangeSelect = (value) => {
@@ -2206,10 +2322,60 @@ const MyTablePage = () => {
 
     // };
 
+    const [campaignComments, setCampaignComments] = useState([]);
+    const [refrst, setRefrst] = useState(false);
+    const fetchCampaignComments = async () => {
+        try {
+
+            const response = await axios.get(`https://prodapis.adsgoat.in/Comments/${account}`, {
+                headers: {
+                    Authorization: token, // Your token for authorization
+                },
+            });
+            setCampaignComments(response.data); // Update the state with the fetched comments
+        } catch (error) {
+            console.error('Error fetching comments:', error);
+        }
+    };
+    useEffect(() => {
+        fetchCampaignComments(); // Fetch comments whenever refrst changes
+    }, [refrst]); // Run this effect when refrst changes
+
+    // useEffect(() => {
+    //     fetchCampaignComments(); // Fetch comments on initial load
+    // }, []); // Run this effect on component mount
+
+    const changeRRefrst = () => {
+        setRefrst((prev) => !prev);
+    };
+
     const autoGroupColumnDefLive = {
         headerName: 'CampaignName',
         minWidth: 450,
         pinned: 'left',
+        sortable: true, // Enable sorting
+
+        comparator: (campaignA, campaignB) => {
+            // Handle cases where campaignA or campaignB might be undefined or null
+            if (!campaignA) return 1; // If campaignA is undefined or null, move it down
+            if (!campaignB) return -1; // If campaignB is undefined or null, move it down
+
+            // Find the campaigns' star status in the comments
+            const getStarredForCampaign = (campaignName) => {
+                const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+                return relatedComment ? relatedComment.starred : false;
+            };
+
+            // Get the star status for both campaigns
+            const isStarredA = getStarredForCampaign(campaignA);
+            const isStarredB = getStarredForCampaign(campaignB);
+
+            // Sort based on starred status (true comes before false)
+            if (isStarredA === isStarredB) {
+                return campaignA.localeCompare(campaignB); // If both are the same, sort alphabetically
+            }
+            return isStarredA ? -1 : 1; // Sort starred campaigns (true) first
+        },
 
         cellRendererParams: {
             suppressCount: false, // Allow count to be shown
@@ -2219,10 +2385,26 @@ const MyTablePage = () => {
                 }
                 // const count = params.node.allChildrenCount; // Get the count of children
                 const firstColumnValue = params.node.key;  // This should give you the campaign name
+                const campaignName = params.node.key;  // Assuming grouping by campaign name
+                const getCommentForCampaign = (campaignName) => {
+                    const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+                    return relatedComment ? relatedComment.comment : null; // Return 'No comment' if none found
+                };
+                const getStarredForCampaign = (campaignName) => {
+                    const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+                    return relatedComment ? relatedComment.starred : false;
+                };
+
+                const relatedComment = getCommentForCampaign(campaignName);
+                const isStarred = getStarredForCampaign(campaignName);
+                console.log(relatedComment, "relatedComment for campaign:", campaignName);
                 const valueWithCount = `${firstColumnValue}`;
-    
+
                 const [tooltipText, setTooltipText] = useState("Click to Copy");
-    
+                const [isModalVisibles, setIsModalVisibles] = useState(false); // Modal visibility state
+                const [comment, setComment] = useState(relatedComment || ''); // Store user's comment
+                const [starred, setStarred] = useState(isStarred);
+
                 const copyToClipboard = () => {
                     navigator.clipboard.writeText(firstColumnValue)
                         .then(() => {
@@ -2234,91 +2416,228 @@ const MyTablePage = () => {
                         });
                 };
 
+
+                // Handle Edit icon click
+                const handleEditClick = () => {
+                    setIsModalVisibles(true); // Open the modal
+                };
+
+                const sendNewCommentToAPI = async (logData) => {
+                    try {
+                        const response = await axios.post('https://prodapis.adsgoat.in/Comments', {
+                            commentsdatas: logData,
+                        }, {
+                            headers: {
+                                Authorization: token, // Pass token in Authorization header
+                            }
+
+                        });
+
+                        console.log('Response from server:', response.data);
+                    } catch (error) {
+                        console.error('Error sending data to server:', error);
+                    }
+                };
+                const sendEditedCommentToAPI = async (logData) => {
+                    try {
+                        const response = await axios.post('https://prodapis.adsgoat.in/Comments/edit', {
+                            campaignname: logData.campaignname,
+                            comment: logData.comment,
+                        }, {
+                            headers: {
+                                Authorization: token, // Send token in Authorization header
+                            }
+                        });
+                        console.log('Response from server (edited comment):', response.data);
+                        return response.data;
+                    } catch (error) {
+                        console.error('Error sending edited comment to server:', error);
+                        throw error;
+                    }
+                };
+                const sendStarStatusToAPI = async (campaignname, isStarred) => {
+                    try {
+                        const endpoint = isStarred ? 'https://prodapis.adsgoat.in/Star' : 'https://prodapis.adsgoat.in/Unstar';
+                        const response = await axios.post(endpoint, {
+                            campaignname: campaignname,
+                            Account: account,
+                            usercommit: userdetails?.email,
+                        }, {
+                            headers: {
+                                Authorization: token,
+                            }
+                        });
+                        console.log('Response from server (starred status):', response.data);
+                    } catch (error) {
+                        console.error('Error updating star status:', error);
+                    }
+                };
+
+                const handleStarClick = async () => {
+                    const updatedStarred = !starred;
+                    setStarred(updatedStarred);
+                    await sendStarStatusToAPI(firstColumnValue, updatedStarred);
+                    message.success(updatedStarred ? "Campaign starred!" : "Campaign unstarred!");
+
+                    // Update the state locally
+                    const updatedComments = campaignComments.map(cmt =>
+                        cmt.campaignname === firstColumnValue ? { ...cmt, starred: updatedStarred } : cmt
+                    );
+                    setCampaignComments(updatedComments);
+                    changeRRefrst();
+                };
+                const handleOks = async () => {
+                    try {
+                        // Construct the object based on the requested format
+                        const logData = {
+                            Account: account,
+                            usercommit: userdetails?.email,
+                            campaignname: firstColumnValue,
+                            comment: comment
+                        };
+
+                        // Determine whether this is a new comment or an edit based on the existence of `relatedComment`
+                        if (relatedComment) {
+                            // If comment exists, update the comment (Edit mode)
+                            await sendEditedCommentToAPI(logData);
+                            message.success("Comment updated successfully!");
+                        } else {
+                            // If comment does not exist, add a new comment
+                            await sendNewCommentToAPI(logData);
+                            message.success("New comment added successfully!");
+                        }
+
+                        // Update the local comments state with the new or updated comment
+                        const updatedComments = relatedComment
+                            ? campaignComments.map(cmt => (cmt.campaignname === firstColumnValue ? { ...cmt, comment } : cmt))
+                            : [...campaignComments, logData]; // If no comment existed, add new comment
+                        setCampaignComments(updatedComments);
+
+                        // Trigger a refresh or re-render using the provided function
+                        changeRRefrst();
+
+                        // Log the structured data for debugging purposes
+                        console.log('Logged Data:', logData);
+
+                        // Close the modal after successful submission
+                        setIsModalVisibles(false);
+                    } catch (error) {
+                        console.error('Error while submitting comment:', error);
+                        message.error("Error while submitting the comment.");
+                    }
+                };
+
+
+                const handleCancels = () => {
+                    setIsModalVisibles(false); // Close the modal without logging anything
+                };
+
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                        <StarOutlined/>
-                        <EditOutlined style={{marginLeft:'10px'}}/>
-                        <Tooltip title={tooltipText}>
+                        {relatedComment && (
+                            starred ? (
+                                <StarFilled onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: 'gold' }} />
+                            ) : (
+                                <StarOutlined onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px' }} />
+                            )
+                        )}                      {relatedComment ? (
+                            <Tooltip title={(
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <span>{relatedComment || 'No comment available'}</span>
+                                    <EditOutlined onClick={handleEditClick} style={{ marginLeft: '10px', color: 'blue', cursor: 'pointer' }} />
+                                </div>
+                            )}>
+                                <MessageOutlined style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
+                                <Tooltip title={tooltipText}></Tooltip>
+                            </Tooltip>
+                        ) : (
+                            <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
+                        )}                        <Tooltip title={tooltipText}>
                             <CopyOutlined
                                 onClick={copyToClipboard}
-                                style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight:'10px' }}
+                                style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight: '10px' }}
                             />
                         </Tooltip>
                         <span
                             onClick={() => {
-                                console.log(`Grouped Make clicked: ${params.value}`);
+                                // console.log(`Grouped Make clicked: ${params.value}`);
                                 const url = `/LiveHistory/LiveCampaignHistory/${params.value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
                                 window.open(url, '_blank');
                             }}
                         >
                             {valueWithCount}
                         </span>
+                        <Modal
+                            title={firstColumnValue}
+                            visible={isModalVisibles}
+                            onOk={handleOks} // Call handleOk when OK is clicked
+                            onCancel={handleCancels} // Call handleCancel when Cancel is clicked
+                        >
+                            <Input.TextArea
+                                placeholder="Enter your comments here"
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)} // Update the comment state when typing
+                            />
+                        </Modal>
                     </div>
+
                 );
             }
         }
     };
 
-
-    // const autoGroupColumnDefLive = {
-    //     headerName: 'CampaignName',
-    //     minWidth: 450,
-    //     cellRendererParams: {
-    //         suppressCount: true,
-    //         innerRenderer: (params) => {
-    //           return (
-    //             <span
-    //               onClick={() => {
-    //                 console.log(`Grouped Make clicked: ${params.value}`);
-    //                 const url = `/LiveHistory/LiveCampaignHistory/${params.value}-${account}-${time}-${revenuePratner}`;
-    //                 window.open(url, '_blank');
-    //               }}
-    //             >
-    //               {params.value}
-    //             </span>
-    //           );
-    //         }
-    //       }
-    // };
-
-    // const autoGroupColumnDef = {
-    //     headerName: 'CampaignName',
-    //     minWidth: 450,
-    //     cellRendererParams: {
-    //         suppressCount: true,
-    //         innerRenderer: (params) => {
-    //           return (
-    //             <span
-    //               onClick={() => {
-    //                 console.log(`Grouped Make clicked: ${params.value}`);
-    //                 const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value}-${account}-${time}`;
-    //                 window.open(url, '_blank');
-    //               }}
-    //             >
-    //               {params.value}
-    //             </span>
-    //           );
-    //         }
-    //       }
-    // };
-
     const autoGroupColumnDef = {
         headerName: 'CampaignName',
         minWidth: 450,
         pinned: 'left',
+        sortable: true, // Enable sorting
+
+        comparator: (campaignA, campaignB) => {
+            if (!campaignA) return 1;
+            if (!campaignB) return -1;
+
+            const getStarredForCampaign = (campaignName) => {
+                const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+                return relatedComment ? relatedComment.starred : false;
+            };
+
+            const isStarredA = getStarredForCampaign(campaignA);
+            const isStarredB = getStarredForCampaign(campaignB);
+
+            if (isStarredA === isStarredB) {
+                return campaignA.localeCompare(campaignB);
+            }
+            return isStarredA ? -1 : 1;
+        },
+
         cellRendererParams: {
-            suppressCount: false, // Allow count to be shown
+            suppressCount: false,
             innerRenderer: (params) => {
                 if (params.node.footer) {
-                    return 'Total'; // Custom footer label
+                    return 'Total';
                 }
-    
-                // Get the group key or value (campaign name in this case)
-                const firstColumnValue = params.node.key;  // This should give you the campaign name
-                const valueWithCount = `${firstColumnValue}`;
-    
+
+                const firstColumnValue = params.node.key;
+                const campaignName = params.node.key;
+
+                const getCommentForCampaign = (campaignName) => {
+                    const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+                    return relatedComment ? relatedComment.comment : null;
+                };
+
+                const getStarredForCampaign = (campaignName) => {
+                    const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+                    return relatedComment ? relatedComment.starred : false;
+                };
+
+                const relatedComment = getCommentForCampaign(campaignName);
+                const isStarred = getStarredForCampaign(campaignName);
+
                 const [tooltipText, setTooltipText] = useState("Click to Copy");
-    
+                const [isModalVisible, setIsModalVisible] = useState(false);
+                const [comment, setComment] = useState(relatedComment || '');
+                const [starred, setStarred] = useState(isStarred);
+
                 const copyToClipboard = () => {
                     navigator.clipboard.writeText(firstColumnValue)
                         .then(() => {
@@ -2329,35 +2648,156 @@ const MyTablePage = () => {
                             console.error('Failed to copy to clipboard');
                         });
                 };
-    
+
+                const handleEditClick = () => {
+                    setIsModalVisible(true);
+                };
+
+                const sendNewCommentToAPI = async (logData) => {
+                    try {
+                        const response = await axios.post('https://prodapis.adsgoat.in/Comments', {
+                            commentsdatas: logData,
+                        }, {
+                            headers: {
+                                Authorization: token,
+                            }
+                        });
+                        console.log('Response from server:', response.data);
+                    } catch (error) {
+                        console.error('Error sending data to server:', error);
+                    }
+                };
+
+                const sendEditedCommentToAPI = async (logData) => {
+                    try {
+                        const response = await axios.post('https://prodapis.adsgoat.in/Comments/edit', {
+                            campaignname: logData.campaignname,
+                            comment: logData.comment,
+                        }, {
+                            headers: {
+                                Authorization: token,
+                            }
+                        });
+                        console.log('Response from server (edited comment):', response.data);
+                        return response.data;
+                    } catch (error) {
+                        console.error('Error sending edited comment to server:', error);
+                        throw error;
+                    }
+                };
+
+                const sendStarStatusToAPI = async (campaignName, isStarred) => {
+                    try {
+                        const endpoint = isStarred ? 'https://prodapis.adsgoat.in/Star' : 'https://prodapis.adsgoat.in/Unstar';
+                        const response = await axios.post(endpoint, {
+                            campaignname: campaignName,
+                            Account: account,
+                            usercommit: userdetails?.email,
+                        }, {
+                            headers: {
+                                Authorization: token,
+                            }
+                        });
+                        console.log('Response from server (starred status):', response.data);
+                    } catch (error) {
+                        console.error('Error updating star status:', error);
+                    }
+                };
+
+                const handleStarClick = async () => {
+                    const updatedStarred = !starred;
+                    setStarred(updatedStarred);
+                    await sendStarStatusToAPI(firstColumnValue, updatedStarred);
+
+                    const updatedComments = campaignComments.map(cmt =>
+                        cmt.campaignname === firstColumnValue ? { ...cmt, starred: updatedStarred } : cmt
+                    );
+                    setCampaignComments(updatedComments);
+                    changeRRefrst();
+                };
+
+                const handleOk = async () => {
+                    const logData = {
+                        Account: account,
+                        usercommit: userdetails?.email,
+                        campaignname: firstColumnValue,
+                        comment: comment
+                    };
+
+                    if (relatedComment) {
+                        await sendEditedCommentToAPI(logData);
+                    } else {
+                        await sendNewCommentToAPI(logData);
+                    }
+
+                    const updatedComments = relatedComment
+                        ? campaignComments.map(cmt => (cmt.campaignname === firstColumnValue ? { ...cmt, comment } : cmt))
+                        : [...campaignComments, logData];
+                    setCampaignComments(updatedComments);
+
+                    changeRRefrst();
+                    setIsModalVisible(false);
+                };
+
+                const handleCancel = () => {
+                    setIsModalVisible(false);
+                };
+
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                        <StarOutlined/>
-                        <EditOutlined style={{marginLeft:'10px'}} />
+                        {relatedComment && (
+                            starred ? (
+                                <StarFilled onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: 'gold' }} />
+                            ) : (
+                                <StarOutlined onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px' }} />
+                            )
+                        )}
+                        {relatedComment ? (
+                            <Tooltip title={(
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <span>{relatedComment || 'No comment available'}</span>
+                                    <EditOutlined onClick={handleEditClick} style={{ marginLeft: '10px', color: 'blue', cursor: 'pointer' }} />
+                                </div>
+                            )}>
+                                <MessageOutlined style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
+                            </Tooltip>
+                        ) : (
+                            <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
+                        )}
                         <Tooltip title={tooltipText}>
                             <CopyOutlined
                                 onClick={copyToClipboard}
-                                style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight:'10px' }}
+                                style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight: '10px' }}
                             />
                         </Tooltip>
                         <span
                             onClick={() => {
-                                console.log(`Grouped Make clicked: ${params.value}`);
                                 const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
                                 window.open(url, '_blank');
                             }}
                         >
-                            {valueWithCount}
+                            {firstColumnValue}
                         </span>
-                        
+                        <Modal
+                            title={firstColumnValue}
+                            visible={isModalVisible}
+                            onOk={handleOk}
+                            onCancel={handleCancel}
+                        >
+                            <Input.TextArea
+                                placeholder="Enter your comments here"
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                            />
+                        </Modal>
                     </div>
                 );
             }
         }
     };
-    
-    
-    
+
+
+
 
     const autoGroupColumnDef2 = {
         headerName: 'CampaignName',
@@ -2369,12 +2809,29 @@ const MyTablePage = () => {
                 if (params.node.footer) {
                     return 'Total'; // Custom footer label
                 }
-                // const count = params.node.allChildrenCount; // Get the count of children
-                const firstColumnValue = params.node.key;  // This should give you the campaign name
+
+                const firstColumnValue = params.node.key; // This should give you the campaign name
+                const campaignName = params.node.key;
                 const valueWithCount = `${firstColumnValue}`;
-    
+
+                const getCommentForCampaign = (campaignName) => {
+                    const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+                    return relatedComment ? relatedComment.comment : null;
+                };
+
+                const getStarredForCampaign = (campaignName) => {
+                    const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+                    return relatedComment ? relatedComment.starred : false;
+                };
+
+                const relatedComment = getCommentForCampaign(campaignName);
+                const isStarred = getStarredForCampaign(campaignName);
+
                 const [tooltipText, setTooltipText] = useState("Click to Copy");
-    
+                const [isModalVisible, setIsModalVisible] = useState(false);
+                const [comment, setComment] = useState(relatedComment || '');
+                const [starred, setStarred] = useState(isStarred);
+
                 const copyToClipboard = () => {
                     navigator.clipboard.writeText(firstColumnValue)
                         .then(() => {
@@ -2386,32 +2843,317 @@ const MyTablePage = () => {
                         });
                 };
 
+                const handleEditClick = () => {
+                    setIsModalVisible(true);
+                };
+
+                const sendNewCommentToAPI = async (logData) => {
+                    try {
+                        const response = await axios.post('https://prodapis.adsgoat.in/Comments', {
+                            commentsdatas: logData,
+                        }, {
+                            headers: {
+                                Authorization: token,
+                            }
+                        });
+                        console.log('Response from server:', response.data);
+                    } catch (error) {
+                        console.error('Error sending data to server:', error);
+                    }
+                };
+
+                const sendEditedCommentToAPI = async (logData) => {
+                    try {
+                        const response = await axios.post('https://prodapis.adsgoat.in/Comments/edit', {
+                            campaignname: logData.campaignname,
+                            comment: logData.comment,
+                        }, {
+                            headers: {
+                                Authorization: token,
+                            }
+                        });
+                        console.log('Response from server (edited comment):', response.data);
+                        return response.data;
+                    } catch (error) {
+                        console.error('Error sending edited comment to server:', error);
+                        throw error;
+                    }
+                };
+
+                const sendStarStatusToAPI = async (campaignName, isStarred) => {
+                    try {
+                        const endpoint = isStarred ? 'https://prodapis.adsgoat.in/Star' : 'https://prodapis.adsgoat.in/Unstar';
+                        const response = await axios.post(endpoint, {
+                            campaignname: campaignName,
+                            Account: account,
+                            usercommit: userdetails?.email,
+                        }, {
+                            headers: {
+                                Authorization: token,
+                            }
+                        });
+                        console.log('Response from server (starred status):', response.data);
+                    } catch (error) {
+                        console.error('Error updating star status:', error);
+                    }
+                };
+
+                const handleStarClick = async () => {
+                    const updatedStarred = !starred;
+                    setStarred(updatedStarred);
+                    await sendStarStatusToAPI(firstColumnValue, updatedStarred);
+
+                    const updatedComments = campaignComments.map(cmt =>
+                        cmt.campaignname === firstColumnValue ? { ...cmt, starred: updatedStarred } : cmt
+                    );
+                    setCampaignComments(updatedComments);
+                    changeRRefrst();
+                };
+
+                const handleOk = async () => {
+                    const logData = {
+                        Account: account,
+                        usercommit: userdetails?.email,
+                        campaignname: firstColumnValue,
+                        comment: comment
+                    };
+
+                    if (relatedComment) {
+                        await sendEditedCommentToAPI(logData);
+                    } else {
+                        await sendNewCommentToAPI(logData);
+                    }
+
+                    const updatedComments = relatedComment
+                        ? campaignComments.map(cmt => (cmt.campaignname === firstColumnValue ? { ...cmt, comment } : cmt))
+                        : [...campaignComments, logData];
+                    setCampaignComments(updatedComments);
+
+                    changeRRefrst();
+                    setIsModalVisible(false);
+                };
+
+                const handleCancel = () => {
+                    setIsModalVisible(false);
+                };
+
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                        <StarOutlined/>
-                        <EditOutlined style={{marginLeft:'10px'}} />
+                        {relatedComment && (
+                            starred ? (
+                                <StarFilled onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: 'gold' }} />
+                            ) : (
+                                <StarOutlined onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px' }} />
+                            )
+                        )}
+                        {relatedComment ? (
+                            <Tooltip title={(
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <span>{relatedComment || 'No comment available'}</span>
+                                    <EditOutlined onClick={handleEditClick} style={{ marginLeft: '10px', color: 'blue', cursor: 'pointer' }} />
+                                </div>
+                            )}>
+                                <MessageOutlined style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
+                            </Tooltip>
+                        ) : (
+                            <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
+                        )}
                         <Tooltip title={tooltipText}>
                             <CopyOutlined
                                 onClick={copyToClipboard}
-                                style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight:'10px' }}
+                                style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight: '10px' }}
                             />
                         </Tooltip>
                         <span
                             onClick={() => {
-                                console.log(`Grouped Make clicked: ${params.value}`);
                                 const url = `/AllCampaigns/CampaignHistory/${params.value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
                                 window.open(url, '_blank');
                             }}
                         >
-                            {valueWithCount}
+                            {firstColumnValue}
                         </span>
-                        
+                        <Modal
+                            title={firstColumnValue}
+                            visible={isModalVisible}
+                            onOk={handleOk}
+                            onCancel={handleCancel}
+                        >
+                            <Input.TextArea
+                                placeholder="Enter your comments here"
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                            />
+                        </Modal>
                     </div>
-                    
                 );
             }
         }
     };
+
+
+    // const autoGroupColumnDefLive = {
+    //     headerName: 'CampaignName',
+    //     minWidth: 450,
+    //     pinned: 'left',
+
+    //     cellRendererParams: {
+    //         suppressCount: false, // Allow count to be shown
+    //         innerRenderer: (params) => {
+    //             if (params.node.footer) {
+    //                 return 'Total'; // Custom footer label
+    //             }
+    //             // const count = params.node.allChildrenCount; // Get the count of children
+    //             const firstColumnValue = params.node.key;  // This should give you the campaign name
+    //             const valueWithCount = `${firstColumnValue}`;
+
+    //             const [tooltipText, setTooltipText] = useState("Click to Copy");
+
+    //             const copyToClipboard = () => {
+    //                 navigator.clipboard.writeText(firstColumnValue)
+    //                     .then(() => {
+    //                         setTooltipText("Copied!");
+    //                         setTimeout(() => setTooltipText("Click to Copy"), 2000);
+    //                     })
+    //                     .catch(() => {
+    //                         console.error('Failed to copy to clipboard');
+    //                     });
+    //             };
+
+    //             return (
+    //                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+    //                     <StarOutlined/>
+    //                     <EditOutlined style={{marginLeft:'10px'}}/>
+    //                     <Tooltip title={tooltipText}>
+    //                         <CopyOutlined
+    //                             onClick={copyToClipboard}
+    //                             style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight:'10px' }}
+    //                         />
+    //                     </Tooltip>
+    //                     <span
+    //                         onClick={() => {
+    //                             console.log(`Grouped Make clicked: ${params.value}`);
+    //                             const url = `/LiveHistory/LiveCampaignHistory/${params.value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
+    //                             window.open(url, '_blank');
+    //                         }}
+    //                     >
+    //                         {valueWithCount}
+    //                     </span>
+    //                 </div>
+    //             );
+    //         }
+    //     }
+    // };
+
+
+
+    // const autoGroupColumnDef = {
+    //     headerName: 'CampaignName',
+    //     minWidth: 450,
+    //     pinned: 'left',
+    //     cellRendererParams: {
+    //         suppressCount: false, // Allow count to be shown
+    //         innerRenderer: (params) => {
+    //             if (params.node.footer) {
+    //                 return 'Total'; // Custom footer label
+    //             }
+
+    //             // Get the group key or value (campaign name in this case)
+    //             const firstColumnValue = params.node.key;  // This should give you the campaign name
+    //             const valueWithCount = `${firstColumnValue}`;
+
+    //             const [tooltipText, setTooltipText] = useState("Click to Copy");
+
+    //             const copyToClipboard = () => {
+    //                 navigator.clipboard.writeText(firstColumnValue)
+    //                     .then(() => {
+    //                         setTooltipText("Copied!");
+    //                         setTimeout(() => setTooltipText("Click to Copy"), 2000);
+    //                     })
+    //                     .catch(() => {
+    //                         console.error('Failed to copy to clipboard');
+    //                     });
+    //             };
+
+    //             return (
+    //                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+    //                     <StarOutlined/>
+    //                     <EditOutlined style={{marginLeft:'10px'}} />
+    //                     <Tooltip title={tooltipText}>
+    //                         <CopyOutlined
+    //                             onClick={copyToClipboard}
+    //                             style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight:'10px' }}
+    //                         />
+    //                     </Tooltip>
+    //                     <span
+    //                         onClick={() => {
+    //                             console.log(`Grouped Make clicked: ${params.value}`);
+    //                             const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
+    //                             window.open(url, '_blank');
+    //                         }}
+    //                     >
+    //                         {valueWithCount}
+    //                     </span>
+
+    //                 </div>
+    //             );
+    //         }
+    //     }
+    // };
+
+
+    // const autoGroupColumnDef2 = {
+    //     headerName: 'CampaignName',
+    //     minWidth: 450,
+    //     pinned: 'left',
+    //     cellRendererParams: {
+    //         suppressCount: false, // Allow count to be shown
+    //         innerRenderer: (params) => {
+    //             if (params.node.footer) {
+    //                 return 'Total'; // Custom footer label
+    //             }
+    //             // const count = params.node.allChildrenCount; // Get the count of children
+    //             const firstColumnValue = params.node.key;  // This should give you the campaign name
+    //             const valueWithCount = `${firstColumnValue}`;
+
+    //             const [tooltipText, setTooltipText] = useState("Click to Copy");
+
+    //             const copyToClipboard = () => {
+    //                 navigator.clipboard.writeText(firstColumnValue)
+    //                     .then(() => {
+    //                         setTooltipText("Copied!");
+    //                         setTimeout(() => setTooltipText("Click to Copy"), 2000);
+    //                     })
+    //                     .catch(() => {
+    //                         console.error('Failed to copy to clipboard');
+    //                     });
+    //             };
+
+    //             return (
+    //                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+    //                     <StarOutlined/>
+    //                     <EditOutlined style={{marginLeft:'10px'}} />
+    //                     <Tooltip title={tooltipText}>
+    //                         <CopyOutlined
+    //                             onClick={copyToClipboard}
+    //                             style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight:'10px' }}
+    //                         />
+    //                     </Tooltip>
+    //                     <span
+    //                         onClick={() => {
+    //                             console.log(`Grouped Make clicked: ${params.value}`);
+    //                             const url = `/AllCampaigns/CampaignHistory/${params.value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
+    //                             window.open(url, '_blank');
+    //                         }}
+    //                     >
+    //                         {valueWithCount}
+    //                     </span>
+
+    //                 </div>
+
+    //             );
+    //         }
+    //     }
+    // };
 
     const GroupRowRenderer = (props) => {
         const { node } = props;
@@ -2431,7 +3173,7 @@ const MyTablePage = () => {
         const newFieldOrder = fieldOrder.filter(item => item !== 'ag-Grid-AutoColumn-campaignname' && item !== 'ag-Grid-AutoColumn' && columnStructure.includes(item));
         localStorage.setItem('columnState', JSON.stringify(newFieldOrder));
         updatingColumnsStructure(newFieldOrder);
-        console.log(`Updating columns structure for grid: ${gridId}`); 
+        console.log(`Updating columns structure for grid: ${gridId}`);
     };
 
     const debouncedHandleColumnMove = useCallback(debounce((params, gridId) => handleColumnMove(params, gridId), 600), []);
@@ -2462,7 +3204,7 @@ const MyTablePage = () => {
     console.log(columnDefs2);
 
 
-    
+
     const defaultDates = [dayjs(yesterday), dayjs(yesterday)];
 
     // const onFilterChanged = (params) => {
@@ -2643,15 +3385,15 @@ const MyTablePage = () => {
             value: [dayjs().add(-90, 'd'), dayjs()],
         },
         {
-          label: 'This Month',
-          value: [dayjs().startOf('month'), dayjs()],
+            label: 'This Month',
+            value: [dayjs().startOf('month'), dayjs()],
         },
         {
-          label: 'Last Month',
-          value: [
-            dayjs().subtract(1, 'month').startOf('month'),
-            dayjs().subtract(1, 'month').endOf('month'),
-          ],
+            label: 'Last Month',
+            value: [
+                dayjs().subtract(1, 'month').startOf('month'),
+                dayjs().subtract(1, 'month').endOf('month'),
+            ],
         },
     ];
 
@@ -2664,7 +3406,7 @@ const MyTablePage = () => {
     // console.log(campaignData, "campaignData");
 
     const refreshGrid = (gridRef) => {
-        
+
         setLoading(true);
         if (gridRef.current) {
             const gridApi = gridRef.current.api;
@@ -2716,7 +3458,7 @@ const MyTablePage = () => {
             setCampaignData([]); // Temporarily clear the data
             setTimeout(() => setCampaignData(newCampaignData.current), 0); // Reset the data
             setTimeout(() => setLoading2(false), 1500);
-            
+
             // Force refresh the grid cells and redraw the rows
             gridApi.refreshCells({ force: true });
             gridApi.redrawRows();
@@ -2731,12 +3473,12 @@ const MyTablePage = () => {
         refreshGrid2(gridRef2); // Refresh gridRef2
     };
 
-    
-    
+
+
 
     const GroupCellRenderer = (props) => {
         const [tooltipText, setTooltipText] = useState("Copy to clipboard");
-    
+
         const copyToClipboard = () => {
             navigator.clipboard.writeText(props.node.key).then(() => {
                 setTooltipText("Copied!");
@@ -2744,11 +3486,11 @@ const MyTablePage = () => {
             }).catch(() => {
                 alert('Failed to copy!');
             });
-    };
+        };
 
-    
 
-    
+
+
         return (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                 <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flexGrow: 1 }}>
@@ -2773,9 +3515,9 @@ const MyTablePage = () => {
     console.log(time);
 
     const createOption = (account) => {
-        
+
         if (typeof account === 'string') {
-            return{
+            return {
                 value: account,
                 label: account,
             }
@@ -2783,16 +3525,16 @@ const MyTablePage = () => {
             return {
                 value: account.accountNumber,
                 label: (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span>{account.accountNumber}</span>
-                    <span>{account.status === "Active" ? <CheckCircleFilled style={{ color: 'green', fontSize: '15px' }} /> : <CloseCircleFilled style={{ color: 'red', fontSize: '15px' }} />}</span>
-                  </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span>{account.accountNumber}</span>
+                        <span>{account.status === "Active" ? <CheckCircleFilled style={{ color: 'green', fontSize: '15px' }} /> : <CloseCircleFilled style={{ color: 'red', fontSize: '15px' }} />}</span>
+                    </div>
                 ),
                 text: account.accountNumber, // Adding a text property for sorting and filtering
             };
         }
-          
-        
+
+
     };
 
     const pinnedBottomRowData1 = [
@@ -2815,7 +3557,7 @@ const MyTablePage = () => {
             ctr: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
         }
     ];
-    
+
     const pinnedBottomRowData2 = [
         {
             campaignName: 'Total',
@@ -2862,7 +3604,7 @@ const MyTablePage = () => {
 
     // console.log(fixedFooter, "fixed");
 
-    
+
 
     return (
         <div className='reports-container'>
@@ -2876,7 +3618,7 @@ const MyTablePage = () => {
                             onChange={onChangeSelectRevenue}
                             style={{ width: '100%' }}
                             placeholder="Select Network"
-                            
+
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
                             optionFilterProp="label"
                             defaultValue={networks[0]}
@@ -2897,9 +3639,9 @@ const MyTablePage = () => {
                             optionFilterProp="value" // Make sure the option has a 'label' property
                             defaultValue={typeof networksData[0] === 'string' ? networksData[0] : networksData[0].accountNumber}
                             options={accountsAccess.map((item) => createOption(item))}
-                            // filterOption={(input, option) =>
-                            //     option?.text.toLowerCase().includes(input.toLowerCase())  // Custom filter logic for case-insensitive search
-                            // }
+                        // filterOption={(input, option) =>
+                        //     option?.text.toLowerCase().includes(input.toLowerCase())  // Custom filter logic for case-insensitive search
+                        // }
                         />
                     </Col>
 
@@ -2915,7 +3657,7 @@ const MyTablePage = () => {
                                     width: '100%',
                                     backgroundColor: theme === 'dark' ? '#333' : undefined,
                                     color: theme === 'dark' ? 'white' : undefined,
-                                  }}
+                                }}
                                 dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}
                             />
                         </ConfigProvider>
@@ -2933,20 +3675,20 @@ const MyTablePage = () => {
                             options={timezones.map((item) => ({
                                 value: item,
                                 label: item,
-                        }))}
+                            }))}
                         />
                     </Col>
 
                     <Col xs={24} sm={12} md={2}>
-                        <Button className='submit-button' type='primary' style={{backgroundColor:'#C7F39A', border:'solid 0px', color:'black', fontWeight:'600'}} onClick={onClickButton} block>
+                        <Button className='submit-button' type='primary' style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black', fontWeight: '600' }} onClick={onClickButton} block>
                             Submit
                         </Button>
                     </Col>
                 </Row>
             </Space>
             <div >
-                <Row style={{ padding: '10px',paddingRight: '30px', display:'flex', justifyContent: 'flex-end', alignItems:'center'}}>
-                    <Col style={{marginRight:'15px'}}>
+                <Row style={{ padding: '10px', paddingRight: '30px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                    <Col style={{ marginRight: '15px' }}>
                         {/* {isSearching ? (
                             <Row gutter={8}>
                                 <Col>
@@ -2972,34 +3714,34 @@ const MyTablePage = () => {
                             />
                         )} */}
                         <Row gutter={8}>
-                                <Col>
-                                    <Input
-                                        placeholder="Search here"
-                                        // autoFocus
-                                        value={inputValue}
-                                        onChange={handleChangeInput}
-                                        onBlur={handleBlur}
-                                        style={{ width: '100%', borderRadius: '5px' }}
-                                    />
-                                </Col>
-                                <Col>
-                                    <Button style={{backgroundColor:'#C7F39A', border:'solid 0px', color:'black'}} icon={<SearchOutlined />} />
-                                </Col>
-                                
+                            <Col>
+                                <Input
+                                    placeholder="Search here"
+                                    // autoFocus
+                                    value={inputValue}
+                                    onChange={handleChangeInput}
+                                    onBlur={handleBlur}
+                                    style={{ width: '100%', borderRadius: '5px' }}
+                                />
+                            </Col>
+                            <Col>
+                                <Button style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<SearchOutlined />} />
+                            </Col>
+
                         </Row>
                     </Col>
                     <Col>
                         <Tooltip title="Click to Refresh Tables">
-                            <Button type="primary" style={{backgroundColor:'#C7F39A', border:'solid 0px', color:'black'}} icon={<ReloadOutlined />}  onClick={onClickRefresh}/>
+                            <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<ReloadOutlined />} onClick={onClickRefresh} />
                         </Tooltip>
                     </Col>
                 </Row>
 
                 <Carousel afterChange={onChange1} ref={carouselRef}>
-                    <div style={{ height: "100%", marginBottom:'20px' }}>
+                    <div style={{ height: "100%", marginBottom: '20px' }}>
                         <div style={contentStyle}>
                             {isLoading === true ? (
-                                <div className="loader-container ag-container" style={{backgroundColor: theme === "dark" ? "#333" : "white"}}>
+                                <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>
                                     <div className="ag-grid-Loader">
                                         <Audio
                                             height="80"
@@ -3013,9 +3755,9 @@ const MyTablePage = () => {
                                     </div>
                                 </div>
                             ) : rowData?.filter((each) => each.campaignname.includes(inputValue))?.length > 0 ? (
-                               
-                                    <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
-                                    
+
+                                <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
+
                                     <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap' }}>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
                                             <Space align="center">
@@ -3042,7 +3784,7 @@ const MyTablePage = () => {
                                         </Col>
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                             <Tooltip title="Export to CSV">
-                                                <Button type="primary" style={{backgroundColor:'#C7F39A', border:'solid 0px', color:'black'}} icon={<DownloadOutlined />} onClick={onBtExport1} />
+                                                <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={onBtExport1} />
                                             </Tooltip>
                                         </Col>
                                     </Row>
@@ -3077,7 +3819,7 @@ const MyTablePage = () => {
                                                     color: theme === "dark" ? '#fff' : '#000',           // Text color should contrast with the background
                                                 };
                                             }
-                                            
+
                                             return null;
                                         }}
                                         // const onFirstDataRendered = {(params) => {
@@ -3093,20 +3835,20 @@ const MyTablePage = () => {
                                         //         }
                                         //     });
                                         // }}
-                                        
-                                       
+
+
                                         getMainMenuItems={getMainMenuItems}
                                     />
 
                                 </div>
                             ) : <div>
                                 {startDate !== endDate ? <Result
-                                    icon={<SmileOutlined  />}
+                                    icon={<SmileOutlined />}
                                     title={`No LiveData for ${account} from ${startDate} to ${endDate}`}
-                                    // extra={<Button type="primary">Next</Button>}
-                                />: <Result
-                                icon={<SmileOutlined  />}
-                                title={`No LiveData for ${account} to ${startDate}`}
+                                // extra={<Button type="primary">Next</Button>}
+                                /> : <Result
+                                    icon={<SmileOutlined />}
+                                    title={`No LiveData for ${account} to ${startDate}`}
                                 // extra={<Button type="primary">Next</Button>}
                                 />}
                             </div>}
@@ -3115,7 +3857,7 @@ const MyTablePage = () => {
                     <div>
                         <div style={contentStyle}>
                             {isLoading1 === true ? (
-                                <div className="loader-container ag-container" style={{backgroundColor: theme === "dark" ? "#333" : "white"}}>
+                                <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>
                                     <div className="ag-grid-Loader">
                                         <Audio
                                             height="80"
@@ -3152,9 +3894,9 @@ const MyTablePage = () => {
                                             </Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
-                                        <Tooltip title="Export to CSV">
-                                            <Button type="primary" style={{backgroundColor:'#C7F39A', border:'solid 0px', color:'black'}} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef1)} />
-                                        </Tooltip>
+                                            <Tooltip title="Export to CSV">
+                                                <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef1)} />
+                                            </Tooltip>
                                         </Col>
                                     </Row>
                                     <AgGridReact
@@ -3184,28 +3926,28 @@ const MyTablePage = () => {
                                                     color: theme === "dark" ? '#fff' : '#000',           // Text color should contrast with the background
                                                 };
                                             }
-                                            
+
                                             return null;
                                         }}
                                     />
                                 </div>
                             ) : <div>
-                                    {startDate !== endDate ? <Result
-                                    icon={<SmileOutlined  />}
+                                {startDate !== endDate ? <Result
+                                    icon={<SmileOutlined />}
                                     title={`No DailyData for ${account} from ${startDate} to ${endDate}`}
-                                    // extra={<Button type="primary">Next</Button>}
-                                    />: <Result
-                                    icon={<SmileOutlined  />}
+                                // extra={<Button type="primary">Next</Button>}
+                                /> : <Result
+                                    icon={<SmileOutlined />}
                                     title={`No DailyData for ${account} to ${startDate}`}
-                                    // extra={<Button type="primary">Next</Button>}
-                                    />}
-                                </div>}
+                                // extra={<Button type="primary">Next</Button>}
+                                />}
+                            </div>}
                         </div>
                     </div>
                     <div>
                         <div style={contentStyle}>
                             {isLoading2 === true ? (
-                                <div className="loader-container ag-container" style={{backgroundColor: theme === "dark" ? "#333" : "white"}}>
+                                <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>
                                     <div className="ag-grid-Loader">
                                         <Audio
                                             height="80"
@@ -3222,9 +3964,9 @@ const MyTablePage = () => {
                                 <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
                                     <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap' }}>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
-                                            <Space align="center" className='daily-contaier' style={{width:'150px'}}>
+                                            <Space align="center" className='daily-contaier' style={{ width: '150px' }}>
                                                 <div class="blinking-circle-3"></div>
-                                                <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600', width:'100px' }}>Campaigns</Text>
+                                                <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600', width: '100px' }}>Campaigns</Text>
                                             </Space>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
@@ -3243,13 +3985,13 @@ const MyTablePage = () => {
                                         </Col>
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                             <Tooltip title="Export to CSV">
-                                                <Button type="primary" style={{backgroundColor:'#C7F39A', border:'solid 0px', color:'black'}} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef2)} />
+                                                <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef2)} />
                                             </Tooltip>
                                         </Col>
                                     </Row>
-                                    
 
-                                    <div style={{height: '90%'}}>
+
+                                    <div style={{ height: '90%' }}>
                                         <AgGridReact
                                             key={gridKey}
                                             ref={gridRef2}
@@ -3281,7 +4023,7 @@ const MyTablePage = () => {
                                                         color: theme === "dark" ? '#fff' : '#000',           // Text color should contrast with the background
                                                     };
                                                 }
-                                                
+
                                                 return null;
                                             }}
                                         // onFirstDataRendered = {(params) => {
@@ -3302,17 +4044,17 @@ const MyTablePage = () => {
                                     </div>
                                 </div>
                             ) : <div>
-                            <div>
-                                {startDate !== endDate ? <Result
-                                    icon={<SmileOutlined  />}
-                                    title={`No CampaignData for ${account} from ${startDate} to ${endDate}`}
+                                <div>
+                                    {startDate !== endDate ? <Result
+                                        icon={<SmileOutlined />}
+                                        title={`No CampaignData for ${account} from ${startDate} to ${endDate}`}
                                     // extra={<Button type="primary">Next</Button>}
-                                />: <Result
-                                icon={<SmileOutlined  />}
-                                title={`No CampaignData for ${account} to ${startDate}`}
-                                // extra={<Button type="primary">Next</Button>}
-                                />}
-                            </div>
+                                    /> : <Result
+                                        icon={<SmileOutlined />}
+                                        title={`No CampaignData for ${account} to ${startDate}`}
+                                    // extra={<Button type="primary">Next</Button>}
+                                    />}
+                                </div>
                             </div>}
 
                         </div>
@@ -3350,16 +4092,16 @@ const MyTablePage = () => {
                 </FloatButton.Group>
             </Draggable>
 
-            <Modal 
-                title="Basic Modal" 
-                open={isModalOpen} 
-                onOk={handleOk} 
+            <Modal
+                title="Basic Modal"
+                open={isModalOpen}
+                onOk={handleOk}
                 onCancel={handleCancel}
                 okText="Add"
                 cancelText="Cancel"
             >
-                <Input value={newColumnName} placeholder='Enter Column Name' style={{marginBottom:'10px'}} onChange={(e) => setNewColumnName(e.target.value)}/>
-                <Input value={formula} placeholder='Enter Formula' style={{marginBottom:'10px'}} onChange={(e) => setFormula(e.target.value)} />
+                <Input value={newColumnName} placeholder='Enter Column Name' style={{ marginBottom: '10px' }} onChange={(e) => setNewColumnName(e.target.value)} />
+                <Input value={formula} placeholder='Enter Formula' style={{ marginBottom: '10px' }} onChange={(e) => setFormula(e.target.value)} />
             </Modal>
 
         </div>
