@@ -6,6 +6,7 @@ import { HighlightOutlined, LeftOutlined, RightOutlined, SearchOutlined, SwapRig
 import { Carousel } from 'react-responsive-carousel';
 import { MailOutlined, SettingOutlined } from '@ant-design/icons';
 // import { , Select } from 'antd';
+import { useTokenContext } from '../components/parent';
 
 const { SubMenu } = Menu;
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
@@ -50,6 +51,7 @@ const UsersTable = () => {
 
     const carouselRef = useRef(null);
     const [currentSlide, setCurrentSlide] = useState(0);
+    const { theme } = useTokenContext();
 
     const handleDotClick = (index) => {
         if (carouselRef.current) {
@@ -423,6 +425,7 @@ const UsersTable = () => {
                             defaultValue={'Network wise accounts'}
                             style={{ width: '200px' }}
                             onChange={handleSelectChange}
+                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
                             dropdownRender={(menu) => (
                                 <Menu
                                 onClick={() => {}}
@@ -452,7 +455,8 @@ const UsersTable = () => {
                     ))
                 }else{
                     return(
-                        <Select style={{ width: '200px' }} defaultValue={'No accounts available'}>
+                        <Select style={{ width: '200px' }} defaultValue={'No accounts available'} 
+                        dropdownClassName={theme === 'dark' && "custom-dropdown"}>
                             <Select.Option key="empty" value="">
                                 No accounts available
                             </Select.Option>
@@ -598,7 +602,7 @@ const UsersTable = () => {
                 showThumbs={false}
             >
                 <div style={{width:'100%'}}>
-                    <Card title="Users Access" size="small">
+                    <Card title="Users Access" size="small" className={theme === 'dark' ? 'dark-theme' : 'light-theme'}>
                         <Row align={"bottom"} gutter={[16, 16]}>
                             <Col xs={24} md={16}>
                                 <Row gutter={[16, 16]}>
@@ -631,6 +635,7 @@ const UsersTable = () => {
                                             onChange={onChangeRole}
                                             defaultValue="All"
                                             style={{ width: "100%", marginTop: '8px' }}
+                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                             options={roles.map((item) => ({
                                                 value: item,
                                                 label: item,
@@ -642,6 +647,7 @@ const UsersTable = () => {
                                         <Select
                                             defaultValue="All"
                                             style={{ width: "100%", marginTop: '8px' }}
+                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                             options={[
                                                 { value: "jack", label: "Jack" },
                                                 { value: "All", label: "All" },
@@ -682,7 +688,7 @@ const UsersTable = () => {
                     )}
                 </div>
                 <div>
-                    <Card title="All accounts" size="small">
+                    <Card title="All accounts" size="small" className={theme === 'dark' ? 'dark-theme' : 'light-theme'}>
                         <Row align={"bottom"} gutter={[16, 16]}>
                             <Col xs={24} md={16}>
                                 <Row gutter={[16, 16]}>
@@ -707,6 +713,7 @@ const UsersTable = () => {
                                             onChange={onChangeNetwork}
                                             defaultValue="All"
                                             style={{ width: "100%", marginTop: '8px' }}
+                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                             options={availableNetworks.map((item) => ({
                                                 value: item,
                                                 label: item,
@@ -719,6 +726,7 @@ const UsersTable = () => {
                                             onChange={onChangeStatus}
                                             defaultValue="All"
                                             style={{ width: "100%", marginTop: '8px' }}
+                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                             options={accountStatus.map((item) => ({
                                                 value: item,
                                                 label: item,

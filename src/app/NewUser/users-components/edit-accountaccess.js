@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { Form, Input, Button, Drawer, Modal, message, Select } from "antd";
 import axios from "axios";
+import { useTokenContext } from '../../components/parent';
 
 const { Option } = Select;
 import { CloseOutlined } from "@ant-design/icons";
@@ -75,6 +76,7 @@ const availableNetworks = [
 const EditAccountAccess = ({ editeddata, visible, onClose }) => {
   const [form] = Form.useForm();
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const { theme } = useTokenContext();
   const token = localStorage.getItem("token");
   console.log(editeddata, "edit");
 
@@ -134,7 +136,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
   return (
     <>
       <Drawer
-        title="New Add Account"
+        title="Edit Account"
         open={visible}
         onClose={onClose}
         width="60%"
@@ -155,7 +157,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
             rules={[{ required: true, message: "Please select a Spend Partner!" }]}
             disabled  style={{backgroundColor:'transparent', color: 'black'}}
           >
-            <Select placeholder="Select a partner" disabled  style={{backgroundColor:'white', color: 'black'}}>
+            <Select placeholder="Select a partner" disabled  style={{backgroundColor:'white', color: 'black'}} dropdownClassName={theme === 'dark' && "custom-dropdown"}>
               <Option value="Facebook">Facebook</Option>
               <Option value="Google">Google</Option>
             </Select>
@@ -166,19 +168,19 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
             name="accountNumber"
             rules={[{ required: true, message: "Please input the Spend Account ID!" }]}
           >
-            <Input   disabled  style={{backgroundColor:'transparent', color: 'black'}}/>
+            <Input   disabled  style={{backgroundColor:'transparent', color: theme === "dark" ? 'white' : "black"}}/>
           </Form.Item>
 
           <Form.Item label="Pixel ID" name="pixelID">
-            <Input />
+            <Input style={{backgroundColor:'transparent', color: theme === "dark" ? 'white' : "black"}}/>
           </Form.Item>
 
           <Form.Item label="Page ID" name="pageID">
-            <Input />
+            <Input style={{backgroundColor:'transparent', color: theme === "dark" ? 'white' : "black"}}/>
           </Form.Item>
 
           <Form.Item label="Page Name" name="pageName">
-            <Input />
+            <Input style={{backgroundColor:'transparent', color: theme === "dark" ? 'white' : "black"}}/>
           </Form.Item>
 
           <Form.Item
@@ -186,7 +188,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
             name="BMName"
             rules={[{ required: true, message: "Please select a BM Name!" }]}
           >
-            <Select placeholder="Select BM Name"   disabled  style={{backgroundColor:'transparent', color: 'black'}}>
+            <Select placeholder="Select BM Name"   disabled  style={{backgroundColor:'transparent', color: theme === "dark" ? 'white' : "black"}} dropdownClassName={theme === 'dark' && "custom-dropdown"}>
               <Option value="Winkleads Search">Winkleads Search</Option>
               <Option value="MODO LEO BM X1">MODO LEO BM X1</Option>
             </Select>
@@ -201,6 +203,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
               showSearch
               disabled  style={{backgroundColor:'transparent', color: 'black'}}
               placeholder="Select Timezone"
+              dropdownClassName={theme === 'dark' && "custom-dropdown"}
               options={timezones.map((item) => ({
                 value: item,
                 label: item,
@@ -213,7 +216,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
             name="status"
             rules={[{ required: true, message: "Please select a Status!" }]}
           >
-            <Select placeholder="Select a status">
+            <Select placeholder="Select a status" dropdownClassName={theme === 'dark' && "custom-dropdown"}>
               <Option value="Active">Active</Option>
               <Option value="InActive">InActive</Option>
             </Select>
@@ -228,6 +231,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
               showSearch
               style={{ width: "100%" }}
               placeholder="Select Revenue Partner"
+              dropdownClassName={theme === 'dark' && "custom-dropdown"}
               options={availableNetworks.map((item) => ({
                 value: item,
                 label: item,

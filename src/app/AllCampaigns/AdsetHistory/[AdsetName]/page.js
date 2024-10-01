@@ -15,7 +15,8 @@ Chart.register(...registerables);
 
 export default function AdsetNameAndAccount({params}){
     
-    const {userdetails} = useTokenContext();
+    const {userdetails} = useTokenContext();const { theme } = useTokenContext();
+    const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
 
     console.log(userdetails, "userDetails");
 
@@ -633,7 +634,8 @@ export default function AdsetNameAndAccount({params}){
                     </div>
                 </div>
             ) : dailyData?.length > 0 ? (
-                <div className="ag-theme-alpine ag-container" >
+                // <div className="ag-theme-alpine ag-container" >
+                <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
                     <AgGridReact
                         rowData={dailyData}
                         columnDefs={columnDefs}
@@ -649,13 +651,15 @@ export default function AdsetNameAndAccount({params}){
                         groupSuppressBlankHeader ={true}
                         pinnedBottomRowData={pinnedBottomRowData}
                         getRowStyle={params => {
-                                if (params.node.rowPinned) {
-                                    return {
-                                        fontWeight: 'bold',
-                                        backgroundColor: '#f4f4f4' // Highlight the footer row
-                                    };
-                                }
-                                return null;
+                            if (params.node.rowPinned) {
+                                return {
+                                    fontWeight: 'bold',
+                                    backgroundColor: theme === "dark" ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
+                                    color: theme === "dark" ? '#fff' : '#000',           // Text color should contrast with the background
+                                };
+                            }
+                            
+                            return null;
                         }}
                         // groupIncludeTotalFooter ={true}
                         // rowGroupPanelShow='always'

@@ -11,6 +11,7 @@ import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { useTokenContext } from '../../../components/parent'
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
+import { color } from 'chart.js/helpers';
 Chart.register(...registerables);
 
 const MnetLiveCampaignHistory = ({ params }) => {
@@ -20,6 +21,9 @@ const MnetLiveCampaignHistory = ({ params }) => {
     // console.log(userdetails, "userDetails");
 
     const user = userdetails?.email;
+
+    const { theme } = useTokenContext();
+    const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
 
     // console.log(user, "user Email");
 
@@ -990,7 +994,8 @@ const MnetLiveCampaignHistory = ({ params }) => {
                         </div>
                     </div>
                 ) : rowData?.length > 0 ? (
-                    <div className="ag-theme-alpine ag-container">
+                    // <div className="ag-theme-alpine ag-container">
+                         <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
                         <AgGridReact
                             rowData={rowData}
                             columnDefs={columnDefs}
@@ -1000,9 +1005,11 @@ const MnetLiveCampaignHistory = ({ params }) => {
                                 if (params.node.rowPinned) {
                                     return {
                                         fontWeight: 'bold',
-                                        backgroundColor: '#f4f4f4' // Highlight the footer row
+                                        backgroundColor: theme === "dark" ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
+                                        color: theme === "dark" ? '#fff' : '#000',           // Text color should contrast with the background
                                     };
                                 }
+                                
                                 return null;
                             }}
                             pagination={true}

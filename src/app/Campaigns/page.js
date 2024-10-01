@@ -42,6 +42,10 @@ const App = () => {
     const [selectedValue, setSelectedValue] = useState(null);
     const [valueOptions, setValueOptions] = useState([]);
     const [error, setError] = useState(null);
+    const [darkMode, setDarkMode] = useState(false);
+    const { theme } = useTokenContext();
+    const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
+
     if (userdetails === null) {
         redirect("/Dashboard");
         // console.log("hi");

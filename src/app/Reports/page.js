@@ -10,7 +10,7 @@ import axios from 'axios';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
 // import { Select } from 'antd';
-import { Carousel, Input, Button, Pagination, Row, Col, Typography, Result, Modal, message, ConfigProvider } from 'antd';
+import { Carousel, Input, Button, Pagination, Row, Col, Typography, Result, Modal, message, ConfigProvider, theme } from 'antd';
 
 // import 'antd/dist/reset.css';
 import { CommentOutlined, CustomerServiceOutlined, MenuOutlined, InfoCircleOutlined, DownloadOutlined, SearchOutlined, ArrowLeftOutlined, ArrowRightOutlined, SmileOutlined, ReloadOutlined, CopyOutlined, StarOutlined, StarFilled, EditOutlined, CheckCircleFilled, CloseCircleFilled, MessageOutlined } from '@ant-design/icons';
@@ -102,22 +102,24 @@ const MyTablePage = () => {
     const { userdetails } = useTokenContext();
     // const router = useRouter();
 
+    const { theme } = useTokenContext();
+    const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
     if (userdetails === null) {
         redirect("/Dashboard");
         // console.log("hi");
     }
-    // console.log(userdetails, "userDetails");
-
+    console.log(userdetails, "userDetails");
+    const [darkMode, setDarkMode] = useState(false);
     // console.log(userdetails._id, "id");
 
     const { adAccounts } = userdetails;
 
-    // console.log(adAccounts, "addAccounts");
+    console.log(adAccounts, "addAccounts");
 
     const networks = Object.keys(adAccounts);
 
     const yesterday = dayjs().subtract(1, 'days').format('YYYY-MM-DD');
-    // console.log('Yesterday\'s date:', yesterday);
+    console.log('Yesterday\'s date:', yesterday);
 
 
     // console.log(networks,"networks");
@@ -178,7 +180,6 @@ const MyTablePage = () => {
     const [isSearching, setIsSearching] = useState(false);
     const [inputValue, setInputValue] = useState('');
 
-
     const handleSearchClick = () => {
         setIsSearching(true);
     };
@@ -208,8 +209,8 @@ const MyTablePage = () => {
 
 
     const accountsForAccess = adAccounts[revenuePratner];
-    // console.log(accountsForAccess, "accounts Access");
-    // console.log(accountsForAccess[0], "accountFor Access");
+    console.log(accountsForAccess, "accounts Access");
+    console.log(accountsForAccess[0], "accountFor Access");
 
     const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
 
@@ -303,8 +304,8 @@ const MyTablePage = () => {
                         const values = Object.values(params.data);
 
                         // Log the sanitized keys
-                        // console.log('Original Keys:', originalKeys);
-                        // console.log('Sanitized Keys:', sanitizedKeys);
+                        console.log('Original Keys:', originalKeys);
+                        console.log('Sanitized Keys:', sanitizedKeys);
 
                         const keyMapping = {};
                         sanitizedKeys.forEach((key, index) => {
@@ -318,7 +319,7 @@ const MyTablePage = () => {
                         const mappedValues = sanitizedKeys.map(key => params.data[keyMapping[key]]);
                         return func(...mappedValues);
                     } catch (error) {
-                        console.error('Error evaluating formula:', error);
+                        console.error('Error evaluatings formula:', error);
                         return null;
                     }
                 },
@@ -331,7 +332,7 @@ const MyTablePage = () => {
                         const values = params.values;
 
                         // Log the values to be aggregated
-                        // console.log('Values to aggregate:', values);
+                        console.log('Values to aggregate:', values);
 
                         // Define how you want to aggregate these values.
                         // Example: You might want to sum them, average them, etc.
@@ -361,7 +362,7 @@ const MyTablePage = () => {
                         const originalKeys = Object.keys(row);
                         const sanitizedKeys = originalKeys.map(key => key.replace(/[^a-zA-Z_$0-9]/g, '_'));
                         const values = Object.values(row);
-                        // console.log(values, "values1");
+                        console.log(values, "values1");
 
                         const keyMapping = {};
                         sanitizedKeys.forEach((key, index) => {
@@ -428,7 +429,7 @@ const MyTablePage = () => {
                 name: 'Reset Columns (Custom)',
                 action: () => {
                     // Your custom logic here
-                    // console.log('Custom Reset Columns logic');
+                    console.log('Custom Reset Columns logic');
                     updatingColumnsStructure(columnStructure)
                     // setTimeout(() => {
                     //     window.location.reload();
@@ -1312,9 +1313,9 @@ const MyTablePage = () => {
             pinned: 'left',
             enableRowGroup: true,
             onClick: (event) => {
-                // console.log(event, "event");
-                // console.log('Group row clicked:', event);
-                // console.log(event);
+                console.log(event, "event");
+                console.log('Group row clicked:', event);
+                console.log(event);
                 const url = `/history/${event}-${account}-${time}`;
                 window.open(url, '_blank');
             },
@@ -1465,9 +1466,9 @@ const MyTablePage = () => {
             // lockposition: true,
             enableRowGroup: true,
             onClick: (event) => {
-                // console.log(event, "event");
-                // console.log('Group row clicked:', event);
-                // console.log(event);
+                console.log(event, "event");
+                console.log('Group row clicked:', event);
+                console.log(event);
                 // const url = `/history/${event}-${account}-${time}`;
                 // window.open(url, '_blank');
 
@@ -1654,7 +1655,7 @@ const MyTablePage = () => {
             return hourAsNumber > max ? hourAsNumber : max;
         }, -Infinity);  // Initialize with -Infinity to ensure proper comparison
 
-        // console.log("Maximum hour:", String(maxHour).padStart(2, '0'));  // Format it back to string with leading zero if necessary
+        console.log("Maximum hour:", String(maxHour).padStart(2, '0'));  // Format it back to string with leading zero if necessary
         return String(maxHour).padStart(2, '0');  // Return the max hour as a string with leading zero
     }
 
@@ -1669,43 +1670,16 @@ const MyTablePage = () => {
     }
 
 
-    // const functionCallForUserColumnStructure = async () => {
-    //     const fetchData = await axios.get(`https://prodapis.adsgoat.in/api/singleUserData?email=${userdetails.email}`);
-    //     // const data = await fetchData.json();
-    //     const mainData = fetchData.data;
-    //     // console.log(mainData.columnStructure, "columnStructure");
-    //     // setRowStructure(mainData.rows); 
-    //     setColumnDefs(getColumnDefs(mainData.columnStructure));
-    //     columnDefs1.current = getColumnDefs2(mainData.columnStructure);
-    //     columnDefs2.current = (getColumnDefs2(mainData.columnStructure))
-    // }
     const functionCallForUserColumnStructure = async () => {
-        try {
-            // Check if userdetails and userdetails.email are available
-            if (!userdetails || !userdetails.email) {
-                throw new Error("User details or email is not available");
-            }
-
-            // Log the email to make sure it's correct
-            console.log(`Fetching column structure for email: ${userdetails.email}`);
-
-            const fetchData = await axios.get(`https://prodapis.adsgoat.in/api/singleUserData?email=${userdetails?.email}`);
-            const mainData = fetchData.data;
-
-            // Log the data to verify the API response
-            console.log(mainData.columnStructure, "columnStructure");
-
-            // Set column structure
-            setColumnDefs(getColumnDefs(mainData?.columnStructure));
-            columnDefs1.current = getColumnDefs2(mainData?.columnStructure);
-            columnDefs2.current = getColumnDefs2(mainData?.columnStructure);
-        } catch (error) {
-            // Handle and log any errors
-            console.error("Error fetching user column structure:", error);
-        }
-    };
-
-
+        const fetchData = await axios.get(`https://prodapis.adsgoat.in/api/singleUserData?email=${userdetails.email}`);
+        // const data = await fetchData.json();
+        const mainData = fetchData.data;
+        console.log(mainData.columnStructure, "columnStructure");
+        // setRowStructure(mainData.rows); 
+        setColumnDefs(getColumnDefs(mainData.columnStructure));
+        columnDefs1.current = getColumnDefs2(mainData.columnStructure);
+        columnDefs2.current = (getColumnDefs2(mainData.columnStructure))
+    }
 
     const functionCall1 = async () => {
         if (!token) {
@@ -1813,6 +1787,89 @@ const MyTablePage = () => {
         setLoading(false);
 
     }
+    // const functionCall1 = async () => {
+    //     const fetchData = await axios.get(`https://prodapis.adsgoat.in/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${account}&timezone=${time}&network=${newtworkCollections[revenuePratner]}`, {
+    //         headers: {
+    //             Authorization: token,
+    //         },
+    //     });
+    //     const mainData = fetchData.data;
+    //     console.log(mainData, "maindata of functinCall1");
+    //     const specifiedTimeZone = selectTimezone[time];
+    //     const filteredData = mainData && mainData.length > 0 ?
+    //         mainData.map((eachData) => {
+    //             let revenueData;
+    //             if (eachData.estimated_revenue === 0 || isNaN(eachData.estimated_revenue)) {
+    //                 revenueData = 0;
+    //             }
+    //             else if (eachData.estimated_revenue === undefined) {
+    //                 revenueData = 0;
+    //             }
+    //             else if (eachData.estimated_revenue === null) {
+    //                 revenueData = 0;
+    //             }
+    //             else {
+    //                 revenueData = eachData.estimated_revenue;
+    //             }
+    //             const profit = (revenueData - eachData.spend).toFixed(2);
+    //             let margin;
+    //             if (revenueData === 0) {
+    //                 margin = "0";
+    //             }
+    //             else {
+    //                 margin = `${Math.round((((revenueData - eachData.spend) / revenueData) * 100) * 100) / 100}%`;
+    //             }
+    //             const rpc = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((revenueData / eachData.conversions) * 100) / 100;
+
+    //             let cpl;
+    //             if (eachData.fbLeads == 0) {
+    //                 cpl = 0;
+    //             } else {
+    //                 cpl = Math.round((eachData.spend / eachData.fbLeads) * 100) / 100;
+    //             }
+    //             const ncpl = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((eachData.spend / eachData.conversions) * 100) / 100;
+    //             // console.log(revenueData, "revenueData");
+    //             return (
+    //                 {
+    //                     campaignname: eachData.campaign_name,
+    //                     adsetname: eachData.adsetName,
+    //                     date: eachData[specifiedTimeZone],
+    //                     'fb-hour': eachData.hour,
+    //                     'mnet-hour': eachData.updatedHour,
+    //                     spend: parseFloat(eachData.spend),
+    //                     revenue: revenueData ? revenueData : 0,
+    //                     profit: parseFloat(profit),
+    //                     margin: margin,
+    //                     fbleads: parseInt(eachData.fbLeads),
+    //                     conversions: eachData.conversions !== null && eachData.conversions !== 0 ? parseInt(eachData.conversions) : 0,
+    //                     cpc: parseFloat(eachData.cpc),
+    //                     fbclicks: parseInt(eachData.fbClicks),
+    //                     impressions: parseInt(eachData.impressions),
+    //                     rpc: parseFloat(rpc),
+    //                     cpl: parseFloat(cpl),
+    //                     ncpl: parseFloat(ncpl),
+    //                     adsetid: eachData.adset_id,
+    //                     campaignid: eachData.campaign_id,
+    //                     timezone: eachData[time],
+    //                 }
+    //             )
+    //         })
+    //         : null;
+    //     // setValue(mainData);
+    //     if (mainData.length > 1) {
+    //         timezone.current = mainData[0].accountTimezone;
+    //         accountStatus.current = mainData[0].accountStatus;
+    //         cronStatus.current = mainData[0].cronStatus;
+    //         maxHour.current = findMaxHour(mainData);
+    //         maxNetworkHour.current = getMaxHour(mainData);
+    //     }
+    //     setRowData(filteredData);
+    //     newRowData.current = filteredData;
+    //     setInitialRowData(filteredData);
+    //     setTrue(false);
+    //     setLoading(false);
+
+    // }
 
     const functionCall2 = async () => {
         try {
@@ -1822,7 +1879,7 @@ const MyTablePage = () => {
                 },
             });
             const mainData = fetchData.data;
-            // console.log(mainData, "mainData of functionCall2");
+            console.log(mainData, "mainData of functionCall2");
             let totalSpend = 0;
             let totalRevenue = 0;
             let totalProfit = 0;
@@ -1832,7 +1889,7 @@ const MyTablePage = () => {
             let totalImpressions = 0;
             let totalConversions = 0;
             const specifiedTimeZone = selectTimezone[time];
-            // console.log(mainData[0], "one");
+            console.log(mainData[0], "one");
             const totalRow = mainData && mainData.length > 0 ?
                 mainData.map((eachData) => {
                     const Revenue = eachData.estimated_revenue !== undefined ? (eachData.estimated_revenue) : 0;
@@ -1887,7 +1944,7 @@ const MyTablePage = () => {
                     ncpl = !isNaN(ncpl) ? ncpl : 0;
                     fMargin = !isNaN(fMargin) ? `${fMargin}%` : '0%';
 
-                    // console.log(eachData.campaign_name, "campaign_name");
+                    console.log(eachData.campaign_name, "campaign_name");
                     return (
                         {
                             campaignname: eachData.campaign_name,
@@ -1918,10 +1975,10 @@ const MyTablePage = () => {
                     )
                 }) : null;
             // console.log(filteredData[0],"one");
-            // console.log(filteredData, "filter");
+            console.log(filteredData, "filter");
 
             const fullData = filteredData?.length > 0 ? [...filteredData] : [];
-            // console.log(fullData, "full");
+            console.log(fullData, "full");
 
             // setDailyColumn(columnDefs);
             setdailyData(fullData);
@@ -1939,14 +1996,14 @@ const MyTablePage = () => {
                 Authorization: token,
             },
         });
-        // console.log(fetchData, "f1");
+        console.log(fetchData, "f1");
         const mainData = fetchData.data.items;
 
         const url = `https://prodapis.adsgoat.in/AllCampaigns?accountNumber=${account}&timezone=${time}&network=${newtworkCollections[revenuePratner]}&page=${pageSize}&limit=100`;
 
         const specifiedTimeZone = selectTimezone[time];
-        // console.log(specifiedTimeZone, "spe");
-        // console.log(mainData, "maindata of functionCall3");
+        console.log(specifiedTimeZone, "spe");
+        console.log(mainData, "maindata of functionCall3");
         const filteredData = mainData && mainData.length > 0 ?
             mainData.map((eachData) => {
                 let revenueData;
@@ -1997,7 +2054,7 @@ const MyTablePage = () => {
             })
             : null;
         totalItems.current = fetchData.data.totalItems;
-        // console.log(mainData);
+        console.log(mainData);
         setCampaignData(filteredData);
         setFixedFooter([
             {
@@ -2034,13 +2091,13 @@ const MyTablePage = () => {
                     await functionCallForUserColumnStructure();
                     await functionCall1();
                     await functionCall2();
-                    // console.log("Initial functions executed successfully.");
+                    console.log("Initial functions executed successfully.");
                     isInitialLoad.current = false; // Set to false after initial load
                 }
 
                 // Run this function on initial load and whenever pageSize changes
                 await functionCall3();
-                // console.log("functionCall3 executed successfully.");
+                console.log("functionCall3 executed successfully.");
             } catch (error) {
                 console.error("Error in function calls:", error);
                 // Optionally, handle the error (e.g., show a notification to the user)
@@ -2098,15 +2155,15 @@ const MyTablePage = () => {
 
     const onChangeSelectRevenue = (value) => {
         const accountsForAccess = adAccounts[value];
-        // console.log(accountsForAccess, "accounts Access");
-        // console.log(accountsForAccess[0], "accountFor Access");
+        console.log(accountsForAccess, "accounts Access");
+        console.log(accountsForAccess[0], "accountFor Access");
 
         const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
 
         // console.log(accountsAccess, "accountsAccess");
         setNetworksData(accountsAccess);
         setRevenuePartner(value);
-        // value ==="FB_Tonic" ? console.log("PDT") : null;
+        value === "FB_Tonic" ? console.log("PDT") : null;
         value === "FB_Rsoc" || value === "FB_Tonic" || value === "FB_DomainActive" ? setTime('PDT') : setTime('UTC')
     }
     const onChangeSelect = (value) => {
@@ -2118,12 +2175,12 @@ const MyTablePage = () => {
     }
 
     const onClickButton = () => {
-        // console.log(account, "account");
-        // console.log(time, "time");
-        // console.log(url1);
-        // console.log(url2);
-        // console.log(startDate, "start");
-        // console.log(endDate, "end");
+        console.log(account, "account");
+        console.log(time, "time");
+        console.log(url1);
+        console.log(url2);
+        console.log(startDate, "start");
+        console.log(endDate, "end");
         setPageSize(1);
         setTrue(true);
         setRowData([]);
@@ -2182,25 +2239,25 @@ const MyTablePage = () => {
     }
 
     const handleCustomerServiceClick = () => {
-        // console.log('Customer Service button clicked');
+        console.log('Customer Service button clicked');
         carouselRef.current.goTo(1); // Change to the first slide
     };
 
     const handleCommentClick = () => {
-        // console.log('Comment button clicked');
+        console.log('Comment button clicked');
         carouselRef.current.goTo(0); // Change to the second slide
     };
 
     const handleCommentClick1 = () => {
-        // console.log('Comment button clicked');
+        console.log('Comment button clicked');
         carouselRef.current.goTo(2);
     }
 
     const handleChange = (dates) => {
         if (dates && dates.length === 2) {
             const [start, end] = dates;
-            // console.log('Start Date:', start.format('YYYY-MM-DD'));
-            // console.log('End Date:', end.format('YYYY-MM-DD'));
+            console.log('Start Date:', start.format('YYYY-MM-DD'));
+            console.log('End Date:', end.format('YYYY-MM-DD'));
             setStartDate(start.format('YYYY-MM-DD'));
             setEndDate(end.format('YYYY-MM-DD'));
         }
@@ -2224,7 +2281,7 @@ const MyTablePage = () => {
             if (value !== undefined) {
                 const url = `/DailyAndCampaignHistory/AdsetHistory/${value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
                 window.open(url, '_blank');
-                // console.log(`Price clicked: ${value}`);
+                console.log(`Price clicked: ${value}`);
             }
         }
 
@@ -2236,7 +2293,7 @@ const MyTablePage = () => {
             if (value !== undefined) {
                 const url = `/AllCampaigns/AdsetHistory/${value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
                 window.open(url, '_blank');
-                // console.log(`Adset clicked: ${value}`);
+                console.log(`Adset clicked: ${value}`);
             }
         }
     };
@@ -2247,7 +2304,7 @@ const MyTablePage = () => {
             if (value !== undefined) {
                 const url = `/LiveHistory/LiveAdsetHistory/${value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
                 window.open(url, '_blank');
-                // console.log(`Adset clicked: ${value}`);
+                console.log(`Adset clicked: ${value}`);
             }
         }
     };
@@ -2264,6 +2321,7 @@ const MyTablePage = () => {
     //     }
 
     // };
+
     const [campaignComments, setCampaignComments] = useState([]);
     const [refrst, setRefrst] = useState(false);
     const fetchCampaignComments = async () => {
@@ -2739,59 +2797,6 @@ const MyTablePage = () => {
     };
 
 
-    // const autoGroupColumnDef = {
-    //     headerName: 'CampaignName',
-    //     minWidth: 450,
-    //     pinned: 'left',
-    //     cellRendererParams: {
-    //         suppressCount: false, // Allow count to be shown
-    //         innerRenderer: (params) => {
-    //             if (params.node.footer) {
-    //                 return 'Total'; // Custom footer label
-    //             }
-
-    //             // Get the group key or value (campaign name in this case)
-    //             const firstColumnValue = params.node.key;  // This should give you the campaign name
-    //             const valueWithCount = `${firstColumnValue}`;
-
-    //             const [tooltipText, setTooltipText] = useState("Click to Copy");
-
-    //             const copyToClipboard = () => {
-    //                 navigator.clipboard.writeText(firstColumnValue)
-    //                     .then(() => {
-    //                         setTooltipText("Copied!");
-    //                         setTimeout(() => setTooltipText("Click to Copy"), 2000);
-    //                     })
-    //                     .catch(() => {
-    //                         console.error('Failed to copy to clipboard');
-    //                     });
-    //             };
-
-    //             return (
-    //                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-    //                     <StarOutlined />
-    //                     <EditOutlined style={{ marginLeft: '10px' }} />
-    //                     <Tooltip title={tooltipText}>
-    //                         <CopyOutlined
-    //                             onClick={copyToClipboard}
-    //                             style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight: '10px' }}
-    //                         />
-    //                     </Tooltip>
-    //                     <span
-    //                         onClick={() => {
-    //                             // console.log(`Grouped Make clicked: ${params.value}`);
-    //                             const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
-    //                             window.open(url, '_blank');
-    //                         }}
-    //                     >
-    //                         {valueWithCount}
-    //                     </span>
-
-    //                 </div>
-    //             );
-    //         }
-    //     }
-    // };
 
 
     const autoGroupColumnDef2 = {
@@ -2986,6 +2991,116 @@ const MyTablePage = () => {
     };
 
 
+    // const autoGroupColumnDefLive = {
+    //     headerName: 'CampaignName',
+    //     minWidth: 450,
+    //     pinned: 'left',
+
+    //     cellRendererParams: {
+    //         suppressCount: false, // Allow count to be shown
+    //         innerRenderer: (params) => {
+    //             if (params.node.footer) {
+    //                 return 'Total'; // Custom footer label
+    //             }
+    //             // const count = params.node.allChildrenCount; // Get the count of children
+    //             const firstColumnValue = params.node.key;  // This should give you the campaign name
+    //             const valueWithCount = `${firstColumnValue}`;
+
+    //             const [tooltipText, setTooltipText] = useState("Click to Copy");
+
+    //             const copyToClipboard = () => {
+    //                 navigator.clipboard.writeText(firstColumnValue)
+    //                     .then(() => {
+    //                         setTooltipText("Copied!");
+    //                         setTimeout(() => setTooltipText("Click to Copy"), 2000);
+    //                     })
+    //                     .catch(() => {
+    //                         console.error('Failed to copy to clipboard');
+    //                     });
+    //             };
+
+    //             return (
+    //                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+    //                     <StarOutlined/>
+    //                     <EditOutlined style={{marginLeft:'10px'}}/>
+    //                     <Tooltip title={tooltipText}>
+    //                         <CopyOutlined
+    //                             onClick={copyToClipboard}
+    //                             style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight:'10px' }}
+    //                         />
+    //                     </Tooltip>
+    //                     <span
+    //                         onClick={() => {
+    //                             console.log(`Grouped Make clicked: ${params.value}`);
+    //                             const url = `/LiveHistory/LiveCampaignHistory/${params.value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
+    //                             window.open(url, '_blank');
+    //                         }}
+    //                     >
+    //                         {valueWithCount}
+    //                     </span>
+    //                 </div>
+    //             );
+    //         }
+    //     }
+    // };
+
+
+
+    // const autoGroupColumnDef = {
+    //     headerName: 'CampaignName',
+    //     minWidth: 450,
+    //     pinned: 'left',
+    //     cellRendererParams: {
+    //         suppressCount: false, // Allow count to be shown
+    //         innerRenderer: (params) => {
+    //             if (params.node.footer) {
+    //                 return 'Total'; // Custom footer label
+    //             }
+
+    //             // Get the group key or value (campaign name in this case)
+    //             const firstColumnValue = params.node.key;  // This should give you the campaign name
+    //             const valueWithCount = `${firstColumnValue}`;
+
+    //             const [tooltipText, setTooltipText] = useState("Click to Copy");
+
+    //             const copyToClipboard = () => {
+    //                 navigator.clipboard.writeText(firstColumnValue)
+    //                     .then(() => {
+    //                         setTooltipText("Copied!");
+    //                         setTimeout(() => setTooltipText("Click to Copy"), 2000);
+    //                     })
+    //                     .catch(() => {
+    //                         console.error('Failed to copy to clipboard');
+    //                     });
+    //             };
+
+    //             return (
+    //                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+    //                     <StarOutlined/>
+    //                     <EditOutlined style={{marginLeft:'10px'}} />
+    //                     <Tooltip title={tooltipText}>
+    //                         <CopyOutlined
+    //                             onClick={copyToClipboard}
+    //                             style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight:'10px' }}
+    //                         />
+    //                     </Tooltip>
+    //                     <span
+    //                         onClick={() => {
+    //                             console.log(`Grouped Make clicked: ${params.value}`);
+    //                             const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
+    //                             window.open(url, '_blank');
+    //                         }}
+    //                     >
+    //                         {valueWithCount}
+    //                     </span>
+
+    //                 </div>
+    //             );
+    //         }
+    //     }
+    // };
+
+
     // const autoGroupColumnDef2 = {
     //     headerName: 'CampaignName',
     //     minWidth: 450,
@@ -3015,17 +3130,17 @@ const MyTablePage = () => {
 
     //             return (
     //                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-    //                     <StarOutlined />
-    //                     <EditOutlined style={{ marginLeft: '10px' }} />
+    //                     <StarOutlined/>
+    //                     <EditOutlined style={{marginLeft:'10px'}} />
     //                     <Tooltip title={tooltipText}>
     //                         <CopyOutlined
     //                             onClick={copyToClipboard}
-    //                             style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight: '10px' }}
+    //                             style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight:'10px' }}
     //                         />
     //                     </Tooltip>
     //                     <span
     //                         onClick={() => {
-    //                             // console.log(`Grouped Make clicked: ${params.value}`);
+    //                             console.log(`Grouped Make clicked: ${params.value}`);
     //                             const url = `/AllCampaigns/CampaignHistory/${params.value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
     //                             window.open(url, '_blank');
     //                         }}
@@ -3053,12 +3168,12 @@ const MyTablePage = () => {
 
     const handleColumnMove = (params, gridId) => {
         const columnState = params.api.getColumnState();
-        // console.log('Column moved in grid:', gridId);
+        console.log('Column moved in grid:', gridId);
         const fieldOrder = columnState.map(col => col.colId);
         const newFieldOrder = fieldOrder.filter(item => item !== 'ag-Grid-AutoColumn-campaignname' && item !== 'ag-Grid-AutoColumn' && columnStructure.includes(item));
         localStorage.setItem('columnState', JSON.stringify(newFieldOrder));
         updatingColumnsStructure(newFieldOrder);
-        // console.log(`Updating columns structure for grid: ${gridId}`); 
+        console.log(`Updating columns structure for grid: ${gridId}`);
     };
 
     const debouncedHandleColumnMove = useCallback(debounce((params, gridId) => handleColumnMove(params, gridId), 600), []);
@@ -3084,9 +3199,9 @@ const MyTablePage = () => {
         onColumnMoved: (params) => debouncedHandleColumnMove(params, 'grid3'),
     };
 
-    // console.log(columnDefs);
-    // console.log(columnDefs1);
-    // console.log(columnDefs2);
+    console.log(columnDefs);
+    console.log(columnDefs1);
+    console.log(columnDefs2);
 
 
 
@@ -3234,7 +3349,7 @@ const MyTablePage = () => {
     };
 
     const handlePageClick = (page, pageSize) => {
-        // console.log(`Clicked page: ${page}, Page size: ${pageSize}`);
+        console.log(`Clicked page: ${page}, Page size: ${pageSize}`);
         setLoading2(true);
         setPageSize(page);
         // Add your custom onClick functionality here
@@ -3282,9 +3397,9 @@ const MyTablePage = () => {
         },
     ];
 
-    // console.log(rowData, "rowData");
-    // console.log(dailyData, "dailyData");
-    // console.log(campaignData, "campaignData");
+    console.log(rowData, "rowData");
+    console.log(dailyData, "dailyData");
+    console.log(campaignData, "campaignData");
 
     // console.log(rowData, "rowData");
     // console.log(dailyData, "dailyData");
@@ -3396,8 +3511,8 @@ const MyTablePage = () => {
         return current && current > dayjs().endOf('day');
     };
 
-    // console.log(revenuePratner);
-    // console.log(time);
+    console.log(revenuePratner);
+    console.log(time);
 
     const createOption = (account) => {
 
@@ -3494,7 +3609,6 @@ const MyTablePage = () => {
     return (
         <div className='reports-container'>
             {/* className='select-container' */}
-
             <Space direction="vertical" style={{ width: '100%', padding: "1%" }}>
                 <Row gutter={[16, 16]}>
                     <Col xs={24} sm={12} md={4}>
@@ -3504,6 +3618,8 @@ const MyTablePage = () => {
                             onChange={onChangeSelectRevenue}
                             style={{ width: '100%' }}
                             placeholder="Select Network"
+
+                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
                             optionFilterProp="label"
                             defaultValue={networks[0]}
                             options={networks.map((item) => ({
@@ -3517,6 +3633,7 @@ const MyTablePage = () => {
                         <Select
                             showSearch
                             onChange={onChangeSelect}
+                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
                             style={{ width: '100%' }}
                             placeholder="Select Account"
                             optionFilterProp="value" // Make sure the option has a 'label' property
@@ -3536,7 +3653,12 @@ const MyTablePage = () => {
                                 disabledDate={disabledDate}
                                 defaultValue={defaultDates}
                                 format="YYYY-MM-DD"
-                                style={{ width: '100%' }}
+                                style={{
+                                    width: '100%',
+                                    backgroundColor: theme === 'dark' ? '#333' : undefined,
+                                    color: theme === 'dark' ? 'white' : undefined,
+                                }}
+                                dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}
                             />
                         </ConfigProvider>
                     </Col>
@@ -3547,6 +3669,7 @@ const MyTablePage = () => {
                             onChange={onChangeTime}
                             style={{ width: '100%' }}
                             placeholder="Select Timezone"
+                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
                             optionFilterProp="label"
                             value={time}
                             options={timezones.map((item) => ({
@@ -3618,7 +3741,7 @@ const MyTablePage = () => {
                     <div style={{ height: "100%", marginBottom: '20px' }}>
                         <div style={contentStyle}>
                             {isLoading === true ? (
-                                <div className="loader-container ag-container">
+                                <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>
                                     <div className="ag-grid-Loader">
                                         <Audio
                                             height="80"
@@ -3632,7 +3755,9 @@ const MyTablePage = () => {
                                     </div>
                                 </div>
                             ) : rowData?.filter((each) => each.campaignname.includes(inputValue))?.length > 0 ? (
-                                <div className="ag-theme-alpine ag-container">
+
+                                <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
+
                                     <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap' }}>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
                                             <Space align="center">
@@ -3690,9 +3815,11 @@ const MyTablePage = () => {
                                             if (params.node.rowPinned) {
                                                 return {
                                                     fontWeight: 'bold',
-                                                    backgroundColor: '#f4f4f4' // Highlight the footer row
+                                                    backgroundColor: theme === "dark" ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
+                                                    color: theme === "dark" ? '#fff' : '#000',           // Text color should contrast with the background
                                                 };
                                             }
+
                                             return null;
                                         }}
                                         // const onFirstDataRendered = {(params) => {
@@ -3730,7 +3857,7 @@ const MyTablePage = () => {
                     <div>
                         <div style={contentStyle}>
                             {isLoading1 === true ? (
-                                <div className="loader-container ag-container">
+                                <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>
                                     <div className="ag-grid-Loader">
                                         <Audio
                                             height="80"
@@ -3744,7 +3871,7 @@ const MyTablePage = () => {
                                     </div>
                                 </div>
                             ) : dailyData.filter((each) => each.campaignname.includes(inputValue))?.length > 0 ? (
-                                <div className="ag-theme-alpine ag-container" >
+                                <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
                                     <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap' }}>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
                                             <Space align="center" className='daily-contaier'>
@@ -3795,9 +3922,11 @@ const MyTablePage = () => {
                                             if (params.node.rowPinned) {
                                                 return {
                                                     fontWeight: 'bold',
-                                                    backgroundColor: '#f4f4f4' // Highlight the footer row
+                                                    backgroundColor: theme === "dark" ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
+                                                    color: theme === "dark" ? '#fff' : '#000',           // Text color should contrast with the background
                                                 };
                                             }
+
                                             return null;
                                         }}
                                     />
@@ -3818,7 +3947,7 @@ const MyTablePage = () => {
                     <div>
                         <div style={contentStyle}>
                             {isLoading2 === true ? (
-                                <div className="loader-container ag-container">
+                                <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>
                                     <div className="ag-grid-Loader">
                                         <Audio
                                             height="80"
@@ -3832,7 +3961,7 @@ const MyTablePage = () => {
                                     </div>
                                 </div>
                             ) : campaignData.filter((each) => each.campaignname.includes(inputValue))?.length > 0 ? (
-                                <div className="ag-theme-alpine ag-container">
+                                <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
                                     <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap' }}>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
                                             <Space align="center" className='daily-contaier' style={{ width: '150px' }}>
@@ -3890,9 +4019,11 @@ const MyTablePage = () => {
                                                 if (params.node.rowPinned) {
                                                     return {
                                                         fontWeight: 'bold',
-                                                        backgroundColor: '#f4f4f4' // Highlight the footer row
+                                                        backgroundColor: theme === "dark" ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
+                                                        color: theme === "dark" ? '#fff' : '#000',           // Text color should contrast with the background
                                                     };
                                                 }
+
                                                 return null;
                                             }}
                                         // onFirstDataRendered = {(params) => {
@@ -3972,8 +4103,6 @@ const MyTablePage = () => {
                 <Input value={newColumnName} placeholder='Enter Column Name' style={{ marginBottom: '10px' }} onChange={(e) => setNewColumnName(e.target.value)} />
                 <Input value={formula} placeholder='Enter Formula' style={{ marginBottom: '10px' }} onChange={(e) => setFormula(e.target.value)} />
             </Modal>
-
-
 
         </div>
     );

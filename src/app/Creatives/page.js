@@ -2,8 +2,13 @@
 import { useState, useEffect } from "react";
 import { FilterOutlined, SearchOutlined } from "@ant-design/icons";
 import { Button, Modal, Input, Select, Menu, Card, Typography } from "antd";
+import { useTokenContext } from "../components/parent";
 
 export default function Creative() {
+
+    const { userdetails } = useTokenContext();
+    const { theme } = useTokenContext();
+    const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
     const { Meta } = Card;
     const { Text } = Typography;
     const { Option } = Select;
@@ -55,11 +60,11 @@ export default function Creative() {
     const filteredCarddata = state.carddata.filter(item =>
         item.camp_name.toLowerCase().includes(state.searchQuery.toLowerCase())
     );
-
+    const { darkMode, toggleTheme } = useTokenContext();
     return (
-        <div style={{ borderRadius: '6px', border: '1px solid #E6E6E6', background: '#FFF', position: 'sticky', top: '0' }}>
+        <div style={{ borderRadius: '6px', border: `solid 5px ${darkMode ? '#333' : '#fff'}`, backgroundColor: darkMode ? '#333' : '#fff', position: 'sticky', top: '0', height:"100vh",overflowY:"scroll", scrollbarWidth:"none" }}>
             <div style={{ padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Text style={{ margin: '0px', color: '#404040', fontFamily: 'Inter', fontSize: '17px', fontWeight: 700 }}>Creatives <span style={{ color: '#B2A4A4' }}>All Creatives</span></Text>
+                <Text style={{ margin: '0px', color: darkMode ? '#fff' : '#333', fontFamily: 'Inter', fontSize: '17px', fontWeight: 700 }}>Creatives <span style={{ color: '#B2A4A4' }}>All Creatives</span></Text>
                 <Button onClick={() => setState(prevState => ({ ...prevState, modalVisible: true }))} style={{ backgroundColor: '#78BC61', color: 'white', marginLeft: '10px' }}>Upload Creatives</Button>
             </div>
             <div style={{ padding: '16px' }}>
@@ -80,9 +85,9 @@ export default function Creative() {
                     </Menu.Item>
                 </Menu>
             </div>
-            <div className="example" style={{ background: '#ededed', borderRadius: '6px', maxHeight: 'calc(91vh - 200px)', overflow: 'auto', position: "relative" }}>
+            <div className="example" style={{ backgroundColor: darkMode ? '#333' : '#fff', borderRadius: '6px', maxHeight: 'calc(91vh - 200px)', overflow: 'auto', position: "relative" }}>
                 {state.activeTab === 'Approved' && (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: "15px", justifyContent: 'center' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: "13px", justifyContent: 'center', padding:"0px 1rem" }}>
                         {filteredCarddata.map((item, index) => (
                             <Card
                                 key={index}
@@ -92,12 +97,12 @@ export default function Creative() {
                                 bodyStyle={{ padding: 0 }}
                             >
                                 <div style={{ position: 'absolute', top: '8px', left: '8px' }}>
-                                    <Text style={{ color: 'white', fontWeight: 'bold', fontSize: '24px' }}>{item.camp_name}</Text>
+                                    <Text style={{ color: darkMode ? '#333' : '#fff', fontWeight: 'bold', fontSize: '24px' }}>{item.camp_name}</Text>
                                 </div>
                                 <Meta description={
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: "6%" }}>
-                                        <span>{item.holder}</span>
-                                        <span style={{ marginLeft: '8px' }}>{item.date}</span>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: "6%", color: darkMode ? '#333' : '#fff' }}>
+                                        <span style={{color: darkMode ? '#fff' : '#333'}}>{item.holder}</span>
+                                        <span style={{ marginLeft: '8px',color: darkMode ? '#fff' : '#333' }}>{item.date}</span>
                                     </div>
                                 } />
                             </Card>

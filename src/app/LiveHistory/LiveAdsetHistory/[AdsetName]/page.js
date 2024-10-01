@@ -23,6 +23,9 @@ const MnetLiveAdsetHistory = ({params}) => {
 
     console.log(user, "user");
 
+    const { theme } = useTokenContext();
+    const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
+
     const [rowData, setRowData] = useState([]);
 
     const [isLoading, setLoading] = useState(true);
@@ -840,7 +843,7 @@ const MnetLiveAdsetHistory = ({params}) => {
                     </div>
                 </div>
             ) : rowData?.length > 0 ? (
-                <div className="ag-theme-alpine ag-container">
+                <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
                     <AgGridReact
                         rowData={rowData}
                         columnDefs={columnDefs}
@@ -856,13 +859,15 @@ const MnetLiveAdsetHistory = ({params}) => {
                         // autoGroupColumnDef={autoGroupColumnDef}
                         pinnedBottomRowData={pinnedBottomRowData}
                         getRowStyle={params => {
-                                if (params.node.rowPinned) {
-                                    return {
-                                        fontWeight: 'bold',
-                                        backgroundColor: '#f4f4f4' // Highlight the footer row
-                                    };
-                                }
-                                return null;
+                            if (params.node.rowPinned) {
+                                return {
+                                    fontWeight: 'bold',
+                                    backgroundColor: theme === "dark" ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
+                                    color: theme === "dark" ? '#fff' : '#000',           // Text color should contrast with the background
+                                };
+                            }
+                            
+                            return null;
                         }}
                     />
                 </div>
