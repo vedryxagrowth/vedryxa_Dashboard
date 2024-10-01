@@ -318,7 +318,7 @@ const MyTablePage = () => {
                         const mappedValues = sanitizedKeys.map(key => params.data[keyMapping[key]]);
                         return func(...mappedValues);
                     } catch (error) {
-                        console.error('Error evaluating formula:', error);
+                        console.error('Error evaluatings formula:', error);
                         return null;
                     }
                 },
