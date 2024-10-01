@@ -3,9 +3,11 @@ import React, { useState } from 'react';
 import { Drawer, Button, Modal, Form, Input, Select, message } from 'antd';
 import { CloseOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import axios from 'axios';
+import { useTokenContext } from '../../components/parent';
 
 const Createnewuser = ({ visible, onClose }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const { theme } = useTokenContext();
     const [formalldata, setFormData] = useState({
         userName: '',
         email: '',
@@ -178,7 +180,9 @@ const Createnewuser = ({ visible, onClose }) => {
                         },
                     ]}
                 >
-                    <Select>
+                    <Select 
+                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                    >
                         <Select.Option value="Media_Buyer">Media_Buyer</Select.Option>
                         <Select.Option value="Special_User">Special_User</Select.Option>
                         <Select.Option value="Admin">Admin</Select.Option>
@@ -195,6 +199,7 @@ const Createnewuser = ({ visible, onClose }) => {
                                         <Select
                                             placeholder="Select a network"
                                             style={{ maxWidth: '120px', height: '30px', marginRight:'8px' }}
+                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                             value={account.network}
                                             onChange={(value) => handleNetworkChange(accountIndex, value)}
                                         >

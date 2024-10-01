@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Form, Input, Button, Drawer, Modal, message, Select } from 'antd';
 import axios from 'axios';
+import { useTokenContext } from '../../components/parent';
 
 const { Option } = Select;
 import { CloseOutlined } from '@ant-design/icons';
@@ -57,7 +58,8 @@ const Newaddaccounts = ({ visible, onClose }) => {
     const [pixelId, setPixelId] = useState('');
     const [pageName, setPageName] = useState('');
     const [pageId, setPageId] = useState('');
-    var token = localStorage.getItem("token")
+    var token = localStorage.getItem("token");
+    const { theme } = useTokenContext();
 
     const onFinish = async (values) => {
         try {
@@ -148,26 +150,28 @@ const Newaddaccounts = ({ visible, onClose }) => {
                 <Form form={form} onFinish={onFinish} layout="vertical" style={{ width: "80%" }} initialValues={{ status: status, spendPartner: spendPartner, revenuePartner: revenuePartner, BMName: BMName, timeZone: timeZone }} >
                     <Form.Item label="Spend Partner" name="spendPartner" value={spendPartner}>
                         <Select placeholder="Select a status" 
-                            defaultValue="Facebook" onChange={onChangeSpendPartner}>
+                            defaultValue="Facebook" onChange={onChangeSpendPartner}
+                            dropdownClassName={theme === 'dark' && "custom-dropdown"}>
                             <Option value="Facebook" defaultValue>Facebook</Option>
                             <Option value="Google">Google</Option>
                         </Select>
                     </Form.Item>
                     <Form.Item label="Spend Account ID" name="accountNumber" rules={[{ required: true, message: 'Please input the Spend Account ID!' }]}>
-                        <Input value={accountNumber} onChange={onChangeAccountNumber} />
+                        <Input value={accountNumber} onChange={onChangeAccountNumber} style={{color: theme === "dark" ? 'white' : "black"}}/>
                     </Form.Item>
                     <Form.Item label="Pixel ID" name="pixelID">
-                        <Input value={pixelId} onChange={onChangePixelId}/>
+                        <Input value={pixelId} onChange={onChangePixelId}  style={{color: theme === "dark" ? 'white' : "black"}}/>
                     </Form.Item>
                     <Form.Item label="Page ID" name="pageID">
-                        <Input value={pageId} onChange={onChangePagelId} />
+                        <Input value={pageId} onChange={onChangePagelId}  style={{color: theme === "dark" ? 'white' : "black"}}/>
                     </Form.Item>
                     <Form.Item label="Page Name" name="pageName">
-                        <Input value={pageName} onChange={onChangePageName} />
+                        <Input value={pageName} onChange={onChangePageName}  style={{color: theme === "dark" ? 'white' : "black"}}/>
                     </Form.Item>
                     <Form.Item label="BM Name" name="BMName" value={BMName}>
                         <Select placeholder="Select a status" 
-                            defaultValue="Winkleads Search" onChange={onChangeBMName}>
+                            defaultValue="Winkleads Search" onChange={onChangeBMName}
+                            dropdownClassName={theme === 'dark' && "custom-dropdown"}>
                             <Option value="Winkleads Search" defaultValue>Winkleads Search</Option>
                             <Option value="MODO LEO BM X1">MODO LEO BM X1</Option>
                         </Select>
@@ -179,6 +183,7 @@ const Newaddaccounts = ({ visible, onClose }) => {
                             style={{ width: '100%' }}
                             placeholder="Select Timezone"
                             optionFilterProp="label"
+                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
                             defaultValue="UTC"
                             options={timezones.map((item) => ({
                                 value: item,
@@ -188,7 +193,8 @@ const Newaddaccounts = ({ visible, onClose }) => {
                     </Form.Item>
                     <Form.Item label="Status" name="status" value={status}>
                         <Select placeholder="Select a status"
-                            defaultValue="Active" onChange={onChangeStatus}>
+                            defaultValue="Active" onChange={onChangeStatus}
+                            dropdownClassName={theme === 'dark' && "custom-dropdown"}>
                             <Option value="Active">Active</Option>
                             <Option value="InActive">Inactive</Option>
                         </Select>
@@ -201,6 +207,7 @@ const Newaddaccounts = ({ visible, onClose }) => {
                             placeholder="Select RevenuePartner"
                             optionFilterProp="label"
                             defaultValue="MEDIA_DOT_NET"
+                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
                             options={availableNetworks.map((item) => ({
                                 value: item,
                                 label: item,

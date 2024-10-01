@@ -654,10 +654,11 @@ export default function CampaignAndAccount({ params }) {
                             if (params.node.rowPinned) {
                                 return {
                                     fontWeight: 'bold',
-                                    backgroundColor: darkMode ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
-                                    color: darkMode ? '#fff' : '#000',           // Text color should contrast with the background
+                                    backgroundColor: theme === "dark" ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
+                                    color: theme === "dark" ? '#fff' : '#000',           // Text color should contrast with the background
                                 };
                             }
+                            
                             return null;
                         }}
                         // getRowClass={params => params.node.rowPinned ? 'sticky-footer' : ''}

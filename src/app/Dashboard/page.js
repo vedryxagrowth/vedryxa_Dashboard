@@ -120,7 +120,9 @@ const rangePresets = [
 
 const Dashboard = () => {
     const { userdetails } = useTokenContext();
-    // console.log(userdetails);
+    const { theme } = useTokenContext();
+    const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
+    console.log(userdetails);
     // console.log(userdetails?.adAccounts, "f1");
     // const { adAccounts } = userdetails;
 
@@ -202,8 +204,8 @@ const Dashboard = () => {
         if (dates && dates.length === 2) {
             setSkeletonLoading(true);
             const [start, end] = dates;
-            // console.log('Start Date:', start.format('YYYY-MM-DD'));
-            // console.log('End Date:', end.format('YYYY-MM-DD'));
+            console.log('Start Date:', start.format('YYYY-MM-DD'));
+            console.log('End Date:', end.format('YYYY-MM-DD'));
             setStartDate(start.format('YYYY-MM-DD'));
             setEndDate(end.format('YYYY-MM-DD'));
         }
@@ -420,7 +422,7 @@ const Dashboard = () => {
           setRowData(groupedData);
           
 
-        // console.log(groupedData);
+        console.log(groupedData);
         
         const dates = groupedData.map(d => d.accountNumber.slice(-4));
         const spend = groupedData.map(d => Math.round((d.spend)*100)/100);
@@ -432,7 +434,7 @@ const Dashboard = () => {
         const margin = groupedData.map(d => Math.round((((d.estimated_revenue-d.spend)/d.estimated_revenue)*100)*100)/100);
 
         setChartData({ dates, spend, revenue, profit, margin, rpc, cpl });
-        // console.log(responseData.length);
+        console.log(responseData.length);
         setSkeletonLoading(false);
     }, 1500);;
       
@@ -448,9 +450,8 @@ const Dashboard = () => {
       
         // Log the default state on component mount (runs only once)
         if (Object.keys(selectedItems).length === 0) {
-            console.log("Select");
-        //   console.log('First Select - Default Selected Categories:', [defaultCategory]);
-        //   console.log('Second Select - Default Selected Items:', { [defaultCategory]: transformedData[defaultCategory] });
+          console.log('First Select - Default Selected Categories:', [defaultCategory]);
+          console.log('Second Select - Default Selected Items:', { [defaultCategory]: transformedData[defaultCategory] });
         }
       
         // Only process selectedItems if it's populated
@@ -462,7 +463,7 @@ const Dashboard = () => {
             return result;
           }, {});
       
-        //   console.log('Second Select - Current Selected Items:', selectedCategoryValues);
+          console.log('Second Select - Current Selected Items:', selectedCategoryValues);
           
       
           // Ensure functionalCall is not triggering state updates
@@ -545,33 +546,43 @@ const Dashboard = () => {
       };
   
       // Render checkboxes for categories dynamically based on the first Select values
-      const renderInnerSelects = () => {
+      const renderInnerSelects = (theme) => {
         return firstSelectValues.map((category) => {
-          const allSelected = transformedData[category]?.length === selectedItems[category]?.length;
+          const allSelected =
+            transformedData[category]?.length === selectedItems[category]?.length;
       
           return (
             <div key={category}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Divider>
-                    {category}
-                    <Checkbox
-                        checked={allSelected}
-                        onChange={(e) => handleSelectAllChange(e.target.checked, category)}
-                        style={{marginLeft:'15px'}}
-                    >
-                    </Checkbox>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  color: theme === 'dark' ? 'white' : 'black',
+                }}
+              >
+                <Divider style={{ color: theme === 'dark' ? 'white' : 'black' }}>
+                  {category}
+                  <Checkbox
+                    checked={allSelected}
+                    onChange={(e) => handleSelectAllChange(e.target.checked, category)}
+                    style={{ marginLeft: '15px' }}
+                    className={theme === 'dark' ? 'checkbox-dark' : 'checkbox-light'}
+                  />
                 </Divider>
-                
               </div>
               <Checkbox.Group
-                options={transformedData[category]}
+                options={transformedData[category]} // Use the plain options as Ant Design expects
                 value={selectedItems[category] || []} // Keep the previously selected items
                 onChange={(checkedValues) => handleGroupChange(checkedValues, category)}
+                className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'} // Apply class based on theme
               />
             </div>
           );
         });
       };
+      
+      
 
 
 
@@ -579,7 +590,7 @@ const Dashboard = () => {
     // const newNetworks = userdetails?.adAccounts.map((each)=>)
 
     const networks = Object.keys(userdetails?.adAccounts);
-    // console.log(networks, "net");
+    console.log(networks, "net");
 
     const options = networks.map(each => ({
         value: each,
@@ -726,7 +737,7 @@ const Dashboard = () => {
 
     
     // console.log(rowData?.map(each=> each.profit > 0));
-    // console.log(chartData, "data");
+    console.log(chartData, "data");
     return (
         <div style={{ padding: '20px' }}>
         <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -741,14 +752,15 @@ const Dashboard = () => {
                 <Select
                     mode="tags"
                     style={{
-                    width: '100%',
-                    maxHeight: '40px',
-                    overflowY: 'auto',
+                        width: '100%',
+                        maxHeight: '40px',
+                        overflowY: 'auto',
                     }}
                     placeholder="Select Categories"
                     value={firstSelectValues}
                     onChange={handleFirstSelectChange}
                     maxTagCount="responsive"
+                    dropdownClassName={theme === 'dark' && "custom-dropdown"}
                     dropdownRender={(menu) => (
                     <div
                         style={{
@@ -756,9 +768,9 @@ const Dashboard = () => {
                             maxHeight: '200px',
                             overflowY: 'auto',
                             overflowX: 'hidden',
-                            padding: '8px',
+                            // padding: '8px',
                             scrollbarWidth: 'none', // For Firefox
-                            msOverflowStyle: 'none', // For Internet Explorer and Edge
+                            msOverflowStyle: 'none',
                         }}
                     >
                         {menu}
@@ -772,23 +784,18 @@ const Dashboard = () => {
                 </Col>
 
                 <Col span={6}>
-                <Select
-                    mode="multiple"
-                    style={{ width: '100%' }}
-                    placeholder="Select items"
-                    value={[]} // This should be updated to reflect `selectedItems` based on the selected categories
-                    dropdownRender={() => (
-                    <div
-                        style={{
-                        maxHeight: '300px',
-                        overflowY: 'auto',
-                        padding: '8px',
-                        }}
-                    >
-                        {renderInnerSelects()}
-                    </div>
-                    )}
-                />
+                    <Select
+                        mode="multiple"
+                        style={{ width: '100%', color: theme === 'dark' ? 'white' : 'black' }}
+                        placeholder="Select items"
+                        dropdownClassName={theme === 'dark' && 'custom-dropdown'}
+                        value={[]} // This should be updated to reflect selectedItems based on the selected categories
+                        dropdownRender={() => (
+                            <div style={{ maxHeight: '300px', overflowY: 'auto', padding: '8px' }}>
+                            {renderInnerSelects(theme)}
+                            </div>
+                        )}
+                    />
                 </Col>
 
                 <Col span={3}>
@@ -797,6 +804,7 @@ const Dashboard = () => {
                     onChange={onChangeTime}
                     style={{ width: '100%' }}
                     placeholder="Select Timezone"
+                    dropdownClassName={theme === 'dark' && "custom-dropdown"}
                     optionFilterProp="label"
                     value={time}
                     options={timezones.map((item) => ({
@@ -814,7 +822,12 @@ const Dashboard = () => {
                             defaultValue={defaultDates}
                             disabledDate={disabledDate}
                             format="YYYY-MM-DD"
-                            style={{ width: '100%' }}
+                            style={{
+                                width: '100%',
+                                backgroundColor: theme === 'dark' ? '#333' : undefined,
+                                color: theme === 'dark' ? 'white' : undefined,
+                              }}
+                            dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}
                         />
                     </ConfigProvider>
                 </Col>
@@ -1171,6 +1184,7 @@ const Dashboard = () => {
                                             backgroundColor: 'rgba(44, 144, 192, 0.2)',
                                             fill: true,
                                             hidden: true,
+                                            tension: 0.3
                                         },
                                         {
                                             label: 'Revenue',
@@ -1179,6 +1193,7 @@ const Dashboard = () => {
                                             backgroundColor: 'rgba(99, 200, 99, 0.2)',
                                             fill: true,
                                             hidden: true,
+                                            tension: 0.3
                                         },
                                         {
                                             label: 'RPC',
@@ -1187,6 +1202,7 @@ const Dashboard = () => {
                                             backgroundColor: 'rgba(255, 99, 132, 0.2)',
                                             fill: true,
                                             hidden: true,
+                                            tension: 0.3
                                         },
                                         {
                                             label: 'CPL',
@@ -1195,6 +1211,7 @@ const Dashboard = () => {
                                             backgroundColor: 'rgba(255, 159, 64, 0.2)',
                                             fill: true,
                                             hidden: true,
+                                            tension: 0.3
                                         },
                                         {
                                             label: 'Profit',
@@ -1202,6 +1219,7 @@ const Dashboard = () => {
                                             borderColor: 'rgba(255, 206, 86, 1)',
                                             backgroundColor: 'rgba(255, 206, 86, 0.2)',
                                             fill: true,
+                                            tension: 0.3
                                         },
                                         {
                                             label: 'Margin',
@@ -1210,6 +1228,7 @@ const Dashboard = () => {
                                             backgroundColor: 'rgba(153, 102, 255, 0.2)',
                                             fill: true,
                                             hidden: true,
+                                            tension: 0.3
                                         },
                                     ],
                                 }}

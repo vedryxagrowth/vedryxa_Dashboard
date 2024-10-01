@@ -4,6 +4,7 @@ import { Drawer, Button, Modal, Form, Input, Select, message, } from 'antd';
 import { CloseOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { Add } from '@mui/icons-material';
+import { useTokenContext } from '../../components/parent';
 
 const Edituseraccesses = ({ editeddata, visible, onClose }) => {
     // console.log(editeddata, "heyy edit-useraccess page")
@@ -18,6 +19,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
     }
     // console.log(userName, "userName");
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const { theme } = useTokenContext();
     
 
     const [formalldata, setFormData] = useState({
@@ -333,7 +335,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                         },
                     ]}
                 >
-                    <Input  disabled  style={{backgroundColor:'transparent', color: 'black'}}/>
+                    <Input  disabled  style={{backgroundColor:'transparent', color: theme === "dark" ? 'white' : "black"}}/>
                 </Form.Item>
 
                 <Form.Item
@@ -346,7 +348,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                         },
                     ]}
                 >
-                    <Input  disabled  style={{backgroundColor:'transparent', color: 'black'}}/>
+                    <Input  disabled  style={{backgroundColor:'transparent', color: theme === "dark" ? 'white' : "black"}}/>
                 </Form.Item>
 
                 <Form.Item
@@ -359,7 +361,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                         },
                     ]}
                 >
-                    <Select>
+                    <Select dropdownClassName={theme === 'dark' && "custom-dropdown"}>
                         <Select.Option value="Media_Buyer">Media_Buyer</Select.Option>
                         <Select.Option value="Special_User">Special_User</Select.Option>
                         <Select.Option value="Admin">Admin</Select.Option>
@@ -407,6 +409,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                             <Select
                                 placeholder="Select a network"
                                 style={{ width: '145px', height: '30px', marginRight:'8px' }}
+                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                 value={account.network}
                                 onChange={(value) => handleNetworkChange(accountIndex, value)}
                             >
@@ -443,7 +446,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                                         handleInputChange(accountIndex, inputIndex, e.target.value)
                                         }
                                         placeholder="Enter ad input"
-                                        style={{ width: '100%', marginRight: '8px' }}
+                                        style={{ width: '100%', marginRight: '8px', color: theme === "dark" ? 'white' : "black" }}
                                     />
                                     
                                     {/* Show DeleteOutlined only if there is more than one input */}
@@ -490,6 +493,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                                     <Select
                                         placeholder="Select a network"
                                         style={{ width: '120px', marginRight: '8px' }}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                         value={account.network}
                                         onChange={(value) => handleNetworkChange1(accountIndex, value)}
                                     >
@@ -506,7 +510,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                                                     value={input}
                                                     onChange={(e) => handleInputChange1(accountIndex, inputIndex, e.target.value)}
                                                     placeholder="Enter ad input"
-                                                    style={{ width: '100%', marginRight: '8px' }}
+                                                    style={{ width: '100%', marginRight: '8px', color: theme === "dark" ? 'white' : "black" }}
                                                 />
                                                 {inputIndex !== 0 && (
                                                     <DeleteOutlined
@@ -532,7 +536,9 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                             </div>
                         ))}
                     </div>
-                    <Button type="dashed" onClick={handleAddAccount} icon={<PlusOutlined />}>
+                    <Button type="dashed" onClick={handleAddAccount} icon={<span style={{ color: theme === 'dark' ? 'white' : 'black' }}> {/* Wrap icon in a span */}
+                        <PlusOutlined />
+                        </span>}>
                         Add Account
                     </Button>
                 </Form.Item>

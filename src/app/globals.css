@@ -638,3 +638,137 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 
 /* =======
 >>>>>>> master */
+
+/* Style for the select input */
+/* Style for the specific select input using the class 'custom-select' */
+.custom-select .ant-select-selector {
+  background-color: #333 !important;
+  color: white !important;
+}
+
+/* Style for the dropdown container of the specific select */
+.custom-dropdown {
+  background-color: #333 !important;
+}
+
+/* Style for the dropdown options */
+.custom-dropdown .ant-select-item {
+  background-color: #333 !important;
+  color: white !important;
+}
+
+/* Style for hovered/active options (light black color) */
+.custom-dropdown .ant-select-item-option-selected,
+.custom-dropdown .ant-select-item-option-active {
+  background-color: #2b2b2b !important; /* Light black color */
+  color: white !important;
+}
+
+/* Scrollbar styling for the custom dropdown */
+.custom-dropdown .ant-select-dropdown ::-webkit-scrollbar {
+  width: 8px; /* Width of the scrollbar */
+}
+
+.custom-dropdown .ant-select-dropdown ::-webkit-scrollbar-track {
+  background-color: #333; /* Black track */
+}
+
+.custom-dropdown .ant-select-dropdown ::-webkit-scrollbar-thumb {
+  background-color: #d3d3d3; /* Light grey thumb */
+  border-radius: 10px; /* Rounded scrollbar thumb */
+}
+
+/* Firefox scrollbar styling */
+.custom-dropdown .ant-select-dropdown {
+  scrollbar-color: #d3d3d3 #333; /* Light grey thumb and black track */
+  scrollbar-width: thin;
+}
+
+/* Ensure that the entire calendar cell (hover state) changes background color to grey */
+.dark-theme-dropdown .ant-picker-cell .ant-picker-cell-inner:hover {
+  background-color: grey !important; /* Force grey background */
+  color: white !important; /* Ensure white text */
+}
+
+/* Apply the dark theme to the entire RangePicker dropdown container */
+.dark-theme-dropdown .ant-picker-panel-container {
+  background-color: #333;
+  color: white;
+}
+
+/* Ensure that the header (month, year controls, and arrows) follows the dark theme */
+.dark-theme-dropdown .ant-picker-header {
+  background-color: #333;
+  color: white;
+}
+
+/* Apply background and text color to the weekday headers (Su, M, Tu, etc.) */
+.dark-theme-dropdown .ant-picker-content th {
+  background-color: #333;
+  color: white;
+}
+
+/* Apply background and text color to the date cells */
+.dark-theme-dropdown .ant-picker-cell-inner {
+  background-color: #333;
+  color: white;
+}
+
+/* Selected date styling */
+.dark-theme-dropdown .ant-picker-cell-selected .ant-picker-cell-inner {
+  background-color: #555;
+  color: white;
+}
+
+/* Disabled date styling */
+.dark-theme-dropdown .ant-picker-cell-disabled .ant-picker-cell-inner {
+  background-color: #333;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Style the range presets list */
+.dark-theme-dropdown .ant-picker-presets {
+  background-color: #333;
+  color: white;
+}
+
+/* Today button styling */
+.dark-theme-dropdown .ant-picker-today-btn {
+  background-color: #333;
+  color: white;
+}
+
+/* Ensure border and surrounding elements match the dark theme */
+.dark-theme-dropdown .ant-picker-panel-container,
+.dark-theme-dropdown .ant-picker-dropdown {
+  background-color: #333;
+  color: white;
+  border: none;
+}
+
+
+.checkbox-group-dark .ant-checkbox-wrapper {
+  color: white !important;
+}
+
+/* Light theme checkbox label color for Checkbox.Group */
+.checkbox-group-light .ant-checkbox-wrapper {
+  color: black !important;
+}
+
+/* Dark theme individual checkbox label */
+.checkbox-dark .ant-checkbox-wrapper {
+  color: white !important;
+}
+
+/* Light theme individual checkbox label */
+.checkbox-light .ant-checkbox-wrapper {
+  color: black !important;
+}
+
+.dark-theme .ant-card-head-title {
+  color: #fff;
+}
+.light-theme .ant-card-head-title {
+  color: #333;
+}
