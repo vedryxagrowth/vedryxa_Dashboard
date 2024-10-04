@@ -13,7 +13,7 @@ import dayjs from 'dayjs';
 import { Carousel, Input, Button, Pagination, Row, Col, Typography, Result, Modal, message, ConfigProvider, theme } from 'antd';
 
 // import 'antd/dist/reset.css';
-import { CommentOutlined, CustomerServiceOutlined, MenuOutlined, InfoCircleOutlined, DownloadOutlined, SearchOutlined, ArrowLeftOutlined, ArrowRightOutlined, SmileOutlined, ReloadOutlined, CopyOutlined, StarOutlined, StarFilled, EditOutlined, CheckCircleFilled, CloseCircleFilled, MessageOutlined } from '@ant-design/icons';
+import { CommentOutlined, CustomerServiceOutlined, MenuOutlined, InfoCircleOutlined, DownloadOutlined, SearchOutlined, ArrowLeftOutlined, ArrowRightOutlined, SmileOutlined, ReloadOutlined, CopyOutlined, StarOutlined, StarFilled, EditOutlined, CheckCircleFilled, CloseCircleFilled, MessageOutlined, SubnodeOutlined } from '@ant-design/icons';
 import { FloatButton, Tooltip } from 'antd';
 import Draggable from 'react-draggable';
 // import FormControl from '@mui/material/FormControl';
@@ -177,11 +177,17 @@ const MyTablePage = () => {
 
     const [revenuePratner, setRevenuePartner] = useState([networks[0]]);
 
+    const [newRevenuePratner, setNewRevenuePartner] = useState([networks[0]]);
+
     const [isSearching, setIsSearching] = useState(false);
     const [inputValue, setInputValue] = useState('');
+    const [isSecondRowVisible, setIsSecondRowVisible] = useState(false);
+
+    // Toggle function
 
     const handleSearchClick = () => {
         setIsSearching(true);
+        setIsSecondRowVisible(prevState => !prevState);
     };
 
     const handleBlur = () => {
@@ -227,6 +233,10 @@ const MyTablePage = () => {
     const [account, setAccount] = useState(typeof accountsForAccess[0] === 'string' ? accountsForAccess[0] : accountsForAccess[0].accountNumber);
 
     const [time, setTime] = useState('UTC');
+
+    const [newaccount, setNewAccount] = useState(typeof accountsForAccess[0] === 'string' ? accountsForAccess[0] : accountsForAccess[0].accountNumber);
+
+    const [newtime, setNewTime] = useState('UTC');
 
     const [pageSize, setPageSize] = useState(1);
 
@@ -1686,7 +1696,7 @@ const MyTablePage = () => {
             console.error("Token not available. Please log in.");
             return;  // Stop execution if token is missing
         }
-        const fetchData = await axios.get(`https://prodapis.adsgoat.in/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${account}&timezone=${time}&network=${newtworkCollections[revenuePratner]}`, {
+        const fetchData = await axios.get(`https://prodapis.adsgoat.in/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`, {
             headers: {
                 Authorization: token,
             },
@@ -1873,7 +1883,7 @@ const MyTablePage = () => {
 
     const functionCall2 = async () => {
         try {
-            const fetchData = await axios.get(`https://prodapis.adsgoat.in/Daily?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${account}&timezone=${time}&network=${newtworkCollections[revenuePratner]}`, {
+            const fetchData = await axios.get(`https://prodapis.adsgoat.in/Daily?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`, {
                 headers: {
                     Authorization: token,
                 },
@@ -1991,7 +2001,7 @@ const MyTablePage = () => {
     }
 
     const functionCall3 = async () => {
-        const fetchData = await axios.get(`https://prodapis.adsgoat.in/AllCampaigns?accountNumber=${account}&timezone=${time}&network=${newtworkCollections[revenuePratner]}&page=${pageSize}&limit=100`, {
+        const fetchData = await axios.get(`https://prodapis.adsgoat.in/AllCampaigns?accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}&page=${pageSize}&limit=100`, {
             headers: {
                 Authorization: token,
             },
@@ -1999,7 +2009,7 @@ const MyTablePage = () => {
         console.log(fetchData, "f1");
         const mainData = fetchData.data.items;
 
-        const url = `https://prodapis.adsgoat.in/AllCampaigns?accountNumber=${account}&timezone=${time}&network=${newtworkCollections[revenuePratner]}&page=${pageSize}&limit=100`;
+        const url = `https://prodapis.adsgoat.in/AllCampaigns?accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}&page=${pageSize}&limit=100`;
 
         const specifiedTimeZone = selectTimezone[time];
         console.log(specifiedTimeZone, "spe");
@@ -2188,6 +2198,9 @@ const MyTablePage = () => {
         setLoading(true);
         setLoading1(true);
         setLoading2(true);
+        setNewAccount(account);
+        setNewTime(time);
+        setNewRevenuePartner(revenuePratner);
         // setMainComponent(true);
     }
 
@@ -2279,7 +2292,7 @@ const MyTablePage = () => {
         if (event.colDef.field === 'adsetname') {
             const value = event.value;
             if (value !== undefined) {
-                const url = `/DailyAndCampaignHistory/AdsetHistory/${value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
+                const url = `/DailyAndCampaignHistory/AdsetHistory/${value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                 window.open(url, '_blank');
                 console.log(`Price clicked: ${value}`);
             }
@@ -2291,7 +2304,7 @@ const MyTablePage = () => {
         if (event.colDef.field === 'adsetname') {
             const value = event.value;
             if (value !== undefined) {
-                const url = `/AllCampaigns/AdsetHistory/${value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
+                const url = `/AllCampaigns/AdsetHistory/${value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                 window.open(url, '_blank');
                 console.log(`Adset clicked: ${value}`);
             }
@@ -2302,7 +2315,7 @@ const MyTablePage = () => {
         if (event.colDef.field === 'adsetname') {
             const value = event.value;
             if (value !== undefined) {
-                const url = `/LiveHistory/LiveAdsetHistory/${value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
+                const url = `/LiveHistory/LiveAdsetHistory/${value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                 window.open(url, '_blank');
                 console.log(`Adset clicked: ${value}`);
             }
@@ -2536,9 +2549,9 @@ const MyTablePage = () => {
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                         {relatedComment && (
                             starred ? (
-                                <StarFilled onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: 'gold' }} />
+                                <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: "gold" }} />
                             ) : (
-                                <StarOutlined onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px' }} />
+                                <StarOutlined className='startview'  onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px' }} />
                             )
                         )}                      {relatedComment ? (
                             <Tooltip title={(
@@ -2547,21 +2560,21 @@ const MyTablePage = () => {
                                     <EditOutlined onClick={handleEditClick} style={{ marginLeft: '10px', color: 'blue', cursor: 'pointer' }} />
                                 </div>
                             )}>
-                                <MessageOutlined style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
+                                <MessageOutlined className='Message' style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
                                 <Tooltip title={tooltipText}></Tooltip>
                             </Tooltip>
                         ) : (
                             <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
                         )}                        <Tooltip title={tooltipText}>
-                            <CopyOutlined
+                            <CopyOutlined 
                                 onClick={copyToClipboard}
-                                style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight: '10px' }}
+                                style={{ cursor: 'pointer', marginLeft: '8px',  color:"#1e1e1f", marginRight: '10px' }}
                             />
                         </Tooltip>
                         <span
                             onClick={() => {
                                 // console.log(`Grouped Make clicked: ${params.value}`);
-                                const url = `/LiveHistory/LiveCampaignHistory/${params.value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
+                                const url = `/LiveHistory/LiveCampaignHistory/${params.value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                                 window.open(url, '_blank');
                             }}
                         >
@@ -2747,9 +2760,9 @@ const MyTablePage = () => {
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                         {relatedComment && (
                             starred ? (
-                                <StarFilled onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: 'gold' }} />
+                                <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: 'gold' }} />
                             ) : (
-                                <StarOutlined onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px' }} />
+                                <StarOutlined className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px' }} />
                             )
                         )}
                         {relatedComment ? (
@@ -2759,7 +2772,7 @@ const MyTablePage = () => {
                                     <EditOutlined onClick={handleEditClick} style={{ marginLeft: '10px', color: 'blue', cursor: 'pointer' }} />
                                 </div>
                             )}>
-                                <MessageOutlined style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
+                                <MessageOutlined className='Message' style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
                             </Tooltip>
                         ) : (
                             <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
@@ -2772,7 +2785,7 @@ const MyTablePage = () => {
                         </Tooltip>
                         <span
                             onClick={() => {
-                                const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
+                                const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                                 window.open(url, '_blank');
                             }}
                         >
@@ -2941,9 +2954,9 @@ const MyTablePage = () => {
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                         {relatedComment && (
                             starred ? (
-                                <StarFilled onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: 'gold' }} />
+                                <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: 'gold' }} />
                             ) : (
-                                <StarOutlined onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px' }} />
+                                <StarOutlined className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px' }} />
                             )
                         )}
                         {relatedComment ? (
@@ -2953,7 +2966,7 @@ const MyTablePage = () => {
                                     <EditOutlined onClick={handleEditClick} style={{ marginLeft: '10px', color: 'blue', cursor: 'pointer' }} />
                                 </div>
                             )}>
-                                <MessageOutlined style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
+                                <MessageOutlined className='Message' style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
                             </Tooltip>
                         ) : (
                             <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
@@ -2966,7 +2979,7 @@ const MyTablePage = () => {
                         </Tooltip>
                         <span
                             onClick={() => {
-                                const url = `/AllCampaigns/CampaignHistory/${params.value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
+                                const url = `/AllCampaigns/CampaignHistory/${params.value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                                 window.open(url, '_blank');
                             }}
                         >
@@ -3655,7 +3668,7 @@ const MyTablePage = () => {
                                 format="YYYY-MM-DD"
                                 style={{
                                     width: '100%',
-                                    backgroundColor: theme === 'dark' ? '#333' : undefined,
+                                    backgroundColor: theme === 'dark' ? '#555' : undefined,
                                     color: theme === 'dark' ? 'white' : undefined,
                                 }}
                                 dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}
@@ -3684,10 +3697,22 @@ const MyTablePage = () => {
                             Submit
                         </Button>
                     </Col>
+                    <Col xs={24} sm={24} md={15} lg={5}>
+                    <Tooltip title="Refresh & Export and Search">
+                    <Button 
+                        type="primary" 
+                        shape="circle" 
+                        style={{ backgroundColor: '#C7F39A', border: 'solid 1px #C7F39A', color: 'black', fontWeight: '600', float: 'inline-end' }} 
+                        icon={<SubnodeOutlined />} 
+                        onClick={handleSearchClick} // Toggle search bar visibility on button click
+                        />
+                    </Tooltip>
+                    </Col>
                 </Row>
             </Space>
             <div >
-                <Row style={{ padding: '10px', paddingRight: '30px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+               <div className={`secondRow ${isSecondRowVisible ? '' : 'hidden'}`}>
+               <Row style={{ padding: '10px', paddingRight: '30px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
                     <Col style={{ marginRight: '15px' }}>
                         {/* {isSearching ? (
                             <Row gutter={8}>
@@ -3736,6 +3761,7 @@ const MyTablePage = () => {
                         </Tooltip>
                     </Col>
                 </Row>
+               </div>
 
                 <Carousel afterChange={onChange1} ref={carouselRef}>
                     <div style={{ height: "100%", marginBottom: '20px' }}>
@@ -3766,7 +3792,7 @@ const MyTablePage = () => {
                                             </Space>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600' }}>Acc: {account}</Text>
+                                            <Text style={{ fontWeight: '600' }}>Acc: {newaccount}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ fontWeight: '600' }}>Timezone: {timezone.current}</Text>
@@ -3844,11 +3870,11 @@ const MyTablePage = () => {
                             ) : <div>
                                 {startDate !== endDate ? <Result
                                     icon={<SmileOutlined />}
-                                    title={`No LiveData for ${account} from ${startDate} to ${endDate}`}
+                                    title={`No LiveData for ${newaccount} from ${startDate} to ${endDate}`}
                                 // extra={<Button type="primary">Next</Button>}
                                 /> : <Result
                                     icon={<SmileOutlined />}
-                                    title={`No LiveData for ${account} to ${startDate}`}
+                                    title={`No LiveData for ${newaccount} to ${startDate}`}
                                 // extra={<Button type="primary">Next</Button>}
                                 />}
                             </div>}
@@ -3880,7 +3906,7 @@ const MyTablePage = () => {
                                             </Space>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600' }}>Acc: {account}</Text>
+                                            <Text style={{ fontWeight: '600' }}>Acc: {newaccount}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ fontWeight: '600' }}>Timezone: {timezone.current}</Text>
@@ -3934,11 +3960,11 @@ const MyTablePage = () => {
                             ) : <div>
                                 {startDate !== endDate ? <Result
                                     icon={<SmileOutlined />}
-                                    title={`No DailyData for ${account} from ${startDate} to ${endDate}`}
+                                    title={`No DailyData for ${newaccount} from ${startDate} to ${endDate}`}
                                 // extra={<Button type="primary">Next</Button>}
                                 /> : <Result
                                     icon={<SmileOutlined />}
-                                    title={`No DailyData for ${account} to ${startDate}`}
+                                    title={`No DailyData for ${newaccount} to ${startDate}`}
                                 // extra={<Button type="primary">Next</Button>}
                                 />}
                             </div>}
@@ -3970,7 +3996,7 @@ const MyTablePage = () => {
                                             </Space>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600' }}>Acc: {account}</Text>
+                                            <Text style={{ fontWeight: '600' }}>Acc: {newaccount}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ fontWeight: '600' }}>Timezone: {timezone.current}</Text>
@@ -4047,11 +4073,11 @@ const MyTablePage = () => {
                                 <div>
                                     {startDate !== endDate ? <Result
                                         icon={<SmileOutlined />}
-                                        title={`No CampaignData for ${account} from ${startDate} to ${endDate}`}
+                                        title={`No CampaignData for ${newaccount} from ${startDate} to ${endDate}`}
                                     // extra={<Button type="primary">Next</Button>}
                                     /> : <Result
                                         icon={<SmileOutlined />}
-                                        title={`No CampaignData for ${account} to ${startDate}`}
+                                        title={`No CampaignData for ${newaccount} to ${startDate}`}
                                     // extra={<Button type="primary">Next</Button>}
                                     />}
                                 </div>
