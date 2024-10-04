@@ -1,10 +1,17 @@
 {
   "polyfillFiles": [
+<<<<<<< Updated upstream
     "static/chunks/polyfills-78c92fac7aa8fdd8.js"
+=======
+    "static/chunks/polyfills.js"
   ],
-  "devFiles": [],
+  "devFiles": [
+    "static/chunks/react-refresh.js"
+>>>>>>> Stashed changes
+  ],
   "ampDevFiles": [],
   "lowPriorityFiles": [
+<<<<<<< Updated upstream
     "static/XdLS53IyDSiPDNvdPIvU-/_buildManifest.js",
     "static/XdLS53IyDSiPDNvdPIvU-/_ssgManifest.js"
   ],
@@ -26,6 +33,25 @@
       "static/chunks/framework-08aa667e5202eed8.js",
       "static/chunks/main-64aa750a4a7e6826.js",
       "static/chunks/pages/_error-c66a4e8afc46f17b.js"
+=======
+    "static/development/_buildManifest.js",
+    "static/development/_ssgManifest.js"
+  ],
+  "rootMainFiles": [
+    "static/chunks/webpack.js",
+    "static/chunks/main-app.js"
+  ],
+  "pages": {
+    "/_app": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/_app.js"
+    ],
+    "/_error": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/_error.js"
+>>>>>>> Stashed changes
     ]
   },
   "ampFirstPages": []
