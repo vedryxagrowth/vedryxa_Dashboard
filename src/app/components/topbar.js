@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { SessionProvider, useSession, signIn, signOut } from 'next-auth/react';
 import Image from "next/image";
-import { Layout, Avatar, Dropdown, Button, Switch, Spin, Form, Input, Divider } from "antd";
+import { Layout, Avatar, Dropdown, Button, Switch, Spin, Form, Input, Divider, Modal } from "antd";
 import React from "react";
 import { useRouter } from "next/navigation";
 import axios from 'axios';
@@ -108,30 +108,117 @@ const Topbar = ({  }) => {
 
 //   const toggleTheme = () => {
 //     setDarkMode(!darkMode);
+
+const {userdetails} = useTokenContext();
+
+const [userProfile, setUserProfile] = useState(userdetails);
+
+useEffect(() => {
+    if(userdetails){
+        setUserProfile(userdetails);
+    }
+}, [userdetails]);
+
+const handleProfileUpdate = (updatedProfileData) => {
+    setUserProfile(prev => ({
+        ...prev,
+        ...updatedProfileData,
+    }));
+};
 //   };
 
-  const dropdownItems = [
-    {
-      key: '1',
-      label: (
-        <a href="/api/auth/signin">Sign in</a>
-      ),
-    },
-    {
-      key: '2',
-      label: (
-        <a
-          onClick={() => {
-            localStorage.clear();
-            localStorage.setItem('redirectUrl', router.asPath);
-            router.push('/api/auth/signout');
-          }}
-        >
-          Sign Out
-        </a>
-      ),
-    },
-  ];
+const [isModalVisible, setIsModalVisible] = useState(false);
+
+const openProfileModal = () => {
+  setIsModalVisible(true);
+};
+
+const onHandleCancel = () => {
+  setIsModalVisible(false);
+}
+
+const renderAdAccounts = () => {
+  if (!userdetails?.adAccounts) return null;
+
+  return Object.keys(userdetails.adAccounts).map((key) => (
+      <div key={key} style={{ textAlign: 'left', marginBottom: '20px' }}>
+          <h4>{key}:</h4>
+          <ul>
+              {userdetails.adAccounts[key].map((accountId, index) => (
+                  <li key={index}>{typeof accountId === 'object' ? accountId.accountNumber : accountId}</li>
+              ))}
+          </ul>
+      </div>
+  ));
+};
+
+const dropdownItems = status === 'authenticated' ? [
+  {
+    key: '1',
+    label: (
+      <a onClick={openProfileModal} style={{padding: '5px'}}>
+        Profile
+      </a>
+    ),
+  },
+  {
+    key: '2',
+    label: (
+      <a
+        onClick={() => {
+          localStorage.clear();
+          localStorage.setItem('redirectUrl', router.asPath);
+          router.push('/api/auth/signout');
+        }}
+      >
+        Sign Out
+      </a>
+    ),
+  },
+] : [
+  {
+    key: '1',
+    label: (
+      <a href="/api/auth/signin">Sign in</a>
+    ),
+  },
+];
+
+const maleImoji = 'https://res.cloudinary.com/dyogjqsil/image/upload/v1727960655/3d-rendering-cartoon-character-with-eyeglasses-jacket_lu1cqi.jpg';
+
+const femaleImoji = 'https://res.cloudinary.com/dyogjqsil/image/upload/v1727960642/portrait-3d-female-doctor_cei7bm.jpg';
+
+const getAvatarSrc = () => {
+  if (userdetails?.gender === 'Male') {
+    return maleImoji;
+  } else if (userdetails?.gender === 'Female') {
+    return femaleImoji;
+  }
+  // return defaultImoji
+}
+
+  // const dropdownItems = [
+  //   {
+  //     key: '1',
+  //     label: (
+  //       <a href="/api/auth/signin">Sign in</a>
+  //     ),
+  //   },
+  //   {
+  //     key: '2',
+  //     label: (
+  //       <a
+  //         onClick={() => {
+  //           localStorage.clear();
+  //           localStorage.setItem('redirectUrl', router.asPath);
+  //           router.push('/api/auth/signout');
+  //         }}
+  //       >
+  //         Sign Out
+  //       </a>
+  //     ),
+  //   },
+  // ];
 
   return (
     <div
@@ -188,8 +275,9 @@ const Topbar = ({  }) => {
         >
           <Avatar
             size="large"
+            src={getAvatarSrc()}
             style={{
-              background: darkMode ? '#555' : '#ebebeb',
+              background: darkMode ? '#333' : '#ebebeb',
               fontSize: '1.8em',
               transition: 'background 0.3s ease',
             }}
@@ -217,9 +305,46 @@ const Topbar = ({  }) => {
         )}
       </button>
 
-
-
       </div>
+            <Modal
+                visible={isModalVisible}
+                width={`50%`}
+                onCancel={onHandleCancel}
+                footer={[
+                    // <Button key="close" onClick={onHandleCancel}>Close</Button>
+                ]}
+                style={{ textAlign: "center", borderRadius: '8px', padding: '0px' }}
+            >
+                <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", width: '100%' }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", flexDirection: "row", height: "12%", marginBottom: '10px' }}>
+                        <div style={{ display: "flex", flexDirection: "column" }}>
+                            <Avatar 
+                                size={110}
+                                src={getAvatarSrc()}
+                                style={{ border: "2px solid #ccc" }}
+                            />
+                            {/* <Button 
+                                type="primary" 
+                                style={{ height: "25px", width: "70px", marginLeft: "10px", marginTop: "10px" }}
+                                onClick={() => handleProfileUpdate({ image: '/new-image.png' })}
+                            >
+                                Upload
+                            </Button> */}
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "flex-start", padding: "0px" }}>
+                            <p style={{margin: "1px"}}><span style={{ fontWeight: "bold" }}>ID:</span> {userdetails ? userdetails._id : ""}</p>
+                            <p style={{margin: "1px"}}><span style={{ fontWeight: "bold" }}>EMAIL_ID:</span> {userdetails ? userdetails.email : "No email"}</p>
+                            <p style={{margin: "1px"}}><span style={{ fontWeight: "bold" }}>Name:</span> {userdetails ? userdetails.userName : "Guest"}</p>
+                        </div>
+                    </div>
+                    <hr style={{ border: "1px solid black", width: "100%" }} />
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+                        <div style={{ maxHeight: '200px', width: "100%", overflowY: 'auto', padding: '10px', border: '1px solid #ccc', marginBottom: '20px' }}>
+                            {renderAdAccounts()}
+                        </div>
+                    </div>
+                </div>
+            </Modal>
     </div>
   );
 };

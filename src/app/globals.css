@@ -780,6 +780,31 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 }
 
 
+/* darkmode ant-modal */
+.dark-mode .ant-modal-content {
+  background-color: #333 !important;
+  color: #fff !important;
+}
+
+.dark-mode .ant-modal-footer button {
+  background-color: #555 !important;
+  color: #fff !important;
+}
+
+.dark-mode {
+  scrollbar-color: #555 #333;
+  scrollbar-width: thin;
+}
+
+/* Dark mode dropdown styles */
+.dark-mode .ant-dropdown-menu {
+  background-color: #333 !important;
+  color: #fff !important;
+}
+
+.dark-mode .ant-dropdown-menu-item {
+  color: #fff !important;
+}
 /* Toggel Css  */
 .secondRow {
   display: block;
