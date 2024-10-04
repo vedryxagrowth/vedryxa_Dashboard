@@ -1696,7 +1696,7 @@ const MyTablePage = () => {
             console.error("Token not available. Please log in.");
             return;  // Stop execution if token is missing
         }
-        const fetchData = await axios.get(`https://prodapis.adsgoat.in/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${account}&timezone=${time}&network=${newtworkCollections[revenuePratner]}`, {
+        const fetchData = await axios.get(`https://prodapis.adsgoat.in/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`, {
             headers: {
                 Authorization: token,
             },
@@ -1883,7 +1883,7 @@ const MyTablePage = () => {
 
     const functionCall2 = async () => {
         try {
-            const fetchData = await axios.get(`https://prodapis.adsgoat.in/Daily?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${account}&timezone=${time}&network=${newtworkCollections[revenuePratner]}`, {
+            const fetchData = await axios.get(`https://prodapis.adsgoat.in/Daily?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`, {
                 headers: {
                     Authorization: token,
                 },
@@ -2001,7 +2001,7 @@ const MyTablePage = () => {
     }
 
     const functionCall3 = async () => {
-        const fetchData = await axios.get(`https://prodapis.adsgoat.in/AllCampaigns?accountNumber=${account}&timezone=${time}&network=${newtworkCollections[revenuePratner]}&page=${pageSize}&limit=100`, {
+        const fetchData = await axios.get(`https://prodapis.adsgoat.in/AllCampaigns?accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}&page=${pageSize}&limit=100`, {
             headers: {
                 Authorization: token,
             },
@@ -2009,7 +2009,7 @@ const MyTablePage = () => {
         console.log(fetchData, "f1");
         const mainData = fetchData.data.items;
 
-        const url = `https://prodapis.adsgoat.in/AllCampaigns?accountNumber=${account}&timezone=${time}&network=${newtworkCollections[revenuePratner]}&page=${pageSize}&limit=100`;
+        const url = `https://prodapis.adsgoat.in/AllCampaigns?accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}&page=${pageSize}&limit=100`;
 
         const specifiedTimeZone = selectTimezone[time];
         console.log(specifiedTimeZone, "spe");
@@ -2292,7 +2292,7 @@ const MyTablePage = () => {
         if (event.colDef.field === 'adsetname') {
             const value = event.value;
             if (value !== undefined) {
-                const url = `/DailyAndCampaignHistory/AdsetHistory/${value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
+                const url = `/DailyAndCampaignHistory/AdsetHistory/${value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                 window.open(url, '_blank');
                 console.log(`Price clicked: ${value}`);
             }
@@ -2304,7 +2304,7 @@ const MyTablePage = () => {
         if (event.colDef.field === 'adsetname') {
             const value = event.value;
             if (value !== undefined) {
-                const url = `/AllCampaigns/AdsetHistory/${value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
+                const url = `/AllCampaigns/AdsetHistory/${value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                 window.open(url, '_blank');
                 console.log(`Adset clicked: ${value}`);
             }
@@ -2315,7 +2315,7 @@ const MyTablePage = () => {
         if (event.colDef.field === 'adsetname') {
             const value = event.value;
             if (value !== undefined) {
-                const url = `/LiveHistory/LiveAdsetHistory/${value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
+                const url = `/LiveHistory/LiveAdsetHistory/${value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                 window.open(url, '_blank');
                 console.log(`Adset clicked: ${value}`);
             }
@@ -2574,7 +2574,7 @@ const MyTablePage = () => {
                         <span
                             onClick={() => {
                                 // console.log(`Grouped Make clicked: ${params.value}`);
-                                const url = `/LiveHistory/LiveCampaignHistory/${params.value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
+                                const url = `/LiveHistory/LiveCampaignHistory/${params.value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                                 window.open(url, '_blank');
                             }}
                         >
@@ -2785,7 +2785,7 @@ const MyTablePage = () => {
                         </Tooltip>
                         <span
                             onClick={() => {
-                                const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
+                                const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                                 window.open(url, '_blank');
                             }}
                         >
@@ -2979,7 +2979,7 @@ const MyTablePage = () => {
                         </Tooltip>
                         <span
                             onClick={() => {
-                                const url = `/AllCampaigns/CampaignHistory/${params.value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
+                                const url = `/AllCampaigns/CampaignHistory/${params.value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                                 window.open(url, '_blank');
                             }}
                         >
@@ -3792,7 +3792,7 @@ const MyTablePage = () => {
                                             </Space>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600' }}>Acc: {account}</Text>
+                                            <Text style={{ fontWeight: '600' }}>Acc: {newaccount}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ fontWeight: '600' }}>Timezone: {timezone.current}</Text>
@@ -3870,11 +3870,11 @@ const MyTablePage = () => {
                             ) : <div>
                                 {startDate !== endDate ? <Result
                                     icon={<SmileOutlined />}
-                                    title={`No LiveData for ${account} from ${startDate} to ${endDate}`}
+                                    title={`No LiveData for ${newaccount} from ${startDate} to ${endDate}`}
                                 // extra={<Button type="primary">Next</Button>}
                                 /> : <Result
                                     icon={<SmileOutlined />}
-                                    title={`No LiveData for ${account} to ${startDate}`}
+                                    title={`No LiveData for ${newaccount} to ${startDate}`}
                                 // extra={<Button type="primary">Next</Button>}
                                 />}
                             </div>}
@@ -3906,7 +3906,7 @@ const MyTablePage = () => {
                                             </Space>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600' }}>Acc: {account}</Text>
+                                            <Text style={{ fontWeight: '600' }}>Acc: {newaccount}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ fontWeight: '600' }}>Timezone: {timezone.current}</Text>
@@ -3960,11 +3960,11 @@ const MyTablePage = () => {
                             ) : <div>
                                 {startDate !== endDate ? <Result
                                     icon={<SmileOutlined />}
-                                    title={`No DailyData for ${account} from ${startDate} to ${endDate}`}
+                                    title={`No DailyData for ${newaccount} from ${startDate} to ${endDate}`}
                                 // extra={<Button type="primary">Next</Button>}
                                 /> : <Result
                                     icon={<SmileOutlined />}
-                                    title={`No DailyData for ${account} to ${startDate}`}
+                                    title={`No DailyData for ${newaccount} to ${startDate}`}
                                 // extra={<Button type="primary">Next</Button>}
                                 />}
                             </div>}
@@ -3996,7 +3996,7 @@ const MyTablePage = () => {
                                             </Space>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600' }}>Acc: {account}</Text>
+                                            <Text style={{ fontWeight: '600' }}>Acc: {newaccount}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ fontWeight: '600' }}>Timezone: {timezone.current}</Text>
@@ -4073,11 +4073,11 @@ const MyTablePage = () => {
                                 <div>
                                     {startDate !== endDate ? <Result
                                         icon={<SmileOutlined />}
-                                        title={`No CampaignData for ${account} from ${startDate} to ${endDate}`}
+                                        title={`No CampaignData for ${newaccount} from ${startDate} to ${endDate}`}
                                     // extra={<Button type="primary">Next</Button>}
                                     /> : <Result
                                         icon={<SmileOutlined />}
-                                        title={`No CampaignData for ${account} to ${startDate}`}
+                                        title={`No CampaignData for ${newaccount} to ${startDate}`}
                                     // extra={<Button type="primary">Next</Button>}
                                     />}
                                 </div>

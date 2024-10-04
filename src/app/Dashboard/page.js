@@ -204,10 +204,22 @@ const Dashboard = () => {
         if (dates && dates.length === 2) {
             setSkeletonLoading(true);
             const [start, end] = dates;
-            console.log('Start Date:', start.format('YYYY-MM-DD'));
-            console.log('End Date:', end.format('YYYY-MM-DD'));
-            setStartDate(start.format('YYYY-MM-DD'));
-            setEndDate(end.format('YYYY-MM-DD'));
+    
+            const formattedStart = start.format('YYYY-MM-DD');
+            const formattedEnd = end.format('YYYY-MM-DD');
+    
+            if (startDate !== formattedStart || endDate !== formattedEnd) {
+                setStartDate(formattedStart);
+                setEndDate(formattedEnd);
+            } else {
+                // Trigger a manual re-render if the dates are the same
+                setStartDate('');
+                setEndDate('');
+                setTimeout(() => {
+                    setStartDate(formattedStart);
+                    setEndDate(formattedEnd);
+                }, 0);
+            }
         }
     };
 
@@ -365,7 +377,7 @@ const Dashboard = () => {
 
         const transformedObject = transformObjectKeys(data);
         // console.log(transformedObject);
-        const response = await axios.post(`https://prodapis.adsgoat.in/Dashboard?timezone=${time}&start_date=${startDate}&end_date=${endDate}`, { formattedData: [transformedObject] });
+        const response = await axios.post(`https://prodapis.adsgoat.in/Dashboard?timezone=${time}&start_date=${startDate}&end_date=${endDate}`, { formattedData: [transformedObject] }); 
         const responseData = response.data;
         const functionForDetailsUpdate = async () => {
             revenue1.current = getTotalEstimatedRevenue(responseData);

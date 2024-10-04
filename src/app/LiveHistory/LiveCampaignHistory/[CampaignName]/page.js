@@ -12,6 +12,8 @@ import { useTokenContext } from '../../../components/parent'
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
 import { color } from 'chart.js/helpers';
+import { Spin } from 'antd';
+
 Chart.register(...registerables);
 
 const MnetLiveCampaignHistory = ({ params }) => {
@@ -784,7 +786,8 @@ const MnetLiveCampaignHistory = ({ params }) => {
         <div>
             {/* Chart.js integration */}
             <div style={{ height: '400px', marginBottom: '10px' }}> {/* Container with fixed height */}
-                <Line
+                {chartData.dates.length === 0 ? (<div style={{width:'100%', height:'100%', display:'flex', justifyContent:'center', alignItems:'center'}}><Spin size="large" /></div>):(
+                    <Line
                     data={{
                         labels: chartData.dates,
                         datasets: [
@@ -794,7 +797,8 @@ const MnetLiveCampaignHistory = ({ params }) => {
                                 borderColor: 'rgba(75, 192, 192, 1)',        // Teal
                                 backgroundColor: 'rgba(75, 192, 192, 0.2)',   // Light Teal
                                 fill: true,
-                                hidden: true
+                                hidden: true,
+                                tension: 0.3
                             },
                             {
                                 label: 'Revenue',
@@ -802,7 +806,8 @@ const MnetLiveCampaignHistory = ({ params }) => {
                                 borderColor: 'rgba(54, 162, 235, 1)',        // Blue
                                 backgroundColor: 'rgba(54, 162, 235, 0.2)',   // Light Blue
                                 fill: true,
-                                hidden: true
+                                hidden: true,
+                                tension: 0.3
 
                             },
                             {
@@ -811,7 +816,8 @@ const MnetLiveCampaignHistory = ({ params }) => {
                                 borderColor: 'rgba(255, 99, 132, 1)',        // Red
                                 backgroundColor: 'rgba(255, 99, 132, 0.2)',   // Light Red
                                 fill: true,
-                                hidden: true
+                                hidden: true,
+                                tension: 0.3
 
                             },
                             {
@@ -820,7 +826,8 @@ const MnetLiveCampaignHistory = ({ params }) => {
                                 borderColor: 'rgba(255, 159, 64, 1)',        // Orange
                                 backgroundColor: 'rgba(255, 159, 64, 0.2)',   // Light Orange
                                 fill: true,
-                                hidden: true
+                                hidden: true,
+                                tension: 0.3
 
                             },
                             {
@@ -829,6 +836,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                                 borderColor: 'rgba(255, 206, 86, 1)',        // Yellow
                                 backgroundColor: 'rgba(255, 206, 86, 0.2)',   // Light Yellow
                                 fill: true,
+                                tension: 0.3
 
                             },
                             {
@@ -837,7 +845,8 @@ const MnetLiveCampaignHistory = ({ params }) => {
                                 borderColor: 'rgba(153, 102, 255, 1)',       // Purple
                                 backgroundColor: 'rgba(153, 102, 255, 0.2)',  // Light Purple
                                 fill: true,
-                                hidden: true
+                                hidden: true,
+                                tension: 0.3
 
                             }
                         ],
@@ -861,6 +870,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                     }}
                     height={350} // Set the height of the chart
                 />
+                )}
             </div>
             <div style={{ display: 'flex', width: '100%', marginLeft: '2%' }}>
                 {/* Left Table: Top 5 RPC Today */}
