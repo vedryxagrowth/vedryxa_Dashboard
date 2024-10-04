@@ -459,10 +459,6 @@ body {
 }
 /* <<<<<<< HEAD */
 
-
-
-
-
 /*  New Css  */
 :where(.css-dev-only-do-not-override-f7vrd6).ant-menu-light .ant-menu-item-selected{
   background-color: #C7F39A !important;
@@ -499,14 +495,24 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-select-outlined:
   background: #555555;
   color: #ffffff;
 }
-/* Dark Mode Styles */
+body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-table-wrapper .ant-table-row-expand-icon {
+  border: 1px solid #282628;
+  background: #555555;
+  color: #ffffff;
+}
+
 body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-picker-outlined {
   background: #555555;
   border: 1px solid #282628;
   color: aliceblue;
 }
+body.dark-mode .startview svg {
+  color: gold !important;
+}
+body.dark-mode .Message svg {
+  color: blue !important;
+}
 
-/* Light Mode Styles */
 body.light-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-picker-outlined {
   border: solid 1px #d9d9d9;
   background: #ffffff;
@@ -586,12 +592,12 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 
 /* Light mode styles */
 .light-mode {
-  background-color: rgb(235, 235, 235); /* gray-200 from Tailwind */
+  background-color: #fff; /* gray-200 from Tailwind */
 }
 
 /* Dark mode styles */
 .dark-mode {
-  background-color: #555555; /* gray-700 from Tailwind */
+  background-color: #333; /* gray-700 from Tailwind */
 }
 
 /* General icon styles */
@@ -771,4 +777,14 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 }
 .light-theme .ant-card-head-title {
   color: #333;
+}
+
+
+/* Toggel Css  */
+.secondRow {
+  display: block;
+}
+
+.hidden {
+  display: none;
 }

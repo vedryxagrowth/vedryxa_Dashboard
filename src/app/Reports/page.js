@@ -13,7 +13,7 @@ import dayjs from 'dayjs';
 import { Carousel, Input, Button, Pagination, Row, Col, Typography, Result, Modal, message, ConfigProvider, theme } from 'antd';
 
 // import 'antd/dist/reset.css';
-import { CommentOutlined, CustomerServiceOutlined, MenuOutlined, InfoCircleOutlined, DownloadOutlined, SearchOutlined, ArrowLeftOutlined, ArrowRightOutlined, SmileOutlined, ReloadOutlined, CopyOutlined, StarOutlined, StarFilled, EditOutlined, CheckCircleFilled, CloseCircleFilled, MessageOutlined } from '@ant-design/icons';
+import { CommentOutlined, CustomerServiceOutlined, MenuOutlined, InfoCircleOutlined, DownloadOutlined, SearchOutlined, ArrowLeftOutlined, ArrowRightOutlined, SmileOutlined, ReloadOutlined, CopyOutlined, StarOutlined, StarFilled, EditOutlined, CheckCircleFilled, CloseCircleFilled, MessageOutlined, SubnodeOutlined } from '@ant-design/icons';
 import { FloatButton, Tooltip } from 'antd';
 import Draggable from 'react-draggable';
 // import FormControl from '@mui/material/FormControl';
@@ -179,9 +179,13 @@ const MyTablePage = () => {
 
     const [isSearching, setIsSearching] = useState(false);
     const [inputValue, setInputValue] = useState('');
+    const [isSecondRowVisible, setIsSecondRowVisible] = useState(false);
+
+    // Toggle function
 
     const handleSearchClick = () => {
         setIsSearching(true);
+        setIsSecondRowVisible(prevState => !prevState);
     };
 
     const handleBlur = () => {
@@ -2536,9 +2540,9 @@ const MyTablePage = () => {
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                         {relatedComment && (
                             starred ? (
-                                <StarFilled onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: 'gold' }} />
+                                <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: "gold" }} />
                             ) : (
-                                <StarOutlined onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px' }} />
+                                <StarOutlined className='startview'  onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px' }} />
                             )
                         )}                      {relatedComment ? (
                             <Tooltip title={(
@@ -2547,15 +2551,15 @@ const MyTablePage = () => {
                                     <EditOutlined onClick={handleEditClick} style={{ marginLeft: '10px', color: 'blue', cursor: 'pointer' }} />
                                 </div>
                             )}>
-                                <MessageOutlined style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
+                                <MessageOutlined className='Message' style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
                                 <Tooltip title={tooltipText}></Tooltip>
                             </Tooltip>
                         ) : (
                             <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
                         )}                        <Tooltip title={tooltipText}>
-                            <CopyOutlined
+                            <CopyOutlined 
                                 onClick={copyToClipboard}
-                                style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight: '10px' }}
+                                style={{ cursor: 'pointer', marginLeft: '8px',  color:"#1e1e1f", marginRight: '10px' }}
                             />
                         </Tooltip>
                         <span
@@ -2747,9 +2751,9 @@ const MyTablePage = () => {
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                         {relatedComment && (
                             starred ? (
-                                <StarFilled onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: 'gold' }} />
+                                <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: 'gold' }} />
                             ) : (
-                                <StarOutlined onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px' }} />
+                                <StarOutlined className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px' }} />
                             )
                         )}
                         {relatedComment ? (
@@ -2759,7 +2763,7 @@ const MyTablePage = () => {
                                     <EditOutlined onClick={handleEditClick} style={{ marginLeft: '10px', color: 'blue', cursor: 'pointer' }} />
                                 </div>
                             )}>
-                                <MessageOutlined style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
+                                <MessageOutlined className='Message' style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
                             </Tooltip>
                         ) : (
                             <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
@@ -2941,9 +2945,9 @@ const MyTablePage = () => {
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                         {relatedComment && (
                             starred ? (
-                                <StarFilled onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: 'gold' }} />
+                                <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: 'gold' }} />
                             ) : (
-                                <StarOutlined onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px' }} />
+                                <StarOutlined className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px' }} />
                             )
                         )}
                         {relatedComment ? (
@@ -2953,7 +2957,7 @@ const MyTablePage = () => {
                                     <EditOutlined onClick={handleEditClick} style={{ marginLeft: '10px', color: 'blue', cursor: 'pointer' }} />
                                 </div>
                             )}>
-                                <MessageOutlined style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
+                                <MessageOutlined className='Message' style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
                             </Tooltip>
                         ) : (
                             <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
@@ -3655,7 +3659,7 @@ const MyTablePage = () => {
                                 format="YYYY-MM-DD"
                                 style={{
                                     width: '100%',
-                                    backgroundColor: theme === 'dark' ? '#333' : undefined,
+                                    backgroundColor: theme === 'dark' ? '#555' : undefined,
                                     color: theme === 'dark' ? 'white' : undefined,
                                 }}
                                 dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}
@@ -3684,10 +3688,22 @@ const MyTablePage = () => {
                             Submit
                         </Button>
                     </Col>
+                    <Col xs={24} sm={24} md={15} lg={5}>
+                    <Tooltip title="Refresh & Export and Search">
+                    <Button 
+                        type="primary" 
+                        shape="circle" 
+                        style={{ backgroundColor: '#C7F39A', border: 'solid 1px #C7F39A', color: 'black', fontWeight: '600', float: 'inline-end' }} 
+                        icon={<SubnodeOutlined />} 
+                        onClick={handleSearchClick} // Toggle search bar visibility on button click
+                        />
+                    </Tooltip>
+                    </Col>
                 </Row>
             </Space>
             <div >
-                <Row style={{ padding: '10px', paddingRight: '30px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+               <div className={`secondRow ${isSecondRowVisible ? '' : 'hidden'}`}>
+               <Row style={{ padding: '10px', paddingRight: '30px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
                     <Col style={{ marginRight: '15px' }}>
                         {/* {isSearching ? (
                             <Row gutter={8}>
@@ -3736,6 +3752,7 @@ const MyTablePage = () => {
                         </Tooltip>
                     </Col>
                 </Row>
+               </div>
 
                 <Carousel afterChange={onChange1} ref={carouselRef}>
                     <div style={{ height: "100%", marginBottom: '20px' }}>

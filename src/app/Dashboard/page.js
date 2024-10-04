@@ -828,7 +828,7 @@ const Dashboard = () => {
                                     format="YYYY-MM-DD"
                                     style={{
                                         width: '100%',
-                                        backgroundColor: theme === 'dark' ? '#333' : undefined,
+                                        backgroundColor: theme === 'dark' ? '#555' : undefined,
                                         color: theme === 'dark' ? 'white' : undefined,
                                     }}
                                     dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}

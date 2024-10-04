@@ -109,14 +109,14 @@ const Appbar = ({ children }) => {
                             onClick={toggleCollapsed}
                             style={{
                                 borderRadius: '50%',
-                                width: '30px',
-                                height: '30px',
+                                width: '35px',
+                                height: '35px',
                                 // border: 'none',
                                 // background: '#fff',
                                 // color: '#007BFF',
                                 background: "rgb(199 243 154)",
                                 color: "rgb(56 102 121)",
-                                border: `solid 5px ${darkMode ? '#282628' : '#384551'}`,
+                                border: `solid 5px ${darkMode ? '#282628' : '#f1f1f1'}`,
 
                                 position: "fixed",
                                 zIndex:"999"
@@ -158,7 +158,7 @@ const Appbar = ({ children }) => {
                     }}
                     onClick={(e) => handleMenuItemClick(e.key)}
                 >
-                    <Image
+                    {/* <Image
                         src="/Ads.png"
                         width={150}
                         height={60}
@@ -166,7 +166,26 @@ const Appbar = ({ children }) => {
                         alt="Logo"
                         // style={{ maxWidth: "8rem", maxHeight: "4rem", marginBottom: '10px', margin:"0px 20px"}} // Optional margin for spacing
                         style={{ margin:"0px 20px"}} // Optional margin for spacing
-                    />
+                    /> */}
+                    {collapsed ? (
+                        <Image
+                        src="/black-white.webp"
+                        width={50}   // Smaller logo when collapsed
+                        height={50}
+                        priority={true}
+                        alt="Collapsed Logo"
+                        style={{ margin: "0px 12px" }}
+                        />
+                        ) : (
+                            <Image
+                            src="/Ads.png"
+                            width={150}  // Larger logo when expanded
+                            height={60}
+                            priority={true}
+                            alt="Expanded Logo"
+                            style={{ margin: "0px 20px" }}
+                            />
+                        )}
                     {menuItems.map(item => (
                         <Menu.Item key={item.key} icon={item.icon} style={{ borderRadius: '8px', margin: '5px 0',  color: darkMode ? '#fff' : '#000', fontWeight: "500", fontSize: "16px" }}>
                             {item.label}
@@ -179,7 +198,7 @@ const Appbar = ({ children }) => {
             <Layout style={{ marginLeft: collapsed ? 0 : 0, transition: 'margin-left 0.2s', backgroundColor: darkMode ? '#262426d6' : '#f5f5f5'  }}>
                  <LayoutWrapper/>
                
-                    <div style={{ border: "", margin:"0px 10px", borderRadius: "", height: "100vh", overflow: "auto",  backgroundColor: darkMode ? '#333' : '#fff' ,scrollbarWidth:"thin "}}>
+                    <div style={{ border: "", margin:"0px 10px", borderRadius: "", height: "86vh", overflow: "auto",  backgroundColor: darkMode ? '#333' : '#fff' ,scrollbarWidth:"thin "}}>
                    
 
                         {React.Children.map(children, child => {

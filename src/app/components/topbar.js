@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { SessionProvider, useSession, signIn, signOut } from 'next-auth/react';
 import Image from "next/image";
-import { Layout, Avatar, Dropdown, Button, Switch, Spin } from "antd";
+import { Layout, Avatar, Dropdown, Button, Switch, Spin, Form, Input, Divider } from "antd";
 import React from "react";
 import { useRouter } from "next/navigation";
 import axios from 'axios';
@@ -10,7 +10,7 @@ const { Header } = Layout;
 import { useTokenContext } from './parent';
 import moment from 'moment-timezone';
 import ContactForm from './mail';
-import { PlusOutlined } from '@ant-design/icons';
+import { GoogleOutlined, LockOutlined, PlusOutlined, UserOutlined } from '@ant-design/icons';
 import { Moon, Sun } from 'lucide-react';
 import { getSession } from 'next-auth/react';
 import debounce from 'lodash.debounce';
@@ -177,7 +177,7 @@ const Topbar = ({  }) => {
             transition: 'color 0.3s ease',
           }}
         >
-          Hi {session?.user?.name || ''}
+          Hi, {session?.user?.name || ''}
         </h2>
         <Dropdown
           menu={{
@@ -389,6 +389,14 @@ const LayoutWrapper = ({ children }) => {
     const toggleTheme = () => {
         setDarkMode(!darkMode);
     };
+    const onFinish = (values) => {
+      console.log('Received values of form: ', values);
+      // Perform your login logic here (e.g., API call for username/password)
+    };
+  
+    const handleGoogleSignIn = () => {
+      signIn('google'); // Use Next-auth for Google sign-in
+    };
 
     return (
         <>
@@ -463,16 +471,109 @@ const LayoutWrapper = ({ children }) => {
           </div>
           ) : 
             ( sessionStatus !== "authenticated" ? (
-              <img
-                  style={{
-                      width: '100%',
-                      height: 'auto',
-                      maxHeight: '90vh',
-                  }}
-                  src="/hope.png"
-                  alt="img"
-                  as="image"
+              <div
+      style={{
+        display: 'flex',
+        height: '100vh',
+      }}
+    >
+      {/* Left side: Image */}
+      <div
+        style={{
+          flex: 1,
+          position: 'relative',
+         height:"80%",
+         width:"100%",
+         marginLeft:"0.8%"
+        }}
+      >
+        <Image
+          src="/yu.jpeg"
+          alt="Login Image"
+          // layout="fill"
+          width={'1000'}
+          height={'540'}
+         
+        />
+      </div>
+
+      {/* Right side: Form */}
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          // alignItems: 'center',
+          justifyContent: 'flex-end',
+          padding: '20px',
+          backgroundColor: '#f5f5f5',
+        }}
+      >
+        <div
+          style={{
+            maxWidth: '400px',
+            height:"60%",
+            width: '100%',
+            padding: '20px',
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+          }}
+        >
+          <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Login</h2>
+
+          <Button
+            type="primary"
+            icon={<GoogleOutlined />}
+            onClick={handleGoogleSignIn}
+            style={{
+              width: '100%',
+              marginBottom: '20px',
+            }}
+          >
+            Sign in with Google
+          </Button>
+
+          <Divider>Or</Divider>
+
+          <Form name="login_form" onFinish={onFinish}>
+            <Form.Item
+              name="username"
+              rules={[{ required: true, message: 'Please input your Username!' }]}
+            >
+              <Input
+                prefix={<UserOutlined />}
+                placeholder="Username"
+                style={{ padding: '10px' }}
               />
+            </Form.Item>
+
+            <Form.Item
+              name="password"
+              rules={[{ required: true, message: 'Please input your Password!' }]}
+            >
+              <Input.Password
+                prefix={<LockOutlined />}
+                placeholder="Password"
+                style={{ padding: '10px' }}
+              />
+            </Form.Item>
+
+            <Form.Item>
+              <Button
+                type="primary"
+                htmlType="submit"
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                }}
+              >
+                Login
+              </Button>
+            </Form.Item>
+          </Form>
+        </div>
+      </div>
+    </div>
             ):
               <p style={{height:'0px', margin:'0px', padding:'0px'}}></p>
             )
