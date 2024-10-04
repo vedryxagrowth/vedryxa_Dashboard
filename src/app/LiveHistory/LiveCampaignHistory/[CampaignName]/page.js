@@ -836,7 +836,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                                 borderColor: 'rgba(255, 206, 86, 1)',        // Yellow
                                 backgroundColor: 'rgba(255, 206, 86, 0.2)',   // Light Yellow
                                 fill: true,
-                                tension: 0.3
+                                tension: 0.2
 
                             },
                             {
@@ -846,7 +846,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                                 backgroundColor: 'rgba(153, 102, 255, 0.2)',  // Light Purple
                                 fill: true,
                                 hidden: true,
-                                tension: 0.3
+                                tension: 0.2
 
                             }
                         ],
