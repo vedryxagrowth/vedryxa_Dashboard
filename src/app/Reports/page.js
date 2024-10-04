@@ -177,6 +177,8 @@ const MyTablePage = () => {
 
     const [revenuePratner, setRevenuePartner] = useState([networks[0]]);
 
+    const [newRevenuePratner, setNewRevenuePartner] = useState([networks[0]]);
+
     const [isSearching, setIsSearching] = useState(false);
     const [inputValue, setInputValue] = useState('');
     const [isSecondRowVisible, setIsSecondRowVisible] = useState(false);
@@ -231,6 +233,10 @@ const MyTablePage = () => {
     const [account, setAccount] = useState(typeof accountsForAccess[0] === 'string' ? accountsForAccess[0] : accountsForAccess[0].accountNumber);
 
     const [time, setTime] = useState('UTC');
+
+    const [newaccount, setNewAccount] = useState(typeof accountsForAccess[0] === 'string' ? accountsForAccess[0] : accountsForAccess[0].accountNumber);
+
+    const [newtime, setNewTime] = useState('UTC');
 
     const [pageSize, setPageSize] = useState(1);
 
@@ -2192,6 +2198,9 @@ const MyTablePage = () => {
         setLoading(true);
         setLoading1(true);
         setLoading2(true);
+        setNewAccount(account);
+        setNewTime(time);
+        setNewRevenuePartner(revenuePratner);
         // setMainComponent(true);
     }
 
