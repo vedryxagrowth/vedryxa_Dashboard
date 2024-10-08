@@ -169,16 +169,16 @@ const Appbar = ({ children }) => {
                     /> */}
                     {collapsed ? (
                         <Image
-                        src="/black-white.webp"
-                        width={50}   // Smaller logo when collapsed
+                        src="/ssk1.png"
+                        width={100}   // Smaller logo when collapsed
                         height={50}
                         priority={true}
                         alt="Collapsed Logo"
-                        style={{ margin: "0px 12px" }}
+                        style={{ margin: "0px 12px", width:"60%",height:"revert-layer",objectFit:"contain" }}
                         />
                         ) : (
                             <Image
-                            src="/Ads.png"
+                            src="/RR1.png"
                             width={150}  // Larger logo when expanded
                             height={60}
                             priority={true}
