@@ -169,7 +169,8 @@ const Appbar = ({ children }) => {
                     /> */}
                     {collapsed ? (
                         <Image
-                        src="/ssk1.png"
+                        // src="/ssk1.png"
+                        src={darkMode ? "/ssk2.png" : "/ssk1.png"} 
                         width={100}   // Smaller logo when collapsed
                         height={50}
                         priority={true}
@@ -178,12 +179,13 @@ const Appbar = ({ children }) => {
                         />
                         ) : (
                             <Image
-                            src="/RR1.png"
+                            // src="/RR1.png"
+                            src={darkMode ? "/4.png" : "/RR1.png"} 
                             width={150}  // Larger logo when expanded
                             height={60}
                             priority={true}
                             alt="Expanded Logo"
-                            style={{ margin: "0px 20px" }}
+                            style={{ margin: "0px 20px", objectFit:"cover" }}
                             />
                         )}
                     {menuItems.map(item => (
