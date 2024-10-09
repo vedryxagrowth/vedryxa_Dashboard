@@ -587,7 +587,7 @@ const LayoutWrapper = ({ children }) => {
                 <p style={{height:'0px', margin:'0px', padding:'0px'}}></p>
             )
           } */}
-      {sessionStatus === "authenticated" && usersData?.length === 0 && !loading ? (
+      {sessionStatus == "authenticated" && usersData?.length === 0 && !loading ? (
         <div style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'hidden' }}>
           <img
             style={{
@@ -598,7 +598,7 @@ const LayoutWrapper = ({ children }) => {
             src="/hope.png"
             alt="img"
           />
-          <div style={{ position: 'absolute', top: 40, right: 4, zIndex: 2, border: "2px dotted green", padding: "1%" }}>
+          <div style={{ position: 'absolute', top: 10, right: 4, zIndex: 2, border: "2px dotted green", padding: "1%" }}>
             <h3>You are not Authorized {session.user.email}`</h3>
             <ContactForm />
           </div>
@@ -621,92 +621,95 @@ const LayoutWrapper = ({ children }) => {
                 marginLeft: "0.8%"
               }}
             >
-              <Image
-                src="/yu.jpeg"
-                alt="Login Image"
-                // layout="fill"
-                width={'1000'}
-                height={'540'}
-
+              <img
+                style={{
+                  width: '100%',
+                  height: 'auto',
+                  maxHeight: '90vh',
+                }}
+                src="/hope.png"
+                alt="img"
               />
             </div>
 
             {/* Right side: Form */}
-            <div
+            {/* <div
               style={{
                 flex: 1,
                 display: 'flex',
                 // alignItems: 'center',
                 justifyContent: 'flex-end',
                 padding: '20px',
-                backgroundColor: '#f5f5f5',
+                backgroundColor: darkMode ? '#333' : '#fff',
+              }}
+            > */}
+            <div
+              style={{
+                marginTop: "5%",
+                marginRight: "2%",
+                maxWidth: '400px',
+                height: "60%",
+                width: '100%',
+                padding: '20px',
+                backgroundColor: darkMode ? '#333' : '#fff',
+                borderRadius: '8px',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
               }}
             >
-              <div
+              <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Login</h2>
+
+              <Button
+                type="primary"
+                icon={<GoogleOutlined />}
+                onClick={handleGoogleSignIn}
                 style={{
-                  maxWidth: '400px',
-                  height: "60%",
                   width: '100%',
-                  padding: '20px',
-                  backgroundColor: 'white',
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                  marginBottom: '20px',
                 }}
               >
-                <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Login</h2>
+                Sign in with Google
+              </Button>
 
-                <Button
-                  type="primary"
-                  icon={<GoogleOutlined />}
-                  onClick={handleGoogleSignIn}
-                  style={{
-                    width: '100%',
-                    marginBottom: '20px',
-                  }}
+              <Divider>Or</Divider>
+
+              <Form name="login_form" onFinish={onFinish}>
+                <Form.Item
+                  name="username"
+                  rules={[{ required: true, message: 'Please input your Username!' }]}
                 >
-                  Sign in with Google
-                </Button>
+                  <Input
+                    prefix={<UserOutlined />}
+                    placeholder="Username"
+                    style={{ padding: '10px' }}
+                  />
+                </Form.Item>
 
-                <Divider>Or</Divider>
+                <Form.Item
+                  name="password"
+                  rules={[{ required: true, message: 'Please input your Password!' }]}
+                >
+                  <Input.Password
+                    prefix={<LockOutlined />}
+                    placeholder="Password"
+                    style={{ padding: '10px' }}
+                  />
+                </Form.Item>
 
-                <Form name="login_form" onFinish={onFinish}>
-                  <Form.Item
-                    name="username"
-                    rules={[{ required: true, message: 'Please input your Username!' }]}
+                <Form.Item>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                    }}
                   >
-                    <Input
-                      prefix={<UserOutlined />}
-                      placeholder="Username"
-                      style={{ padding: '10px' }}
-                    />
-                  </Form.Item>
-
-                  <Form.Item
-                    name="password"
-                    rules={[{ required: true, message: 'Please input your Password!' }]}
-                  >
-                    <Input.Password
-                      prefix={<LockOutlined />}
-                      placeholder="Password"
-                      style={{ padding: '10px' }}
-                    />
-                  </Form.Item>
-
-                  <Form.Item>
-                    <Button
-                      type="primary"
-                      htmlType="submit"
-                      style={{
-                        width: '100%',
-                        padding: '10px',
-                      }}
-                    >
-                      Login
-                    </Button>
-                  </Form.Item>
-                </Form>
-              </div>
+                    Login
+                  </Button>
+                </Form.Item>
+              </Form>
             </div>
+            {/* </div> */}
           </div>
         ) :
           <p style={{ height: '0px', margin: '0px', padding: '0px' }}></p>
