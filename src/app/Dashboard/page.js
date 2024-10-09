@@ -204,10 +204,10 @@ const Dashboard = () => {
         if (dates && dates.length === 2) {
             setSkeletonLoading(true);
             const [start, end] = dates;
-    
+
             const formattedStart = start.format('YYYY-MM-DD');
             const formattedEnd = end.format('YYYY-MM-DD');
-    
+
             if (startDate !== formattedStart || endDate !== formattedEnd) {
                 setStartDate(formattedStart);
                 setEndDate(formattedEnd);
@@ -377,7 +377,7 @@ const Dashboard = () => {
 
         const transformedObject = transformObjectKeys(data);
         // console.log(transformedObject);
-        const response = await axios.post(`https://prodapis.adsgoat.in/Dashboard?timezone=${time}&start_date=${startDate}&end_date=${endDate}`, { formattedData: [transformedObject] }); 
+        const response = await axios.post(`https://prodapis.adsgoat.in/Dashboard?timezone=${time}&start_date=${startDate}&end_date=${endDate}`, { formattedData: [transformedObject] });
         const responseData = response.data;
         const functionForDetailsUpdate = async () => {
             revenue1.current = getTotalEstimatedRevenue(responseData);
@@ -666,6 +666,7 @@ const Dashboard = () => {
             valueFormatter: currencyFormatter,
         }, // Custom aggregation for Profit
     ]);
+
 
     const [columnDefs1] = useState([
         {
