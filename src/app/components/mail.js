@@ -6,7 +6,7 @@ import emailjs from 'emailjs-com';
 emailjs.init('YuvB6pBrVHNld_VA2');
 
 const ContactForm = () => {
-    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isModalVisible, setIsModalVisible] = useState(true);
     const [form] = Form.useForm();
 
     const showModal = () => {
@@ -41,7 +41,7 @@ const ContactForm = () => {
     return (
         <>
             <Button type="primary" onClick={showModal}>
-                Contact Adsgoat
+                Contact Administration
             </Button>
             <Modal
                 title="Add Details"
