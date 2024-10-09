@@ -464,6 +464,10 @@ body {
   background-color: #C7F39A !important;
   
 }
+:where(.css-f7vrd6).ant-menu-light .ant-menu-item-selected{
+  background-color: #C7F39A !important;
+}
+
 :where(.css-dev-only-do-not-override-f7vrd6).ant-btn-primary {
   color: #fff;
   background: #1677ff;
@@ -495,7 +499,17 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-select-outlined:
   background: #555555;
   color: #ffffff;
 }
+body.dark-mode .ant-select-selector {
+  border: 1px solid #282628;
+  background: #555555;
+  color: #ffffff;
+}
 body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-table-wrapper .ant-table-row-expand-icon {
+  border: 1px solid #282628;
+  background: #555555;
+  color: #ffffff;
+}
+body.dark-mode .ant-table-row-expand-icon {
   border: 1px solid #282628;
   background: #555555;
   color: #ffffff;
@@ -505,6 +519,12 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-picker-outlined 
   background: #555555;
   border: 1px solid #282628;
   color: aliceblue;
+}
+body.dark-mode .ant-picker-outlined {
+  background: #555555;
+  border: 1px solid #282628;
+  background-color: rgb(85, 85, 85);
+  color: white;
 }
 body.dark-mode .startview svg {
   color: gold !important;
@@ -780,6 +800,31 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 }
 
 
+/* darkmode ant-modal */
+.dark-mode .ant-modal-content {
+  background-color: #333 !important;
+  color: #fff !important;
+}
+
+.dark-mode .ant-modal-footer button {
+  background-color: #555 !important;
+  color: #fff !important;
+}
+
+.dark-mode {
+  scrollbar-color: #555 #333;
+  scrollbar-width: thin;
+}
+
+/* Dark mode dropdown styles */
+.dark-mode .ant-dropdown-menu {
+  background-color: #333 !important;
+  color: #fff !important;
+}
+
+.dark-mode .ant-dropdown-menu-item {
+  color: #fff !important;
+}
 /* Toggel Css  */
 .secondRow {
   display: block;

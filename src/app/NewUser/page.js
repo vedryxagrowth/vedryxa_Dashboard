@@ -1,10 +1,11 @@
 "use client"
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
-import { Table, Button, Col, Card, Input, Row, Select, Result, Spin, Space, Modal, message, Menu, Switch, Search } from 'antd';
-import { HighlightOutlined, LeftOutlined, RightOutlined, SearchOutlined, SwapRightOutlined, DownOutlined, EditOutlined } from "@ant-design/icons";
+import { Table, Button, Col, Card, Input, Row, Select, Result, Spin, Space, Modal, message, Menu, Switch, Search, Tooltip } from 'antd';
+import { HighlightOutlined, LeftOutlined, RightOutlined, SearchOutlined, SwapRightOutlined, DownOutlined, EditOutlined, EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
 import { Carousel } from 'react-responsive-carousel';
 import { MailOutlined, SettingOutlined } from '@ant-design/icons';
+
 // import { , Select } from 'antd';
 import { useTokenContext } from '../components/parent';
 
@@ -14,6 +15,9 @@ import Createnewuser from './users-components/create-newuser';
 import Newaddaccounts from './users-components/add-newaccount';
 import Edituseraccesses from './users-components/edit-usersaccess';
 import EditAccountAccess from './users-components/edit-accountaccess';
+import EditNetworkAccess from './users-components/edit-network';
+
+import debounce from 'lodash.debounce';
 
 const contentStyle = {
     margin: 0,
@@ -28,6 +32,13 @@ const accountStatus = ['All', 'Active', 'InActive'];
 const availableNetworks = ['All', "MEDIA_DOT_NET", "MEDIA_DOT_NET_BING", "ENKI", "TONIC", "System1", "Bodies", "Bodies1", "Rsoc", "Domain Active"];
 
 const UsersTable = () => {
+    const [isSearchingNetwork, setIsSearchingNetwork] = useState(false); //prudhvi
+    const [netSearchInput, setNetSearchInput] = useState(""); //prudhvi
+    const [networkAccessDrawerkVisible, setNetworkAccessDrawerVisible] = useState(false); //prudhvi
+    const [networkFilteredData, setNetworkFilteredData] = useState([]); //prudhvi
+    const [networksData, setNetworksData] = useState([]); //prudhvi
+    const [networkAccessData, setNetworkAccessData] = useState(null);
+
     const [usersData, setUsersData] = useState([]);
     const [AccountsData, setAccountsData] = useState([]);
     const [searchInput, setSearchInput] = useState("");
@@ -162,9 +173,11 @@ const UsersTable = () => {
 
     var token = localStorage.getItem("token")
     useEffect(() => {
+        const debouncedFetchData = debounce(fetchNetworksData, 1000);
         const functionaCall = async() => {
             await fetchusersData();
             await fetchAccountsData();
+            await debouncedFetchData();
         }
         functionaCall();
     }, []);
@@ -293,6 +306,272 @@ const UsersTable = () => {
             setLoading(false);
         }
     };
+
+    //Networks Details
+    const handleSearchNetwork = () => {
+        setIsSearchingNetwork(true);
+    };
+
+    const handleBlur2 = () => {
+        setIsSearchingNetwork(false);
+    };
+
+    const handleNetworkStatusChange = async(revenuePartner, checked) => {
+        // console.log(checked, "checked");
+        const newData = networksData.map((item) => {
+            if (item.revenuePartner === revenuePartner) {
+                // console.log(`Account Number: ${item.accountNumber}`);
+                return {
+                    ...item,
+                    Status: checked ? 'Active' : 'InActive',
+                };
+            }
+            return item;
+        });
+        // console.log(newData, "newData");
+        const newStatus = checked ? 'Active' : 'InActive';
+        // console.log(newStatus, "newStatus");
+        // console.log(token, "token");
+        const response = await axios.get(`https://prodapis.adsgoat.in/updateNetwork/?revenuePartner=${revenuePartner}&Status=${newStatus}`, {
+                headers: {
+                    Authorization: token
+                }
+        });
+        console.log(response.data);
+        setNetworksData(newData);
+    };
+
+    const fetchNetworksData = async () => {
+        try{
+            const response = await axios.get('https://prodapis.adsgoat.in/get/networksData/', {
+                headers: {
+                    Authorization: token
+                }
+            });
+            console.log("Response:", response.data);
+            if (response.status === 200) {
+                setNetworksData(response.data);
+                console.log(response.data, "Networks Data");
+            } else {
+                console.error('Failed to fetch Networks data');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const networkFilterData = () => {
+        console.log(status, 'status');
+        console.log(revenuePartner, 'revenuePartner');
+        return networksData?.filter(item => 
+            // Check if the status matches the selected status
+            (status === 'All' || item.status === status) &&
+            // Check if the revenuePartner matches or is 'All'
+            (revenuePartner === 'All' || item.revenuePartner === revenuePartner)
+        );
+    };
+
+    const filteredNetworkData = networkFilterData();
+
+    const [passwordVisibility, setPasswordVisibility] = useState(
+        Array(filteredNetworkData.length).fill(false)
+    );
+
+    const toggleVisibility = (index) => {
+        setPasswordVisibility((prevState) => {
+            const newVisibility = [...prevState];
+            newVisibility[index] = !newVisibility[index]; 
+            return newVisibility;
+        });
+    };
+
+    const networksColumn = [
+        {
+            title: 'CronStaus',
+            dataIndex: 'cronStatus',
+            key: 'cronStatus',
+            render: (text) => (text ? text : '---'),
+        },
+        {
+            title: 'Message',
+            dataIndex: 'Message',
+            key: 'Message',
+            render: (text) => (text ? text: '---')
+        },
+        {
+            title: 'Status',
+            dataIndex: 'Status',
+            key: 'Status',
+            render: (text, record) => (
+                <Row
+                    gutter={[8, 8]}
+                    align="middle"
+                    wrap
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        flexWrap: 'wrap',
+                        width: '100%',
+                        justifyContent:'center'
+                    }}
+                >
+                    <Col flex="1 1 auto">
+                        <span>{text}</span>
+                    </Col>
+                    <Col flex="1 1 auto">
+                        <Switch
+                            checked={record.Status === 'Active'}
+                            onChange={(checked) => handleNetworkStatusChange(record.revenuePartner, checked)}
+                        />
+                    </Col>
+                    <Col flex="1 1 auto">
+                        <EditOutlined style={{ fontSize: '20px', cursor: 'pointer' }} onClick={() => handleEditNetwork(record)} />
+                    </Col>
+                </Row>
+            ),
+        },
+        {
+            title: 'RevenuePartner',
+            dataIndex: 'revenuePartner',
+            key: 'revenuePartner',
+            render: (text) => (text ? text: '---')
+        },
+        {
+            title: 'TimeZone',
+            dataIndex: 'timeZone',
+            key: 'timeZone',
+            render: (text) => (text ? text: '---')
+        },
+        {
+            title: 'Email',
+            dataIndex: 'Email',
+            key: 'Email',
+            render: (text) => (text ? text: '---')
+        },
+        {
+            title: 'Password',
+            dataIndex: 'Password',
+            key: 'Password',
+            render: (text, record, index) => {
+                if (!text) {
+                    return '---'; 
+                }
+
+                const isVisible = passwordVisibility[index]; 
+
+                return (
+                    <Row gutter={[8, 8]} align="middle" wrap>
+                        <Col flex="1 1 auto">
+                            <span>{isVisible ? text : '*****'.repeat(Math.ceil(text.length / 5))}</span>
+                        </Col>
+                        <Col flex="1 1 auto">
+                            <Tooltip title={isVisible ? 'Hide Password' : 'Show Password'}>
+                                {isVisible ? (
+                                    <EyeInvisibleOutlined
+                                        onClick={() => toggleVisibility(index)} 
+                                        style={{ fontSize: '20px', cursor: 'pointer' }}
+                                    />
+                                ) : (
+                                    <EyeOutlined
+                                        onClick={() => toggleVisibility(index)} 
+                                        style={{ fontSize: '20px', cursor: 'pointer' }}
+                                    />
+                                )}
+                            </Tooltip>
+                        </Col>
+                    </Row>
+                );
+            },
+        },               
+        {
+            title: 'Key',
+            dataIndex: 'key',
+            key: 'displayKey',
+            render: (text) => {
+                if (text) {
+                    return `****${text.slice(-5)}`;
+                }
+                return '---';
+            }
+        },
+        {
+            title: 'Consumer_Key',
+            dataIndex: 'consumer_key',
+            key: 'consumer_key',
+            render: (text) => {
+                if (text) {
+                    return `****${text.slice(-5)}`;
+                }
+                return '---';
+            },
+            width: 130
+        },
+        {
+            title: 'Consumer_Secret',
+            dataIndex: 'consumer_secret',
+            key: 'consumer_secret',
+            render: (text) => {
+                if (text) {
+                    return `****${text.slice(-5)}`;
+                }
+                return '---';
+            },
+            width: 150
+        },
+        {
+            title: 'Client_ID',
+            dataIndex: 'client_id',
+            key: 'client_id',
+            render: (text) => (text ? text: '---')
+        },
+        {
+            title: 'Secret',
+            dataIndex: 'Secret',
+            key: 'Secret',
+            render: (text) => {
+                if (text) {
+                    return `****${text.slice(-5)}`;
+                }
+                return '---';
+            }
+        },
+        {
+            title: 'Service',
+            dataIndex: 'Service',
+            key: 'Service',
+            render: (text) => (text ? text: '---'),
+            width: 80
+        },
+        {
+            title: 'Market',
+            dataIndex: 'Market',
+            key: 'Market',
+            render: (text) => (text ? text: '---'),
+            width: 80
+        },
+        {
+            title: 'Config_ID',
+            dataIndex: 'config_id',
+            key: 'config_id',
+            render: (text) => (text ? text: '---'),
+            width: 100
+        },
+        {
+            title: 'Token',
+            dataIndex: 'Token',
+            Key: 'Token',
+            render: (text) => {
+                if (text) {
+                    return `****${text.slice(-5)}`;
+                }
+                return '---';
+            }
+        },
+    ];
+
+
     const Accountscolumn = [
         {
             title: 'Spend Account ID',
@@ -501,6 +780,23 @@ const UsersTable = () => {
         setaccFilteredData(accfiltered);
     };
 
+    const handleNetworkSearchChange = (e) => {
+        const searchValue = e.target.value.toLowerCase();
+        setNetSearchInput(searchValue);
+        
+        // Filtering only fields that are strings
+        const networkFiltered = networksData.filter((item) =>
+            Object.values(item).some((field) =>
+                typeof field === 'string' && field.toLowerCase().includes(searchValue)
+            )
+        );
+        setNetworkFilteredData(networkFiltered);
+    };
+
+    const showNetworkDrawer = () => {
+        setNetworkDrawerVisible(true)
+    }
+
     useEffect(() => {
         const handleResize = () => {
             if (window.innerWidth < 768) {
@@ -537,12 +833,17 @@ const UsersTable = () => {
         // console.log(values, "Edit")
     }
 
+    const handleEditNetwork = (values) => {
+        setNetworkAccessDrawerVisible(true)
+        setNetworkAccessData(values)
+    }
+
     const onCloseDrawer = () => {
         setDrawerVisible(false);
         setaccountDrawerVisible(false)
         setusersaccessDrawerVisible(false)
         setaccountaccessDrawerVisible(false)
-
+        setNetworkAccessDrawerVisible(false);
     };
 
     const onChangeRole = (value) => {
@@ -591,6 +892,7 @@ const UsersTable = () => {
             <Newaddaccounts visible={accountDrawerVisible} onClose={onCloseDrawer} />
             <Edituseraccesses editeddata={usersaccessData} visible={usersaccessDrawerVisible} onClose={onCloseDrawer} />
             <EditAccountAccess editeddata={accountaccessData} visible={accountaccessDrawerVisible} onClose={onCloseDrawer} />
+            <EditNetworkAccess editeddata={networkAccessData} visible={networkAccessDrawerkVisible} onClose={onCloseDrawer} />
 
             <Carousel
                 // className="custom-carousel"
@@ -760,6 +1062,83 @@ const UsersTable = () => {
                             subTitle="Sorry, this page contains no data."
                             extra={<Button type="primary" onClick={shownnewaccountdrawar}>
                                 Add New Account
+                            </Button>}
+                        />
+                    )}
+                </div>
+                <div>
+                    <Card title="All Networks" size="small">
+                        <Row align={"bottom"} gutter={[16, 16]}>
+                            <Col xs={24} md={16}>
+                                <Row gutter={[16, 16]}>
+                                    
+                                    <Col xs={24} sm={12} md={8}>
+                                        <span style={{ color: "#B4B4B4", display: 'block' }}>Search</span>
+                                        <div style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
+                                            <Button icon={<SearchOutlined />} onClick={handleSearchNetwork} />
+                                            <Input
+                                                placeholder="Search here"
+                                                autoFocus={isSearchingNetwork}  // Only autofocus when searching
+                                                value={netSearchInput}
+                                                onChange={handleNetworkSearchChange}
+                                                onBlur={handleBlur2}
+                                                style={{ width: '100%', borderRadius: '5px', marginLeft:'8px' }} // Adjust input width and margin dynamically
+                                            />
+                                        </div>
+                                    </Col>
+                                    <Col xs={24} sm={12} md={8}>
+                                        <span style={{ color: "#B4B4B4", display: 'block' }}>Network</span>
+                                        <Select
+                                            onChange={onChangeNetwork}
+                                            defaultValue="All"
+                                            style={{ width: "100%", marginTop: '8px' }}
+                                            options={availableNetworks.map((item) => ({
+                                                value: item,
+                                                label: item,
+                                            }))}
+                                        />
+                                    </Col>
+                                    <Col xs={24} sm={12} md={8}>
+                                        <span style={{ color: "#B4B4B4", display: 'block' }}>Status</span>
+                                        <Select
+                                            onChange={onChangeStatus}
+                                            defaultValue="All"
+                                            style={{ width: "100%", marginTop: '8px' }}
+                                            options={accountStatus.map((item) => ({
+                                                value: item,
+                                                label: item,
+                                            }))}
+                                        />
+                                    </Col>
+                                    
+                                </Row>
+                            </Col>
+                            {/* <Col xs={24} md={8}>
+                                <Button type="primary" style={{ float: "right", marginLeft: "5%" }} onClick={showNetworkDrawer}>
+                                    Add New Network
+                                </Button>
+                            </Col> */}
+                        </Row>
+                    </Card>
+                    {loading ? (
+                        <Spin />
+                    ) : networksData.length > 0 ? ( 
+                        <Table
+                            bordered
+                            dataSource={netSearchInput ? networkFilteredData.map((item, index) => ({ ...item, key: item.key, id: index })) : filteredNetworkData.map((item, index) => ({ ...item, key: item.key, id: index }))}
+                            columns={networksColumn}
+                            pagination={{ pageSize: paginationSize }}
+                            scroll={{ y: 'calc(80vh - 200px)', x: 'max-content' }}
+                            // style={{ tableLayout: 'auto' }} 
+                            // scroll={{ x: 'max-content' }} 
+                        />
+                    ) : (
+                        <Result
+                            status="404"
+                            title="No Networks Data Available"
+                            subTitle="Sorry, this page contains no data."
+                            extra={<Button type="primary" onClick={showNetworkDrawer}>
+                                Add New Network
                             </Button>}
                         />
                     )}
