@@ -31,13 +31,13 @@ function getItem(label, key, icon) {
 // const menuItems = [
 //     getItem('Dashboard', '/Dashboard', <HomeOutlined />),
 //     getItem('Reports', '/Reports', <DatabaseOutlined />),
-//     // getItem('Creatives', '/Creatives', <PieChartOutlined />),
+//     getItem('Creatives', '/Creatives', <PieChartOutlined />),
 //     getItem('Campaigns', '/Campaigns', <DesktopOutlined />),
 //     // getItem('Users', '/Users', <ContainerOutlined />),
 //     getItem('NewUser', '/NewUser', <UserOutlined />),
-//     // getItem('Setting', '/setting', <SettingOutlined />),
-//     // getItem('Password', '/password', <LockOutlined />),
-//     // getItem('Sign Out', '/signout', <LogoutOutlined />),
+//     getItem('Setting', '/setting', <SettingOutlined />),
+//     getItem('Password', '/password', <LockOutlined />),
+//     getItem('Sign Out', '/signout', <LogoutOutlined />),
 // ].filter(Boolean);
 
 const Appbar = ({ children }) => {
@@ -49,7 +49,7 @@ const Appbar = ({ children }) => {
     const [height, setHeight] = useState(0);
     console.log(session?.user?.email)
     const { userdetails } = useTokenContext();
-    console.log(userdetails, "goooooooooooooooooooooooooooooooooooooooooooo");
+    console.log(userdetails);
 
     useEffect(() => {
         const handleResize = () => {
@@ -66,7 +66,7 @@ const Appbar = ({ children }) => {
     const menuItems = [
         getItem('Dashboard', '/Dashboard', <HomeOutlined />),
         getItem('Reports', '/Reports', <DatabaseOutlined />),
-        // getItem('Creatives', '/Creatives', <PieChartOutlined />),
+        userdetails?.role === 'Admin' && getItem('Creatives', '/Creatives', <PieChartOutlined />),
         getItem('Campaigns', '/Campaigns', <DesktopOutlined />),
         // getItem('Users', '/Users', <ContainerOutlined />),
         userdetails?.role === 'Admin' && getItem('NewUser', '/NewUser', <UserOutlined />),
@@ -180,21 +180,23 @@ const Appbar = ({ children }) => {
                     /> */}
                     {collapsed ? (
                         <Image
-                            src="/black-white.webp"
-                            width={50}   // Smaller logo when collapsed
+                            // src="/ssk1.png"
+                            src={darkMode ? "/ssk2.png" : "/ssk1.png"}
+                            width={100}   // Smaller logo when collapsed
                             height={50}
                             priority={true}
                             alt="Collapsed Logo"
-                            style={{ margin: "0px 12px" }}
+                            style={{ margin: "0px 12px", width: "60%", height: "revert-layer", objectFit: "contain" }}
                         />
                     ) : (
                         <Image
-                            src="/Ads.png"
+                            // src="/RR1.png"
+                            src={darkMode ? "/4.png" : "/RR1.png"}
                             width={150}  // Larger logo when expanded
                             height={60}
                             priority={true}
                             alt="Expanded Logo"
-                            style={{ margin: "0px 20px" }}
+                            style={{ margin: "0px 20px", objectFit: "cover" }}
                         />
                     )}
                     {menuItems.map(item => (
