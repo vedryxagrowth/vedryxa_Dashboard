@@ -27,18 +27,18 @@ function getItem(label, key, icon) {
         label,
     };
 }
-{/* <UserOutlined /> */}
-const menuItems = [
-    getItem('Dashboard', '/Dashboard', <HomeOutlined />),
-    getItem('Reports', '/Reports', <DatabaseOutlined />),
-    getItem('Creatives', '/Creatives', <PieChartOutlined />),
-    getItem('Campaigns', '/Campaigns', <DesktopOutlined />),
-    // getItem('Users', '/Users', <ContainerOutlined />),
-    getItem('NewUser', '/NewUser', <UserOutlined />),
-    getItem('Setting', '/setting', <SettingOutlined />),
-    getItem('Password', '/password', <LockOutlined />),
-    getItem('Sign Out', '/signout', <LogoutOutlined />),
-].filter(Boolean);
+{/* <UserOutlined /> */ }
+// const menuItems = [
+//     getItem('Dashboard', '/Dashboard', <HomeOutlined />),
+//     getItem('Reports', '/Reports', <DatabaseOutlined />),
+//     getItem('Creatives', '/Creatives', <PieChartOutlined />),
+//     getItem('Campaigns', '/Campaigns', <DesktopOutlined />),
+//     // getItem('Users', '/Users', <ContainerOutlined />),
+//     getItem('NewUser', '/NewUser', <UserOutlined />),
+//     getItem('Setting', '/setting', <SettingOutlined />),
+//     getItem('Password', '/password', <LockOutlined />),
+//     getItem('Sign Out', '/signout', <LogoutOutlined />),
+// ].filter(Boolean);
 
 const Appbar = ({ children }) => {
     const { darkMode, toggleTheme } = useTokenContext();
@@ -63,11 +63,22 @@ const Appbar = ({ children }) => {
             window.removeEventListener("resize", handleResize); // Clean up event listener
         };
     }, []);
+    const menuItems = [
+        getItem('Dashboard', '/Dashboard', <HomeOutlined />),
+        getItem('Reports', '/Reports', <DatabaseOutlined />),
+        userdetails?.role === 'Admin' && getItem('Creatives', '/Creatives', <PieChartOutlined />),
+        getItem('Campaigns', '/Campaigns', <DesktopOutlined />),
+        // getItem('Users', '/Users', <ContainerOutlined />),
+        userdetails?.role === 'Admin' && getItem('NewUser', '/NewUser', <UserOutlined />),
+        // getItem('Setting', '/setting', <SettingOutlined />),
+        // getItem('Password', '/password', <LockOutlined />),
+        // getItem('Sign Out', '/signout', <LogoutOutlined />),
+    ].filter(Boolean);
 
-//     useEffect(async()=>{
-//     const userResponse = await axios.get(`https://prodapis.adsgoat.in/api/getusersData?email=${session?.user?.email}`);
-//     setusersDataForLogin(userResponse.data);
-//   },[session?.user?.email]);
+    //     useEffect(async()=>{
+    //     const userResponse = await axios.get(`https://prodapis.adsgoat.in/api/getusersData?email=${session?.user?.email}`);
+    //     setusersDataForLogin(userResponse.data);
+    //   },[session?.user?.email]);
 
     const toggleCollapsed = () => {
         setCollapsed(!collapsed);
@@ -79,19 +90,19 @@ const Appbar = ({ children }) => {
 
     return (
         <Layout style={{ minHeight: height, backgroundColor: darkMode ? '#333' : '#fff' }}>
-            
+
             <Sider
                 collapsible
                 collapsed={collapsed}
                 trigger={null}
                 width={220}
                 style={{
-                    backgroundColor: darkMode ? '#333' : '#fff' ,
+                    backgroundColor: darkMode ? '#333' : '#fff',
                     color: darkMode ? '#fff' : '#000',
                     borderRadius: '5px',
                     overflow: 'hidden',
                     height: '100vh',
-                   
+
                 }}
             >
                 <div
@@ -102,8 +113,8 @@ const Appbar = ({ children }) => {
                         width: '100%',
                     }}
                 >
-                    <div style={{ marginTop: '1.6rem',position:"absolute",left:"auto",right:"20px",zIndex:"999 !important", }}>
-                        <Button 
+                    <div style={{ marginTop: '1.6rem', position: "absolute", left: "auto", right: "20px", zIndex: "999 !important", }}>
+                        <Button
                             type="primary"
                             icon={collapsed ? <DoubleRightOutlined /> : <DoubleLeftOutlined />}
                             onClick={toggleCollapsed}
@@ -119,7 +130,7 @@ const Appbar = ({ children }) => {
                                 border: `solid 5px ${darkMode ? '#282628' : '#f1f1f1'}`,
 
                                 position: "fixed",
-                                zIndex:"999"
+                                zIndex: "999"
                             }}
                         />
                     </div>
@@ -148,13 +159,13 @@ const Appbar = ({ children }) => {
                     mode="inline"
                     selectedKeys={[pathname]}
                     style={{
-                        backgroundColor: darkMode ? '#333' : '#fff' ,
+                        backgroundColor: darkMode ? '#333' : '#fff',
                         color: darkMode ? '#007BFF' : '#000',
                         // color: '#007BFF',
                         fontSize: '16px',
                         borderRight: 'none',
                         marginTop: '10px',
-                       
+
                     }}
                     onClick={(e) => handleMenuItemClick(e.key)}
                 >
@@ -169,45 +180,45 @@ const Appbar = ({ children }) => {
                     /> */}
                     {collapsed ? (
                         <Image
-                        // src="/ssk1.png"
-                        src={darkMode ? "/ssk2.png" : "/ssk1.png"} 
-                        width={100}   // Smaller logo when collapsed
-                        height={50}
-                        priority={true}
-                        alt="Collapsed Logo"
-                        style={{ margin: "0px 12px", width:"60%",height:"revert-layer",objectFit:"contain" }}
+                            // src="/ssk1.png"
+                            src={darkMode ? "/ssk2.png" : "/ssk1.png"}
+                            width={100}   // Smaller logo when collapsed
+                            height={50}
+                            priority={true}
+                            alt="Collapsed Logo"
+                            style={{ margin: "0px 12px", width: "60%", height: "revert-layer", objectFit: "contain" }}
                         />
-                        ) : (
-                            <Image
+                    ) : (
+                        <Image
                             // src="/RR1.png"
-                            src={darkMode ? "/4.png" : "/RR1.png"} 
+                            src={darkMode ? "/4.png" : "/RR1.png"}
                             width={150}  // Larger logo when expanded
                             height={60}
                             priority={true}
                             alt="Expanded Logo"
-                            style={{ margin: "0px 20px", objectFit:"cover" }}
-                            />
-                        )}
+                            style={{ margin: "0px 20px", objectFit: "cover" }}
+                        />
+                    )}
                     {menuItems.map(item => (
-                        <Menu.Item key={item.key} icon={item.icon} style={{ borderRadius: '8px', margin: '5px 0',  color: darkMode ? '#fff' : '#000', fontWeight: "500", fontSize: "16px" }}>
+                        <Menu.Item key={item.key} icon={item.icon} style={{ borderRadius: '8px', margin: '5px 0', color: darkMode ? '#fff' : '#000', fontWeight: "500", fontSize: "16px" }}>
                             {item.label}
                         </Menu.Item>
                     ))}
                 </Menu>
 
             </Sider>
-           
-            <Layout style={{ marginLeft: collapsed ? 0 : 0, transition: 'margin-left 0.2s', backgroundColor: darkMode ? '#262426d6' : '#f5f5f5'  }}>
-                 <LayoutWrapper/>
-               
-                    <div style={{ border: "", margin:"0px 10px", borderRadius: "", height: "86vh", overflow: "auto",  backgroundColor: darkMode ? '#333' : '#fff' ,scrollbarWidth:"thin "}}>
-                   
 
-                        {React.Children.map(children, child => {
-                            return React.cloneElement(child, { darkMode });
-                        })}
-                    </div>
-               
+            <Layout style={{ marginLeft: collapsed ? 0 : 0, transition: 'margin-left 0.2s', backgroundColor: darkMode ? '#262426d6' : '#f5f5f5' }}>
+                <LayoutWrapper />
+
+                <div style={{ border: "", margin: "0px 10px", borderRadius: "", height: "86vh", overflow: "auto", backgroundColor: darkMode ? '#333' : '#fff', scrollbarWidth: "thin " }}>
+
+
+                    {React.Children.map(children, child => {
+                        return React.cloneElement(child, { darkMode });
+                    })}
+                </div>
+
             </Layout>
         </Layout>
     );
