@@ -118,6 +118,13 @@ const rangePresets = [
     },
 ];
 
+// async function  functionForFetchingUsersData(){
+//     const { userdetails } = useTokenContext();
+//     const response = await axios.post('http://localhost:8000/getAccountNameandStatus/', {updatedNetwork: userdetails?.adAccounts});
+//     return response.data;
+
+// }
+
 const Dashboard = () => {
     const { userdetails } = useTokenContext();
     const { theme } = useTokenContext();
@@ -125,6 +132,17 @@ const Dashboard = () => {
     console.log(userdetails);
     // console.log(userdetails?.adAccounts, "f1");
     // const { adAccounts } = userdetails;
+    // const handleAsyncLogic = async () => {
+    //     // Wait for async function to finish
+    //     const data = await functionForFetchingUsersData();
+    
+    //     // After async function resolves, do something with the data
+    //     const anotherVariable = `User count: ${data.length}`;
+    
+    //     console.log('Fetched Data:', data);
+    //     console.log('Another Variable:', anotherVariable);
+    //     return data
+    // };
 
     if (!userdetails?.adAccounts) {
         return <div style={{ width: '100%', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -142,21 +160,31 @@ const Dashboard = () => {
                 // Check if the value is an array and if it contains objects
                 if (Array.isArray(value) && value.length > 0 && typeof value[0] === 'object') {
                     // Convert array of objects to array of accountNumbers
-                    return [key, value.map(obj => obj.accountNumber)];
+                    return [key, value.map(obj => ({accountNumber:obj.accountNumber, accountName: obj.accountName}))];
                 }
                 // If it's not an array of objects, keep it as is
                 return [key, value];
             })
         );
     };
+    
+    const [skeletonLoading, setSkeletonLoading] = useState(true);
+    const [rendering, setRendering] = useState(false);
+    const [usersDataFromFetch, setUsersDataFromFetch] = useState(null);
+
+    // (async () => {
+    //     if (usersDataFromFetch === null) {  // Prevents multiple calls
+    //       const data = await functionForFetchingUsersData();
+    //       setUsersDataFromFetch(data);  // Set the fetched data
+    //       setRendering(false);  // Stop the loading state
+    //     }
+    //   })();
 
     const transformedData = transformData(userdetails?.adAccounts);
-    // console.log(transformedData, "1");
+    // console.log(userdetails?.adAccounts, "1");
 
 
     const defaultCategory = Object.keys(transformedData)[0];
-
-    const [skeletonLoading, setSkeletonLoading] = useState(true);
 
     const [startDate, setStartDate] = useState(yesterday);
 
@@ -192,9 +220,10 @@ const Dashboard = () => {
         [defaultCategory]: transformedData[defaultCategory], // Default all items in the first category
     });
 
-    const [chartData, setChartData] = useState({ dates: [], spend: [], revenue: [], profit: [], margin: [] });
+    const [chartData, setChartData] = useState({ dates: [], newDates: [], spend: [], revenue: [], profit: [], margin: [] });
 
     const [rowData, setRowData] = useState([]);
+    const [top5Campaigns, setTop5Campaigns] = useState([]);
 
     // const functionalCall = (data) => {
     //     setData(data);
@@ -351,21 +380,33 @@ const Dashboard = () => {
     const functionCallForResponse = debounce(async (data) => {
         const transformObjectKeys = (obj) => {
             const transformedObject = {};
-
+        
             Object.keys(obj).forEach((key) => {
                 // Split the key by underscore
                 const splitKey = key.split('_');
-
-                // Add "Facebook_" to the first index
-                //   splitKey[0] = "Facebook_" + splitKey[1];
-
-                // Join the array back into a string
+        
+                // Join the array back into a string for the new key
                 const newKey = "Facebook_" + splitKey[1];
-
-                // Assign the value to the new key in the transformed object
-                transformedObject[newKey] = obj[key];
+        
+                // Initialize the array if the key doesn't exist
+                if (!transformedObject[newKey]) {
+                    transformedObject[newKey] = [];
+                }
+        
+                // Check if the value is an array
+                if (Array.isArray(obj[key])) {
+                    // Loop through the array and extract each accountNumber
+                    obj[key].forEach(item => {
+                        if (item.accountNumber) {
+                            transformedObject[newKey].push(item.accountNumber);
+                        }
+                    });
+                } else if (obj[key]?.accountNumber) {
+                    // If it's an object, directly push the accountNumber
+                    transformedObject[newKey].push(obj[key].accountNumber);
+                }
             });
-
+        
             return transformedObject;
         };
 
@@ -379,6 +420,7 @@ const Dashboard = () => {
         // console.log(transformedObject);
         const response = await axios.post(`https://prodapis.adsgoat.in/Dashboard?timezone=${time}&start_date=${startDate}&end_date=${endDate}`, { formattedData: [transformedObject] });
         const responseData = response.data;
+        console.log(responseData, "response");
         const functionForDetailsUpdate = async () => {
             revenue1.current = getTotalEstimatedRevenue(responseData);
             spend1.current = getTotalEstimatedSpend(responseData);
@@ -394,19 +436,153 @@ const Dashboard = () => {
             setData(responseData);
         }
         functionForDetailsUpdate();
-
-        function groupByAccountNumber(data) {
+        function groupByCampaignAndDate(data) {
             return data.reduce((acc, obj) => {
-                const key = obj.accountNumber;
-
-                // Find if the accountNumber already exists in the accumulator array
-                let account = acc.find(item => item.accountNumber === key);
-
-                if (!account) {
-                    // If not found, create a new entry for this accountNumber
+                const campaignKey = obj.campaign_name;
+                const dateKey = obj[`${time}Date`]; // directly access the specifiedDate field from the object
+        
+                // Create a combined key for grouping by both campaign_name and specifiedDate
+                const key = `${campaignKey}_${dateKey}`;
+        
+                // Find if the combined key already exists in the accumulator array
+                let entry = acc.find(item => item.key === key);
+        
+                if (!entry) {
+                    // If not found, create a new entry for this campaign_name and specifiedDate
                     acc.push({
+                        key, // Unique key for grouping
+                        campaign_name: obj.campaign_name,
+                        Date: dateKey,
+                        spend: obj.spend ? parseFloat(obj.spend) : 0,
+                        estimated_revenue: obj.estimated_revenue ? parseFloat(obj.estimated_revenue) : 0,
+                        fbLeads: obj.fbLeads ? parseInt(obj.fbLeads) : 0,
+                        conversions: obj.conversions ? parseInt(obj.conversions) : 0,
+                        revenuePartner: obj.revenuePartner,
+                        mediaBuyerName: obj.MediaBuyerName,
+                        holder: obj.Holder,
+                        accountNumber: obj.accountNumber
+                        // Add any other fields you want to keep after grouping
+                    });
+                } else {
+                    // If found, sum the respective fields
+                    entry.spend += obj.spend !== null && obj.spend !== undefined ? parseFloat(obj.spend) : 0;
+                    entry.estimated_revenue += obj.estimated_revenue !== null && obj.estimated_revenue !== undefined ? parseFloat(obj.estimated_revenue) : 0;
+                    entry.fbLeads += obj.fbLeads !== null && obj.fbLeads !== undefined ? parseInt(obj.fbLeads) : 0;
+                    entry.conversions += obj.conversions !== null && obj.conversions !== undefined ? parseInt(obj.conversions) : 0;
+                }
+        
+                return acc;
+            }, []).map(campaign => {
+                // Calculate profit after grouping
+                campaign.profit = campaign.estimated_revenue - campaign.spend;
+                return campaign;
+            });
+        }
+        
+        const group = groupByCampaignAndDate(responseData);
+        console.log(group);
+
+        function getTopFiveSpendCampaignsByDate(data) {
+            // Step 1: Group objects by specifiedDate using a Map
+            const groupedByDate = data.reduce((acc, curr) => {
+                const date = curr.Date; // Use specifiedDate directly from the object
+        
+                if (!acc.has(date)) {
+                    acc.set(date, []);
+                }
+                acc.get(date).push(curr); // Add campaigns to the date group
+        
+                return acc;
+            }, new Map());
+        
+            // Step 2: Prepare an array to hold the top 5 campaigns across all dates
+            const topFiveCampaigns = [];
+        
+            // Step 3: Iterate through each date group and get the top 5 campaigns by spend
+            groupedByDate.forEach(campaigns => {
+                // Sort the campaigns by spend in descending order and take the top 5
+                const topFive = campaigns
+                    .sort((a, b) => b.spend - a.spend) // Sort by spend descending
+                    .slice(0, 5); // Take top 5 campaigns for each date
+        
+                // Add the top 5 campaigns to the final result array
+                topFiveCampaigns.push(...topFive);
+            });
+        
+            return topFiveCampaigns; // Return a combined array of top 5 campaigns across all dates
+        }
+        
+
+        const top5SpendCampaignsByDate = getTopFiveSpendCampaignsByDate(groupByCampaignAndDate(responseData));
+
+        setTop5Campaigns(top5SpendCampaignsByDate);
+        console.log(top5SpendCampaignsByDate);
+
+        // function groupAndSortByCampaignSpend(data) {
+        //     const groupedData = data.reduce((acc, obj) => {
+        //         const key = obj.campaign_name;
+        
+        //         // Find if the campaign_name already exists in the accumulator array
+        //         let campaign = acc.find(item => item.campaign_name === key);
+        
+        //         if (!campaign) {
+        //             // If not found, create a new entry for this campaign_name
+        //             acc.push({
+        //                 accountNumber: obj.accountNumber,
+        //                 campaign_name: obj.campaign_name,
+        //                 spend: obj.spend ? parseFloat(obj.spend) : 0, // Initialize with current object values
+        //                 estimated_revenue: obj.estimated_revenue ? parseFloat(obj.estimated_revenue) : 0,
+        //                 fbLeads: obj.fbLeads ? parseInt(obj.fbLeads) : 0,
+        //                 conversions: obj.conversions ? parseInt(obj.conversions) : 0,
+        //                 revenuePartner: obj.revenuePartner,
+        //                 mediaBuyerName: obj.MediaBuyerName,
+        //                 holder: obj.Holder,
+        //             });
+        //         } else {
+        //             // If found, sum the respective fields
+        //             campaign.spend += obj.spend !== null && obj.spend !== undefined ? parseFloat(obj.spend) : 0;
+        //             campaign.estimated_revenue += obj.estimated_revenue !== null && obj.estimated_revenue !== undefined ? parseFloat(obj.estimated_revenue) : 0;
+        //             campaign.fbLeads += obj.fbLeads !== null && obj.fbLeads !== undefined ? parseInt(obj.fbLeads) : 0;
+        //             campaign.conversions += obj.conversions !== null && obj.conversions !== undefined ? parseInt(obj.conversions) : 0;
+        //         }
+        
+        //         return acc;
+        //     }, []).map(campaign => {
+        //         // Calculate profit after grouping
+        //         campaign.profit = campaign.estimated_revenue - campaign.spend;
+        //         return campaign;
+        //     });
+        
+        //     // Sort the grouped data by spend in descending order and return the top 5 campaigns
+        //     return groupedData.sort((a, b) => b.spend - a.spend).slice(0, 5);
+        // }
+        
+        // // Example usage
+        // const groupedData1 = groupAndSortByCampaignSpend(responseData);
+        // setTop5Campaigns(groupedData1);
+
+
+        // console.log(groupedData1, "campaign");
+        
+
+        function groupByAccountNumberAndDate(data, specifiedDateKey) {
+            return data.reduce((acc, obj) => {
+                const accountKey = obj.accountNumber;
+                const dateKey = obj[`${specifiedDateKey}Date`]; // dynamically access the specified date field
+        
+                // Create a combined key for grouping by both accountNumber and dynamically passed date field
+                const key = `${accountKey}_${dateKey}`;
+        
+                // Find if the combined key already exists in the accumulator array
+                let entry = acc.find(item => item.key === key);
+        
+                if (!entry) {
+                    // If not found, create a new entry for this accountNumber and specifiedDate
+                    acc.push({
+                        key, // Unique key for grouping
                         accountNumber: obj.accountNumber,
-                        spend: obj.spend ? parseFloat(obj.spend) : 0, // Initialize with current object values
+                        specifiedDate: dateKey,
+                        spend: obj.spend ? parseFloat(obj.spend) : 0,
                         estimated_revenue: obj.estimated_revenue ? parseFloat(obj.estimated_revenue) : 0,
                         fbLeads: obj.fbLeads ? parseInt(obj.fbLeads) : 0,
                         conversions: obj.conversions ? parseInt(obj.conversions) : 0,
@@ -416,12 +592,12 @@ const Dashboard = () => {
                     });
                 } else {
                     // If found, sum the respective fields
-                    account.spend += obj.spend !== null && obj.spend !== undefined ? parseFloat(obj.spend) : 0;
-                    account.estimated_revenue += obj.estimated_revenue !== null && obj.estimated_revenue !== undefined ? parseFloat(obj.estimated_revenue) : 0;
-                    account.fbLeads += obj.fbLeads !== null && obj.fbLeads !== undefined ? parseInt(obj.fbLeads) : 0;
-                    account.conversions += obj.conversions !== null && obj.conversions !== undefined ? parseInt(obj.conversions) : 0;
+                    entry.spend += obj.spend !== null && obj.spend !== undefined ? parseFloat(obj.spend) : 0;
+                    entry.estimated_revenue += obj.estimated_revenue !== null && obj.estimated_revenue !== undefined ? parseFloat(obj.estimated_revenue) : 0;
+                    entry.fbLeads += obj.fbLeads !== null && obj.fbLeads !== undefined ? parseInt(obj.fbLeads) : 0;
+                    entry.conversions += obj.conversions !== null && obj.conversions !== undefined ? parseInt(obj.conversions) : 0;
                 }
-
+        
                 return acc;
             }, []).map(account => {
                 // Calculate profit after grouping
@@ -430,25 +606,59 @@ const Dashboard = () => {
             });
         }
 
-        const groupedData = groupByAccountNumber(responseData);
+        const groupedData = groupByAccountNumberAndDate(responseData, time);
         setRowData(groupedData);
 
 
         console.log(groupedData);
 
-        const dates = groupedData.map(d => d.accountNumber.slice(-4));
-        const spend = groupedData.map(d => Math.round((d.spend) * 100) / 100);
-        const revenue = groupedData.map(d => (Math.round(d.estimated_revenue) * 100) / 100);
-        const profit = groupedData.map(d => Math.round((d.estimated_revenue - d.spend) * 100) / 100);
-        const rpc = groupedData.map(d => Math.round((d.estimated_revenue / d.conversions) * 100) / 100);
-        const cpl = groupedData.map(d => Math.round(((d.spend / d.fbLeads) * 100) * 100) / 100);
+        const sortedData = groupedData.sort((a, b) => {
+            if (a.accountNumber < b.accountNumber) {
+              return -1;
+            }
+            if (a.accountNumber > b.accountNumber) {
+              return 1;
+            }
+            return 0;  // If accountNumber is the same, maintain original order
+        });
+        console.log(sortedData);
 
-        const margin = groupedData.map(d => Math.round((((d.estimated_revenue - d.spend) / d.estimated_revenue) * 100) * 100) / 100);
+        const dates = sortedData.map(d => d.accountNumber.slice(-4));
+        const newDates = sortedData.map(d => d.specifiedDate);
+        const spend = sortedData.map(d => Math.round((d.spend) * 100) / 100);
+        const revenue = sortedData.map(d => Math.round(parseFloat(d.estimated_revenue) * 100) / 100);
+        const profit = sortedData.map(d => Math.round((d.estimated_revenue - d.spend) * 100) / 100);
+        const rpc = sortedData.map(d => !isNaN((d.estimated_revenue / d.conversions)) && (d.estimated_revenue / d.conversions) !== undefined ? Math.round((d.estimated_revenue / d.conversions) * 100) / 100 : 0);
+        const cpl = sortedData.map(d => !isNaN(((d.spend / d.fbLeads) * 100)) && ((d.spend / d.fbLeads) * 100) !== undefined ? Math.round(((d.spend / d.fbLeads) * 100) * 100) / 100 : 0);
 
-        setChartData({ dates, spend, revenue, profit, margin, rpc, cpl });
+        const margin = sortedData.map(d => d.estimated_revenue !== 0 ?Math.round((((d.estimated_revenue - d.spend) / d.estimated_revenue) * 100) * 100) / 100 : 0);
+
+        // console.log(revenue);
+
+        setChartData({ dates, newDates, spend, revenue, profit, margin, rpc, cpl });
         console.log(responseData.length);
         setSkeletonLoading(false);
     }, 1500);;
+
+    // useEffect(() => {
+    //     const fetchData = async () => {
+    //         try {
+    //             const networksFetch = await axios.post('http://localhost:8000/getAccountNameandStatus/', {
+    //                 updatedNetwork: userdetails?.adAccounts // Pass in the body of the POST request
+    //             });
+    
+    //             if (networksFetch.status === 200) {
+    //                 setRendering(false);
+    //                 setUsersDataFromFetch(networksFetch.data); // Access data from the Axios response
+    //             }
+    //         } catch (error) {
+    //             console.error('Error fetching data:', error);
+    //         }
+    //     };
+    
+    //     fetchData(); // Call the async function inside useEffect
+    
+    // }, [userdetails]);
 
     useEffect(() => {
         // if(selectedItems.length > 0){
@@ -533,8 +743,10 @@ const Dashboard = () => {
     const debouncedUpdateSelectedItems = useCallback(
         debounce((category, checkedValues) => {
             setSelectedItems((prevSelected) => ({
-                ...prevSelected,
-                [category]: checkedValues,
+                ...prevSelected,  // Spread the previous selected items to retain selections for other categories
+            [category]: checkedValues.map(value => ({
+                accountNumber: value  // Store the accountNumber in the selected items array for the category
+            }))
             }));
             //   setSkeletonLoading(false); // Optionally stop loading
         }, 1000), // Adjust debounce time (1000ms in this example)
@@ -560,9 +772,11 @@ const Dashboard = () => {
     // Render checkboxes for categories dynamically based on the first Select values
     const renderInnerSelects = (theme) => {
         return firstSelectValues.map((category) => {
+            // Ensure transformedData[category] is available before proceeding
+            console.log(transformedData[category]);
             const allSelected =
                 transformedData[category]?.length === selectedItems[category]?.length;
-
+    
             return (
                 <div key={category}>
                     <div
@@ -583,16 +797,41 @@ const Dashboard = () => {
                             />
                         </Divider>
                     </div>
+    
                     <Checkbox.Group
-                        options={transformedData[category]} // Use the plain options as Ant Design expects
-                        value={selectedItems[category] || []} // Keep the previously selected items
-                        onChange={(checkedValues) => handleGroupChange(checkedValues, category)}
-                        className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'} // Apply class based on theme
+                        options={
+                            transformedData[category]?.map((item) => {
+                                const accountNumber = item?.accountNumber ? item.accountNumber.toString() : 'Unknown';
+                                return {
+                                    label: (
+                                        <div style={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            padding: '5px 10px',
+                                            borderBottom: '1px solid #ddd',  // Optional: to separate each item visually
+                                        }}>
+                                            <div style={{display:'flex', flexDirection:'column'}}>
+                                                <span style={{ fontWeight: '600' }}>{accountNumber}</span>
+                                                <span>{item.accountName || ''}</span>
+                                            </div>
+                                        </div>
+                                    ),
+                                    value: accountNumber,  // Ensure the value is the accountNumber as a string
+                                };
+                            }) || []  // Fallback to an empty array if transformedData[category] is undefined
+                        }
+                        value={selectedItems[category]?.map(item => item.accountNumber?.toString()) || []}
+                        onChange={(checkedValues) => handleGroupChange(checkedValues, category)}  // Handle the change in selection
+                        className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}  // Apply class based on theme
                     />
+
                 </div>
             );
         });
     };
+    
+    
 
 
 
@@ -641,11 +880,17 @@ const Dashboard = () => {
             rowGroup: true,
             enableRowGroup: true,
         }, // Group by Holder
+        { field: 'accountNumber', headerName: 'AccountNumber',
+        resizable: true,
+        sortable: true,
+        hide: true, // Hide column as it's grouped
+        rowGroup: true,
+        enableRowGroup: true, },
+        {field:'specifiedDate', headerName:'Date'},
         {
             field: "mediaBuyerName",
 
         }, // Display Media Buyer name
-        { field: 'accountNumber', headerName: 'AccountNumber' },
         {
             field: "spend",
             aggFunc: spender,
@@ -671,8 +916,14 @@ const Dashboard = () => {
     const [columnDefs1] = useState([
         {
             field: "accountNumber",
+            resizable: true,
+            sortable: true,
+            hide: true, // Hide column as it's grouped
+            rowGroup: true,
+            enableRowGroup: true,
 
         }, // Group by Network
+        {field:'specifiedDate', headerName:'Date'},
         {
             field: "spend",
             aggFunc: spender,
@@ -700,9 +951,64 @@ const Dashboard = () => {
             field: "holder",// Group by MediaBuyerName
         },
         {
-            field: "mediaBuyerName",// Group by MediaBuyerName
+            field: "mediaBuyerName", headerName:'User'// Group by MediaBuyerName
         },
     ]);
+
+    const [columnDefs2] = useState([
+        {   field: 'campaign_name', headerName:'CampaignName', minWidth: 430, suppressAutoSize: true,  
+            resizable: true,
+            sortable: true,
+            hide: true, // Hide column as it's grouped
+            rowGroup: true,
+            enableRowGroup: true,
+        },
+        {
+            field: "accountNumber", minWidth:180
+
+        }, // Group by Network
+        {field:'Date'},
+        {
+            field: "spend",
+            aggFunc: spender,
+            valueFormatter: currencyFormatter,
+            sort: 'desc'
+        }, // Summing Spend column
+        {
+            headerName: 'Revenue',
+            field: "estimated_revenue",
+            aggFunc: spender,
+            valueFormatter: currencyFormatter,
+        }, // Summing Revenue column
+        {
+            field: "profit",
+            aggFunc: spender,
+            sort: 'desc',
+            cellClassRules: {
+                'font-red': p => p.value < 0
+            },
+            valueFormatter: currencyFormatter,
+        },
+        {
+            field: "revenuePartner",
+        }, // Group by Holder
+        {
+            field: "holder",// Group by MediaBuyerName
+        },
+        {
+            field: "mediaBuyerName", headerName:'User'// Group by MediaBuyerName
+        },
+    ]);
+
+    const autoGroupColumnDef = {
+        headerName: 'Campaign Name', // Display name for the grouped column
+        minWidth: 430, // Set width for grouped rows
+        resizable: true, // Enable resizing
+        sortable: true, // Enable sorting
+        cellRendererParams: {
+          suppressCount: true, // Suppress row count in the grouped column
+        },
+      };
 
     //   const [columnDefs2] = useState([
     //     { field: "revenuePartner", 
@@ -754,446 +1060,448 @@ const Dashboard = () => {
 
 
     // console.log(rowData?.map(each=> each.profit > 0));
-    console.log(chartData, "data");
+    // console.log(chartData.revenue, "data");
     return (
-        <div style={{ padding: '20px' }}>
-            <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ width: '40%' }}>
-                    <h1 style={{ color: darkMode ? '#007BFF' : '#fff', fontSize: '22px', textAlign: 'start' }}>
-                        Welcome, {userdetails?.userName} !
-                    </h1>
-                </div>
-                <div style={{ width: '60%', display: 'flex', justifyContent: 'flex-end', height: '50px' }}>
-                    <Row style={{ width: '100%', height: '100px', display: 'flex', justifyContent: 'space-between' }}>
-                        <Col span={5}>
-                            <Select
-                                mode="tags"
-                                style={{
-                                    width: '100%',
-                                    maxHeight: '40px',
-                                    overflowY: 'auto',
-                                }}
-                                placeholder="Select Categories"
-                                value={firstSelectValues}
-                                onChange={handleFirstSelectChange}
-                                maxTagCount="responsive"
-                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                dropdownRender={(menu) => (
-                                    <div
-                                        style={{
-                                            width: '100%',
-                                            maxHeight: '200px',
-                                            overflowY: 'auto',
-                                            overflowX: 'hidden',
-                                            // padding: '8px',
-                                            scrollbarWidth: 'none', // For Firefox
-                                            msOverflowStyle: 'none',
-                                        }}
-                                    >
-                                        {menu}
-                                    </div>
-                                )}
-                                options={Object.keys(transformedData).map((category) => ({
-                                    value: category,
-                                    label: category,
-                                }))}
-                            />
-                        </Col>
-
-                        <Col span={6}>
-                            <Select
-                                mode="multiple"
-                                style={{ width: '100%', color: theme === 'dark' ? 'white' : 'black' }}
-                                placeholder="Select items"
-                                dropdownClassName={theme === 'dark' && 'custom-dropdown'}
-                                value={[]} // This should be updated to reflect selectedItems based on the selected categories
-                                dropdownRender={() => (
-                                    <div style={{ maxHeight: '300px', overflowY: 'auto', padding: '8px' }}>
-                                        {renderInnerSelects(theme)}
-                                    </div>
-                                )}
-                            />
-                        </Col>
-
-                        <Col span={3}>
-                            <Select
-                                showSearch
-                                onChange={onChangeTime}
-                                style={{ width: '100%' }}
-                                placeholder="Select Timezone"
-                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                optionFilterProp="label"
-                                value={time}
-                                options={timezones.map((item) => ({
-                                    value: item,
-                                    label: item,
-                                }))}
-                            />
-                        </Col>
-
-                        <Col span={8}>
-                            <ConfigProvider locale={locale}>
-                                <RangePicker
-                                    presets={rangePresets}
-                                    onChange={handleChangeDates}
-                                    defaultValue={defaultDates}
-                                    disabledDate={disabledDate}
-                                    format="YYYY-MM-DD"
+        <div>
+            {rendering === true ? <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><Spin size="large"/></div> : (
+                <div style={{ padding: '20px' }}>
+                <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ width: '40%' }}>
+                        <h1 style={{ color: darkMode ? '#007BFF' : '#fff', fontSize: '22px', textAlign: 'start' }}>
+                            Welcome, {userdetails?.userName} !
+                        </h1>
+                    </div>
+                    <div style={{ width: '60%', display: 'flex', justifyContent: 'flex-end', height: '50px' }}>
+                        <Row style={{ width: '100%', height: '100px', display: 'flex', justifyContent: 'space-between' }}>
+                            <Col span={5}>
+                                <Select
+                                    mode="tags"
                                     style={{
                                         width: '100%',
-                                        backgroundColor: theme === 'dark' ? '#555' : undefined,
-                                        color: theme === 'dark' ? 'white' : undefined,
+                                        maxHeight: '40px',
+                                        overflowY: 'auto',
                                     }}
-                                    dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}
+                                    placeholder="Select Categories"
+                                    value={firstSelectValues}
+                                    onChange={handleFirstSelectChange}
+                                    maxTagCount="responsive"
+                                    dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                    dropdownRender={(menu) => (
+                                        <div
+                                            style={{
+                                                width: '100%',
+                                                maxHeight: '200px',
+                                                overflowY: 'auto',
+                                                overflowX: 'hidden',
+                                                // padding: '8px',
+                                                scrollbarWidth: 'none', // For Firefox
+                                                msOverflowStyle: 'none',
+                                            }}
+                                        >
+                                            {menu}
+                                        </div>
+                                    )}
+                                    options={Object.keys(transformedData).map((category) => ({
+                                        value: category,
+                                        label: category,
+                                    }))}
                                 />
-                            </ConfigProvider>
-                        </Col>
-                    </Row>
+                            </Col>
+    
+                            <Col span={6}>
+                                <Select
+                                    mode="multiple"
+                                    style={{ width: '100%', color: theme === 'dark' ? 'white' : 'black' }}
+                                    placeholder="Select items"
+                                    dropdownClassName={theme === 'dark' && 'custom-dropdown'}
+                                    value={[]} // This should be updated to reflect selectedItems based on the selected categories
+                                    dropdownRender={() => (
+                                        <div style={{ maxHeight: '300px', overflowY: 'auto', padding: '8px' }}>
+                                            {renderInnerSelects(theme)}
+                                        </div>
+                                    )}
+                                />
+                            </Col>
+    
+                            <Col span={3}>
+                                <Select
+                                    showSearch
+                                    onChange={onChangeTime}
+                                    style={{ width: '100%' }}
+                                    placeholder="Select Timezone"
+                                    dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                    optionFilterProp="label"
+                                    value={time}
+                                    options={timezones.map((item) => ({
+                                        value: item,
+                                        label: item,
+                                    }))}
+                                />
+                            </Col>
+    
+                            <Col span={8}>
+                                <ConfigProvider locale={locale}>
+                                    <RangePicker
+                                        presets={rangePresets}
+                                        onChange={handleChangeDates}
+                                        defaultValue={defaultDates}
+                                        disabledDate={disabledDate}
+                                        format="YYYY-MM-DD"
+                                        style={{
+                                            width: '100%',
+                                            backgroundColor: theme === 'dark' ? '#555' : undefined,
+                                            color: theme === 'dark' ? 'white' : undefined,
+                                        }}
+                                        dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}
+                                    />
+                                </ConfigProvider>
+                            </Col>
+                        </Row>
+                    </div>
                 </div>
-            </div>
-
-            {skeletonLoading ? (
-                <Skeleton active paragraph={{ rows: 18 }} />
-            ) : (
-                <div style={{ height: '100%', paddingBottom: '40px' }}>
-                    <Row gutter={24} style={{ marginTop: '20px' }} justify="space-between">
-                        <Col flex="1">
-                            <Card>
-                                <Statistic
-                                    title={
-                                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                                            <span
-                                                style={{
-                                                    display: 'inline-block',
-                                                    height: '12px',
-                                                    width: '12px',
-                                                    backgroundColor: '#A3F254',
-                                                    borderRadius: '50%',
-                                                    marginRight: '8px',
-                                                }}
-                                            ></span>
-                                            <span style={{ color: '#A3F254', fontWeight: 600 }}>Revenue</span>
-                                        </div>
-                                    }
-                                    value={data.length > 0 ? revenue1.current : 0}
-                                    prefix="$"
-                                    valueStyle={{ color: '#3f8600' }}
-                                />
-                            </Card>
-                        </Col>
-
-                        <Col flex="1">
-                            <Card>
-                                <Statistic
-                                    title={
-                                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                                            <span
-                                                style={{
-                                                    display: 'inline-block',
-                                                    height: '12px',
-                                                    width: '12px',
-                                                    backgroundColor: '#EC7117',
-                                                    borderRadius: '50%',
-                                                    marginRight: '8px',
-                                                }}
-                                            ></span>
-                                            <span style={{ color: '#EC7117', fontWeight: 600 }}>Profit</span>
-                                        </div>
-                                    }
-                                    value={data.length > 0 ? profit1.current : 0}
-                                    prefix="$"
-                                    valueStyle={{ color: '#3f8600' }}
-                                />
-                            </Card>
-                        </Col>
-
-                        <Col flex="1">
-                            <Card>
-                                <Statistic
-                                    title={
-                                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                                            <span
-                                                style={{
-                                                    display: 'inline-block',
-                                                    height: '12px',
-                                                    width: '12px',
-                                                    backgroundColor: '#5C58EE',
-                                                    borderRadius: '50%',
-                                                    marginRight: '8px',
-                                                }}
-                                            ></span>
-                                            <span style={{ color: '#5C58EE', fontWeight: 600 }}>Spend</span>
-                                        </div>
-                                    }
-                                    value={data.length > 0 ? spend1.current : 0}
-                                    prefix="$"
-                                    valueStyle={{ color: '#3f8600' }}
-                                />
-                            </Card>
-                        </Col>
-
-                        <Col flex="1">
-                            <Card>
-                                <Statistic
-                                    title={
-                                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                                            <span
-                                                style={{
-                                                    display: 'inline-block',
-                                                    height: '12px',
-                                                    width: '12px',
-                                                    backgroundColor: '#EC7117',
-                                                    borderRadius: '50%',
-                                                    marginRight: '8px',
-                                                }}
-                                            ></span>
-                                            <span style={{ color: '#EC7117', fontWeight: 600 }}>Leads</span>
-                                        </div>
-                                    }
-                                    value={data.length > 0 ? leads1.current : 0}
-                                    valueStyle={{ color: '#3f8600' }}
-                                />
-                            </Card>
-                        </Col>
-
-                        <Col flex="1">
-                            <Card>
-                                <Statistic
-                                    title={
-                                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                                            <span
-                                                style={{
-                                                    display: 'inline-block',
-                                                    height: '12px',
-                                                    width: '12px',
-                                                    backgroundColor: '#5C58EE',
-                                                    borderRadius: '50%',
-                                                    marginRight: '8px',
-                                                }}
-                                            ></span>
-                                            <span style={{ color: '#5C58EE', fontWeight: 600 }}>Conversions</span>
-                                        </div>
-                                    }
-                                    value={data.length > 0 ? conversions1.current : 0}
-                                    valueStyle={{ color: '#3f8600' }}
-                                />
-                            </Card>
-                        </Col>
-                    </Row>
-
-                    <Row gutter={24} style={{ marginTop: '20px' }} justify="space-between">
-                        <Col flex="1">
-                            <Card>
-                                <Statistic
-                                    title={
-                                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                                            <span
-                                                style={{
-                                                    display: 'inline-block',
-                                                    height: '12px',
-                                                    width: '12px',
-                                                    backgroundColor: '#A3F254',
-                                                    borderRadius: '50%',
-                                                    marginRight: '8px',
-                                                }}
-                                            ></span>
-                                            <span style={{ color: '#A3F254', fontWeight: 600 }}>NCPL</span>
-                                        </div>
-                                    }
-                                    value={data.length > 0 ? ncpl1.current : 0}
-                                    valueStyle={{ color: '#3f8600' }}
-                                />
-                            </Card>
-                        </Col>
-
-                        <Col flex="1">
-                            <Card>
-                                <Statistic
-                                    title={
-                                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                                            <span
-                                                style={{
-                                                    display: 'inline-block',
-                                                    height: '12px',
-                                                    width: '12px',
-                                                    backgroundColor: '#EC7117',
-                                                    borderRadius: '50%',
-                                                    marginRight: '8px',
-                                                }}
-                                            ></span>
-                                            <span style={{ color: '#EC7117', fontWeight: 600 }}>CPL</span>
-                                        </div>
-                                    }
-                                    value={data.length > 0 ? cpl1.current : 0}
-                                    valueStyle={{ color: '#3f8600' }}
-                                />
-                            </Card>
-                        </Col>
-
-                        <Col flex="1">
-                            <Card>
-                                <Statistic
-                                    title={
-                                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                                            <span
-                                                style={{
-                                                    display: 'inline-block',
-                                                    height: '12px',
-                                                    width: '12px',
-                                                    backgroundColor: '#5C58EE',
-                                                    borderRadius: '50%',
-                                                    marginRight: '8px',
-                                                }}
-                                            ></span>
-                                            <span style={{ color: '#5C58EE', fontWeight: 600 }}>CTR</span>
-                                        </div>
-                                    }
-                                    value={data.length > 0 ? ctr1.current : 0}
-                                    valueStyle={{ color: '#3f8600' }}
-                                />
-                            </Card>
-                        </Col>
-
-                        <Col flex="1">
-                            <Card>
-                                <Statistic
-                                    title={
-                                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                                            <span
-                                                style={{
-                                                    display: 'inline-block',
-                                                    height: '12px',
-                                                    width: '12px',
-                                                    backgroundColor: '#EC7117',
-                                                    borderRadius: '50%',
-                                                    marginRight: '8px',
-                                                }}
-                                            ></span>
-                                            <span style={{ color: '#EC7117', fontWeight: 600 }}>CPC</span>
-                                        </div>
-                                    }
-                                    value={data.length > 0 ? cpc1.current : 0}
-                                    valueStyle={{ color: '#3f8600' }}
-                                />
-                            </Card>
-                        </Col>
-
-                        <Col flex="1">
-                            <Card>
-                                <Statistic
-                                    title={
-                                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                                            <span
-                                                style={{
-                                                    display: 'inline-block',
-                                                    height: '12px',
-                                                    width: '12px',
-                                                    backgroundColor: '#5C58EE',
-                                                    borderRadius: '50%',
-                                                    marginRight: '8px',
-                                                }}
-                                            ></span>
-                                            <span style={{ color: '#5C58EE', fontWeight: 600 }}>RPC</span>
-                                        </div>
-                                    }
-                                    value={data.length > 0 ? rpc1.current : 0}
-                                    valueStyle={{ color: '#3f8600' }}
-                                />
-                            </Card>
-                        </Col>
-                    </Row>
-
-                    {/* <Row style={{ height: '400px', marginBottom: '10px', marginTop: '25px', padding: '0px', marginLeft:'0px', marginRight:'0px' }}>
-                    <Line
-                    data={{
-                        labels: chartData.dates,
-                        datasets: [
-                        {
-                            label: 'Spend',
-                            data: chartData.spend,
-                            borderColor: 'rgba(44, 144, 192, 1)',
-                            backgroundColor: 'rgba(44, 144, 192, 0.2)',
-                            fill: true,
-                            hidden: true,
-                            tension: 0.3
-                        },
-                        {
-                            label: 'Revenue',
-                            data: chartData.revenue,
-                            borderColor: 'rgba(99, 200, 99, 1)',
-                            backgroundColor: 'rgba(99, 200, 99, 0.2)',
-                            fill: true,
-                            hidden: true,
-                            tension: 0.3
-                        },
-                        {
-                            label: 'RPC',
-                            data: chartData.rpc,
-                            borderColor: 'rgba(255, 99, 132, 1)',
-                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                            fill: true,
-                            hidden: true,
-                            tension: 0.3
-                        },
-                        {
-                            label: 'CPL',
-                            data: chartData.cpl,
-                            borderColor: 'rgba(255, 159, 64, 1)',
-                            backgroundColor: 'rgba(255, 159, 64, 0.2)',
-                            fill: true,
-                            hidden: true,
-                            tension: 0.3
-                        },
-                        {
-                            label: 'Profit',
-                            data: chartData.profit,
-                            borderColor: 'rgba(255, 206, 86, 1)',
-                            backgroundColor: 'rgba(255, 206, 86, 0.2)',
-                            fill: true,
-                            tension: 0.3
-                        },
-                        {
-                            label: 'Margin',
-                            data: chartData.margin,
-                            borderColor: 'rgba(153, 102, 255, 1)',
-                            backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                            fill: true,
-                            hidden: true,
-                            tension: 0.3
-                        },
-                        ],
-                    }}
-                    options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                        x: {
-                            ticks: {
-                            padding: 30,
-                            },
-                        },
-                        y: {
-                            beginAtZero: true,
-                        },
-                        },
-                    }}
-                    height={350}
-                    />
-                </Row> */}
-                    <Row
-                        style={{
-                            height: '400px',
-                            marginBottom: '10px',
-                            marginTop: '25px',
-                            padding: '0px',
-                            marginLeft: '0px',
-                            marginRight: '0px',
-                        }}
-                    >
+    
+                {skeletonLoading ? (
+                    <Skeleton active paragraph={{ rows: 15 }} />
+                ) : (
+                    <div style={{ height: '100%', paddingBottom: '40px' }}>
+                        <Row gutter={24} style={{ marginTop: '20px' }} justify="space-between">
+                            <Col flex="1">
+                                <Card>
+                                    <Statistic
+                                        title={
+                                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                <span
+                                                    style={{
+                                                        display: 'inline-block',
+                                                        height: '12px',
+                                                        width: '12px',
+                                                        backgroundColor: '#A3F254',
+                                                        borderRadius: '50%',
+                                                        marginRight: '8px',
+                                                    }}
+                                                ></span>
+                                                <span style={{ color: '#A3F254', fontWeight: 600 }}>Revenue</span>
+                                            </div>
+                                        }
+                                        value={data.length > 0 ? revenue1.current : 0}
+                                        prefix="$"
+                                        valueStyle={{ color: '#3f8600' }}
+                                    />
+                                </Card>
+                            </Col>
+    
+                            <Col flex="1">
+                                <Card>
+                                    <Statistic
+                                        title={
+                                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                <span
+                                                    style={{
+                                                        display: 'inline-block',
+                                                        height: '12px',
+                                                        width: '12px',
+                                                        backgroundColor: '#EC7117',
+                                                        borderRadius: '50%',
+                                                        marginRight: '8px',
+                                                    }}
+                                                ></span>
+                                                <span style={{ color: '#EC7117', fontWeight: 600 }}>Profit</span>
+                                            </div>
+                                        }
+                                        value={data.length > 0 ? profit1.current : 0}
+                                        prefix="$"
+                                        valueStyle={{ color: '#3f8600' }}
+                                    />
+                                </Card>
+                            </Col>
+    
+                            <Col flex="1">
+                                <Card>
+                                    <Statistic
+                                        title={
+                                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                <span
+                                                    style={{
+                                                        display: 'inline-block',
+                                                        height: '12px',
+                                                        width: '12px',
+                                                        backgroundColor: '#5C58EE',
+                                                        borderRadius: '50%',
+                                                        marginRight: '8px',
+                                                    }}
+                                                ></span>
+                                                <span style={{ color: '#5C58EE', fontWeight: 600 }}>Spend</span>
+                                            </div>
+                                        }
+                                        value={data.length > 0 ? spend1.current : 0}
+                                        prefix="$"
+                                        valueStyle={{ color: '#3f8600' }}
+                                    />
+                                </Card>
+                            </Col>
+    
+                            <Col flex="1">
+                                <Card>
+                                    <Statistic
+                                        title={
+                                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                <span
+                                                    style={{
+                                                        display: 'inline-block',
+                                                        height: '12px',
+                                                        width: '12px',
+                                                        backgroundColor: '#EC7117',
+                                                        borderRadius: '50%',
+                                                        marginRight: '8px',
+                                                    }}
+                                                ></span>
+                                                <span style={{ color: '#EC7117', fontWeight: 600 }}>Leads</span>
+                                            </div>
+                                        }
+                                        value={data.length > 0 ? leads1.current : 0}
+                                        valueStyle={{ color: '#3f8600' }}
+                                    />
+                                </Card>
+                            </Col>
+    
+                            <Col flex="1">
+                                <Card>
+                                    <Statistic
+                                        title={
+                                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                <span
+                                                    style={{
+                                                        display: 'inline-block',
+                                                        height: '12px',
+                                                        width: '12px',
+                                                        backgroundColor: '#5C58EE',
+                                                        borderRadius: '50%',
+                                                        marginRight: '8px',
+                                                    }}
+                                                ></span>
+                                                <span style={{ color: '#5C58EE', fontWeight: 600 }}>Conversions</span>
+                                            </div>
+                                        }
+                                        value={data.length > 0 ? conversions1.current : 0}
+                                        valueStyle={{ color: '#3f8600' }}
+                                    />
+                                </Card>
+                            </Col>
+                        </Row>
+    
+                        <Row gutter={24} style={{ marginTop: '20px' }} justify="space-between">
+                            <Col flex="1">
+                                <Card>
+                                    <Statistic
+                                        title={
+                                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                <span
+                                                    style={{
+                                                        display: 'inline-block',
+                                                        height: '12px',
+                                                        width: '12px',
+                                                        backgroundColor: '#A3F254',
+                                                        borderRadius: '50%',
+                                                        marginRight: '8px',
+                                                    }}
+                                                ></span>
+                                                <span style={{ color: '#A3F254', fontWeight: 600 }}>NCPL</span>
+                                            </div>
+                                        }
+                                        value={data.length > 0 ? ncpl1.current : 0}
+                                        valueStyle={{ color: '#3f8600' }}
+                                    />
+                                </Card>
+                            </Col>
+    
+                            <Col flex="1">
+                                <Card>
+                                    <Statistic
+                                        title={
+                                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                <span
+                                                    style={{
+                                                        display: 'inline-block',
+                                                        height: '12px',
+                                                        width: '12px',
+                                                        backgroundColor: '#EC7117',
+                                                        borderRadius: '50%',
+                                                        marginRight: '8px',
+                                                    }}
+                                                ></span>
+                                                <span style={{ color: '#EC7117', fontWeight: 600 }}>CPL</span>
+                                            </div>
+                                        }
+                                        value={data.length > 0 ? cpl1.current : 0}
+                                        valueStyle={{ color: '#3f8600' }}
+                                    />
+                                </Card>
+                            </Col>
+    
+                            <Col flex="1">
+                                <Card>
+                                    <Statistic
+                                        title={
+                                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                <span
+                                                    style={{
+                                                        display: 'inline-block',
+                                                        height: '12px',
+                                                        width: '12px',
+                                                        backgroundColor: '#5C58EE',
+                                                        borderRadius: '50%',
+                                                        marginRight: '8px',
+                                                    }}
+                                                ></span>
+                                                <span style={{ color: '#5C58EE', fontWeight: 600 }}>CTR</span>
+                                            </div>
+                                        }
+                                        value={data.length > 0 ? ctr1.current : 0}
+                                        valueStyle={{ color: '#3f8600' }}
+                                    />
+                                </Card>
+                            </Col>
+    
+                            <Col flex="1">
+                                <Card>
+                                    <Statistic
+                                        title={
+                                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                <span
+                                                    style={{
+                                                        display: 'inline-block',
+                                                        height: '12px',
+                                                        width: '12px',
+                                                        backgroundColor: '#EC7117',
+                                                        borderRadius: '50%',
+                                                        marginRight: '8px',
+                                                    }}
+                                                ></span>
+                                                <span style={{ color: '#EC7117', fontWeight: 600 }}>CPC</span>
+                                            </div>
+                                        }
+                                        value={data.length > 0 ? cpc1.current : 0}
+                                        valueStyle={{ color: '#3f8600' }}
+                                    />
+                                </Card>
+                            </Col>
+    
+                            <Col flex="1">
+                                <Card>
+                                    <Statistic
+                                        title={
+                                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                <span
+                                                    style={{
+                                                        display: 'inline-block',
+                                                        height: '12px',
+                                                        width: '12px',
+                                                        backgroundColor: '#5C58EE',
+                                                        borderRadius: '50%',
+                                                        marginRight: '8px',
+                                                    }}
+                                                ></span>
+                                                <span style={{ color: '#5C58EE', fontWeight: 600 }}>RPC</span>
+                                            </div>
+                                        }
+                                        value={data.length > 0 ? rpc1.current : 0}
+                                        valueStyle={{ color: '#3f8600' }}
+                                    />
+                                </Card>
+                            </Col>
+                        </Row>
+    
+                        {/* <Row style={{ height: '400px', marginBottom: '10px', marginTop: '25px', padding: '0px', marginLeft:'0px', marginRight:'0px' }}>
                         <Line
-                            data={{
-                                labels: chartData.dates,
-                                datasets: [
+                        data={{
+                            labels: chartData.dates,
+                            datasets: [
+                            {
+                                label: 'Spend',
+                                data: chartData.spend,
+                                borderColor: 'rgba(44, 144, 192, 1)',
+                                backgroundColor: 'rgba(44, 144, 192, 0.2)',
+                                fill: true,
+                                hidden: true,
+                                tension: 0.3
+                            },
+                            {
+                                label: 'Revenue',
+                                data: chartData.revenue,
+                                borderColor: 'rgba(99, 200, 99, 1)',
+                                backgroundColor: 'rgba(99, 200, 99, 0.2)',
+                                fill: true,
+                                hidden: true,
+                                tension: 0.3
+                            },
+                            {
+                                label: 'RPC',
+                                data: chartData.rpc,
+                                borderColor: 'rgba(255, 99, 132, 1)',
+                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                fill: true,
+                                hidden: true,
+                                tension: 0.3
+                            },
+                            {
+                                label: 'CPL',
+                                data: chartData.cpl,
+                                borderColor: 'rgba(255, 159, 64, 1)',
+                                backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                                fill: true,
+                                hidden: true,
+                                tension: 0.3
+                            },
+                            {
+                                label: 'Profit',
+                                data: chartData.profit,
+                                borderColor: 'rgba(255, 206, 86, 1)',
+                                backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                                fill: true,
+                                tension: 0.3
+                            },
+                            {
+                                label: 'Margin',
+                                data: chartData.margin,
+                                borderColor: 'rgba(153, 102, 255, 1)',
+                                backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                                fill: true,
+                                hidden: true,
+                                tension: 0.3
+                            },
+                            ],
+                        }}
+                        options={{
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                            x: {
+                                ticks: {
+                                padding: 30,
+                                },
+                            },
+                            y: {
+                                beginAtZero: true,
+                            },
+                            },
+                        }}
+                        height={350}
+                        />
+                    </Row> */}
+                        <Row
+                            style={{
+                                height: '400px',
+                                marginBottom: '10px',
+                                marginTop: '25px',
+                                padding: '0px',
+                                marginLeft: '0px',
+                                marginRight: '0px',
+                            }}
+                        >
+                            <Line
+                                data={{
+                                    labels: chartData.dates, // Labels for X-axis (dates)
+                                    datasets: [
                                     {
                                         label: 'Spend',
                                         data: chartData.spend,
@@ -1201,7 +1509,11 @@ const Dashboard = () => {
                                         backgroundColor: 'rgba(44, 144, 192, 0.2)',
                                         fill: true,
                                         hidden: true,
-                                        tension: 0.3
+                                        tension: 0.3,
+                                        pointRadius: 5,
+                                        pointHoverRadius: 8,
+                                        pointBackgroundColor: 'rgba(44, 144, 192, 1)',
+                                        pointHoverBackgroundColor: 'rgba(44, 144, 192, 1)',
                                     },
                                     {
                                         label: 'Revenue',
@@ -1210,7 +1522,11 @@ const Dashboard = () => {
                                         backgroundColor: 'rgba(99, 200, 99, 0.2)',
                                         fill: true,
                                         hidden: true,
-                                        tension: 0.3
+                                        tension: 0.3,
+                                        pointRadius: 5,
+                                        pointHoverRadius: 8,
+                                        pointBackgroundColor: 'rgba(99, 200, 99, 1)',
+                                        pointHoverBackgroundColor: 'rgba(99, 200, 99, 1)',
                                     },
                                     {
                                         label: 'RPC',
@@ -1219,7 +1535,11 @@ const Dashboard = () => {
                                         backgroundColor: 'rgba(255, 99, 132, 0.2)',
                                         fill: true,
                                         hidden: true,
-                                        tension: 0.3
+                                        tension: 0.3,
+                                        pointRadius: 5,
+                                        pointHoverRadius: 8,
+                                        pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+                                        pointHoverBackgroundColor: 'rgba(255, 99, 132, 1)',
                                     },
                                     {
                                         label: 'CPL',
@@ -1228,7 +1548,11 @@ const Dashboard = () => {
                                         backgroundColor: 'rgba(255, 159, 64, 0.2)',
                                         fill: true,
                                         hidden: true,
-                                        tension: 0.3
+                                        tension: 0.3,
+                                        pointRadius: 5,
+                                        pointHoverRadius: 8,
+                                        pointBackgroundColor: 'rgba(255, 159, 64, 1)',
+                                        pointHoverBackgroundColor: 'rgba(255, 159, 64, 1)',
                                     },
                                     {
                                         label: 'Profit',
@@ -1236,7 +1560,11 @@ const Dashboard = () => {
                                         borderColor: 'rgba(255, 206, 86, 1)',
                                         backgroundColor: 'rgba(255, 206, 86, 0.2)',
                                         fill: true,
-                                        tension: 0.3
+                                        tension: 0.3,
+                                        pointRadius: 5,
+                                        pointHoverRadius: 8,
+                                        pointBackgroundColor: 'rgba(255, 206, 86, 1)',
+                                        pointHoverBackgroundColor: 'rgba(255, 206, 86, 1)',
                                     },
                                     {
                                         label: 'Margin',
@@ -1245,134 +1573,180 @@ const Dashboard = () => {
                                         backgroundColor: 'rgba(153, 102, 255, 0.2)',
                                         fill: true,
                                         hidden: true,
-                                        tension: 0.3
+                                        tension: 0.3,
+                                        pointRadius: 5,
+                                        pointHoverRadius: 8,
+                                        pointBackgroundColor: 'rgba(153, 102, 255, 1)',
+                                        pointHoverBackgroundColor: 'rgba(153, 102, 255, 1)',
                                     },
-                                ],
-                            }}
-                            options={{
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                scales: {
+                                    ],
+                                }}
+                                options={{
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    scales: {
                                     x: {
                                         ticks: {
-                                            padding: 30,
-                                            color: darkMode ? '#fff' : '#000', // Change tick color based on mode
+                                        padding: 30,
+                                        color: darkMode ? '#fff' : '#000',
                                         },
                                         grid: {
-                                            color: darkMode ? '#444' : '#e0e0e0', // Change grid color based on mode
+                                        color: darkMode ? '#444' : '#e0e0e0',
                                         },
                                     },
                                     y: {
                                         beginAtZero: true,
                                         ticks: {
-                                            color: darkMode ? '#fff' : '#000', // Change tick color based on mode
+                                        callback: function(value) {
+                                            return value.toFixed(2); // Ensure decimal values are displayed
+                                        },
+                                        color: darkMode ? '#fff' : '#000',
                                         },
                                         grid: {
-                                            color: darkMode ? '#444' : '#e0e0e0', // Change grid color based on mode
+                                        color: darkMode ? '#444' : '#e0e0e0',
                                         },
                                     },
-                                },
-                                plugins: {
+                                    },
+                                    plugins: {
                                     legend: {
                                         labels: {
-                                            color: darkMode ? '#fff' : '#000', // Change legend color based on mode
+                                        color: darkMode ? '#fff' : '#000',
                                         },
                                     },
-                                },
-                            }}
-                            height={350}
-                        />
-                    </Row>
-
-                    <Row style={{ display: 'flex', flexDirection: 'column' }}>
-                        <Col>
-                            <h2 >
-                                Over All Report
-                            </h2>
-
-                        </Col>
-                        {/* <Col>
-                        <div className="ag-theme-alpine" style={{ width: '100%', height: '400px' }}>
-                            
-                            <AgGridReact
-                            rowData={rowData}
-                            columnDefs={columnDefs}
-                            defaultColDef={defaultColDef}
-                            rowGroupPanelShow="always"
-                            suppressAggFuncInHeader={true}
-                            groupIncludeFooter={true}
-                            groupIncludeTotalFooter={true}
+                                    tooltip: {
+                                        callbacks: {
+                                        // Custom tooltip formatting to show chartData.column value instead of date
+                                        label: function(tooltipItem) {
+                                            const index = tooltipItem.dataIndex; // Get the index of the hovered point
+                                            const datasetLabel = tooltipItem.dataset.label || ''; // Dataset label (e.g. 'Spend')
+                                            const value = tooltipItem.raw; // Value from the dataset at the hovered point
+                                            const columnValue = chartData.newDates[index]; // Get the corresponding value from chartData.column
+                                            return `${datasetLabel}: ${value} (Date: ${columnValue})`; // Custom label
+                                        },
+                                        },
+                                    },
+                                    },
+                                }}
+                                height={350}
                             />
-                        </div>
-                    </Col> */}
-                        <Col>
-                            <div
-                                className={`ag-theme-alpine ${gridThemeClass}`}
-                                style={{ width: '100%', height: '400px' }}
-                            >
+
+
+
+                        </Row>
+    
+                        <Row style={{ display: 'flex', flexDirection: 'column' }}>
+                            <Col>
+                                <h2 >
+                                    Over All Report
+                                </h2>
+    
+                            </Col>
+                            {/* <Col>
+                            <div className="ag-theme-alpine" style={{ width: '100%', height: '400px' }}>
+                                
                                 <AgGridReact
-                                    rowData={rowData}
-                                    columnDefs={columnDefs}
-                                    defaultColDef={defaultColDef}
-                                    rowGroupPanelShow="always"
-                                    suppressAggFuncInHeader={true}
-                                    groupIncludeFooter={true}
-                                    groupIncludeTotalFooter={true}
+                                rowData={rowData}
+                                columnDefs={columnDefs}
+                                defaultColDef={defaultColDef}
+                                rowGroupPanelShow="always"
+                                suppressAggFuncInHeader={true}
+                                groupIncludeFooter={true}
+                                groupIncludeTotalFooter={true}
                                 />
                             </div>
-                        </Col>
-
-                    </Row>
-
-                    <Row style={{ display: 'flex', flexDirection: 'column' }}>
-                        <Col>
-                            <h2>Profit Accounts</h2>
-                        </Col>
-
-                        <Col>
-                            <div
-                                className={`ag-theme-alpine ${gridThemeClass}`}
-                                style={{ width: '100%', height: '400px' }}
-                            >
-                                <AgGridReact
-                                    rowData={rowData?.filter((each) => each.profit > 0)}
-                                    columnDefs={columnDefs1}
-                                    defaultColDef={defaultColDef}
-                                    rowGroupPanelShow="always"
-                                    suppressAggFuncInHeader={true}
-                                    groupIncludeFooter={true}
-                                    groupIncludeTotalFooter={true}
-                                />
-                            </div>
-                        </Col>
-
-                    </Row>
-                    <Row style={{ display: 'flex', flexDirection: 'column' }}>
-                        <Col>
-                            <h2>Loss Accounts</h2>
-                        </Col>
-                        <Col>
-                            <div
-                                className={`ag-theme-alpine ${gridThemeClass}`}
-                                style={{ width: '100%', height: '400px' }}
-                            >             <AgGridReact
-                                    rowData={rowData?.filter(each => each.profit < 0)}
-                                    columnDefs={columnDefs1}
-                                    defaultColDef={defaultColDef}
-                                    rowGroupPanelShow="always"
-                                    suppressAggFuncInHeader={true}
-                                    groupIncludeFooter={true}
-                                    groupIncludeTotalFooter={true}
-                                />
-                            </div>
-                        </Col>
-                    </Row>
-                    <Row></Row>
-
-
-                </div>
+                        </Col> */}
+                            <Col>
+                                <div
+                                    className={`ag-theme-alpine ${gridThemeClass}`}
+                                    style={{ width: '100%', height: '400px' }}
+                                >
+                                    <AgGridReact
+                                        rowData={rowData}
+                                        columnDefs={columnDefs}
+                                        defaultColDef={defaultColDef}
+                                        rowGroupPanelShow="always"
+                                        suppressAggFuncInHeader={true}
+                                        groupIncludeFooter={true}
+                                        groupIncludeTotalFooter={true}
+                                    />
+                                </div>
+                            </Col>
+    
+                        </Row>
+    
+                        <Row style={{ display: 'flex', flexDirection: 'column' }}>
+                            <Col>
+                                <h2>Profit Accounts</h2>
+                            </Col>
+    
+                            <Col>
+                                <div
+                                    className={`ag-theme-alpine ${gridThemeClass}`}
+                                    style={{ width: '100%', height: '400px' }}
+                                >
+                                    <AgGridReact
+                                        rowData={rowData?.filter((each) => each.profit > 0)}
+                                        columnDefs={columnDefs1}
+                                        defaultColDef={defaultColDef}
+                                        rowGroupPanelShow="always"
+                                        suppressAggFuncInHeader={true}
+                                        groupIncludeFooter={true}
+                                        groupIncludeTotalFooter={true}
+                                    />
+                                </div>
+                            </Col>
+    
+                        </Row>
+                        <Row style={{ display: 'flex', flexDirection: 'column' }}>
+                            <Col>
+                                <h2>Loss Accounts</h2>
+                            </Col>
+                            <Col>
+                                <div
+                                    className={`ag-theme-alpine ${gridThemeClass}`}
+                                    style={{ width: '100%', height: '400px' }}
+                                >             <AgGridReact
+                                        rowData={rowData?.filter(each => each.profit < 0)}
+                                        columnDefs={columnDefs1}
+                                        defaultColDef={defaultColDef}
+                                        rowGroupPanelShow="always"
+                                        suppressAggFuncInHeader={true}
+                                        groupIncludeFooter={true}
+                                        groupIncludeTotalFooter={true}
+                                    />
+                                </div>
+                            </Col>
+                        </Row>
+                        <Row style={{ display: 'flex', flexDirection: 'column' }}>
+                            <Col>
+                                <h2>Top 5 Campaigns</h2>
+                            </Col>
+                            <Col>
+                                <div
+                                    className={`ag-theme-alpine ${gridThemeClass}`}
+                                    style={{ width: '100%', height: '400px' }}
+                                >             <AgGridReact
+                                        rowData={top5Campaigns}
+                                        columnDefs={columnDefs2}
+                                        defaultColDef={defaultColDef}
+                                        rowGroupPanelShow="always"
+                                        suppressAggFuncInHeader={true}
+                                        groupIncludeFooter={true}
+                                        groupIncludeTotalFooter={true}
+                                        autoGroupColumnDef={autoGroupColumnDef}
+                                    />
+                                </div>
+                            </Col>
+                        </Row>
+                        <Row></Row>
+    
+    
+                    </div>
+                )}
+            </div>
             )}
         </div>
+        
 
 
     );

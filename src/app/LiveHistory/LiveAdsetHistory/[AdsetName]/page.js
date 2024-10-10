@@ -10,7 +10,7 @@ import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
-import { Spin } from 'antd';
+import { Spin, Row, Col } from 'antd';
 Chart.register(...registerables);
 
 import { useTokenContext } from '../../../components/parent';
@@ -46,6 +46,8 @@ const MnetLiveAdsetHistory = ({params}) => {
     const [endDate1, setEndDate1] = useState();
 
     const [columnDefs, setColumnStructure] = useState([]);
+
+    const [decode, setDebounc] = useState("");
 
     const [chartData, setChartData] = useState({ dates: [], sortedData: [], sortedMarginData: [], rpcDate:[], hoursDate:[], hours: [], spend: [], revenue: [], profit: [], margin: [] });
 
@@ -419,6 +421,7 @@ const MnetLiveAdsetHistory = ({params}) => {
         const timeZone = paramsData[2];
         // console.log(paramsData[3], "network");
         let network = paramsData[3];
+        setDebounc(decodedString);
         
         console.log(decodedString, "decode");
         // const fetchData = await fetch(`http://localhost:8000/${network}?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}`);
@@ -495,14 +498,34 @@ const MnetLiveAdsetHistory = ({params}) => {
         setLoading(false);
         setTrue(false);
 
-        const dates = filteredData.map(d => d.date);
-        const spend = filteredData.map(d => d.spend);
-        const revenue = filteredData.map(d => d.revenue);
-        const profit = filteredData.map(d => d.profit);
-        const rpc = filteredData.map(d => d.rpc);
-        const cpl = filteredData.map(d => d.cpl);
 
-        const margin = filteredData.map(d => parseFloat(d.margin));const hoursDate = filteredData.map(d => ({date: d.date, hour: d.hour, margin: parseFloat(d.margin)}));
+        const parseDate = (dateString) => new Date(dateString);
+
+        // Step 1: Find the highest date in the array
+        const highestDate = filteredData.reduce((max, item) => {
+        const itemDate = parseDate(item.date);
+        return itemDate > max ? itemDate : max;
+        }, new Date(0));
+
+        // Step 2: Filter the array to include only objects within the last 10 days from the highest date
+        const result2 = filteredData
+        .filter((item) => {
+            const itemDate = parseDate(item.date);
+            const timeDiff = highestDate - itemDate;
+            const daysDiff = timeDiff / (1000 * 60 * 60 * 24); // Convert milliseconds to days
+            return daysDiff >= 0 && daysDiff <= 10;
+        })
+        // Step 3: Sort the filtered results by date in ascending order
+        .sort((a, b) => parseDate(a.date) - parseDate(b.date));
+
+        const dates = result2.map(d => d.date);
+        const spend = result2.map(d => d.spend);
+        const revenue = result2.map(d => d.revenue);
+        const profit = result2.map(d => d.profit);
+        const rpc = result2.map(d => d.rpc);
+        const cpl = result2.map(d => d.cpl);
+
+        const margin = result2.map(d => parseFloat(d.margin));const hoursDate = filteredData.map(d => ({date: d.date, hour: d.hour, margin: parseFloat(d.margin)}));
         const today = moment.tz('UTC').format('YYYY-MM-DD');
 
         console.log(filteredData);
@@ -634,8 +657,13 @@ const MnetLiveAdsetHistory = ({params}) => {
     console.log(columnDefs);
 
     return (
-        <div>
-            <div style={{ height: '400px', marginBottom: '10px' }}> {/* Container with fixed height */}
+        <Row style={{display:'flex', flexDirection:'column'}}>
+            {isLoading === false && 
+                <Col>
+                    <h3 style={{textAlign:'center'}}>{decode}</h3>
+                </Col>}
+            <Col style={{ height: '400px', marginBottom: '10px' }}> {/* Container with fixed height */}
+            
             {chartData.dates.length === 0 ? (<div style={{width:'100%', height:'100%', display:'flex', justifyContent:'center', alignItems:'center'}}><Spin size="large" /></div>):(
                 <Line
                     data={{
@@ -720,8 +748,8 @@ const MnetLiveAdsetHistory = ({params}) => {
                     }}
                     height={350} // Set the height of the chart
                 />)}
-            </div>
-            <div style={{ display: 'flex', width: '100%', marginLeft: '2%' }}>
+            </Col>
+            <Col style={{ display: 'flex', width: '100%', marginLeft: '2%' }}>
                 {/* Left Table: Top 5 RPC Today */}
                 <div style={{ marginLeft: "1%", width: '20%' }}>
                     <h3>Top 5 Rpc Today</h3>
@@ -835,7 +863,8 @@ const MnetLiveAdsetHistory = ({params}) => {
 
 
 
-            </div>
+            </Col>
+            <Col>
             {isLoading === true ? (
                 <div className="loader-container ag-container">
                     <div className="ag-grid-Loader">
@@ -880,8 +909,9 @@ const MnetLiveAdsetHistory = ({params}) => {
                     />
                 </div>
             ) : null}
+            </Col>
             
-        </div>
+        </Row>
     );
 };
 
