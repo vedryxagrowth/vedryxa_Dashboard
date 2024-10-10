@@ -236,6 +236,9 @@ const MyTablePage = () => {
 
     const [newaccount, setNewAccount] = useState(typeof accountsForAccess[0] === 'string' ? accountsForAccess[0] : accountsForAccess[0].accountNumber);
 
+    const [accountName, setAccountName] = useState(typeof accountsForAccess[0] === 'string' ? accountsForAccess[0] : accountsForAccess[0].accountName);
+
+    const [newAccountName, setnewAccountName] = useState(typeof accountsForAccess[0] === 'string' ? accountsForAccess[0] : accountsForAccess[0].accountName);
     const [newtime, setNewTime] = useState('UTC');
 
     const [pageSize, setPageSize] = useState(1);
@@ -2199,6 +2202,7 @@ const MyTablePage = () => {
         setLoading1(true);
         setLoading2(true);
         setNewAccount(account);
+        setnewAccountName(accountName)
         setNewTime(time);
         setNewRevenuePartner(revenuePratner);
         // setMainComponent(true);
@@ -3200,16 +3204,28 @@ const MyTablePage = () => {
     const gridOptions = {
         onColumnMoved: (params) => debouncedHandleColumnMove(params, 'grid1'),
         defaultColDef: {
-            suppressMenu: true
+            suppressMenu: true,
+            headerClass: "custom-header" // Apply to all columns by default
+            
         }
     };
 
     const gridOptions1 = {
         onColumnMoved: (params) => debouncedHandleColumnMove(params, 'grid2'),
+        defaultColDef: {
+            suppressMenu: true,
+            headerClass: "custom-header" // Apply to all columns by default
+            
+        }
     };
 
     const gridOptions2 = {
         onColumnMoved: (params) => debouncedHandleColumnMove(params, 'grid3'),
+        defaultColDef: {
+            suppressMenu: true,
+            headerClass: "custom-header" // Apply to all columns by default
+            
+        }
     };
 
     console.log(columnDefs);
@@ -3527,28 +3543,99 @@ const MyTablePage = () => {
     console.log(revenuePratner);
     console.log(time);
 
-    const createOption = (account) => {
+    const [isOpen, setIsOpen] = useState(false); // State to track if dropdown is open
+    const [selectedValue, setSelectedValue] = useState(
+        typeof networksData[0] === 'string' ? networksData[0] : networksData[0].accountNumber
+    ); // Track selected value
 
+    // Handle dropdown open/close state
+    const handleDropdownVisibleChange = (open) => {
+        setIsOpen(open); // Set dropdown open state
+    };
+
+    // Handle option selection
+    const handleChange1 = (value) => {
+        const findAccount = (data, accountNumber) =>
+            Object.values(data).flat().find(item => item.accountNumber === accountNumber) || null;
+        
+        const accountNameForAccount = findAccount(userdetails?.adAccounts, value);
+        setAccountName(accountNameForAccount.accountName)
+        setSelectedValue(value); // Update selected value
+        onChangeSelect(value); // Call onChangeSelect function
+    };
+
+    // Create option with conditional rendering of additional info
+    const createOption = (account) => {
         if (typeof account === 'string') {
             return {
                 value: account,
-                label: account,
-            }
+                label: account, // If account is just a string, display it directly
+            };
         } else {
             return {
                 value: account.accountNumber,
                 label: (
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span>{account.accountNumber}</span>
-                        <span>{account.status === "Active" ? <CheckCircleFilled style={{ color: 'green', fontSize: '15px' }} /> : <CloseCircleFilled style={{ color: 'red', fontSize: '15px' }} />}</span>
+                    <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center', 
+                        width: '100%', 
+                        padding: '5px 0', 
+                        height: 'auto',  // Adjust height to prevent layout issues
+                        overflow: 'hidden'  // Prevent overflow issues
+                    }}>
+                        {/* Left Section: Account Details */}
+                        <div style={{ 
+                            display: 'flex', 
+                            flexDirection: 'column', 
+                            maxWidth: '70%' 
+                        }}>
+                            {/* Always show accountNumber */}
+                            <p style={{ 
+                                margin: '0px', 
+                                padding: '0px', 
+                                fontWeight: 'bold', 
+                                whiteSpace: 'nowrap', 
+                                overflow: 'hidden', 
+                                textOverflow: 'ellipsis' 
+                            }}>
+                                {account.accountNumber}
+                            </p>
+                            {/* Show "Additional Info" ONLY if the dropdown is open */}
+                            {isOpen && (
+                                <p style={{ 
+                                    margin: '0px', 
+                                    padding: '0px', 
+                                    fontSize: '12px', 
+                                    color: 'gray', 
+                                    whiteSpace: 'nowrap', 
+                                    overflow: 'hidden', 
+                                    textOverflow: 'ellipsis' 
+                                }}>
+                                    {account.accountName ? account.accountName : ''}
+                                </p>
+                            )}
+                        </div>
+                        {/* Right Section: Status Icon */}
+                        <span style={{ marginLeft: '10px', flexShrink: 0 }}>
+                            {account.status === "Active" ? (
+                                <CheckCircleFilled style={{ color: 'green', fontSize: '15px' }} />
+                            ) : (
+                                <CloseCircleFilled style={{ color: 'red', fontSize: '15px' }} />
+                            )}
+                        </span>
                     </div>
                 ),
-                text: account.accountNumber, // Adding a text property for sorting and filtering
+                text: account.accountNumber, // For sorting/filtering purposes
             };
         }
-
-
     };
+
+
+    
+    
+    
+    
 
     const pinnedBottomRowData1 = [
         {
@@ -3642,22 +3729,20 @@ const MyTablePage = () => {
                         />
                     </Col>
 
-                    <Col xs={24} sm={12} md={4}>
+                    <Col xs={24} sm={12} md={4} style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}>
                         <Select
                             showSearch
-                            onChange={onChangeSelect}
-                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                            style={{ width: '100%' }}
+                            onChange={handleChange1} // Handle value selection
+                            dropdownClassName={theme === 'dark' ? "custom-dropdown" : ''} // Apply dark theme if needed
+                            style={{ width: '100%', maxWidth: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} // Prevent overflow with ellipsis
                             placeholder="Select Account"
-                            optionFilterProp="value" // Make sure the option has a 'label' property
+                            optionFilterProp="value"
+                            value={selectedValue}  // Set selected value
                             defaultValue={typeof networksData[0] === 'string' ? networksData[0] : networksData[0].accountNumber}
-                            options={accountsAccess.map((item) => createOption(item))}
-                        // filterOption={(input, option) =>
-                        //     option?.text.toLowerCase().includes(input.toLowerCase())  // Custom filter logic for case-insensitive search
-                        // }
+                            options={accountsAccess.map((item) => createOption(item))} // Create options dynamically
+                            onDropdownVisibleChange={handleDropdownVisibleChange} // Toggle dropdown state
                         />
                     </Col>
-
                     <Col xs={24} sm={24} md={15} lg={6}>
                         <ConfigProvider locale={locale}>
                             <RangePicker
@@ -3698,7 +3783,7 @@ const MyTablePage = () => {
                         </Button>
                     </Col>
                     <Col xs={24} sm={24} md={15} lg={5}>
-                    <Tooltip title="Refresh & Export and Search">
+                    <Tooltip title="Refresh and Search">
                     <Button 
                         type="primary" 
                         shape="circle" 
@@ -3793,6 +3878,9 @@ const MyTablePage = () => {
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ fontWeight: '600' }}>Acc: {newaccount}</Text>
+                                        </Col>
+                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                            <Text style={{ fontWeight: '600' }}>AccName: {newAccountName}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ fontWeight: '600' }}>Timezone: {timezone.current}</Text>
@@ -3909,6 +3997,9 @@ const MyTablePage = () => {
                                             <Text style={{ fontWeight: '600' }}>Acc: {newaccount}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                            <Text style={{ fontWeight: '600' }}>AccName: {newAccountName}</Text>
+                                        </Col>
+                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ fontWeight: '600' }}>Timezone: {timezone.current}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
@@ -3997,6 +4088,9 @@ const MyTablePage = () => {
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ fontWeight: '600' }}>Acc: {newaccount}</Text>
+                                        </Col>
+                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                            <Text style={{ fontWeight: '600' }}>AccName: {newAccountName}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ fontWeight: '600' }}>Timezone: {timezone.current}</Text>
