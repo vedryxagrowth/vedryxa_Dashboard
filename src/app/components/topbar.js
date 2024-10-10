@@ -401,7 +401,8 @@ const LayoutWrapper = ({ children }) => {
                         // console.log(await networkResponse.data);
                       }
                       else {
-                        MediaBuyernewObject[item] = MediaBuyeradAccounts[item];
+                        const response = await axios.post('https://prodapis.adsgoat.in/getAccountNameandStatusofNetwork/', {updatedNetwork: MediaBuyeradAccounts[item]});
+                        MediaBuyernewObject[item] = response.data;
                       }
                     };
                     setuserdetails({ ...matchedUser, adAccounts: MediaBuyernewObject });
@@ -421,7 +422,8 @@ const LayoutWrapper = ({ children }) => {
                         console.log(await networkResponse.data);
                       }
                       else {
-                        SpecialUsernewObject[item] = SpecialUseradAccounts[item];
+                        const response = await axios.post('https://prodapis.adsgoat.in/getAccountNameandStatusofNetwork/', {updatedNetwork: SpecialUseradAccounts[item]});
+                        SpecialUsernewObject[item] = response.data;
                       }
                     };
                     setuserdetails({ ...matchedUser, adAccounts: SpecialUsernewObject });
@@ -441,7 +443,8 @@ const LayoutWrapper = ({ children }) => {
                         // console.log(await networkResponse.data);
                       }
                       else {
-                        ManagernewObject[item] = ManageradAccounts[item];
+                        const response = await axios.post('https://prodapis.adsgoat.in/getAccountNameandStatusofNetwork/', {updatedNetwork: ManageradAccounts[item]});
+                        ManagernewObject[item] = response.data;
                       }
                     };
                     setuserdetails({ ...matchedUser, adAccounts: ManagernewObject });
