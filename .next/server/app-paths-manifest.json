@@ -1,3 +1,7 @@
 {
-  "/Dashboard/page": "app/Dashboard/page.js"
+  "/Dashboard/page": "app/Dashboard/page.js",
+  "/Reports/page": "app/Reports/page.js",
+  "/LiveHistory/LiveCampaignHistory/[CampaignName]/page": "app/LiveHistory/LiveCampaignHistory/[CampaignName]/page.js",
+  "/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page": "app/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page.js",
+  "/page": "app/page.js"
 }

@@ -628,10 +628,10 @@ const Dashboard = () => {
         const spend = sortedData.map(d => Math.round((d.spend) * 100) / 100);
         const revenue = sortedData.map(d => Math.round(parseFloat(d.estimated_revenue) * 100) / 100);
         const profit = sortedData.map(d => Math.round((d.estimated_revenue - d.spend) * 100) / 100);
-        const rpc = sortedData.map(d => Math.round((d.estimated_revenue / d.conversions) * 100) / 100);
-        const cpl = sortedData.map(d => Math.round(((d.spend / d.fbLeads) * 100) * 100) / 100);
+        const rpc = sortedData.map(d => !isNaN((d.estimated_revenue / d.conversions)) && (d.estimated_revenue / d.conversions) !== undefined ? Math.round((d.estimated_revenue / d.conversions) * 100) / 100 : 0);
+        const cpl = sortedData.map(d => !isNaN(((d.spend / d.fbLeads) * 100)) && ((d.spend / d.fbLeads) * 100) !== undefined ? Math.round(((d.spend / d.fbLeads) * 100) * 100) / 100 : 0);
 
-        const margin = sortedData.map(d => Math.round((((d.estimated_revenue - d.spend) / d.estimated_revenue) * 100) * 100) / 100);
+        const margin = sortedData.map(d => d.estimated_revenue !== 0 ?Math.round((((d.estimated_revenue - d.spend) / d.estimated_revenue) * 100) * 100) / 100 : 0);
 
         // console.log(revenue);
 
