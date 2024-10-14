@@ -10,7 +10,7 @@ import axios from 'axios';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
 // import { Select } from 'antd';
-import { Carousel, Input, Button, Pagination, Row, Col, Typography, Result, Modal, message, ConfigProvider, theme } from 'antd';
+import { Carousel, Input, Button, Pagination, Row, Col, Typography, Result, Modal, message, ConfigProvider, theme, Switch, Divider } from 'antd';
 
 // import 'antd/dist/reset.css';
 import { CommentOutlined, CustomerServiceOutlined, MenuOutlined, InfoCircleOutlined, DownloadOutlined, SearchOutlined, ArrowLeftOutlined, ArrowRightOutlined, SmileOutlined, ReloadOutlined, CopyOutlined, StarOutlined, StarFilled, EditOutlined, CheckCircleFilled, CloseCircleFilled, MessageOutlined, SubnodeOutlined } from '@ant-design/icons';
@@ -932,6 +932,18 @@ const MyTablePage = () => {
     //     return `$${value}`; // Format the value as currency
     // }
 
+    const onChangeSpendAndStatus = () => {
+        console.log("hi hello one");
+    };
+
+    const isYesterday = () => {
+        const startDate1 = moment(startDate); // Convert to moment object
+        const endDate1 = moment(endDate);     // Convert to moment object
+
+        // Define "yesterday" as a reference
+        const yesterday1 = moment().subtract(1, 'days');
+        return startDate1.isSame(yesterday1, 'day') && endDate1.isSame(yesterday1, 'day');
+    };
 
     const columnDefsObject = {
         campaignname: {
@@ -955,6 +967,102 @@ const MyTablePage = () => {
             //     tooltip: 'This is a campaign name tooltip.',
             // },
             // getMainMenuItems
+        },
+        status: {
+            headerName: '...',
+            field: 'status',
+            minWidth: 50,
+            sortable: true,
+            filter: true,
+            hide: false,
+            hide: !isYesterday(),
+            cellRenderer: (params) => {
+                const [isModalVisible, setIsModalVisible] = useState(false);
+                const [groupedData, setGroupedData] = useState([]);
+            
+                const onChangeSpendAndStatus = () => {
+                    // Check if it's a group footer row (for groupIncludeFooter)
+                    if (params?.node?.footer) {
+                        console.log("This is a groupIncludeFooter row. Modal will not open.");
+                        return; // Prevent modal from opening for group footer rows
+                    }
+            
+                    // Ensure allLeafChildren exists and is an array before proceeding
+                    const allLeafChildren = params.node?.allLeafChildren || [];
+            
+                    // Fetch all the rows under the current group
+                    const groupedData = allLeafChildren.map(node => node.data) || [];
+                    
+                    // Only show the modal if there is data (groupedData length is greater than 0)
+                    if (groupedData.length > 0) {
+                        setGroupedData(groupedData); // Set the grouped data for the modal
+                        setIsModalVisible(true); // Show the modal for non-footer rows
+                    }
+                };
+            
+                const handleOk = () => {
+                    setIsModalVisible(false); // Close the modal
+                };
+            
+                const handleCancel = () => {
+                    setIsModalVisible(false); // Close the modal
+                };
+            
+                const getTotalSpend = (data) => {
+                    if (!data || data.length === 0) return 0;
+                    const total = data.reduce((total, item) => {
+                        return total + (item?.spend || 0);
+                    }, 0);
+                    return Math.round(total * 100) / 100; // Round to 2 decimal places
+                };
+            
+                return (
+                    <div>
+                        {/* Click action for status cell */}
+                        <div onClick={onChangeSpendAndStatus}>
+                            <span>{params.value || "..."}</span> {/* Fallback to '...' if status is not available */}
+                        </div>
+                        {/* Modal should only be shown for non-footer rows and when groupedData length is greater than 0 */}
+                        {isModalVisible && (
+                            <Modal
+                                title={groupedData[0]?.campaignname}
+                                visible={isModalVisible}
+                                onOk={handleOk}
+                                onCancel={handleCancel}
+                                width={600}  // Set a custom width for the modal
+                                style={{ padding: '20px' }}  // Adjust body padding
+                            >
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                    {/* Campaign Name and Switch */}
+                                    {/* <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <Typography.Text strong>Campaign Name:</Typography.Text>
+                                        <Typography.Text strong style={{ paddingLeft: '5px' }}>
+                                            {`${groupedData[0]?.campaignname || "N/A"}`}
+                                        </Typography.Text>
+                                    </div> */}
+                                    <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                                        <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign: Activate/Pause</Typography.Text>
+                                        <Switch />
+                                    </div>
+            
+                                    {/* Input Field */}
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <Typography.Text strong style={{ marginBottom: '10px' }}>Total Spend:</Typography.Text>
+                                        <Input placeholder="Enter your value here" value={getTotalSpend(groupedData)} />
+                                    </div>
+            
+                                    {/* Campaign ID */}
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <Typography.Text strong>Campaign ID:</Typography.Text>
+                                        <p>{groupedData[0]?.campaignid || "N/A"}</p>
+                                    </div>
+                                </div>
+                            </Modal>
+                        )}
+                    </div>
+                );
+            }
+                
         },
         adsetname: {
             headerName: 'AdsetName',
@@ -1334,6 +1442,102 @@ const MyTablePage = () => {
             },
             cellRenderer: campaignNameRenderer,
         },
+        status: {
+            headerName: '...',
+            field: 'status',
+            minWidth: 50,
+            sortable: true,
+            filter: true,
+            hide: false,
+            hide: !isYesterday(),
+            cellRenderer: (params) => {
+                const [isModalVisible, setIsModalVisible] = useState(false);
+                const [groupedData, setGroupedData] = useState([]);
+            
+                const onChangeSpendAndStatus = () => {
+                    // Check if it's a group footer row (for groupIncludeFooter)
+                    if (params?.node?.footer) {
+                        console.log("This is a groupIncludeFooter row. Modal will not open.");
+                        return; // Prevent modal from opening for group footer rows
+                    }
+            
+                    // Ensure allLeafChildren exists and is an array before proceeding
+                    const allLeafChildren = params.node?.allLeafChildren || [];
+            
+                    // Fetch all the rows under the current group
+                    const groupedData = allLeafChildren.map(node => node.data) || [];
+                    
+                    // Only show the modal if there is data (groupedData length is greater than 0)
+                    if (groupedData.length > 0) {
+                        setGroupedData(groupedData); // Set the grouped data for the modal
+                        setIsModalVisible(true); // Show the modal for non-footer rows
+                    }
+                };
+            
+                const handleOk = () => {
+                    setIsModalVisible(false); // Close the modal
+                };
+            
+                const handleCancel = () => {
+                    setIsModalVisible(false); // Close the modal
+                };
+            
+                const getTotalSpend = (data) => {
+                    if (!data || data.length === 0) return 0;
+                    const total = data.reduce((total, item) => {
+                        return total + (item?.spend || 0);
+                    }, 0);
+                    return Math.round(total * 100) / 100; // Round to 2 decimal places
+                };
+            
+                return (
+                    <div>
+                        {/* Click action for status cell */}
+                        <div onClick={onChangeSpendAndStatus}>
+                            <span>{params.value || "..."}</span> {/* Fallback to '...' if status is not available */}
+                        </div>
+                        {/* Modal should only be shown for non-footer rows and when groupedData length is greater than 0 */}
+                        {isModalVisible && (
+                            <Modal
+                                title={groupedData[0]?.campaignname}
+                                visible={isModalVisible}
+                                onOk={handleOk}
+                                onCancel={handleCancel}
+                                width={600}  // Set a custom width for the modal
+                                style={{ padding: '20px' }}  // Adjust body padding
+                            >
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                    {/* Campaign Name and Switch */}
+                                    {/* <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <Typography.Text strong>Campaign Name:</Typography.Text>
+                                        <Typography.Text strong style={{ paddingLeft: '5px' }}>
+                                            {`${groupedData[0]?.campaignname || "N/A"}`}
+                                        </Typography.Text>
+                                    </div> */}
+                                    <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                                        <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign: Activate/Pause</Typography.Text>
+                                        <Switch />
+                                    </div>
+            
+                                    {/* Input Field */}
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <Typography.Text strong style={{ marginBottom: '10px' }}>Total Spend:</Typography.Text>
+                                        <Input placeholder="Enter your value here" value={getTotalSpend(groupedData)} />
+                                    </div>
+            
+                                    {/* Campaign ID */}
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <Typography.Text strong>Campaign ID:</Typography.Text>
+                                        <p>{groupedData[0]?.campaignid || "N/A"}</p>
+                                    </div>
+                                </div>
+                            </Modal>
+                        )}
+                    </div>
+                );
+            }
+                
+        },
 
         adsetname: {
             headerName: 'AdsetName', field: 'adsetname',
@@ -1499,6 +1703,102 @@ const MyTablePage = () => {
             //     return params.data?.campaignName; // Display regular campaign name for normal rows
             // }
         },
+        status: {
+            headerName: '...',
+            field: 'status',
+            minWidth: 50,
+            sortable: true,
+            filter: true,
+            hide: false,
+            hide: !isYesterday(),
+            cellRenderer: (params) => {
+                const [isModalVisible, setIsModalVisible] = useState(false);
+                const [groupedData, setGroupedData] = useState([]);
+            
+                const onChangeSpendAndStatus = () => {
+                    // Check if it's a group footer row (for groupIncludeFooter)
+                    if (params?.node?.footer) {
+                        console.log("This is a groupIncludeFooter row. Modal will not open.");
+                        return; // Prevent modal from opening for group footer rows
+                    }
+            
+                    // Ensure allLeafChildren exists and is an array before proceeding
+                    const allLeafChildren = params.node?.allLeafChildren || [];
+            
+                    // Fetch all the rows under the current group
+                    const groupedData = allLeafChildren.map(node => node.data) || [];
+                    
+                    // Only show the modal if there is data (groupedData length is greater than 0)
+                    if (groupedData.length > 0) {
+                        setGroupedData(groupedData); // Set the grouped data for the modal
+                        setIsModalVisible(true); // Show the modal for non-footer rows
+                    }
+                };
+            
+                const handleOk = () => {
+                    setIsModalVisible(false); // Close the modal
+                };
+            
+                const handleCancel = () => {
+                    setIsModalVisible(false); // Close the modal
+                };
+            
+                const getTotalSpend = (data) => {
+                    if (!data || data.length === 0) return 0;
+                    const total = data.reduce((total, item) => {
+                        return total + (item?.spend || 0);
+                    }, 0);
+                    return Math.round(total * 100) / 100; // Round to 2 decimal places
+                };
+            
+                return (
+                    <div>
+                        {/* Click action for status cell */}
+                        <div onClick={onChangeSpendAndStatus}>
+                            <span>{params.value || "..."}</span> {/* Fallback to '...' if status is not available */}
+                        </div>
+                        {/* Modal should only be shown for non-footer rows and when groupedData length is greater than 0 */}
+                        {isModalVisible && (
+                            <Modal
+                                title={groupedData[0]?.campaignname}
+                                visible={isModalVisible}
+                                onOk={handleOk}
+                                onCancel={handleCancel}
+                                width={600}  // Set a custom width for the modal
+                                style={{ padding: '20px' }}  // Adjust body padding
+                            >
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                    {/* Campaign Name and Switch */}
+                                    {/* <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <Typography.Text strong>Campaign Name:</Typography.Text>
+                                        <Typography.Text strong style={{ paddingLeft: '5px' }}>
+                                            {`${groupedData[0]?.campaignname || "N/A"}`}
+                                        </Typography.Text>
+                                    </div> */}
+                                    <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                                        <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign: Activate/Pause</Typography.Text>
+                                        <Switch />
+                                    </div>
+            
+                                    {/* Input Field */}
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <Typography.Text strong style={{ marginBottom: '10px' }}>Total Spend:</Typography.Text>
+                                        <Input placeholder="Enter your value here" value={getTotalSpend(groupedData)} />
+                                    </div>
+            
+                                    {/* Campaign ID */}
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <Typography.Text strong>Campaign ID:</Typography.Text>
+                                        <p>{groupedData[0]?.campaignid || "N/A"}</p>
+                                    </div>
+                                </div>
+                            </Modal>
+                        )}
+                    </div>
+                );
+            }
+                
+        },
         adsetname: {
             headerName: 'AdsetName', field: 'adsetname',
             // resizeble: true,
@@ -1516,7 +1816,6 @@ const MyTablePage = () => {
             // enableRowGroup: true,
             // autoHeight: true,
             // cellRendererFramework: AdsetNameRenderer,
-
         },
         date: {
             headerName: 'Date', field: 'date', sort: 'asc', sortable: true,
@@ -1780,7 +2079,8 @@ const MyTablePage = () => {
                         adsetid: eachData.adset_id,
                         campaignid: eachData.campaign_id,
                         timezone: eachData[time],
-                        comment: relatedComment ? relatedComment.comment : null
+                        comment: relatedComment ? relatedComment.comment : null,
+                        status: '...'
                     }
                 )
             })
@@ -1983,6 +2283,7 @@ const MyTablePage = () => {
                             campaignid: eachData.campaign_id,
                             adsetid: eachData.adset_id,
                             timezone: 'UTC',
+                            status: '...'
                             // compaignid: eachData.campaign_id,
                         }
                     )
@@ -2062,6 +2363,7 @@ const MyTablePage = () => {
                         impressions: eachData.impressions,
                         campaignid: eachData.campaign_id,
                         adsetid: eachData.adset_id,
+                        status: '...'
                     }
                 )
             })
