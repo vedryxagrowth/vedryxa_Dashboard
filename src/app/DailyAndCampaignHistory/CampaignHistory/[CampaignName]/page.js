@@ -272,7 +272,7 @@ export default function CampaignAndAccount({ params }) {
         // const data = await fetchData.json();
         const mainData = fetchData.data;
         console.log(mainData.columnStructure, "columnStructure");
-        const filteredData = mainData.columnStructure.filter((each) => each !== "fb-hour" && each !== "mnet-hour" && each !== "timezone");
+        const filteredData = mainData.columnStructure.filter((each) => each !== "fb-hour" && each !== "mnet-hour" && each !== "timezone" && each !== "actions" );
         console.log(filteredData);
         setColumnStructure(getColumnDefs(filteredData));
         // setRowStructure(mainData.rows); 
