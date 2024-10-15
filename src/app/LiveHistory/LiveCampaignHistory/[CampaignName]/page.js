@@ -477,7 +477,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
         const mainData = fetchData.data;
         console.log(mainData);
         console.log(mainData.columnStructure, "columnStructure");
-        const filteredData = mainData.columnStructure?.filter((each) => each !== "fb-hour" && each !== "mnet-hour");
+        const filteredData = mainData.columnStructure?.filter((each) => each !== "fb-hour" && each !== "mnet-hour" && each !== "actions" );
         console.log(filteredData);
         setColumnStructure(getColumnDefs(filteredData));
         // setRowStructure(mainData.rows); 

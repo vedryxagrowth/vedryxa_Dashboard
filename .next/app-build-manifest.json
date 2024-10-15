@@ -1,9 +1,10 @@
 {
   "pages": {
-    "/page": [
+    "/LiveHistory/LiveCampaignHistory/[CampaignName]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/page.js"
+      "static/css/app/LiveHistory/LiveCampaignHistory/[CampaignName]/page.css",
+      "static/chunks/app/LiveHistory/LiveCampaignHistory/[CampaignName]/page.js"
     ],
     "/layout": [
       "static/chunks/webpack.js",
@@ -22,24 +23,6 @@
       "static/chunks/main-app.js",
       "static/css/app/Reports/page.css",
       "static/chunks/app/Reports/page.js"
-    ],
-    "/LiveHistory/LiveCampaignHistory/[CampaignName]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/LiveHistory/LiveCampaignHistory/[CampaignName]/page.css",
-      "static/chunks/app/LiveHistory/LiveCampaignHistory/[CampaignName]/page.js"
-    ],
-    "/Campaigns/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/Campaigns/page.css",
-      "static/chunks/app/Campaigns/page.js"
-    ],
-    "/Creatives/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/Creatives/page.css",
-      "static/chunks/app/Creatives/page.js"
     ]
   }
 }

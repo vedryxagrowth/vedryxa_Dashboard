@@ -968,9 +968,9 @@ const MyTablePage = () => {
             // },
             // getMainMenuItems
         },
-        status: {
+        actions: {
             headerName: '...',
-            field: 'status',
+            field: 'actions',
             minWidth: 50,
             sortable: true,
             filter: true,
@@ -979,8 +979,10 @@ const MyTablePage = () => {
             cellRenderer: (params) => {
                 const [isModalVisible, setIsModalVisible] = useState(false);
                 const [groupedData, setGroupedData] = useState([]);
+                const [changeBudget, onChangeBudget] = useState();
+                const [campaignStatus, setCampaignStatus] = useState(true);
             
-                const onChangeSpendAndStatus = () => {
+                const onChangeSpendAndStatus = async() => {
                     // Check if it's a group footer row (for groupIncludeFooter)
                     if (params?.node?.footer) {
                         console.log("This is a groupIncludeFooter row. Modal will not open.");
@@ -995,17 +997,46 @@ const MyTablePage = () => {
                     
                     // Only show the modal if there is data (groupedData length is greater than 0)
                     if (groupedData.length > 0) {
-                        setGroupedData(groupedData); // Set the grouped data for the modal
+                        const getCampaignResponse = await axios.get(`https://prodapis.adsgoat.in/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`, {
+                            headers: {
+                              Authorization: token,
+                            },
+                          });
+                        if(getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0){
+                            setGroupedData(getCampaignResponse.data);
+                        }
+                        else{
+                            setGroupedData(groupedData);
+                        }
+                         // Set the grouped data for the modal
                         setIsModalVisible(true); // Show the modal for non-footer rows
                     }
                 };
             
-                const handleOk = () => {
+                const handleOk = async() => {
                     setIsModalVisible(false); // Close the modal
+                    const object = {
+                        campaignname: typeof groupedData === 'object' ? groupedData?.campaignname: groupedData[0]?.campaignname,
+                        adsetid: typeof groupedData === 'object' ? groupedData?.adsetid : groupedData[0]?.adsetid,
+                        campaignid:typeof groupedData === 'object' ? groupedData?.campaignid:  groupedData[0]?.campaignid,
+                        usercommit:userdetails?.email,
+                        accountNumber: newaccount,
+                        budget: changeBudget * 100,
+                        status: campaignStatus
+                    }; 
+                    console.log(object);
+                    const requestResponse = await axios.post('https://prodapis.adsgoat.in/Comments/accountNumber/campaign', {formattedData: object},{
+                        headers: {
+                          Authorization: token,
+                        },
+                      });
+                    const responseData = requestResponse.data;
+                    console.log(responseData, "response");
                 };
             
                 const handleCancel = () => {
-                    setIsModalVisible(false); // Close the modal
+                    setIsModalVisible(false);
+                    // console.log(changeBudget); // Close the modal
                 };
             
                 const getTotalSpend = (data) => {
@@ -1015,6 +1046,16 @@ const MyTablePage = () => {
                     }, 0);
                     return Math.round(total * 100) / 100; // Round to 2 decimal places
                 };
+
+                const onChangeBudgetValue = event => {
+                    onChangeBudget(event.target.value)
+                }
+
+                const onChangeCampaignStatus = () => {
+                    setCampaignStatus((prev) => !prev);
+                }
+
+                console.log(groupedData);
             
                 return (
                     <div>
@@ -1025,7 +1066,7 @@ const MyTablePage = () => {
                         {/* Modal should only be shown for non-footer rows and when groupedData length is greater than 0 */}
                         {isModalVisible && (
                             <Modal
-                                title={groupedData[0]?.campaignname}
+                                title={groupedData?.length > 0 && groupedData?.length !== 1 ? groupedData[0]?.campaignname : groupedData?.campaignname}
                                 visible={isModalVisible}
                                 onOk={handleOk}
                                 onCancel={handleCancel}
@@ -1042,19 +1083,19 @@ const MyTablePage = () => {
                                     </div> */}
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                         <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign: Activate/Pause</Typography.Text>
-                                        <Switch />
+                                        <Switch checked={campaignStatus} onChange={onChangeCampaignStatus}/>
                                     </div>
             
                                     {/* Input Field */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong style={{ marginBottom: '10px' }}>Total Spend:</Typography.Text>
-                                        <Input placeholder="Enter your value here" value={getTotalSpend(groupedData)} />
+                                        <Input placeholder="Enter your value here" defaultValue={groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : (groupedData?.budget)/100} onChange={onChangeBudgetValue}/>
                                     </div>
             
                                     {/* Campaign ID */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong>Campaign ID:</Typography.Text>
-                                        <p>{groupedData[0]?.campaignid || "N/A"}</p>
+                                        <p>{groupedData?.length > 0 && groupedData?.length !== 1? groupedData[0]?.campaignid : groupedData.campaignid}</p>
                                     </div>
                                 </div>
                             </Modal>
@@ -1442,9 +1483,9 @@ const MyTablePage = () => {
             },
             cellRenderer: campaignNameRenderer,
         },
-        status: {
+        actions: {
             headerName: '...',
-            field: 'status',
+            field: 'actions',
             minWidth: 50,
             sortable: true,
             filter: true,
@@ -1453,8 +1494,10 @@ const MyTablePage = () => {
             cellRenderer: (params) => {
                 const [isModalVisible, setIsModalVisible] = useState(false);
                 const [groupedData, setGroupedData] = useState([]);
+                const [changeBudget, onChangeBudget] = useState();
+                const [campaignStatus, setCampaignStatus] = useState(true);
             
-                const onChangeSpendAndStatus = () => {
+                const onChangeSpendAndStatus = async() => {
                     // Check if it's a group footer row (for groupIncludeFooter)
                     if (params?.node?.footer) {
                         console.log("This is a groupIncludeFooter row. Modal will not open.");
@@ -1469,17 +1512,47 @@ const MyTablePage = () => {
                     
                     // Only show the modal if there is data (groupedData length is greater than 0)
                     if (groupedData.length > 0) {
-                        setGroupedData(groupedData); // Set the grouped data for the modal
+                        const getCampaignResponse = await axios.get(`https://prodapis.adsgoat.in/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`, {
+                            headers: {
+                              Authorization: token,
+                            },
+                          });
+                        if(getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0){
+                            setGroupedData(getCampaignResponse.data);
+                        }
+                        else{
+                            setGroupedData(groupedData);
+                            console.log("dailyadd");
+                        }
+                         // Set the grouped data for the modal
                         setIsModalVisible(true); // Show the modal for non-footer rows
                     }
                 };
             
-                const handleOk = () => {
+                const handleOk = async() => {
                     setIsModalVisible(false); // Close the modal
+                    const object = {
+                        campaignname: typeof groupedData === 'object' ? groupedData?.campaignname: groupedData[0]?.campaignname,
+                        adsetid: typeof groupedData === 'object' ? groupedData?.adsetid : groupedData[0]?.adsetid,
+                        campaignid:typeof groupedData === 'object' ? groupedData?.campaignid:  groupedData[0]?.campaignid,
+                        usercommit:userdetails?.email,
+                        accountNumber: newaccount,
+                        budget: changeBudget * 100,
+                        status: campaignStatus
+                    }; 
+                    console.log(object);
+                    const requestResponse = await axios.post('https://prodapis.adsgoat.in/Comments/accountNumber/campaign', {formattedData: object},{
+                        headers: {
+                          Authorization: token,
+                        },
+                      });
+                    const responseData = requestResponse.data;
+                    console.log(responseData, "response");
                 };
             
                 const handleCancel = () => {
-                    setIsModalVisible(false); // Close the modal
+                    setIsModalVisible(false);
+                    // console.log(changeBudget); // Close the modal
                 };
             
                 const getTotalSpend = (data) => {
@@ -1489,6 +1562,17 @@ const MyTablePage = () => {
                     }, 0);
                     return Math.round(total * 100) / 100; // Round to 2 decimal places
                 };
+
+                const onChangeBudgetValue = event => {
+                    onChangeBudget(event.target.value)
+                }
+
+                const onChangeCampaignStatus = () => {
+                    setCampaignStatus((prev) => !prev);
+                }
+
+
+                console.log(groupedData);
             
                 return (
                     <div>
@@ -1499,7 +1583,7 @@ const MyTablePage = () => {
                         {/* Modal should only be shown for non-footer rows and when groupedData length is greater than 0 */}
                         {isModalVisible && (
                             <Modal
-                                title={groupedData[0]?.campaignname}
+                                title={groupedData?.length > 0 && groupedData?.length !== 0 ? groupedData[0]?.campaignname : groupedData?.campaignname}
                                 visible={isModalVisible}
                                 onOk={handleOk}
                                 onCancel={handleCancel}
@@ -1516,19 +1600,19 @@ const MyTablePage = () => {
                                     </div> */}
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                         <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign: Activate/Pause</Typography.Text>
-                                        <Switch />
+                                        <Switch checked={campaignStatus} onChange={onChangeCampaignStatus}/>
                                     </div>
             
                                     {/* Input Field */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong style={{ marginBottom: '10px' }}>Total Spend:</Typography.Text>
-                                        <Input placeholder="Enter your value here" value={getTotalSpend(groupedData)} />
+                                        <Input placeholder="Enter your value here" defaultValue={groupedData?.length > 0 && groupedData?.length !== 0 ? getTotalSpend(groupedData) : (groupedData?.budget)/100} onChange={onChangeBudgetValue}/>
                                     </div>
             
                                     {/* Campaign ID */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong>Campaign ID:</Typography.Text>
-                                        <p>{groupedData[0]?.campaignid || "N/A"}</p>
+                                        <p>{groupedData?.length > 0 && groupedData?.length !== 0? groupedData[0]?.campaignid : groupedData.campaignid}</p>
                                     </div>
                                 </div>
                             </Modal>
@@ -1703,9 +1787,9 @@ const MyTablePage = () => {
             //     return params.data?.campaignName; // Display regular campaign name for normal rows
             // }
         },
-        status: {
+        actions: {
             headerName: '...',
-            field: 'status',
+            field: 'actions',
             minWidth: 50,
             sortable: true,
             filter: true,
@@ -1714,8 +1798,10 @@ const MyTablePage = () => {
             cellRenderer: (params) => {
                 const [isModalVisible, setIsModalVisible] = useState(false);
                 const [groupedData, setGroupedData] = useState([]);
+                const [changeBudget, onChangeBudget] = useState();
+                const [campaignStatus, setCampaignStatus] = useState(true);
             
-                const onChangeSpendAndStatus = () => {
+                const onChangeSpendAndStatus = async() => {
                     // Check if it's a group footer row (for groupIncludeFooter)
                     if (params?.node?.footer) {
                         console.log("This is a groupIncludeFooter row. Modal will not open.");
@@ -1730,17 +1816,46 @@ const MyTablePage = () => {
                     
                     // Only show the modal if there is data (groupedData length is greater than 0)
                     if (groupedData.length > 0) {
-                        setGroupedData(groupedData); // Set the grouped data for the modal
+                        const getCampaignResponse = await axios.get(`https://prodapis.adsgoat.in/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`, {
+                            headers: {
+                              Authorization: token,
+                            },
+                          });
+                        if(getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0){
+                            setGroupedData(getCampaignResponse.data);
+                        }
+                        else{
+                            setGroupedData(groupedData);
+                        }
+                         // Set the grouped data for the modal
                         setIsModalVisible(true); // Show the modal for non-footer rows
                     }
                 };
             
-                const handleOk = () => {
+                const handleOk = async() => {
                     setIsModalVisible(false); // Close the modal
+                    const object = {
+                        campaignname: typeof groupedData === 'object' ? groupedData?.campaignname: groupedData[0]?.campaignname,
+                        adsetid: typeof groupedData === 'object' ? groupedData?.adsetid : groupedData[0]?.adsetid,
+                        campaignid:typeof groupedData === 'object' ? groupedData?.campaignid:  groupedData[0]?.campaignid,
+                        usercommit:userdetails?.email,
+                        accountNumber: newaccount,
+                        budget: changeBudget * 100,
+                        status: campaignStatus
+                    }; 
+                    console.log(object);
+                    const requestResponse = await axios.post('https://prodapis.adsgoat.in/Comments/accountNumber/campaign', {formattedData: object},{
+                        headers: {
+                          Authorization: token,
+                        },
+                      });
+                    const responseData = requestResponse.data;
+                    console.log(responseData, "response");
                 };
             
                 const handleCancel = () => {
-                    setIsModalVisible(false); // Close the modal
+                    setIsModalVisible(false);
+                    // console.log(changeBudget); // Close the modal
                 };
             
                 const getTotalSpend = (data) => {
@@ -1750,6 +1865,16 @@ const MyTablePage = () => {
                     }, 0);
                     return Math.round(total * 100) / 100; // Round to 2 decimal places
                 };
+
+                const onChangeBudgetValue = event => {
+                    onChangeBudget(event.target.value)
+                }
+
+                const onChangeCampaignStatus = () => {
+                    setCampaignStatus((prev) => !prev);
+                }
+
+                console.log(groupedData);
             
                 return (
                     <div>
@@ -1760,7 +1885,7 @@ const MyTablePage = () => {
                         {/* Modal should only be shown for non-footer rows and when groupedData length is greater than 0 */}
                         {isModalVisible && (
                             <Modal
-                                title={groupedData[0]?.campaignname}
+                                title={groupedData?.length > 0 && groupedData?.length !== 0 ? groupedData[0]?.campaignname : groupedData?.campaignname}
                                 visible={isModalVisible}
                                 onOk={handleOk}
                                 onCancel={handleCancel}
@@ -1777,19 +1902,19 @@ const MyTablePage = () => {
                                     </div> */}
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                         <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign: Activate/Pause</Typography.Text>
-                                        <Switch />
+                                        <Switch checked={campaignStatus} onChange={onChangeCampaignStatus}/>
                                     </div>
             
                                     {/* Input Field */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong style={{ marginBottom: '10px' }}>Total Spend:</Typography.Text>
-                                        <Input placeholder="Enter your value here" value={getTotalSpend(groupedData)} />
+                                        <Input placeholder="Enter your value here" defaultValue={groupedData?.length > 0 && groupedData?.length !== 0 ? getTotalSpend(groupedData) : (groupedData?.budget)/100} onChange={onChangeBudgetValue}/>
                                     </div>
             
                                     {/* Campaign ID */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong>Campaign ID:</Typography.Text>
-                                        <p>{groupedData[0]?.campaignid || "N/A"}</p>
+                                        <p>{groupedData?.length > 0 && groupedData?.length !== 0? groupedData[0]?.campaignid : groupedData.campaignid}</p>
                                     </div>
                                 </div>
                             </Modal>
@@ -2080,7 +2205,7 @@ const MyTablePage = () => {
                         campaignid: eachData.campaign_id,
                         timezone: eachData[time],
                         comment: relatedComment ? relatedComment.comment : null,
-                        status: '...'
+                        actions: '...'
                     }
                 )
             })
@@ -2283,7 +2408,7 @@ const MyTablePage = () => {
                             campaignid: eachData.campaign_id,
                             adsetid: eachData.adset_id,
                             timezone: 'UTC',
-                            status: '...'
+                            actions: '...'
                             // compaignid: eachData.campaign_id,
                         }
                     )
@@ -2363,7 +2488,7 @@ const MyTablePage = () => {
                         impressions: eachData.impressions,
                         campaignid: eachData.campaign_id,
                         adsetid: eachData.adset_id,
-                        status: '...'
+                        actions: '...'
                     }
                 )
             })
