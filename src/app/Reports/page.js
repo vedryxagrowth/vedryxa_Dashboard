@@ -1016,9 +1016,9 @@ const MyTablePage = () => {
                 const handleOk = async() => {
                     setIsModalVisible(false); // Close the modal
                     const object = {
-                        campaignname: typeof groupedData === 'object' ? groupedData?.campaignname: groupedData[0]?.campaignname,
-                        adsetid: typeof groupedData === 'object' ? groupedData?.adsetid : groupedData[0]?.adsetid,
-                        campaignid:typeof groupedData === 'object' ? groupedData?.campaignid:  groupedData[0]?.campaignid,
+                        campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname: groupedData[0]?.campaignname,
+                        adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
+                        campaignid:!Array.isArray(groupedData) ? groupedData?.campaignid :  groupedData[0]?.campaignid,
                         usercommit:userdetails?.email,
                         accountNumber: newaccount,
                         budget: changeBudget * 100,
@@ -1532,9 +1532,9 @@ const MyTablePage = () => {
                 const handleOk = async() => {
                     setIsModalVisible(false); // Close the modal
                     const object = {
-                        campaignname: typeof groupedData === 'object' ? groupedData?.campaignname: groupedData[0]?.campaignname,
-                        adsetid: typeof groupedData === 'object' ? groupedData?.adsetid : groupedData[0]?.adsetid,
-                        campaignid:typeof groupedData === 'object' ? groupedData?.campaignid:  groupedData[0]?.campaignid,
+                        campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname: groupedData[0]?.campaignname,
+                        adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
+                        campaignid:!Array.isArray(groupedData) ? groupedData?.campaignid :  groupedData[0]?.campaignid,
                         usercommit:userdetails?.email,
                         accountNumber: newaccount,
                         budget: changeBudget * 100,
@@ -1835,9 +1835,9 @@ const MyTablePage = () => {
                 const handleOk = async() => {
                     setIsModalVisible(false); // Close the modal
                     const object = {
-                        campaignname: typeof groupedData === 'object' ? groupedData?.campaignname: groupedData[0]?.campaignname,
-                        adsetid: typeof groupedData === 'object' ? groupedData?.adsetid : groupedData[0]?.adsetid,
-                        campaignid:typeof groupedData === 'object' ? groupedData?.campaignid:  groupedData[0]?.campaignid,
+                        campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname: groupedData[0]?.campaignname,
+                        adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
+                        campaignid:!Array.isArray(groupedData) ? groupedData?.campaignid :  groupedData[0]?.campaignid,
                         usercommit:userdetails?.email,
                         accountNumber: newaccount,
                         budget: changeBudget * 100,
