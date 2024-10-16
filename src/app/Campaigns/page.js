@@ -16,6 +16,19 @@ import ExpandedRowContent from './camp-components/expandcreatives';
 import moment from 'moment-timezone';
 
 const App = () => {
+    const { userdetails } = useTokenContext();
+    console.log("useTokenContext", userdetails)
+
+    if (!userdetails?.adAccounts) {
+        return <div style={{ width: '100%', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <Flex align="center" gap="middle">
+                {/* <Spin size="small" />
+                <Spin /> */}
+                <Spin size="large" />
+            </Flex>
+        </div>;
+    }
+
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [paginationSize, setPaginationSize] = useState(10);
     const [searchInput, setSearchInput] = useState("");
@@ -34,8 +47,6 @@ const App = () => {
     const [adsetcampaigndata, setadsetcampaigndata] = useState(null)
     const [duplicatenewcampaigns, setduplicatenewcampaigns] = useState(null)
     const [refrst, setRefrst] = useState(false)
-    const { userdetails } = useTokenContext();
-    console.log("useTokenContext", userdetails)
     const [options, setOptions] = useState([]);
     const [createcamselectedacc, setcreatecamselectedacc] = useState("");
     const [selectedKey, setSelectedKey] = useState(null);
@@ -46,10 +57,7 @@ const App = () => {
     const { theme } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
 
-    if (userdetails === null) {
-        redirect("/Dashboard");
-        // console.log("hi");
-    }
+    
     // const [selectedAccount, setSelectedAccount] = useState('All');
     const restrictedEmails = [
         "creatives@adsgoat.in",
