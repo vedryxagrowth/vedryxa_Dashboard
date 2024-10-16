@@ -10,7 +10,7 @@ import axios from 'axios';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
 // import { Select } from 'antd';
-import { Carousel, Input, Button, Pagination, Row, Col, Typography, Result, Modal, message, ConfigProvider, theme, Switch, Divider } from 'antd';
+import { Carousel, Input, Button, Pagination, Row, Col, Typography, Result, Modal, message, ConfigProvider, theme, Switch, Divider, Flex, Spin } from 'antd';
 
 // import 'antd/dist/reset.css';
 import { CommentOutlined, CustomerServiceOutlined, MenuOutlined, InfoCircleOutlined, DownloadOutlined, SearchOutlined, ArrowLeftOutlined, ArrowRightOutlined, SmileOutlined, ReloadOutlined, CopyOutlined, StarOutlined, StarFilled, EditOutlined, CheckCircleFilled, CloseCircleFilled, MessageOutlined, SubnodeOutlined } from '@ant-design/icons';
@@ -104,9 +104,14 @@ const MyTablePage = () => {
 
     const { theme } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
-    if (userdetails === null) {
-        redirect("/Dashboard");
-        // console.log("hi");
+    if (!userdetails?.adAccounts) {
+        return <div style={{ width: '100%', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <Flex align="center" gap="middle">
+                {/* <Spin size="small" />
+                <Spin /> */}
+                <Spin size="large" />
+            </Flex>
+        </div>;
     }
     console.log(userdetails, "userDetails");
     const [darkMode, setDarkMode] = useState(false);

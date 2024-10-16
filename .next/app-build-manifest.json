@@ -12,11 +12,11 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/Dashboard/page": [
+    "/Campaigns/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/Dashboard/page.css",
-      "static/chunks/app/Dashboard/page.js"
+      "static/css/app/Campaigns/page.css",
+      "static/chunks/app/Campaigns/page.js"
     ]
   }
 }
