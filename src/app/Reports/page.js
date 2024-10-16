@@ -2221,20 +2221,39 @@ const MyTablePage = () => {
         // setValue(mainData);
         // console.log(mainData[0])
 
-        const getValidValue = mainData.filter(item => item.fbCron !== null && item.revenueCron !== null)
-
-        // console.log(getValidValue[0])
-          
+        const getFbValue = mainData.filter(item => item.fbCron !== null && item.fbCron !== 'Failed');
+        const getRevenueValue = mainData.filter(item => item.revenueCron !== null && item.revenueCron !== 'Failed');
 
         if (mainData.length > 1) {
             timezone.current = mainData[0].accountTimezone;
             accountStatus.current = mainData[0].accountStatus;
             cronStatus.current = mainData[0].cronStatus;
-            fbCron.current = getValidValue[0].fbCron;
-            revenueCron.current = getValidValue[0].revenueCron;
+
+            // fbCron.current = getFbValue[0].fbCron;
+            // revenueCron.current = getRevenueValue[0]?.revenueCron;
+
+            fbCron.current = getFbValue[0]?.fbCron ? getFbValue[0].fbCron : 'Failed';
+            revenueCron.current = getRevenueValue[0]?.revenueCron ? getRevenueValue[0].revenueCron : 'Failed';
+
             maxHour.current = findMaxHour(mainData);
             maxNetworkHour.current = getMaxHour(mainData);
         }
+
+
+        // const getValidValue = mainData.filter(item => item.fbCron !== null && item.revenueCron !== null)
+
+        // // console.log(getValidValue[0])
+          
+
+        // if (mainData.length > 1) {
+        //     timezone.current = mainData[0].accountTimezone;
+        //     accountStatus.current = mainData[0].accountStatus;
+        //     cronStatus.current = mainData[0].cronStatus;
+        //     fbCron.current = getValidValue[0].fbCron;
+        //     revenueCron.current = getValidValue[0].revenueCron;
+        //     maxHour.current = findMaxHour(mainData);
+        //     maxNetworkHour.current = getMaxHour(mainData);
+        // }
         setRowData(filteredData);
         newRowData.current = filteredData;
         setInitialRowData(filteredData);
@@ -4244,12 +4263,12 @@ const MyTablePage = () => {
                <Row style={{ padding: '10px', paddingRight: '30px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
                     <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                         <Text style={{ fontWeight: '600', display: 'flex', justifyContent: 'flex-end' }}>
-                            fbCron status: {`${fbCron.current}`}
+                            FbAcc Status: {`${fbCron.current}`}
                         </Text>
                     </Col>
                     <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                         <Text style={{ fontWeight: '600', display: 'flex', justifyContent: 'flex-end', marginRight: '20%' }}>
-                            revCron status: {`${revenueCron.current}`}
+                            RevAcc Status: {`${revenueCron.current}`}
                         </Text>
                     </Col>
                     <Col style={{ marginRight: '15px' }}>
