@@ -2896,7 +2896,7 @@ const MyTablePage = () => {
     
                 const sendNewCommentToAPI = async (logData) => {
                     try {
-                        const response = await axios.post('http://localhost:8000/Comments', {
+                        const response = await axios.post('https://prodapis.adsgoat.in/Comments', {
                             commentsdatas: logData,
                         }, {
                             headers: {
@@ -2913,7 +2913,7 @@ const MyTablePage = () => {
     
                 const sendEditedCommentToAPI = async (logData) => {
                     try {
-                        const response = await axios.post('http://localhost:8000/Comments/edit', {
+                        const response = await axios.post('https://prodapis.adsgoat.in/Comments/edit', {
                             campaignname: logData.campaignname,
                             comment: logData.comment,
                             Account: logData.Account,
@@ -2938,7 +2938,7 @@ const MyTablePage = () => {
                     // console.log(campaignid);
                     // console.log(adsetid);
                     try {
-                        const endpoint = isStarred ? 'http://localhost:8000/Star' : 'http://localhost:8000/Unstar';
+                        const endpoint = isStarred ? 'https://prodapis.adsgoat.in/Star' : 'https://prodapis.adsgoat.in/Unstar';
                         const response = await axios.post(endpoint, {
                             campaignname: campaignname,
                             Account: account,
@@ -3151,7 +3151,7 @@ const MyTablePage = () => {
     
                 const sendNewCommentToAPI = async (logData) => {
                     try {
-                        const response = await axios.post('http://localhost:8000/Comments', {
+                        const response = await axios.post('https://prodapis.adsgoat.in/Comments', {
                             commentsdatas: logData,
                         }, {
                             headers: {
@@ -3166,7 +3166,7 @@ const MyTablePage = () => {
     
                 const sendEditedCommentToAPI = async (logData) => {
                     try {
-                        const response = await axios.post('http://localhost:8000/Comments/edit', {
+                        const response = await axios.post('https://prodapis.adsgoat.in/Comments/edit', {
                             campaignname: logData.campaignname,
                             comment: logData.comment,
                             Account: logData.Account,
@@ -3187,7 +3187,7 @@ const MyTablePage = () => {
     
                 const sendStarStatusToAPI = async (campaignname, isStarred) => {
                     try {
-                        const endpoint = isStarred ? 'http://localhost:8000/Star' : 'http://localhost:8000/Unstar';
+                        const endpoint = isStarred ? 'https://prodapis.adsgoat.in/Star' : 'https://prodapis.adsgoat.in/Unstar';
                         const response = await axios.post(endpoint, {
                             campaignname: campaignname,
                             Account: account,
@@ -3380,7 +3380,7 @@ const MyTablePage = () => {
     
                 const sendNewCommentToAPI = async (logData) => {
                     try {
-                        const response = await axios.post('http://localhost:8000/Comments', {
+                        const response = await axios.post('https://prodapis.adsgoat.in/Comments', {
                             commentsdatas: logData,
                         }, {
                             headers: {
@@ -3395,7 +3395,7 @@ const MyTablePage = () => {
     
                 const sendEditedCommentToAPI = async (logData) => {
                     try {
-                        const response = await axios.post('http://localhost:8000/Comments/edit', {
+                        const response = await axios.post('https://prodapis.adsgoat.in/Comments/edit', {
                             campaignname: logData.campaignname,
                             comment: logData.comment,
                             Account: logData.Account,
@@ -3416,7 +3416,7 @@ const MyTablePage = () => {
     
                 const sendStarStatusToAPI = async (campaignname, isStarred) => {
                     try {
-                        const endpoint = isStarred ? 'http://localhost:8000/Star' : 'http://localhost:8000/Unstar';
+                        const endpoint = isStarred ? 'https://prodapis.adsgoat.in/Star' : 'https://prodapis.adsgoat.in/Unstar';
                         const response = await axios.post(endpoint, {
                             campaignname: campaignname,
                             Account: account,
