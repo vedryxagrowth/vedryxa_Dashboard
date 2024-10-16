@@ -251,6 +251,14 @@ const MyTablePage = () => {
 
     const accountStatus = useRef();
 
+
+    /* cronstatus*/
+    let fbCron = useRef();
+
+    let revenueCron = useRef();
+
+
+
     const carouselRef = useRef();
 
     const maxHour = useRef();
@@ -1016,9 +1024,9 @@ const MyTablePage = () => {
                 const handleOk = async() => {
                     setIsModalVisible(false); // Close the modal
                     const object = {
-                        campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname: groupedData[0]?.campaignname,
-                        adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
-                        campaignid:!Array.isArray(groupedData) ? groupedData?.campaignid :  groupedData[0]?.campaignid,
+                        campaignname: typeof groupedData === 'object' ? groupedData?.campaignname: groupedData[0]?.campaignname,
+                        adsetid: typeof groupedData === 'object' ? groupedData?.adsetid : groupedData[0]?.adsetid,
+                        campaignid:typeof groupedData === 'object' ? groupedData?.campaignid:  groupedData[0]?.campaignid,
                         usercommit:userdetails?.email,
                         accountNumber: newaccount,
                         budget: changeBudget * 100,
@@ -1532,9 +1540,9 @@ const MyTablePage = () => {
                 const handleOk = async() => {
                     setIsModalVisible(false); // Close the modal
                     const object = {
-                        campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname: groupedData[0]?.campaignname,
-                        adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
-                        campaignid:!Array.isArray(groupedData) ? groupedData?.campaignid :  groupedData[0]?.campaignid,
+                        campaignname: typeof groupedData === 'object' ? groupedData?.campaignname: groupedData[0]?.campaignname,
+                        adsetid: typeof groupedData === 'object' ? groupedData?.adsetid : groupedData[0]?.adsetid,
+                        campaignid:typeof groupedData === 'object' ? groupedData?.campaignid:  groupedData[0]?.campaignid,
                         usercommit:userdetails?.email,
                         accountNumber: newaccount,
                         budget: changeBudget * 100,
@@ -1835,9 +1843,9 @@ const MyTablePage = () => {
                 const handleOk = async() => {
                     setIsModalVisible(false); // Close the modal
                     const object = {
-                        campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname: groupedData[0]?.campaignname,
-                        adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
-                        campaignid:!Array.isArray(groupedData) ? groupedData?.campaignid :  groupedData[0]?.campaignid,
+                        campaignname: typeof groupedData === 'object' ? groupedData?.campaignname: groupedData[0]?.campaignname,
+                        adsetid: typeof groupedData === 'object' ? groupedData?.adsetid : groupedData[0]?.adsetid,
+                        campaignid:typeof groupedData === 'object' ? groupedData?.campaignid:  groupedData[0]?.campaignid,
                         usercommit:userdetails?.email,
                         accountNumber: newaccount,
                         budget: changeBudget * 100,
@@ -2211,10 +2219,19 @@ const MyTablePage = () => {
             })
             : null;
         // setValue(mainData);
+        // console.log(mainData[0])
+
+        const getValidValue = mainData.filter(item => item.fbCron !== null && item.revenueCron !== null)
+
+        // console.log(getValidValue[0])
+          
+
         if (mainData.length > 1) {
             timezone.current = mainData[0].accountTimezone;
             accountStatus.current = mainData[0].accountStatus;
             cronStatus.current = mainData[0].cronStatus;
+            fbCron.current = getValidValue[0].fbCron;
+            revenueCron.current = getValidValue[0].revenueCron;
             maxHour.current = findMaxHour(mainData);
             maxNetworkHour.current = getMaxHour(mainData);
         }
@@ -4222,9 +4239,19 @@ const MyTablePage = () => {
                     </Col>
                 </Row>
             </Space>
-            <div >
+            <div>
                <div className={`secondRow ${isSecondRowVisible ? '' : 'hidden'}`}>
                <Row style={{ padding: '10px', paddingRight: '30px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                    <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                        <Text style={{ fontWeight: '600', display: 'flex', justifyContent: 'flex-end' }}>
+                            fbCron status: {`${fbCron.current}`}
+                        </Text>
+                    </Col>
+                    <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                        <Text style={{ fontWeight: '600', display: 'flex', justifyContent: 'flex-end', marginRight: '20%' }}>
+                            revCron status: {`${revenueCron.current}`}
+                        </Text>
+                    </Col>
                     <Col style={{ marginRight: '15px' }}>
                         {/* {isSearching ? (
                             <Row gutter={8}>
@@ -4264,7 +4291,6 @@ const MyTablePage = () => {
                             <Col>
                                 <Button style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<SearchOutlined />} />
                             </Col>
-
                         </Row>
                     </Col>
                     <Col>
