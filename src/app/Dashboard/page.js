@@ -641,7 +641,6 @@ const Dashboard = () => {
         console.log(responseData.length);
         setSkeletonLoading(false);
     }, 1500);;
-
     // useEffect(() => {
     //     const fetchData = async () => {
     //         try {
@@ -672,7 +671,6 @@ const Dashboard = () => {
     useEffect(() => {
         let selectedCategoryValues = null;
 
-        // Log the default state on component mount (runs only once)
         if (Object.keys(selectedItems).length === 0) {
             console.log('First Select - Default Selected Categories:', [defaultCategory]);
             console.log('Second Select - Default Selected Items:', { [defaultCategory]: transformedData[defaultCategory] });
