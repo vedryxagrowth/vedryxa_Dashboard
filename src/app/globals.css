@@ -833,3 +833,7 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 .hidden {
   display: none;
 }
+
+.ag-header-cell[col-id="actions"] .ag-header-cell-menu-button {
+  display: none !important;  /* Hide the menu button */
+}
