@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { Table, Button, Col, Card, Input, Row, Select, Result, Spin, Space, Modal, message, Menu, Switch, Search, Tooltip } from 'antd';
-import { HighlightOutlined, LeftOutlined, RightOutlined, SearchOutlined, SwapRightOutlined, DownOutlined, EditOutlined, EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
+import { ReloadOutlined, HighlightOutlined, LeftOutlined, RightOutlined, SearchOutlined, SwapRightOutlined, DownOutlined, EditOutlined, EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
 import { Carousel } from 'react-responsive-carousel';
 import { MailOutlined, SettingOutlined } from '@ant-design/icons';
 
@@ -886,6 +886,47 @@ const UsersTable = () => {
     // };
     // console.log(filteredAccountData, "filteredAccountData");
 
+    const refreshUsers = async () => {
+        try {
+            setLoading(true);
+            const response = await fetchusersData();  
+            setUsersData(response.data);  
+        } catch (error) {
+            console.error("Error refreshing account data:", error);
+            
+        } finally {
+          
+            setLoading(false);
+        }
+    };
+
+    const refreshAccounts = async () => {
+        try { 
+            setLoading(true);
+            const response = await fetchAccountsData(); 
+            setAccountsData(response.data);  
+        } catch (error) {
+            console.error("Error refreshing account data:", error);
+            
+        } finally {
+          
+            setLoading(false);
+        }
+    };
+    
+    const refreshNetworks = async () => {
+        try {
+            setLoading(true);
+            const response = await fetchNetworksData();  
+            setNetworksData(response.data); 
+        } catch (error) {
+            console.error("Error fetching network data:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+
     return (
         <>
             <Createnewuser visible={drawerVisible} onClose={onCloseDrawer} />
@@ -962,6 +1003,13 @@ const UsersTable = () => {
                                 </Row>
                             </Col>
                             <Col xs={24} md={8}>
+                                <Button 
+                                    type="default" 
+                                    icon={<ReloadOutlined />} 
+                                    style={{ float: "right", marginLeft: "10px", backgroundColor: '#C7F39A' }} 
+                                    onClick={refreshUsers}  // Call refresh function when clicked
+                                >
+                                </Button>
                                 <Button type="primary" style={{ float: "right" }} onClick={shownewuserdrawar}>
                                     Create User
                                 </Button>
@@ -1039,6 +1087,13 @@ const UsersTable = () => {
                                 </Row>
                             </Col>
                             <Col xs={24} md={8}>
+                                <Button 
+                                    type="default" 
+                                    icon={<ReloadOutlined />} 
+                                    style={{ float: "right", marginLeft: "10px", backgroundColor: '#C7F39A' }} 
+                                    onClick={refreshAccounts}  // Call refresh function when clicked
+                                >
+                                </Button>
                                 <Button type="primary" style={{ float: "right", marginLeft: "5%" }} onClick={shownnewaccountdrawar}>
                                     Add New Account
                                 </Button>
@@ -1113,11 +1168,18 @@ const UsersTable = () => {
                                     
                                 </Row>
                             </Col>
-                            {/* <Col xs={24} md={8}>
-                                <Button type="primary" style={{ float: "right", marginLeft: "5%" }} onClick={showNetworkDrawer}>
+                            <Col xs={24} md={8}>
+                                {/* <Button type="primary" style={{ float: "right", marginLeft: "5%" }} onClick={showNetworkDrawer}>
                                     Add New Network
+                                </Button> */}
+                                <Button 
+                                    type="default" 
+                                    icon={<ReloadOutlined />} 
+                                    style={{ float: "right", marginLeft: "10px", backgroundColor: '#C7F39A' }} 
+                                    onClick={refreshNetworks}
+                                >
                                 </Button>
-                            </Col> */}
+                            </Col>
                         </Row>
                     </Card>
                     {loading ? (

@@ -589,6 +589,8 @@ const Dashboard = () => {
                         revenuePartner: obj.revenuePartner,
                         mediaBuyerName: obj.MediaBuyerName,
                         holder: obj.Holder,
+                        rpc: parseFloat(((obj.estimated_revenue/obj.conversions)*100)/100).toFixed(2),
+                        cpl: parseFloat(((obj.spend/obj.fbLeads)*100)/100).toFixed(2)
                     });
                 } else {
                     // If found, sum the respective fields
@@ -836,8 +838,6 @@ const Dashboard = () => {
 
 
 
-
-
     // const newNetworks = userdetails?.adAccounts.map((each)=>)
 
     const networks = Object.keys(userdetails?.adAccounts);
@@ -858,9 +858,39 @@ const Dashboard = () => {
         return Math.round(total * 100) / 100; // Round to 2 decimal places
     };
 
+    // const rpc = (params) => {
+    //     const total = params.values.reduce((acc, value) => )
+    // }
+
     const currencyFormatter = (params) => {
         return `$${parseFloat(params.value || 0).toFixed(2)}`; // Ensure 2 decimal places in currency format
     };
+
+
+    const rpcCplFormatter = (params) => {
+        const value = params.value;
+        // Check for NaN or Infinity and return 0 if encountered, otherwise format to two decimal places
+        return isNaN(value) || !isFinite(value) ? '0' : parseFloat(value).toFixed(2);
+    };
+
+
+    const avgRpcCpl = (params) => {
+        // Filter out NaN and Infinity values
+        const validValues = params.values.filter(value => !isNaN(value) && isFinite(value));
+        
+        // If there are no valid values, return 0
+        if (validValues.length === 0) {
+            return 0;
+        }
+    
+        // Calculate average
+        const sum = validValues.reduce((acc, value) => acc + value, 0);
+        const average = sum / validValues.length;
+    
+        // Return the average rounded to two decimal places
+        return parseFloat(average);
+    };
+    
 
     const [columnDefs] = useState([
         {
@@ -889,7 +919,6 @@ const Dashboard = () => {
         {field:'specifiedDate', headerName:'Date'},
         {
             field: "mediaBuyerName",
-
         }, // Display Media Buyer name
         {
             field: "spend",
@@ -910,6 +939,18 @@ const Dashboard = () => {
             },
             valueFormatter: currencyFormatter,
         }, // Custom aggregation for Profit
+        {
+            field: 'rpc',
+            headerName: 'RPC',
+            aggFunc: avgRpcCpl,
+            valueFormatter: rpcCplFormatter,
+        },
+        {
+            field: 'cpl',
+            headerName: 'CPL',
+            aggFunc: avgRpcCpl,
+            valueFormatter: rpcCplFormatter,
+        }
     ]);
 
 
