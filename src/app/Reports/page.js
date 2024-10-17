@@ -188,6 +188,7 @@ const MyTablePage = () => {
     const [isSearching, setIsSearching] = useState(false);
     const [inputValue, setInputValue] = useState('');
     const [isSecondRowVisible, setIsSecondRowVisible] = useState(false);
+    const [refrst, setRefrst] = useState(false);
 
     // Toggle function
 
@@ -306,6 +307,10 @@ const MyTablePage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const showModal = () => {
         setIsModalOpen(true);
+    };
+
+    const changeRRefrst = () => {
+        setRefrst((prev) => !prev);
     };
 
 
@@ -983,12 +988,17 @@ const MyTablePage = () => {
             // getMainMenuItems
         },
         actions: {
-            headerName: '...',
+            headerName: 'Actions',
             field: 'actions',
-            minWidth: 50,
-            sortable: true,
-            filter: true,
-            hide: false,
+            minWidth: 90,
+            // sortable: true,
+            // filter: true,
+            sortable: false,    // Ensure sorting is disabled
+            filter: false,      // Ensure filtering is disabled
+            enableSorting: false,  // Disable sorting at the column level
+            enableFilter: false, 
+            suppressMenu: true,    // Suppress the column menu
+            menuTabs: [], 
             hide: !isYesterday(),
             cellRenderer: (params) => {
                 const [isModalVisible, setIsModalVisible] = useState(false);
@@ -1020,6 +1030,8 @@ const MyTablePage = () => {
                           });
                         if(getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0){
                             setGroupedData(getCampaignResponse.data);
+                            setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
+                            onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget/100)
                         }
                         else{
                             setGroupedData(groupedData);
@@ -1048,6 +1060,8 @@ const MyTablePage = () => {
                       });
                     const responseData = requestResponse.data;
                     console.log(responseData, "response");
+                    message.success("Budget and Status Updated");
+                    changeRRefrst();
                 };
             
                 const handleCancel = () => {
@@ -1098,13 +1112,13 @@ const MyTablePage = () => {
                                         </Typography.Text>
                                     </div> */}
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                                        <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign: Activate/Pause</Typography.Text>
+                                        <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
                                         <Switch checked={campaignStatus} onChange={onChangeCampaignStatus}/>
                                     </div>
             
                                     {/* Input Field */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                        <Typography.Text strong style={{ marginBottom: '10px' }}>Total Spend:</Typography.Text>
+                                        <Typography.Text strong style={{ marginBottom: '10px' }}>Budget:</Typography.Text>
                                         <Input placeholder="Enter your value here" defaultValue={groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget)/100 : getTotalSpend(newgroupedData)} onChange={onChangeBudgetValue}/>
                                     </div>
             
@@ -1118,8 +1132,7 @@ const MyTablePage = () => {
                         )}
                     </div>
                 );
-            }
-                
+            },
         },
         adsetname: {
             headerName: 'AdsetName',
@@ -1500,12 +1513,15 @@ const MyTablePage = () => {
             cellRenderer: campaignNameRenderer,
         },
         actions: {
-            headerName: '...',
+            headerName: 'Actions',
             field: 'actions',
-            minWidth: 50,
-            sortable: true,
-            filter: true,
+            minWidth: 90,
+            sortable: false,    // Ensure sorting is disabled
+            filter: false,      // Ensure filtering is disabled
+            enableSorting: false,  // Disable sorting at the column level
+            enableFilter: false,
             hide: false,
+            suppressMenu: true,
             hide: !isYesterday(),
             cellRenderer: (params) => {
                 const [isModalVisible, setIsModalVisible] = useState(false);
@@ -1537,6 +1553,8 @@ const MyTablePage = () => {
                           });
                         if(getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0){
                             setGroupedData(getCampaignResponse.data);
+                            setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
+                            onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget/100)
                         }
                         else{
                             setGroupedData(groupedData);
@@ -1566,6 +1584,8 @@ const MyTablePage = () => {
                       });
                     const responseData = requestResponse.data;
                     console.log(responseData, "response");
+                    message.success("Budget and Status Updated");
+                    changeRRefrst();
                 };
             
                 const handleCancel = () => {
@@ -1617,13 +1637,13 @@ const MyTablePage = () => {
                                         </Typography.Text>
                                     </div> */}
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                                        <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign: Activate/Pause</Typography.Text>
+                                        <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
                                         <Switch checked={campaignStatus} onChange={onChangeCampaignStatus}/>
                                     </div>
             
                                     {/* Input Field */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                        <Typography.Text strong style={{ marginBottom: '10px' }}>Total Spend:</Typography.Text>
+                                        <Typography.Text strong style={{ marginBottom: '10px' }}>Budget:</Typography.Text>
                                         <Input placeholder="Enter your value here" defaultValue={groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget)/100 : getTotalSpend(newgroupedData)} onChange={onChangeBudgetValue}/>
                                     </div>
             
@@ -1637,7 +1657,8 @@ const MyTablePage = () => {
                         )}
                     </div>
                 );
-            }
+            },
+            filterParams: { filterEnabled: false }, 
                 
         },
 
@@ -1806,12 +1827,15 @@ const MyTablePage = () => {
             // }
         },
         actions: {
-            headerName: '...',
+            headerName: 'Actions',
             field: 'actions',
-            minWidth: 50,
-            sortable: true,
-            filter: true,
+            minWidth: 90,
+            sortable: false,    // Ensure sorting is disabled
+            filter: false,      // Ensure filtering is disabled
+            enableSorting: false,  // Disable sorting at the column level
+            enableFilter: false,
             hide: false,
+            suppressMenu: true,
             hide: !isYesterday(),
             cellRenderer: (params) => {
                 const [isModalVisible, setIsModalVisible] = useState(false);
@@ -1843,6 +1867,8 @@ const MyTablePage = () => {
                           });
                         if(getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0){
                             setGroupedData(getCampaignResponse.data);
+                            setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
+                            onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget/100)
                         }
                         else{
                             setGroupedData(groupedData);
@@ -1871,6 +1897,8 @@ const MyTablePage = () => {
                       });
                     const responseData = requestResponse.data;
                     console.log(responseData, "response");
+                    message.success("Budget and Status Updated");
+                    changeRRefrst();
                 };
             
                 const handleCancel = () => {
@@ -1921,13 +1949,13 @@ const MyTablePage = () => {
                                         </Typography.Text>
                                     </div> */}
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                                        <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign: Activate/Pause</Typography.Text>
+                                        <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
                                         <Switch checked={campaignStatus} onChange={onChangeCampaignStatus}/>
                                     </div>
             
                                     {/* Input Field */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                        <Typography.Text strong style={{ marginBottom: '10px' }}>Total Spend:</Typography.Text>
+                                        <Typography.Text strong style={{ marginBottom: '10px' }}>Budget:</Typography.Text>
                                         <Input placeholder="Enter your value here" defaultValue={groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget)/100 : getTotalSpend(newgroupedData)} onChange={onChangeBudgetValue}/>
                                     </div>
             
@@ -1941,7 +1969,8 @@ const MyTablePage = () => {
                         )}
                     </div>
                 );
-            }
+            },
+            filterParams: { filterEnabled: false }, 
                 
         },
         adsetname: {
@@ -2815,7 +2844,6 @@ const MyTablePage = () => {
     // };
 
     const [campaignComments, setCampaignComments] = useState([]);
-    const [refrst, setRefrst] = useState(false);
     const fetchCampaignComments = async () => {
         try {
 
@@ -2837,9 +2865,7 @@ const MyTablePage = () => {
     //     fetchCampaignComments(); // Fetch comments on initial load
     // }, []); // Run this effect on component mount
 
-    const changeRRefrst = () => {
-        setRefrst((prev) => !prev);
-    };
+    
 
     const autoGroupColumnDefLive = {
         headerName: 'CampaignName',
@@ -2895,6 +2921,13 @@ const MyTablePage = () => {
                         </div>
                     );
                 }
+                const getStatusForCampaign = (campaignName, newaccount) =>{
+                    const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
+                    console.log(relatedStatus, "relatedStatus");
+                    const relatedStatusTrue = relatedStatus !== undefined && relatedStatus.status === true ? true : relatedStatus !== undefined ? false : null;
+                    // console.log(relatedStatusTrue);
+                    return relatedStatusTrue;
+                }
     
                 const getCommentForCampaign = (campaignName) => {
                     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
@@ -2905,7 +2938,7 @@ const MyTablePage = () => {
                     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                     return relatedComment ? relatedComment.starred : false;
                 };
-    
+                const relatedStatus = getStatusForCampaign(campaignName, newaccount);
                 const relatedComment = getCommentForCampaign(campaignName);
                 const isStarred = getStarredForCampaign(campaignName);
                 const valueWithCount = `${firstColumnValue}`;
@@ -2954,7 +2987,8 @@ const MyTablePage = () => {
                             comment: logData.comment,
                             Account: logData.Account,
                             adsetid: logData.adsetid,
-                            campaignid: logData.campaignid
+                            campaignid: logData.campaignid,
+                            status: true
 
                         },{
                             headers: {
@@ -3043,9 +3077,11 @@ const MyTablePage = () => {
     
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                        {relatedStatus === true && <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }}/>}
+                        {relatedStatus === false && <CloseCircleFilled style={{ color: 'red', fontSize: '15px' , marginRight: relatedComment ? "10px" : '0px' }}/>}
                         {relatedComment && (
                             starred ? (
-                                <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: "gold" }} />
+                                <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: "gold"}} />
                             ) : (
                                 <StarOutlined className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px' }} />
                             )
@@ -3150,6 +3186,13 @@ const MyTablePage = () => {
                         </div>
                     );
                 }
+                const getStatusForCampaign = (campaignName, newaccount) =>{
+                    const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
+                    console.log(relatedStatus, "relatedStatus");
+                    const relatedStatusTrue = relatedStatus !== undefined && relatedStatus.status === true ? true : relatedStatus !== undefined ? false : null;
+                    // console.log(relatedStatusTrue);
+                    return relatedStatusTrue;
+                }
     
                 const getCommentForCampaign = (campaignName) => {
                     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
@@ -3160,7 +3203,7 @@ const MyTablePage = () => {
                     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                     return relatedComment ? relatedComment.starred : false;
                 };
-    
+                const relatedStatus = getStatusForCampaign(campaignName, newaccount);
                 const relatedComment = getCommentForCampaign(campaignName);
                 const isStarred = getStarredForCampaign(campaignName);
                 const valueWithCount = `${firstColumnValue}`;
@@ -3207,7 +3250,8 @@ const MyTablePage = () => {
                             comment: logData.comment,
                             Account: logData.Account,
                             adsetid: logData.adsetid,
-                            campaignid: logData.campaignid
+                            campaignid: logData.campaignid,
+                            status: true
                         }, {
                             headers: {
                                 Authorization: token,
@@ -3292,6 +3336,8 @@ const MyTablePage = () => {
     
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                    {relatedStatus === true && <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }}/>}
+                    {relatedStatus === false && <CloseCircleFilled style={{ color: 'red', fontSize: '15px' , marginRight: relatedComment ? "10px" : '0px' }}/>}
                         {relatedComment && (
                             starred ? (
                                 <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: "gold" }} />
@@ -3379,6 +3425,13 @@ const MyTablePage = () => {
                         </div>
                     );
                 }
+                const getStatusForCampaign = (campaignName, newaccount) =>{
+                    const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
+                    console.log(relatedStatus, "relatedStatus");
+                    const relatedStatusTrue = relatedStatus !== undefined && relatedStatus.status === true ? true : relatedStatus !== undefined ? false : null;
+                    // console.log(relatedStatusTrue);
+                    return relatedStatusTrue;
+                }
     
                 const getCommentForCampaign = (campaignName) => {
                     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
@@ -3389,7 +3442,7 @@ const MyTablePage = () => {
                     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                     return relatedComment ? relatedComment.starred : false;
                 };
-    
+                const relatedStatus = getStatusForCampaign(campaignName, newaccount);
                 const relatedComment = getCommentForCampaign(campaignName);
                 const isStarred = getStarredForCampaign(campaignName);
                 const valueWithCount = `${firstColumnValue}`;
@@ -3436,7 +3489,8 @@ const MyTablePage = () => {
                             comment: logData.comment,
                             Account: logData.Account,
                             adsetid: logData.adsetid,
-                            campaignid: logData.campaignid
+                            campaignid: logData.campaignid,
+                            status: true
                         }, {
                             headers: {
                                 Authorization: token,
@@ -3516,6 +3570,8 @@ const MyTablePage = () => {
     
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                        {relatedStatus === true && <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }}/>}
+                        {relatedStatus === false && <CloseCircleFilled style={{ color: 'red', fontSize: '15px' , marginRight: relatedComment ? "10px" : '0px' }}/>}
                         {relatedComment && (
                             starred ? (
                                 <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: 'gold' }} />
