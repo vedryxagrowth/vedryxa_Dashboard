@@ -10,7 +10,7 @@ import axios from 'axios';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
 // import { Select } from 'antd';
-import { Carousel, Input, Button, Pagination, Row, Col, Typography, Result, Modal, message, ConfigProvider, theme, Switch, Divider } from 'antd';
+import { Carousel, Input, Button, Pagination, Row, Col, Typography, Result, Modal, message, ConfigProvider, theme, Switch, Divider, Flex, Spin } from 'antd';
 
 // import 'antd/dist/reset.css';
 import { CommentOutlined, CustomerServiceOutlined, MenuOutlined, InfoCircleOutlined, DownloadOutlined, SearchOutlined, ArrowLeftOutlined, ArrowRightOutlined, SmileOutlined, ReloadOutlined, CopyOutlined, StarOutlined, StarFilled, EditOutlined, CheckCircleFilled, CloseCircleFilled, MessageOutlined, SubnodeOutlined } from '@ant-design/icons';
@@ -104,9 +104,14 @@ const MyTablePage = () => {
 
     const { theme } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
-    if (userdetails === null) {
-        redirect("/Dashboard");
-        // console.log("hi");
+    if (!userdetails?.adAccounts) {
+        return <div style={{ width: '100%', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <Flex align="center" gap="middle">
+                {/* <Spin size="small" />
+                <Spin /> */}
+                <Spin size="large" />
+            </Flex>
+        </div>;
     }
     console.log(userdetails, "userDetails");
     const [darkMode, setDarkMode] = useState(false);
@@ -128,6 +133,7 @@ const MyTablePage = () => {
 
     // Define your rowData and columnDefs
     const columnStructure = [
+        "actions",
         "date",
         "spend",
         "revenue",
@@ -987,6 +993,7 @@ const MyTablePage = () => {
             cellRenderer: (params) => {
                 const [isModalVisible, setIsModalVisible] = useState(false);
                 const [groupedData, setGroupedData] = useState([]);
+                const [newgroupedData, setNewGroupedData] = useState([]);
                 const [changeBudget, onChangeBudget] = useState();
                 const [campaignStatus, setCampaignStatus] = useState(true);
             
@@ -1002,6 +1009,7 @@ const MyTablePage = () => {
             
                     // Fetch all the rows under the current group
                     const groupedData = allLeafChildren.map(node => node.data) || [];
+                    setNewGroupedData(groupedData);
                     
                     // Only show the modal if there is data (groupedData length is greater than 0)
                     if (groupedData.length > 0) {
@@ -1097,7 +1105,7 @@ const MyTablePage = () => {
                                     {/* Input Field */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong style={{ marginBottom: '10px' }}>Total Spend:</Typography.Text>
-                                        <Input placeholder="Enter your value here" defaultValue={groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : (groupedData?.budget)/100} onChange={onChangeBudgetValue}/>
+                                        <Input placeholder="Enter your value here" defaultValue={groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget)/100 : getTotalSpend(newgroupedData)} onChange={onChangeBudgetValue}/>
                                     </div>
             
                                     {/* Campaign ID */}
@@ -1501,6 +1509,7 @@ const MyTablePage = () => {
             hide: !isYesterday(),
             cellRenderer: (params) => {
                 const [isModalVisible, setIsModalVisible] = useState(false);
+                const [newgroupedData, setNewGroupedData] = useState([]);
                 const [groupedData, setGroupedData] = useState([]);
                 const [changeBudget, onChangeBudget] = useState();
                 const [campaignStatus, setCampaignStatus] = useState(true);
@@ -1514,6 +1523,7 @@ const MyTablePage = () => {
             
                     // Ensure allLeafChildren exists and is an array before proceeding
                     const allLeafChildren = params.node?.allLeafChildren || [];
+                    setNewGroupedData(groupedData);
             
                     // Fetch all the rows under the current group
                     const groupedData = allLeafChildren.map(node => node.data) || [];
@@ -1614,7 +1624,7 @@ const MyTablePage = () => {
                                     {/* Input Field */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong style={{ marginBottom: '10px' }}>Total Spend:</Typography.Text>
-                                        <Input placeholder="Enter your value here" defaultValue={groupedData?.length > 0 && groupedData?.length !== 0 ? getTotalSpend(groupedData) : (groupedData?.budget)/100} onChange={onChangeBudgetValue}/>
+                                        <Input placeholder="Enter your value here" defaultValue={groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget)/100 : getTotalSpend(newgroupedData)} onChange={onChangeBudgetValue}/>
                                     </div>
             
                                     {/* Campaign ID */}
@@ -1805,6 +1815,7 @@ const MyTablePage = () => {
             hide: !isYesterday(),
             cellRenderer: (params) => {
                 const [isModalVisible, setIsModalVisible] = useState(false);
+                const [newgroupedData, setNewGroupedData] = useState([]);
                 const [groupedData, setGroupedData] = useState([]);
                 const [changeBudget, onChangeBudget] = useState();
                 const [campaignStatus, setCampaignStatus] = useState(true);
@@ -1821,6 +1832,7 @@ const MyTablePage = () => {
             
                     // Fetch all the rows under the current group
                     const groupedData = allLeafChildren.map(node => node.data) || [];
+                    setNewGroupedData(groupedData);
                     
                     // Only show the modal if there is data (groupedData length is greater than 0)
                     if (groupedData.length > 0) {
@@ -1916,7 +1928,7 @@ const MyTablePage = () => {
                                     {/* Input Field */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong style={{ marginBottom: '10px' }}>Total Spend:</Typography.Text>
-                                        <Input placeholder="Enter your value here" defaultValue={groupedData?.length > 0 && groupedData?.length !== 0 ? getTotalSpend(groupedData) : (groupedData?.budget)/100} onChange={onChangeBudgetValue}/>
+                                        <Input placeholder="Enter your value here" defaultValue={groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget)/100 : getTotalSpend(newgroupedData)} onChange={onChangeBudgetValue}/>
                                     </div>
             
                                     {/* Campaign ID */}
@@ -2834,290 +2846,75 @@ const MyTablePage = () => {
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting
-
-        comparator: (campaignA, campaignB) => {
-            // Handle cases where campaignA or campaignB might be undefined or null
-            if (!campaignA) return 1; // If campaignA is undefined or null, move it down
-            if (!campaignB) return -1; // If campaignB is undefined or null, move it down
-
-            // Find the campaigns' star status in the comments
-            const getStarredForCampaign = (campaignName) => {
-                const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
-                return relatedComment ? relatedComment.starred : false;
-            };
-
-            // Get the star status for both campaigns
-            const isStarredA = getStarredForCampaign(campaignA);
-            const isStarredB = getStarredForCampaign(campaignB);
-
-            // Sort based on starred status (true comes before false)
-            if (isStarredA === isStarredB) {
-                return campaignA.localeCompare(campaignB); // If both are the same, sort alphabetically
-            }
-            return isStarredA ? -1 : 1; // Sort starred campaigns (true) first
-        },
-
-        cellRendererParams: {
-            suppressCount: false, // Allow count to be shown
-            innerRenderer: (params) => {
-                if (params.node.footer) {
-                    return 'Total'; // Custom footer label
-                }
-                // const count = params.node.allChildrenCount; // Get the count of children
-                const firstColumnValue = params.node.key;  // This should give you the campaign name
-                const campaignName = params.node.key;  // Assuming grouping by campaign name
-                const getCommentForCampaign = (campaignName) => {
-                    const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
-                    return relatedComment ? relatedComment.comment : null; // Return 'No comment' if none found
-                };
-                const getStarredForCampaign = (campaignName) => {
-                    const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
-                    return relatedComment ? relatedComment.starred : false;
-                };
-
-                const relatedComment = getCommentForCampaign(campaignName);
-                const isStarred = getStarredForCampaign(campaignName);
-                console.log(relatedComment, "relatedComment for campaign:", campaignName);
-                const valueWithCount = `${firstColumnValue}`;
-
-                const [tooltipText, setTooltipText] = useState("Click to Copy");
-                const [isModalVisibles, setIsModalVisibles] = useState(false); // Modal visibility state
-                const [comment, setComment] = useState(relatedComment || ''); // Store user's comment
-                const [starred, setStarred] = useState(isStarred);
-
-                const copyToClipboard = () => {
-                    navigator.clipboard.writeText(firstColumnValue)
-                        .then(() => {
-                            setTooltipText("Copied!");
-                            setTimeout(() => setTooltipText("Click to Copy"), 2000);
-                        })
-                        .catch(() => {
-                            console.error('Failed to copy to clipboard');
-                        });
-                };
-
-
-                // Handle Edit icon click
-                const handleEditClick = () => {
-                    setIsModalVisibles(true); // Open the modal
-                };
-
-                const sendNewCommentToAPI = async (logData) => {
-                    try {
-                        const response = await axios.post('https://prodapis.adsgoat.in/Comments', {
-                            commentsdatas: logData,
-                        }, {
-                            headers: {
-                                Authorization: token, // Pass token in Authorization header
-                            }
-
-                        });
-
-                        console.log('Response from server:', response.data);
-                    } catch (error) {
-                        console.error('Error sending data to server:', error);
-                    }
-                };
-                const sendEditedCommentToAPI = async (logData) => {
-                    try {
-                        const response = await axios.post('https://prodapis.adsgoat.in/Comments/edit', {
-                            campaignname: logData.campaignname,
-                            comment: logData.comment,
-                        }, {
-                            headers: {
-                                Authorization: token, // Send token in Authorization header
-                            }
-                        });
-                        console.log('Response from server (edited comment):', response.data);
-                        return response.data;
-                    } catch (error) {
-                        console.error('Error sending edited comment to server:', error);
-                        throw error;
-                    }
-                };
-                const sendStarStatusToAPI = async (campaignname, isStarred) => {
-                    try {
-                        const endpoint = isStarred ? 'https://prodapis.adsgoat.in/Star' : 'https://prodapis.adsgoat.in/Unstar';
-                        const response = await axios.post(endpoint, {
-                            campaignname: campaignname,
-                            Account: account,
-                            usercommit: userdetails?.email,
-                        }, {
-                            headers: {
-                                Authorization: token,
-                            }
-                        });
-                        console.log('Response from server (starred status):', response.data);
-                    } catch (error) {
-                        console.error('Error updating star status:', error);
-                    }
-                };
-
-                const handleStarClick = async () => {
-                    const updatedStarred = !starred;
-                    setStarred(updatedStarred);
-                    await sendStarStatusToAPI(firstColumnValue, updatedStarred);
-                    message.success(updatedStarred ? "Campaign starred!" : "Campaign unstarred!");
-
-                    // Update the state locally
-                    const updatedComments = campaignComments.map(cmt =>
-                        cmt.campaignname === firstColumnValue ? { ...cmt, starred: updatedStarred } : cmt
-                    );
-                    setCampaignComments(updatedComments);
-                    changeRRefrst();
-                };
-                const handleOks = async () => {
-                    try {
-                        // Construct the object based on the requested format
-                        const logData = {
-                            Account: account,
-                            usercommit: userdetails?.email,
-                            campaignname: firstColumnValue,
-                            comment: comment
-                        };
-
-                        // Determine whether this is a new comment or an edit based on the existence of `relatedComment`
-                        if (relatedComment) {
-                            // If comment exists, update the comment (Edit mode)
-                            await sendEditedCommentToAPI(logData);
-                            message.success("Comment updated successfully!");
-                        } else {
-                            // If comment does not exist, add a new comment
-                            await sendNewCommentToAPI(logData);
-                            message.success("New comment added successfully!");
-                        }
-
-                        // Update the local comments state with the new or updated comment
-                        const updatedComments = relatedComment
-                            ? campaignComments.map(cmt => (cmt.campaignname === firstColumnValue ? { ...cmt, comment } : cmt))
-                            : [...campaignComments, logData]; // If no comment existed, add new comment
-                        setCampaignComments(updatedComments);
-
-                        // Trigger a refresh or re-render using the provided function
-                        changeRRefrst();
-
-                        // Log the structured data for debugging purposes
-                        console.log('Logged Data:', logData);
-
-                        // Close the modal after successful submission
-                        setIsModalVisibles(false);
-                    } catch (error) {
-                        console.error('Error while submitting comment:', error);
-                        message.error("Error while submitting the comment.");
-                    }
-                };
-
-
-                const handleCancels = () => {
-                    setIsModalVisibles(false); // Close the modal without logging anything
-                };
-
-                return (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                        {relatedComment && (
-                            starred ? (
-                                <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: "gold" }} />
-                            ) : (
-                                <StarOutlined className='startview'  onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px' }} />
-                            )
-                        )}                      {relatedComment ? (
-                            <Tooltip title={(
-                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                    <span>{relatedComment || 'No comment available'}</span>
-                                    <EditOutlined onClick={handleEditClick} style={{ marginLeft: '10px', color: 'blue', cursor: 'pointer' }} />
-                                </div>
-                            )}>
-                                <MessageOutlined className='Message' style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
-                                <Tooltip title={tooltipText}></Tooltip>
-                            </Tooltip>
-                        ) : (
-                            <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
-                        )}                        <Tooltip title={tooltipText}>
-                            <CopyOutlined 
-                                onClick={copyToClipboard}
-                                style={{ cursor: 'pointer', marginLeft: '8px',  color:"#1e1e1f", marginRight: '10px' }}
-                            />
-                        </Tooltip>
-                        <span
-                            onClick={() => {
-                                // console.log(`Grouped Make clicked: ${params.value}`);
-                                const url = `/LiveHistory/LiveCampaignHistory/${params.value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
-                                window.open(url, '_blank');
-                            }}
-                        >
-                            {valueWithCount}
-                        </span>
-                        <Modal
-                            title={firstColumnValue}
-                            visible={isModalVisibles}
-                            onOk={handleOks} // Call handleOk when OK is clicked
-                            onCancel={handleCancels} // Call handleCancel when Cancel is clicked
-                        >
-                            <Input.TextArea
-                                placeholder="Enter your comments here"
-                                value={comment}
-                                onChange={(e) => setComment(e.target.value)} // Update the comment state when typing
-                            />
-                        </Modal>
-                    </div>
-
-                );
-            }
-        }
-    };
-
-    const autoGroupColumnDef = {
-        headerName: 'CampaignName',
-        minWidth: 450,
-        pinned: 'left',
-        sortable: true, // Enable sorting
-
+    
         comparator: (campaignA, campaignB) => {
             if (!campaignA) return 1;
             if (!campaignB) return -1;
-
+    
             const getStarredForCampaign = (campaignName) => {
                 const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                 return relatedComment ? relatedComment.starred : false;
             };
-
+    
             const isStarredA = getStarredForCampaign(campaignA);
             const isStarredB = getStarredForCampaign(campaignB);
-
+    
             if (isStarredA === isStarredB) {
                 return campaignA.localeCompare(campaignB);
             }
             return isStarredA ? -1 : 1;
         },
-
+    
         cellRendererParams: {
             suppressCount: false,
             innerRenderer: (params) => {
                 if (params.node.footer) {
                     return 'Total';
                 }
-
-                const firstColumnValue = params.node.key;
+    
+                const firstColumnValue = params.node.key;  // campaign name
                 const campaignName = params.node.key;
-
+    
+                // Check if this is a grouped row and has children
+                let campaignid, adsetid;
+    
+                if (params.node.group && params.node.childrenAfterGroup && params.node.childrenAfterGroup.length > 0) {
+                    // Get the first child row data to extract campaignid and adsetid
+                    const firstChild = params.node.childrenAfterGroup[0].data;
+                    campaignid = firstChild.campaignid;
+                    adsetid = firstChild.adsetid;
+                } else if (params.data) {
+                    // Fallback to individual row data if not grouped
+                    campaignid = params.data.campaignid;
+                    adsetid = params.data.adsetid;
+                } else {
+                    console.error('Missing campaignid or adsetid for campaign:', campaignName);
+                    return (
+                        <div style={{ color: 'red' }}>
+                            Error: campaignid or adsetid missing for {campaignName}
+                        </div>
+                    );
+                }
+    
                 const getCommentForCampaign = (campaignName) => {
                     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                     return relatedComment ? relatedComment.comment : null;
                 };
-
+    
                 const getStarredForCampaign = (campaignName) => {
                     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                     return relatedComment ? relatedComment.starred : false;
                 };
-
+    
                 const relatedComment = getCommentForCampaign(campaignName);
                 const isStarred = getStarredForCampaign(campaignName);
-
+                const valueWithCount = `${firstColumnValue}`;
+    
                 const [tooltipText, setTooltipText] = useState("Click to Copy");
-                const [isModalVisible, setIsModalVisible] = useState(false);
+                const [isModalVisibles, setIsModalVisibles] = useState(false);
                 const [comment, setComment] = useState(relatedComment || '');
                 const [starred, setStarred] = useState(isStarred);
-
+    
                 const copyToClipboard = () => {
                     navigator.clipboard.writeText(firstColumnValue)
                         .then(() => {
@@ -3128,11 +2925,11 @@ const MyTablePage = () => {
                             console.error('Failed to copy to clipboard');
                         });
                 };
-
+    
                 const handleEditClick = () => {
-                    setIsModalVisible(true);
+                    setIsModalVisibles(true);
                 };
-
+    
                 const sendNewCommentToAPI = async (logData) => {
                     try {
                         const response = await axios.post('https://prodapis.adsgoat.in/Comments', {
@@ -3142,18 +2939,24 @@ const MyTablePage = () => {
                                 Authorization: token,
                             }
                         });
+    
                         console.log('Response from server:', response.data);
                     } catch (error) {
                         console.error('Error sending data to server:', error);
                     }
+                    console.log(logData);
                 };
-
+    
                 const sendEditedCommentToAPI = async (logData) => {
                     try {
                         const response = await axios.post('https://prodapis.adsgoat.in/Comments/edit', {
                             campaignname: logData.campaignname,
                             comment: logData.comment,
-                        }, {
+                            Account: logData.Account,
+                            adsetid: logData.adsetid,
+                            campaignid: logData.campaignid
+
+                        },{
                             headers: {
                                 Authorization: token,
                             }
@@ -3164,15 +2967,20 @@ const MyTablePage = () => {
                         console.error('Error sending edited comment to server:', error);
                         throw error;
                     }
+                    // console.log(logData);
                 };
-
-                const sendStarStatusToAPI = async (campaignName, isStarred) => {
+    
+                const sendStarStatusToAPI = async (campaignname, isStarred) => {
+                    // console.log(campaignid);
+                    // console.log(adsetid);
                     try {
                         const endpoint = isStarred ? 'https://prodapis.adsgoat.in/Star' : 'https://prodapis.adsgoat.in/Unstar';
                         const response = await axios.post(endpoint, {
-                            campaignname: campaignName,
+                            campaignname: campaignname,
                             Account: account,
                             usercommit: userdetails?.email,
+                            campaignid: campaignid, // Pass campaignid from grouped data
+                            adsetid: adsetid // Pass adsetid from grouped data
                         }, {
                             headers: {
                                 Authorization: token,
@@ -3183,51 +2991,61 @@ const MyTablePage = () => {
                         console.error('Error updating star status:', error);
                     }
                 };
-
+    
                 const handleStarClick = async () => {
                     const updatedStarred = !starred;
                     setStarred(updatedStarred);
                     await sendStarStatusToAPI(firstColumnValue, updatedStarred);
-
+                    message.success(updatedStarred ? "Campaign starred!" : "Campaign unstarred!");
+    
                     const updatedComments = campaignComments.map(cmt =>
                         cmt.campaignname === firstColumnValue ? { ...cmt, starred: updatedStarred } : cmt
                     );
                     setCampaignComments(updatedComments);
                     changeRRefrst();
                 };
-
-                const handleOk = async () => {
-                    const logData = {
-                        Account: account,
-                        usercommit: userdetails?.email,
-                        campaignname: firstColumnValue,
-                        comment: comment
-                    };
-
-                    if (relatedComment) {
-                        await sendEditedCommentToAPI(logData);
-                    } else {
-                        await sendNewCommentToAPI(logData);
+    
+                const handleOks = async () => {
+                    try {
+                        const logData = {
+                            Account: newaccount,
+                            usercommit: userdetails?.email,
+                            campaignname: firstColumnValue,
+                            comment: comment,
+                            campaignid: campaignid, // Pass campaignid
+                            adsetid: adsetid // Pass adsetid
+                        };
+    
+                        if (relatedComment) {
+                            await sendEditedCommentToAPI(logData);
+                            message.success("Comment updated successfully!");
+                        } else {
+                            await sendNewCommentToAPI(logData);
+                            message.success("New comment added successfully!");
+                        }
+    
+                        const updatedComments = relatedComment
+                            ? campaignComments.map(cmt => (cmt.campaignname === firstColumnValue ? { ...cmt, comment } : cmt))
+                            : [...campaignComments, logData];
+                        setCampaignComments(updatedComments);
+    
+                        changeRRefrst();
+                        setIsModalVisibles(false);
+                    } catch (error) {
+                        console.error('Error while submitting comment:', error);
+                        message.error("Error while submitting the comment.");
                     }
-
-                    const updatedComments = relatedComment
-                        ? campaignComments.map(cmt => (cmt.campaignname === firstColumnValue ? { ...cmt, comment } : cmt))
-                        : [...campaignComments, logData];
-                    setCampaignComments(updatedComments);
-
-                    changeRRefrst();
-                    setIsModalVisible(false);
                 };
-
-                const handleCancel = () => {
-                    setIsModalVisible(false);
+    
+                const handleCancels = () => {
+                    setIsModalVisibles(false);
                 };
-
+    
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                         {relatedComment && (
                             starred ? (
-                                <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: 'gold' }} />
+                                <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: "gold" }} />
                             ) : (
                                 <StarOutlined className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px' }} />
                             )
@@ -3240,29 +3058,30 @@ const MyTablePage = () => {
                                 </div>
                             )}>
                                 <MessageOutlined className='Message' style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
+                                <Tooltip title={tooltipText}></Tooltip>
                             </Tooltip>
                         ) : (
                             <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
                         )}
                         <Tooltip title={tooltipText}>
-                            <CopyOutlined
+                            <CopyOutlined 
                                 onClick={copyToClipboard}
-                                style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight: '10px' }}
+                                style={{ cursor: 'pointer', marginLeft: '8px', color:"#1e1e1f", marginRight: '10px' }}
                             />
                         </Tooltip>
                         <span
                             onClick={() => {
-                                const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                                const url = `/LiveHistory/LiveCampaignHistory/${params.value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                                 window.open(url, '_blank');
                             }}
                         >
-                            {firstColumnValue}
+                            {valueWithCount}
                         </span>
                         <Modal
                             title={firstColumnValue}
-                            visible={isModalVisible}
-                            onOk={handleOk}
-                            onCancel={handleCancel}
+                            visible={isModalVisibles}
+                            onOk={handleOks}
+                            onCancel={handleCancels}
                         >
                             <Input.TextArea
                                 placeholder="Enter your comments here"
@@ -3275,6 +3094,256 @@ const MyTablePage = () => {
             }
         }
     };
+    
+    
+    
+    
+
+    const autoGroupColumnDef = {
+        headerName: 'CampaignName',
+        minWidth: 450,
+        pinned: 'left',
+        sortable: true, // Enable sorting
+    
+        comparator: (campaignA, campaignB) => {
+            if (!campaignA) return 1;
+            if (!campaignB) return -1;
+    
+            const getStarredForCampaign = (campaignName) => {
+                const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+                return relatedComment ? relatedComment.starred : false;
+            };
+    
+            const isStarredA = getStarredForCampaign(campaignA);
+            const isStarredB = getStarredForCampaign(campaignB);
+    
+            if (isStarredA === isStarredB) {
+                return campaignA.localeCompare(campaignB);
+            }
+            return isStarredA ? -1 : 1;
+        },
+    
+        cellRendererParams: {
+            suppressCount: false,
+            innerRenderer: (params) => {
+                if (params.node.footer) {
+                    return 'Total';
+                }
+    
+                const firstColumnValue = params.node.key;  // campaign name
+                const campaignName = params.node.key;
+    
+                let campaignid, adsetid;
+    
+                if (params.node.group && params.node.childrenAfterGroup && params.node.childrenAfterGroup.length > 0) {
+                    const firstChild = params.node.childrenAfterGroup[0].data;
+                    campaignid = firstChild.campaignid;
+                    adsetid = firstChild.adsetid;
+                } else if (params.data) {
+                    campaignid = params.data.campaignid;
+                    adsetid = params.data.adsetid;
+                } else {
+                    console.error('Missing campaignid or adsetid for campaign:', campaignName);
+                    return (
+                        <div style={{ color: 'red' }}>
+                            Error: campaignid or adsetid missing for {campaignName}
+                        </div>
+                    );
+                }
+    
+                const getCommentForCampaign = (campaignName) => {
+                    const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+                    return relatedComment ? relatedComment.comment : null;
+                };
+    
+                const getStarredForCampaign = (campaignName) => {
+                    const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+                    return relatedComment ? relatedComment.starred : false;
+                };
+    
+                const relatedComment = getCommentForCampaign(campaignName);
+                const isStarred = getStarredForCampaign(campaignName);
+                const valueWithCount = `${firstColumnValue}`;
+    
+                const [tooltipText, setTooltipText] = useState("Click to Copy");
+                const [isModalVisibles, setIsModalVisibles] = useState(false);
+                const [comment, setComment] = useState(relatedComment || '');
+                const [starred, setStarred] = useState(isStarred);
+    
+                const copyToClipboard = () => {
+                    navigator.clipboard.writeText(firstColumnValue)
+                        .then(() => {
+                            setTooltipText("Copied!");
+                            setTimeout(() => setTooltipText("Click to Copy"), 2000);
+                        })
+                        .catch(() => {
+                            console.error('Failed to copy to clipboard');
+                        });
+                };
+    
+                const handleEditClick = () => {
+                    setIsModalVisibles(true);
+                };
+    
+                const sendNewCommentToAPI = async (logData) => {
+                    try {
+                        const response = await axios.post('https://prodapis.adsgoat.in/Comments', {
+                            commentsdatas: logData,
+                        }, {
+                            headers: {
+                                Authorization: token,
+                            }
+                        });
+                        console.log('Response from server:', response.data);
+                    } catch (error) {
+                        console.error('Error sending data to server:', error);
+                    }
+                };
+    
+                const sendEditedCommentToAPI = async (logData) => {
+                    try {
+                        const response = await axios.post('https://prodapis.adsgoat.in/Comments/edit', {
+                            campaignname: logData.campaignname,
+                            comment: logData.comment,
+                            Account: logData.Account,
+                            adsetid: logData.adsetid,
+                            campaignid: logData.campaignid
+                        }, {
+                            headers: {
+                                Authorization: token,
+                            }
+                        });
+                        console.log('Response from server (edited comment):', response.data);
+                        return response.data;
+                    } catch (error) {
+                        console.error('Error sending edited comment to server:', error);
+                        throw error;
+                    }
+                };
+    
+                const sendStarStatusToAPI = async (campaignname, isStarred) => {
+                    try {
+                        const endpoint = isStarred ? 'https://prodapis.adsgoat.in/Star' : 'https://prodapis.adsgoat.in/Unstar';
+                        const response = await axios.post(endpoint, {
+                            campaignname: campaignname,
+                            Account: account,
+                            usercommit: userdetails?.email,
+                            campaignid: campaignid,
+                            adsetid: adsetid
+                        }, {
+                            headers: {
+                                Authorization: token,
+                            }
+                        });
+                        console.log('Response from server (starred status):', response.data);
+                    } catch (error) {
+                        console.error('Error updating star status:', error);
+                    }
+                };
+    
+                const handleStarClick = async () => {
+                    const updatedStarred = !starred;
+                    setStarred(updatedStarred);
+                    await sendStarStatusToAPI(firstColumnValue, updatedStarred);
+                    message.success(updatedStarred ? "Campaign starred!" : "Campaign unstarred!");
+    
+                    const updatedComments = campaignComments.map(cmt =>
+                        cmt.campaignname === firstColumnValue ? { ...cmt, starred: updatedStarred } : cmt
+                    );
+                    setCampaignComments(updatedComments);
+                    changeRRefrst();
+                };
+    
+                const handleOks = async () => {
+                    try {
+                        const logData = {
+                            Account: newaccount,
+                            usercommit: userdetails?.email,
+                            campaignname: firstColumnValue,
+                            comment: comment,
+                            campaignid: campaignid,
+                            adsetid: adsetid
+                        };
+    
+                        if (relatedComment) {
+                            await sendEditedCommentToAPI(logData);
+                            message.success("Comment updated successfully!");
+                        } else {
+                            await sendNewCommentToAPI(logData);
+                            message.success("New comment added successfully!");
+                        }
+    
+                        const updatedComments = relatedComment
+                            ? campaignComments.map(cmt => (cmt.campaignname === firstColumnValue ? { ...cmt, comment } : cmt))
+                            : [...campaignComments, logData];
+                        setCampaignComments(updatedComments);
+    
+                        changeRRefrst();
+                        setIsModalVisibles(false);
+                    } catch (error) {
+                        console.error('Error while submitting comment:', error);
+                        message.error("Error while submitting the comment.");
+                    }
+                };
+    
+                const handleCancels = () => {
+                    setIsModalVisibles(false);
+                };
+    
+                return (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                        {relatedComment && (
+                            starred ? (
+                                <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: "gold" }} />
+                            ) : (
+                                <StarOutlined className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px' }} />
+                            )
+                        )}
+                        {relatedComment ? (
+                            <Tooltip title={(
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <span>{relatedComment || 'No comment available'}</span>
+                                    <EditOutlined onClick={handleEditClick} style={{ marginLeft: '10px', color: 'blue', cursor: 'pointer' }} />
+                                </div>
+                            )}>
+                                <MessageOutlined className='Message' style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
+                                <Tooltip title={tooltipText}></Tooltip>
+                            </Tooltip>
+                        ) : (
+                            <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
+                        )}
+                        <Tooltip title={tooltipText}>
+                            <CopyOutlined 
+                                onClick={copyToClipboard}
+                                style={{ cursor: 'pointer', marginLeft: '8px', color:"#1e1e1f", marginRight: '10px' }}
+                            />
+                        </Tooltip>
+                        <span
+                            onClick={() => {
+                                const url = `/CampaignHistory/${params.value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                                window.open(url, '_blank');
+                            }}
+                        >
+                            {valueWithCount}
+                        </span>
+                        <Modal
+                            title={firstColumnValue}
+                            visible={isModalVisibles}
+                            onOk={handleOks}
+                            onCancel={handleCancels}
+                        >
+                            <Input.TextArea
+                                placeholder="Enter your comments here"
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                            />
+                        </Modal>
+                    </div>
+                );
+            }
+        }
+    };
+    
 
 
 
@@ -3289,29 +3358,47 @@ const MyTablePage = () => {
                 if (params.node.footer) {
                     return 'Total'; // Custom footer label
                 }
-
+    
                 const firstColumnValue = params.node.key; // This should give you the campaign name
                 const campaignName = params.node.key;
-                const valueWithCount = `${firstColumnValue}`;
-
+    
+                let campaignid, adsetid;
+    
+                if (params.node.group && params.node.childrenAfterGroup && params.node.childrenAfterGroup.length > 0) {
+                    const firstChild = params.node.childrenAfterGroup[0].data;
+                    campaignid = firstChild.campaignid;
+                    adsetid = firstChild.adsetid;
+                } else if (params.data) {
+                    campaignid = params.data.campaignid;
+                    adsetid = params.data.adsetid;
+                } else {
+                    console.error('Missing campaignid or adsetid for campaign:', campaignName);
+                    return (
+                        <div style={{ color: 'red' }}>
+                            Error: campaignid or adsetid missing for {campaignName}
+                        </div>
+                    );
+                }
+    
                 const getCommentForCampaign = (campaignName) => {
                     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                     return relatedComment ? relatedComment.comment : null;
                 };
-
+    
                 const getStarredForCampaign = (campaignName) => {
                     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                     return relatedComment ? relatedComment.starred : false;
                 };
-
+    
                 const relatedComment = getCommentForCampaign(campaignName);
                 const isStarred = getStarredForCampaign(campaignName);
-
+                const valueWithCount = `${firstColumnValue}`;
+    
                 const [tooltipText, setTooltipText] = useState("Click to Copy");
                 const [isModalVisible, setIsModalVisible] = useState(false);
                 const [comment, setComment] = useState(relatedComment || '');
                 const [starred, setStarred] = useState(isStarred);
-
+    
                 const copyToClipboard = () => {
                     navigator.clipboard.writeText(firstColumnValue)
                         .then(() => {
@@ -3322,11 +3409,11 @@ const MyTablePage = () => {
                             console.error('Failed to copy to clipboard');
                         });
                 };
-
+    
                 const handleEditClick = () => {
                     setIsModalVisible(true);
                 };
-
+    
                 const sendNewCommentToAPI = async (logData) => {
                     try {
                         const response = await axios.post('https://prodapis.adsgoat.in/Comments', {
@@ -3341,12 +3428,15 @@ const MyTablePage = () => {
                         console.error('Error sending data to server:', error);
                     }
                 };
-
+    
                 const sendEditedCommentToAPI = async (logData) => {
                     try {
                         const response = await axios.post('https://prodapis.adsgoat.in/Comments/edit', {
                             campaignname: logData.campaignname,
                             comment: logData.comment,
+                            Account: logData.Account,
+                            adsetid: logData.adsetid,
+                            campaignid: logData.campaignid
                         }, {
                             headers: {
                                 Authorization: token,
@@ -3359,14 +3449,16 @@ const MyTablePage = () => {
                         throw error;
                     }
                 };
-
-                const sendStarStatusToAPI = async (campaignName, isStarred) => {
+    
+                const sendStarStatusToAPI = async (campaignname, isStarred) => {
                     try {
                         const endpoint = isStarred ? 'https://prodapis.adsgoat.in/Star' : 'https://prodapis.adsgoat.in/Unstar';
                         const response = await axios.post(endpoint, {
-                            campaignname: campaignName,
+                            campaignname: campaignname,
                             Account: account,
                             usercommit: userdetails?.email,
+                            campaignid: campaignid,
+                            adsetid: adsetid
                         }, {
                             headers: {
                                 Authorization: token,
@@ -3377,46 +3469,51 @@ const MyTablePage = () => {
                         console.error('Error updating star status:', error);
                     }
                 };
-
+    
                 const handleStarClick = async () => {
                     const updatedStarred = !starred;
                     setStarred(updatedStarred);
                     await sendStarStatusToAPI(firstColumnValue, updatedStarred);
-
+                    message.success(updatedStarred ? "Campaign starred!" : "Campaign unstarred!");
+    
                     const updatedComments = campaignComments.map(cmt =>
                         cmt.campaignname === firstColumnValue ? { ...cmt, starred: updatedStarred } : cmt
                     );
                     setCampaignComments(updatedComments);
                     changeRRefrst();
                 };
-
+    
                 const handleOk = async () => {
                     const logData = {
                         Account: account,
                         usercommit: userdetails?.email,
                         campaignname: firstColumnValue,
-                        comment: comment
+                        comment: comment,
+                        campaignid: campaignid,
+                        adsetid: adsetid
                     };
-
+    
                     if (relatedComment) {
                         await sendEditedCommentToAPI(logData);
+                        message.success("Comment updated successfully!");
                     } else {
                         await sendNewCommentToAPI(logData);
+                        message.success("New comment added successfully!");
                     }
-
+    
                     const updatedComments = relatedComment
                         ? campaignComments.map(cmt => (cmt.campaignname === firstColumnValue ? { ...cmt, comment } : cmt))
                         : [...campaignComments, logData];
                     setCampaignComments(updatedComments);
-
+    
                     changeRRefrst();
                     setIsModalVisible(false);
                 };
-
+    
                 const handleCancel = () => {
                     setIsModalVisible(false);
                 };
-
+    
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                         {relatedComment && (
@@ -3434,14 +3531,15 @@ const MyTablePage = () => {
                                 </div>
                             )}>
                                 <MessageOutlined className='Message' style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
+                                <Tooltip title={tooltipText}></Tooltip>
                             </Tooltip>
                         ) : (
                             <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
                         )}
                         <Tooltip title={tooltipText}>
-                            <CopyOutlined
+                            <CopyOutlined 
                                 onClick={copyToClipboard}
-                                style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight: '10px' }}
+                                style={{ cursor: 'pointer', marginLeft: '8px', color:"#1e1e1f", marginRight: '10px' }}
                             />
                         </Tooltip>
                         <span
@@ -3450,7 +3548,7 @@ const MyTablePage = () => {
                                 window.open(url, '_blank');
                             }}
                         >
-                            {firstColumnValue}
+                            {valueWithCount}
                         </span>
                         <Modal
                             title={firstColumnValue}
@@ -3469,6 +3567,7 @@ const MyTablePage = () => {
             }
         }
     };
+    
 
 
     // const autoGroupColumnDefLive = {
