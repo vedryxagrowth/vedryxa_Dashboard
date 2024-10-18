@@ -5,13 +5,14 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
+import moment from 'moment-timezone';
 import 'ag-grid-enterprise';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import {useTokenContext} from '../../../components/parent'
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
-import { Spin } from 'antd';
+import { Spin, Row, Col } from 'antd';
 Chart.register(...registerables);
 
 export default function AdsetNameAndAccount({params}){
@@ -269,7 +270,7 @@ export default function AdsetNameAndAccount({params}){
         // const data = await fetchData.json();
         const mainData = fetchData.data;
         console.log(mainData.columnStructure, "columnStructure");
-        const filteredData = mainData.columnStructure.filter((each)=> each !== "fb-hour" && each !== "mnet-hour" && each !== "timezone" );
+        const filteredData = mainData.columnStructure.filter((each)=> each !== "fb-hour" && each !== "mnet-hour" && each !== "timezone" && each !== "actions" );
         console.log(filteredData);
         setColumnStructure(getColumnDefs(filteredData));
         // setRowStructure(mainData.rows); 
@@ -482,94 +483,98 @@ export default function AdsetNameAndAccount({params}){
     };
 
     return(
-        <div>
-            <div style={{ height: '400px', marginBottom: '10px' }}> {/* Container with fixed height */}
-            {chartData.dates.length === 0 ? (<div style={{width:'100%', height:'100%', display:'flex', justifyContent:'center', alignItems:'center'}}><Spin size="large" /></div>):
-                (<Line
-                    data={{
-                        labels: chartData.dates,
-                        datasets: [
-                            {
-                                label: 'Spend',
-                                data: chartData.spend,
-                                borderColor: 'rgba(75, 192, 192, 1)',        // Teal
-                                backgroundColor: 'rgba(75, 192, 192, 0.2)',   // Light Teal
-                                fill: true,
-                                hidden: true,
-                                tension: 0.3
-                            },
-                            {
-                                label: 'Revenue',
-                                data: chartData.revenue,
-                                borderColor: 'rgba(54, 162, 235, 1)',        // Blue
-                                backgroundColor: 'rgba(54, 162, 235, 0.2)',   // Light Blue
-                                fill: true,
-                                hidden: true,
-                                tension: 0.3
+        <Row style={{display:'flex', flexDirection:'column'}}>
+            <Col>
+                <h3 style={{textAlign:'center'}}>AdsetName: {decodedString}</h3>
+            </Col>
+            {/* <h1>AdsetName: {decodedString}</h1> */}
+            <Col style={{ height: '400px', marginBottom: '10px' }}> {/* Container with fixed height */}
+                {chartData.dates.length === 0 ? (<div style={{width:'100%', height:'100%', display:'flex', justifyContent:'center', alignItems:'center'}}><Spin size="large" /></div>):
+                    (<Line
+                        data={{
+                            labels: chartData.dates,
+                            datasets: [
+                                {
+                                    label: 'Spend',
+                                    data: chartData.spend,
+                                    borderColor: 'rgba(75, 192, 192, 1)',        // Teal
+                                    backgroundColor: 'rgba(75, 192, 192, 0.2)',   // Light Teal
+                                    fill: true,
+                                    hidden: true,
+                                    tension: 0.3
+                                },
+                                {
+                                    label: 'Revenue',
+                                    data: chartData.revenue,
+                                    borderColor: 'rgba(54, 162, 235, 1)',        // Blue
+                                    backgroundColor: 'rgba(54, 162, 235, 0.2)',   // Light Blue
+                                    fill: true,
+                                    hidden: true,
+                                    tension: 0.3
 
-                            },
-                            {
-                                label: 'RPC',
-                                data: chartData.rpc,
-                                borderColor: 'rgba(255, 99, 132, 1)',        // Red
-                                backgroundColor: 'rgba(255, 99, 132, 0.2)',   // Light Red
-                                fill: true,
-                                hidden: true,
-                                tension: 0.3
+                                },
+                                {
+                                    label: 'RPC',
+                                    data: chartData.rpc,
+                                    borderColor: 'rgba(255, 99, 132, 1)',        // Red
+                                    backgroundColor: 'rgba(255, 99, 132, 0.2)',   // Light Red
+                                    fill: true,
+                                    hidden: true,
+                                    tension: 0.3
 
-                            },
-                            {
-                                label: 'CPL',
-                                data: chartData.cpl,
-                                borderColor: 'rgba(255, 159, 64, 1)',        // Orange
-                                backgroundColor: 'rgba(255, 159, 64, 0.2)',   // Light Orange
-                                fill: true,
-                                hidden: true,
-                                tension: 0.3
+                                },
+                                {
+                                    label: 'CPL',
+                                    data: chartData.cpl,
+                                    borderColor: 'rgba(255, 159, 64, 1)',        // Orange
+                                    backgroundColor: 'rgba(255, 159, 64, 0.2)',   // Light Orange
+                                    fill: true,
+                                    hidden: true,
+                                    tension: 0.3
 
-                            },
-                            {
-                                label: 'Profit',
-                                data: chartData.profit,
-                                borderColor: 'rgba(255, 206, 86, 1)',        // Yellow
-                                backgroundColor: 'rgba(255, 206, 86, 0.2)',   // Light Yellow
-                                fill: true,
-                                tension: 0.3
+                                },
+                                {
+                                    label: 'Profit',
+                                    data: chartData.profit,
+                                    borderColor: 'rgba(255, 206, 86, 1)',        // Yellow
+                                    backgroundColor: 'rgba(255, 206, 86, 0.2)',   // Light Yellow
+                                    fill: true,
+                                    tension: 0.3
 
-                            },
-                            {
-                                label: 'Margin',
-                                data: chartData.margin,
-                                borderColor: 'rgba(153, 102, 255, 1)',       // Purple
-                                backgroundColor: 'rgba(153, 102, 255, 0.2)',  // Light Purple
-                                fill: true,
-                                hidden: true,
-                                tension: 0.3
+                                },
+                                {
+                                    label: 'Margin',
+                                    data: chartData.margin,
+                                    borderColor: 'rgba(153, 102, 255, 1)',       // Purple
+                                    backgroundColor: 'rgba(153, 102, 255, 0.2)',  // Light Purple
+                                    fill: true,
+                                    hidden: true,
+                                    tension: 0.3
 
-                            }
-                        ],
+                                }
+                            ],
 
-                    }}
-                    options={{
-                        responsive: true,
-                        maintainAspectRatio: false, // Allow the chart to take the full height of its container
-                        scales: {
-                            x: {
-                                ticks: {
-                                    // autoSkip: false,
-                                    // maxRotation: 0, // Keep labels horizontal
-                                    padding: 30, // Increase padding between labels and the axis
+                        }}
+                        options={{
+                            responsive: true,
+                            maintainAspectRatio: false, // Allow the chart to take the full height of its container
+                            scales: {
+                                x: {
+                                    ticks: {
+                                        // autoSkip: false,
+                                        // maxRotation: 0, // Keep labels horizontal
+                                        padding: 30, // Increase padding between labels and the axis
+                                    },
+                                },
+                                y: {
+                                    beginAtZero: true, // Ensure the y-axis starts at zero
                                 },
                             },
-                            y: {
-                                beginAtZero: true, // Ensure the y-axis starts at zero
-                            },
-                        },
-                    }}
-                    height={350} // Set the height of the chart
-                />)}
-            </div>
-            <div style={{ display: 'flex', width: '100%', marginLeft: '2%' }}>
+                        }}
+                        height={350} // Set the height of the chart
+                    />)}
+            </Col>
+            <Col style={{ display: 'flex', width: '100%', marginLeft: '2%' }}>
                 {/* Top 5 Dates with RPC */}
                 <div style={{ width: '20%' }}>
                     <h3>Top 5 Dates with RPC</h3>
@@ -578,6 +583,7 @@ export default function AdsetNameAndAccount({params}){
                             <tr>
                                 <th style={{ border: '1px solid #ddd', padding: '3px' }}>Date</th>
                                 <th style={{ border: '1px solid #ddd', padding: '2px' }}>RPC</th>
+                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>WeekDay</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -592,6 +598,7 @@ export default function AdsetNameAndAccount({params}){
                                     <tr key={index}>
                                         <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.date}</td>
                                         <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.rpc}</td>
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{moment(item.date).format('dddd')}</td>
                                     </tr>
                                 ))}
                         </tbody>
@@ -606,6 +613,7 @@ export default function AdsetNameAndAccount({params}){
                             <tr>
                                 <th style={{ border: '1px solid #ddd', padding: '3px' }}>Date</th>
                                 <th style={{ border: '1px solid #ddd', padding: '3px' }}>Margin</th>
+                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>WeekDay</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -620,13 +628,15 @@ export default function AdsetNameAndAccount({params}){
                                     <tr key={index}>
                                         <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.date}</td>
                                         <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.margin}</td>
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{moment(item.date).format('dddd')}</td>
                                     </tr>
                                 ))}
                         </tbody>
                     </table>
                 </div>
-            </div>
+            </Col>
             {/* <h1>{params.campaignAndAccount}hi</h1> */}
+            <Col>
             {isLoading === true ? (
                 <div className="loader-container ag-container">
                     <div className="ag-grid-Loader">
@@ -690,6 +700,7 @@ export default function AdsetNameAndAccount({params}){
                     />
                 </div>
             ) : <div><p>No adset history to show</p></div>}
-        </div>
+            </Col>
+        </Row>
     )
 }

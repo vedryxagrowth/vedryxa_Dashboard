@@ -10,7 +10,7 @@ import axios from 'axios';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
 // import { Select } from 'antd';
-import { Carousel, Input, Button, Pagination, Row, Col, Typography, Result, Modal, message, ConfigProvider, theme } from 'antd';
+import { Carousel, Input, Button, Pagination, Row, Col, Typography, Result, Modal, message, ConfigProvider, theme, Switch, Divider, Flex, Spin } from 'antd';
 
 // import 'antd/dist/reset.css';
 import { CommentOutlined, CustomerServiceOutlined, MenuOutlined, InfoCircleOutlined, DownloadOutlined, SearchOutlined, ArrowLeftOutlined, ArrowRightOutlined, SmileOutlined, ReloadOutlined, CopyOutlined, StarOutlined, StarFilled, EditOutlined, CheckCircleFilled, CloseCircleFilled, MessageOutlined, SubnodeOutlined } from '@ant-design/icons';
@@ -104,9 +104,14 @@ const MyTablePage = () => {
 
     const { theme } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
-    if (userdetails === null) {
-        redirect("/Dashboard");
-        // console.log("hi");
+    if (!userdetails?.adAccounts) {
+        return <div style={{ width: '100%', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <Flex align="center" gap="middle">
+                {/* <Spin size="small" />
+                <Spin /> */}
+                <Spin size="large" />
+            </Flex>
+        </div>;
     }
     console.log(userdetails, "userDetails");
     const [darkMode, setDarkMode] = useState(false);
@@ -128,6 +133,7 @@ const MyTablePage = () => {
 
     // Define your rowData and columnDefs
     const columnStructure = [
+        "actions",
         "date",
         "spend",
         "revenue",
@@ -182,6 +188,7 @@ const MyTablePage = () => {
     const [isSearching, setIsSearching] = useState(false);
     const [inputValue, setInputValue] = useState('');
     const [isSecondRowVisible, setIsSecondRowVisible] = useState(false);
+    const [refrst, setRefrst] = useState(false);
 
     // Toggle function
 
@@ -236,6 +243,9 @@ const MyTablePage = () => {
 
     const [newaccount, setNewAccount] = useState(typeof accountsForAccess[0] === 'string' ? accountsForAccess[0] : accountsForAccess[0].accountNumber);
 
+    const [accountName, setAccountName] = useState(typeof accountsForAccess[0] === 'string' ? accountsForAccess[0] : accountsForAccess[0].accountName);
+
+    const [newAccountName, setnewAccountName] = useState(typeof accountsForAccess[0] === 'string' ? accountsForAccess[0] : accountsForAccess[0].accountName);
     const [newtime, setNewTime] = useState('UTC');
 
     const [pageSize, setPageSize] = useState(1);
@@ -247,6 +257,14 @@ const MyTablePage = () => {
     const cronStatus = useRef();
 
     const accountStatus = useRef();
+
+
+    /* cronstatus*/
+    let fbCron = useRef();
+
+    let revenueCron = useRef();
+
+
 
     const carouselRef = useRef();
 
@@ -289,6 +307,10 @@ const MyTablePage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const showModal = () => {
         setIsModalOpen(true);
+    };
+
+    const changeRRefrst = () => {
+        setRefrst((prev) => !prev);
     };
 
 
@@ -929,6 +951,18 @@ const MyTablePage = () => {
     //     return `$${value}`; // Format the value as currency
     // }
 
+    const onChangeSpendAndStatus = () => {
+        console.log("hi hello one");
+    };
+
+    const isYesterday = () => {
+        const startDate1 = moment(startDate); // Convert to moment object
+        const endDate1 = moment(endDate);     // Convert to moment object
+
+        // Define "yesterday" as a reference
+        const yesterday1 = moment().subtract(1, 'days');
+        return startDate1.isSame(yesterday1, 'day') && endDate1.isSame(yesterday1, 'day');
+    };
 
     const columnDefsObject = {
         campaignname: {
@@ -952,6 +986,153 @@ const MyTablePage = () => {
             //     tooltip: 'This is a campaign name tooltip.',
             // },
             // getMainMenuItems
+        },
+        actions: {
+            headerName: 'Actions',
+            field: 'actions',
+            minWidth: 90,
+            // sortable: true,
+            // filter: true,
+            sortable: false,    // Ensure sorting is disabled
+            filter: false,      // Ensure filtering is disabled
+            enableSorting: false,  // Disable sorting at the column level
+            enableFilter: false, 
+            suppressMenu: true,    // Suppress the column menu
+            menuTabs: [], 
+            hide: !isYesterday(),
+            cellRenderer: (params) => {
+                const [isModalVisible, setIsModalVisible] = useState(false);
+                const [groupedData, setGroupedData] = useState([]);
+                const [newgroupedData, setNewGroupedData] = useState([]);
+                const [changeBudget, onChangeBudget] = useState();
+                const [campaignStatus, setCampaignStatus] = useState(true);
+            
+                const onChangeSpendAndStatus = async() => {
+                    // Check if it's a group footer row (for groupIncludeFooter)
+                    if (params?.node?.footer) {
+                        console.log("This is a groupIncludeFooter row. Modal will not open.");
+                        return; // Prevent modal from opening for group footer rows
+                    }
+            
+                    // Ensure allLeafChildren exists and is an array before proceeding
+                    const allLeafChildren = params.node?.allLeafChildren || [];
+            
+                    // Fetch all the rows under the current group
+                    const groupedData = allLeafChildren.map(node => node.data) || [];
+                    setNewGroupedData(groupedData);
+                    
+                    // Only show the modal if there is data (groupedData length is greater than 0)
+                    if (groupedData.length > 0) {
+                        const getCampaignResponse = await axios.get(`https://prodapis.adsgoat.in/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`, {
+                            headers: {
+                              Authorization: token,
+                            },
+                          });
+                        if(getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0){
+                            setGroupedData(getCampaignResponse.data);
+                            setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
+                            onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget/100)
+                        }
+                        else{
+                            setGroupedData(groupedData);
+                        }
+                         // Set the grouped data for the modal
+                        setIsModalVisible(true); // Show the modal for non-footer rows
+                    }
+                };
+            
+                const handleOk = async() => {
+                    setIsModalVisible(false); // Close the modal
+                    const object = {
+                        campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname: groupedData[0]?.campaignname,
+                        adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
+                        campaignid:!Array.isArray(groupedData) ? groupedData?.campaignid :  groupedData[0]?.campaignid,
+                        usercommit:userdetails?.email,
+                        accountNumber: newaccount,
+                        budget: changeBudget * 100,
+                        status: campaignStatus
+                    }; 
+                    console.log(object);
+                    const requestResponse = await axios.post('https://prodapis.adsgoat.in/Comments/accountNumber/campaign', {formattedData: object},{
+                        headers: {
+                          Authorization: token,
+                        },
+                      });
+                    const responseData = requestResponse.data;
+                    console.log(responseData, "response");
+                    message.success("Budget and Status Updated");
+                    changeRRefrst();
+                };
+            
+                const handleCancel = () => {
+                    setIsModalVisible(false);
+                    // console.log(changeBudget); // Close the modal
+                };
+            
+                const getTotalSpend = (data) => {
+                    if (!data || data.length === 0) return 0;
+                    const total = data.reduce((total, item) => {
+                        return total + (item?.spend || 0);
+                    }, 0);
+                    return Math.round(total * 100) / 100; // Round to 2 decimal places
+                };
+
+                const onChangeBudgetValue = event => {
+                    onChangeBudget(event.target.value)
+                }
+
+                const onChangeCampaignStatus = () => {
+                    setCampaignStatus((prev) => !prev);
+                }
+
+                console.log(groupedData);
+            
+                return (
+                    <div>
+                        {/* Click action for status cell */}
+                        <div onClick={onChangeSpendAndStatus}>
+                            <span>{params.value || "..."}</span> {/* Fallback to '...' if status is not available */}
+                        </div>
+                        {/* Modal should only be shown for non-footer rows and when groupedData length is greater than 0 */}
+                        {isModalVisible && (
+                            <Modal
+                                title={groupedData?.length > 0 && groupedData?.length !== 1 ? groupedData[0]?.campaignname : groupedData?.campaignname}
+                                visible={isModalVisible}
+                                onOk={handleOk}
+                                onCancel={handleCancel}
+                                width={600}  // Set a custom width for the modal
+                                style={{ padding: '20px' }}  // Adjust body padding
+                            >
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                    {/* Campaign Name and Switch */}
+                                    {/* <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <Typography.Text strong>Campaign Name:</Typography.Text>
+                                        <Typography.Text strong style={{ paddingLeft: '5px' }}>
+                                            {`${groupedData[0]?.campaignname || "N/A"}`}
+                                        </Typography.Text>
+                                    </div> */}
+                                    <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                                        <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
+                                        <Switch checked={campaignStatus} onChange={onChangeCampaignStatus}/>
+                                    </div>
+            
+                                    {/* Input Field */}
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <Typography.Text strong style={{ marginBottom: '10px' }}>Budget:</Typography.Text>
+                                        <Input placeholder="Enter your value here" defaultValue={groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget)/100 : getTotalSpend(newgroupedData)} onChange={onChangeBudgetValue}/>
+                                    </div>
+            
+                                    {/* Campaign ID */}
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <Typography.Text strong>Campaign ID:</Typography.Text>
+                                        <p>{groupedData?.length > 0 && groupedData?.length !== 1? groupedData[0]?.campaignid : groupedData.campaignid}</p>
+                                    </div>
+                                </div>
+                            </Modal>
+                        )}
+                    </div>
+                );
+            },
         },
         adsetname: {
             headerName: 'AdsetName',
@@ -1331,6 +1512,155 @@ const MyTablePage = () => {
             },
             cellRenderer: campaignNameRenderer,
         },
+        actions: {
+            headerName: 'Actions',
+            field: 'actions',
+            minWidth: 90,
+            sortable: false,    // Ensure sorting is disabled
+            filter: false,      // Ensure filtering is disabled
+            enableSorting: false,  // Disable sorting at the column level
+            enableFilter: false,
+            hide: false,
+            suppressMenu: true,
+            hide: !isYesterday(),
+            cellRenderer: (params) => {
+                const [isModalVisible, setIsModalVisible] = useState(false);
+                const [newgroupedData, setNewGroupedData] = useState([]);
+                const [groupedData, setGroupedData] = useState([]);
+                const [changeBudget, onChangeBudget] = useState();
+                const [campaignStatus, setCampaignStatus] = useState(true);
+            
+                const onChangeSpendAndStatus = async() => {
+                    // Check if it's a group footer row (for groupIncludeFooter)
+                    if (params?.node?.footer) {
+                        console.log("This is a groupIncludeFooter row. Modal will not open.");
+                        return; // Prevent modal from opening for group footer rows
+                    }
+            
+                    // Ensure allLeafChildren exists and is an array before proceeding
+                    const allLeafChildren = params.node?.allLeafChildren || [];
+                    setNewGroupedData(groupedData);
+            
+                    // Fetch all the rows under the current group
+                    const groupedData = allLeafChildren.map(node => node.data) || [];
+                    
+                    // Only show the modal if there is data (groupedData length is greater than 0)
+                    if (groupedData.length > 0) {
+                        const getCampaignResponse = await axios.get(`https://prodapis.adsgoat.in/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`, {
+                            headers: {
+                              Authorization: token,
+                            },
+                          });
+                        if(getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0){
+                            setGroupedData(getCampaignResponse.data);
+                            setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
+                            onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget/100)
+                        }
+                        else{
+                            setGroupedData(groupedData);
+                            console.log("dailyadd");
+                        }
+                         // Set the grouped data for the modal
+                        setIsModalVisible(true); // Show the modal for non-footer rows
+                    }
+                };
+            
+                const handleOk = async() => {
+                    setIsModalVisible(false); // Close the modal
+                    const object = {
+                        campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname: groupedData[0]?.campaignname,
+                        adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
+                        campaignid:!Array.isArray(groupedData) ? groupedData?.campaignid :  groupedData[0]?.campaignid,
+                        usercommit:userdetails?.email,
+                        accountNumber: newaccount,
+                        budget: changeBudget * 100,
+                        status: campaignStatus
+                    }; 
+                    console.log(object);
+                    const requestResponse = await axios.post('https://prodapis.adsgoat.in/Comments/accountNumber/campaign', {formattedData: object},{
+                        headers: {
+                          Authorization: token,
+                        },
+                      });
+                    const responseData = requestResponse.data;
+                    console.log(responseData, "response");
+                    message.success("Budget and Status Updated");
+                    changeRRefrst();
+                };
+            
+                const handleCancel = () => {
+                    setIsModalVisible(false);
+                    // console.log(changeBudget); // Close the modal
+                };
+            
+                const getTotalSpend = (data) => {
+                    if (!data || data.length === 0) return 0;
+                    const total = data.reduce((total, item) => {
+                        return total + (item?.spend || 0);
+                    }, 0);
+                    return Math.round(total * 100) / 100; // Round to 2 decimal places
+                };
+
+                const onChangeBudgetValue = event => {
+                    onChangeBudget(event.target.value)
+                }
+
+                const onChangeCampaignStatus = () => {
+                    setCampaignStatus((prev) => !prev);
+                }
+
+
+                console.log(groupedData);
+            
+                return (
+                    <div>
+                        {/* Click action for status cell */}
+                        <div onClick={onChangeSpendAndStatus}>
+                            <span>{params.value || "..."}</span> {/* Fallback to '...' if status is not available */}
+                        </div>
+                        {/* Modal should only be shown for non-footer rows and when groupedData length is greater than 0 */}
+                        {isModalVisible && (
+                            <Modal
+                                title={groupedData?.length > 0 && groupedData?.length !== 0 ? groupedData[0]?.campaignname : groupedData?.campaignname}
+                                visible={isModalVisible}
+                                onOk={handleOk}
+                                onCancel={handleCancel}
+                                width={600}  // Set a custom width for the modal
+                                style={{ padding: '20px' }}  // Adjust body padding
+                            >
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                    {/* Campaign Name and Switch */}
+                                    {/* <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <Typography.Text strong>Campaign Name:</Typography.Text>
+                                        <Typography.Text strong style={{ paddingLeft: '5px' }}>
+                                            {`${groupedData[0]?.campaignname || "N/A"}`}
+                                        </Typography.Text>
+                                    </div> */}
+                                    <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                                        <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
+                                        <Switch checked={campaignStatus} onChange={onChangeCampaignStatus}/>
+                                    </div>
+            
+                                    {/* Input Field */}
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <Typography.Text strong style={{ marginBottom: '10px' }}>Budget:</Typography.Text>
+                                        <Input placeholder="Enter your value here" defaultValue={groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget)/100 : getTotalSpend(newgroupedData)} onChange={onChangeBudgetValue}/>
+                                    </div>
+            
+                                    {/* Campaign ID */}
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <Typography.Text strong>Campaign ID:</Typography.Text>
+                                        <p>{groupedData?.length > 0 && groupedData?.length !== 0? groupedData[0]?.campaignid : groupedData.campaignid}</p>
+                                    </div>
+                                </div>
+                            </Modal>
+                        )}
+                    </div>
+                );
+            },
+            filterParams: { filterEnabled: false }, 
+                
+        },
 
         adsetname: {
             headerName: 'AdsetName', field: 'adsetname',
@@ -1496,6 +1826,153 @@ const MyTablePage = () => {
             //     return params.data?.campaignName; // Display regular campaign name for normal rows
             // }
         },
+        actions: {
+            headerName: 'Actions',
+            field: 'actions',
+            minWidth: 90,
+            sortable: false,    // Ensure sorting is disabled
+            filter: false,      // Ensure filtering is disabled
+            enableSorting: false,  // Disable sorting at the column level
+            enableFilter: false,
+            hide: false,
+            suppressMenu: true,
+            hide: !isYesterday(),
+            cellRenderer: (params) => {
+                const [isModalVisible, setIsModalVisible] = useState(false);
+                const [newgroupedData, setNewGroupedData] = useState([]);
+                const [groupedData, setGroupedData] = useState([]);
+                const [changeBudget, onChangeBudget] = useState();
+                const [campaignStatus, setCampaignStatus] = useState(true);
+            
+                const onChangeSpendAndStatus = async() => {
+                    // Check if it's a group footer row (for groupIncludeFooter)
+                    if (params?.node?.footer) {
+                        console.log("This is a groupIncludeFooter row. Modal will not open.");
+                        return; // Prevent modal from opening for group footer rows
+                    }
+            
+                    // Ensure allLeafChildren exists and is an array before proceeding
+                    const allLeafChildren = params.node?.allLeafChildren || [];
+            
+                    // Fetch all the rows under the current group
+                    const groupedData = allLeafChildren.map(node => node.data) || [];
+                    setNewGroupedData(groupedData);
+                    
+                    // Only show the modal if there is data (groupedData length is greater than 0)
+                    if (groupedData.length > 0) {
+                        const getCampaignResponse = await axios.get(`https://prodapis.adsgoat.in/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`, {
+                            headers: {
+                              Authorization: token,
+                            },
+                          });
+                        if(getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0){
+                            setGroupedData(getCampaignResponse.data);
+                            setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
+                            onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget/100)
+                        }
+                        else{
+                            setGroupedData(groupedData);
+                        }
+                         // Set the grouped data for the modal
+                        setIsModalVisible(true); // Show the modal for non-footer rows
+                    }
+                };
+            
+                const handleOk = async() => {
+                    setIsModalVisible(false); // Close the modal
+                    const object = {
+                        campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname: groupedData[0]?.campaignname,
+                        adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
+                        campaignid:!Array.isArray(groupedData) ? groupedData?.campaignid :  groupedData[0]?.campaignid,
+                        usercommit:userdetails?.email,
+                        accountNumber: newaccount,
+                        budget: changeBudget * 100,
+                        status: campaignStatus
+                    }; 
+                    console.log(object);
+                    const requestResponse = await axios.post('https://prodapis.adsgoat.in/Comments/accountNumber/campaign', {formattedData: object},{
+                        headers: {
+                          Authorization: token,
+                        },
+                      });
+                    const responseData = requestResponse.data;
+                    console.log(responseData, "response");
+                    message.success("Budget and Status Updated");
+                    changeRRefrst();
+                };
+            
+                const handleCancel = () => {
+                    setIsModalVisible(false);
+                    // console.log(changeBudget); // Close the modal
+                };
+            
+                const getTotalSpend = (data) => {
+                    if (!data || data.length === 0) return 0;
+                    const total = data.reduce((total, item) => {
+                        return total + (item?.spend || 0);
+                    }, 0);
+                    return Math.round(total * 100) / 100; // Round to 2 decimal places
+                };
+
+                const onChangeBudgetValue = event => {
+                    onChangeBudget(event.target.value)
+                }
+
+                const onChangeCampaignStatus = () => {
+                    setCampaignStatus((prev) => !prev);
+                }
+
+                console.log(groupedData);
+            
+                return (
+                    <div>
+                        {/* Click action for status cell */}
+                        <div onClick={onChangeSpendAndStatus}>
+                            <span>{params.value || "..."}</span> {/* Fallback to '...' if status is not available */}
+                        </div>
+                        {/* Modal should only be shown for non-footer rows and when groupedData length is greater than 0 */}
+                        {isModalVisible && (
+                            <Modal
+                                title={groupedData?.length > 0 && groupedData?.length !== 0 ? groupedData[0]?.campaignname : groupedData?.campaignname}
+                                visible={isModalVisible}
+                                onOk={handleOk}
+                                onCancel={handleCancel}
+                                width={600}  // Set a custom width for the modal
+                                style={{ padding: '20px' }}  // Adjust body padding
+                            >
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                    {/* Campaign Name and Switch */}
+                                    {/* <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <Typography.Text strong>Campaign Name:</Typography.Text>
+                                        <Typography.Text strong style={{ paddingLeft: '5px' }}>
+                                            {`${groupedData[0]?.campaignname || "N/A"}`}
+                                        </Typography.Text>
+                                    </div> */}
+                                    <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                                        <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
+                                        <Switch checked={campaignStatus} onChange={onChangeCampaignStatus}/>
+                                    </div>
+            
+                                    {/* Input Field */}
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <Typography.Text strong style={{ marginBottom: '10px' }}>Budget:</Typography.Text>
+                                        <Input placeholder="Enter your value here" defaultValue={groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget)/100 : getTotalSpend(newgroupedData)} onChange={onChangeBudgetValue}/>
+                                    </div>
+            
+                                    {/* Campaign ID */}
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <Typography.Text strong>Campaign ID:</Typography.Text>
+                                        <p>{groupedData?.length > 0 && groupedData?.length !== 0? groupedData[0]?.campaignid : groupedData.campaignid}</p>
+                                    </div>
+                                </div>
+                            </Modal>
+                        )}
+                    </div>
+                );
+            },
+            filterParams: { filterEnabled: false }, 
+                
+        },
         adsetname: {
             headerName: 'AdsetName', field: 'adsetname',
             // resizeble: true,
@@ -1513,7 +1990,6 @@ const MyTablePage = () => {
             // enableRowGroup: true,
             // autoHeight: true,
             // cellRendererFramework: AdsetNameRenderer,
-
         },
         date: {
             headerName: 'Date', field: 'date', sort: 'asc', sortable: true,
@@ -1777,19 +2253,48 @@ const MyTablePage = () => {
                         adsetid: eachData.adset_id,
                         campaignid: eachData.campaign_id,
                         timezone: eachData[time],
-                        comment: relatedComment ? relatedComment.comment : null
+                        comment: relatedComment ? relatedComment.comment : null,
+                        actions: '...'
                     }
                 )
             })
             : null;
         // setValue(mainData);
+        // console.log(mainData[0])
+
+        const getFbValue = mainData.filter(item => item.fbCron !== null && item.fbCron !== 'Failed');
+        const getRevenueValue = mainData.filter(item => item.revenueCron !== null && item.revenueCron !== 'Failed');
+
         if (mainData.length > 1) {
             timezone.current = mainData[0].accountTimezone;
             accountStatus.current = mainData[0].accountStatus;
             cronStatus.current = mainData[0].cronStatus;
+
+            // fbCron.current = getFbValue[0].fbCron;
+            // revenueCron.current = getRevenueValue[0]?.revenueCron;
+
+            fbCron.current = getFbValue[0]?.fbCron ? getFbValue[0].fbCron : 'Failed';
+            revenueCron.current = getRevenueValue[0]?.revenueCron ? getRevenueValue[0].revenueCron : 'Failed';
+
             maxHour.current = findMaxHour(mainData);
             maxNetworkHour.current = getMaxHour(mainData);
         }
+
+
+        // const getValidValue = mainData.filter(item => item.fbCron !== null && item.revenueCron !== null)
+
+        // // console.log(getValidValue[0])
+          
+
+        // if (mainData.length > 1) {
+        //     timezone.current = mainData[0].accountTimezone;
+        //     accountStatus.current = mainData[0].accountStatus;
+        //     cronStatus.current = mainData[0].cronStatus;
+        //     fbCron.current = getValidValue[0].fbCron;
+        //     revenueCron.current = getValidValue[0].revenueCron;
+        //     maxHour.current = findMaxHour(mainData);
+        //     maxNetworkHour.current = getMaxHour(mainData);
+        // }
         setRowData(filteredData);
         newRowData.current = filteredData;
         setInitialRowData(filteredData);
@@ -1980,6 +2485,7 @@ const MyTablePage = () => {
                             campaignid: eachData.campaign_id,
                             adsetid: eachData.adset_id,
                             timezone: 'UTC',
+                            actions: '...'
                             // compaignid: eachData.campaign_id,
                         }
                     )
@@ -2059,6 +2565,7 @@ const MyTablePage = () => {
                         impressions: eachData.impressions,
                         campaignid: eachData.campaign_id,
                         adsetid: eachData.adset_id,
+                        actions: '...'
                     }
                 )
             })
@@ -2199,6 +2706,7 @@ const MyTablePage = () => {
         setLoading1(true);
         setLoading2(true);
         setNewAccount(account);
+        setnewAccountName(accountName)
         setNewTime(time);
         setNewRevenuePartner(revenuePratner);
         // setMainComponent(true);
@@ -2336,7 +2844,6 @@ const MyTablePage = () => {
     // };
 
     const [campaignComments, setCampaignComments] = useState([]);
-    const [refrst, setRefrst] = useState(false);
     const fetchCampaignComments = async () => {
         try {
 
@@ -2358,299 +2865,89 @@ const MyTablePage = () => {
     //     fetchCampaignComments(); // Fetch comments on initial load
     // }, []); // Run this effect on component mount
 
-    const changeRRefrst = () => {
-        setRefrst((prev) => !prev);
-    };
+    
 
     const autoGroupColumnDefLive = {
         headerName: 'CampaignName',
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting
-
-        comparator: (campaignA, campaignB) => {
-            // Handle cases where campaignA or campaignB might be undefined or null
-            if (!campaignA) return 1; // If campaignA is undefined or null, move it down
-            if (!campaignB) return -1; // If campaignB is undefined or null, move it down
-
-            // Find the campaigns' star status in the comments
-            const getStarredForCampaign = (campaignName) => {
-                const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
-                return relatedComment ? relatedComment.starred : false;
-            };
-
-            // Get the star status for both campaigns
-            const isStarredA = getStarredForCampaign(campaignA);
-            const isStarredB = getStarredForCampaign(campaignB);
-
-            // Sort based on starred status (true comes before false)
-            if (isStarredA === isStarredB) {
-                return campaignA.localeCompare(campaignB); // If both are the same, sort alphabetically
-            }
-            return isStarredA ? -1 : 1; // Sort starred campaigns (true) first
-        },
-
-        cellRendererParams: {
-            suppressCount: false, // Allow count to be shown
-            innerRenderer: (params) => {
-                if (params.node.footer) {
-                    return 'Total'; // Custom footer label
-                }
-                // const count = params.node.allChildrenCount; // Get the count of children
-                const firstColumnValue = params.node.key;  // This should give you the campaign name
-                const campaignName = params.node.key;  // Assuming grouping by campaign name
-                const getCommentForCampaign = (campaignName) => {
-                    const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
-                    return relatedComment ? relatedComment.comment : null; // Return 'No comment' if none found
-                };
-                const getStarredForCampaign = (campaignName) => {
-                    const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
-                    return relatedComment ? relatedComment.starred : false;
-                };
-
-                const relatedComment = getCommentForCampaign(campaignName);
-                const isStarred = getStarredForCampaign(campaignName);
-                console.log(relatedComment, "relatedComment for campaign:", campaignName);
-                const valueWithCount = `${firstColumnValue}`;
-
-                const [tooltipText, setTooltipText] = useState("Click to Copy");
-                const [isModalVisibles, setIsModalVisibles] = useState(false); // Modal visibility state
-                const [comment, setComment] = useState(relatedComment || ''); // Store user's comment
-                const [starred, setStarred] = useState(isStarred);
-
-                const copyToClipboard = () => {
-                    navigator.clipboard.writeText(firstColumnValue)
-                        .then(() => {
-                            setTooltipText("Copied!");
-                            setTimeout(() => setTooltipText("Click to Copy"), 2000);
-                        })
-                        .catch(() => {
-                            console.error('Failed to copy to clipboard');
-                        });
-                };
-
-
-                // Handle Edit icon click
-                const handleEditClick = () => {
-                    setIsModalVisibles(true); // Open the modal
-                };
-
-                const sendNewCommentToAPI = async (logData) => {
-                    try {
-                        const response = await axios.post('https://prodapis.adsgoat.in/Comments', {
-                            commentsdatas: logData,
-                        }, {
-                            headers: {
-                                Authorization: token, // Pass token in Authorization header
-                            }
-
-                        });
-
-                        console.log('Response from server:', response.data);
-                    } catch (error) {
-                        console.error('Error sending data to server:', error);
-                    }
-                };
-                const sendEditedCommentToAPI = async (logData) => {
-                    try {
-                        const response = await axios.post('https://prodapis.adsgoat.in/Comments/edit', {
-                            campaignname: logData.campaignname,
-                            comment: logData.comment,
-                        }, {
-                            headers: {
-                                Authorization: token, // Send token in Authorization header
-                            }
-                        });
-                        console.log('Response from server (edited comment):', response.data);
-                        return response.data;
-                    } catch (error) {
-                        console.error('Error sending edited comment to server:', error);
-                        throw error;
-                    }
-                };
-                const sendStarStatusToAPI = async (campaignname, isStarred) => {
-                    try {
-                        const endpoint = isStarred ? 'https://prodapis.adsgoat.in/Star' : 'https://prodapis.adsgoat.in/Unstar';
-                        const response = await axios.post(endpoint, {
-                            campaignname: campaignname,
-                            Account: account,
-                            usercommit: userdetails?.email,
-                        }, {
-                            headers: {
-                                Authorization: token,
-                            }
-                        });
-                        console.log('Response from server (starred status):', response.data);
-                    } catch (error) {
-                        console.error('Error updating star status:', error);
-                    }
-                };
-
-                const handleStarClick = async () => {
-                    const updatedStarred = !starred;
-                    setStarred(updatedStarred);
-                    await sendStarStatusToAPI(firstColumnValue, updatedStarred);
-                    message.success(updatedStarred ? "Campaign starred!" : "Campaign unstarred!");
-
-                    // Update the state locally
-                    const updatedComments = campaignComments.map(cmt =>
-                        cmt.campaignname === firstColumnValue ? { ...cmt, starred: updatedStarred } : cmt
-                    );
-                    setCampaignComments(updatedComments);
-                    changeRRefrst();
-                };
-                const handleOks = async () => {
-                    try {
-                        // Construct the object based on the requested format
-                        const logData = {
-                            Account: account,
-                            usercommit: userdetails?.email,
-                            campaignname: firstColumnValue,
-                            comment: comment
-                        };
-
-                        // Determine whether this is a new comment or an edit based on the existence of `relatedComment`
-                        if (relatedComment) {
-                            // If comment exists, update the comment (Edit mode)
-                            await sendEditedCommentToAPI(logData);
-                            message.success("Comment updated successfully!");
-                        } else {
-                            // If comment does not exist, add a new comment
-                            await sendNewCommentToAPI(logData);
-                            message.success("New comment added successfully!");
-                        }
-
-                        // Update the local comments state with the new or updated comment
-                        const updatedComments = relatedComment
-                            ? campaignComments.map(cmt => (cmt.campaignname === firstColumnValue ? { ...cmt, comment } : cmt))
-                            : [...campaignComments, logData]; // If no comment existed, add new comment
-                        setCampaignComments(updatedComments);
-
-                        // Trigger a refresh or re-render using the provided function
-                        changeRRefrst();
-
-                        // Log the structured data for debugging purposes
-                        console.log('Logged Data:', logData);
-
-                        // Close the modal after successful submission
-                        setIsModalVisibles(false);
-                    } catch (error) {
-                        console.error('Error while submitting comment:', error);
-                        message.error("Error while submitting the comment.");
-                    }
-                };
-
-
-                const handleCancels = () => {
-                    setIsModalVisibles(false); // Close the modal without logging anything
-                };
-
-                return (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                        {relatedComment && (
-                            starred ? (
-                                <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: "gold" }} />
-                            ) : (
-                                <StarOutlined className='startview'  onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px' }} />
-                            )
-                        )}                      {relatedComment ? (
-                            <Tooltip title={(
-                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                    <span>{relatedComment || 'No comment available'}</span>
-                                    <EditOutlined onClick={handleEditClick} style={{ marginLeft: '10px', color: 'blue', cursor: 'pointer' }} />
-                                </div>
-                            )}>
-                                <MessageOutlined className='Message' style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
-                                <Tooltip title={tooltipText}></Tooltip>
-                            </Tooltip>
-                        ) : (
-                            <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
-                        )}                        <Tooltip title={tooltipText}>
-                            <CopyOutlined 
-                                onClick={copyToClipboard}
-                                style={{ cursor: 'pointer', marginLeft: '8px',  color:"#1e1e1f", marginRight: '10px' }}
-                            />
-                        </Tooltip>
-                        <span
-                            onClick={() => {
-                                // console.log(`Grouped Make clicked: ${params.value}`);
-                                const url = `/LiveHistory/LiveCampaignHistory/${params.value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
-                                window.open(url, '_blank');
-                            }}
-                        >
-                            {valueWithCount}
-                        </span>
-                        <Modal
-                            title={firstColumnValue}
-                            visible={isModalVisibles}
-                            onOk={handleOks} // Call handleOk when OK is clicked
-                            onCancel={handleCancels} // Call handleCancel when Cancel is clicked
-                        >
-                            <Input.TextArea
-                                placeholder="Enter your comments here"
-                                value={comment}
-                                onChange={(e) => setComment(e.target.value)} // Update the comment state when typing
-                            />
-                        </Modal>
-                    </div>
-
-                );
-            }
-        }
-    };
-
-    const autoGroupColumnDef = {
-        headerName: 'CampaignName',
-        minWidth: 450,
-        pinned: 'left',
-        sortable: true, // Enable sorting
-
+    
         comparator: (campaignA, campaignB) => {
             if (!campaignA) return 1;
             if (!campaignB) return -1;
-
+    
             const getStarredForCampaign = (campaignName) => {
                 const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                 return relatedComment ? relatedComment.starred : false;
             };
-
+    
             const isStarredA = getStarredForCampaign(campaignA);
             const isStarredB = getStarredForCampaign(campaignB);
-
+    
             if (isStarredA === isStarredB) {
                 return campaignA.localeCompare(campaignB);
             }
             return isStarredA ? -1 : 1;
         },
-
+    
         cellRendererParams: {
             suppressCount: false,
             innerRenderer: (params) => {
                 if (params.node.footer) {
                     return 'Total';
                 }
-
-                const firstColumnValue = params.node.key;
+    
+                const firstColumnValue = params.node.key;  // campaign name
                 const campaignName = params.node.key;
-
+    
+                // Check if this is a grouped row and has children
+                let campaignid, adsetid;
+    
+                if (params.node.group && params.node.childrenAfterGroup && params.node.childrenAfterGroup.length > 0) {
+                    // Get the first child row data to extract campaignid and adsetid
+                    const firstChild = params.node.childrenAfterGroup[0].data;
+                    campaignid = firstChild.campaignid;
+                    adsetid = firstChild.adsetid;
+                } else if (params.data) {
+                    // Fallback to individual row data if not grouped
+                    campaignid = params.data.campaignid;
+                    adsetid = params.data.adsetid;
+                } else {
+                    console.error('Missing campaignid or adsetid for campaign:', campaignName);
+                    return (
+                        <div style={{ color: 'red' }}>
+                            Error: campaignid or adsetid missing for {campaignName}
+                        </div>
+                    );
+                }
+                const getStatusForCampaign = (campaignName, newaccount) =>{
+                    const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
+                    console.log(relatedStatus, "relatedStatus");
+                    const relatedStatusTrue = relatedStatus !== undefined && relatedStatus.status === true ? true : relatedStatus !== undefined ? false : null;
+                    // console.log(relatedStatusTrue);
+                    return relatedStatusTrue;
+                }
+    
                 const getCommentForCampaign = (campaignName) => {
                     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                     return relatedComment ? relatedComment.comment : null;
                 };
-
+    
                 const getStarredForCampaign = (campaignName) => {
                     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                     return relatedComment ? relatedComment.starred : false;
                 };
-
+                const relatedStatus = getStatusForCampaign(campaignName, newaccount);
                 const relatedComment = getCommentForCampaign(campaignName);
                 const isStarred = getStarredForCampaign(campaignName);
-
+                const valueWithCount = `${firstColumnValue}`;
+    
                 const [tooltipText, setTooltipText] = useState("Click to Copy");
-                const [isModalVisible, setIsModalVisible] = useState(false);
+                const [isModalVisibles, setIsModalVisibles] = useState(false);
                 const [comment, setComment] = useState(relatedComment || '');
                 const [starred, setStarred] = useState(isStarred);
-
+    
                 const copyToClipboard = () => {
                     navigator.clipboard.writeText(firstColumnValue)
                         .then(() => {
@@ -2661,11 +2958,11 @@ const MyTablePage = () => {
                             console.error('Failed to copy to clipboard');
                         });
                 };
-
+    
                 const handleEditClick = () => {
-                    setIsModalVisible(true);
+                    setIsModalVisibles(true);
                 };
-
+    
                 const sendNewCommentToAPI = async (logData) => {
                     try {
                         const response = await axios.post('https://prodapis.adsgoat.in/Comments', {
@@ -2675,18 +2972,25 @@ const MyTablePage = () => {
                                 Authorization: token,
                             }
                         });
+    
                         console.log('Response from server:', response.data);
                     } catch (error) {
                         console.error('Error sending data to server:', error);
                     }
+                    console.log(logData);
                 };
-
+    
                 const sendEditedCommentToAPI = async (logData) => {
                     try {
                         const response = await axios.post('https://prodapis.adsgoat.in/Comments/edit', {
                             campaignname: logData.campaignname,
                             comment: logData.comment,
-                        }, {
+                            Account: logData.Account,
+                            adsetid: logData.adsetid,
+                            campaignid: logData.campaignid,
+                            status: true
+
+                        },{
                             headers: {
                                 Authorization: token,
                             }
@@ -2697,15 +3001,20 @@ const MyTablePage = () => {
                         console.error('Error sending edited comment to server:', error);
                         throw error;
                     }
+                    // console.log(logData);
                 };
-
-                const sendStarStatusToAPI = async (campaignName, isStarred) => {
+    
+                const sendStarStatusToAPI = async (campaignname, isStarred) => {
+                    // console.log(campaignid);
+                    // console.log(adsetid);
                     try {
                         const endpoint = isStarred ? 'https://prodapis.adsgoat.in/Star' : 'https://prodapis.adsgoat.in/Unstar';
                         const response = await axios.post(endpoint, {
-                            campaignname: campaignName,
+                            campaignname: campaignname,
                             Account: account,
                             usercommit: userdetails?.email,
+                            campaignid: campaignid, // Pass campaignid from grouped data
+                            adsetid: adsetid // Pass adsetid from grouped data
                         }, {
                             headers: {
                                 Authorization: token,
@@ -2716,51 +3025,63 @@ const MyTablePage = () => {
                         console.error('Error updating star status:', error);
                     }
                 };
-
+    
                 const handleStarClick = async () => {
                     const updatedStarred = !starred;
                     setStarred(updatedStarred);
                     await sendStarStatusToAPI(firstColumnValue, updatedStarred);
-
+                    message.success(updatedStarred ? "Campaign starred!" : "Campaign unstarred!");
+    
                     const updatedComments = campaignComments.map(cmt =>
                         cmt.campaignname === firstColumnValue ? { ...cmt, starred: updatedStarred } : cmt
                     );
                     setCampaignComments(updatedComments);
                     changeRRefrst();
                 };
-
-                const handleOk = async () => {
-                    const logData = {
-                        Account: account,
-                        usercommit: userdetails?.email,
-                        campaignname: firstColumnValue,
-                        comment: comment
-                    };
-
-                    if (relatedComment) {
-                        await sendEditedCommentToAPI(logData);
-                    } else {
-                        await sendNewCommentToAPI(logData);
+    
+                const handleOks = async () => {
+                    try {
+                        const logData = {
+                            Account: newaccount,
+                            usercommit: userdetails?.email,
+                            campaignname: firstColumnValue,
+                            comment: comment,
+                            campaignid: campaignid, // Pass campaignid
+                            adsetid: adsetid // Pass adsetid
+                        };
+    
+                        if (relatedComment) {
+                            await sendEditedCommentToAPI(logData);
+                            message.success("Comment updated successfully!");
+                        } else {
+                            await sendNewCommentToAPI(logData);
+                            message.success("New comment added successfully!");
+                        }
+    
+                        const updatedComments = relatedComment
+                            ? campaignComments.map(cmt => (cmt.campaignname === firstColumnValue ? { ...cmt, comment } : cmt))
+                            : [...campaignComments, logData];
+                        setCampaignComments(updatedComments);
+    
+                        changeRRefrst();
+                        setIsModalVisibles(false);
+                    } catch (error) {
+                        console.error('Error while submitting comment:', error);
+                        message.error("Error while submitting the comment.");
                     }
-
-                    const updatedComments = relatedComment
-                        ? campaignComments.map(cmt => (cmt.campaignname === firstColumnValue ? { ...cmt, comment } : cmt))
-                        : [...campaignComments, logData];
-                    setCampaignComments(updatedComments);
-
-                    changeRRefrst();
-                    setIsModalVisible(false);
                 };
-
-                const handleCancel = () => {
-                    setIsModalVisible(false);
+    
+                const handleCancels = () => {
+                    setIsModalVisibles(false);
                 };
-
+    
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                        {relatedStatus === true && <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }}/>}
+                        {relatedStatus === false && <CloseCircleFilled style={{ color: 'red', fontSize: '15px' , marginRight: relatedComment ? "10px" : '0px' }}/>}
                         {relatedComment && (
                             starred ? (
-                                <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: 'gold' }} />
+                                <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: "gold"}} />
                             ) : (
                                 <StarOutlined className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px' }} />
                             )
@@ -2773,29 +3094,30 @@ const MyTablePage = () => {
                                 </div>
                             )}>
                                 <MessageOutlined className='Message' style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
+                                <Tooltip title={tooltipText}></Tooltip>
                             </Tooltip>
                         ) : (
                             <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
                         )}
                         <Tooltip title={tooltipText}>
-                            <CopyOutlined
+                            <CopyOutlined 
                                 onClick={copyToClipboard}
-                                style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight: '10px' }}
+                                style={{ cursor: 'pointer', marginLeft: '8px', color:"#1e1e1f", marginRight: '10px' }}
                             />
                         </Tooltip>
                         <span
                             onClick={() => {
-                                const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                                const url = `/LiveHistory/LiveCampaignHistory/${params.value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                                 window.open(url, '_blank');
                             }}
                         >
-                            {firstColumnValue}
+                            {valueWithCount}
                         </span>
                         <Modal
                             title={firstColumnValue}
-                            visible={isModalVisible}
-                            onOk={handleOk}
-                            onCancel={handleCancel}
+                            visible={isModalVisibles}
+                            onOk={handleOks}
+                            onCancel={handleCancels}
                         >
                             <Input.TextArea
                                 placeholder="Enter your comments here"
@@ -2808,6 +3130,266 @@ const MyTablePage = () => {
             }
         }
     };
+    
+    
+    
+    
+
+    const autoGroupColumnDef = {
+        headerName: 'CampaignName',
+        minWidth: 450,
+        pinned: 'left',
+        sortable: true, // Enable sorting
+    
+        comparator: (campaignA, campaignB) => {
+            if (!campaignA) return 1;
+            if (!campaignB) return -1;
+    
+            const getStarredForCampaign = (campaignName) => {
+                const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+                return relatedComment ? relatedComment.starred : false;
+            };
+    
+            const isStarredA = getStarredForCampaign(campaignA);
+            const isStarredB = getStarredForCampaign(campaignB);
+    
+            if (isStarredA === isStarredB) {
+                return campaignA.localeCompare(campaignB);
+            }
+            return isStarredA ? -1 : 1;
+        },
+    
+        cellRendererParams: {
+            suppressCount: false,
+            innerRenderer: (params) => {
+                if (params.node.footer) {
+                    return 'Total';
+                }
+    
+                const firstColumnValue = params.node.key;  // campaign name
+                const campaignName = params.node.key;
+    
+                let campaignid, adsetid;
+    
+                if (params.node.group && params.node.childrenAfterGroup && params.node.childrenAfterGroup.length > 0) {
+                    const firstChild = params.node.childrenAfterGroup[0].data;
+                    campaignid = firstChild.campaignid;
+                    adsetid = firstChild.adsetid;
+                } else if (params.data) {
+                    campaignid = params.data.campaignid;
+                    adsetid = params.data.adsetid;
+                } else {
+                    console.error('Missing campaignid or adsetid for campaign:', campaignName);
+                    return (
+                        <div style={{ color: 'red' }}>
+                            Error: campaignid or adsetid missing for {campaignName}
+                        </div>
+                    );
+                }
+                const getStatusForCampaign = (campaignName, newaccount) =>{
+                    const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
+                    console.log(relatedStatus, "relatedStatus");
+                    const relatedStatusTrue = relatedStatus !== undefined && relatedStatus.status === true ? true : relatedStatus !== undefined ? false : null;
+                    // console.log(relatedStatusTrue);
+                    return relatedStatusTrue;
+                }
+    
+                const getCommentForCampaign = (campaignName) => {
+                    const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+                    return relatedComment ? relatedComment.comment : null;
+                };
+    
+                const getStarredForCampaign = (campaignName) => {
+                    const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+                    return relatedComment ? relatedComment.starred : false;
+                };
+                const relatedStatus = getStatusForCampaign(campaignName, newaccount);
+                const relatedComment = getCommentForCampaign(campaignName);
+                const isStarred = getStarredForCampaign(campaignName);
+                const valueWithCount = `${firstColumnValue}`;
+    
+                const [tooltipText, setTooltipText] = useState("Click to Copy");
+                const [isModalVisibles, setIsModalVisibles] = useState(false);
+                const [comment, setComment] = useState(relatedComment || '');
+                const [starred, setStarred] = useState(isStarred);
+    
+                const copyToClipboard = () => {
+                    navigator.clipboard.writeText(firstColumnValue)
+                        .then(() => {
+                            setTooltipText("Copied!");
+                            setTimeout(() => setTooltipText("Click to Copy"), 2000);
+                        })
+                        .catch(() => {
+                            console.error('Failed to copy to clipboard');
+                        });
+                };
+    
+                const handleEditClick = () => {
+                    setIsModalVisibles(true);
+                };
+    
+                const sendNewCommentToAPI = async (logData) => {
+                    try {
+                        const response = await axios.post('https://prodapis.adsgoat.in/Comments', {
+                            commentsdatas: logData,
+                        }, {
+                            headers: {
+                                Authorization: token,
+                            }
+                        });
+                        console.log('Response from server:', response.data);
+                    } catch (error) {
+                        console.error('Error sending data to server:', error);
+                    }
+                };
+    
+                const sendEditedCommentToAPI = async (logData) => {
+                    try {
+                        const response = await axios.post('https://prodapis.adsgoat.in/Comments/edit', {
+                            campaignname: logData.campaignname,
+                            comment: logData.comment,
+                            Account: logData.Account,
+                            adsetid: logData.adsetid,
+                            campaignid: logData.campaignid,
+                            status: true
+                        }, {
+                            headers: {
+                                Authorization: token,
+                            }
+                        });
+                        console.log('Response from server (edited comment):', response.data);
+                        return response.data;
+                    } catch (error) {
+                        console.error('Error sending edited comment to server:', error);
+                        throw error;
+                    }
+                };
+    
+                const sendStarStatusToAPI = async (campaignname, isStarred) => {
+                    try {
+                        const endpoint = isStarred ? 'https://prodapis.adsgoat.in/Star' : 'https://prodapis.adsgoat.in/Unstar';
+                        const response = await axios.post(endpoint, {
+                            campaignname: campaignname,
+                            Account: account,
+                            usercommit: userdetails?.email,
+                            campaignid: campaignid,
+                            adsetid: adsetid
+                        }, {
+                            headers: {
+                                Authorization: token,
+                            }
+                        });
+                        console.log('Response from server (starred status):', response.data);
+                    } catch (error) {
+                        console.error('Error updating star status:', error);
+                    }
+                };
+    
+                const handleStarClick = async () => {
+                    const updatedStarred = !starred;
+                    setStarred(updatedStarred);
+                    await sendStarStatusToAPI(firstColumnValue, updatedStarred);
+                    message.success(updatedStarred ? "Campaign starred!" : "Campaign unstarred!");
+    
+                    const updatedComments = campaignComments.map(cmt =>
+                        cmt.campaignname === firstColumnValue ? { ...cmt, starred: updatedStarred } : cmt
+                    );
+                    setCampaignComments(updatedComments);
+                    changeRRefrst();
+                };
+    
+                const handleOks = async () => {
+                    try {
+                        const logData = {
+                            Account: newaccount,
+                            usercommit: userdetails?.email,
+                            campaignname: firstColumnValue,
+                            comment: comment,
+                            campaignid: campaignid,
+                            adsetid: adsetid
+                        };
+    
+                        if (relatedComment) {
+                            await sendEditedCommentToAPI(logData);
+                            message.success("Comment updated successfully!");
+                        } else {
+                            await sendNewCommentToAPI(logData);
+                            message.success("New comment added successfully!");
+                        }
+    
+                        const updatedComments = relatedComment
+                            ? campaignComments.map(cmt => (cmt.campaignname === firstColumnValue ? { ...cmt, comment } : cmt))
+                            : [...campaignComments, logData];
+                        setCampaignComments(updatedComments);
+    
+                        changeRRefrst();
+                        setIsModalVisibles(false);
+                    } catch (error) {
+                        console.error('Error while submitting comment:', error);
+                        message.error("Error while submitting the comment.");
+                    }
+                };
+    
+                const handleCancels = () => {
+                    setIsModalVisibles(false);
+                };
+    
+                return (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                    {relatedStatus === true && <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }}/>}
+                    {relatedStatus === false && <CloseCircleFilled style={{ color: 'red', fontSize: '15px' , marginRight: relatedComment ? "10px" : '0px' }}/>}
+                        {relatedComment && (
+                            starred ? (
+                                <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: "gold" }} />
+                            ) : (
+                                <StarOutlined className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px' }} />
+                            )
+                        )}
+                        {relatedComment ? (
+                            <Tooltip title={(
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <span>{relatedComment || 'No comment available'}</span>
+                                    <EditOutlined onClick={handleEditClick} style={{ marginLeft: '10px', color: 'blue', cursor: 'pointer' }} />
+                                </div>
+                            )}>
+                                <MessageOutlined className='Message' style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
+                                <Tooltip title={tooltipText}></Tooltip>
+                            </Tooltip>
+                        ) : (
+                            <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
+                        )}
+                        <Tooltip title={tooltipText}>
+                            <CopyOutlined 
+                                onClick={copyToClipboard}
+                                style={{ cursor: 'pointer', marginLeft: '8px', color:"#1e1e1f", marginRight: '10px' }}
+                            />
+                        </Tooltip>
+                        <span
+                            onClick={() => {
+                                const url = `/CampaignHistory/${params.value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                                window.open(url, '_blank');
+                            }}
+                        >
+                            {valueWithCount}
+                        </span>
+                        <Modal
+                            title={firstColumnValue}
+                            visible={isModalVisibles}
+                            onOk={handleOks}
+                            onCancel={handleCancels}
+                        >
+                            <Input.TextArea
+                                placeholder="Enter your comments here"
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                            />
+                        </Modal>
+                    </div>
+                );
+            }
+        }
+    };
+    
 
 
 
@@ -2822,29 +3404,54 @@ const MyTablePage = () => {
                 if (params.node.footer) {
                     return 'Total'; // Custom footer label
                 }
-
+    
                 const firstColumnValue = params.node.key; // This should give you the campaign name
                 const campaignName = params.node.key;
-                const valueWithCount = `${firstColumnValue}`;
-
+    
+                let campaignid, adsetid;
+    
+                if (params.node.group && params.node.childrenAfterGroup && params.node.childrenAfterGroup.length > 0) {
+                    const firstChild = params.node.childrenAfterGroup[0].data;
+                    campaignid = firstChild.campaignid;
+                    adsetid = firstChild.adsetid;
+                } else if (params.data) {
+                    campaignid = params.data.campaignid;
+                    adsetid = params.data.adsetid;
+                } else {
+                    console.error('Missing campaignid or adsetid for campaign:', campaignName);
+                    return (
+                        <div style={{ color: 'red' }}>
+                            Error: campaignid or adsetid missing for {campaignName}
+                        </div>
+                    );
+                }
+                const getStatusForCampaign = (campaignName, newaccount) =>{
+                    const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
+                    console.log(relatedStatus, "relatedStatus");
+                    const relatedStatusTrue = relatedStatus !== undefined && relatedStatus.status === true ? true : relatedStatus !== undefined ? false : null;
+                    // console.log(relatedStatusTrue);
+                    return relatedStatusTrue;
+                }
+    
                 const getCommentForCampaign = (campaignName) => {
                     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                     return relatedComment ? relatedComment.comment : null;
                 };
-
+    
                 const getStarredForCampaign = (campaignName) => {
                     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                     return relatedComment ? relatedComment.starred : false;
                 };
-
+                const relatedStatus = getStatusForCampaign(campaignName, newaccount);
                 const relatedComment = getCommentForCampaign(campaignName);
                 const isStarred = getStarredForCampaign(campaignName);
-
+                const valueWithCount = `${firstColumnValue}`;
+    
                 const [tooltipText, setTooltipText] = useState("Click to Copy");
                 const [isModalVisible, setIsModalVisible] = useState(false);
                 const [comment, setComment] = useState(relatedComment || '');
                 const [starred, setStarred] = useState(isStarred);
-
+    
                 const copyToClipboard = () => {
                     navigator.clipboard.writeText(firstColumnValue)
                         .then(() => {
@@ -2855,11 +3462,11 @@ const MyTablePage = () => {
                             console.error('Failed to copy to clipboard');
                         });
                 };
-
+    
                 const handleEditClick = () => {
                     setIsModalVisible(true);
                 };
-
+    
                 const sendNewCommentToAPI = async (logData) => {
                     try {
                         const response = await axios.post('https://prodapis.adsgoat.in/Comments', {
@@ -2874,12 +3481,16 @@ const MyTablePage = () => {
                         console.error('Error sending data to server:', error);
                     }
                 };
-
+    
                 const sendEditedCommentToAPI = async (logData) => {
                     try {
                         const response = await axios.post('https://prodapis.adsgoat.in/Comments/edit', {
                             campaignname: logData.campaignname,
                             comment: logData.comment,
+                            Account: logData.Account,
+                            adsetid: logData.adsetid,
+                            campaignid: logData.campaignid,
+                            status: true
                         }, {
                             headers: {
                                 Authorization: token,
@@ -2892,14 +3503,16 @@ const MyTablePage = () => {
                         throw error;
                     }
                 };
-
-                const sendStarStatusToAPI = async (campaignName, isStarred) => {
+    
+                const sendStarStatusToAPI = async (campaignname, isStarred) => {
                     try {
                         const endpoint = isStarred ? 'https://prodapis.adsgoat.in/Star' : 'https://prodapis.adsgoat.in/Unstar';
                         const response = await axios.post(endpoint, {
-                            campaignname: campaignName,
+                            campaignname: campaignname,
                             Account: account,
                             usercommit: userdetails?.email,
+                            campaignid: campaignid,
+                            adsetid: adsetid
                         }, {
                             headers: {
                                 Authorization: token,
@@ -2910,48 +3523,55 @@ const MyTablePage = () => {
                         console.error('Error updating star status:', error);
                     }
                 };
-
+    
                 const handleStarClick = async () => {
                     const updatedStarred = !starred;
                     setStarred(updatedStarred);
                     await sendStarStatusToAPI(firstColumnValue, updatedStarred);
-
+                    message.success(updatedStarred ? "Campaign starred!" : "Campaign unstarred!");
+    
                     const updatedComments = campaignComments.map(cmt =>
                         cmt.campaignname === firstColumnValue ? { ...cmt, starred: updatedStarred } : cmt
                     );
                     setCampaignComments(updatedComments);
                     changeRRefrst();
                 };
-
+    
                 const handleOk = async () => {
                     const logData = {
                         Account: account,
                         usercommit: userdetails?.email,
                         campaignname: firstColumnValue,
-                        comment: comment
+                        comment: comment,
+                        campaignid: campaignid,
+                        adsetid: adsetid
                     };
-
+    
                     if (relatedComment) {
                         await sendEditedCommentToAPI(logData);
+                        message.success("Comment updated successfully!");
                     } else {
                         await sendNewCommentToAPI(logData);
+                        message.success("New comment added successfully!");
                     }
-
+    
                     const updatedComments = relatedComment
                         ? campaignComments.map(cmt => (cmt.campaignname === firstColumnValue ? { ...cmt, comment } : cmt))
                         : [...campaignComments, logData];
                     setCampaignComments(updatedComments);
-
+    
                     changeRRefrst();
                     setIsModalVisible(false);
                 };
-
+    
                 const handleCancel = () => {
                     setIsModalVisible(false);
                 };
-
+    
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                        {relatedStatus === true && <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }}/>}
+                        {relatedStatus === false && <CloseCircleFilled style={{ color: 'red', fontSize: '15px' , marginRight: relatedComment ? "10px" : '0px' }}/>}
                         {relatedComment && (
                             starred ? (
                                 <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: 'gold' }} />
@@ -2967,14 +3587,15 @@ const MyTablePage = () => {
                                 </div>
                             )}>
                                 <MessageOutlined className='Message' style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
+                                <Tooltip title={tooltipText}></Tooltip>
                             </Tooltip>
                         ) : (
                             <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
                         )}
                         <Tooltip title={tooltipText}>
-                            <CopyOutlined
+                            <CopyOutlined 
                                 onClick={copyToClipboard}
-                                style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight: '10px' }}
+                                style={{ cursor: 'pointer', marginLeft: '8px', color:"#1e1e1f", marginRight: '10px' }}
                             />
                         </Tooltip>
                         <span
@@ -2983,7 +3604,7 @@ const MyTablePage = () => {
                                 window.open(url, '_blank');
                             }}
                         >
-                            {firstColumnValue}
+                            {valueWithCount}
                         </span>
                         <Modal
                             title={firstColumnValue}
@@ -3002,6 +3623,7 @@ const MyTablePage = () => {
             }
         }
     };
+    
 
 
     // const autoGroupColumnDefLive = {
@@ -3200,16 +3822,28 @@ const MyTablePage = () => {
     const gridOptions = {
         onColumnMoved: (params) => debouncedHandleColumnMove(params, 'grid1'),
         defaultColDef: {
-            suppressMenu: true
+            suppressMenu: true,
+            headerClass: "custom-header" // Apply to all columns by default
+            
         }
     };
 
     const gridOptions1 = {
         onColumnMoved: (params) => debouncedHandleColumnMove(params, 'grid2'),
+        defaultColDef: {
+            suppressMenu: true,
+            headerClass: "custom-header" // Apply to all columns by default
+            
+        }
     };
 
     const gridOptions2 = {
         onColumnMoved: (params) => debouncedHandleColumnMove(params, 'grid3'),
+        defaultColDef: {
+            suppressMenu: true,
+            headerClass: "custom-header" // Apply to all columns by default
+            
+        }
     };
 
     console.log(columnDefs);
@@ -3527,28 +4161,99 @@ const MyTablePage = () => {
     console.log(revenuePratner);
     console.log(time);
 
-    const createOption = (account) => {
+    const [isOpen, setIsOpen] = useState(false); // State to track if dropdown is open
+    const [selectedValue, setSelectedValue] = useState(
+        typeof networksData[0] === 'string' ? networksData[0] : networksData[0].accountNumber
+    ); // Track selected value
 
+    // Handle dropdown open/close state
+    const handleDropdownVisibleChange = (open) => {
+        setIsOpen(open); // Set dropdown open state
+    };
+
+    // Handle option selection
+    const handleChange1 = (value) => {
+        const findAccount = (data, accountNumber) =>
+            Object.values(data).flat().find(item => item.accountNumber === accountNumber) || null;
+        
+        const accountNameForAccount = findAccount(userdetails?.adAccounts, value);
+        setAccountName(accountNameForAccount.accountName)
+        setSelectedValue(value); // Update selected value
+        onChangeSelect(value); // Call onChangeSelect function
+    };
+
+    // Create option with conditional rendering of additional info
+    const createOption = (account) => {
         if (typeof account === 'string') {
             return {
                 value: account,
-                label: account,
-            }
+                label: account, // If account is just a string, display it directly
+            };
         } else {
             return {
                 value: account.accountNumber,
                 label: (
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span>{account.accountNumber}</span>
-                        <span>{account.status === "Active" ? <CheckCircleFilled style={{ color: 'green', fontSize: '15px' }} /> : <CloseCircleFilled style={{ color: 'red', fontSize: '15px' }} />}</span>
+                    <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center', 
+                        width: '100%', 
+                        padding: '5px 0', 
+                        height: 'auto',  // Adjust height to prevent layout issues
+                        overflow: 'hidden'  // Prevent overflow issues
+                    }}>
+                        {/* Left Section: Account Details */}
+                        <div style={{ 
+                            display: 'flex', 
+                            flexDirection: 'column', 
+                            maxWidth: '70%' 
+                        }}>
+                            {/* Always show accountNumber */}
+                            <p style={{ 
+                                margin: '0px', 
+                                padding: '0px', 
+                                fontWeight: 'bold', 
+                                whiteSpace: 'nowrap', 
+                                overflow: 'hidden', 
+                                textOverflow: 'ellipsis' 
+                            }}>
+                                {account.accountNumber}
+                            </p>
+                            {/* Show "Additional Info" ONLY if the dropdown is open */}
+                            {isOpen && (
+                                <p style={{ 
+                                    margin: '0px', 
+                                    padding: '0px', 
+                                    fontSize: '12px', 
+                                    color: 'gray', 
+                                    whiteSpace: 'nowrap', 
+                                    overflow: 'hidden', 
+                                    textOverflow: 'ellipsis' 
+                                }}>
+                                    {account.accountName ? account.accountName : ''}
+                                </p>
+                            )}
+                        </div>
+                        {/* Right Section: Status Icon */}
+                        <span style={{ marginLeft: '10px', flexShrink: 0 }}>
+                            {account.status === "Active" ? (
+                                <CheckCircleFilled style={{ color: 'green', fontSize: '15px' }} />
+                            ) : (
+                                <CloseCircleFilled style={{ color: 'red', fontSize: '15px' }} />
+                            )}
+                        </span>
                     </div>
                 ),
-                text: account.accountNumber, // Adding a text property for sorting and filtering
+                text: account.accountNumber, // For sorting/filtering purposes
             };
         }
-
-
     };
+
+
+    
+    
+    
+    
 
     const pinnedBottomRowData1 = [
         {
@@ -3642,22 +4347,20 @@ const MyTablePage = () => {
                         />
                     </Col>
 
-                    <Col xs={24} sm={12} md={4}>
+                    <Col xs={24} sm={12} md={4} style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}>
                         <Select
                             showSearch
-                            onChange={onChangeSelect}
-                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                            style={{ width: '100%' }}
+                            onChange={handleChange1} // Handle value selection
+                            dropdownClassName={theme === 'dark' ? "custom-dropdown" : ''} // Apply dark theme if needed
+                            style={{ width: '100%', maxWidth: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} // Prevent overflow with ellipsis
                             placeholder="Select Account"
-                            optionFilterProp="value" // Make sure the option has a 'label' property
+                            optionFilterProp="value"
+                            value={selectedValue}  // Set selected value
                             defaultValue={typeof networksData[0] === 'string' ? networksData[0] : networksData[0].accountNumber}
-                            options={accountsAccess.map((item) => createOption(item))}
-                        // filterOption={(input, option) =>
-                        //     option?.text.toLowerCase().includes(input.toLowerCase())  // Custom filter logic for case-insensitive search
-                        // }
+                            options={accountsAccess.map((item) => createOption(item))} // Create options dynamically
+                            onDropdownVisibleChange={handleDropdownVisibleChange} // Toggle dropdown state
                         />
                     </Col>
-
                     <Col xs={24} sm={24} md={15} lg={6}>
                         <ConfigProvider locale={locale}>
                             <RangePicker
@@ -3698,7 +4401,7 @@ const MyTablePage = () => {
                         </Button>
                     </Col>
                     <Col xs={24} sm={24} md={15} lg={5}>
-                    <Tooltip title="Refresh & Export and Search">
+                    <Tooltip title="Refresh and Search">
                     <Button 
                         type="primary" 
                         shape="circle" 
@@ -3710,9 +4413,19 @@ const MyTablePage = () => {
                     </Col>
                 </Row>
             </Space>
-            <div >
+            <div>
                <div className={`secondRow ${isSecondRowVisible ? '' : 'hidden'}`}>
                <Row style={{ padding: '10px', paddingRight: '30px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                    <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                        <Text style={{ fontWeight: '600', display: 'flex', justifyContent: 'flex-end' }}>
+                            FbAcc Status: {`${fbCron.current}`}
+                        </Text>
+                    </Col>
+                    <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                        <Text style={{ fontWeight: '600', display: 'flex', justifyContent: 'flex-end', marginRight: '20%' }}>
+                            RevAcc Status: {`${revenueCron.current}`}
+                        </Text>
+                    </Col>
                     <Col style={{ marginRight: '15px' }}>
                         {/* {isSearching ? (
                             <Row gutter={8}>
@@ -3752,7 +4465,6 @@ const MyTablePage = () => {
                             <Col>
                                 <Button style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<SearchOutlined />} />
                             </Col>
-
                         </Row>
                     </Col>
                     <Col>
@@ -3793,6 +4505,9 @@ const MyTablePage = () => {
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ fontWeight: '600' }}>Acc: {newaccount}</Text>
+                                        </Col>
+                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                            <Text style={{ fontWeight: '600' }}>AccName: {newAccountName}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ fontWeight: '600' }}>Timezone: {timezone.current}</Text>
@@ -3909,6 +4624,9 @@ const MyTablePage = () => {
                                             <Text style={{ fontWeight: '600' }}>Acc: {newaccount}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                            <Text style={{ fontWeight: '600' }}>AccName: {newAccountName}</Text>
+                                        </Col>
+                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ fontWeight: '600' }}>Timezone: {timezone.current}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
@@ -3997,6 +4715,9 @@ const MyTablePage = () => {
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ fontWeight: '600' }}>Acc: {newaccount}</Text>
+                                        </Col>
+                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                            <Text style={{ fontWeight: '600' }}>AccName: {newAccountName}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ fontWeight: '600' }}>Timezone: {timezone.current}</Text>

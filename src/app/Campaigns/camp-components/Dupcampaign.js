@@ -511,7 +511,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
 
     const handleBidStrategyChange = (value) => {
         // Show bid_amount if the selected bid strategy is "Bid Cap", otherwise hide it
-        setShowBidAmount(value === "LOWEST_COST_WITH_BID_CAP");
+        // setShowBidAmount(value === "LOWEST_COST_WITH_BID_CAP");
+        setShowBidAmount(["LOWEST_COST_WITH_BID_CAP", "COST_CAP"].includes(value));
     };
     // const Accountchange = (e) => {
     //     setAccountNumber(e.target.value);
@@ -1399,7 +1400,9 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
 
                                         />
                                     </Form.Item>
-                                    {(DuplicatedampaignData?.camapaignlevel?.Bid_strategy === "LOWEST_COST_WITH_BID_CAP") ? (
+                                    {(DuplicatedampaignData?.camapaignlevel?.Bid_strategy === "LOWEST_COST_WITH_BID_CAP" ||
+                                        DuplicatedampaignData?.camapaignlevel?.Bid_strategy === "COST_CAP"
+                                    ) ? (
                                         <Form.Item
                                             name="bid_amount"
                                             label={<span style={{ color: "#B4B4B4" }}>Bid_amount</span>}

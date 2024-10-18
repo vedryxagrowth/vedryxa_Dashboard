@@ -4,13 +4,14 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
+import moment from 'moment-timezone';
 import 'ag-grid-enterprise';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { useTokenContext } from '../../../components/parent'
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
-import { Spin } from 'antd';
+import { Spin, Row, Col } from 'antd';
 Chart.register(...registerables);
 
 export default function CampaignAndAccount({ params }) {
@@ -271,7 +272,7 @@ export default function CampaignAndAccount({ params }) {
         // const data = await fetchData.json();
         const mainData = fetchData.data;
         console.log(mainData.columnStructure, "columnStructure");
-        const filteredData = mainData.columnStructure.filter((each) => each !== "fb-hour" && each !== "mnet-hour" && each !== "timezone");
+        const filteredData = mainData.columnStructure.filter((each) => each !== "fb-hour" && each !== "mnet-hour" && each !== "timezone" && each !== "actions" );
         console.log(filteredData);
         setColumnStructure(getColumnDefs(filteredData));
         // setRowStructure(mainData.rows); 
@@ -533,9 +534,12 @@ export default function CampaignAndAccount({ params }) {
     };
 
     return (
-        <div>
+        <Row style={{display:'flex', flexDirection:'column'}}>
+            <Col>
+                <h3 style={{textAlign:'center'}}>{decodedString}</h3>
+            </Col>
             {/* <h1>{params.campaignAndAccount}hi</h1> */}
-            <div style={{ height: '400px', marginBottom: '10px' }}> {/* Container with fixed height */}
+            <Col style={{ height: '400px', marginBottom: '10px' }}> {/* Container with fixed height */}
               {chartData.dates.length === 0 ? (<div style={{width:'100%', height:'100%', display:'flex', justifyContent:'center', alignItems:'center'}}><Spin size="large" /></div>):
                 (<Line
                     data={{
@@ -619,8 +623,8 @@ export default function CampaignAndAccount({ params }) {
                     }}
                     height={350} // Set the height of the chart
                 />)}
-            </div>
-            <div style={{ display: 'flex', width: '100%', marginLeft: '2%' }}>
+            </Col>
+            <Col style={{ display: 'flex', width: '100%', marginLeft: '2%' }}>
                 {/* Top 5 Dates with RPC */}
                 <div style={{ width: '20%' }}>
                     <h3>Top 5 Dates with RPC</h3>
@@ -629,6 +633,7 @@ export default function CampaignAndAccount({ params }) {
                             <tr>
                                 <th style={{ border: '1px solid #ddd', padding: '3px' }}>Date</th>
                                 <th style={{ border: '1px solid #ddd', padding: '2px' }}>RPC</th>
+                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>WeekDay</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -643,6 +648,7 @@ export default function CampaignAndAccount({ params }) {
                                     <tr key={index}>
                                         <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.date}</td>
                                         <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.rpc}</td>
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{moment(item.date).format('dddd')}</td>
                                     </tr>
                                 ))}
                         </tbody>
@@ -657,6 +663,7 @@ export default function CampaignAndAccount({ params }) {
                             <tr>
                                 <th style={{ border: '1px solid #ddd', padding: '3px' }}>Date</th>
                                 <th style={{ border: '1px solid #ddd', padding: '3px' }}>Margin</th>
+                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>WeekDay</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -671,13 +678,14 @@ export default function CampaignAndAccount({ params }) {
                                     <tr key={index}>
                                         <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.date}</td>
                                         <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.margin}</td>
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{moment(item.date).format('dddd')}</td>
                                     </tr>
                                 ))}
                         </tbody>
                     </table>
                 </div>
-            </div>
-
+            </Col>
+            <Col>
             {isLoading === true ? (
                 <div className="loader-container ag-container">
                     <div className="ag-grid-Loader">
@@ -740,6 +748,7 @@ export default function CampaignAndAccount({ params }) {
                     />
                 </div>
             ) : null}
-        </div>
+            </Col>
+        </Row>
     )
 }
