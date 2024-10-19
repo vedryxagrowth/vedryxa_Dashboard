@@ -113,8 +113,10 @@ const EditNetworkAccess = ({ editeddata, visible, onClose }) => {
 
       if (response.status === 200) {
         message.success("Network updated successfully");
+        
         form.resetFields();
-        onClose(); 
+        onClose(newValues);  // Pass the updated data to the parent
+        // onClose(); 
       } else {
         message.error("Failed to update Network");
       }

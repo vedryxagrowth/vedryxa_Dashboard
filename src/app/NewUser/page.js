@@ -181,6 +181,7 @@ const UsersTable = () => {
         }
         functionaCall();
     }, []);
+    
     const handleDelete = async (values) => {
         // console.log(values, "Delete");
 
@@ -361,6 +362,7 @@ const UsersTable = () => {
             setLoading(false);
         }
     }
+
 
     const networkFilterData = () => {
         console.log(status, 'status');
@@ -838,13 +840,13 @@ const UsersTable = () => {
         setNetworkAccessData(values)
     }
 
-    const onCloseDrawer = () => {
-        setDrawerVisible(false);
-        setaccountDrawerVisible(false)
-        setusersaccessDrawerVisible(false)
-        setaccountaccessDrawerVisible(false)
-        setNetworkAccessDrawerVisible(false);
-    };
+    // const onCloseDrawer = () => {
+    //     setDrawerVisible(false);
+    //     setaccountDrawerVisible(false)
+    //     setusersaccessDrawerVisible(false)
+    //     setaccountaccessDrawerVisible(false)
+    //     setNetworkAccessDrawerVisible(false);
+    // };
 
     const onChangeRole = (value) => {
         // if(value === 'All'){
@@ -925,6 +927,45 @@ const UsersTable = () => {
             setLoading(false);
         }
     };
+
+
+    const onCloseDrawer = (updatedData) => {
+        if (updatedData) {
+          if (updatedData.email) {
+            // Handle user data update
+            setUsersData((prevData) =>
+              prevData.map((user) =>
+                user.email === updatedData.email ? updatedData : user
+              )
+            );
+          } else if (updatedData.accountNumber) {
+            // Handle account data update
+            setAccountsData((prevData) =>
+              prevData.map((account) =>
+                account.accountNumber === updatedData.accountNumber ? updatedData : account
+              )
+            );
+          } else if (updatedData.revenuePartner) {
+            // Handle network data update
+            setNetworksData((prevData) =>
+              prevData.map((network) =>
+                network.revenuePartner === updatedData.revenuePartner ? updatedData : network
+              )
+            );
+          }
+        }
+      
+        // Close all relevant drawers
+        setDrawerVisible(false);
+        setaccountDrawerVisible(false);
+        setusersaccessDrawerVisible(false);
+        setaccountaccessDrawerVisible(false);
+        setNetworkAccessDrawerVisible(false);
+    };
+
+   
+      
+    
     
 
     return (
@@ -1208,6 +1249,7 @@ const UsersTable = () => {
             </Carousel>
         </>
     );
+
 };
 
 export default UsersTable;

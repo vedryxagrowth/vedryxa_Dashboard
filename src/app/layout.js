@@ -8,6 +8,8 @@ import { SessionProvider, useSession } from 'next-auth/react';
 import Parent, { TokenProvider, useTokenContext } from "./components/parent";
 import { useEffect, useState } from "react";
 
+import {Spin} from 'antd';
+
 const inter = Inter({ subsets: ["latin"] });
 
 const BodyWrapper = ({ children }) => {
@@ -40,17 +42,18 @@ const ContentWrapper = ({ children }) => {
     const fetchUserData = async () => {
       if (session?.user?.email) {
         try {
-
         setLoading(true);
           const userResponse = await axios.get(`https://prodapis.adsgoat.in/api/getusersData?email=${session?.user?.email}`);
           if (isMounted) {
             setusersDataForLogin(userResponse.data);
-
             setLoading(false);
           }
         } catch (error) {
           console.error("Error fetching user data:", error);
+          setLoading(false); // Make sure to stop loading in case of an error
         }
+      } else {
+        setLoading(false); // Stop loading if there is no session
       }
     };
 
@@ -67,6 +70,14 @@ const ContentWrapper = ({ children }) => {
   };
 
   console.log(usersDataForLogin, "usersLogin");
+
+  if (status === "loading" || loading) {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+        <Spin size="small" /> 
+      </div>
+    );
+  }
 
   return (
     <>
