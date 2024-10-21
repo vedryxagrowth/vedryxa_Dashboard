@@ -1106,7 +1106,7 @@ const Dashboard = () => {
                 <div style={{ padding: '20px' }}>
                 <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ width: '40%' }}>
-                        <h1 style={{ color: darkMode ? '#007BFF' : '#fff', fontSize: '22px', textAlign: 'start' }}>
+                        <h1 style={{  color: theme === 'dark' ? 'white' : 'black' , fontSize: '22px', textAlign: 'start' }}>
                             Welcome, {userdetails?.userName} !
                         </h1>
                     </div>
