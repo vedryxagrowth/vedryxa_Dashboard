@@ -46,21 +46,23 @@ const positionOptions = {
     { key: "instream_video", label: "Facebook In-Stream Videos" },
     { key: "facebook_reels", label: "Facebook Reels" },
     { key: "profile_feed", label: "Facebook Profile Feed" },
-    { key: "search", label: "Facebook search" }
+    { key: "search", label: "Facebook search" },
+    { key: "story_fb", label: "Facebook Stories" }
   ],
   instagram: [
     { key: "stream", label: "Instagram Stream" },
-    { key: "story", label: "Instagram Story" },
+    { key: "story_in", label: "Instagram Story" },
     { key: "explore", label: "Instagram Explore" },
     { key: "explore_home", label: "Instagram Explore Home" },
     { key: "reels", label: "Instagram Reels" },
-    { key: "profile_feed", label: "Instagram Profile Feed" },
+    { key: "profile_feed_in", label: "Instagram Profile Feed" },
     { key: "ig_search", label: "Instagram Search" },
     { key: "profile_reels", label: "Instagram Profile Reels" }
   ],
   messenger: [
     { key: "messenger_home", label: "Messenger Home" },
-    { key: "story", label: "Messenger Story" }
+    { key: "story_ms", label: "Messenger Story" },
+    { key: "sponsored_messages", label: "Messenger sponsored messages" }
   ],
   audience_network: [
     { key: "classic", label: "Audience Network Classic" },
