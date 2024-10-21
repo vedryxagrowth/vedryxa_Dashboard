@@ -837,3 +837,8 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 .ag-header-cell[col-id="actions"] .ag-header-cell-menu-button {
   display: none !important;  /* Hide the menu button */
 }
+
+.dark-theme .ant-table {
+  background-color: #333 !important;
+  color: #fff !important;
+}
