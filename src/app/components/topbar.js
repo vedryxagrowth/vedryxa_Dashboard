@@ -460,6 +460,21 @@ const Topbar = () => {
     }
   ];
 
+  const renderAdAccounts = () => {
+        if (!userdetails?.adAccounts) return null;
+    
+        return Object.keys(userdetails.adAccounts).map((key) => (
+          <div key={key} style={{ textAlign: 'left', marginBottom: '20px' }}>
+            <h4>{key}:</h4>
+            <ul>
+              {userdetails.adAccounts[key].map((accountId, index) => (
+                <li key={index}>{typeof accountId === 'object' ? accountId.accountNumber : accountId}</li>
+              ))}
+            </ul>
+          </div>
+        ));
+      };
+
   // Only show profile and signout if the user is authenticated and has access
   const isUserAuthorized = status === 'authenticated' && userdetails;
 
@@ -651,6 +666,11 @@ const Topbar = () => {
             </div>
           </div>
           <hr style={{ border: "1px solid black", width: "100%" }} />
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+            <div style={{ maxHeight: '200px', width: "100%", overflowY: 'auto', padding: '10px', border: '1px solid #ccc', marginBottom: '20px' }}>
+              {renderAdAccounts()}
+            </div>          
+          </div>
         </div>
       </Modal>
     </div>
