@@ -1,5 +1,5 @@
 // Topbar.js
-import { useState, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { SessionProvider, useSession, signIn, signOut } from 'next-auth/react';
 import Image from "next/image";
 import { Layout, Avatar, Dropdown, Button, Switch, Spin, Form, Input, Divider, Modal } from "antd";
@@ -15,7 +15,7 @@ import { Moon, Sun } from 'lucide-react';
 import { getSession } from 'next-auth/react';
 import debounce from 'lodash.debounce';
 
-
+import { useGlobalLoading } from "../layout";
 
 const items = (setuserdetails, router) => [
   {
@@ -60,270 +60,6 @@ const items = (setuserdetails, router) => [
   },
 ];
 
-// const Topbar = ({ session, darkMode, toggleTheme, setUserDetails }) => {
-
-//     const router = useRouter();
-//     const dropdownItems = items(setUserDetails, router);
-
-//     return (
-//         <div style={{ backgroundColor: darkMode ? '#333' : '#fff', padding: '0 20px',margin:"10px" }}>
-//             <div>
-
-//                 <div
-//                     style={{
-//                         display: "flex",
-//                         flexDirection: "row",
-//                         alignItems: "center",
-//                         gap: "1em",
-//                         height :"60px",
-//                         justifyContent:"end"
-//                     }}>
-//                     <h2 style={{ color: darkMode ? '#fff' : '#000', margin: 0, fontSize: '1.2rem' }}>Hi {session ? session.user.name : ""}</h2>
-//                     <Dropdown
-//                         menu={{
-//                             items: dropdownItems
-//                         }}
-//                         placement="bottomLeft"
-//                         arrow={{ pointAtCenter: true }}>
-//                         <Avatar
-//                             size="large"
-//                             style={{
-//                                 background: "#ebebeb",
-//                                 fontSize: "1.8em",
-//                             }}>
-//                         </Avatar>
-//                     </Dropdown>
-//                     <Switch checked={darkMode} onChange={toggleTheme} />
-//                     <span>{darkMode ? 'Dark Mode' : 'Light Mode'}</span>
-//                 </div>
-//             </div>
-//         </div>
-//     );
-// };
-
-
-// const Topbar = ({ }) => {
-//   const { darkMode, toggleTheme, usersData } = useTokenContext();
-//   const router = useRouter();
-//   const { data: session, status } = useSession(); // get session status from next-auth
-//   const { userdetails } = useTokenContext();
-
-//   const [userProfile, setUserProfile] = useState(userdetails);
-
-//   useEffect(() => {
-//     if (userdetails) {
-//       setUserProfile(userdetails);
-//     }
-//   }, [userdetails]);
-
-//   const handleProfileUpdate = (updatedProfileData) => {
-//     setUserProfile(prev => ({
-//       ...prev,
-//       ...updatedProfileData,
-//     }));
-//   };
-
-//   const [isModalVisible, setIsModalVisible] = useState(false);
-
-//   const openProfileModal = () => {
-//     setIsModalVisible(true);
-//   };
-
-//   const onHandleCancel = () => {
-//     setIsModalVisible(false);
-//   };
-
-//   const renderAdAccounts = () => {
-//     if (!userdetails?.adAccounts) return null;
-
-//     return Object.keys(userdetails.adAccounts).map((key) => (
-//       <div key={key} style={{ textAlign: 'left', marginBottom: '20px' }}>
-//         <h4>{key}:</h4>
-//         <ul>
-//           {userdetails.adAccounts[key].map((accountId, index) => (
-//             <li key={index}>{typeof accountId === 'object' ? accountId.accountNumber : accountId}</li>
-//           ))}
-//         </ul>
-//       </div>
-//     ));
-//   };
-
-//   const maleImoji = 'https://res.cloudinary.com/dyogjqsil/image/upload/v1727960655/3d-rendering-cartoon-character-with-eyeglasses-jacket_lu1cqi.jpg';
-//   const femaleImoji = 'https://res.cloudinary.com/dyogjqsil/image/upload/v1727960642/portrait-3d-female-doctor_cei7bm.jpg';
-
-//   const getAvatarSrc = () => {
-//     if (userdetails?.gender === 'Male') {
-//       return maleImoji;
-//     } else if (userdetails?.gender === 'Female') {
-//       return femaleImoji;
-//     }
-//   };
-
-//   const dropdownItemsAuthenticated =  [
-//     {
-//       key: '1',
-//       label: (
-//         <a onClick={openProfileModal} style={{ padding: '5px' }}>
-//           Profile
-//         </a>
-//       ),
-//     },
-//     {
-//       key: '2',
-//       label: (
-//         <a
-//           onClick={() => {
-//             localStorage.clear();
-//             localStorage.setItem('redirectUrl', router.asPath);
-//             router.push('/api/auth/signout');
-//           }}
-//         >
-//           Sign Out
-//         </a>
-//       ),
-//     },
-//   ];
-
-//   const dropdownItemsUnauthenticated = [
-//     {
-//       key: '1',
-//       label: (
-//         <span onClick={() => signIn()} style={{ cursor: 'pointer' }}>
-//           Sign in
-//         </span>
-//       ),
-//     }
-//   ];
-
-//   return (
-//     <div
-//       style={{
-//         backgroundColor: darkMode ? '#333' : '#fff',
-//         paddingRight: '20px',
-//         margin: '10px',
-//         display: 'flex',
-//         justifyContent: "space-between",
-//         alignItems: 'center',
-//       }}
-//     >
-//       {/* Logo always visible */}
-//       <div>
-//         <Image
-//           src={darkMode ? "/4.png" : "/RR1.png"}
-//           width={150}
-//           height={60}
-//           priority={true}
-//           alt="Logo"
-//           style={{ margin: "0px 20px", objectFit: "cover" }}
-//         />
-//       </div>
-
-//       <div
-//         style={{
-//           display: 'flex',
-//           flexDirection: 'row',
-//           alignItems: 'center',
-//           gap: '1em',
-//           height: '60px',
-//           justifyContent: 'flex-end',
-//         }}
-//       >
-//         {/* Check if status is loading, authenticated, or unauthenticated */}
-//         { status === 'authenticated' ? (
-//           <>
-//             <h2
-//               style={{
-//                 color: darkMode ? '#fff' : '#000',
-//                 margin: 0,
-//                 fontSize: '1.2rem',
-//                 transition: 'color 0.3s ease',
-//               }}
-//             >
-//               Hi, {session?.user?.name || ''}
-//             </h2>
-//             <Dropdown
-//               menu={{
-//                 items: dropdownItemsAuthenticated,
-//               }}
-//               placement="bottomLeft"
-//               arrow={{ pointAtCenter: true }}
-//             >
-//               <Avatar
-//                 size="large"
-//                 src={getAvatarSrc()}
-//                 style={{
-//                   background: darkMode ? '#333' : '#ebebeb',
-//                   fontSize: '1.8em',
-//                   transition: 'background 0.3s ease',
-//                 }}
-//               />
-//             </Dropdown>
-//           </>
-//         ) : (
-//           <Dropdown
-//             menu={{
-//               items: dropdownItemsUnauthenticated,
-//             }}
-//             placement="bottomLeft"
-//             arrow={{ pointAtCenter: true }}
-//           >
-//             <Avatar
-//               size="large"
-//               style={{
-//                 background: darkMode ? '#333' : '#ebebeb',
-//                 fontSize: '1.8em',
-//                 transition: 'background 0.3s ease',
-//               }}
-//             />
-//           </Dropdown>
-//         )}
-
-//         <button
-//           onClick={toggleTheme}
-//           className={`theme-toggle-btn ${darkMode ? 'dark-mode' : 'light-mode'}`}
-//         >
-//           {darkMode ? (
-//             <Sun className="icon sun-icon" />
-//           ) : (
-//             <Moon className="icon moon-icon" />
-//           )}
-//         </button>
-//       </div>
-
-//       <Modal
-//         visible={isModalVisible}
-//         width={`50%`}
-//         onCancel={onHandleCancel}
-//         footer={null}
-//         style={{ textAlign: "center", borderRadius: '8px', padding: '0px' }}
-//       >
-//         <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", width: '100%' }}>
-//           <div style={{ display: "flex", justifyContent: "space-between", flexDirection: "row", height: "12%", marginBottom: '10px' }}>
-//             <div style={{ display: "flex", flexDirection: "column" }}>
-//               <Avatar
-//                 size={110}
-//                 src={getAvatarSrc()}
-//                 style={{ border: "2px solid #ccc" }}
-//               />
-//             </div>
-//             <div style={{ display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "flex-start", padding: "0px" }}>
-//               <p style={{ margin: "1px" }}><span style={{ fontWeight: "bold" }}>ID:</span> {userdetails ? userdetails._id : ""}</p>
-//               <p style={{ margin: "1px" }}><span style={{ fontWeight: "bold" }}>EMAIL_ID:</span> {userdetails ? userdetails.email : "No email"}</p>
-//               <p style={{ margin: "1px" }}><span style={{ fontWeight: "bold" }}>Name:</span> {userdetails ? userdetails.userName : "Guest"}</p>
-//             </div>
-//           </div>
-//           <hr style={{ border: "1px solid black", width: "100%" }} />
-//           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-//             <div style={{ maxHeight: '200px', width: "100%", overflowY: 'auto', padding: '10px', border: '1px solid #ccc', marginBottom: '20px' }}>
-//               {renderAdAccounts()}
-//             </div>
-//           </div>
-//         </div>
-//       </Modal>
-//     </div>
-//   );
-// };
-
 const Topbar = () => {
   const { darkMode, toggleTheme } = useTokenContext();
   const router = useRouter();
@@ -339,6 +75,21 @@ const Topbar = () => {
 
   const onHandleCancel = () => {
     setIsModalVisible(false);
+  };
+
+  const renderAdAccounts = () => {
+    if (!userdetails?.adAccounts) return null;
+
+    return Object.keys(userdetails.adAccounts).map((key) => (
+      <div key={key} style={{ textAlign: 'left', marginBottom: '20px' }}>
+        <h4>{key}:</h4>
+        <ul>
+          {userdetails.adAccounts[key].map((accountId, index) => (
+            <li key={index}>{typeof accountId === 'object' ? accountId.accountNumber : accountId}</li>
+          ))}
+        </ul>
+      </div>
+    ));
   };
 
   const maleImoji = 'https://res.cloudinary.com/dyogjqsil/image/upload/v1727960655/3d-rendering-cartoon-character-with-eyeglasses-jacket_lu1cqi.jpg';
@@ -389,21 +140,6 @@ const Topbar = () => {
     }
   ];
 
-  const renderAdAccounts = () => {
-        if (!userdetails?.adAccounts) return null;
-    
-        return Object.keys(userdetails.adAccounts).map((key) => (
-          <div key={key} style={{ textAlign: 'left', marginBottom: '20px' }}>
-            <h4>{key}:</h4>
-            <ul>
-              {userdetails.adAccounts[key].map((accountId, index) => (
-                <li key={index}>{typeof accountId === 'object' ? accountId.accountNumber : accountId}</li>
-              ))}
-            </ul>
-          </div>
-        ));
-      };
-
   // Only show profile and signout if the user is authenticated and has access
   const isUserAuthorized = status === 'authenticated' && userdetails;
 
@@ -419,7 +155,7 @@ const Topbar = () => {
       }}
     >
     {/* Show logo only if the user is NOT authenticated */}
-      {!isUserAuthorized && (
+      {status !== 'authenticated' && status !== 'loading' && (
         <div>
           <Image
             src={darkMode ? "/4.png" : "/RR1.png"}
@@ -444,9 +180,7 @@ const Topbar = () => {
         }}
       >
         {/* Conditional rendering based on authentication and authorization status */}
-        {status === 'loading' ? (
-          <p>Loading...</p>
-        ) : isUserAuthorized ? (
+        { isUserAuthorized ? (
           <>
             <h2
               style={{
@@ -530,11 +264,11 @@ const Topbar = () => {
             </div>
           </div>
           <hr style={{ border: "1px solid black", width: "100%" }} />
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-            <div style={{ maxHeight: '200px', width: "100%", overflowY: 'auto', padding: '10px', border: '1px solid #ccc', marginBottom: '20px' }}>
-              {renderAdAccounts()}
-            </div>          
-          </div>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+              <div style={{ maxHeight: '200px', width: "100%", overflowY: 'auto', padding: '10px', border: '1px solid #ccc', marginBottom: '20px' }}>
+                {renderAdAccounts()}
+              </div>
+            </div>
         </div>
       </Modal>
     </div>
