@@ -1,5 +1,5 @@
 "use client"
-import React from 'react';
+import React, { useRef } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
@@ -52,6 +52,8 @@ const MnetLiveCampaignHistory = ({ params }) => {
     const [decode, setDebounc] = useState("");
 
     const [chartData, setChartData] = useState({ dates: [], sortedData: [], sortedMarginData: [], rpcDate:[], hoursDate:[], hours: [], spend: [], revenue: [], profit: [], margin: [] });
+
+    const timeZoneToDisplay = useRef();
 
 
     const spender = (params) => {
@@ -463,6 +465,14 @@ const MnetLiveCampaignHistory = ({ params }) => {
         timezone: { headerName: 'TimeZone', field: 'timezone',
             comparator: defaultComparator,
          },
+        "fb-hour": {
+            headerName:'F-H', field: "hour",
+            comparator: defaultComparator,
+        },
+        "mnet-hour":{
+            headerName:'N-H', field:"updatedHour",
+            comparator: defaultComparator,
+        }
     };
 
     const getColumnDefs = (order) => {
@@ -477,7 +487,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
         const mainData = fetchData.data;
         console.log(mainData);
         console.log(mainData.columnStructure, "columnStructure");
-        const filteredData = mainData.columnStructure?.filter((each) => each !== "fb-hour" && each !== "mnet-hour" && each !== "actions" );
+        const filteredData = mainData.columnStructure?.filter((each) => each !== "actions" );
         console.log(filteredData);
         setColumnStructure(getColumnDefs(filteredData));
         // setRowStructure(mainData.rows); 
@@ -575,6 +585,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
         const decodedString = decodeURIComponent(paramsData[0]);
         const accountNumber = paramsData[1];
         const timeZone = paramsData[2];
+        timeZoneToDisplay.current = timeZone;
         let network = paramsData[3];
         setDebounc(decodedString);
         console.log(network, "network");
@@ -604,9 +615,9 @@ const MnetLiveCampaignHistory = ({ params }) => {
                     cpl = Math.round((eachData.spend / eachData.fbLeads) * 100) / 100;
                 }
                 const ncpl = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((eachData.spend / eachData.conversions) * 100) / 100;
-
+                console.log(eachData[`${timeZone}Date`], `${timeZone}Date`);
                 return {
-                    date: eachData[time].split(" ")[0],
+                    date: eachData[`${timeZone}Date`],
                     campaignName: eachData.campaign_name,
                     adsetName: eachData.adsetName,
                     spend: eachData.spend,
@@ -623,7 +634,9 @@ const MnetLiveCampaignHistory = ({ params }) => {
                     ncpl: ncpl,
                     adsetId: eachData.adset_id,
                     campaignId: eachData.campaign_id,
-                    timezone: eachData[time],
+                    timezone: eachData[timeZone],
+                    hour: eachData.hour,
+                    updatedHour: eachData.updatedHour,
                 };
             })
             : null;
@@ -632,17 +645,19 @@ const MnetLiveCampaignHistory = ({ params }) => {
         setValue(mainData);
         setLoading(false);
 
+        console.log(filteredData, "filterdData");
+
         const parseDate = (dateString) => new Date(dateString);
 
         // Step 1: Find the highest date in the array
-        const highestDate = filteredData.reduce((max, item) => {
+        const highestDate = filteredData?.reduce((max, item) => {
         const itemDate = parseDate(item.date);
         return itemDate > max ? itemDate : max;
         }, new Date(0));
 
         // Step 2: Filter the array to include only objects within the last 10 days from the highest date
         const result2 = filteredData
-        .filter((item) => {
+        ?.filter((item) => {
             const itemDate = parseDate(item.date);
             const timeDiff = highestDate - itemDate;
             const daysDiff = timeDiff / (1000 * 60 * 60 * 24); // Convert milliseconds to days
@@ -656,56 +671,56 @@ const MnetLiveCampaignHistory = ({ params }) => {
 
 
         // Prepare data for charts
-        const dates = result2.map(d => d.date);
-        const spend = result2.map(d => d.spend);
-        const revenue = result2.map(d => d.revenue);
-        const profit = result2.map(d => d.profit);
-        const rpc = result2.map(d => d.rpc ? d.rpc : 0);
-        const cpl = result2.map(d => d.cpl);
+        const dates = result2?.map(d => d.date);
+        const spend = result2?.map(d => d.spend);
+        const revenue = result2?.map(d => d.revenue);
+        const profit = result2?.map(d => d.profit);
+        const rpc = result2?.map(d => d.rpc ? d.rpc : 0);
+        const cpl = result2?.map(d => d.cpl);
 
-        const margin = result2.map(d => parseFloat(d.margin));
+        const margin = result2?.map(d => parseFloat(d.margin));
             
-        const hoursDate = filteredData.map(d => ({date: d.date, hour: d.hour, margin: parseFloat(d.margin)}));
+        const hoursDate = filteredData?.map(d => ({date: d.date, hour: d.hour, margin: parseFloat(d.margin)}));
         const today = moment.tz('UTC').format('YYYY-MM-DD');
 
         console.log(filteredData);
         // Filter, map, sort, and slice the data
         const result = filteredData
-          .filter(item => item.date === today) // Filter to only today's data
-          .map(item => ({
+          ?.filter(item => item.date === today) // Filter to only today's data
+          ?.map(item => ({
             date: item.date,
             hour: item.timezone.split(" ")[1].split(":")[0],
             margin: parseFloat(item.margin), // Ensure margin is a number
           }))
-          .sort((a, b) => b.margin - a.margin) // Sort by margin in descending order
-          .slice(0, 5); // Get top 5 margins
+          ?.sort((a, b) => b.margin - a.margin) // Sort by margin in descending order
+          ?.slice(0, 5); // Get top 5 margins
 
         const result1 = filteredData
-          .filter(item => item.date === today) // Filter to only today's data
-          .map(item => ({
+          ?.filter(item => item.date === today) // Filter to only today's data
+          ?.map(item => ({
             date: item.date,
             hour: item.timezone.split(" ")[1].split(":")[0],
             rpc: (item.rpc ? item.rpc : 0), // Ensure margin is a number
           }))
-          .sort((a, b) => b.rpc - a.rpc) // Sort by margin in descending order
-          .slice(0, 5); // Get top 5 margins
+          ?.sort((a, b) => b.rpc - a.rpc) // Sort by margin in descending order
+          ?.slice(0, 5); // Get top 5 margins
         console.log(result, "result");
 
-        const newDates = filteredData.map(d => ({date: d.timezone, rpc: d.rpc}));
+        const newDates = filteredData?.map(d => ({date: d.timezone, rpc: d.rpc}));
 
         const filteredArray = filteredData
-            .map(item => ({
+            ?.map(item => ({
                 date: moment(item.timezone, "YYYY-MM-DD HH:mm:ss").format("YYYY-MM-DD"),
                 hour: moment(item.timezone, "YYYY-MM-DD HH:mm:ss").format("HH"),
                 rpc: isNaN(item.rpc) ? 0 : item.rpc  // Ensure rpc is a number, otherwise default to 0
             }))
-            .filter(item => {
+            ?.filter(item => {
                 const today = moment();
                 const tenDaysAgo = today.clone().subtract(10, 'days');
                 return moment(item.date).isBetween(tenDaysAgo, today, null, '[]');
             });
 
-        const aggregatedData = filteredArray.reduce((acc, item) => {
+        const aggregatedData = filteredArray?.reduce((acc, item) => {
             const key = item.hour; // Group by hour only
             if (!acc[key]) {
                 acc[key] = { ...item, count: 0, totalRpc: 0 };
@@ -716,26 +731,26 @@ const MnetLiveCampaignHistory = ({ params }) => {
         }, {});
 
         // Sort by frequency (count) and filter out any invalid data before taking the top 5
-        const sortedData = Object.values(aggregatedData)
+        const sortedData = Object?.values(aggregatedData)
             .filter(item => !isNaN(item.totalRpc) && item.count > 0)  // Filter out invalid data (NaN or zero count)
             .sort((a, b) => b.count - a.count) // Sort by frequency (count) descending
             .slice(0, 5); // Take top 5
 
         const filteredArrayForMargin = filteredData
-            .map(item => ({
+            ?.map(item => ({
                 date: moment(item.timezone, "YYYY-MM-DD HH:mm:ss").format("YYYY-MM-DD"),
                 hour: moment(item.timezone, "YYYY-MM-DD HH:mm:ss").format("HH"),
                 margin: typeof item.margin === 'string' && item.margin.includes('%')
                     ? parseFloat(item.margin.replace('%', '')) // Remove % and convert to number
                     : isNaN(item.margin) ? 0 : item.margin  // Fallback to 0 if margin is invalid
             }))
-            .filter(item => {
+            ?.filter(item => {
                 const today = moment();
                 const tenDaysAgo = today.clone().subtract(10, 'days');
                 return moment(item.date).isBetween(tenDaysAgo, today, null, '[]');
             });
         
-        const aggregatedMarginData = filteredArrayForMargin.reduce((acc, item) => {
+        const aggregatedMarginData = filteredArrayForMargin?.reduce((acc, item) => {
             const key = item.hour; // Group by hour only
             if (!acc[key]) {
                 acc[key] = { ...item, count: 0, totalMargin: 0 };
@@ -746,7 +761,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
         }, {});
         
         // Sort Margin data and take top 5
-        const sortedMarginData = Object.values(aggregatedMarginData)
+        const sortedMarginData = Object?.values(aggregatedMarginData)
             .filter(item => !isNaN(item.totalMargin) && item.count > 0)  // Filter out invalid data
             .sort((a, b) => b.count - a.count) // Sort by frequency (count) descending
             .slice(0, 5); // Take top 5
@@ -812,8 +827,14 @@ const MnetLiveCampaignHistory = ({ params }) => {
         <Row style={{display:'flex', flexDirection:'column'}}>
             {/* Chart.js integration */}
             {isLoading === false && 
-                <Col>
-                    <h3 style={{textAlign:'center'}}>{decode}</h3>
+                <Col style={{width:'100%', display:'flex', alignItems:'center'}}>
+                    <div style={{width:'100%'}}>
+                        <h3 style={{textAlign:'center'}}>{decode}</h3>
+                    </div>
+                    <div style={{width:'120px'}}>
+                        <p>Timezone: <span style={{fontWeight:'bold'}}>{timeZoneToDisplay.current}</span></p>
+                    </div>
+                    
                 </Col>}
             <Col style={{ height: '400px', marginBottom: '10px' }}> {/* Container with fixed height */}
                 {chartData.dates.length === 0 ? (<div style={{width:'100%', height:'100%', display:'flex', justifyContent:'center', alignItems:'center'}}><Spin size="large" /></div>):(

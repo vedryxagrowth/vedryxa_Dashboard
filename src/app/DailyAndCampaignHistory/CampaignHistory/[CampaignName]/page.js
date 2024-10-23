@@ -535,8 +535,14 @@ export default function CampaignAndAccount({ params }) {
 
     return (
         <Row style={{display:'flex', flexDirection:'column'}}>
-            <Col>
-                <h3 style={{textAlign:'center'}}>{decodedString}</h3>
+            <Col style={{width:'100%', display:'flex', alignItems:'center'}}>
+                <div style={{width:'100%'}}>
+                    <h3 style={{textAlign:'center'}}>{decodedString}</h3>
+                </div>
+                <div style={{width:'120px'}}>
+                    <p>Timezone: <span style={{fontWeight:'bold'}}>{timeZone}</span></p>
+                </div>
+                    
             </Col>
             {/* <h1>{params.campaignAndAccount}hi</h1> */}
             <Col style={{ height: '400px', marginBottom: '10px' }}> {/* Container with fixed height */}

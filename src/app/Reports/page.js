@@ -258,6 +258,8 @@ const MyTablePage = () => {
 
     const accountStatus = useRef();
 
+    const hasFetched = useRef(false);
+
 
     /* cronstatus*/
     let fbCron = useRef();
@@ -488,6 +490,12 @@ const MyTablePage = () => {
 
     const currencyFormatter = (params) => {
         return `$${parseFloat(params.value || 0).toFixed(2)}`; // Ensure 2 decimal places in currency format
+    };
+
+    const numberComparator = (valueA, valueB) => {
+        const numA = parseFloat(valueA) || 0;
+        const numB = parseFloat(valueB) || 0;
+        return numA - numB;
     };
 
 
@@ -964,6 +972,18 @@ const MyTablePage = () => {
         return startDate1.isSame(yesterday1, 'day') && endDate1.isSame(yesterday1, 'day');
     };
 
+    const customNumberComparator = (valueA, valueB) => {
+        const a = parseFloat(valueA);
+        const b = parseFloat(valueB);
+
+        // Handle null/undefined values first (nulls should appear last in the sort order)
+        if (isNaN(a)) return 1;
+        if (isNaN(b)) return -1;
+
+        // Standard comparison for non-null values
+        return a - b;
+    };
+
     const columnDefsObject = {
         campaignname: {
             headerName: 'CampaignName',
@@ -1204,7 +1224,7 @@ const MyTablePage = () => {
             // getMainMenuItems
         },
         'mnet-hour': {
-            headerName: 'M-H',
+            headerName: 'N-H',
             field: 'mnet-hour',
             width: 85,
             sortable: true,
@@ -1712,23 +1732,37 @@ const MyTablePage = () => {
         'fb-hour': { headerName: 'F-H', field: 'fb-hour', width: 85, sortable: true, hide: true, filter: 'agNumberColumnFilter' },
         'mnet-hour': { headerName: 'M-H', field: 'mnet-hour', width: 85, sortable: true, hide: true, filter: 'agNumberColumnFilter' },
         spend: {
-            headerName: 'Spend($)', field: 'spend', width: 150,
-            aggFunc: spender,
-            valueFormatter: params => params.value ? `$${Math.round(params.value * 100) / 100}` : '', sortable: true,
-            filter: 'agNumberColumnFilter'
+            headerName: 'Spend($)',
+            field: 'spend',
+            width: 120,
+            aggFunc: liveSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            valueFormatter: currencyFormatter, // Format display as currency
+            comparator: numberComparator,
         },
         revenue: {
-            headerName: 'Revenue($)', field: 'revenue', width: 150,
-            aggFunc: spender,
-            valueFormatter: params => params.value ? `$${Math.round(params.value * 100) / 100}` : '', sortable: true, filter: 'agNumberColumnFilter'
+            headerName: 'Revenue($)',
+            field: 'revenue',
+            width: 120,
+            aggFunc: liveSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            valueFormatter: currencyFormatter,
+            comparator: numberComparator,
         },
         profit: {
-            headerName: 'Profit($)', field: 'profit', width: 150, cellClassRules: {
-                'font-red': p => p.value < 0
+            headerName: 'Profit($)',
+            field: 'profit',
+            width: 120,
+            aggFunc: liveSpender,
+            sortable: true,
+            cellClassRules: {
+                'font-red': p => p.value < 0 // Conditional formatting for negative profit
             },
-            aggFunc: spender,
-            valueFormatter: params => params.value ? `$${Math.round(params.value * 100) / 100}` : '', sortable: true,
-            headerTooltip: 'Revenue - Spend', filter: 'agNumberColumnFilter'
+            filter: "agNumberColumnFilter",
+            valueFormatter: currencyFormatter,
+            comparator: numberComparator,
         },
         margin: {
             headerName: 'Margin(%)', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: 'Profit/Revenue', filter: 'agNumberColumnFilter',
@@ -2022,17 +2056,17 @@ const MyTablePage = () => {
         },
         spend: {
             headerName: 'Spend($)', field: 'spend', width: 150, aggFunc: spender, sortable: true, filter: 'agNumberColumnFilter',
-            valueFormatter: currencyFormatter
+            valueFormatter: currencyFormatter, comparator: numberComparator
         },
         revenue: {
             headerName: 'Revenue($)', field: 'revenue', width: 150, aggFunc: spender, sortable: true, filter: 'agNumberColumnFilter',
-            valueFormatter: currencyFormatter
+            valueFormatter: currencyFormatter, comparator: numberComparator
         },
         profit: {
             headerName: 'Profit($)', field: 'profit', width: 150, aggFunc: spender, cellClassRules: {
                 'font-red': p => p.value < 0
             }, sortable: true, headerTooltip: 'Revenue - Spend', filter: 'agNumberColumnFilter',
-            valueFormatter: currencyFormatter
+            valueFormatter: currencyFormatter, comparator: numberComparator
         },
         margin: {
             headerName: 'Margin(%)', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: 'Profit/Revenue', filter: true,
@@ -2179,7 +2213,7 @@ const MyTablePage = () => {
         });
         const mainData = fetchData.data;
         let campaignComments = [];
-        if (fetchData.status === 200) {
+        if (fetchData.status === 200 && mainData.length> 0) {
             try {
                 const commentFetch = await axios.get(`https://prodapis.adsgoat.in/Comments/${account}`, {
                     headers: {
@@ -2190,8 +2224,6 @@ const MyTablePage = () => {
             } catch (error) {
                 console.error('Error fetching comments:', error); // Log any errors fetching comments
             }
-        } else {
-            console.error('Error fetching comments:', error);
         }
         setCampaignComments(campaignComments);
         // console.log(mainData, "maindata of functinCall1");
@@ -2858,7 +2890,12 @@ const MyTablePage = () => {
         }
     };
     useEffect(() => {
-        fetchCampaignComments(); // Fetch comments whenever refrst changes
+        // Ensure it only runs if `refrst` changes after the first render
+        if (hasFetched.current) {
+            fetchCampaignComments();
+        } else {
+            hasFetched.current = true; // Set it to true after first render
+        }
     }, [refrst]); // Run this effect when refrst changes
 
     // useEffect(() => {
@@ -2921,6 +2958,15 @@ const MyTablePage = () => {
                         </div>
                     );
                 }
+
+                const getEditedUserAndTime = (campaignName, newaccount) =>{
+                    const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
+                    console.log(relatedStatus, "relatedStatus");
+                    const relatedStatusEditedTime = relatedStatus ? relatedStatus : null;
+                    // console.log(relatedStatusTrue);
+                    return relatedStatusEditedTime;
+                }
+
                 const getStatusForCampaign = (campaignName, newaccount) =>{
                     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
                     console.log(relatedStatus, "relatedStatus");
@@ -2938,6 +2984,8 @@ const MyTablePage = () => {
                     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                     return relatedComment ? relatedComment.starred : false;
                 };
+
+                const editUserANdTime = getEditedUserAndTime(campaignName, newaccount);
                 const relatedStatus = getStatusForCampaign(campaignName, newaccount);
                 const relatedComment = getCommentForCampaign(campaignName);
                 const isStarred = getStarredForCampaign(campaignName);
@@ -3074,11 +3122,26 @@ const MyTablePage = () => {
                 const handleCancels = () => {
                     setIsModalVisibles(false);
                 };
+
+                const CustomTooltipContent = ({editedTime, usercommit}) => (
+                    <div style={{ padding: '5px', borderRadius: '5px' }}>
+                      <p style={{ margin: 0, color:  "#ffffff" }}>{usercommit}</p>
+                      <p style={{ margin: 0, color: "#ffffff" }}>{editedTime}</p>
+                    </div>
+                );
     
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                        {relatedStatus === true && <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }}/>}
-                        {relatedStatus === false && <CloseCircleFilled style={{ color: 'red', fontSize: '15px' , marginRight: relatedComment ? "10px" : '0px' }}/>}
+                        {relatedStatus === true && 
+                            <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit}/>}>
+                                <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }}/>
+                            </Tooltip>
+                        }
+                        {relatedStatus === false && 
+                            <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit}/>}>
+                                <CloseCircleFilled style={{ color: 'red', fontSize: '15px' , marginRight: relatedComment ? "10px" : '0px' }}/>
+                            </Tooltip>
+                        }
                         {relatedComment && (
                             starred ? (
                                 <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: "gold"}} />
@@ -3366,7 +3429,7 @@ const MyTablePage = () => {
                         </Tooltip>
                         <span
                             onClick={() => {
-                                const url = `/CampaignHistory/${params.value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                                const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                                 window.open(url, '_blank');
                             }}
                         >
@@ -4322,7 +4385,7 @@ const MyTablePage = () => {
 
     // console.log(fixedFooter, "fixed");
 
-
+    console.log(dailyData, "Daily");
 
     return (
         <div className='reports-container'>
