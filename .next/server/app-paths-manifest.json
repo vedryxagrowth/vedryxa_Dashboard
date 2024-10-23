@@ -1,5 +1,6 @@
 {
-  "/LiveHistory/LiveCampaignHistory/[CampaignName]/page": "app/LiveHistory/LiveCampaignHistory/[CampaignName]/page.js",
+  "/page": "app/page.js",
   "/Dashboard/page": "app/Dashboard/page.js",
+  "/NewUser/page": "app/NewUser/page.js",
   "/Reports/page": "app/Reports/page.js"
 }

@@ -1,10 +1,9 @@
 {
   "pages": {
-    "/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page": [
+    "/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page.css",
-      "static/chunks/app/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page.js"
+      "static/chunks/app/page.js"
     ],
     "/layout": [
       "static/chunks/webpack.js",
@@ -12,23 +11,23 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/Reports/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/Reports/page.css",
-      "static/chunks/app/Reports/page.js"
-    ],
     "/Dashboard/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/css/app/Dashboard/page.css",
       "static/chunks/app/Dashboard/page.js"
     ],
-    "/LiveHistory/LiveCampaignHistory/[CampaignName]/page": [
+    "/Reports/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/LiveHistory/LiveCampaignHistory/[CampaignName]/page.css",
-      "static/chunks/app/LiveHistory/LiveCampaignHistory/[CampaignName]/page.js"
+      "static/css/app/Reports/page.css",
+      "static/chunks/app/Reports/page.js"
+    ],
+    "/NewUser/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/NewUser/page.css",
+      "static/chunks/app/NewUser/page.js"
     ]
   }
 }
