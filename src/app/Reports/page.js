@@ -3250,6 +3250,13 @@ const MyTablePage = () => {
                         </div>
                     );
                 }
+                const getEditedUserAndTime = (campaignName, newaccount) =>{
+                    const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
+                    console.log(relatedStatus, "relatedStatus");
+                    const relatedStatusEditedTime = relatedStatus ? relatedStatus : null;
+                    // console.log(relatedStatusTrue);
+                    return relatedStatusEditedTime;
+                }
                 const getStatusForCampaign = (campaignName, newaccount) =>{
                     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
                     console.log(relatedStatus, "relatedStatus");
@@ -3267,6 +3274,7 @@ const MyTablePage = () => {
                     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                     return relatedComment ? relatedComment.starred : false;
                 };
+                const editUserANdTime = getEditedUserAndTime(campaignName, newaccount);
                 const relatedStatus = getStatusForCampaign(campaignName, newaccount);
                 const relatedComment = getCommentForCampaign(campaignName);
                 const isStarred = getStarredForCampaign(campaignName);
@@ -3397,11 +3405,26 @@ const MyTablePage = () => {
                 const handleCancels = () => {
                     setIsModalVisibles(false);
                 };
+
+                const CustomTooltipContent = ({editedTime, usercommit}) => (
+                    <div style={{ padding: '5px', borderRadius: '5px' }}>
+                      <p style={{ margin: 0, color:  "#ffffff" }}>{usercommit}</p>
+                      <p style={{ margin: 0, color: "#ffffff" }}>{editedTime}</p>
+                    </div>
+                );
     
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                    {relatedStatus === true && <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }}/>}
-                    {relatedStatus === false && <CloseCircleFilled style={{ color: 'red', fontSize: '15px' , marginRight: relatedComment ? "10px" : '0px' }}/>}
+                        {relatedStatus === true && 
+                            <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit}/>}>
+                                <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }}/>
+                            </Tooltip>
+                        }
+                        {relatedStatus === false && 
+                            <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit}/>}>
+                                <CloseCircleFilled style={{ color: 'red', fontSize: '15px' , marginRight: relatedComment ? "10px" : '0px' }}/>
+                            </Tooltip>
+                        }
                         {relatedComment && (
                             starred ? (
                                 <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: "gold" }} />
@@ -3488,6 +3511,12 @@ const MyTablePage = () => {
                             Error: campaignid or adsetid missing for {campaignName}
                         </div>
                     );
+                }const getEditedUserAndTime = (campaignName, newaccount) =>{
+                    const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
+                    console.log(relatedStatus, "relatedStatus");
+                    const relatedStatusEditedTime = relatedStatus ? relatedStatus : null;
+                    // console.log(relatedStatusTrue);
+                    return relatedStatusEditedTime;
                 }
                 const getStatusForCampaign = (campaignName, newaccount) =>{
                     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
@@ -3506,6 +3535,7 @@ const MyTablePage = () => {
                     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                     return relatedComment ? relatedComment.starred : false;
                 };
+                const editUserANdTime = getEditedUserAndTime(campaignName, newaccount);
                 const relatedStatus = getStatusForCampaign(campaignName, newaccount);
                 const relatedComment = getCommentForCampaign(campaignName);
                 const isStarred = getStarredForCampaign(campaignName);
@@ -3631,11 +3661,26 @@ const MyTablePage = () => {
                 const handleCancel = () => {
                     setIsModalVisible(false);
                 };
+
+                const CustomTooltipContent = ({editedTime, usercommit}) => (
+                    <div style={{ padding: '5px', borderRadius: '5px' }}>
+                      <p style={{ margin: 0, color:  "#ffffff" }}>{usercommit}</p>
+                      <p style={{ margin: 0, color: "#ffffff" }}>{editedTime}</p>
+                    </div>
+                );
     
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                        {relatedStatus === true && <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }}/>}
-                        {relatedStatus === false && <CloseCircleFilled style={{ color: 'red', fontSize: '15px' , marginRight: relatedComment ? "10px" : '0px' }}/>}
+                        {relatedStatus === true && 
+                            <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit}/>}>
+                                <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }}/>
+                            </Tooltip>
+                        }
+                        {relatedStatus === false && 
+                            <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit}/>}>
+                                <CloseCircleFilled style={{ color: 'red', fontSize: '15px' , marginRight: relatedComment ? "10px" : '0px' }}/>
+                            </Tooltip>
+                        }
                         {relatedComment && (
                             starred ? (
                                 <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: 'gold' }} />
