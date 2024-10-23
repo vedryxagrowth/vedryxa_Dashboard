@@ -1,6 +1,6 @@
 "use client"
 import React from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
 import axios from 'axios';
@@ -50,6 +50,8 @@ const MnetLiveAdsetHistory = ({params}) => {
     const [decode, setDebounc] = useState("");
 
     const [chartData, setChartData] = useState({ dates: [], sortedData: [], sortedMarginData: [], rpcDate:[], hoursDate:[], hours: [], spend: [], revenue: [], profit: [], margin: [] });
+
+    const timeZoneToDisplay = useRef();
 
     const spender = (params) => {
         var total = 0;
@@ -395,6 +397,12 @@ const MnetLiveAdsetHistory = ({params}) => {
         adsetid: { headerName: 'AdsetId', field: 'adsetId' },
         campaignid: { headerName: 'CompaignId', field: 'campaignId' },
         timezone: { headerName: 'TimeZone', field: 'timezone'},
+        "fb-hour": {
+            headerName:'F-H', field: "hour"
+        },
+        "mnet-hour":{
+            headerName:'N-H', field:"updatedHour"
+        }
     };
 
     const getColumnDefs = (order) => {
@@ -407,7 +415,7 @@ const MnetLiveAdsetHistory = ({params}) => {
         // const data = await fetchData.json();
         const mainData = fetchData.data;
         console.log(mainData.columnStructure, "columnStructure");
-        const filteredData = mainData.columnStructure.filter((each)=> each !== "fb-hour" && each !== "mnet-hour");
+        const filteredData = mainData.columnStructure.filter((each)=> each !== "actions");
         console.log(filteredData);
         setColumnStructure(getColumnDefs(filteredData));
         // setRowStructure(mainData.rows); 
@@ -419,6 +427,7 @@ const MnetLiveAdsetHistory = ({params}) => {
         const decodedString = decodeURIComponent(paramsData[0]);
         const accountNumber = paramsData[1];
         const timeZone = paramsData[2];
+        timeZoneToDisplay.current = timeZone;
         // console.log(paramsData[3], "network");
         let network = paramsData[3];
         setDebounc(decodedString);
@@ -469,7 +478,7 @@ const MnetLiveAdsetHistory = ({params}) => {
             
             return(
                 {
-                    date: eachData[time].split(" ")[0],
+                    date: eachData[`${timeZone}Date`],
                     campaignName: eachData.campaign_name,
                     adsetName: eachData.adsetName,
                     // 'fb-hour': eachData.hour,
@@ -488,7 +497,9 @@ const MnetLiveAdsetHistory = ({params}) => {
                     ncpl:ncpl,
                     adsetId: eachData.adset_id,
                     campaignId: eachData.campaign_id,
-                    timezone: eachData[time],
+                    timezone: eachData[timeZone],
+                    hour: eachData.hour,
+                    updatedHour: eachData.updatedHour,
                 }
             )
         })
@@ -659,9 +670,16 @@ const MnetLiveAdsetHistory = ({params}) => {
     return (
         <Row style={{display:'flex', flexDirection:'column'}}>
             {isLoading === false && 
-                <Col>
-                    <h3 style={{textAlign:'center'}}>{decode}</h3>
-                </Col>}
+                <Col style={{width:'100%', display:'flex', alignItems:'center'}}>
+                    <div style={{width:'100%'}}>
+                        <h3 style={{textAlign:'center'}}>{decode}</h3>
+                    </div>
+                    <div style={{width:'120px'}}>
+                        <p>Timezone: <span style={{fontWeight:'bold'}}>{timeZoneToDisplay.current}</span></p>
+                    </div>
+                    
+                </Col>
+            }
             <Col style={{ height: '400px', marginBottom: '10px' }}> {/* Container with fixed height */}
             
             {chartData.dates.length === 0 ? (<div style={{width:'100%', height:'100%', display:'flex', justifyContent:'center', alignItems:'center'}}><Spin size="large" /></div>):(

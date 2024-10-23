@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 // pages/index.js
 import React from 'react';
 import axios from 'axios';
-import { Select, Tag, theme } from 'antd';
+import { Select, Tag, theme, Button } from 'antd';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
 import debounce from 'lodash.debounce';
@@ -20,6 +20,8 @@ Chart.register(...registerables);
 // }
 
 import { DatePicker, Space, ConfigProvider, Flex, Spin, Skeleton } from 'antd';
+import { generate } from '@ant-design/colors'; // For dynamic color generation
+import { ReloadOutlined } from "@ant-design/icons";
 const { RangePicker } = DatePicker;
 import locale from 'antd/es/date-picker/locale/en_US';
 const yesterday = dayjs().subtract(1, 'days').format('YYYY-MM-DD');
@@ -189,6 +191,11 @@ const Dashboard = () => {
     const [startDate, setStartDate] = useState(yesterday);
 
     const [endDate, setEndDate] = useState(yesterday);
+
+    const [newstartDate, setNewStartDate] = useState(yesterday);
+
+    const [newendDate, setNewEndDate] = useState(yesterday);
+
     const [darkMode, setDarkMode] = useState(false);
     const [data, setData] = useState([]);
     // const toggleTheme = () => {
@@ -224,34 +231,57 @@ const Dashboard = () => {
 
     const [rowData, setRowData] = useState([]);
     const [top5Campaigns, setTop5Campaigns] = useState([]);
+    const [selectedDates, setSelectedDates] = useState(defaultDates);
+    const [isPickerOpen, setIsPickerOpen] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
 
     // const functionalCall = (data) => {
     //     setData(data);
     // }
 
     const handleChangeDates = (dates) => {
-        if (dates && dates.length === 2) {
-            setSkeletonLoading(true);
-            const [start, end] = dates;
-
-            const formattedStart = start.format('YYYY-MM-DD');
-            const formattedEnd = end.format('YYYY-MM-DD');
-
-            if (startDate !== formattedStart || endDate !== formattedEnd) {
-                setStartDate(formattedStart);
-                setEndDate(formattedEnd);
-            } else {
-                // Trigger a manual re-render if the dates are the same
-                setStartDate('');
-                setEndDate('');
-                setTimeout(() => {
-                    setStartDate(formattedStart);
-                    setEndDate(formattedEnd);
-                }, 0);
-            }
-        }
+        setSelectedDates(dates || []); // Save selected dates in state
+        setIsPickerOpen(true); // Ensure the RangePicker stays open after date selection
     };
 
+    const onClickCloseButton = () => {
+        setIsPickerOpen(false)
+        setSelectedDates([dayjs(startDate), dayjs(endDate)])
+        
+    }
+    
+    // Handle the "Submit" button click
+    const handleSubmit = () => {
+      if (selectedDates.length === 1) {
+        const [start] = selectedDates;
+        const formattedStart = start ? start.format('YYYY-MM-DD') : '';
+        setStartDate(formattedStart);
+        setEndDate(''); // Keep endDate empty if only startDate is selected
+      } else if (selectedDates.length === 2) {
+        const [start, end] = selectedDates;
+        const formattedStart = start ? start.format('YYYY-MM-DD') : '';
+        const formattedEnd = end ? end.format('YYYY-MM-DD') : '';
+        if (startDate !== formattedStart || endDate !== formattedEnd) {
+          setSkeletonLoading(true); // Start loading when dates change
+        }
+        setStartDate(formattedStart);
+        setEndDate(formattedEnd);
+      }
+    
+      // Close the date picker only after clicking submit
+      setIsPickerOpen(false);
+    };
+    
+    // Handle closing when clicking outside the picker
+    const handleOpenChange = (open) => {
+      if (!open && !isPickerOpen) {
+        // This condition ensures we only close when the user clicks outside
+        setIsPickerOpen(false);
+      } else if (open) {
+        setIsPickerOpen(true); // Ensure it remains open if interacting with it
+      }
+    };
+    
     function getTotalEstimatedRevenue(fullData) {
         const total = fullData.reduce((sum, item) => {
             // Check if 'estimated_revenue' exists in the object and is a number
@@ -378,6 +408,7 @@ const Dashboard = () => {
     }
 
     const functionCallForResponse = debounce(async (data) => {
+        // console.log(moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A'), "start");
         const transformObjectKeys = (obj) => {
             const transformedObject = {};
         
@@ -417,10 +448,12 @@ const Dashboard = () => {
         // };
 
         const transformedObject = transformObjectKeys(data);
+        // console.log(moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A'), "end");
         // console.log(transformedObject);
         const response = await axios.post(`https://prodapis.adsgoat.in/Dashboard?timezone=${time}&start_date=${startDate}&end_date=${endDate}`, { formattedData: [transformedObject] });
         const responseData = response.data;
         console.log(responseData, "response");
+        // console.log(moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A'), "deadend");
         const functionForDetailsUpdate = async () => {
             revenue1.current = getTotalEstimatedRevenue(responseData);
             spend1.current = getTotalEstimatedSpend(responseData);
@@ -663,7 +696,9 @@ const Dashboard = () => {
 
     useEffect(() => {
         // if(selectedItems.length > 0){
-        functionCallForResponse(selectedItems);
+        if(startDate !== '' && endDate !== ''){
+            functionCallForResponse(selectedItems);
+        }
         // }
     }, [selectedItems, time, startDate, endDate])
 
@@ -1006,36 +1041,41 @@ const Dashboard = () => {
             field: "accountNumber", minWidth:180
 
         }, // Group by Network
-        {field:'Date'},
+        {field:'Date',
+        minWidth: 125},
         {
             field: "spend",
             aggFunc: spender,
             valueFormatter: currencyFormatter,
-            sort: 'desc'
+            minWidth: 125
         }, // Summing Spend column
         {
             headerName: 'Revenue',
             field: "estimated_revenue",
             aggFunc: spender,
             valueFormatter: currencyFormatter,
+            minWidth: 125
         }, // Summing Revenue column
         {
             field: "profit",
             aggFunc: spender,
-            sort: 'desc',
             cellClassRules: {
                 'font-red': p => p.value < 0
             },
             valueFormatter: currencyFormatter,
+            minWidth: 125
         },
         {
             field: "revenuePartner",
+            minWidth: 180
         }, // Group by Holder
         {
-            field: "holder",// Group by MediaBuyerName
+            field: "holder",
+            minWidth: 125// Group by MediaBuyerName
         },
         {
-            field: "mediaBuyerName", headerName:'User'// Group by MediaBuyerName
+            field: "mediaBuyerName", headerName:'User',
+            minWidth: 125// Group by MediaBuyerName
         },
     ]);
 
@@ -1092,10 +1132,44 @@ const Dashboard = () => {
         enableRowGroup: true, // Enable row grouping
     });
 
+
+    const refreshUsers = () => {
+        try {
+            setSkeletonLoading(true);
+            functionCallForResponse(selectedItems);  
+            
+        } catch (error) {
+            console.error("Error refreshing account data:", error);
+            
+        } 
+    };
+
     //   function currencyFormatter(params) {
     //     const value = params.value || 0; // Ensure value is defined and default to 0
     //     return `$${value}`; // Format the value as currency
     //   }
+
+    const getRandomColor = () => {
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+      };
+      
+      const colorMap = {};
+      
+      const getColorForValue = (value) => {
+        if (!colorMap[value]) {
+          colorMap[value] = getRandomColor(); // Generate and assign a color
+        }
+        return colorMap[value]; // Return the assigned color
+      };
+
+
+
+
 
 
     // console.log(rowData?.map(each=> each.profit > 0));
@@ -1182,8 +1256,11 @@ const Dashboard = () => {
                                 <ConfigProvider locale={locale}>
                                     <RangePicker
                                         presets={rangePresets}
-                                        onChange={handleChangeDates}
-                                        defaultValue={defaultDates}
+                                        value={selectedDates}
+                                        onCalendarChange={handleChangeDates}
+                                        open={isPickerOpen} // Control the open/close state
+                                        onOpenChange={handleOpenChange} // Handle outside click
+                                        onClick={() => setIsPickerOpen(true)} // Open the picker when clicked
                                         disabledDate={disabledDate}
                                         format="YYYY-MM-DD"
                                         style={{
@@ -1192,8 +1269,33 @@ const Dashboard = () => {
                                             color: theme === 'dark' ? 'white' : undefined,
                                         }}
                                         dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}
+                                        renderExtraFooter={() => (
+                                            <div style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '8px', paddingTop: '5px', paddingBottom: '5px' }}>
+                                            <Button
+                                                style={{ marginRight: '8px' }} // Adds spacing between buttons
+                                                onClick={onClickCloseButton} // Close the picker
+                                            >
+                                                Close
+                                            </Button>
+                                            <Button
+                                                type="primary"
+                                                onClick={handleSubmit}
+                                            >
+                                                Submit
+                                            </Button>
+                                            </div>
+                                        )}
                                     />
                                 </ConfigProvider>
+                            </Col>
+                            <Col>
+                                <Button 
+                                    type="default" 
+                                    icon={<ReloadOutlined />} 
+                                    style={{ float: "right", marginLeft: "10px", backgroundColor: '#C7F39A' }} 
+                                    onClick={refreshUsers}  // Call refresh function when clicked
+                                >
+                                </Button>
                             </Col>
                         </Row>
                     </div>
@@ -1539,7 +1641,7 @@ const Dashboard = () => {
                         >
                             <Line
                                 data={{
-                                    labels: chartData.dates, // Labels for X-axis (dates)
+                                    labels: chartData.dates, // X-axis labels (dates)
                                     datasets: [
                                     {
                                         label: 'Spend',
@@ -1627,7 +1729,10 @@ const Dashboard = () => {
                                     x: {
                                         ticks: {
                                         padding: 30,
-                                        color: darkMode ? '#fff' : '#000',
+                                        color: (context) => {
+                                            const label = chartData.dates[context.index];
+                                            return getColorForValue(label);
+                                        },
                                         },
                                         grid: {
                                         color: darkMode ? '#444' : '#e0e0e0',
@@ -1636,8 +1741,8 @@ const Dashboard = () => {
                                     y: {
                                         beginAtZero: true,
                                         ticks: {
-                                        callback: function(value) {
-                                            return value.toFixed(2); // Ensure decimal values are displayed
+                                        callback: function (value) {
+                                            return value.toFixed(2);
                                         },
                                         color: darkMode ? '#fff' : '#000',
                                         },
@@ -1653,24 +1758,27 @@ const Dashboard = () => {
                                         },
                                     },
                                     tooltip: {
+                                        mode: 'index', // Ensure all datasets at this x-axis point are shown
+                                        intersect: true, // Show tooltip only when hovering directly over a bubble/point
                                         callbacks: {
-                                        // Custom tooltip formatting to show chartData.column value instead of date
-                                        label: function(tooltipItem) {
-                                            const index = tooltipItem.dataIndex; // Get the index of the hovered point
-                                            const datasetLabel = tooltipItem.dataset.label || ''; // Dataset label (e.g. 'Spend')
-                                            const value = tooltipItem.raw; // Value from the dataset at the hovered point
-                                            const columnValue = chartData.newDates[index]; // Get the corresponding value from chartData.column
-                                            return `${datasetLabel}: ${value} (Date: ${columnValue})`; // Custom label
+                                        label: function (tooltipItem) {
+                                            const index = tooltipItem.dataIndex;
+                                            const dataset = tooltipItem.dataset;
+                                            const value = dataset.data[index];
+                                            const datasetLabel = dataset.label || '';
+
+                                            // Return label with value and date
+                                            return `${datasetLabel}: ${value} (Date: ${chartData.newDates[index]})`;
                                         },
                                         },
+                                        displayColors: true, // Enable color box for each dataset
+                                        boxWidth: 15, // Adjust the width of the color box
+                                        boxHeight: 15, // Adjust the height of the color box
                                     },
                                     },
                                 }}
                                 height={350}
                             />
-
-
-
                         </Row>
     
                         <Row style={{ display: 'flex', flexDirection: 'column' }}>
@@ -1713,7 +1821,7 @@ const Dashboard = () => {
     
                         </Row>
     
-                        <Row style={{ display: 'flex', flexDirection: 'column' }}>
+                        <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
                             <Col>
                                 <h2>Profit Accounts</h2>
                             </Col>
@@ -1736,7 +1844,7 @@ const Dashboard = () => {
                             </Col>
     
                         </Row>
-                        <Row style={{ display: 'flex', flexDirection: 'column' }}>
+                        <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
                             <Col>
                                 <h2>Loss Accounts</h2>
                             </Col>
@@ -1756,7 +1864,7 @@ const Dashboard = () => {
                                 </div>
                             </Col>
                         </Row>
-                        <Row style={{ display: 'flex', flexDirection: 'column' }}>
+                        <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
                             <Col>
                                 <h2>Top 5 Campaigns</h2>
                             </Col>

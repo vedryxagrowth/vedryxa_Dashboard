@@ -1061,6 +1061,7 @@ const UsersTable = () => {
                         <Spin />
                     ) : usersData.length > 0 ? (
                         <Table
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             dataSource={searchInput ? filteredData.map((item, index) => ({ ...item, key: index })) : filteredRoleData.map((item, index) => ({ ...item, key: index }))}
                             columns={columns}
                             pagination={{ pageSize: paginationSize }}
@@ -1071,6 +1072,7 @@ const UsersTable = () => {
                     ) : (
                         <Result
                             status="404"
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             title="No Users Data Available"
                             extra={<Button type="primary" onClick={shownewuserdrawar}>
                                 Create User
@@ -1146,6 +1148,7 @@ const UsersTable = () => {
                     ) : AccountsData.length > 0 ? (
                         <Table
                             bordered
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             dataSource={newSearchInput ? accFilteredData.map((item, index) => ({ ...item, key: index })) : filteredAccountData.map((item, index) => ({ ...item, key: index }))}
                             columns={Accountscolumn}
                             pagination={{ pageSize: paginationSize }}
@@ -1154,6 +1157,7 @@ const UsersTable = () => {
                     ) : (
                         <Result
                             status="404"
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             title="No Accounts Data Available"
                             subTitle="Sorry, this page contains no data."
                             extra={<Button type="primary" onClick={shownnewaccountdrawar}>
@@ -1186,6 +1190,7 @@ const UsersTable = () => {
                                         <span style={{ color: "#B4B4B4", display: 'block' }}>Network</span>
                                         <Select
                                             onChange={onChangeNetwork}
+                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                             defaultValue="All"
                                             style={{ width: "100%", marginTop: '8px' }}
                                             options={availableNetworks.map((item) => ({
@@ -1198,6 +1203,7 @@ const UsersTable = () => {
                                         <span style={{ color: "#B4B4B4", display: 'block' }}>Status</span>
                                         <Select
                                             onChange={onChangeStatus}
+                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                             defaultValue="All"
                                             style={{ width: "100%", marginTop: '8px' }}
                                             options={accountStatus.map((item) => ({
@@ -1228,6 +1234,7 @@ const UsersTable = () => {
                     ) : networksData.length > 0 ? ( 
                         <Table
                             bordered
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             dataSource={netSearchInput ? networkFilteredData.map((item, index) => ({ ...item, key: item.key, id: index })) : filteredNetworkData.map((item, index) => ({ ...item, key: item.key, id: index }))}
                             columns={networksColumn}
                             pagination={{ pageSize: paginationSize }}
@@ -1238,6 +1245,7 @@ const UsersTable = () => {
                     ) : (
                         <Result
                             status="404"
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             title="No Networks Data Available"
                             subTitle="Sorry, this page contains no data."
                             extra={<Button type="primary" onClick={showNetworkDrawer}>

@@ -487,8 +487,14 @@ export default function AdsetNameAndAccount({params}){
 
     return(
         <Row style={{display:'flex', flexDirection:'column'}}>
-            <Col>
-                <h3 style={{textAlign:'center'}}>{decodedString}</h3> 
+            <Col style={{width:'100%', display:'flex', alignItems:'center'}}>
+                <div style={{width:'100%'}}>
+                    <h3 style={{textAlign:'center'}}>{decodedString}</h3>
+                </div>
+                <div style={{width:'120px'}}>
+                    <p>Timezone: <span style={{fontWeight:'bold'}}>{timeZone}</span></p>
+                </div>
+                    
             </Col>
             <Col style={{ height: '400px', marginBottom: '10px' }}> {/* Container with fixed height */}
               {chartData.dates.length === 0 ? (<div style={{width:'100%', height:'100%', display:'flex', justifyContent:'center', alignItems:'center'}}><Spin size="large" /></div>):
