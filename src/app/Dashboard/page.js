@@ -1180,7 +1180,7 @@ const Dashboard = () => {
                 <div style={{ padding: '20px' }}>
                 <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ width: '40%' }}>
-                        <h1 style={{ color: darkMode ? '#007BFF' : '#fff', fontSize: '22px', textAlign: 'start' }}>
+                        <h1 style={{  color: theme === 'dark' ? 'white' : 'black' , fontSize: '22px', textAlign: 'start' }}>
                             Welcome, {userdetails?.userName} !
                         </h1>
                     </div>
@@ -1821,7 +1821,7 @@ const Dashboard = () => {
     
                         </Row>
     
-                        <Row style={{ display: 'flex', flexDirection: 'column' }}>
+                        <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
                             <Col>
                                 <h2>Profit Accounts</h2>
                             </Col>
@@ -1844,7 +1844,7 @@ const Dashboard = () => {
                             </Col>
     
                         </Row>
-                        <Row style={{ display: 'flex', flexDirection: 'column' }}>
+                        <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
                             <Col>
                                 <h2>Loss Accounts</h2>
                             </Col>
@@ -1864,7 +1864,7 @@ const Dashboard = () => {
                                 </div>
                             </Col>
                         </Row>
-                        <Row style={{ display: 'flex', flexDirection: 'column' }}>
+                        <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
                             <Col>
                                 <h2>Top 5 Campaigns</h2>
                             </Col>

@@ -35,12 +35,13 @@ import { RiLiveFill } from 'react-icons/ri';
 import { FaDailymotion } from 'react-icons/fa';
 const { Text } = Typography;
 const contentStyle = {
-    margin: 0,
+    margin: "10px",
     // height: '800px',
     color: '#66fc03',
     lineHeight: '160px',
     textAlign: 'center',
     background: '#fbfcfa',
+    
 };
 
 // function debounce(func, wait) {

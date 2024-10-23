@@ -837,3 +837,47 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 .ag-header-cell[col-id="actions"] .ag-header-cell-menu-button {
   display: none !important;  /* Hide the menu button */
 }
+
+.dark-theme .ant-table {
+  background-color: #333 !important;
+  color: #fff !important;
+}
+.notifiview{
+  position: absolute;
+    background-color: white;
+    z-index: 99999999;
+    padding: 10px 16px;
+    /* border: solid 1px lightslategray; */
+    left: auto;
+    right: 60px;
+    top: 73px;
+    width: 300px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    height: 300px ;
+    overflow-y: scroll;
+    scrollbar-width: none;
+  
+}
+.Badge{
+  position: relative;
+    background-color: red;
+    padding: 2px 5px;
+    border-radius: 50%;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    top: -17px;
+    left: auto;
+    right: 13px;
+}
+.dark-mode .Badge{
+  color: black;
+}
+ .ag-header {
+  background-color: #c7f39a57 !important;
+}
+.dark-mode .notifiview{
+  color: #fff;
+  background-color: #333333;
+}

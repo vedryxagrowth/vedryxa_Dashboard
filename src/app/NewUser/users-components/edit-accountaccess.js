@@ -114,8 +114,12 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
 
       if (response.status === 200) {
         message.success("Account created successfully");
+
+        
+
         form.resetFields();
-        onClose(); // Close the drawer after successful submission
+        onClose(newValues);
+        // onClose(); // Close the drawer after successful submission
       } else {
         message.error("Failed to create account");
       }

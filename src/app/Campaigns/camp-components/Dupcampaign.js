@@ -27,21 +27,23 @@ const positionOptions = {
         { key: "instream_video", label: "Facebook In-Stream Videos" },
         { key: "facebook_reels", label: "Facebook Reels" },
         { key: "profile_feed", label: "Facebook Profile Feed" },
-        { key: "search", label: "Facebook search" }
+        { key: "search", label: "Facebook search" },
+        { key: "story_fb", label: "Facebook Stories" }
     ],
     instagram: [
         { key: "stream", label: "Instagram Stream" },
-        { key: "story", label: "Instagram Story" },
+        { key: "story_in", label: "Instagram Story" },
         { key: "explore", label: "Instagram Explore" },
         { key: "explore_home", label: "Instagram Explore Home" },
         { key: "reels", label: "Instagram Reels" },
-        { key: "profile_feed", label: "Instagram Profile Feed" },
+        { key: "profile_feed_in", label: "Instagram Profile Feed" },
         { key: "ig_search", label: "Instagram Search" },
         { key: "profile_reels", label: "Instagram Profile Reels" }
     ],
     messenger: [
         { key: "messenger_home", label: "Messenger Home" },
-        { key: "story", label: "Messenger Story" }
+        { key: "story_ms", label: "Messenger Story" },
+        { key: "sponsored_messages", label: "Messenger sponsored messages" }
     ],
     audience_network: [
         { key: "classic", label: "Audience Network Classic" },
@@ -512,7 +514,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
     const handleBidStrategyChange = (value) => {
         // Show bid_amount if the selected bid strategy is "Bid Cap", otherwise hide it
         // setShowBidAmount(value === "LOWEST_COST_WITH_BID_CAP");
-        setShowBidAmount(["LOWEST_COST_WITH_BID_CAP", "COST_CAP"].includes(value));
+        setShowBidAmount(value === "LOWEST_COST_WITH_BID_CAP" || value === "COST_CAP");
+        // setShowBidAmount(["LOWEST_COST_WITH_BID_CAP", "COST_CAP"].includes(value));
     };
     // const Accountchange = (e) => {
     //     setAccountNumber(e.target.value);
@@ -854,6 +857,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
                 console.log('Form data submitted successfully');
                 onClose(); // Close the drawer or perform any other action
                 message.success("Campaign was created");
+                // changeRRefrst();
             } else {
                 console.error('Failed to submit form data');
             }
@@ -1401,6 +1405,40 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
                                         />
                                     </Form.Item>
                                     {(DuplicatedampaignData?.camapaignlevel?.Bid_strategy === "LOWEST_COST_WITH_BID_CAP" ||
+                                        DuplicatedampaignData?.camapaignlevel?.Bid_strategy === "COST_CAP" || showBidAmount) && (
+                                            <Form.Item
+                                                name="bid_amount"
+                                                label={<span style={{ color: "#B4B4B4" }}>Bid_amount</span>}
+                                                rules={[
+                                                    {
+                                                        required: true,
+                                                        message: "Please enter a bid amount!",
+                                                    },
+                                                    {
+                                                        validator: (_, value) =>
+                                                            value && !isNaN(value) && parseFloat(value) > 0
+                                                                ? Promise.resolve()
+                                                                : Promise.reject(new Error("Please enter a valid float value!")),
+                                                    },
+                                                ]}
+                                                style={{ flex: 0.1, marginLeft: "2%" }}
+                                            >
+                                                <Input
+                                                    type="number"
+                                                    placeholder="$"
+                                                    onKeyPress={(event) => {
+                                                        const charCode = event.charCode;
+                                                        const charStr = String.fromCharCode(charCode);
+                                                        const regex = /^[0-9]*\.?[0-9]*$/;
+                                                        if (!regex.test(charStr)) {
+                                                            event.preventDefault();
+                                                        }
+                                                    }}
+                                                />
+                                            </Form.Item>
+                                        )}
+
+                                    {/* {(DuplicatedampaignData?.camapaignlevel?.Bid_strategy === "LOWEST_COST_WITH_BID_CAP" ||
                                         DuplicatedampaignData?.camapaignlevel?.Bid_strategy === "COST_CAP"
                                     ) ? (
                                         <Form.Item
@@ -1462,7 +1500,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
                                                 }
                                             }}
                                         />
-                                    </Form.Item>))}
+                                    </Form.Item>))} */}
 
 
                                 </div>

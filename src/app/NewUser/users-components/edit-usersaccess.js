@@ -258,13 +258,19 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                         });
         
                     if (response.status === 200) {
-                        // console.log('User updated successfully');
                         message.success("User Edits updated successfully"); // Display success message
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1500);
-                        setIsModalVisible(false); // Close modal after success
-                        onClose(); // Close drawer
+
+                        // Pass the updated user data back to the parent to update the table
+                        const updatedUserData = { ...editeddata, ...formattedData };
+                        
+                        // Call onClose and pass the updated data to the parent
+                        onClose(updatedUserData);
+                        
+                        // setTimeout(() => {
+                        //     window.location.reload();
+                        // }, 1500);
+
+                        setIsModalVisible(false); 
                     }
                      else {
                         console.error('Failed to update user');
