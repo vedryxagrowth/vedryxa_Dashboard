@@ -161,7 +161,10 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
             rules={[{ required: true, message: "Please select a Spend Partner!" }]}
             disabled  style={{backgroundColor:'transparent', color: 'black'}}
           >
-            <Select placeholder="Select a partner" disabled  style={{backgroundColor:'white', color: 'black'}} dropdownClassName={theme === 'dark' && "custom-dropdown"}>
+            <Select placeholder="Select a partner" disabled  style={{
+              backgroundColor: theme === 'dark' && '#333', // Background color
+              color: theme === 'dark' && '#fff',
+            }} dropdownClassName={theme === 'dark' && "custom-dropdown"}>
               <Option value="Facebook">Facebook</Option>
               <Option value="Google">Google</Option>
             </Select>
@@ -205,7 +208,10 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
           >
             <Select
               showSearch
-              disabled  style={{backgroundColor:'transparent', color: 'black'}}
+              disabled  
+              style={{backgroundColor:'transparent', // Background color
+                color: theme === 'dark' && '#fff',
+              }}
               placeholder="Select Timezone"
               dropdownClassName={theme === 'dark' && "custom-dropdown"}
               options={timezones.map((item) => ({
@@ -220,7 +226,11 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
             name="status"
             rules={[{ required: true, message: "Please select a Status!" }]}
           >
-            <Select placeholder="Select a status" dropdownClassName={theme === 'dark' && "custom-dropdown"}>
+            <Select placeholder="Select a status" style={{
+              width: '100%',
+              backgroundColor: theme === 'dark' && '#333', // Background color
+              color: theme === 'dark' && '#fff',
+            }} dropdownClassName={theme === 'dark' && "custom-dropdown"}>
               <Option value="Active">Active</Option>
               <Option value="InActive">InActive</Option>
             </Select>
@@ -233,7 +243,11 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
           >
             <Select
               showSearch
-              style={{ width: "100%" }}
+              style={{ 
+                width: '100%',
+                backgroundColor: theme === 'dark' && '#333', // Background color
+                color: theme === 'dark' && '#fff',
+              }}
               placeholder="Select Revenue Partner"
               dropdownClassName={theme === 'dark' && "custom-dropdown"}
               options={availableNetworks.map((item) => ({

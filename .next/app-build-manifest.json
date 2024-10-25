@@ -23,6 +23,18 @@
       "static/css/app/Reports/page.css",
       "static/chunks/app/Reports/page.js"
     ],
+    "/LiveHistory/LiveCampaignHistory/[CampaignName]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/LiveHistory/LiveCampaignHistory/[CampaignName]/page.css",
+      "static/chunks/app/LiveHistory/LiveCampaignHistory/[CampaignName]/page.js"
+    ],
+    "/Campaigns/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/Campaigns/page.css",
+      "static/chunks/app/Campaigns/page.js"
+    ],
     "/NewUser/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",

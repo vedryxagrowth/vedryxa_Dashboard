@@ -170,6 +170,10 @@ const Newaddaccounts = ({ visible, onClose }) => {
                     </Form.Item>
                     <Form.Item label="BM Name" name="BMName" value={BMName}>
                         <Select placeholder="Select a status" 
+                            style={{
+                                backgroundColor: theme === 'dark' && '#333', // Background color
+                                color: theme === 'dark' && '#fff',
+                            }}
                             defaultValue="Winkleads Search" onChange={onChangeBMName}
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}>
                             <Option value="Winkleads Search" defaultValue>Winkleads Search</Option>
@@ -180,7 +184,11 @@ const Newaddaccounts = ({ visible, onClose }) => {
                         <Select
                             showSearch
                             onChange={onChangeTimeZone}
-                            style={{ width: '100%' }}
+                            style={{ 
+                                width: '100%',
+                                backgroundColor: theme === 'dark' && '#333', // Background color
+                                color: theme === 'dark' && '#fff',
+                            }}
                             placeholder="Select Timezone"
                             optionFilterProp="label"
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
@@ -194,6 +202,10 @@ const Newaddaccounts = ({ visible, onClose }) => {
                     <Form.Item label="Status" name="status" value={status}>
                         <Select placeholder="Select a status"
                             defaultValue="Active" onChange={onChangeStatus}
+                            style={{
+                                backgroundColor: theme === 'dark' && '#333', // Background color
+                                color: theme === 'dark' && '#fff',
+                            }}
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}>
                             <Option value="Active">Active</Option>
                             <Option value="InActive">Inactive</Option>
@@ -203,7 +215,11 @@ const Newaddaccounts = ({ visible, onClose }) => {
                         <Select
                             showSearch
                             onChange={onChangeRevenuePartner}
-                            style={{ width: '100%' }}
+                            style={{ 
+                                width: '100%',
+                                backgroundColor: theme === 'dark' && '#333', // Background color
+                                color: theme === 'dark' && '#fff',
+                            }}
                             placeholder="Select RevenuePartner"
                             optionFilterProp="label"
                             defaultValue="MEDIA_DOT_NET"

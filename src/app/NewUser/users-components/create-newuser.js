@@ -181,6 +181,10 @@ const Createnewuser = ({ visible, onClose }) => {
                     ]}
                 >
                     <Select 
+                        style={{
+                            backgroundColor: theme === 'dark' && '#333', // Background color
+                            color: theme === 'dark' && '#fff',
+                        }}
                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                     >
                         <Select.Option value="Media_Buyer">Media_Buyer</Select.Option>
@@ -198,7 +202,10 @@ const Createnewuser = ({ visible, onClose }) => {
                                     <div style={{ display: 'flex', marginBottom: '8px', width: '100%' }}>
                                         <Select
                                             placeholder="Select a network"
-                                            style={{ maxWidth: '120px', height: '30px', marginRight:'8px' }}
+                                            style={{ maxWidth: '120px', height: '30px', marginRight:'8px',
+                                                backgroundColor: theme === 'dark' && '#333', // Background color
+                                                color: theme === 'dark' && '#fff',
+                                            }}
                                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                             value={account.network}
                                             onChange={(value) => handleNetworkChange(accountIndex, value)}

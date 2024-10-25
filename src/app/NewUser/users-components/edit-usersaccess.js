@@ -367,7 +367,13 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                         },
                     ]}
                 >
-                    <Select dropdownClassName={theme === 'dark' && "custom-dropdown"}>
+                    <Select
+                    style={{
+                        width: '100%',
+                        backgroundColor: theme === 'dark' && '#333', // Background color
+                        color: theme === 'dark' && '#fff',
+                    }}      
+                    dropdownClassName={theme === 'dark' && "custom-dropdown"}>
                         <Select.Option value="Media_Buyer">Media_Buyer</Select.Option>
                         <Select.Option value="Special_User">Special_User</Select.Option>
                         <Select.Option value="Admin">Admin</Select.Option>
@@ -414,7 +420,10 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                         <div style={{ display: 'flex', marginBottom: '8px', width: '100%' }}>
                             <Select
                                 placeholder="Select a network"
-                                style={{ width: '145px', height: '30px', marginRight:'8px' }}
+                                style={{ width: '145px', height: '30px', marginRight:'8px',
+                                    backgroundColor: theme === 'dark' && '#333', // Background color
+                                    color: theme === 'dark' && '#fff',
+                                }}
                                 dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                 value={account.network}
                                 onChange={(value) => handleNetworkChange(accountIndex, value)}
@@ -498,7 +507,10 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                                 <div style={{ display: 'flex', marginBottom: '8px', width: '100%' }}>
                                     <Select
                                         placeholder="Select a network"
-                                        style={{ width: '120px', marginRight: '8px' }}
+                                        style={{ width: '120px', marginRight: '8px',
+                                            backgroundColor: theme === 'dark' && '#333', // Background color
+                                            color: theme === 'dark' && '#fff',
+                                         }}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                         value={account.network}
                                         onChange={(value) => handleNetworkChange1(accountIndex, value)}
