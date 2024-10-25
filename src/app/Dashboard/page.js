@@ -1194,9 +1194,8 @@ const Dashboard = () => {
                                         maxHeight: '40px',
                                         overflowY: 'auto',
                                         // width: '100%',
-                                        backgroundColor: theme === 'dark' && '#333', // Background color
-                                        color: theme === 'dark' && '#fff',
                                     }}
+                                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     placeholder="Select Categories"
                                     value={firstSelectValues}
                                     onChange={handleFirstSelectChange}
@@ -1229,9 +1228,8 @@ const Dashboard = () => {
                                     mode="multiple"
                                     style={{ 
                                         width: '100%',
-                                        backgroundColor: theme === 'dark' && '#333', // Background color
-                                        color: theme === 'dark' && '#fff',
                                     }}
+                                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     placeholder="Select items"
                                     dropdownClassName={theme === 'dark' && 'custom-dropdown'}
                                     value={[]} // This should be updated to reflect selectedItems based on the selected categories
@@ -1249,9 +1247,8 @@ const Dashboard = () => {
                                     onChange={onChangeTime}
                                     style={{
                                         width: '100%',
-                                        backgroundColor: theme === 'dark' && '#333', // Background color
-                                        color: theme === 'dark' && '#fff',
                                     }}
+                                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     placeholder="Select Timezone"
                                     dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                     optionFilterProp="label"
