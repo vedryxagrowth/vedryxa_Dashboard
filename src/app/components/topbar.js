@@ -15,6 +15,8 @@ import { Bell, Edit3Icon, Moon, Sun } from 'lucide-react';
 import { getSession } from 'next-auth/react';
 import debounce from 'lodash.debounce';
 
+import { message } from 'antd';
+
 import { useGlobalLoading } from "../layout";
 
 const items = (setuserdetails, router) => [
@@ -69,75 +71,215 @@ const Topbar = () => {
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [modalText, setModalText] = useState('Content of the modal');
+  const [notifications, setNotifications] = useState([]); // New state for notifications
+  const [isNotificationModalVisible, setIsNotificationModalVisible] = useState(false); // Notification modal state
+  const [isAddNotificationModalVisible, setIsAddNotificationModalVisible] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-
-  const showModal = () => {
-    setOpen(true);
-  };
-
-  const handleOk = () => {
-    // Create a new notification object
-    const newNotification = {
-      key: (notifications.length + 1).toString(),
-      title: title || 'No Title Provided',
-      description: description || 'No Description Provided',
-    };
-
-    // Add new notification to the existing list
-    setNotifications([...notifications, newNotification]);
-
-    setConfirmLoading(true);
-
-    // Simulate a delay (e.g., saving data)
-    setTimeout(() => {
-      setOpen(false);
-      setConfirmLoading(false);
-      setTitle(''); // Clear input fields after submission
-      setDescription('');
-    }, 2000);
-  };
-
-  const handleCancel = () => {
-    setOpen(false);
-  };
-  console.log('Session Status:', status);
-  const [notifications, setNotifications] = useState([
-    {
-      key: '1',
-      title: 'New Message',
-      description: 'You have received a new message from John Doe.',
-    },
-    {
-      key: '2',
-      title: 'Order Shipped',
-      description: 'Your order #12345 has been shipped and is on its way.',
-    },
-  ]);
-  
- 
-  const [showNotifications, setShowNotifications] = useState(false);
   const wrapperRef = useRef(null);
 
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
-        setShowNotifications(false);
+  const notificationIconRef = useRef(null); // Ref for the notification icon
+  const [modalPosition, setModalPosition] = useState({ top: 0, right: 0 }); // Modal position
+  const [selectedNotification, setSelectedNotification] = useState(null); // For the notification to be displayed in modal
+  const [isViewNotificationModalVisible, setIsViewNotificationModalVisible] = useState(false); // View notification moda
+
+  console.log(userdetails);
+
+  const tokenForAuth = localStorage.getItem('token');
+
+
+  // Handle viewing and removing the notification after modal closes
+const handleViewNotification = async (notification) => {
+  if (!notification || !notification._id) {
+    console.error('Invalid notification:', notification);
+    return;
+  }
+
+  try {
+    console.log('Marking notification as viewed:', notification._id);
+    const response = await axios.post('https://prodapis.adsgoat.in/Notifications/view', {
+      email: userdetails?.email,
+      notificationId: notification._id,
+    },
+    {
+      headers: {
+          Authorization: tokenForAuth,
       }
+  });
+
+    if (response.status === 200) {
+      console.log('Notification marked as viewed and removed:', notification._id);
+      // Remove the notification from the list in the frontend
+      setNotifications((prevNotifications) =>
+        prevNotifications.filter((n) => n._id !== notification._id)
+      );
+      setSelectedNotification(null); // Clear selected notification after viewing
+      message.success("Message Viewed");
+    } else {
+      console.error('Failed to mark notification as viewed:', response.data);
+    }
+  } catch (error) {
+    console.error('Error viewing notification:', error);
+  }
+};
+
+  // Open the notifications list modal
+  const openNotificationsList = () => {
+    setIsNotificationModalVisible(true);
+  };
+
+
+     // Open the view notification modal for a specific notification
+  const openViewNotificationModal = (notification) => {
+    setSelectedNotification(notification);
+    setIsViewNotificationModalVisible(true);
+  };
+
+  // Close the view notification modal and remove the notification
+  const closeViewNotificationModal = async () => {
+    if (selectedNotification) {
+      await handleViewNotification(selectedNotification); 
+      setIsViewNotificationModalVisible(false); 
+    }
+  };
+  
+
+  // Fetch notifications function
+  const fetchNotifications = async () => {
+    try {
+      console.log(tokenForAuth);
+      const response = await axios.get(`https://prodapis.adsgoat.in/Notifications/get?email=${userdetails?.email}`,
+        {
+          headers: {
+              Authorization: tokenForAuth,
+          }
+      }
+      );
+      if (response.status === 200) {
+        setNotifications(response.data.notifications);
+      }
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (userdetails?.email) {
+      fetchNotifications();
+    }
+  }, [userdetails?.email]);
+
+
+  const openNotificationModal = () => {
+    if (notificationIconRef.current) {
+      const iconRect = notificationIconRef.current.getBoundingClientRect();
+      setModalPosition({
+        top: iconRect.bottom + 100, 
+        right: window.innerWidth - iconRect.right, 
+      });
+    }
+    setIsNotificationModalVisible(true);
+  };
+
+  // Function to handle adding a notification via the backend API
+  const handleAddNotification = async () => {
+    if (!title || !description) {
+      alert('Title and description are required.');
+      return;
     }
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [wrapperRef]);
-  const removeNotification = (key) => {
-    setNotifications((prevNotifications) =>
-      prevNotifications.filter((notification) => notification.key !== key)
-    );
+    try {
+      const response = await axios.post('https://prodapis.adsgoat.in/Notifications/add', {
+        title,
+        description,
+      },
+        {
+          headers: {
+              Authorization: tokenForAuth,
+          }
+      }
+      );
+
+      if (response.status === 200) {
+        message.success('Notification added to all users'); 
+        setTitle('');
+        setDescription('');
+        setIsAddNotificationModalVisible(false);
+        fetchNotifications(); // Refetch notifications to update the list
+      } else {
+        message.error('Failed to add notification');
+      }
+    } catch (error) {
+      console.error('Error adding notification:', error);
+      message.error('An error occurred while adding the notification.');
+    }
   };
-  const toggleNotifications = () => {
-    setShowNotifications(!showNotifications);
+
+
+  const renderNotifications = () => {
+    return notifications.map((notification, index) => (
+      <div
+        key={index}
+        style={{
+          padding: '5px 0', 
+          borderBottom: '1px solid #f0f0f0', 
+          display: 'flex',
+          flexDirection: 'column', 
+          justifyContent: 'space-between', 
+          position: 'relative', 
+          minHeight: 'auto', 
+          // paddingRight: '50px', // Ensure space for the Eye icon
+        }}
+      >
+        <div>
+          <h3 style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '4px' }}>
+            {notification.title}
+          </h3>
+  
+          <p style={{ fontSize: '14px', marginBottom: '20px', color: '#555' }}>
+            {notification.description}
+          </p>
+        </div>
+  
+        <EyeOutlined
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px', 
+            fontSize: '18px',
+            cursor: 'pointer',
+            color: '#1890ff',
+          }}
+          onClick={() => openViewNotificationModal(notification)}
+        />
+  
+        <div
+          style={{
+            fontSize: '12px',
+            color: '#888',
+            textAlign: 'right',
+            marginTop: '10px', 
+          }}
+        >
+          {notification.date} 
+        </div>
+      </div>
+    ));
+  };
+  
+
+  // Function to close the modals
+  const onHandleNotificationCancel = () => {
+    setIsNotificationModalVisible(false);
+  };
+
+  // Function to open the add notification modal
+  const openAddNotificationModal = () => {
+    setIsAddNotificationModalVisible(true);
+  };
+
+  const onHandleAddNotificationCancel = () => {
+    setIsAddNotificationModalVisible(false);
   };
 
   const openProfileModal = () => {
@@ -253,79 +395,33 @@ const Topbar = () => {
         {/* Conditional rendering based on authentication and authorization status */}
         { isUserAuthorized ? (
           <>
-         <div className="relative inline-block" ref={wrapperRef}>
-      <div className="cursor-pointer" onClick={toggleNotifications}>
-        <Bell size={24} />
-        <Badge className="Badge absolute -top-2 -right-2" variant="destructive">
-          {notifications.length}
-        </Badge>
-      </div>
-      
-      {showNotifications && (
-        <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg z-10 border border-gray-200">
-          <div className="notifiview py-1">
-         {userdetails ?.role ==="Admin" && 
-         <Edit3Icon  onClick={showModal}
-                  style={{
-                    marginLeft: '8px',
-                    color: '#333',
-                    fontSize: '18px',
-                  }}
-                  
-                />
-          }
-          
-            {notifications.map((notification) => (
-              <div key={notification.key} className="px-4 py-2 hover:bg-gray-100">
-                <div className='View' style={{display:"flex", justifyContent:'space-between'}}>
-                <h3 className="text-sm font-semibold">{notification.title} </h3>
-                <EyeOutlined
-                  style={{
-                    marginLeft: '8px',
-                    color: '#333',
-                    fontSize: '18px',
-                  }}
-                  onClick={() => removeNotification(notification.key)}
-                />
-                </div>
-                <p className="text-xs text-gray-600" style={{margin:"0px"}}>{notification.description}</p>
+            <div className="relative inline-block" ref={wrapperRef}>
+              <div className="cursor-pointer" onClick={openNotificationsList}>
+                <Bell size={24} />
+                {notifications.length > 0 && (
+                   <Badge
+                   style={{ color: 'red' }}
+                   className="Badge absolute -top-2 -right-2"
+                   variant="destructive"
+                 >
+                   {notifications.length}
+                 </Badge>
+                ) }
               </div>
-            ))}
-          </div>
-        </div>
-      )}
-     
-      <Modal
-        title="Title"
-        open={open}
-        onOk={handleOk}
-        confirmLoading={confirmLoading}
-        onCancel={handleCancel}
-      >
-        <Input
-          placeholder="Enter Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          style={{ marginBottom: '10px' }}
-        />
-        <Input.TextArea
-          placeholder="Enter Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          rows={4}
-        />
-      </Modal>
-    </div>
-    <button
-          onClick={toggleTheme}
-          className={`theme-toggle-btn ${darkMode ? 'dark-mode' : 'light-mode'}`}
-        >
-          {darkMode ? (
-            <Sun className="icon sun-icon" />
-          ) : (
-            <Moon className="icon moon-icon" />
-          )}
-        </button>
+            </div>
+
+
+
+            <button
+              onClick={toggleTheme}
+              className={`theme-toggle-btn ${darkMode ? 'dark-mode' : 'light-mode'}`}
+            >
+              {darkMode ? (
+                <Sun className="icon sun-icon" />
+              ) : (
+                <Moon className="icon moon-icon" />
+              )}
+            </button>
             <h2
               style={{
                 color: darkMode ? '#fff' : '#000',
@@ -372,10 +468,88 @@ const Topbar = () => {
             />
           </Dropdown>
         )}
-
-      
-      
       </div>
+
+       {/* View Notification Modal */}
+      <Modal
+        title={null}
+        visible={isViewNotificationModalVisible}
+        onOk={closeViewNotificationModal} // Close the modal and remove the notification
+        onCancel={() => setIsViewNotificationModalVisible(false)}
+        // onCancel={closeViewNotificationModal}
+        okText="Ok"
+      >
+        {selectedNotification && (
+          <>
+            <h2 style={{ fontWeight: 'bold', fontSize: '24px', marginBottom: '10px' }}>
+              {selectedNotification.title}
+            </h2>
+            <p style={{ fontSize: '16px', marginBottom: '20px' }}>
+              {selectedNotification.description}
+            </p>
+            <p style={{ fontSize: '12px', color: '#888' }}> 
+              {selectedNotification.date.split('T')[0]}
+            </p>
+          </>
+        )}
+      </Modal>
+      
+      {/*Notifications Modal */}
+      <Modal
+        visible={isNotificationModalVisible}
+        width={`30%`} 
+        onCancel={onHandleNotificationCancel}
+        footer={null}
+        title={null}
+        bodyStyle={{
+          padding: '0px', 
+          margin: '0px', 
+        }}
+        style={{
+          top: `${modalPosition.top + 70}px`,  // Set dynamically based on the icon's position
+          right: `${modalPosition.right + 10}px`, // Align with the icon's right edge
+          position: 'absolute', 
+          padding: '0px'
+        }}
+      >
+        {userdetails?.role === 'Admin' && <button style={{marginRight: '10px', padding: '7px', borderRadius: '5px', backgroundColor: '#6495ED', border: 'none', color: 'white'}} onClick={openAddNotificationModal}>Add Notification</button>} {/* Only visible to admin */}
+
+        <div style={{ padding: '0px' }}>
+          {renderNotifications()} 
+        </div>
+      </Modal>
+   
+
+       
+
+       {/* Add Notification Modal */}
+       <Modal
+        visible={isAddNotificationModalVisible}
+        width={`30%`}
+        onCancel={onHandleAddNotificationCancel}
+        onOk={handleAddNotification} 
+        title="Add Notification" 
+        okText="OK" 
+        cancelText="Cancel" 
+        style={{
+          top: `${modalPosition.top + 100}px`,  // Set dynamically based on the icon's position
+          right: `${modalPosition.right + 500}px`, // Align with the icon's right edge
+          position: 'absolute', 
+        }}
+      >
+        <Input
+          placeholder="Enter Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          style={{ marginBottom: '10px' }}
+        />
+        <Input.TextArea
+          placeholder="Enter Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={4}
+        />
+      </Modal>
 
       <Modal
         visible={isModalVisible}
