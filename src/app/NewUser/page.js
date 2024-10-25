@@ -705,9 +705,8 @@ const UsersTable = () => {
                         <Select
                             defaultValue={'Network wise accounts'}
                             style={{ width: '200px',
-                                backgroundColor: theme === 'dark' && '#333', // Background color
-                                color: theme === 'dark' && '#fff',
                             }}
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             onChange={handleSelectChange}
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
                             dropdownRender={(menu) => (
@@ -739,10 +738,10 @@ const UsersTable = () => {
                     ))
                 }else{
                     return(
-                        <Select style={{ width: '200px',
-                            backgroundColor: theme === 'dark' && '#333', // Background color
-                            color: theme === 'dark' && '#fff',
-                         }} defaultValue={'No accounts available'} 
+                        <Select style={{ width: '200px'
+                         }}
+                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                        defaultValue={'No accounts available'} 
                         dropdownClassName={theme === 'dark' && "custom-dropdown"}>
                             <Select.Option key="empty" value="">
                                 No accounts available
@@ -1031,10 +1030,9 @@ const UsersTable = () => {
                                         <Select
                                             onChange={onChangeRole}
                                             defaultValue="All"
-                                            style={{ width: "100%", marginTop: '8px',
-                                                backgroundColor: theme === 'dark' && '#333', // Background color
-                                                color: theme === 'dark' && '#fff',
+                                            style={{ width: "100%", marginTop: '8px'
                                             }}
+                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                             options={roles.map((item) => ({
                                                 value: item,
@@ -1046,10 +1044,9 @@ const UsersTable = () => {
                                         <span style={{ color: "#B4B4B4", display: 'block' }}>Category</span>
                                         <Select
                                             defaultValue="All"
-                                            style={{ width: "100%", marginTop: '8px',
-                                                backgroundColor: theme === 'dark' && '#333', // Background color
-                                                color: theme === 'dark' && '#fff',
+                                            style={{ width: "100%", marginTop: '8px'
                                             }}
+                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                             options={[
                                                 { value: "jack", label: "Jack" },
@@ -1131,10 +1128,9 @@ const UsersTable = () => {
                                         <Select
                                             onChange={onChangeNetwork}
                                             defaultValue="All"
-                                            style={{ width: "100%", marginTop: '8px',
-                                                backgroundColor: theme === 'dark' && '#333', // Background color
-                                                color: theme === 'dark' && '#fff',
+                                            style={{ width: "100%", marginTop: '8px'
                                             }}
+                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                             options={availableNetworks.map((item) => ({
                                                 value: item,
@@ -1147,10 +1143,9 @@ const UsersTable = () => {
                                         <Select
                                             onChange={onChangeStatus}
                                             defaultValue="All"
-                                            style={{ width: "100%", marginTop: '8px',
-                                                backgroundColor: theme === 'dark' && '#333', // Background color
-                                                color: theme === 'dark' && '#fff',
+                                            style={{ width: "100%", marginTop: '8px'
                                             }}
+                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                             options={accountStatus.map((item) => ({
                                                 value: item,
@@ -1231,10 +1226,9 @@ const UsersTable = () => {
                                             onChange={onChangeNetwork}
                                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                             defaultValue="All"
-                                            style={{ width: "100%", marginTop: '8px',
-                                                backgroundColor: theme === 'dark' && '#333', // Background color
-                                                color: theme === 'dark' && '#fff',
+                                            style={{ width: "100%", marginTop: '8px'
                                             }}
+                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                             options={availableNetworks.map((item) => ({
                                                 value: item,
                                                 label: item,
@@ -1247,10 +1241,9 @@ const UsersTable = () => {
                                             onChange={onChangeStatus}
                                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                             defaultValue="All"
-                                            style={{ width: "100%", marginTop: '8px',
-                                                backgroundColor: theme === 'dark' && '#333', // Background color
-                                                color: theme === 'dark' && '#fff',
+                                            style={{ width: "100%", marginTop: '8px'
                                             }}
+                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                             options={accountStatus.map((item) => ({
                                                 value: item,
                                                 label: item,

@@ -4465,10 +4465,9 @@ const MyTablePage = () => {
                             showSearch
                             onChange={handleChange1} // Handle value selection
                             dropdownClassName={theme === 'dark' ? "custom-dropdown" : ''} // Apply dark theme if needed
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             style={{ 
                                 width: '100%',
-                                backgroundColor: theme === 'dark' && '#333', // Background color
-                                color: theme === 'dark' && '#fff',
                                 maxWidth: '100%', 
                                 whiteSpace: 'nowrap', 
                                 overflow: 'hidden', 
@@ -4503,11 +4502,7 @@ const MyTablePage = () => {
                         <Select
                             showSearch
                             onChange={onChangeTime}
-                            style={{ 
-                                width: '100%',
-                                backgroundColor: theme === 'dark' && '#333', // Background color
-                                color: theme === 'dark' && '#fff',
-                            }}
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             placeholder="Select Timezone"
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
                             optionFilterProp="label"
@@ -4706,7 +4701,7 @@ const MyTablePage = () => {
                                     />
 
                                 </div>
-                            ) : <div>
+                            ) : <div style={{backgroundColor: theme === "dark" ? "green" : 'white'}}>
                                 {startDate !== endDate ? <Result
                                     className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                     icon={<SmileOutlined />}
@@ -4817,113 +4812,113 @@ const MyTablePage = () => {
                         </div>
                     </div>
                     <div>
-        <div style={contentStyle}>
-            {isLoading2 === true ? (
-                <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>
-                    <div className="ag-grid-Loader">
-                        <Audio
-                            height="80"
-                            width="80"
-                            radius="9"
-                            color="green"
-                            ariaLabel="loading"
-                            wrapperStyle
-                            wrapperClass
-                        />
-                    </div>
-                </div>
-            ) : campaignData.filter((each) => each.campaignname.includes(inputValue))?.length > 0 ? (
-                <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
-                    <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap' }}>
-                        <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
-                            <Space align="center" className='daily-container' style={{ width: '150px' }}>
-                                <div class="blinking-circle-3"></div>
-                                <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600', width: '100px' }}>Campaigns</Text>
-                            </Space>
-                        </Col>
-                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                            <Text style={{ fontWeight: '600' }}>Acc: {newaccount}</Text>
-                        </Col>
-                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                            <Text style={{ fontWeight: '600' }}>AccName: {newAccountName}</Text>
-                        </Col>
-                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                            <Text style={{ fontWeight: '600' }}>Timezone: {timezone.current}</Text>
-                        </Col>
-                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                            <Text style={{ fontWeight: '600' }}>
-                                Cron/Acc status: {cronStatus.current} /{' '}
-                                <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
-                                    {accountStatus.current}
-                                </span>
-                            </Text>
-                        </Col>
-                        <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
-                            <Tooltip title="Export to CSV">
-                                <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef2)} />
-                            </Tooltip>
-                        </Col>
-                    </Row>
+                        <div style={contentStyle}>
+                            {isLoading2 === true ? (
+                                <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>
+                                    <div className="ag-grid-Loader">
+                                        <Audio
+                                            height="80"
+                                            width="80"
+                                            radius="9"
+                                            color="green"
+                                            ariaLabel="loading"
+                                            wrapperStyle
+                                            wrapperClass
+                                        />
+                                    </div>
+                                </div>
+                            ) : campaignData.filter((each) => each.campaignname.includes(inputValue))?.length > 0 ? (
+                                <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
+                                    <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap' }}>
+                                        <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
+                                            <Space align="center" className='daily-container' style={{ width: '150px' }}>
+                                                <div class="blinking-circle-3"></div>
+                                                <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600', width: '100px' }}>Campaigns</Text>
+                                            </Space>
+                                        </Col>
+                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                            <Text style={{ fontWeight: '600' }}>Acc: {newaccount}</Text>
+                                        </Col>
+                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                            <Text style={{ fontWeight: '600' }}>AccName: {newAccountName}</Text>
+                                        </Col>
+                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                            <Text style={{ fontWeight: '600' }}>Timezone: {timezone.current}</Text>
+                                        </Col>
+                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                            <Text style={{ fontWeight: '600' }}>
+                                                Cron/Acc status: {cronStatus.current} /{' '}
+                                                <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
+                                                    {accountStatus.current}
+                                                </span>
+                                            </Text>
+                                        </Col>
+                                        <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
+                                            <Tooltip title="Export to CSV">
+                                                <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef2)} />
+                                            </Tooltip>
+                                        </Col>
+                                    </Row>
 
-                    <div style={{ height: '90%' }}>
-                        <AgGridReact
-                            ref={gridRef2}
-                            rowData={campaignData.filter((each) => each.campaignname.includes(inputValue))}
-                            columnDefs={columnDefs2.current}
-                            onCellClicked={onCellClickedAllCampaigns}
-                            autoGroupColumnDef={autoGroupColumnDef2}
-                            defaultColDef={defaultColDef}
-                            groupDisplayType='multipleColumns'
-                            suppressAggFuncInHeader={true}
-                            groupRowRenderer={GroupRowRenderer}
-                            onGridReady={(params) => {
-                                onGridReady(params, 'grid3', gridRef2);
-                                params.api.refreshCells(); // Refresh cells to apply the theme dynamically
-                            }}
-                            gridOptions={gridOptions2}
-                            suppressMenuHide={true}
-                            getMainMenuItems={getMainMenuItems}
-                            pinnedBottomRowData={campaignData.length > 0 ? fixedFooter : []}
-                            getRowStyle={params => {
-                                if (params.node.rowPinned) {
-                                    return {
-                                        fontWeight: 'bold',
-                                        // backgroundColor: theme === "dark" ? '#000' : '#fff', // Apply theme dynamically
-                                        // color: theme === "dark" ? '#fff' : '#000',           // Apply theme dynamically
-                                    };
-                                }
-                                return null;
-                            }}
+                                    <div style={{ height: '90%' }}>
+                                        <AgGridReact
+                                            ref={gridRef2}
+                                            rowData={campaignData.filter((each) => each.campaignname.includes(inputValue))}
+                                            columnDefs={columnDefs2.current}
+                                            onCellClicked={onCellClickedAllCampaigns}
+                                            autoGroupColumnDef={autoGroupColumnDef2}
+                                            defaultColDef={defaultColDef}
+                                            groupDisplayType='multipleColumns'
+                                            suppressAggFuncInHeader={true}
+                                            groupRowRenderer={GroupRowRenderer}
+                                            onGridReady={(params) => {
+                                                onGridReady(params, 'grid3', gridRef2);
+                                                params.api.refreshCells(); // Refresh cells to apply the theme dynamically
+                                            }}
+                                            gridOptions={gridOptions2}
+                                            suppressMenuHide={true}
+                                            getMainMenuItems={getMainMenuItems}
+                                            pinnedBottomRowData={campaignData.length > 0 ? fixedFooter : []}
+                                            getRowStyle={params => {
+                                                if (params.node.rowPinned) {
+                                                    return {
+                                                        fontWeight: 'bold',
+                                                        // backgroundColor: theme === "dark" ? '#000' : '#fff', // Apply theme dynamically
+                                                        // color: theme === "dark" ? '#fff' : '#000',           // Apply theme dynamically
+                                                    };
+                                                }
+                                                return null;
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            ) : (
+                                <div>
+                                    <div>
+                                        {startDate !== endDate ? <Result
+                                            className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                            icon={<SmileOutlined />}
+                                            title={`No CampaignData for ${newaccount} from ${startDate} to ${endDate}`}
+                                        /> : <Result
+                                        className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                            icon={<SmileOutlined />}
+                                            title={`No CampaignData for ${newaccount} to ${startDate}`}
+                                        />}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                        <Pagination
+                            style={{ marginBottom: '12px' }}
+                            total={totalItems.current}
+                            pageSize={100}
+                            itemRender={itemRender}
+                            showSizeChanger={false}
+                            showQuickJumper={false}
+                            current={pageSize}
+                            onChange={handlePageClick}
                         />
                     </div>
-                </div>
-            ) : (
-                <div>
-                    <div>
-                        {startDate !== endDate ? <Result
-                            className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                            icon={<SmileOutlined />}
-                            title={`No CampaignData for ${newaccount} from ${startDate} to ${endDate}`}
-                        /> : <Result
-                        className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                            icon={<SmileOutlined />}
-                            title={`No CampaignData for ${newaccount} to ${startDate}`}
-                        />}
-                    </div>
-                </div>
-            )}
-        </div>
-        <Pagination
-            style={{ marginBottom: '12px' }}
-            total={totalItems.current}
-            pageSize={100}
-            itemRender={itemRender}
-            showSizeChanger={false}
-            showQuickJumper={false}
-            current={pageSize}
-            onChange={handlePageClick}
-        />
-    </div>
 
                 </Carousel>
             </div>
