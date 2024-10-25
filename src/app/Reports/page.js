@@ -4701,7 +4701,7 @@ const MyTablePage = () => {
                                     />
 
                                 </div>
-                            ) : <div style={{backgroundColor: theme === "dark" ? "green" : 'white'}}>
+                            ) : <div style={{backgroundColor: theme === "dark" && "#333"}}>
                                 {startDate !== endDate ? <Result
                                     className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                     icon={<SmileOutlined />}
@@ -4796,7 +4796,7 @@ const MyTablePage = () => {
                                         }}
                                     />
                                 </div>
-                            ) : <div>
+                            ) : <div style={{backgroundColor: theme === "dark" && "#333"}}>
                                 {startDate !== endDate ? <Result
                                     className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                     icon={<SmileOutlined />}
@@ -4894,7 +4894,7 @@ const MyTablePage = () => {
                                 </div>
                             ) : (
                                 <div>
-                                    <div>
+                                    <div style={{backgroundColor: theme === "dark" && "#333"}}>
                                         {startDate !== endDate ? <Result
                                             className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                             icon={<SmileOutlined />}
