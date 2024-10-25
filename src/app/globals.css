@@ -881,3 +881,37 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
   color: #fff;
   background-color: #333333;
 }
+.dark-theme .ant-table-cell {
+  cursor: pointer; /* Set the cursor to pointer or any desired style */
+  color: #ffffff !important; /* Force the text color to black */
+}
+.dark-theme .ant-table-thead > tr > th {
+  color: #333333 !important;  /* Change the header text color to a dark color */
+  background-color: #ffffff !important; /* Optionally set the background color to black */
+}
+
+
+.dark-result .ant-result-title {
+  color: #ffffff; /* Title color in dark mode */
+}
+
+.dark-result .anticon-smile {
+  color: #ffffff; /* Smile icon color in dark mode */
+}
+.dark-theme input::placeholder {
+  color: #ffffff; /* White placeholder text for dark theme */
+  opacity: 1; /* Ensures the color is applied fully */
+}
+
+/* Placeholder color for light theme */
+.light-theme input::placeholder {
+  color: #333333; /* Dark gray placeholder text for light theme */
+}
+.dark-theme .ant-result-subtitle {
+  color: #ffffff; /* White color for dark theme */
+}
+
+/* Subtitle color for light theme */
+.light-theme .ant-result-subtitle {
+  color: #333333; /* Dark gray color for light theme */
+}

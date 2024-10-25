@@ -681,156 +681,155 @@ const LayoutWrapper = ({ children }) => {
   const [initialized, setInitialized] = useState(false);
   const [usersData, setUsersData] = useState([]);
   const { setuserdetails } = useTokenContext();
+  const isCalledRef = useRef(false);  // To ensure getUsersData API is called only once
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        console.log("Session Status: ", sessionStatus);
-        console.log("Session Data: ", session);
-        if (session?.user?.email) {
+// Generic retry mechanism for any API
+const retryFetch = async (fetchFunc, retries = 3) => {
+  try {
+    return await fetchFunc();  // Try the API call
+  } catch (error) {
+    if (retries === 1) throw error;  // Throw error if no retries left
+    console.log(`Retrying... Attempts left: ${retries - 1}`);
+    return retryFetch(fetchFunc, retries - 1);  // Recursive retry
+  }
+};
 
-          const userResponse = await axios.get(`https://prodapis.adsgoat.in/api/getusersData?email=${session.user.email}`);
-          if (userResponse.status === 200) {
-            const fetchedUsersData = userResponse.data;
-            setUsersData(fetchedUsersData);
-            setLoading(false);
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      console.log("Session Status: ", sessionStatus);
+      console.log("Session Data: ", session);
 
-            if (fetchedUsersData.length > 0 &&
-              session && session.user && session.user.email &&
-              fetchedUsersData.some(user => user.email.toLowerCase() === session.user.email.toLowerCase())) {
-              const matchedUser = fetchedUsersData.find(
-                user => user.email.toLowerCase() === session.user.email.toLowerCase()
-              );
+      if (session?.user?.email) {
+        // Retry for getUsersData API
+        const userResponse = await retryFetch(() => axios.get(`https://prodapis.adsgoat.in/api/getusersData?email=${session.user.email}`));
+        if (userResponse.status === 200) {
+          const fetchedUsersData = userResponse.data;
+          setUsersData(fetchedUsersData);
+          setLoading(false);
 
-              if (matchedUser) {
-                // setuserdetails(matchedUser);
-                switch (matchedUser.role) {
-                  case 'Media_Buyer':
-                    const MediaBuyeradAccounts = matchedUser.adAccounts;
-                    const MediaBuyerkeysOfAdAccounts = Object.keys(MediaBuyeradAccounts);
-                    const MediaBuyernewObject = {};
-                    console.log(MediaBuyerkeysOfAdAccounts, "keys");
-                    for (let item of MediaBuyerkeysOfAdAccounts) {
-                      if (MediaBuyeradAccounts[item][0] === "All") {
-                        const networkResponse = await axios.get(`https://prodapis.adsgoat.in/network/Accounts?network=${item}`);
-                        MediaBuyernewObject[item] = await networkResponse.data;
-                        // console.log(await networkResponse.data);
-                      }
-                      else {
-                        const response = await axios.post('https://prodapis.adsgoat.in/getAccountNameandStatusofNetwork/', {updatedNetwork: MediaBuyeradAccounts[item]});
-                        MediaBuyernewObject[item] = response.data;
-                      }
-                    };
-                    setuserdetails({ ...matchedUser, adAccounts: MediaBuyernewObject });
-                    // console.log("New Object", MediaBuyernewObject);
-                    // console.log("Matched User:", matchedUser);
-                    //   setuserdetails({ ...matchedUser, extraInfo: "Media Buyer Specific Info" });
-                    break;
-                  case 'Special_User':
-                    const SpecialUseradAccounts = matchedUser.adAccounts;
-                    const SpecialUserkeysOfAdAccounts = Object.keys(SpecialUseradAccounts);
-                    const SpecialUsernewObject = {};
-                    console.log(SpecialUserkeysOfAdAccounts, "keys");
-                    for (let item of SpecialUserkeysOfAdAccounts) {
-                      if (SpecialUseradAccounts[item][0] === "All") {
-                        const networkResponse = await axios.get(`https://prodapis.adsgoat.in/network/Accounts?network=${item}`);
-                        SpecialUsernewObject[item] = await networkResponse.data;
-                        console.log(await networkResponse.data);
-                      }
-                      else {
-                        const response = await axios.post('https://prodapis.adsgoat.in/getAccountNameandStatusofNetwork/', {updatedNetwork: SpecialUseradAccounts[item]});
-                        SpecialUsernewObject[item] = response.data;
-                      }
-                    };
-                    setuserdetails({ ...matchedUser, adAccounts: SpecialUsernewObject });
-                    // console.log("New Object", SpecialUsernewObject);
-                    // console.log("Matched User:", matchedUser);
-                    //   setuserdetails({ ...matchedUser, extraInfo: "Special User Specific Info" });
-                    break;
-                  case 'Manager':
-                    const ManageradAccounts = matchedUser.adAccounts;
-                    const ManagerkeysOfAdAccounts = Object.keys(ManageradAccounts);
-                    const ManagernewObject = {};
-                    console.log(ManagerkeysOfAdAccounts, "keys");
-                    for (let item of ManagerkeysOfAdAccounts) {
-                      if (ManageradAccounts[item][0] === "All") {
-                        const networkResponse = await axios.get(`https://prodapis.adsgoat.in/network/Accounts?network=${item}`);
-                        ManagernewObject[item] = await networkResponse.data;
-                        // console.log(await networkResponse.data);
-                      }
-                      else {
-                        const response = await axios.post('https://prodapis.adsgoat.in/getAccountNameandStatusofNetwork/', {updatedNetwork: ManageradAccounts[item]});
-                        ManagernewObject[item] = response.data;
-                      }
-                    };
-                    setuserdetails({ ...matchedUser, adAccounts: ManagernewObject });
-                    // console.log("New Object", ManagernewObject);
-                    // console.log("Matched User:", matchedUser);
-                    //   setuserdetails({ ...matchedUser, extraInfo: "Manager Specific Info" });
-                    break;
-                  case 'Admin':
-                    const AllAccountsData = await axios.get(`https://prodapis.adsgoat.in/All/Accounts/`);
-                    const responseData = await AllAccountsData.data;
-                    console.log(responseData, "responseData");
-                    setuserdetails({ ...matchedUser, adAccounts: responseData });
-                    //   const adAccounts = matchedUser.adAccounts;
-                    //   const keysOfAdAccounts = Object.keys(adAccounts);
-                    //   const newObject ={};
-                    //   console.log(keysOfAdAccounts, "keys");
-                    //   for(let item of keysOfAdAccounts){
-                    //     if (adAccounts[item][0] === "All"){
-                    //         console.log("Yes");
-                    //         const networkResponse = await axios.get(`http://localhost:8080/network/Accounts?network=${item}`);
-                    //         newObject[item] = await networkResponse.data;
-                    //         // console.log(await networkResponse.data);
-                    //     }
-                    //     else{
-                    //         newObject[item] = adAccounts[item];
-                    //     }
-                    //   };
-                    //   setuserdetails({...matchedUser, adAccounts: newObject});
-                    //   console.log("New Object",newObject);
-                    //   console.log("Matched User:", matchedUser);
-                    //   setuserdetails({ ...matchedUser, extraInfo: "Admin Specific Info" });
-                    break;
-                  default:
-                    setuserdetails(matchedUser);
-                }
+          if (fetchedUsersData.length > 0 &&
+            session && session.user && session.user.email &&
+            fetchedUsersData.some(user => user.email.toLowerCase() === session.user.email.toLowerCase())) {
+
+            const matchedUser = fetchedUsersData.find(
+              user => user.email.toLowerCase() === session.user.email.toLowerCase()
+            );
+
+            if (matchedUser) {
+              // Case Media_Buyer
+              switch (matchedUser.role) {
+                case 'Media_Buyer':
+                  const MediaBuyeradAccounts = matchedUser.adAccounts;
+                  const MediaBuyerkeysOfAdAccounts = Object.keys(MediaBuyeradAccounts);
+                  const MediaBuyernewObject = {};
+                  console.log(MediaBuyerkeysOfAdAccounts, "keys");
+
+                  for (let item of MediaBuyerkeysOfAdAccounts) {
+                    if (MediaBuyeradAccounts[item][0] === "All") {
+                      // Retry logic for Accounts API
+                      const networkResponse = await retryFetch(() => axios.get(`https://prodapis.adsgoat.in/network/Accounts?network=${item}`));
+                      MediaBuyernewObject[item] = networkResponse.data;
+                    } else {
+                      const response = await retryFetch(() =>
+                        axios.post('https://prodapis.adsgoat.in/getAccountNameandStatusofNetwork/', { updatedNetwork: MediaBuyeradAccounts[item] })
+                      );
+                      MediaBuyernewObject[item] = response.data;
+                    }
+                  }
+                  setuserdetails({ ...matchedUser, adAccounts: MediaBuyernewObject });
+                  break;
+
+                // Case Special_User
+                case 'Special_User':
+                  const SpecialUseradAccounts = matchedUser.adAccounts;
+                  const SpecialUserkeysOfAdAccounts = Object.keys(SpecialUseradAccounts);
+                  const SpecialUsernewObject = {};
+                  console.log(SpecialUserkeysOfAdAccounts, "keys");
+
+                  for (let item of SpecialUserkeysOfAdAccounts) {
+                    if (SpecialUseradAccounts[item][0] === "All") {
+                      // Retry logic for Accounts API
+                      const networkResponse = await retryFetch(() => axios.get(`https://prodapis.adsgoat.in/network/Accounts?network=${item}`));
+                      SpecialUsernewObject[item] = networkResponse.data;
+                    } else {
+                      const response = await retryFetch(() =>
+                        axios.post('https://prodapis.adsgoat.in/getAccountNameandStatusofNetwork/', { updatedNetwork: SpecialUseradAccounts[item] })
+                      );
+                      SpecialUsernewObject[item] = response.data;
+                    }
+                  }
+                  setuserdetails({ ...matchedUser, adAccounts: SpecialUsernewObject });
+                  break;
+
+                // Case Manager
+                case 'Manager':
+                  const ManageradAccounts = matchedUser.adAccounts;
+                  const ManagerkeysOfAdAccounts = Object.keys(ManageradAccounts);
+                  const ManagernewObject = {};
+                  console.log(ManagerkeysOfAdAccounts, "keys");
+
+                  for (let item of ManagerkeysOfAdAccounts) {
+                    if (ManageradAccounts[item][0] === "All") {
+                      // Retry logic for Accounts API
+                      const networkResponse = await retryFetch(() => axios.get(`https://prodapis.adsgoat.in/network/Accounts?network=${item}`));
+                      ManagernewObject[item] = networkResponse.data;
+                    } else {
+                      const response = await retryFetch(() =>
+                        axios.post('https://prodapis.adsgoat.in/getAccountNameandStatusofNetwork/', { updatedNetwork: ManageradAccounts[item] })
+                      );
+                      ManagernewObject[item] = response.data;
+                    }
+                  }
+                  setuserdetails({ ...matchedUser, adAccounts: ManagernewObject });
+                  break;
+
+                // Case Admin
+                case 'Admin':
+                  // Retry logic for All Accounts API
+                  const AllAccountsData = await retryFetch(() => axios.get(`https://prodapis.adsgoat.in/All/Accounts/`));
+                  const responseData = AllAccountsData.data;
+                  console.log(responseData, "responseData");
+                  setuserdetails({ ...matchedUser, adAccounts: responseData });
+                  break;
+
+                default:
+                  setuserdetails(matchedUser);
               }
+            }
 
-              const email = session.user.email;
-              const tokenResponse = await axios.post('/api/auth/jwt', { email });
-              const token = tokenResponse.data.token;
+            const email = session.user.email;
+            const tokenResponse = await retryFetch(() => axios.post('/api/auth/jwt', { email }));
+            const token = tokenResponse.data.token;
 
-              if (!localStorage.getItem("token")) {
-                localStorage.setItem("token", token);
-              } else {
-                console.log("Token is already stored:", localStorage.getItem("token"));
-              }
+            if (!localStorage.getItem("token")) {
+              localStorage.setItem("token", token);
             } else {
-              console.error('Invalid user data or user email mismatch');
-              localStorage.removeItem("token");
+              console.log("Token is already stored:", localStorage.getItem("token"));
             }
           } else {
-            console.error('Failed to fetch users data');
+            console.error('Invalid user data or user email mismatch');
+            localStorage.removeItem("token");
           }
+        } else {
+          console.error('Failed to fetch users data');
         }
-      } catch (error) {
-        console.error('Error:', error);
-      } finally {
-        setLoading(false);
-        setInitialized(true);
       }
-    };
-    const debouncedFetchData = debounce(fetchData, 2000);
-    if (sessionStatus === "authenticated" && session?.user?.email && !initialized) {
-      debouncedFetchData();
-
-
-    } else if (sessionStatus === 'authenticated' && !session?.user?.email) {
-      console.log("Authenticated but session.user.email is undefined or not available.");
+    } catch (error) {
+      console.error('Error during API call:', error);
+    } finally {
+      setLoading(false);
+      setInitialized(true);
     }
-  }, [session, sessionStatus, initialized]);
+  };
+
+  if (sessionStatus === "authenticated" && session?.user?.email && !isCalledRef.current) {
+    isCalledRef.current = true;  // Set flag to true after first call
+    fetchData();  // Call fetchData only once
+  } else if (sessionStatus === 'authenticated' && !session?.user?.email) {
+    console.log("Authenticated but session.user.email is undefined or not available.");
+  }
+}, [sessionStatus, session]);
 
   // useEffect(() => {
   //   // Reload page if session has just become authenticated to avoid session delay issues
@@ -906,23 +905,26 @@ const LayoutWrapper = ({ children }) => {
                 <p style={{height:'0px', margin:'0px', padding:'0px'}}></p>
             )
           } */}
-      {sessionStatus == "authenticated" && usersData?.length === 0 && !loading ? (
-        <div style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'hidden' }}>
-          <img
-            style={{
-              width: '100%',
-              height: 'auto',
-              maxHeight: '90vh',
-            }}
-            src="/hope.png"
-            alt="img"
-          />
-          <div style={{ position: 'absolute', top: 10, right: 4, zIndex: 2, border: "2px dotted green", padding: "1%" }}>
-            <h3>You are not Authorized {session.user.email}`</h3>
-            <ContactForm />
-          </div>
-        </div>
-      ) :
+      {sessionStatus == "authenticated" && usersData?.length === 0 && !loading ? 
+      // (
+      //   <div style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'hidden' }}>
+      //     <img
+      //       style={{
+      //         width: '100%',
+      //         height: 'auto',
+      //         maxHeight: '90vh',
+      //       }}
+      //       src="/hope.png"
+      //       alt="img"
+      //     />
+      //     <div style={{ position: 'absolute', top: 10, right: 4, zIndex: 2, border: "2px dotted green", padding: "1%" }}>
+      //       <h3>You are not Authorized {session.user.email}`</h3>
+      //       <ContactForm />
+      //     </div>
+      //   </div>
+      // ) 
+      null
+      :
         (sessionStatus !== "authenticated" ? (
           <div
             style={{
