@@ -236,9 +236,21 @@ const handleViewNotification = async (notification) => {
             {notification.title}
           </h3>
   
-          <p style={{ fontSize: '14px', marginBottom: '20px', color: '#555' }}>
-            {notification.description}
-          </p>
+          <p
+          style={{
+            fontSize: '14px',
+            marginBottom: '20px',
+            color: darkMode ? '#fff' : '#555',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+          }}
+        >
+          {notification.description}
+        </p>
+
         </div>
   
         <EyeOutlined
@@ -497,7 +509,7 @@ const handleViewNotification = async (notification) => {
       {/*Notifications Modal */}
       <Modal
         visible={isNotificationModalVisible}
-        width={`30%`} 
+        width={`25%`} 
         onCancel={onHandleNotificationCancel}
         footer={null}
         title={null}
@@ -507,7 +519,7 @@ const handleViewNotification = async (notification) => {
         }}
         style={{
           top: `${modalPosition.top + 70}px`,  // Set dynamically based on the icon's position
-          right: `${modalPosition.right + 10}px`, // Align with the icon's right edge
+          right: `${modalPosition.right + 1}rem`, // Align with the icon's right edge
           position: 'absolute', 
           padding: '0px'
         }}
