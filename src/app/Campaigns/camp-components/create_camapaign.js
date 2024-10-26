@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect } from 'react';
 import { Drawer, Button, DatePicker, Space, Form, Input, Select, Collapse, Upload, Steps, Modal, message, Spin } from 'antd';
-import { PlusOutlined, UploadOutlined, ShareAltOutlined, CommentOutlined, LikeOutlined, MoreOutlined, CloseOutlined, GlobalOutlined } from '@ant-design/icons';
+import { PlusOutlined, UploadOutlined, ShareAltOutlined, CommentOutlined, LikeOutlined, MoreOutlined, CloseOutlined, GlobalOutlined,EditOutlined } from '@ant-design/icons';
 import moment from 'moment-timezone';
 import { useState, useRef } from 'react';
 import TextArea from 'antd/es/input/TextArea';
@@ -27,21 +27,23 @@ const positionOptions = {
         { key: "instream_video", label: "Facebook In-Stream Videos" },
         { key: "facebook_reels", label: "Facebook Reels" },
         { key: "profile_feed", label: "Facebook Profile Feed" },
-        { key: "search", label: "Facebook search" }
+        { key: "search", label: "Facebook search" },
+        { key: "story_fb", label: "Facebook Stories" }
     ],
     instagram: [
         { key: "stream", label: "Instagram Stream" },
-        { key: "story", label: "Instagram Story" },
+        { key: "story_in", label: "Instagram Story" },
         { key: "explore", label: "Instagram Explore" },
         { key: "explore_home", label: "Instagram Explore Home" },
         { key: "reels", label: "Instagram Reels" },
-        { key: "profile_feed", label: "Instagram Profile Feed" },
+        { key: "profile_feed_in", label: "Instagram Profile Feed" },
         { key: "ig_search", label: "Instagram Search" },
         { key: "profile_reels", label: "Instagram Profile Reels" }
     ],
     messenger: [
         { key: "messenger_home", label: "Messenger Home" },
-        { key: "story", label: "Messenger Story" }
+        { key: "story_ms", label: "Messenger Story" },
+        { key: "sponsored_messages", label: "Messenger sponsored messages" }
     ],
     audience_network: [
         { key: "classic", label: "Audience Network Classic" },
@@ -476,7 +478,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis }) =>
 
     const handleBidStrategyChange = (value) => {
         // Show bid_amount if the selected bid strategy is "Bid Cap", otherwise hide it
-        setShowBidAmount(value === "LOWEST_COST_WITH_BID_CAP");
+        setShowBidAmount(value === "LOWEST_COST_WITH_BID_CAP" || value === "COST_CAP");
+        // setShowBidAmount(["LOWEST_COST_WITH_BID_CAP", "COST_CAP"].includes(value));
     };
     useEffect(() => {
         setAccountNumber(accountis);
@@ -1368,13 +1371,18 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis }) =>
                                 </Form.Item>
                                 <Form.Item
                                     name="Language"
+
                                     label={<span style={{ color: "#B4B4B4" }}>Language</span>}
                                     rules={[{ required: true, message: "Please select an option!" }]}
                                     style={{ flex: '1 1 150px' }}
                                 >
                                     <Select
                                         mode="multiple"
+                                        showSearch
                                         placeholder="Select Language"
+                                        filterOption={(input, option) =>
+                                            option.children.toLowerCase().includes(input.toLowerCase())
+                                        }
                                     >
                                         {localesdata.map(option => (
                                             <Option key={option.key} value={option.key}>
@@ -1445,7 +1453,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis }) =>
                             </div>
                         </Panel>
 
-                        <Panel header="ADD LEVEL" key="3">
+                        <Panel header="AD LEVEL" key="3">
                             <div style={{ display: "flex", justifyContent: "space-between" }}>
                                 <div style={{ flex: "70%", marginRight: "5%" }}>
                                     <div style={{ display: 'flex', gap: '16px' }}>
@@ -1594,6 +1602,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis }) =>
                                             onChange={(e) => setWebsiteURL(e.target.value)}
 
                                         />
+                                        <EditOutlined/>
                                     </Form.Item>
                                     {/* <Form.Item
                                     label="URL Parameters"

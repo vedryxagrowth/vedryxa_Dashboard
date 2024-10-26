@@ -30,6 +30,7 @@ const contentStyle = {
 const roles = ['All', 'Media_Buyer', 'Admin', 'Manager', 'Special_User'];
 const accountStatus = ['All', 'Active', 'InActive'];
 const availableNetworks = ['All', "MEDIA_DOT_NET", "MEDIA_DOT_NET_BING", "ENKI", "TONIC", "System1", "Bodies", "Bodies1", "Rsoc", "Domain Active"];
+const networkStatus = ['All', 'Active', 'InActive'];
 
 const UsersTable = () => {
     const [isSearchingNetwork, setIsSearchingNetwork] = useState(false); //prudhvi
@@ -173,7 +174,7 @@ const UsersTable = () => {
 
     var token = localStorage.getItem("token")
     useEffect(() => {
-        const debouncedFetchData = debounce(fetchNetworksData, 1000);
+        const debouncedFetchData = debounce(fetchNetworksData, 2000);
         const functionaCall = async() => {
             await fetchusersData();
             await fetchAccountsData();
@@ -181,6 +182,7 @@ const UsersTable = () => {
         }
         functionaCall();
     }, []);
+    
     const handleDelete = async (values) => {
         // console.log(values, "Delete");
 
@@ -361,6 +363,7 @@ const UsersTable = () => {
             setLoading(false);
         }
     }
+
 
     const networkFilterData = () => {
         console.log(status, 'status');
@@ -702,7 +705,9 @@ const UsersTable = () => {
                     return((
                         <Select
                             defaultValue={'Network wise accounts'}
-                            style={{ width: '200px' }}
+                            style={{ width: '200px',
+                            }}
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             onChange={handleSelectChange}
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
                             dropdownRender={(menu) => (
@@ -734,7 +739,10 @@ const UsersTable = () => {
                     ))
                 }else{
                     return(
-                        <Select style={{ width: '200px' }} defaultValue={'No accounts available'} 
+                        <Select style={{ width: '200px'
+                         }}
+                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                        defaultValue={'No accounts available'} 
                         dropdownClassName={theme === 'dark' && "custom-dropdown"}>
                             <Select.Option key="empty" value="">
                                 No accounts available
@@ -838,13 +846,13 @@ const UsersTable = () => {
         setNetworkAccessData(values)
     }
 
-    const onCloseDrawer = () => {
-        setDrawerVisible(false);
-        setaccountDrawerVisible(false)
-        setusersaccessDrawerVisible(false)
-        setaccountaccessDrawerVisible(false)
-        setNetworkAccessDrawerVisible(false);
-    };
+    // const onCloseDrawer = () => {
+    //     setDrawerVisible(false);
+    //     setaccountDrawerVisible(false)
+    //     setusersaccessDrawerVisible(false)
+    //     setaccountaccessDrawerVisible(false)
+    //     setNetworkAccessDrawerVisible(false);
+    // };
 
     const onChangeRole = (value) => {
         // if(value === 'All'){
@@ -925,6 +933,45 @@ const UsersTable = () => {
             setLoading(false);
         }
     };
+
+
+    const onCloseDrawer = (updatedData) => {
+        if (updatedData) {
+          if (updatedData.email) {
+            // Handle user data update
+            setUsersData((prevData) =>
+              prevData.map((user) =>
+                user.email === updatedData.email ? updatedData : user
+              )
+            );
+          } else if (updatedData.accountNumber) {
+            // Handle account data update
+            setAccountsData((prevData) =>
+              prevData.map((account) =>
+                account.accountNumber === updatedData.accountNumber ? updatedData : account
+              )
+            );
+          } else if (updatedData.revenuePartner) {
+            // Handle network data update
+            setNetworksData((prevData) =>
+              prevData.map((network) =>
+                network.revenuePartner === updatedData.revenuePartner ? updatedData : network
+              )
+            );
+          }
+        }
+      
+        // Close all relevant drawers
+        setDrawerVisible(false);
+        setaccountDrawerVisible(false);
+        setusersaccessDrawerVisible(false);
+        setaccountaccessDrawerVisible(false);
+        setNetworkAccessDrawerVisible(false);
+    };
+
+   
+      
+    
     
 
     return (
@@ -954,14 +1001,21 @@ const UsersTable = () => {
                                         <div style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
                                             {/* {isSearching ? ( */}
                                                 <>
-                                                    <Button icon={<SearchOutlined />} />
+                                                    <Button  style={{color: theme === "dark" ? "#333": "#fff"}} icon={<SearchOutlined  style={{color: theme === "dark" ? "#333": "#fff"}} />} />
                                                     <Input
                                                         placeholder="Search here"
                                                         autoFocus
                                                         value={searchInput}
                                                         onChange={handleSearchChange}
                                                         onBlur={handleBlur}
-                                                        style={{ width: '100%', borderRadius: '5px', marginLeft: '8px' }}
+                                                        style={{
+                                                            width: '100%',
+                                                            borderRadius: '5px',
+                                                            marginLeft: '8px',
+                                                            backgroundColor: theme === 'dark' ? '#333' : '#ffffff',  // Dark theme: dark background, Light theme: white background
+                                                            color: theme === 'dark' ? '#ffffff' : '#333',            // Dark theme: white text, Light theme: dark text
+                                                            borderColor: theme === 'dark' ? '#444444' : '#d9d9d9'       // Optional: adjust border color as well
+                                                        }}
                                                     />
                                                 </>
                                             {/* ) : (
@@ -977,7 +1031,9 @@ const UsersTable = () => {
                                         <Select
                                             onChange={onChangeRole}
                                             defaultValue="All"
-                                            style={{ width: "100%", marginTop: '8px' }}
+                                            style={{ width: "100%", marginTop: '8px'
+                                            }}
+                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                             options={roles.map((item) => ({
                                                 value: item,
@@ -989,7 +1045,9 @@ const UsersTable = () => {
                                         <span style={{ color: "#B4B4B4", display: 'block' }}>Category</span>
                                         <Select
                                             defaultValue="All"
-                                            style={{ width: "100%", marginTop: '8px' }}
+                                            style={{ width: "100%", marginTop: '8px'
+                                            }}
+                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                             options={[
                                                 { value: "jack", label: "Jack" },
@@ -1020,6 +1078,7 @@ const UsersTable = () => {
                         <Spin />
                     ) : usersData.length > 0 ? (
                         <Table
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             dataSource={searchInput ? filteredData.map((item, index) => ({ ...item, key: index })) : filteredRoleData.map((item, index) => ({ ...item, key: index }))}
                             columns={columns}
                             pagination={{ pageSize: paginationSize }}
@@ -1030,6 +1089,7 @@ const UsersTable = () => {
                     ) : (
                         <Result
                             status="404"
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             title="No Users Data Available"
                             extra={<Button type="primary" onClick={shownewuserdrawar}>
                                 Create User
@@ -1046,14 +1106,21 @@ const UsersTable = () => {
                                     <Col xs={24} sm={12} md={8}>
                                         <span style={{ color: "#B4B4B4", display: 'block' }}>Search</span>
                                         <div style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
-                                            <Button icon={<SearchOutlined />} onClick={handleSearchClick1} />
+                                            <Button  style={{color: theme === "dark" ? "#333": "#fff"}} icon={<SearchOutlined  style={{color: theme === "dark" ? "#333": "#fff"}}/>} onClick={handleSearchClick1} />
                                             <Input
                                                 placeholder="Search here"
                                                 autoFocus={isSearchingAccount}  // Only autofocus when searching
                                                 value={newSearchInput}
                                                 onChange={handleaccountSearchChange}
                                                 onBlur={handleBlur1}
-                                                style={{ width: '100%', borderRadius: '5px', marginLeft:'8px' }} // Adjust input width and margin dynamically
+                                                style={{
+                                                    width: '100%',
+                                                    borderRadius: '5px',
+                                                    marginLeft: '8px',
+                                                    backgroundColor: theme === 'dark' ? '#333' : '#ffffff',  // Dark theme: dark background, Light theme: white background
+                                                    color: theme === 'dark' ? '#ffffff' : '#333',            // Dark theme: white text, Light theme: dark text
+                                                    borderColor: theme === 'dark' ? '#444444' : '#d9d9d9'       // Optional: adjust border color as well
+                                                }} // Adjust input width and margin dynamically
                                             />
                                         </div>
                                     </Col>
@@ -1062,7 +1129,9 @@ const UsersTable = () => {
                                         <Select
                                             onChange={onChangeNetwork}
                                             defaultValue="All"
-                                            style={{ width: "100%", marginTop: '8px' }}
+                                            style={{ width: "100%", marginTop: '8px'
+                                            }}
+                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                             options={availableNetworks.map((item) => ({
                                                 value: item,
@@ -1075,7 +1144,9 @@ const UsersTable = () => {
                                         <Select
                                             onChange={onChangeStatus}
                                             defaultValue="All"
-                                            style={{ width: "100%", marginTop: '8px' }}
+                                            style={{ width: "100%", marginTop: '8px'
+                                            }}
+                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                             options={accountStatus.map((item) => ({
                                                 value: item,
@@ -1105,6 +1176,7 @@ const UsersTable = () => {
                     ) : AccountsData.length > 0 ? (
                         <Table
                             bordered
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             dataSource={newSearchInput ? accFilteredData.map((item, index) => ({ ...item, key: index })) : filteredAccountData.map((item, index) => ({ ...item, key: index }))}
                             columns={Accountscolumn}
                             pagination={{ pageSize: paginationSize }}
@@ -1113,6 +1185,7 @@ const UsersTable = () => {
                     ) : (
                         <Result
                             status="404"
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             title="No Accounts Data Available"
                             subTitle="Sorry, this page contains no data."
                             extra={<Button type="primary" onClick={shownnewaccountdrawar}>
@@ -1130,14 +1203,21 @@ const UsersTable = () => {
                                     <Col xs={24} sm={12} md={8}>
                                         <span style={{ color: "#B4B4B4", display: 'block' }}>Search</span>
                                         <div style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
-                                            <Button icon={<SearchOutlined />} onClick={handleSearchNetwork} />
+                                            <Button  style={{color: theme === "dark" ? "#333": "#fff"}} icon={<SearchOutlined  style={{color: theme === "dark" ? "#333": "#fff"}} />} onClick={handleSearchNetwork} />
                                             <Input
                                                 placeholder="Search here"
                                                 autoFocus={isSearchingNetwork}  // Only autofocus when searching
                                                 value={netSearchInput}
                                                 onChange={handleNetworkSearchChange}
                                                 onBlur={handleBlur2}
-                                                style={{ width: '100%', borderRadius: '5px', marginLeft:'8px' }} // Adjust input width and margin dynamically
+                                                style={{
+                                                    width: '100%',
+                                                    borderRadius: '5px',
+                                                    marginLeft: '8px',
+                                                    backgroundColor: theme === 'dark' ? '#333' : '#ffffff',  // Dark theme: dark background, Light theme: white background
+                                                    color: theme === 'dark' ? '#ffffff' : '#333',            // Dark theme: white text, Light theme: dark text
+                                                    borderColor: theme === 'dark' ? '#444444' : '#d9d9d9'       // Optional: adjust border color as well
+                                                }} // Adjust input width and margin dynamically
                                             />
                                         </div>
                                     </Col>
@@ -1145,8 +1225,11 @@ const UsersTable = () => {
                                         <span style={{ color: "#B4B4B4", display: 'block' }}>Network</span>
                                         <Select
                                             onChange={onChangeNetwork}
+                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                             defaultValue="All"
-                                            style={{ width: "100%", marginTop: '8px' }}
+                                            style={{ width: "100%", marginTop: '8px'
+                                            }}
+                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                             options={availableNetworks.map((item) => ({
                                                 value: item,
                                                 label: item,
@@ -1157,9 +1240,12 @@ const UsersTable = () => {
                                         <span style={{ color: "#B4B4B4", display: 'block' }}>Status</span>
                                         <Select
                                             onChange={onChangeStatus}
+                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                             defaultValue="All"
-                                            style={{ width: "100%", marginTop: '8px' }}
-                                            options={accountStatus.map((item) => ({
+                                            style={{ width: "100%", marginTop: '8px'
+                                            }}
+                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                            options={networkStatus.map((item) => ({
                                                 value: item,
                                                 label: item,
                                             }))}
@@ -1187,6 +1273,7 @@ const UsersTable = () => {
                     ) : networksData.length > 0 ? ( 
                         <Table
                             bordered
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             dataSource={netSearchInput ? networkFilteredData.map((item, index) => ({ ...item, key: item.key, id: index })) : filteredNetworkData.map((item, index) => ({ ...item, key: item.key, id: index }))}
                             columns={networksColumn}
                             pagination={{ pageSize: paginationSize }}
@@ -1197,6 +1284,7 @@ const UsersTable = () => {
                     ) : (
                         <Result
                             status="404"
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             title="No Networks Data Available"
                             subTitle="Sorry, this page contains no data."
                             extra={<Button type="primary" onClick={showNetworkDrawer}>
@@ -1208,6 +1296,7 @@ const UsersTable = () => {
             </Carousel>
         </>
     );
+
 };
 
 export default UsersTable;

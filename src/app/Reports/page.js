@@ -10,7 +10,7 @@ import axios from 'axios';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
 // import { Select } from 'antd';
-import { Carousel, Input, Button, Pagination, Row, Col, Typography, Result, Modal, message, ConfigProvider, theme, Switch, Divider, Flex, Spin } from 'antd';
+import { Carousel, Input, Button, Pagination, Row, Col, Typography, Result, Modal, message, ConfigProvider, Switch, Divider, Flex, Spin } from 'antd';
 
 // import 'antd/dist/reset.css';
 import { CommentOutlined, CustomerServiceOutlined, MenuOutlined, InfoCircleOutlined, DownloadOutlined, SearchOutlined, ArrowLeftOutlined, ArrowRightOutlined, SmileOutlined, ReloadOutlined, CopyOutlined, StarOutlined, StarFilled, EditOutlined, CheckCircleFilled, CloseCircleFilled, MessageOutlined, SubnodeOutlined } from '@ant-design/icons';
@@ -35,12 +35,13 @@ import { RiLiveFill } from 'react-icons/ri';
 import { FaDailymotion } from 'react-icons/fa';
 const { Text } = Typography;
 const contentStyle = {
-    margin: 0,
+    margin: "10px",
     // height: '800px',
     color: '#66fc03',
     lineHeight: '160px',
     textAlign: 'center',
     background: '#fbfcfa',
+    
 };
 
 // function debounce(func, wait) {
@@ -257,6 +258,8 @@ const MyTablePage = () => {
     const cronStatus = useRef();
 
     const accountStatus = useRef();
+
+    const hasFetched = useRef(false);
 
 
     /* cronstatus*/
@@ -488,6 +491,12 @@ const MyTablePage = () => {
 
     const currencyFormatter = (params) => {
         return `$${parseFloat(params.value || 0).toFixed(2)}`; // Ensure 2 decimal places in currency format
+    };
+
+    const numberComparator = (valueA, valueB) => {
+        const numA = parseFloat(valueA) || 0;
+        const numB = parseFloat(valueB) || 0;
+        return numA - numB;
     };
 
 
@@ -964,6 +973,18 @@ const MyTablePage = () => {
         return startDate1.isSame(yesterday1, 'day') && endDate1.isSame(yesterday1, 'day');
     };
 
+    const customNumberComparator = (valueA, valueB) => {
+        const a = parseFloat(valueA);
+        const b = parseFloat(valueB);
+
+        // Handle null/undefined values first (nulls should appear last in the sort order)
+        if (isNaN(a)) return 1;
+        if (isNaN(b)) return -1;
+
+        // Standard comparison for non-null values
+        return a - b;
+    };
+
     const columnDefsObject = {
         campaignname: {
             headerName: 'CampaignName',
@@ -1204,7 +1225,7 @@ const MyTablePage = () => {
             // getMainMenuItems
         },
         'mnet-hour': {
-            headerName: 'M-H',
+            headerName: 'N-H',
             field: 'mnet-hour',
             width: 85,
             sortable: true,
@@ -1712,23 +1733,37 @@ const MyTablePage = () => {
         'fb-hour': { headerName: 'F-H', field: 'fb-hour', width: 85, sortable: true, hide: true, filter: 'agNumberColumnFilter' },
         'mnet-hour': { headerName: 'M-H', field: 'mnet-hour', width: 85, sortable: true, hide: true, filter: 'agNumberColumnFilter' },
         spend: {
-            headerName: 'Spend($)', field: 'spend', width: 150,
-            aggFunc: spender,
-            valueFormatter: params => params.value ? `$${Math.round(params.value * 100) / 100}` : '', sortable: true,
-            filter: 'agNumberColumnFilter'
+            headerName: 'Spend($)',
+            field: 'spend',
+            width: 120,
+            aggFunc: liveSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            valueFormatter: currencyFormatter, // Format display as currency
+            comparator: numberComparator,
         },
         revenue: {
-            headerName: 'Revenue($)', field: 'revenue', width: 150,
-            aggFunc: spender,
-            valueFormatter: params => params.value ? `$${Math.round(params.value * 100) / 100}` : '', sortable: true, filter: 'agNumberColumnFilter'
+            headerName: 'Revenue($)',
+            field: 'revenue',
+            width: 120,
+            aggFunc: liveSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            valueFormatter: currencyFormatter,
+            comparator: numberComparator,
         },
         profit: {
-            headerName: 'Profit($)', field: 'profit', width: 150, cellClassRules: {
-                'font-red': p => p.value < 0
+            headerName: 'Profit($)',
+            field: 'profit',
+            width: 120,
+            aggFunc: liveSpender,
+            sortable: true,
+            cellClassRules: {
+                'font-red': p => p.value < 0 // Conditional formatting for negative profit
             },
-            aggFunc: spender,
-            valueFormatter: params => params.value ? `$${Math.round(params.value * 100) / 100}` : '', sortable: true,
-            headerTooltip: 'Revenue - Spend', filter: 'agNumberColumnFilter'
+            filter: "agNumberColumnFilter",
+            valueFormatter: currencyFormatter,
+            comparator: numberComparator,
         },
         margin: {
             headerName: 'Margin(%)', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: 'Profit/Revenue', filter: 'agNumberColumnFilter',
@@ -2022,17 +2057,17 @@ const MyTablePage = () => {
         },
         spend: {
             headerName: 'Spend($)', field: 'spend', width: 150, aggFunc: spender, sortable: true, filter: 'agNumberColumnFilter',
-            valueFormatter: currencyFormatter
+            valueFormatter: currencyFormatter, comparator: numberComparator
         },
         revenue: {
             headerName: 'Revenue($)', field: 'revenue', width: 150, aggFunc: spender, sortable: true, filter: 'agNumberColumnFilter',
-            valueFormatter: currencyFormatter
+            valueFormatter: currencyFormatter, comparator: numberComparator
         },
         profit: {
             headerName: 'Profit($)', field: 'profit', width: 150, aggFunc: spender, cellClassRules: {
                 'font-red': p => p.value < 0
             }, sortable: true, headerTooltip: 'Revenue - Spend', filter: 'agNumberColumnFilter',
-            valueFormatter: currencyFormatter
+            valueFormatter: currencyFormatter, comparator: numberComparator
         },
         margin: {
             headerName: 'Margin(%)', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: 'Profit/Revenue', filter: true,
@@ -2179,7 +2214,7 @@ const MyTablePage = () => {
         });
         const mainData = fetchData.data;
         let campaignComments = [];
-        if (fetchData.status === 200) {
+        if (fetchData.status === 200 && mainData.length> 0) {
             try {
                 const commentFetch = await axios.get(`https://prodapis.adsgoat.in/Comments/${account}`, {
                     headers: {
@@ -2190,8 +2225,6 @@ const MyTablePage = () => {
             } catch (error) {
                 console.error('Error fetching comments:', error); // Log any errors fetching comments
             }
-        } else {
-            console.error('Error fetching comments:', error);
         }
         setCampaignComments(campaignComments);
         // console.log(mainData, "maindata of functinCall1");
@@ -2858,7 +2891,12 @@ const MyTablePage = () => {
         }
     };
     useEffect(() => {
-        fetchCampaignComments(); // Fetch comments whenever refrst changes
+        // Ensure it only runs if `refrst` changes after the first render
+        if (hasFetched.current) {
+            fetchCampaignComments();
+        } else {
+            hasFetched.current = true; // Set it to true after first render
+        }
     }, [refrst]); // Run this effect when refrst changes
 
     // useEffect(() => {
@@ -2921,6 +2959,15 @@ const MyTablePage = () => {
                         </div>
                     );
                 }
+
+                const getEditedUserAndTime = (campaignName, newaccount) =>{
+                    const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
+                    console.log(relatedStatus, "relatedStatus");
+                    const relatedStatusEditedTime = relatedStatus ? relatedStatus : null;
+                    // console.log(relatedStatusTrue);
+                    return relatedStatusEditedTime;
+                }
+
                 const getStatusForCampaign = (campaignName, newaccount) =>{
                     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
                     console.log(relatedStatus, "relatedStatus");
@@ -2938,6 +2985,8 @@ const MyTablePage = () => {
                     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                     return relatedComment ? relatedComment.starred : false;
                 };
+
+                const editUserANdTime = getEditedUserAndTime(campaignName, newaccount);
                 const relatedStatus = getStatusForCampaign(campaignName, newaccount);
                 const relatedComment = getCommentForCampaign(campaignName);
                 const isStarred = getStarredForCampaign(campaignName);
@@ -3074,11 +3123,26 @@ const MyTablePage = () => {
                 const handleCancels = () => {
                     setIsModalVisibles(false);
                 };
+
+                const CustomTooltipContent = ({editedTime, usercommit}) => (
+                    <div style={{ padding: '5px', borderRadius: '5px' }}>
+                      <p style={{ margin: 0, color:  "#ffffff" }}>{usercommit}</p>
+                      <p style={{ margin: 0, color: "#ffffff" }}>{editedTime}</p>
+                    </div>
+                );
     
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                        {relatedStatus === true && <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }}/>}
-                        {relatedStatus === false && <CloseCircleFilled style={{ color: 'red', fontSize: '15px' , marginRight: relatedComment ? "10px" : '0px' }}/>}
+                        {relatedStatus === true && 
+                            <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit}/>}>
+                                <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }}/>
+                            </Tooltip>
+                        }
+                        {relatedStatus === false && 
+                            <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit}/>}>
+                                <CloseCircleFilled style={{ color: 'red', fontSize: '15px' , marginRight: relatedComment ? "10px" : '0px' }}/>
+                            </Tooltip>
+                        }
                         {relatedComment && (
                             starred ? (
                                 <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: "gold"}} />
@@ -3186,6 +3250,13 @@ const MyTablePage = () => {
                         </div>
                     );
                 }
+                const getEditedUserAndTime = (campaignName, newaccount) =>{
+                    const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
+                    console.log(relatedStatus, "relatedStatus");
+                    const relatedStatusEditedTime = relatedStatus ? relatedStatus : null;
+                    // console.log(relatedStatusTrue);
+                    return relatedStatusEditedTime;
+                }
                 const getStatusForCampaign = (campaignName, newaccount) =>{
                     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
                     console.log(relatedStatus, "relatedStatus");
@@ -3203,6 +3274,7 @@ const MyTablePage = () => {
                     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                     return relatedComment ? relatedComment.starred : false;
                 };
+                const editUserANdTime = getEditedUserAndTime(campaignName, newaccount);
                 const relatedStatus = getStatusForCampaign(campaignName, newaccount);
                 const relatedComment = getCommentForCampaign(campaignName);
                 const isStarred = getStarredForCampaign(campaignName);
@@ -3333,11 +3405,26 @@ const MyTablePage = () => {
                 const handleCancels = () => {
                     setIsModalVisibles(false);
                 };
+
+                const CustomTooltipContent = ({editedTime, usercommit}) => (
+                    <div style={{ padding: '5px', borderRadius: '5px' }}>
+                      <p style={{ margin: 0, color:  "#ffffff" }}>{usercommit}</p>
+                      <p style={{ margin: 0, color: "#ffffff" }}>{editedTime}</p>
+                    </div>
+                );
     
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                    {relatedStatus === true && <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }}/>}
-                    {relatedStatus === false && <CloseCircleFilled style={{ color: 'red', fontSize: '15px' , marginRight: relatedComment ? "10px" : '0px' }}/>}
+                        {relatedStatus === true && 
+                            <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit}/>}>
+                                <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }}/>
+                            </Tooltip>
+                        }
+                        {relatedStatus === false && 
+                            <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit}/>}>
+                                <CloseCircleFilled style={{ color: 'red', fontSize: '15px' , marginRight: relatedComment ? "10px" : '0px' }}/>
+                            </Tooltip>
+                        }
                         {relatedComment && (
                             starred ? (
                                 <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: "gold" }} />
@@ -3366,7 +3453,7 @@ const MyTablePage = () => {
                         </Tooltip>
                         <span
                             onClick={() => {
-                                const url = `/CampaignHistory/${params.value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                                const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                                 window.open(url, '_blank');
                             }}
                         >
@@ -3424,6 +3511,12 @@ const MyTablePage = () => {
                             Error: campaignid or adsetid missing for {campaignName}
                         </div>
                     );
+                }const getEditedUserAndTime = (campaignName, newaccount) =>{
+                    const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
+                    console.log(relatedStatus, "relatedStatus");
+                    const relatedStatusEditedTime = relatedStatus ? relatedStatus : null;
+                    // console.log(relatedStatusTrue);
+                    return relatedStatusEditedTime;
                 }
                 const getStatusForCampaign = (campaignName, newaccount) =>{
                     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
@@ -3442,6 +3535,7 @@ const MyTablePage = () => {
                     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                     return relatedComment ? relatedComment.starred : false;
                 };
+                const editUserANdTime = getEditedUserAndTime(campaignName, newaccount);
                 const relatedStatus = getStatusForCampaign(campaignName, newaccount);
                 const relatedComment = getCommentForCampaign(campaignName);
                 const isStarred = getStarredForCampaign(campaignName);
@@ -3567,11 +3661,26 @@ const MyTablePage = () => {
                 const handleCancel = () => {
                     setIsModalVisible(false);
                 };
+
+                const CustomTooltipContent = ({editedTime, usercommit}) => (
+                    <div style={{ padding: '5px', borderRadius: '5px' }}>
+                      <p style={{ margin: 0, color:  "#ffffff" }}>{usercommit}</p>
+                      <p style={{ margin: 0, color: "#ffffff" }}>{editedTime}</p>
+                    </div>
+                );
     
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                        {relatedStatus === true && <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }}/>}
-                        {relatedStatus === false && <CloseCircleFilled style={{ color: 'red', fontSize: '15px' , marginRight: relatedComment ? "10px" : '0px' }}/>}
+                        {relatedStatus === true && 
+                            <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit}/>}>
+                                <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }}/>
+                            </Tooltip>
+                        }
+                        {relatedStatus === false && 
+                            <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit}/>}>
+                                <CloseCircleFilled style={{ color: 'red', fontSize: '15px' , marginRight: relatedComment ? "10px" : '0px' }}/>
+                            </Tooltip>
+                        }
                         {relatedComment && (
                             starred ? (
                                 <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: 'gold' }} />
@@ -4322,7 +4431,7 @@ const MyTablePage = () => {
 
     // console.log(fixedFooter, "fixed");
 
-
+    console.log(dailyData, "Daily");
 
     return (
         <div className='reports-container'>
@@ -4334,7 +4443,11 @@ const MyTablePage = () => {
                             showSearch
                             className='select-element'
                             onChange={onChangeSelectRevenue}
-                            style={{ width: '100%' }}
+                            style={{ 
+                                width: '100%',
+                                backgroundColor: theme === 'dark' && '#333', // Background color
+                                color: theme === 'dark' && '#fff',
+                            }}
                             placeholder="Select Network"
 
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
@@ -4352,7 +4465,13 @@ const MyTablePage = () => {
                             showSearch
                             onChange={handleChange1} // Handle value selection
                             dropdownClassName={theme === 'dark' ? "custom-dropdown" : ''} // Apply dark theme if needed
-                            style={{ width: '100%', maxWidth: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} // Prevent overflow with ellipsis
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                            style={{ 
+                                width: '100%',
+                                maxWidth: '100%', 
+                                whiteSpace: 'nowrap', 
+                                overflow: 'hidden', 
+                                textOverflow: 'ellipsis' }} // Prevent overflow with ellipsis
                             placeholder="Select Account"
                             optionFilterProp="value"
                             value={selectedValue}  // Set selected value
@@ -4383,7 +4502,7 @@ const MyTablePage = () => {
                         <Select
                             showSearch
                             onChange={onChangeTime}
-                            style={{ width: '100%' }}
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             placeholder="Select Timezone"
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
                             optionFilterProp="label"
@@ -4582,12 +4701,14 @@ const MyTablePage = () => {
                                     />
 
                                 </div>
-                            ) : <div>
+                            ) : <div style={{backgroundColor: theme === "dark" && "#333"}}>
                                 {startDate !== endDate ? <Result
+                                    className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                     icon={<SmileOutlined />}
                                     title={`No LiveData for ${newaccount} from ${startDate} to ${endDate}`}
                                 // extra={<Button type="primary">Next</Button>}
                                 /> : <Result
+                                    className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                     icon={<SmileOutlined />}
                                     title={`No LiveData for ${newaccount} to ${startDate}`}
                                 // extra={<Button type="primary">Next</Button>}
@@ -4675,12 +4796,14 @@ const MyTablePage = () => {
                                         }}
                                     />
                                 </div>
-                            ) : <div>
+                            ) : <div style={{backgroundColor: theme === "dark" && "#333"}}>
                                 {startDate !== endDate ? <Result
+                                    className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                     icon={<SmileOutlined />}
                                     title={`No DailyData for ${newaccount} from ${startDate} to ${endDate}`}
                                 // extra={<Button type="primary">Next</Button>}
                                 /> : <Result
+                                    className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                     icon={<SmileOutlined />}
                                     title={`No DailyData for ${newaccount} to ${startDate}`}
                                 // extra={<Button type="primary">Next</Button>}
@@ -4708,7 +4831,7 @@ const MyTablePage = () => {
                                 <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
                                     <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap' }}>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
-                                            <Space align="center" className='daily-contaier' style={{ width: '150px' }}>
+                                            <Space align="center" className='daily-container' style={{ width: '150px' }}>
                                                 <div class="blinking-circle-3"></div>
                                                 <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600', width: '100px' }}>Campaigns</Text>
                                             </Space>
@@ -4737,27 +4860,21 @@ const MyTablePage = () => {
                                         </Col>
                                     </Row>
 
-
                                     <div style={{ height: '90%' }}>
                                         <AgGridReact
-                                            key={gridKey}
                                             ref={gridRef2}
                                             rowData={campaignData.filter((each) => each.campaignname.includes(inputValue))}
                                             columnDefs={columnDefs2.current}
                                             onCellClicked={onCellClickedAllCampaigns}
                                             autoGroupColumnDef={autoGroupColumnDef2}
                                             defaultColDef={defaultColDef}
-                                            // pagination={true}
-                                            // paginationPageSize={50}
-                                            // paginationPageSizeSelector={[10,20,30]}
                                             groupDisplayType='multipleColumns'
                                             suppressAggFuncInHeader={true}
-                                            // groupIncludeTotalFooter={true}
-                                            // // rowGroupPanelShow='always'
-                                            // groupIncludeFooter={true}
                                             groupRowRenderer={GroupRowRenderer}
-                                            onGridReady={(params) => onGridReady(params, 'grid3', gridRef2)}
-                                            // onColumnMoved={debouncedHandleColumnMove2}
+                                            onGridReady={(params) => {
+                                                onGridReady(params, 'grid3', gridRef2);
+                                                params.api.refreshCells(); // Refresh cells to apply the theme dynamically
+                                            }}
                                             gridOptions={gridOptions2}
                                             suppressMenuHide={true}
                                             getMainMenuItems={getMainMenuItems}
@@ -4766,44 +4883,30 @@ const MyTablePage = () => {
                                                 if (params.node.rowPinned) {
                                                     return {
                                                         fontWeight: 'bold',
-                                                        backgroundColor: theme === "dark" ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
-                                                        color: theme === "dark" ? '#fff' : '#000',           // Text color should contrast with the background
+                                                        // backgroundColor: theme === "dark" ? '#000' : '#fff', // Apply theme dynamically
+                                                        // color: theme === "dark" ? '#fff' : '#000',           // Apply theme dynamically
                                                     };
                                                 }
-
                                                 return null;
                                             }}
-                                        // onFirstDataRendered = {(params) => {
-                                        //     params.api.sizeColumnsToFit(100);
-                                        //   }}
-                                        // groupMultiAutoColumn={true}
-                                        // autoGroupColumnDef={autoGroupColumnDef}
-                                        // groupDefaultExpanded={-1} // Expand all groups by default
-                                        // animateRows={true}
-                                        // domLayout="autoHeight"
-                                        // autoGroupColumnDef={{
-                                        //     headerName: 'Group',
-                                        //     cellRendererParams: {
-                                        //         suppressCount: true,
-                                        //     },
-                                        // }}
                                         />
                                     </div>
                                 </div>
-                            ) : <div>
+                            ) : (
                                 <div>
-                                    {startDate !== endDate ? <Result
-                                        icon={<SmileOutlined />}
-                                        title={`No CampaignData for ${newaccount} from ${startDate} to ${endDate}`}
-                                    // extra={<Button type="primary">Next</Button>}
-                                    /> : <Result
-                                        icon={<SmileOutlined />}
-                                        title={`No CampaignData for ${newaccount} to ${startDate}`}
-                                    // extra={<Button type="primary">Next</Button>}
-                                    />}
+                                    <div style={{backgroundColor: theme === "dark" && "#333"}}>
+                                        {startDate !== endDate ? <Result
+                                            className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                            icon={<SmileOutlined />}
+                                            title={`No CampaignData for ${newaccount} from ${startDate} to ${endDate}`}
+                                        /> : <Result
+                                        className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                            icon={<SmileOutlined />}
+                                            title={`No CampaignData for ${newaccount} to ${startDate}`}
+                                        />}
+                                    </div>
                                 </div>
-                            </div>}
-
+                            )}
                         </div>
                         <Pagination
                             style={{ marginBottom: '12px' }}

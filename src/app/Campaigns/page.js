@@ -1,7 +1,7 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import { Table, Tag, Button, Col, Card, Drawer, Dropdown, Flex, Input, Row, Select, Spin, Menu, Space, Modal, message, Switch, Tooltip } from 'antd';
-import { EditOutlined, EyeOutlined, SearchOutlined, CloseOutlined, SwapRightOutlined, PlusOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, ExclamationCircleFilled } from "@ant-design/icons";
+import { EditOutlined, EyeOutlined, SearchOutlined, CloseOutlined, SwapRightOutlined, PlusOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, ExclamationCircleFilled, ReloadOutlined } from "@ant-design/icons";
 import CreateCampaignDrawer from './camp-components/create_camapaign';
 import ViewDrawer from './camp-components/view-campaign';
 import axios from 'axios';
@@ -52,12 +52,11 @@ const App = () => {
     const [selectedKey, setSelectedKey] = useState(null);
     const [selectedValue, setSelectedValue] = useState(null);
     const [valueOptions, setValueOptions] = useState([]);
-    const [error, setError] = useState(null);
-    const [darkMode, setDarkMode] = useState(false);
+    const [error, setError] = useState(false);
     const { theme } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
 
-    
+
     // const [selectedAccount, setSelectedAccount] = useState('All');
     const restrictedEmails = [
         "creatives@adsgoat.in",
@@ -192,7 +191,11 @@ const App = () => {
             fetchData(selectedValue);
         }
     }, [refrst, selectedValue]);
-
+    const handleRefresh = () => {
+        if (selectedValue) {
+            fetchData(selectedValue);
+        } // This will re-fetch the data or update the component
+    };
     useEffect(() => {
         const handleResize = () => {
             if (window.innerWidth < 768) {
@@ -254,6 +257,7 @@ const App = () => {
 
                 message.success("Approval confirmed");
                 setIsModalVisible(false); // Close modal after updating
+                changeRRefrst();
                 // setTimeout(() => {
                 //     window.location.reload();
                 // }, 2000);
@@ -811,6 +815,8 @@ const App = () => {
                             </Button>
                         </Col>
                     )}
+                    <Button type="primary" onClick={handleRefresh} icon={<ReloadOutlined />}>
+                    </Button>
 
                 </Row>
             </Card>
