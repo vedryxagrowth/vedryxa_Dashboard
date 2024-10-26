@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { SessionProvider, useSession, signIn, signOut } from 'next-auth/react';
 import Image from "next/image";
-import { Layout, Avatar, Dropdown, Button, Switch, Spin, Form, Input, Divider, Modal, Badge, Card } from "antd";
+import { Layout, Avatar, Dropdown, Button, Switch, Spin, Form, Input, Divider, Modal, Badge, Card, notification } from "antd";
 import React from "react";
 import { useRouter } from "next/navigation";
 import axios from 'axios';
