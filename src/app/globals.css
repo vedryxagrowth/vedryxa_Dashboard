@@ -500,9 +500,15 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-select-outlined:
   color: #ffffff;
 }
 body.dark-mode .ant-select-selector {
-  border: 1px solid #282628;
-  background: #555555;
-  color: #ffffff;
+  border: 1px solid #282628 !important;
+  background: #555555 !important;
+  color: #ffffff !important;
+}
+body.dark-mode :where(.css-f7vrd6).ant-table-wrapper .ant-table-tbody .ant-table-row >.ant-table-cell-row-hover {
+  background: #282628 !important;
+}
+body.light-mode :where(.css-f7vrd6).ant-table-wrapper .ant-table-tbody .ant-table-row >.ant-table-cell-row-hover {
+  background: #fff !important;
 }
 body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-table-wrapper .ant-table-row-expand-icon {
   border: 1px solid #282628;
