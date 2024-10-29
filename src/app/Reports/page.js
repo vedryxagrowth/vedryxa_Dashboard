@@ -41,7 +41,7 @@ const contentStyle = {
     lineHeight: '160px',
     textAlign: 'center',
     background: '#fbfcfa',
-    
+
 };
 
 // function debounce(func, wait) {
@@ -1017,9 +1017,9 @@ const MyTablePage = () => {
             sortable: false,    // Ensure sorting is disabled
             filter: false,      // Ensure filtering is disabled
             enableSorting: false,  // Disable sorting at the column level
-            enableFilter: false, 
+            enableFilter: false,
             suppressMenu: true,    // Suppress the column menu
-            menuTabs: [], 
+            menuTabs: [],
             hide: !isYesterday(),
             cellRenderer: (params) => {
                 const [isModalVisible, setIsModalVisible] = useState(false);
@@ -1027,69 +1027,69 @@ const MyTablePage = () => {
                 const [newgroupedData, setNewGroupedData] = useState([]);
                 const [changeBudget, onChangeBudget] = useState();
                 const [campaignStatus, setCampaignStatus] = useState(true);
-            
-                const onChangeSpendAndStatus = async() => {
+
+                const onChangeSpendAndStatus = async () => {
                     // Check if it's a group footer row (for groupIncludeFooter)
                     if (params?.node?.footer) {
                         console.log("This is a groupIncludeFooter row. Modal will not open.");
                         return; // Prevent modal from opening for group footer rows
                     }
-            
+
                     // Ensure allLeafChildren exists and is an array before proceeding
                     const allLeafChildren = params.node?.allLeafChildren || [];
-            
+
                     // Fetch all the rows under the current group
                     const groupedData = allLeafChildren.map(node => node.data) || [];
                     setNewGroupedData(groupedData);
-                    
+
                     // Only show the modal if there is data (groupedData length is greater than 0)
                     if (groupedData.length > 0) {
                         const getCampaignResponse = await axios.get(`https://prodapis.adsgoat.in/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`, {
                             headers: {
-                              Authorization: token,
+                                Authorization: token,
                             },
-                          });
-                        if(getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0){
+                        });
+                        if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
                             setGroupedData(getCampaignResponse.data);
                             setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
-                            onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget/100)
+                            onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
                         }
-                        else{
+                        else {
                             setGroupedData(groupedData);
                         }
-                         // Set the grouped data for the modal
+                        // Set the grouped data for the modal
                         setIsModalVisible(true); // Show the modal for non-footer rows
                     }
                 };
-            
-                const handleOk = async() => {
+
+                const handleOk = async () => {
                     setIsModalVisible(false); // Close the modal
                     const object = {
-                        campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname: groupedData[0]?.campaignname,
+                        campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname : groupedData[0]?.campaignname,
                         adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
-                        campaignid:!Array.isArray(groupedData) ? groupedData?.campaignid :  groupedData[0]?.campaignid,
-                        usercommit:userdetails?.email,
+                        campaignid: !Array.isArray(groupedData) ? groupedData?.campaignid : groupedData[0]?.campaignid,
+                        usercommit: userdetails?.email,
                         accountNumber: newaccount,
                         budget: changeBudget * 100,
                         status: campaignStatus
-                    }; 
+                    };
                     console.log(object);
-                    const requestResponse = await axios.post('https://prodapis.adsgoat.in/Comments/accountNumber/campaign', {formattedData: object},{
+                    const requestResponse = await axios.post('https://prodapis.adsgoat.in/Comments/accountNumber/campaign', { formattedData: object }, {
                         headers: {
-                          Authorization: token,
+                            Authorization: token,
                         },
-                      });
+                    });
                     const responseData = requestResponse.data;
                     console.log(responseData, "response");
                     message.success("Budget and Status Updated");
                     changeRRefrst();
                 };
-            
+
                 const handleCancel = () => {
                     setIsModalVisible(false);
                     // console.log(changeBudget); // Close the modal
                 };
-            
+
                 const getTotalSpend = (data) => {
                     if (!data || data.length === 0) return 0;
                     const total = data.reduce((total, item) => {
@@ -1107,7 +1107,7 @@ const MyTablePage = () => {
                 }
 
                 console.log(groupedData);
-            
+
                 return (
                     <div>
                         {/* Click action for status cell */}
@@ -1134,19 +1134,19 @@ const MyTablePage = () => {
                                     </div> */}
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                         <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-                                        <Switch checked={campaignStatus} onChange={onChangeCampaignStatus}/>
+                                        <Switch checked={campaignStatus} onChange={onChangeCampaignStatus} />
                                     </div>
-            
+
                                     {/* Input Field */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong style={{ marginBottom: '10px' }}>Budget:</Typography.Text>
-                                        <Input placeholder="Enter your value here" defaultValue={groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget)/100 : getTotalSpend(newgroupedData)} onChange={onChangeBudgetValue}/>
+                                        <Input placeholder="Enter your value here" defaultValue={groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData)} onChange={onChangeBudgetValue} />
                                     </div>
-            
+
                                     {/* Campaign ID */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong>Campaign ID:</Typography.Text>
-                                        <p>{groupedData?.length > 0 && groupedData?.length !== 1? groupedData[0]?.campaignid : groupedData.campaignid}</p>
+                                        <p>{groupedData?.length > 0 && groupedData?.length !== 1 ? groupedData[0]?.campaignid : groupedData.campaignid}</p>
                                     </div>
                                 </div>
                             </Modal>
@@ -1550,70 +1550,70 @@ const MyTablePage = () => {
                 const [groupedData, setGroupedData] = useState([]);
                 const [changeBudget, onChangeBudget] = useState();
                 const [campaignStatus, setCampaignStatus] = useState(true);
-            
-                const onChangeSpendAndStatus = async() => {
+
+                const onChangeSpendAndStatus = async () => {
                     // Check if it's a group footer row (for groupIncludeFooter)
                     if (params?.node?.footer) {
                         console.log("This is a groupIncludeFooter row. Modal will not open.");
                         return; // Prevent modal from opening for group footer rows
                     }
-            
+
                     // Ensure allLeafChildren exists and is an array before proceeding
                     const allLeafChildren = params.node?.allLeafChildren || [];
                     setNewGroupedData(groupedData);
-            
+
                     // Fetch all the rows under the current group
                     const groupedData = allLeafChildren.map(node => node.data) || [];
-                    
+
                     // Only show the modal if there is data (groupedData length is greater than 0)
                     if (groupedData.length > 0) {
                         const getCampaignResponse = await axios.get(`https://prodapis.adsgoat.in/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`, {
                             headers: {
-                              Authorization: token,
+                                Authorization: token,
                             },
-                          });
-                        if(getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0){
+                        });
+                        if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
                             setGroupedData(getCampaignResponse.data);
                             setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
-                            onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget/100)
+                            onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
                         }
-                        else{
+                        else {
                             setGroupedData(groupedData);
                             console.log("dailyadd");
                         }
-                         // Set the grouped data for the modal
+                        // Set the grouped data for the modal
                         setIsModalVisible(true); // Show the modal for non-footer rows
                     }
                 };
-            
-                const handleOk = async() => {
+
+                const handleOk = async () => {
                     setIsModalVisible(false); // Close the modal
                     const object = {
-                        campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname: groupedData[0]?.campaignname,
+                        campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname : groupedData[0]?.campaignname,
                         adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
-                        campaignid:!Array.isArray(groupedData) ? groupedData?.campaignid :  groupedData[0]?.campaignid,
-                        usercommit:userdetails?.email,
+                        campaignid: !Array.isArray(groupedData) ? groupedData?.campaignid : groupedData[0]?.campaignid,
+                        usercommit: userdetails?.email,
                         accountNumber: newaccount,
                         budget: changeBudget * 100,
                         status: campaignStatus
-                    }; 
+                    };
                     console.log(object);
-                    const requestResponse = await axios.post('https://prodapis.adsgoat.in/Comments/accountNumber/campaign', {formattedData: object},{
+                    const requestResponse = await axios.post('https://prodapis.adsgoat.in/Comments/accountNumber/campaign', { formattedData: object }, {
                         headers: {
-                          Authorization: token,
+                            Authorization: token,
                         },
-                      });
+                    });
                     const responseData = requestResponse.data;
                     console.log(responseData, "response");
                     message.success("Budget and Status Updated");
                     changeRRefrst();
                 };
-            
+
                 const handleCancel = () => {
                     setIsModalVisible(false);
                     // console.log(changeBudget); // Close the modal
                 };
-            
+
                 const getTotalSpend = (data) => {
                     if (!data || data.length === 0) return 0;
                     const total = data.reduce((total, item) => {
@@ -1632,7 +1632,7 @@ const MyTablePage = () => {
 
 
                 console.log(groupedData);
-            
+
                 return (
                     <div>
                         {/* Click action for status cell */}
@@ -1659,19 +1659,19 @@ const MyTablePage = () => {
                                     </div> */}
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                         <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-                                        <Switch checked={campaignStatus} onChange={onChangeCampaignStatus}/>
+                                        <Switch checked={campaignStatus} onChange={onChangeCampaignStatus} />
                                     </div>
-            
+
                                     {/* Input Field */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong style={{ marginBottom: '10px' }}>Budget:</Typography.Text>
-                                        <Input placeholder="Enter your value here" defaultValue={groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget)/100 : getTotalSpend(newgroupedData)} onChange={onChangeBudgetValue}/>
+                                        <Input placeholder="Enter your value here" defaultValue={groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData)} onChange={onChangeBudgetValue} />
                                     </div>
-            
+
                                     {/* Campaign ID */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong>Campaign ID:</Typography.Text>
-                                        <p>{groupedData?.length > 0 && groupedData?.length !== 0? groupedData[0]?.campaignid : groupedData.campaignid}</p>
+                                        <p>{groupedData?.length > 0 && groupedData?.length !== 0 ? groupedData[0]?.campaignid : groupedData.campaignid}</p>
                                     </div>
                                 </div>
                             </Modal>
@@ -1679,8 +1679,8 @@ const MyTablePage = () => {
                     </div>
                 );
             },
-            filterParams: { filterEnabled: false }, 
-                
+            filterParams: { filterEnabled: false },
+
         },
 
         adsetname: {
@@ -1878,69 +1878,69 @@ const MyTablePage = () => {
                 const [groupedData, setGroupedData] = useState([]);
                 const [changeBudget, onChangeBudget] = useState();
                 const [campaignStatus, setCampaignStatus] = useState(true);
-            
-                const onChangeSpendAndStatus = async() => {
+
+                const onChangeSpendAndStatus = async () => {
                     // Check if it's a group footer row (for groupIncludeFooter)
                     if (params?.node?.footer) {
                         console.log("This is a groupIncludeFooter row. Modal will not open.");
                         return; // Prevent modal from opening for group footer rows
                     }
-            
+
                     // Ensure allLeafChildren exists and is an array before proceeding
                     const allLeafChildren = params.node?.allLeafChildren || [];
-            
+
                     // Fetch all the rows under the current group
                     const groupedData = allLeafChildren.map(node => node.data) || [];
                     setNewGroupedData(groupedData);
-                    
+
                     // Only show the modal if there is data (groupedData length is greater than 0)
                     if (groupedData.length > 0) {
                         const getCampaignResponse = await axios.get(`https://prodapis.adsgoat.in/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`, {
                             headers: {
-                              Authorization: token,
+                                Authorization: token,
                             },
-                          });
-                        if(getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0){
+                        });
+                        if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
                             setGroupedData(getCampaignResponse.data);
                             setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
-                            onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget/100)
+                            onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
                         }
-                        else{
+                        else {
                             setGroupedData(groupedData);
                         }
-                         // Set the grouped data for the modal
+                        // Set the grouped data for the modal
                         setIsModalVisible(true); // Show the modal for non-footer rows
                     }
                 };
-            
-                const handleOk = async() => {
+
+                const handleOk = async () => {
                     setIsModalVisible(false); // Close the modal
                     const object = {
-                        campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname: groupedData[0]?.campaignname,
+                        campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname : groupedData[0]?.campaignname,
                         adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
-                        campaignid:!Array.isArray(groupedData) ? groupedData?.campaignid :  groupedData[0]?.campaignid,
-                        usercommit:userdetails?.email,
+                        campaignid: !Array.isArray(groupedData) ? groupedData?.campaignid : groupedData[0]?.campaignid,
+                        usercommit: userdetails?.email,
                         accountNumber: newaccount,
                         budget: changeBudget * 100,
                         status: campaignStatus
-                    }; 
+                    };
                     console.log(object);
-                    const requestResponse = await axios.post('https://prodapis.adsgoat.in/Comments/accountNumber/campaign', {formattedData: object},{
+                    const requestResponse = await axios.post('https://prodapis.adsgoat.in/Comments/accountNumber/campaign', { formattedData: object }, {
                         headers: {
-                          Authorization: token,
+                            Authorization: token,
                         },
-                      });
+                    });
                     const responseData = requestResponse.data;
                     console.log(responseData, "response");
                     message.success("Budget and Status Updated");
                     changeRRefrst();
                 };
-            
+
                 const handleCancel = () => {
                     setIsModalVisible(false);
                     // console.log(changeBudget); // Close the modal
                 };
-            
+
                 const getTotalSpend = (data) => {
                     if (!data || data.length === 0) return 0;
                     const total = data.reduce((total, item) => {
@@ -1958,7 +1958,7 @@ const MyTablePage = () => {
                 }
 
                 console.log(groupedData);
-            
+
                 return (
                     <div>
                         {/* Click action for status cell */}
@@ -1985,19 +1985,19 @@ const MyTablePage = () => {
                                     </div> */}
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                         <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-                                        <Switch checked={campaignStatus} onChange={onChangeCampaignStatus}/>
+                                        <Switch checked={campaignStatus} onChange={onChangeCampaignStatus} />
                                     </div>
-            
+
                                     {/* Input Field */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong style={{ marginBottom: '10px' }}>Budget:</Typography.Text>
-                                        <Input placeholder="Enter your value here" defaultValue={groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget)/100 : getTotalSpend(newgroupedData)} onChange={onChangeBudgetValue}/>
+                                        <Input placeholder="Enter your value here" defaultValue={groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData)} onChange={onChangeBudgetValue} />
                                     </div>
-            
+
                                     {/* Campaign ID */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong>Campaign ID:</Typography.Text>
-                                        <p>{groupedData?.length > 0 && groupedData?.length !== 0? groupedData[0]?.campaignid : groupedData.campaignid}</p>
+                                        <p>{groupedData?.length > 0 && groupedData?.length !== 0 ? groupedData[0]?.campaignid : groupedData.campaignid}</p>
                                     </div>
                                 </div>
                             </Modal>
@@ -2005,8 +2005,8 @@ const MyTablePage = () => {
                     </div>
                 );
             },
-            filterParams: { filterEnabled: false }, 
-                
+            filterParams: { filterEnabled: false },
+
         },
         adsetname: {
             headerName: 'AdsetName', field: 'adsetname',
@@ -2207,14 +2207,14 @@ const MyTablePage = () => {
             console.error("Token not available. Please log in.");
             return;  // Stop execution if token is missing
         }
-        const fetchData = await axios.get(`https://prodapis.adsgoat.in/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`, {
+        const fetchData = await axios.get(`http://localhost:8000/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`, {
             headers: {
                 Authorization: token,
             },
         });
         const mainData = fetchData.data;
         let campaignComments = [];
-        if (fetchData.status === 200 && mainData.length> 0) {
+        if (fetchData.status === 200 && mainData.length > 0) {
             try {
                 const commentFetch = await axios.get(`https://prodapis.adsgoat.in/Comments/${account}`, {
                     headers: {
@@ -2317,7 +2317,7 @@ const MyTablePage = () => {
         // const getValidValue = mainData.filter(item => item.fbCron !== null && item.revenueCron !== null)
 
         // // console.log(getValidValue[0])
-          
+
 
         // if (mainData.length > 1) {
         //     timezone.current = mainData[0].accountTimezone;
@@ -2903,45 +2903,45 @@ const MyTablePage = () => {
     //     fetchCampaignComments(); // Fetch comments on initial load
     // }, []); // Run this effect on component mount
 
-    
+
 
     const autoGroupColumnDefLive = {
         headerName: 'CampaignName',
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting
-    
+
         comparator: (campaignA, campaignB) => {
             if (!campaignA) return 1;
             if (!campaignB) return -1;
-    
+
             const getStarredForCampaign = (campaignName) => {
                 const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                 return relatedComment ? relatedComment.starred : false;
             };
-    
+
             const isStarredA = getStarredForCampaign(campaignA);
             const isStarredB = getStarredForCampaign(campaignB);
-    
+
             if (isStarredA === isStarredB) {
                 return campaignA.localeCompare(campaignB);
             }
             return isStarredA ? -1 : 1;
         },
-    
+
         cellRendererParams: {
             suppressCount: false,
             innerRenderer: (params) => {
                 if (params.node.footer) {
                     return 'Total';
                 }
-    
+
                 const firstColumnValue = params.node.key;  // campaign name
                 const campaignName = params.node.key;
-    
+
                 // Check if this is a grouped row and has children
                 let campaignid, adsetid;
-    
+
                 if (params.node.group && params.node.childrenAfterGroup && params.node.childrenAfterGroup.length > 0) {
                     // Get the first child row data to extract campaignid and adsetid
                     const firstChild = params.node.childrenAfterGroup[0].data;
@@ -2960,7 +2960,7 @@ const MyTablePage = () => {
                     );
                 }
 
-                const getEditedUserAndTime = (campaignName, newaccount) =>{
+                const getEditedUserAndTime = (campaignName, newaccount) => {
                     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
                     console.log(relatedStatus, "relatedStatus");
                     const relatedStatusEditedTime = relatedStatus ? relatedStatus : null;
@@ -2968,19 +2968,19 @@ const MyTablePage = () => {
                     return relatedStatusEditedTime;
                 }
 
-                const getStatusForCampaign = (campaignName, newaccount) =>{
+                const getStatusForCampaign = (campaignName, newaccount) => {
                     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
                     console.log(relatedStatus, "relatedStatus");
                     const relatedStatusTrue = relatedStatus !== undefined && relatedStatus.status === true ? true : relatedStatus !== undefined ? false : null;
                     // console.log(relatedStatusTrue);
                     return relatedStatusTrue;
                 }
-    
+
                 const getCommentForCampaign = (campaignName) => {
                     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                     return relatedComment ? relatedComment.comment : null;
                 };
-    
+
                 const getStarredForCampaign = (campaignName) => {
                     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                     return relatedComment ? relatedComment.starred : false;
@@ -2991,12 +2991,12 @@ const MyTablePage = () => {
                 const relatedComment = getCommentForCampaign(campaignName);
                 const isStarred = getStarredForCampaign(campaignName);
                 const valueWithCount = `${firstColumnValue}`;
-    
+
                 const [tooltipText, setTooltipText] = useState("Click to Copy");
                 const [isModalVisibles, setIsModalVisibles] = useState(false);
                 const [comment, setComment] = useState(relatedComment || '');
                 const [starred, setStarred] = useState(isStarred);
-    
+
                 const copyToClipboard = () => {
                     navigator.clipboard.writeText(firstColumnValue)
                         .then(() => {
@@ -3007,11 +3007,11 @@ const MyTablePage = () => {
                             console.error('Failed to copy to clipboard');
                         });
                 };
-    
+
                 const handleEditClick = () => {
                     setIsModalVisibles(true);
                 };
-    
+
                 const sendNewCommentToAPI = async (logData) => {
                     try {
                         const response = await axios.post('https://prodapis.adsgoat.in/Comments', {
@@ -3021,14 +3021,14 @@ const MyTablePage = () => {
                                 Authorization: token,
                             }
                         });
-    
+
                         console.log('Response from server:', response.data);
                     } catch (error) {
                         console.error('Error sending data to server:', error);
                     }
                     console.log(logData);
                 };
-    
+
                 const sendEditedCommentToAPI = async (logData) => {
                     try {
                         const response = await axios.post('https://prodapis.adsgoat.in/Comments/edit', {
@@ -3039,7 +3039,7 @@ const MyTablePage = () => {
                             campaignid: logData.campaignid,
                             status: true
 
-                        },{
+                        }, {
                             headers: {
                                 Authorization: token,
                             }
@@ -3052,7 +3052,7 @@ const MyTablePage = () => {
                     }
                     // console.log(logData);
                 };
-    
+
                 const sendStarStatusToAPI = async (campaignname, isStarred) => {
                     // console.log(campaignid);
                     // console.log(adsetid);
@@ -3074,20 +3074,20 @@ const MyTablePage = () => {
                         console.error('Error updating star status:', error);
                     }
                 };
-    
+
                 const handleStarClick = async () => {
                     const updatedStarred = !starred;
                     setStarred(updatedStarred);
                     await sendStarStatusToAPI(firstColumnValue, updatedStarred);
                     message.success(updatedStarred ? "Campaign starred!" : "Campaign unstarred!");
-    
+
                     const updatedComments = campaignComments.map(cmt =>
                         cmt.campaignname === firstColumnValue ? { ...cmt, starred: updatedStarred } : cmt
                     );
                     setCampaignComments(updatedComments);
                     changeRRefrst();
                 };
-    
+
                 const handleOks = async () => {
                     try {
                         const logData = {
@@ -3098,7 +3098,7 @@ const MyTablePage = () => {
                             campaignid: campaignid, // Pass campaignid
                             adsetid: adsetid // Pass adsetid
                         };
-    
+
                         if (relatedComment) {
                             await sendEditedCommentToAPI(logData);
                             message.success("Comment updated successfully!");
@@ -3106,12 +3106,12 @@ const MyTablePage = () => {
                             await sendNewCommentToAPI(logData);
                             message.success("New comment added successfully!");
                         }
-    
+
                         const updatedComments = relatedComment
                             ? campaignComments.map(cmt => (cmt.campaignname === firstColumnValue ? { ...cmt, comment } : cmt))
                             : [...campaignComments, logData];
                         setCampaignComments(updatedComments);
-    
+
                         changeRRefrst();
                         setIsModalVisibles(false);
                     } catch (error) {
@@ -3119,33 +3119,33 @@ const MyTablePage = () => {
                         message.error("Error while submitting the comment.");
                     }
                 };
-    
+
                 const handleCancels = () => {
                     setIsModalVisibles(false);
                 };
 
-                const CustomTooltipContent = ({editedTime, usercommit}) => (
+                const CustomTooltipContent = ({ editedTime, usercommit }) => (
                     <div style={{ padding: '5px', borderRadius: '5px' }}>
-                      <p style={{ margin: 0, color:  "#ffffff" }}>{usercommit}</p>
-                      <p style={{ margin: 0, color: "#ffffff" }}>{editedTime}</p>
+                        <p style={{ margin: 0, color: "#ffffff" }}>{usercommit}</p>
+                        <p style={{ margin: 0, color: "#ffffff" }}>{editedTime}</p>
                     </div>
                 );
-    
+
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                        {relatedStatus === true && 
-                            <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit}/>}>
-                                <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }}/>
+                        {relatedStatus === true &&
+                            <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit} />}>
+                                <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }} />
                             </Tooltip>
                         }
-                        {relatedStatus === false && 
-                            <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit}/>}>
-                                <CloseCircleFilled style={{ color: 'red', fontSize: '15px' , marginRight: relatedComment ? "10px" : '0px' }}/>
+                        {relatedStatus === false &&
+                            <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit} />}>
+                                <CloseCircleFilled style={{ color: 'red', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }} />
                             </Tooltip>
                         }
                         {relatedComment && (
                             starred ? (
-                                <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: "gold"}} />
+                                <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: "gold" }} />
                             ) : (
                                 <StarOutlined className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px' }} />
                             )
@@ -3164,9 +3164,9 @@ const MyTablePage = () => {
                             <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
                         )}
                         <Tooltip title={tooltipText}>
-                            <CopyOutlined 
+                            <CopyOutlined
                                 onClick={copyToClipboard}
-                                style={{ cursor: 'pointer', marginLeft: '8px', color:"#1e1e1f", marginRight: '10px' }}
+                                style={{ cursor: 'pointer', marginLeft: '8px', color: "#1e1e1f", marginRight: '10px' }}
                             />
                         </Tooltip>
                         <span
@@ -3194,47 +3194,47 @@ const MyTablePage = () => {
             }
         }
     };
-    
-    
-    
-    
+
+
+
+
 
     const autoGroupColumnDef = {
         headerName: 'CampaignName',
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting
-    
+
         comparator: (campaignA, campaignB) => {
             if (!campaignA) return 1;
             if (!campaignB) return -1;
-    
+
             const getStarredForCampaign = (campaignName) => {
                 const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                 return relatedComment ? relatedComment.starred : false;
             };
-    
+
             const isStarredA = getStarredForCampaign(campaignA);
             const isStarredB = getStarredForCampaign(campaignB);
-    
+
             if (isStarredA === isStarredB) {
                 return campaignA.localeCompare(campaignB);
             }
             return isStarredA ? -1 : 1;
         },
-    
+
         cellRendererParams: {
             suppressCount: false,
             innerRenderer: (params) => {
                 if (params.node.footer) {
                     return 'Total';
                 }
-    
+
                 const firstColumnValue = params.node.key;  // campaign name
                 const campaignName = params.node.key;
-    
+
                 let campaignid, adsetid;
-    
+
                 if (params.node.group && params.node.childrenAfterGroup && params.node.childrenAfterGroup.length > 0) {
                     const firstChild = params.node.childrenAfterGroup[0].data;
                     campaignid = firstChild.campaignid;
@@ -3250,26 +3250,26 @@ const MyTablePage = () => {
                         </div>
                     );
                 }
-                const getEditedUserAndTime = (campaignName, newaccount) =>{
+                const getEditedUserAndTime = (campaignName, newaccount) => {
                     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
                     console.log(relatedStatus, "relatedStatus");
                     const relatedStatusEditedTime = relatedStatus ? relatedStatus : null;
                     // console.log(relatedStatusTrue);
                     return relatedStatusEditedTime;
                 }
-                const getStatusForCampaign = (campaignName, newaccount) =>{
+                const getStatusForCampaign = (campaignName, newaccount) => {
                     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
                     console.log(relatedStatus, "relatedStatus");
                     const relatedStatusTrue = relatedStatus !== undefined && relatedStatus.status === true ? true : relatedStatus !== undefined ? false : null;
                     // console.log(relatedStatusTrue);
                     return relatedStatusTrue;
                 }
-    
+
                 const getCommentForCampaign = (campaignName) => {
                     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                     return relatedComment ? relatedComment.comment : null;
                 };
-    
+
                 const getStarredForCampaign = (campaignName) => {
                     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                     return relatedComment ? relatedComment.starred : false;
@@ -3279,12 +3279,12 @@ const MyTablePage = () => {
                 const relatedComment = getCommentForCampaign(campaignName);
                 const isStarred = getStarredForCampaign(campaignName);
                 const valueWithCount = `${firstColumnValue}`;
-    
+
                 const [tooltipText, setTooltipText] = useState("Click to Copy");
                 const [isModalVisibles, setIsModalVisibles] = useState(false);
                 const [comment, setComment] = useState(relatedComment || '');
                 const [starred, setStarred] = useState(isStarred);
-    
+
                 const copyToClipboard = () => {
                     navigator.clipboard.writeText(firstColumnValue)
                         .then(() => {
@@ -3295,11 +3295,11 @@ const MyTablePage = () => {
                             console.error('Failed to copy to clipboard');
                         });
                 };
-    
+
                 const handleEditClick = () => {
                     setIsModalVisibles(true);
                 };
-    
+
                 const sendNewCommentToAPI = async (logData) => {
                     try {
                         const response = await axios.post('https://prodapis.adsgoat.in/Comments', {
@@ -3314,7 +3314,7 @@ const MyTablePage = () => {
                         console.error('Error sending data to server:', error);
                     }
                 };
-    
+
                 const sendEditedCommentToAPI = async (logData) => {
                     try {
                         const response = await axios.post('https://prodapis.adsgoat.in/Comments/edit', {
@@ -3336,7 +3336,7 @@ const MyTablePage = () => {
                         throw error;
                     }
                 };
-    
+
                 const sendStarStatusToAPI = async (campaignname, isStarred) => {
                     try {
                         const endpoint = isStarred ? 'https://prodapis.adsgoat.in/Star' : 'https://prodapis.adsgoat.in/Unstar';
@@ -3356,20 +3356,20 @@ const MyTablePage = () => {
                         console.error('Error updating star status:', error);
                     }
                 };
-    
+
                 const handleStarClick = async () => {
                     const updatedStarred = !starred;
                     setStarred(updatedStarred);
                     await sendStarStatusToAPI(firstColumnValue, updatedStarred);
                     message.success(updatedStarred ? "Campaign starred!" : "Campaign unstarred!");
-    
+
                     const updatedComments = campaignComments.map(cmt =>
                         cmt.campaignname === firstColumnValue ? { ...cmt, starred: updatedStarred } : cmt
                     );
                     setCampaignComments(updatedComments);
                     changeRRefrst();
                 };
-    
+
                 const handleOks = async () => {
                     try {
                         const logData = {
@@ -3380,7 +3380,7 @@ const MyTablePage = () => {
                             campaignid: campaignid,
                             adsetid: adsetid
                         };
-    
+
                         if (relatedComment) {
                             await sendEditedCommentToAPI(logData);
                             message.success("Comment updated successfully!");
@@ -3388,12 +3388,12 @@ const MyTablePage = () => {
                             await sendNewCommentToAPI(logData);
                             message.success("New comment added successfully!");
                         }
-    
+
                         const updatedComments = relatedComment
                             ? campaignComments.map(cmt => (cmt.campaignname === firstColumnValue ? { ...cmt, comment } : cmt))
                             : [...campaignComments, logData];
                         setCampaignComments(updatedComments);
-    
+
                         changeRRefrst();
                         setIsModalVisibles(false);
                     } catch (error) {
@@ -3401,28 +3401,28 @@ const MyTablePage = () => {
                         message.error("Error while submitting the comment.");
                     }
                 };
-    
+
                 const handleCancels = () => {
                     setIsModalVisibles(false);
                 };
 
-                const CustomTooltipContent = ({editedTime, usercommit}) => (
+                const CustomTooltipContent = ({ editedTime, usercommit }) => (
                     <div style={{ padding: '5px', borderRadius: '5px' }}>
-                      <p style={{ margin: 0, color:  "#ffffff" }}>{usercommit}</p>
-                      <p style={{ margin: 0, color: "#ffffff" }}>{editedTime}</p>
+                        <p style={{ margin: 0, color: "#ffffff" }}>{usercommit}</p>
+                        <p style={{ margin: 0, color: "#ffffff" }}>{editedTime}</p>
                     </div>
                 );
-    
+
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                        {relatedStatus === true && 
-                            <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit}/>}>
-                                <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }}/>
+                        {relatedStatus === true &&
+                            <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit} />}>
+                                <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }} />
                             </Tooltip>
                         }
-                        {relatedStatus === false && 
-                            <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit}/>}>
-                                <CloseCircleFilled style={{ color: 'red', fontSize: '15px' , marginRight: relatedComment ? "10px" : '0px' }}/>
+                        {relatedStatus === false &&
+                            <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit} />}>
+                                <CloseCircleFilled style={{ color: 'red', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }} />
                             </Tooltip>
                         }
                         {relatedComment && (
@@ -3446,9 +3446,9 @@ const MyTablePage = () => {
                             <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
                         )}
                         <Tooltip title={tooltipText}>
-                            <CopyOutlined 
+                            <CopyOutlined
                                 onClick={copyToClipboard}
-                                style={{ cursor: 'pointer', marginLeft: '8px', color:"#1e1e1f", marginRight: '10px' }}
+                                style={{ cursor: 'pointer', marginLeft: '8px', color: "#1e1e1f", marginRight: '10px' }}
                             />
                         </Tooltip>
                         <span
@@ -3476,7 +3476,7 @@ const MyTablePage = () => {
             }
         }
     };
-    
+
 
 
 
@@ -3491,12 +3491,12 @@ const MyTablePage = () => {
                 if (params.node.footer) {
                     return 'Total'; // Custom footer label
                 }
-    
+
                 const firstColumnValue = params.node.key; // This should give you the campaign name
                 const campaignName = params.node.key;
-    
+
                 let campaignid, adsetid;
-    
+
                 if (params.node.group && params.node.childrenAfterGroup && params.node.childrenAfterGroup.length > 0) {
                     const firstChild = params.node.childrenAfterGroup[0].data;
                     campaignid = firstChild.campaignid;
@@ -3511,26 +3511,26 @@ const MyTablePage = () => {
                             Error: campaignid or adsetid missing for {campaignName}
                         </div>
                     );
-                }const getEditedUserAndTime = (campaignName, newaccount) =>{
+                } const getEditedUserAndTime = (campaignName, newaccount) => {
                     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
                     console.log(relatedStatus, "relatedStatus");
                     const relatedStatusEditedTime = relatedStatus ? relatedStatus : null;
                     // console.log(relatedStatusTrue);
                     return relatedStatusEditedTime;
                 }
-                const getStatusForCampaign = (campaignName, newaccount) =>{
+                const getStatusForCampaign = (campaignName, newaccount) => {
                     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
                     console.log(relatedStatus, "relatedStatus");
                     const relatedStatusTrue = relatedStatus !== undefined && relatedStatus.status === true ? true : relatedStatus !== undefined ? false : null;
                     // console.log(relatedStatusTrue);
                     return relatedStatusTrue;
                 }
-    
+
                 const getCommentForCampaign = (campaignName) => {
                     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                     return relatedComment ? relatedComment.comment : null;
                 };
-    
+
                 const getStarredForCampaign = (campaignName) => {
                     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                     return relatedComment ? relatedComment.starred : false;
@@ -3540,12 +3540,12 @@ const MyTablePage = () => {
                 const relatedComment = getCommentForCampaign(campaignName);
                 const isStarred = getStarredForCampaign(campaignName);
                 const valueWithCount = `${firstColumnValue}`;
-    
+
                 const [tooltipText, setTooltipText] = useState("Click to Copy");
                 const [isModalVisible, setIsModalVisible] = useState(false);
                 const [comment, setComment] = useState(relatedComment || '');
                 const [starred, setStarred] = useState(isStarred);
-    
+
                 const copyToClipboard = () => {
                     navigator.clipboard.writeText(firstColumnValue)
                         .then(() => {
@@ -3556,11 +3556,11 @@ const MyTablePage = () => {
                             console.error('Failed to copy to clipboard');
                         });
                 };
-    
+
                 const handleEditClick = () => {
                     setIsModalVisible(true);
                 };
-    
+
                 const sendNewCommentToAPI = async (logData) => {
                     try {
                         const response = await axios.post('https://prodapis.adsgoat.in/Comments', {
@@ -3575,7 +3575,7 @@ const MyTablePage = () => {
                         console.error('Error sending data to server:', error);
                     }
                 };
-    
+
                 const sendEditedCommentToAPI = async (logData) => {
                     try {
                         const response = await axios.post('https://prodapis.adsgoat.in/Comments/edit', {
@@ -3597,7 +3597,7 @@ const MyTablePage = () => {
                         throw error;
                     }
                 };
-    
+
                 const sendStarStatusToAPI = async (campaignname, isStarred) => {
                     try {
                         const endpoint = isStarred ? 'https://prodapis.adsgoat.in/Star' : 'https://prodapis.adsgoat.in/Unstar';
@@ -3617,20 +3617,20 @@ const MyTablePage = () => {
                         console.error('Error updating star status:', error);
                     }
                 };
-    
+
                 const handleStarClick = async () => {
                     const updatedStarred = !starred;
                     setStarred(updatedStarred);
                     await sendStarStatusToAPI(firstColumnValue, updatedStarred);
                     message.success(updatedStarred ? "Campaign starred!" : "Campaign unstarred!");
-    
+
                     const updatedComments = campaignComments.map(cmt =>
                         cmt.campaignname === firstColumnValue ? { ...cmt, starred: updatedStarred } : cmt
                     );
                     setCampaignComments(updatedComments);
                     changeRRefrst();
                 };
-    
+
                 const handleOk = async () => {
                     const logData = {
                         Account: account,
@@ -3640,7 +3640,7 @@ const MyTablePage = () => {
                         campaignid: campaignid,
                         adsetid: adsetid
                     };
-    
+
                     if (relatedComment) {
                         await sendEditedCommentToAPI(logData);
                         message.success("Comment updated successfully!");
@@ -3648,37 +3648,37 @@ const MyTablePage = () => {
                         await sendNewCommentToAPI(logData);
                         message.success("New comment added successfully!");
                     }
-    
+
                     const updatedComments = relatedComment
                         ? campaignComments.map(cmt => (cmt.campaignname === firstColumnValue ? { ...cmt, comment } : cmt))
                         : [...campaignComments, logData];
                     setCampaignComments(updatedComments);
-    
+
                     changeRRefrst();
                     setIsModalVisible(false);
                 };
-    
+
                 const handleCancel = () => {
                     setIsModalVisible(false);
                 };
 
-                const CustomTooltipContent = ({editedTime, usercommit}) => (
+                const CustomTooltipContent = ({ editedTime, usercommit }) => (
                     <div style={{ padding: '5px', borderRadius: '5px' }}>
-                      <p style={{ margin: 0, color:  "#ffffff" }}>{usercommit}</p>
-                      <p style={{ margin: 0, color: "#ffffff" }}>{editedTime}</p>
+                        <p style={{ margin: 0, color: "#ffffff" }}>{usercommit}</p>
+                        <p style={{ margin: 0, color: "#ffffff" }}>{editedTime}</p>
                     </div>
                 );
-    
+
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                        {relatedStatus === true && 
-                            <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit}/>}>
-                                <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }}/>
+                        {relatedStatus === true &&
+                            <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit} />}>
+                                <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }} />
                             </Tooltip>
                         }
-                        {relatedStatus === false && 
-                            <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit}/>}>
-                                <CloseCircleFilled style={{ color: 'red', fontSize: '15px' , marginRight: relatedComment ? "10px" : '0px' }}/>
+                        {relatedStatus === false &&
+                            <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit} />}>
+                                <CloseCircleFilled style={{ color: 'red', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }} />
                             </Tooltip>
                         }
                         {relatedComment && (
@@ -3702,9 +3702,9 @@ const MyTablePage = () => {
                             <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
                         )}
                         <Tooltip title={tooltipText}>
-                            <CopyOutlined 
+                            <CopyOutlined
                                 onClick={copyToClipboard}
-                                style={{ cursor: 'pointer', marginLeft: '8px', color:"#1e1e1f", marginRight: '10px' }}
+                                style={{ cursor: 'pointer', marginLeft: '8px', color: "#1e1e1f", marginRight: '10px' }}
                             />
                         </Tooltip>
                         <span
@@ -3732,7 +3732,7 @@ const MyTablePage = () => {
             }
         }
     };
-    
+
 
 
     // const autoGroupColumnDefLive = {
@@ -3933,7 +3933,7 @@ const MyTablePage = () => {
         defaultColDef: {
             suppressMenu: true,
             headerClass: "custom-header" // Apply to all columns by default
-            
+
         }
     };
 
@@ -3942,7 +3942,7 @@ const MyTablePage = () => {
         defaultColDef: {
             suppressMenu: true,
             headerClass: "custom-header" // Apply to all columns by default
-            
+
         }
     };
 
@@ -3951,7 +3951,7 @@ const MyTablePage = () => {
         defaultColDef: {
             suppressMenu: true,
             headerClass: "custom-header" // Apply to all columns by default
-            
+
         }
     };
 
@@ -4284,7 +4284,7 @@ const MyTablePage = () => {
     const handleChange1 = (value) => {
         const findAccount = (data, accountNumber) =>
             Object.values(data).flat().find(item => item.accountNumber === accountNumber) || null;
-        
+
         const accountNameForAccount = findAccount(userdetails?.adAccounts, value);
         setAccountName(accountNameForAccount.accountName)
         setSelectedValue(value); // Update selected value
@@ -4302,42 +4302,42 @@ const MyTablePage = () => {
             return {
                 value: account.accountNumber,
                 label: (
-                    <div style={{ 
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'center', 
-                        width: '100%', 
-                        padding: '5px 0', 
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        width: '100%',
+                        padding: '5px 0',
                         height: 'auto',  // Adjust height to prevent layout issues
                         overflow: 'hidden'  // Prevent overflow issues
                     }}>
                         {/* Left Section: Account Details */}
-                        <div style={{ 
-                            display: 'flex', 
-                            flexDirection: 'column', 
-                            maxWidth: '70%' 
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            maxWidth: '70%'
                         }}>
                             {/* Always show accountNumber */}
-                            <p style={{ 
-                                margin: '0px', 
-                                padding: '0px', 
-                                fontWeight: 'bold', 
-                                whiteSpace: 'nowrap', 
-                                overflow: 'hidden', 
-                                textOverflow: 'ellipsis' 
+                            <p style={{
+                                margin: '0px',
+                                padding: '0px',
+                                fontWeight: 'bold',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis'
                             }}>
                                 {account.accountNumber}
                             </p>
                             {/* Show "Additional Info" ONLY if the dropdown is open */}
                             {isOpen && (
-                                <p style={{ 
-                                    margin: '0px', 
-                                    padding: '0px', 
-                                    fontSize: '12px', 
-                                    color: 'gray', 
-                                    whiteSpace: 'nowrap', 
-                                    overflow: 'hidden', 
-                                    textOverflow: 'ellipsis' 
+                                <p style={{
+                                    margin: '0px',
+                                    padding: '0px',
+                                    fontSize: '12px',
+                                    color: 'gray',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis'
                                 }}>
                                     {account.accountName ? account.accountName : ''}
                                 </p>
@@ -4359,10 +4359,10 @@ const MyTablePage = () => {
     };
 
 
-    
-    
-    
-    
+
+
+
+
 
     const pinnedBottomRowData1 = [
         {
@@ -4443,7 +4443,7 @@ const MyTablePage = () => {
                             showSearch
                             className='select-element'
                             onChange={onChangeSelectRevenue}
-                            style={{ 
+                            style={{
                                 width: '100%',
                                 backgroundColor: theme === 'dark' && '#333', // Background color
                                 color: theme === 'dark' && '#fff',
@@ -4466,12 +4466,13 @@ const MyTablePage = () => {
                             onChange={handleChange1} // Handle value selection
                             dropdownClassName={theme === 'dark' ? "custom-dropdown" : ''} // Apply dark theme if needed
                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                            style={{ 
+                            style={{
                                 width: '100%',
-                                maxWidth: '100%', 
-                                whiteSpace: 'nowrap', 
-                                overflow: 'hidden', 
-                                textOverflow: 'ellipsis' }} // Prevent overflow with ellipsis
+                                maxWidth: '100%',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis'
+                            }} // Prevent overflow with ellipsis
                             placeholder="Select Account"
                             optionFilterProp="value"
                             value={selectedValue}  // Set selected value
@@ -4520,33 +4521,33 @@ const MyTablePage = () => {
                         </Button>
                     </Col>
                     <Col xs={24} sm={24} md={15} lg={5}>
-                    <Tooltip title="Refresh and Search">
-                    <Button 
-                        type="primary" 
-                        shape="circle" 
-                        style={{ backgroundColor: '#C7F39A', border: 'solid 1px #C7F39A', color: 'black', fontWeight: '600', float: 'inline-end' }} 
-                        icon={<SubnodeOutlined />} 
-                        onClick={handleSearchClick} // Toggle search bar visibility on button click
-                        />
-                    </Tooltip>
+                        <Tooltip title="Refresh and Search">
+                            <Button
+                                type="primary"
+                                shape="circle"
+                                style={{ backgroundColor: '#C7F39A', border: 'solid 1px #C7F39A', color: 'black', fontWeight: '600', float: 'inline-end' }}
+                                icon={<SubnodeOutlined />}
+                                onClick={handleSearchClick} // Toggle search bar visibility on button click
+                            />
+                        </Tooltip>
                     </Col>
                 </Row>
             </Space>
             <div>
-               <div className={`secondRow ${isSecondRowVisible ? '' : 'hidden'}`}>
-               <Row style={{ padding: '10px', paddingRight: '30px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-                    <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                        <Text style={{ fontWeight: '600', display: 'flex', justifyContent: 'flex-end' }}>
-                            FbAcc Status: {`${fbCron.current}`}
-                        </Text>
-                    </Col>
-                    <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                        <Text style={{ fontWeight: '600', display: 'flex', justifyContent: 'flex-end', marginRight: '20%' }}>
-                            RevAcc Status: {`${revenueCron.current}`}
-                        </Text>
-                    </Col>
-                    <Col style={{ marginRight: '15px' }}>
-                        {/* {isSearching ? (
+                <div className={`secondRow ${isSecondRowVisible ? '' : 'hidden'}`}>
+                    <Row style={{ padding: '10px', paddingRight: '30px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                            <Text style={{ fontWeight: '600', display: 'flex', justifyContent: 'flex-end' }}>
+                                FbAcc Status: {`${fbCron.current}`}
+                            </Text>
+                        </Col>
+                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                            <Text style={{ fontWeight: '600', display: 'flex', justifyContent: 'flex-end', marginRight: '20%' }}>
+                                RevAcc Status: {`${revenueCron.current}`}
+                            </Text>
+                        </Col>
+                        <Col style={{ marginRight: '15px' }}>
+                            {/* {isSearching ? (
                             <Row gutter={8}>
                                 <Col>
                                     <Input
@@ -4570,29 +4571,29 @@ const MyTablePage = () => {
 
                             />
                         )} */}
-                        <Row gutter={8}>
-                            <Col>
-                                <Input
-                                    placeholder="Search here"
-                                    // autoFocus
-                                    value={inputValue}
-                                    onChange={handleChangeInput}
-                                    onBlur={handleBlur}
-                                    style={{ width: '100%', borderRadius: '5px' }}
-                                />
-                            </Col>
-                            <Col>
-                                <Button style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<SearchOutlined />} />
-                            </Col>
-                        </Row>
-                    </Col>
-                    <Col>
-                        <Tooltip title="Click to Refresh Tables">
-                            <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<ReloadOutlined />} onClick={onClickRefresh} />
-                        </Tooltip>
-                    </Col>
-                </Row>
-               </div>
+                            <Row gutter={8}>
+                                <Col>
+                                    <Input
+                                        placeholder="Search here"
+                                        // autoFocus
+                                        value={inputValue}
+                                        onChange={handleChangeInput}
+                                        onBlur={handleBlur}
+                                        style={{ width: '100%', borderRadius: '5px' }}
+                                    />
+                                </Col>
+                                <Col>
+                                    <Button style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<SearchOutlined />} />
+                                </Col>
+                            </Row>
+                        </Col>
+                        <Col>
+                            <Tooltip title="Click to Refresh Tables">
+                                <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<ReloadOutlined />} onClick={onClickRefresh} />
+                            </Tooltip>
+                        </Col>
+                    </Row>
+                </div>
 
                 <Carousel afterChange={onChange1} ref={carouselRef}>
                     <div style={{ height: "100%", marginBottom: '20px' }}>
@@ -4701,7 +4702,7 @@ const MyTablePage = () => {
                                     />
 
                                 </div>
-                            ) : <div style={{backgroundColor: theme === "dark" && "#333"}}>
+                            ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
                                 {startDate !== endDate ? <Result
                                     className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                     icon={<SmileOutlined />}
@@ -4796,7 +4797,7 @@ const MyTablePage = () => {
                                         }}
                                     />
                                 </div>
-                            ) : <div style={{backgroundColor: theme === "dark" && "#333"}}>
+                            ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
                                 {startDate !== endDate ? <Result
                                     className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                     icon={<SmileOutlined />}
@@ -4894,13 +4895,13 @@ const MyTablePage = () => {
                                 </div>
                             ) : (
                                 <div>
-                                    <div style={{backgroundColor: theme === "dark" && "#333"}}>
+                                    <div style={{ backgroundColor: theme === "dark" && "#333" }}>
                                         {startDate !== endDate ? <Result
                                             className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                             icon={<SmileOutlined />}
                                             title={`No CampaignData for ${newaccount} from ${startDate} to ${endDate}`}
                                         /> : <Result
-                                        className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                            className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                             icon={<SmileOutlined />}
                                             title={`No CampaignData for ${newaccount} to ${startDate}`}
                                         />}

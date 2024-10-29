@@ -1,13 +1,16 @@
 "use client"
 import React, { useEffect } from 'react';
-import { Drawer, Button, DatePicker, Space, Form, Input, Select, Collapse, Upload, Steps, Modal, message, Spin } from 'antd';
-import { PlusOutlined, UploadOutlined, ShareAltOutlined, CommentOutlined, LikeOutlined, MoreOutlined, CloseOutlined, GlobalOutlined,EditOutlined } from '@ant-design/icons';
+import { Drawer, Button, DatePicker, Space, Form, Input, Select, Collapse, Upload, Steps, Modal, message, Spin, Badge } from 'antd';
+import { PlusOutlined, UploadOutlined, ShareAltOutlined, CommentOutlined, LikeOutlined, MoreOutlined, CloseOutlined, GlobalOutlined, EditOutlined } from '@ant-design/icons';
 import moment from 'moment-timezone';
 import { useState, useRef } from 'react';
 import TextArea from 'antd/es/input/TextArea';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import { v4 as uuidv4 } from 'uuid';
+import dynamic from 'next/dynamic';
+
+const FabricCanvas = dynamic(() => import('./Fabricanvas'), { ssr: false });
 
 const { Panel } = Collapse;
 const { Option } = Select;
@@ -451,6 +454,29 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis }) =>
     const [description, setDescription] = useState('');
     const [websiteURL, setWebsiteURL] = useState('');
     const [loading, setLoading] = useState(false);
+    const [currentFile, setCurrentFile] = useState(null); // File to be edited
+    const [isImgEditorShown, setIsImgEditorShown] = useState(false);
+    const [editedImages, setEditedImages] = useState({});
+
+
+    // Function to handle edit icon click
+    const handleEditClick = (file) => {
+        setCurrentFile(file); // Set the file to be edited
+        setIsImgEditorShown(true); // Open the image editor
+    };
+
+    // Function to handle saving the edited image
+    const handleSaveEditedImage = (fileId, editedImageObject) => {
+        setEditedImages(prev => ({
+            ...prev,
+            [fileId]: editedImageObject.imageBase64 || editedImageObject.imageUrl
+        }));
+        closeCanvasModal();
+    };
+
+    const closeCanvasModal = () => {
+        setIsImgEditorShown(false); // Close the image editor
+    };
 
 
     // const [imageHashes, setImageHashes] = useState([]);
@@ -510,53 +536,131 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis }) =>
         }
     };
 
-    // const getpixelandpageid = async () => {
-    //     try {
-    //         // Make the GET request to the Facebook Graph API
-    //         const Pixeldata = await axios.get(
-    //             `https://graph.facebook.com/v19.0/act_${imagehash[0]?.extAccountId}/adspixels`,
-    //             {
-    //                 params: {
-    //                     fields: 'id,name',
-    //                     access_token: imagehash[0]?.token
-    //                 }
-    //             }
-    //         );
-
-    //         console.log('Response data PIXEL ID:', Pixeldata?.data?.data[0]?.id);
-    //         setpixelid(Pixeldata?.data?.data[0]?.id)
-    //         // res.status(200).json(response.data);
-    //     } catch (error) {
-    //         console.error('Error:', error.response?.data || error.message);
-    //         // res.status(error.response?.status || 500).json({ error: 'Internal Server Error' });
-    //     }
-
-    //     try {
-    //         // Make the GET request to the Facebook Graph API
-    //         const pageiddata = await axios.get(
-    //             `https://graph.facebook.com/v19.0/act_${imagehash[0]?.extAccountId}/adcreatives`,
-    //             {
-    //                 params: {
-    //                     fields: 'object_story_spec{page_id}',
-    //                     access_token: imagehash[0]?.token,
-    //                 }
-    //             }
-    //         );
-
-    //         // Log the response data
-    //         console.log('Response data Pageid:', pageiddata?.data?.data[0]?.object_story_spec?.page_id);
-    //         setpageid(pageiddata?.data?.data[0]?.object_story_spec?.page_id)
-    //         // res.status(200).json(response.data);
-    //     } catch (error) {
-    //         console.error('Error:', error.response?.data || error.message);
-    //         // res.status(error.response?.status || 500).json({ error: 'Internal Server Error' });
-    //     }
-    // }
     const handleFormChange = (changedValues, allValues) => {
         // Check if all fields are filled
         const isComplete = Object.values(allValues).every(value => value !== undefined && value !== '');
         setIsFormComplete(isComplete);
     };
+    const customRequest = async (onSuccess, onError) => {
+        if (!imagehash || imagehash.length === 0) {
+            onError("Image hash data not loaded");
+            return [];
+        }
+        const token = imagehash.token;
+        const account = imagehash.accountNumber;
+
+        const uploadPromises = selectedFiles.map(async (file) => {
+            try {
+                const formData = new FormData();
+                const fileId = file.name;
+                const editedImage = editedImages[fileId];
+
+                // Use edited image if available, otherwise original file
+                const uploadFile = editedImage ? await fetch(editedImage).then(res => res.blob()) : file;
+
+                // Log the MIME type of the file
+                const fileType = uploadFile.type;
+                console.log("File type:", fileType);
+
+                if (!fileType.startsWith("image/") && !fileType.startsWith("video/")) {
+                    onError("Unsupported file type");
+                    return;
+                }
+
+                formData.append("file", uploadFile, `blob/${file.name}`);
+
+
+                let response, fbResponse;
+
+                if (file.type.startsWith('image/')) {
+                    response = await axios.post('https://www.testapi.adsgoat.in/upload', formData, {
+                        headers: { 'Authorization': localStorage.getItem("token"), "Content-Type": "multipart/form-data" },
+                    });
+                    if (!response.data.imageUrl) {
+                        onError("Error: Image URL not returned from custom API");
+                        throw new Error("Image upload to custom API failed, imageUrl missing");
+                    }
+
+                    console.log("Custom API response imageUrl:", response);
+
+                    formData.append('file', file);
+                    formData.append('access_token', token);
+
+                    fbResponse = await axios.post(`https://graph.facebook.com/v19.0/act_${account}/adimages`, formData, {
+                        headers: { 'Content-Type': 'multipart/form-data' }
+                    });
+
+                    if (response.status === 200 && fbResponse.status === 200) {
+                        onSuccess("ok", response);
+                        return {
+                            filename: response.data.imageUrl,
+                            imag_hash: fbResponse.data?.images?.[file.name]?.hash,
+                        };
+                    } else {
+                        onError("error", response);
+                        throw new Error("Image upload failed");
+                    }
+                } else if (file.type.startsWith('video/')) {
+                    response = await axios.post('https://www.testapi.adsgoat.in/upload', formData, {
+                        headers: { 'Authorization': localStorage.getItem("token"), "Content-Type": "multipart/form-data" },
+                    });
+
+                    if (response.status !== 200) {
+                        onError("error", response);
+                        throw new Error("Video upload to custom API failed");
+                    }
+
+                    formData.append('access_token', token);
+
+                    fbResponse = await axios.post(`https://graph.facebook.com/v19.0/act_${account}/advideos`, formData, {
+                        headers: { 'Content-Type': 'multipart/form-data' }
+                    });
+
+                    if (fbResponse.status === 200) {
+                        const videoid = fbResponse?.data?.id;
+                        await new Promise(resolve => setTimeout(resolve, 10000));
+
+                        const thumbnailResponse = await axios.get(`https://graph.facebook.com/v19.0/${videoid}`, {
+                            params: {
+                                access_token: token,
+                                fields: 'thumbnails',
+                                is_preferred: true
+                            }
+                        });
+
+                        const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
+                        const uri = preferredThumbnail ? preferredThumbnail.uri : "";
+
+                        onSuccess("ok", fbResponse);
+
+                        return {
+                            filename: response.data.imageUrl,
+                            videoid: videoid,
+                            thambnailurl: uri,
+                        };
+                    } else {
+                        onError("error", fbResponse);
+                        throw new Error("Video upload to Facebook failed");
+                    }
+                }
+            } catch (error) {
+                console.error("Error uploading file:", error);
+                onError("error", error);
+                throw error;
+            }
+        });
+
+        try {
+            const mediaHashArray = await Promise.all(uploadPromises);
+            console.log("All media files uploaded successfully. Media Hash Array:", mediaHashArray);
+            return mediaHashArray;
+        } catch (error) {
+            console.error("One or more media uploads failed:", error);
+            return [];
+        }
+    };
+
+
     // const customRequest = async (onSuccess, onError) => {
     //     if (!imagehash || imagehash.length === 0) {
     //         onError("Image hash data not loaded");
@@ -579,7 +683,6 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis }) =>
     //                     headers: { 'Authorization': localStorage.getItem("token"), "Content-Type": "multipart/form-data" },
     //                 });
 
-
     //                 formData.append('filename', file.name);
     //                 formData.append('access_token', token);
 
@@ -599,9 +702,19 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis }) =>
     //                 }
 
     //             } else if (file.type.startsWith('video/')) {
-    //                 // Upload video
+    //                 // Upload video to custom /upload API
+    //                 response = await axios.post('https://www.testapi.adsgoat.in/upload', formData, {
+    //                     headers: { 'Authorization': localStorage.getItem("token"), "Content-Type": "multipart/form-data" },
+    //                 });
+
+    //                 if (response.status !== 200) {
+    //                     onError("error", response);
+    //                     throw new Error("Video upload to custom API failed");
+    //                 }
+
     //                 formData.append('access_token', token);
 
+    //                 // Upload video to Facebook
     //                 fbResponse = await axios.post(`https://graph.facebook.com/v19.0/act_${account}/advideos`, formData, {
     //                     headers: { 'Content-Type': 'multipart/form-data' }
     //                 });
@@ -610,6 +723,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis }) =>
     //                     const videoid = fbResponse?.data?.id;
     //                     console.log(fbResponse, response, token, videoid, "all are from the 2nd API");
     //                     await new Promise(resolve => setTimeout(resolve, 10000));
+
     //                     // Get thumbnail URL
     //                     const thumbnailResponse = await axios.get(`https://graph.facebook.com/v19.0/${videoid}`, {
     //                         params: {
@@ -619,35 +733,21 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis }) =>
     //                         }
     //                     });
 
-
     //                     console.log('Thumbnail Response:', thumbnailResponse.data.thumbnails.data);
     //                     const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
 
-    //                     if (preferredThumbnail) {
-    //                         const uri = preferredThumbnail.uri;
-    //                         // console.log(uri, "uriuriuriuriuriuriuriuriuriuriuriuriuriuriuriuri")
+    //                     const uri = preferredThumbnail ? preferredThumbnail.uri : "";
 
-    //                         onSuccess("ok", fbResponse);
+    //                     onSuccess("ok", fbResponse);
 
-    //                         return {
-    //                             filename: fbResponse.data.imageUrl,
-    //                             videoid: videoid,
-    //                             thambnailurl: uri,
-    //                         };
-    //                     } else {
-    //                         console.log("No preferred thumbnail found.");
-
-    //                         onSuccess("ok", fbResponse);
-
-    //                         return {
-    //                             filename: fbResponse.data.imageUrl,
-    //                             videoid: videoid,
-    //                             thambnailurl: "", // or handle it as you prefer
-    //                         };
-    //                     }
+    //                     return {
+    //                         filename: response.data.imageUrl,  // Return filename from the custom API response
+    //                         videoid: videoid,
+    //                         thambnailurl: uri,
+    //                     };
     //                 } else {
     //                     onError("error", fbResponse);
-    //                     throw new Error("Video upload failed");
+    //                     throw new Error("Video upload to Facebook failed");
     //                 }
     //             }
     //         } catch (error) {
@@ -667,113 +767,6 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis }) =>
     //         return [];  // Return an empty array if any upload fails
     //     }
     // };
-
-    const customRequest = async (onSuccess, onError) => {
-        if (!imagehash || imagehash.length === 0) {
-            onError("Image hash data not loaded");
-            return [];
-        }
-        const token = imagehash.token;
-        const account = imagehash.accountNumber;
-
-        // Create an array of upload promises
-        const uploadPromises = selectedFiles.map(async (file) => {
-            const formData = new FormData();
-            formData.append("file", file);
-
-            try {
-                let response, fbResponse;
-
-                if (file.type.startsWith('image/')) {
-                    // Upload image
-                    response = await axios.post('https://www.testapi.adsgoat.in/upload', formData, {
-                        headers: { 'Authorization': localStorage.getItem("token"), "Content-Type": "multipart/form-data" },
-                    });
-
-                    formData.append('filename', file.name);
-                    formData.append('access_token', token);
-
-                    fbResponse = await axios.post(`https://graph.facebook.com/v19.0/act_${account}/adimages`, formData, {
-                        headers: { 'Content-Type': 'multipart/form-data' }
-                    });
-
-                    if (response.status === 200 && fbResponse.status === 200) {
-                        onSuccess("ok", response);
-                        return {
-                            filename: response.data.imageUrl,
-                            imag_hash: fbResponse.data?.images?.[file.name]?.hash,
-                        };
-                    } else {
-                        onError("error", response);
-                        throw new Error("Image upload failed");
-                    }
-
-                } else if (file.type.startsWith('video/')) {
-                    // Upload video to custom /upload API
-                    response = await axios.post('https://www.testapi.adsgoat.in/upload', formData, {
-                        headers: { 'Authorization': localStorage.getItem("token"), "Content-Type": "multipart/form-data" },
-                    });
-
-                    if (response.status !== 200) {
-                        onError("error", response);
-                        throw new Error("Video upload to custom API failed");
-                    }
-
-                    formData.append('access_token', token);
-
-                    // Upload video to Facebook
-                    fbResponse = await axios.post(`https://graph.facebook.com/v19.0/act_${account}/advideos`, formData, {
-                        headers: { 'Content-Type': 'multipart/form-data' }
-                    });
-
-                    if (fbResponse.status === 200) {
-                        const videoid = fbResponse?.data?.id;
-                        console.log(fbResponse, response, token, videoid, "all are from the 2nd API");
-                        await new Promise(resolve => setTimeout(resolve, 10000));
-
-                        // Get thumbnail URL
-                        const thumbnailResponse = await axios.get(`https://graph.facebook.com/v19.0/${videoid}`, {
-                            params: {
-                                access_token: token,
-                                fields: 'thumbnails',
-                                is_preferred: true
-                            }
-                        });
-
-                        console.log('Thumbnail Response:', thumbnailResponse.data.thumbnails.data);
-                        const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
-
-                        const uri = preferredThumbnail ? preferredThumbnail.uri : "";
-
-                        onSuccess("ok", fbResponse);
-
-                        return {
-                            filename: response.data.imageUrl,  // Return filename from the custom API response
-                            videoid: videoid,
-                            thambnailurl: uri,
-                        };
-                    } else {
-                        onError("error", fbResponse);
-                        throw new Error("Video upload to Facebook failed");
-                    }
-                }
-            } catch (error) {
-                console.error("Error uploading file:", error);
-                onError("error", error);
-                throw error;
-            }
-        });
-
-        try {
-            // Wait for all uploads to complete
-            const mediaHashArray = await Promise.all(uploadPromises);
-            console.log("All media files uploaded successfully. Media Hash Array:", mediaHashArray);
-            return mediaHashArray;
-        } catch (error) {
-            console.error("One or more media uploads failed:", error);
-            return [];  // Return an empty array if any upload fails
-        }
-    };
 
 
     const handleBeforeUpload = (file) => {
@@ -1601,8 +1594,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis }) =>
                                             autoSize={{ minRows: 5, maxRows: 15 }}
                                             onChange={(e) => setWebsiteURL(e.target.value)}
 
+
                                         />
-                                        <EditOutlined/>
                                     </Form.Item>
                                     {/* <Form.Item
                                     label="URL Parameters"
@@ -1619,90 +1612,113 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis }) =>
                                 <div style={{ flex: "30%" }}>
                                     {selectedFiles.length > 0 && (
                                         selectedFiles.map((file, index) => (
-                                            <div key={index} className="container-ad-preview">
-                                                <div className="ad-preview" style={{ width: "350px" }}>
-                                                    <div className="ad-heading">
-                                                        <div className="img">
+                                            <Badge
+                                                count={
+                                                    <EditOutlined
+                                                        style={{ fontSize: '25px', color: '#fff' }}
+                                                        onClick={() => handleEditClick(file)} // Edit icon click handler
+                                                    />
+                                                }
+                                                style={{
+                                                    backgroundColor: '#52c41a',
+                                                    borderRadius: '50%',
+                                                    position: 'absolute',
+                                                    top: '5px',
+                                                    right: '5px',
+                                                    zIndex: 10,
+                                                    cursor: 'pointer',
+                                                }}
+                                                offset={[5, 5]}
+                                                key={index}
+                                            >
+                                                <div key={index} className="container-ad-preview">
+                                                    <div className="ad-preview" style={{ width: "350px" }}>
+                                                        <div className="ad-heading">
+                                                            <div className="img">
+                                                                {file.type.startsWith('image/') ? (
+                                                                    <img
+                                                                        src={URL.createObjectURL(file)}
+                                                                        alt="page id"
+                                                                        width="40"
+                                                                        height="40"
+                                                                        style={{ objectFit: 'cover' }}
+                                                                    />
+
+
+                                                                ) : (
+                                                                    <video
+                                                                        src={URL.createObjectURL(file)}
+                                                                        alt="page id"
+                                                                        width="40"
+                                                                        height="30"
+                                                                        style={{ objectFit: 'cover' }}
+                                                                        muted // Muted to prevent sound on preview
+                                                                    />
+                                                                )}
+                                                            </div>
+
+                                                            <div className="title">
+                                                                <div className="main">{addName}</div>
+                                                                <div className="sub">
+                                                                    Sponsored <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                                </div>
+                                                            </div>
+                                                            <div className="close">
+                                                                <CloseOutlined style={{ fontSize: "20px" }} />
+                                                            </div>
+                                                            <div className="moreoptions">
+                                                                <MoreOutlined style={{ fontSize: "20px" }} />
+                                                            </div>
+                                                        </div>
+                                                        <div className="ad-desc">{primaryText}</div>
+                                                        <div className="ad-image" style={{ width: '350px', height: '200px' }}>
                                                             {file.type.startsWith('image/') ? (
                                                                 <img
-                                                                    src={URL.createObjectURL(file)}
-                                                                    alt="page id"
-                                                                    width="40"
-                                                                    height="40"
-                                                                    style={{ objectFit: 'cover' }}
+                                                                    src={editedImages[file.name] || URL.createObjectURL(file)} // Use edited image if available
+                                                                    alt="ad content"
+                                                                    style={{ width: '350px', height: '200px', objectFit: 'cover' }}
                                                                 />
                                                             ) : (
                                                                 <video
-                                                                    src={URL.createObjectURL(file)}
-                                                                    alt="page id"
-                                                                    width="40"
-                                                                    height="30"
-                                                                    style={{ objectFit: 'cover' }}
-                                                                    muted // Muted to prevent sound on preview
-                                                                />
+                                                                    controls
+                                                                    style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                >
+                                                                    <source src={URL.createObjectURL(file)} type={file.type} />
+                                                                    Your browser does not support the video tag.
+                                                                </video>
                                                             )}
                                                         </div>
 
-                                                        <div className="title">
-                                                            <div className="main">{addName}</div>
-                                                            <div className="sub">
-                                                                Sponsored <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                        <div className="ad-cta">
+                                                            <div className="details">
+                                                                <div className="link">{caption}</div>
+                                                                <div className="title">{headline}</div>
+                                                                <div className="desc">{description}</div>
+                                                            </div>
+                                                            <div className="ad-button">
+                                                                <button type="button">Learn More</button>
                                                             </div>
                                                         </div>
-                                                        <div className="close">
-                                                            <CloseOutlined style={{ fontSize: "20px" }} />
-                                                        </div>
-                                                        <div className="moreoptions">
-                                                            <MoreOutlined style={{ fontSize: "20px" }} />
-                                                        </div>
-                                                    </div>
-                                                    <div className="ad-desc">{primaryText}</div>
-                                                    <div className="ad-image" style={{ width: '350px', height: '200px' }}>
-                                                        {file.type.startsWith('image/') ? (
-                                                            <img
-                                                                src={URL.createObjectURL(file)}
-                                                                alt="ad content"
-                                                                style={{ width: '350px', height: '200px', objectFit: 'cover' }}
-                                                            />
-                                                        ) : (
-                                                            <video
-                                                                controls
-                                                                style={{ width: '350px', height: '200px', objectFit: 'cover' }}
-                                                            >
-                                                                <source src={URL.createObjectURL(file)} type={file.type} />
-                                                                Your browser does not support the video tag.
-                                                            </video>
-                                                        )}
-                                                    </div>
-
-                                                    <div className="ad-cta">
-                                                        <div className="details">
-                                                            <div className="link">{caption}</div>
-                                                            <div className="title">{headline}</div>
-                                                            <div className="desc">{description}</div>
-                                                        </div>
-                                                        <div className="ad-button">
-                                                            <button type="button">Learn More</button>
-                                                        </div>
-                                                    </div>
-                                                    <a href={websiteURL} target="_blank" rel="noopener noreferrer" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: '#0066cc', padding: '10px' }}>
-                                                        {websiteURL}
-                                                    </a>                                                <div className="icons">
-                                                        <div className="like">
-                                                            <LikeOutlined style={{ fontSize: "20px" }} />
-                                                            Like
-                                                        </div>
-                                                        <div className="comment">
-                                                            <CommentOutlined style={{ fontSize: "20px" }} />
-                                                            Comment
-                                                        </div>
-                                                        <div className="share">
-                                                            <ShareAltOutlined style={{ fontSize: "20px" }} />
-                                                            Share
+                                                        <a href={websiteURL} target="_blank" rel="noopener noreferrer" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: '#0066cc', padding: '10px' }}>
+                                                            {websiteURL}
+                                                        </a>
+                                                        <div className="icons">
+                                                            <div className="like">
+                                                                <LikeOutlined style={{ fontSize: "20px" }} />
+                                                                Like
+                                                            </div>
+                                                            <div className="comment">
+                                                                <CommentOutlined style={{ fontSize: "20px" }} />
+                                                                Comment
+                                                            </div>
+                                                            <div className="share">
+                                                                <ShareAltOutlined style={{ fontSize: "20px" }} />
+                                                                Share
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            </Badge>
                                         ))
                                     )}
                                 </div>
@@ -1719,6 +1735,23 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis }) =>
                             </Button>
                         )}
                     </Form.Item>
+                    {isImgEditorShown && currentFile && (
+                        <FabricCanvas
+                            fileId={currentFile.name} // Pass a unique identifier
+                            initialImage={URL.createObjectURL(currentFile)}
+                            closeCanvasModal={closeCanvasModal}
+                            onSaveEditedImage={handleSaveEditedImage}
+                        />
+                    )}
+
+                    {/* {isImgEditorShown && currentFile && (
+                        <FabricCanvas
+                            initialImage={URL.createObjectURL(currentFile)}
+                            openCanvasModal={() => setIsImgEditorShown(true)}
+                            closeCanvasModal={closeCanvasModal}
+                            selectedFile={currentFile}
+                        />
+                    )} */}
                     <Modal
                         title="Confirmation"
                         open={isModalVisible}
