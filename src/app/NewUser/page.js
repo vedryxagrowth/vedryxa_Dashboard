@@ -1000,7 +1000,7 @@ const UsersTable = () => {
                                         <div style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
                                             {/* {isSearching ? ( */}
                                                 <>
-                                                    <Button  style={{color: theme === "dark" ? "#333": "#fff"}} icon={<SearchOutlined  style={{color: theme === "dark" ? "#333": "#fff"}} />} />
+                                                    <Button  style={{color: theme === "dark" ? "#333": "#fff"}} icon={<SearchOutlined  style={{color: theme === "dark" ? "#fff": "#333"}} />} />
                                                     <Input
                                                         placeholder="Search here"
                                                         autoFocus
@@ -1202,7 +1202,7 @@ const UsersTable = () => {
                                     <Col xs={24} sm={12} md={8}>
                                         <span style={{ color: "#B4B4B4", display: 'block' }}>Search</span>
                                         <div style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
-                                            <Button  style={{color: theme === "dark" ? "#333": "#fff"}} icon={<SearchOutlined  style={{color: theme === "dark" ? "#333": "#fff"}} />} onClick={handleSearchNetwork} />
+                                            <Button  style={{color: theme === "dark" ? "#333": "#fff"}} icon={<SearchOutlined  style={{color: theme === "dark" ? "#fff": "#333"}} />} onClick={handleSearchNetwork} />
                                             <Input
                                                 placeholder="Search here"
                                                 autoFocus={isSearchingNetwork}  // Only autofocus when searching

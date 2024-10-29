@@ -1,13 +1,18 @@
 "use client"
 import React, { useEffect } from 'react';
-import { Drawer, Button, DatePicker, Space, Form, Input, Select, Collapse, Upload, Steps, Modal, message, Spin } from 'antd';
-import { PlusOutlined, UploadOutlined, ShareAltOutlined, CommentOutlined, LikeOutlined, MoreOutlined, CloseOutlined, GlobalOutlined,EditOutlined } from '@ant-design/icons';
+import { Drawer, Button, DatePicker, Space, Form, Input, Select, Collapse, Upload, Steps, Modal, message, Spin, Row, Col,Tooltip, Grid } from 'antd';
+import { PlusOutlined, UploadOutlined, ShareAltOutlined, CommentOutlined, LikeOutlined, MoreOutlined, CloseOutlined, GlobalOutlined,EditOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import moment from 'moment-timezone';
 import { useState, useRef } from 'react';
 import TextArea from 'antd/es/input/TextArea';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import { v4 as uuidv4 } from 'uuid';
+const { useBreakpoint } = Grid;
+
+import MnetUrlBuilder from './urlbuilder/mnet';
+import TonicUrlBuilder from './urlbuilder/tonic';
+import System1UrlBuilder from './urlbuilder/system1';
 
 const { Panel } = Collapse;
 const { Option } = Select;
@@ -421,9 +426,10 @@ const localesdata = [
     }
 ]
 
-const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis }) => {
+const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, network }) => {
     // const [selectedFile, setSelectedFile] = useState(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] = useState(false);
     // const [imageshow, setimageshow] = useState(null);
     const [formValues, setFormValues] = useState(null);
     const [form] = Form.useForm();
@@ -455,6 +461,13 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis }) =>
 
     // const [imageHashes, setImageHashes] = useState([]);
 
+    const onClickEdit = () => {
+        setIsModalVisibleForURLBuilder(true);
+    };
+
+    const handleCancelForURLBuilder = () => {
+        setIsModalVisibleForURLBuilder(false);
+    };
 
 
     const handlePublisherChange = (value) => {
@@ -485,6 +498,24 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis }) =>
         setAccountNumber(accountis);
     }, [accountis]);
 
+    useEffect(() => {
+        // Update the form field value for Website_URL whenever websiteURL changes
+        form.setFieldsValue({ Website_URL: websiteURL });
+    
+        // Check if all required fields are complete
+        const checkFormCompletion = () => {
+          const allValues = form.getFieldsValue(true);
+          const isComplete = Object.keys(allValues).every(
+            key => allValues[key] !== undefined && allValues[key] !== ''
+          );
+          setIsFormComplete(isComplete);
+        };
+    
+        // Trigger form completion check
+        checkFormCompletion();
+        
+    }, [websiteURL, form]);
+
     const Accountchange = (e) => {
         setAccountNumber(e.target.value);
     };
@@ -509,6 +540,23 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis }) =>
             // Handle error
         }
     };
+
+    const onReturnUrl = (text) =>{
+        setIsModalVisibleForURLBuilder(false);
+        setWebsiteURL(text);
+        // console.log(text, "text");
+    }
+
+    const getUrlBuilder = (network) =>{
+        switch(network){
+            case 'FB_Mnet':
+                return <MnetUrlBuilder onReturnMessage={onReturnUrl}/>
+            case 'FB_Tonic':
+                return <TonicUrlBuilder onReturnMessage={onReturnUrl}/>
+            case 'FB_System1':
+                return <System1UrlBuilder onReturnMessage={onReturnUrl}/>
+        }
+    }
 
     // const getpixelandpageid = async () => {
     //     try {
@@ -553,6 +601,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis }) =>
     //     }
     // }
     const handleFormChange = (changedValues, allValues) => {
+        if (!allValues) return; // Return early if allValues is undefined
+    
         // Check if all fields are filled
         const isComplete = Object.values(allValues).every(value => value !== undefined && value !== '');
         setIsFormComplete(isComplete);
@@ -970,7 +1020,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis }) =>
         positions: ["feed"],
         publisher_platforms: ["facebook"],
         Account_Number: accountis == "All" ? '' : accountis,
-        Language: [6]
+        Language: [6],
+        Website_URL: websiteURL
         // device_platforms: "mobile",
 
     };
@@ -981,7 +1032,9 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis }) =>
 
 
     const handleDrawerClose = () => {
+        form.setFieldsValue(initialValues);
         form.resetFields()
+        setWebsiteURL('')
         onClose(); // Call onClose handler to close the drawer
     };
 
@@ -1585,7 +1638,19 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis }) =>
                                         />
                                     </Form.Item>
                                     <Form.Item
-                                        label="Website_URL"
+                                        label={
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', paddingRight:'50px' }}>
+                                                    <span>Website_URL</span>
+                                                    <Tooltip title="This is a required field">
+                                                        <QuestionCircleOutlined style={{ marginLeft: 4, cursor: 'pointer' }} />
+                                                    </Tooltip>
+                                                </div>
+                                                <EditOutlined style={{ cursor: 'pointer' }}  onClick={onClickEdit}/>
+                                            </div>
+                                        }
+                                        labelCol={{ style: { width: '100%' } }}  // Makes the label full width
+                                        wrapperCol={{ style: { width: '100%' } }}  // Ensures TextArea takes the same full width
                                         name="Website_URL"
                                         rules={[
                                             {
@@ -1594,16 +1659,34 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis }) =>
                                             },
                                         ]}
                                         required
-                                        tooltip="This is a required field"
                                     >
                                         <TextArea
                                             placeholder="Website_URL"
                                             autoSize={{ minRows: 5, maxRows: 15 }}
                                             onChange={(e) => setWebsiteURL(e.target.value)}
-
+                                            value={websiteURL}
+                                            style={{ width: '100%' }}
                                         />
-                                        <EditOutlined/>
                                     </Form.Item>
+                                    <Modal
+                                                title="URL Builder"
+                                                visible={isModalVisibleForURLBuilder}
+                                                onCancel={handleCancelForURLBuilder}
+                                                // footer={[
+                                                //     <Button key="cancel" onClick={handleCancel}>
+                                                //         Cancel
+                                                //     </Button>,
+                                                //     <Button key="submit" type="primary" onClick={() => setIsModalVisible(false)}>
+                                                //         Submit
+                                                //     </Button>
+                                                // ]}
+                                                footer={null}
+                                                width="80%" // Set width of the modal
+                                                bodyStyle={{ height: '50vh', overflowY: 'auto' }}
+                                            >
+                                                {getUrlBuilder(network)}
+                                    </Modal>
+
                                     {/* <Form.Item
                                     label="URL Parameters"
                                     name="urlParameters"
