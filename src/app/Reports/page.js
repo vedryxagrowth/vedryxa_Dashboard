@@ -2207,7 +2207,7 @@ const MyTablePage = () => {
             console.error("Token not available. Please log in.");
             return;  // Stop execution if token is missing
         }
-        const fetchData = await axios.get(`http://localhost:8000/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`, {
+        const fetchData = await axios.get(`https://prodapis.adsgoat.in/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`, {
             headers: {
                 Authorization: token,
             },
