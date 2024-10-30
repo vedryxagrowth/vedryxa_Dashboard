@@ -30,6 +30,7 @@ const contentStyle = {
 const roles = ['All', 'Media_Buyer', 'Admin', 'Manager', 'Special_User'];
 const accountStatus = ['All', 'Active', 'InActive'];
 const availableNetworks = ['All', "MEDIA_DOT_NET", "MEDIA_DOT_NET_BING", "ENKI", "TONIC", "System1", "Bodies", "Bodies1", "Rsoc", "Domain Active"];
+const networkStatus = ['All', 'Active', 'InActive'];
 
 const UsersTable = () => {
     const [isSearchingNetwork, setIsSearchingNetwork] = useState(false); //prudhvi
@@ -173,7 +174,7 @@ const UsersTable = () => {
 
     var token = localStorage.getItem("token")
     useEffect(() => {
-        const debouncedFetchData = debounce(fetchNetworksData, 1000);
+        const debouncedFetchData = debounce(fetchNetworksData, 2000);
         const functionaCall = async() => {
             await fetchusersData();
             await fetchAccountsData();
@@ -1244,7 +1245,7 @@ const UsersTable = () => {
                                             style={{ width: "100%", marginTop: '8px'
                                             }}
                                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                            options={accountStatus.map((item) => ({
+                                            options={networkStatus.map((item) => ({
                                                 value: item,
                                                 label: item,
                                             }))}
