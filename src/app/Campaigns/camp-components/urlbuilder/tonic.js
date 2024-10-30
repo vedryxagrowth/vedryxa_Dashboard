@@ -40,7 +40,6 @@ const TonicUrlBuilder = ({onReturnMessage}) => {
                 .replace("sitename_replace", siteName)
                 .replace("keywords_replace", keywords);
             onReturnMessage(url);
-            onClickClear();
         }
         else{
             setErrorMessage("Please complete all fields.");

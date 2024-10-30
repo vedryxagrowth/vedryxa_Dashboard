@@ -203,7 +203,6 @@ const MnetUrlBuilder = ({onReturnMessage}) => {
                 .replace("campaign_id_replace", campaign_id)
                 .replace("adset_id_replace", adset_id);
             onReturnMessage(url);
-            onClickClear();
         }
         else{
             setErrorMessage("Please complete all fields.");

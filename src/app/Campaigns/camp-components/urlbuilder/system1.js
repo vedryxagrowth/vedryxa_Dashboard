@@ -215,7 +215,6 @@ const System1UrlBuilder = ({onReturnMessage}) => {
                 .replace("pixelid_replace", pixelId)
                 .replace("keywords_replace", keywords);
             onReturnMessage(url);
-            onClickClear();
         }
         else{
             setErrorMessage("Please complete all fields.");

@@ -10,6 +10,11 @@ import { useSession } from 'next-auth/react';
 import { v4 as uuidv4 } from 'uuid';
 import dynamic from 'next/dynamic';
 
+import MnetUrlBuilder from './urlbuilder/mnet';
+import TonicUrlBuilder from './urlbuilder/tonic';
+import System1UrlBuilder from './urlbuilder/system1';
+
+
 const FabricCanvas = dynamic(() => import('./Fabricanvas'), { ssr: false });
 
 const { Panel } = Collapse;
@@ -478,6 +483,25 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     const closeCanvasModal = () => {
         setIsImgEditorShown(false); // Close the image editor
     };
+
+    const onReturnUrl = (text) =>{
+        setIsModalVisibleForURLBuilder(false);
+        setWebsiteURL(text);
+        // console.log(text, "text");
+    }
+
+
+    const getUrlBuilder = (network) =>{
+        switch(network){
+            case 'FB_Mnet':
+                return <MnetUrlBuilder onReturnMessage={onReturnUrl}/>
+            case 'FB_Tonic':
+                return <TonicUrlBuilder onReturnMessage={onReturnUrl}/>
+            case 'FB_System1':
+                return <System1UrlBuilder onReturnMessage={onReturnUrl}/>
+        }
+    }
+
 
 
     // const [imageHashes, setImageHashes] = useState([]);

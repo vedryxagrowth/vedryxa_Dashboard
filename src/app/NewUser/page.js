@@ -33,6 +33,7 @@ const availableNetworks = ['All', "MEDIA_DOT_NET", "MEDIA_DOT_NET_BING", "ENKI",
 const networkStatus = ['All', 'Active', 'InActive'];
 
 const UsersTable = () => {
+    const { userdetails } = useTokenContext();
     const [isSearchingNetwork, setIsSearchingNetwork] = useState(false); //prudhvi
     const [netSearchInput, setNetSearchInput] = useState(""); //prudhvi
     const [networkAccessDrawerkVisible, setNetworkAccessDrawerVisible] = useState(false); //prudhvi
@@ -174,14 +175,40 @@ const UsersTable = () => {
 
     var token = localStorage.getItem("token")
     useEffect(() => {
-        const debouncedFetchData = debounce(fetchNetworksData, 2000);
-        const functionaCall = async() => {
-            await fetchusersData();
-            await fetchAccountsData();
-            await debouncedFetchData();
+        if (userdetails?.adAccounts) {
+            const debouncedFetchData = debounce(fetchusersData, 1200);
+            const debouncedFetchData1 = debounce(fetchAccountsData, 2500);
+            const debouncedFetchData2 = debounce(fetchNetworksData, 3500);
+    
+            const functionaCall = async () => {
+                const retryWithDelay = async (fn, retries = 3, delay = 1000) => {
+                    for (let i = 0; i < retries; i++) {
+                        try {
+                            return await fn();
+                        } catch (error) {
+                            if (i < retries - 1) {
+                                console.warn(`Retrying (${i + 1}/${retries})...`);
+                                await new Promise(resolve => setTimeout(resolve, delay * (i + 1)));
+                            } else {
+                                console.error('All retry attempts failed');
+                                throw error;
+                            }
+                        }
+                    }
+                };
+    
+                try {
+                    await retryWithDelay(debouncedFetchData);
+                    await retryWithDelay(debouncedFetchData1);
+                    await retryWithDelay(debouncedFetchData2);
+                } catch (error) {
+                    console.error('Failed to fetch data:', error);
+                }
+            };
+    
+            functionaCall();
         }
-        functionaCall();
-    }, []);
+    }, [userdetails]);
     
     const handleDelete = async (values) => {
         // console.log(values, "Delete");
