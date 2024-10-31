@@ -1,6 +1,4 @@
 {
-  "/Campaigns/page": "app/Campaigns/page.js",
-  "/Dashboard/page": "app/Dashboard/page.js",
-  "/NewUser/page": "app/NewUser/page.js",
-  "/Reports/page": "app/Reports/page.js"
+  "/_not-found/page": "app/_not-found/page.js",
+  "/Campaigns/page": "app/Campaigns/page.js"
 }
