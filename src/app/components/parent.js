@@ -70,6 +70,7 @@ import 'ag-grid-enterprise';
 
 export const TokenProvider = ({ children }) => {
   const { data: session } = useSession();
+  const [cachedSession, setCachedSession] = useState(null);
   const [userdetails, setuserdetails] = useState(null);
   
   // We need a flag to determine if we're on the client-side to avoid the hydration error

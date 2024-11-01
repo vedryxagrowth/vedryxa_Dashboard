@@ -12,6 +12,7 @@ import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
 import { Spin, Row, Col } from 'antd';
 Chart.register(...registerables);
+import debounce from 'lodash.debounce';
 
 import { useTokenContext } from '../../../components/parent';
 const MnetLiveAdsetHistory = ({params}) => {
@@ -624,16 +625,23 @@ const MnetLiveAdsetHistory = ({params}) => {
 
     }
 
-    useEffect(()=>{
-        if(user !== undefined){
-            const mainFunctionCall = async()=>{
-                await functionCallForUserColumnStructure();
-                await functionCall();
-            }
-            mainFunctionCall();
+    const debouncedFunctionCallForUserColumnStructure = debounce(async () => {
+        await functionCallForUserColumnStructure();
+      }, 1500);
+      
+      const debouncedFunctionCall = debounce(async () => {
+        await functionCall();
+      }, 3000);
+      
+      useEffect(() => {
+        if (userdetails?.adAccounts) {
+          const mainFunctionCall = async () => {
+            await debouncedFunctionCallForUserColumnStructure();
+            await debouncedFunctionCall();
+          };
+          mainFunctionCall();
         }
-        
-    },[user])
+      }, [userdetails]);
     console.log(fetchvalue);
     
     // const selectElementData = ['674038077865381', '665204411821465', '364991119488050'];
