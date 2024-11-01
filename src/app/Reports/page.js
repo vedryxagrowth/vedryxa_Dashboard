@@ -10,12 +10,13 @@ import axios from 'axios';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
 // import { Select } from 'antd';
-import { Carousel, Input, Button, Pagination, Row, Col, Typography, Result, Modal, message, ConfigProvider, Switch, Divider, Flex, Spin } from 'antd';
+import { Carousel, Input, Button, Pagination, Row, Col, Typography, Result, Modal, message, ConfigProvider, Switch, Divider, Flex, Spin, Tabs  } from 'antd';
 
 // import 'antd/dist/reset.css';
 import { CommentOutlined, CustomerServiceOutlined, MenuOutlined, InfoCircleOutlined, DownloadOutlined, SearchOutlined, ArrowLeftOutlined, ArrowRightOutlined, SmileOutlined, ReloadOutlined, CopyOutlined, StarOutlined, StarFilled, EditOutlined, CheckCircleFilled, CloseCircleFilled, MessageOutlined, SubnodeOutlined } from '@ant-design/icons';
 import { FloatButton, Tooltip } from 'antd';
 import Draggable from 'react-draggable';
+import StickyBox from 'react-sticky-box';
 // import FormControl from '@mui/material/FormControl';
 // import Select from '@mui/material/Select';
 import { Select } from 'antd';
@@ -1227,7 +1228,7 @@ const MyTablePage = () => {
         'mnet-hour': {
             headerName: 'N-H',
             field: 'mnet-hour',
-            width: 85,
+            minWidth: 95,
             sortable: true,
             filter: "agNumberColumnFilter",
             // headerComponent: CustomHeader,
@@ -4433,6 +4434,46 @@ const MyTablePage = () => {
 
     console.log(dailyData, "Daily");
 
+
+    const items = [
+        { key: '1', label: 'Live', content: 'Content for Live data' },
+        { key: '2', label: 'Daily', content: 'Content for Daily data' },
+        { key: '3', label: 'Campaigns', content: 'Content for Campaign data' }
+    ];
+    
+    const handleCarouselChange = (index) => {
+        if (carouselRef.current) {
+          carouselRef.current.goTo(index);
+        }
+    };
+    
+    const renderCarouselNav = () => (
+            <StickyBox offsetTop={64} offsetBottom={20} style={{ zIndex: 1, padding: '0px', margin: '0px', paddingLeft: '12px' }}>
+                <Tabs
+                    defaultActiveKey="1"
+                    onChange={(key) => handleCarouselChange(Number(key) - 1)}
+                    items={items.map((item) => ({
+                    key: item.key,
+                    label: item.label,
+                    }))}
+                    className="custom-tabs" // Apply custom CSS class
+                    style={{
+                    backgroundColor: '#f0f2f5',
+                    padding: '0',       
+                    marginBottom: '0',  
+                    }}
+                    tabBarStyle={{
+                    fontSize: '12px',      
+                    padding: '0',          
+                    height: '30px',        
+                    lineHeight: '30px',    
+                    marginBottom: '-1px',  
+                    borderBottom: 'none',  
+                    }}
+                />
+            </StickyBox>
+    );
+
     return (
         <div className='reports-container'>
             {/* className='select-container' */}
@@ -4533,6 +4574,9 @@ const MyTablePage = () => {
                     </Col>
                 </Row>
             </Space>
+            <div style={{padding:'0px', margin:'0px'}}>
+                {renderCarouselNav()}
+            </div>
             <div>
                 <div className={`secondRow ${isSecondRowVisible ? '' : 'hidden'}`}>
                     <Row style={{ padding: '10px', paddingRight: '30px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
