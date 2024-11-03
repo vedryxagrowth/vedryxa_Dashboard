@@ -1,1 +1,5 @@
+<<<<<<< HEAD
 self.__REACT_LOADABLE_MANIFEST="{\"app\\\\Campaigns\\\\camp-components\\\\Fabricanvas.js -> react-filerobot-image-editor\":{\"id\":\"app\\\\Campaigns\\\\camp-components\\\\Fabricanvas.js -> react-filerobot-image-editor\",\"files\":[]},\"app\\\\Campaigns\\\\camp-components\\\\create_camapaign.js -> ./Fabricanvas\":{\"id\":\"app\\\\Campaigns\\\\camp-components\\\\create_camapaign.js -> ./Fabricanvas\",\"files\":[]}}"
+=======
+self.__REACT_LOADABLE_MANIFEST='{"app\\\\Campaigns\\\\camp-components\\\\Fabricanvas.js -> react-filerobot-image-editor":{"id":290,"files":[]},"app\\\\Campaigns\\\\camp-components\\\\create_camapaign.js -> ./Fabricanvas":{"id":170,"files":["static/chunks/3458-3169bc118a4e9c0b.js","static/chunks/290.a49368e08a40a289.js","static/chunks/170.b00afac16e7e2386.js"]}}';
+>>>>>>> DevUi
