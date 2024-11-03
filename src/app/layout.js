@@ -118,7 +118,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <head></head>
       <body className={`${inter.className} full-width`}>
-        <SessionProvider>
+        <SessionProvider refetchOnWindowFocus={false} refetchInterval={0}>
           <TokenProvider>
             <BodyWrapper>
               <ContentWrapper>

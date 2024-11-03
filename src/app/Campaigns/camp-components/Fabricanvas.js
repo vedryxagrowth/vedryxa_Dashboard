@@ -115,7 +115,7 @@ export default function FabricCanvas({
     return (
         <div>
             {isImgEditorShown && imageSource && (
-                <div style={{ width: "90vw", height: "90vh", position: "fixed", top: "5vh", left: "5vw", zIndex: 1000 }}>
+                <div style={{ width: "80vw", height: "90vh", position: "fixed", top: "5vh", left: "5vw", zIndex: 1000 }}>
                     <DynamicFilerobotImageEditor
                         source={imageSource}
                         onSave={handleSave}

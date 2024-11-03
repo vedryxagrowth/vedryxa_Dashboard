@@ -14,6 +14,7 @@ import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
 import { Spin, Row, Col } from 'antd';
 Chart.register(...registerables);
+import debounce from 'lodash.debounce';
 
 export default function AdsetNameAndAccount({params}){
     
@@ -353,15 +354,23 @@ export default function AdsetNameAndAccount({params}){
         setChartData({ dates, spend, revenue, profit, margin, rpc, cpl });
     }
 
+    const debouncedFunctionCallForUserColumnStructure = debounce(async () => {
+        await functionCallForUserColumnStructure();
+      }, 1500);
+      
+      const debouncedFunctionCall = debounce(async () => {
+        await getHistoryData();
+      }, 3000);
+
     useEffect(()=>{
-        if(user !== undefined){
+        if(userdetails?.adAccounts){
             const functionCall = async()=>{
-                await functionCallForUserColumnStructure();
-                await getHistoryData();
+                await debouncedFunctionCallForUserColumnStructure();
+                await debouncedFunctionCall();
             }
             functionCall();
         }
-    },[user]);
+    },[userdetails]);
 
     const pinnedBottomRowData = [
         {

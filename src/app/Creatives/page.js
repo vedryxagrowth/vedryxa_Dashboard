@@ -1,131 +1,240 @@
 "use client"
-import { useState, useEffect } from "react";
-import { FilterOutlined, SearchOutlined } from "@ant-design/icons";
-import { Button, Modal, Input, Select, Menu, Card, Typography } from "antd";
 import { useTokenContext } from "../components/parent";
+// pages/image-upload.js
+// pages/image-upload.js
+// import React, { useState } from 'react';
+// import { Upload, Modal, Input, Button } from 'antd';
+// import { EditOutlined, UploadOutlined, PlusOutlined } from '@ant-design/icons';
+// import Image from 'next/image';
 
-export default function Creative() {
+// const ImageUploadPage = () => {
+//     const [images, setImages] = useState([]);
+//     const [isModalVisible, setIsModalVisible] = useState(false);
+//     const [selectedImage, setSelectedImage] = useState(null);
+//     const [urlInput, setUrlInput] = useState('');
 
-    const { userdetails } = useTokenContext();
-    const { theme } = useTokenContext();
-    const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
-    const { Meta } = Card;
-    const { Text } = Typography;
-    const { Option } = Select;
+//     // Handle image upload from files
+//     const handleFileChange = ({ fileList }) => {
+//         const uploadedImages = fileList.map(file => ({
+//             uid: file.uid,
+//             url: URL.createObjectURL(file.originFileObj),
+//         }));
+//         setImages([...images, ...uploadedImages]);
+//     };
 
-    const [state, setState] = useState({
-        activeTab: 'Approved',
-        carddata: [],
-        searchQuery: '',
-        modalVisible: false,
-        imageSrc: ""
-    });
+//     // Handle image upload from URL
+//     const handleUrlUpload = () => {
+//         if (urlInput) {
+//             setImages([...images, { uid: Date.now(), url: urlInput }]);
+//             setUrlInput(''); // Clear input after upload
+//         }
+//     };
 
-    const handleImageClick = (src) => {
-        setState(prevState => ({ ...prevState, imageSrc: src, modalVisible: true }));
+//     // Show modal for editing the image
+//     const showModal = (image) => {
+//         setSelectedImage(image);
+//         setIsModalVisible(true);
+//     };
+
+//     // Close modal
+//     const handleCancel = () => {
+//         setIsModalVisible(false);
+//         setSelectedImage(null);
+//     };
+
+//     return (
+//         <div style={{ padding: '20px' }}>
+//             <h1>Image Upload and Edit</h1>
+
+//             {/* URL Input for Image */}
+//             <div style={{ display: 'flex', marginBottom: '20px' }}>
+//                 <Input
+//                     placeholder="Enter Image URL"
+//                     value={urlInput}
+//                     onChange={(e) => setUrlInput(e.target.value)}
+//                     style={{ width: '300px', marginRight: '10px' }}
+//                 />
+//                 <Button type="primary" onClick={handleUrlUpload} icon={<UploadOutlined />}>
+//                     Upload from URL
+//                 </Button>
+//             </div>
+
+//             {/* File Upload for Image */}
+//             <Upload
+//                 multiple
+//                 listType="picture-card"
+//                 showUploadList={false}
+//                 beforeUpload={() => false}
+//                 onChange={handleFileChange}
+//             >
+//                 <div>
+//                     <PlusOutlined />
+//                     <div style={{ marginTop: 8 }}>Upload</div>
+//                 </div>
+//             </Upload>
+
+//             {/* Display Images with Edit Icon */}
+//             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '20px' }}>
+//                 {images.map((image) => (
+//                     <div key={image.uid} style={{ position: 'relative', width: '150px', height: '150px' }}>
+//                         <img
+//                             src={image.url}
+//                             alt="Uploaded Image"
+//                             style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }}
+//                         />
+//                         <EditOutlined
+//                             style={{
+//                                 position: 'absolute',
+//                                 top: '5px',
+//                                 right: '5px',
+//                                 fontSize: '20px',
+//                                 color: '#fff',
+//                                 backgroundColor: 'rgba(0, 0, 0, 0.5)',
+//                                 borderRadius: '50%',
+//                                 padding: '5px',
+//                                 cursor: 'pointer',
+//                             }}
+//                             onClick={() => showModal(image)}
+//                         />
+//                     </div>
+//                 ))}
+//             </div>
+
+//             {/* Modal for Editing Image */}
+//             <Modal
+//                 title="Edit Image"
+//                 visible={isModalVisible}
+//                 onCancel={handleCancel}
+//                 footer={null}
+//             >
+//                 {selectedImage && (
+//                     <img
+//                         src={selectedImage.url}
+//                         alt="Selected Image"
+//                         style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
+//                     />
+//                 )}
+//             </Modal>
+//         </div>
+//     );
+// };
+
+// export default ImageUploadPage;
+// pages/image-upload.js
+import React, { useState } from 'react';
+import { Upload, Modal, Input, Button } from 'antd';
+import { EditOutlined, UploadOutlined, PlusOutlined } from '@ant-design/icons';
+import Image from 'next/image';
+import dynamic from "next/dynamic";
+
+// Dynamically import the FabricCanvas to avoid SSR issues
+const FabricCanvas = dynamic(() => import("../Campaigns/camp-components/Fabricanvas"), { ssr: false });
+
+const ImageUploadPage = () => {
+    const [images, setImages] = useState([]);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [isEditorVisible, setIsEditorVisible] = useState(false);
+    const [urlInput, setUrlInput] = useState('');
+
+    // Handle image upload from files
+    const handleFileChange = ({ fileList }) => {
+        const uploadedImages = fileList.map(file => ({
+            uid: file.uid,
+            url: URL.createObjectURL(file.originFileObj),
+        }));
+        setImages([...images, ...uploadedImages]);
     };
 
-    const handleModalClose = () => {
-        setState(prevState => ({ ...prevState, modalVisible: false }));
-    };
-
-    useEffect(() => {
-        async function fetchCards() {
-            try {
-                const response = await fetch('https://api.imgflip.com/get_memes');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch memes');
-                }
-                const totalcards = await response.json();
-                const finaldata = totalcards.data.memes.map(source => ({
-                    camp_name: source.name,
-                    pic: source.url,
-                    date: "2023-02-02",
-                    holder: "@Siddu"
-                }));
-                setState(prevState => ({ ...prevState, carddata: finaldata }));
-            } catch (error) {
-                console.error('Error fetching memes:', error);
-            }
+    // Handle image upload from URL
+    const handleUrlUpload = () => {
+        if (urlInput) {
+            setImages([...images, { uid: Date.now(), url: urlInput }]);
+            setUrlInput(''); // Clear input after upload
         }
-
-        fetchCards();
-    }, []);
-
-    const handleSearchChange = (event) => {
-        const { value } = event.target;
-        setState(prevState => ({ ...prevState, searchQuery: value }));
     };
 
-    const filteredCarddata = state.carddata.filter(item =>
-        item.camp_name.toLowerCase().includes(state.searchQuery.toLowerCase())
-    );
-    const { darkMode, toggleTheme } = useTokenContext();
+    // Show editor for editing the image
+    const openEditor = (image) => {
+        setSelectedImage(image);
+        setIsEditorVisible(true);
+    };
+
+    const handleSaveEditedImage = (fileId, editedImage) => {
+        // Update the edited image in the images list
+        setImages((prevImages) => prevImages.map(img => img.uid === fileId ? { ...img, url: editedImage.imageBase64 } : img));
+        setIsEditorVisible(false); // Close editor after saving
+    };
+
     return (
-        <div style={{ borderRadius: '6px', border: `solid 5px ${darkMode ? '#333' : '#fff'}`, backgroundColor: darkMode ? '#333' : '#fff', position: 'sticky', top: '0', height:"100vh",overflowY:"scroll", scrollbarWidth:"none" }}>
-            <div style={{ padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Text style={{ margin: '0px', color: darkMode ? '#fff' : '#333', fontFamily: 'Inter', fontSize: '17px', fontWeight: 700 }}>Creatives <span style={{ color: '#B2A4A4' }}>All Creatives</span></Text>
-                <Button onClick={() => setState(prevState => ({ ...prevState, modalVisible: true }))} style={{ backgroundColor: '#78BC61', color: 'white', marginLeft: '10px' }}>Upload Creatives</Button>
+        <div style={{ padding: '20px' }}>
+            <h1>Image Upload and Edit</h1>
+
+            {/* URL Input for Image */}
+            <div style={{ display: 'flex', marginBottom: '20px' }}>
+                <Input
+                    placeholder="Enter Image URL"
+                    value={urlInput}
+                    onChange={(e) => setUrlInput(e.target.value)}
+                    style={{ width: '300px', marginRight: '10px' }}
+                />
+                <Button type="primary" onClick={handleUrlUpload} icon={<UploadOutlined />}>
+                    Upload from URL
+                </Button>
             </div>
-            <div style={{ padding: '16px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', height: '40px', gap: '30px' }}>
-                    <Button style={{ backgroundColor: '#ffffff', border: '1px solid #C2C2C2', width: '90px' }}><FilterOutlined /> Filter</Button>
-                    <Input placeholder="Enter your search query" suffix={<SearchOutlined />} onChange={handleSearchChange} style={{ width: '30%', height: '40px' }} />
-                    <Select defaultValue="All" variant="filled" style={{ width: '10%' }} options={[{ value: 'jack', label: 'Jack' }, { value: 'All', label: 'All' }, { value: 'Yiminghe', label: 'yiminghe' }, { value: 'disabled', label: 'Disabled', disabled: true }]} />
-                    <Select defaultValue="All" variant="filled" style={{ width: '10%' }} options={[{ value: 'jack', label: 'Jack' }, { value: 'All', label: 'All' }, { value: 'Yiminghe', label: 'yiminghe' }, { value: 'disabled', label: 'Disabled', disabled: true }]} />
-                </div>
-            </div>
-            <div style={{ borderBottom: '1px solid #F5F5F5' }}>
-                <Menu mode="horizontal" style={{ padding: '0px 16px' }}>
-                    <Menu.Item key="Approved" className={state.activeTab === 'Approved' ? 'active' : ''} onClick={() => setState(prevState => ({ ...prevState, activeTab: 'Approved' }))}>
-                        Approved
-                    </Menu.Item>
-                    <Menu.Item key="FF" className={state.activeTab === 'FF' ? 'active' : ''} onClick={() => setState(prevState => ({ ...prevState, activeTab: 'FF' }))}>
-                        Un Approved
-                    </Menu.Item>
-                </Menu>
-            </div>
-            <div className="example" style={{ backgroundColor: darkMode ? '#333' : '#fff', borderRadius: '6px', maxHeight: 'calc(91vh - 200px)', overflow: 'auto', position: "relative" }}>
-                {state.activeTab === 'Approved' && (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: "13px", justifyContent: 'center', padding:"0px 1rem" }}>
-                        {filteredCarddata.map((item, index) => (
-                            <Card
-                                key={index}
-                                hoverable
-                                cover={<img alt={`Image ${index}`} src={item.pic} style={{ height: '240px', objectFit: 'cover' }} onClick={() => handleImageClick(item.pic)} />}
-                                style={{ width: '240px', flex: '1 1 auto' }}
-                                bodyStyle={{ padding: 0 }}
-                            >
-                                <div style={{ position: 'absolute', top: '8px', left: '8px' }}>
-                                    <Text style={{ color: darkMode ? '#333' : '#fff', fontWeight: 'bold', fontSize: '24px' }}>{item.camp_name}</Text>
-                                </div>
-                                <Meta description={
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: "6%", color: darkMode ? '#333' : '#fff' }}>
-                                        <span style={{color: darkMode ? '#fff' : '#333'}}>{item.holder}</span>
-                                        <span style={{ marginLeft: '8px',color: darkMode ? '#fff' : '#333' }}>{item.date}</span>
-                                    </div>
-                                } />
-                            </Card>
-                        ))}
-                    </div>
-                )}
-                {state.activeTab === 'FF' && (
-                    <div>
-                        <h2>Un Approved</h2>
-                    </div>
-                )}
-            </div>
-            <Modal
-                visible={state.modalVisible}
-                onCancel={handleModalClose}
-                footer={null}
-                width={null}
-                bodyStyle={{ padding: 0 }}
-                centered
-                style={{ top: 0 }}
+
+            {/* File Upload for Image */}
+            <Upload
+                multiple
+                listType="picture-card"
+                showUploadList={false}
+                beforeUpload={() => false}
+                onChange={handleFileChange}
             >
-                <img alt="Enlarged Image" src={state.imageSrc} style={{ width: '100%', height: '100vh', objectFit: 'contain' }} />
-            </Modal>
+                <div>
+                    <PlusOutlined />
+                    <div style={{ marginTop: 8 }}>Upload</div>
+                </div>
+            </Upload>
+
+            {/* Display Images with Edit Icon */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '20px' }}>
+                {images.map((image) => (
+                    <div key={image.uid} style={{ position: 'relative', width: '150px', height: '150px' }}>
+                        <img
+                            src={image.url}
+                            alt="Uploaded Image"
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }}
+                        />
+                        <EditOutlined
+                            style={{
+                                position: 'absolute',
+                                top: '5px',
+                                right: '5px',
+                                fontSize: '20px',
+                                color: '#fff',
+                                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                                borderRadius: '50%',
+                                padding: '5px',
+                                cursor: 'pointer',
+                            }}
+                            onClick={() => openEditor(image)}
+                        />
+                    </div>
+                ))}
+            </div>
+
+            {/* Image Editor */}
+            {isEditorVisible && selectedImage && (
+                <FabricCanvas
+                    fileId={selectedImage.uid}
+                    initialImage={selectedImage.url}
+                    closeCanvasModal={() => setIsEditorVisible(false)}
+                    onSaveEditedImage={handleSaveEditedImage}
+                />
+            )}
         </div>
     );
-}
+};
+
+export default ImageUploadPage;

@@ -921,3 +921,11 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 .light-theme .ant-result-subtitle {
   color: #333333; /* Dark gray color for light theme */
 }
+.custom-tabs .ant-tabs-nav .ant-tabs-tab {
+  margin: 0;              /* Remove default margin between tabs */
+  padding: 0 15px;         /* Add slight padding for readability */
+}
+
+.custom-tabs .ant-tabs-nav {
+  gap: 5;                 /* Ensure no gap between tabs */
+}

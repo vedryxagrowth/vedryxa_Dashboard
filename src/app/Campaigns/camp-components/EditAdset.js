@@ -446,6 +446,14 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
   const [formData, setFormData] = useState(null);
   const [selectedPublishers, setSelectedPublishers] = useState([]);
   const [selectedPositions, setSelectedPositions] = useState(["feed"]);
+  const [isManual, setIsManual] = useState(false);
+  const [platform, setPlatform] = useState("facebook");
+
+
+
+  const handleModeChange = (value) => {
+    setIsManual(value === "manual");
+  };
 
   useEffect(() => {
     if (editadsetlevel) {
@@ -551,7 +559,8 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
     Gender: editadsetlevel?.Gender,
     publisher_platforms: editadsetlevel?.publisher_platforms,
     device_platforms: editadsetlevel?.device_platforms,
-    Language: editadsetlevel?.locales
+    Language: editadsetlevel?.locales,
+    placements: editadsetlevel?.placements
     // Facebook_positions: editadsetlevel?.Facebook_positions,
   }
   const postData = async (values) => {
@@ -571,14 +580,24 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
           Min_Age: values.Min_Age,
           Max_Age: values.Max_Age,
           Gender: parseInt(values.Gender),
-          publisher_platforms: values.publisher_platforms,
-          Facebook_positions: values.facebook_positions || [],
-          instagram_positions: values.instagram_positions || [],
-          audience_network_positions: values.audience_network_positions || [],
-          messenger_positions: values.messenger_positions || [],
-          position: values.positions,
+          placements: values.placements,
+          ...(values.placements !== 'Advance' && {
+            publisher_platforms: values.publisher_platforms,
+            Facebook_positions: values.facebook_positions || [],
+            instagram_positions: values.instagram_positions || [],
+            audience_network_positions: values.audience_network_positions || [],
+            messenger_positions: values.messenger_positions || [],
+            position: values.positions,
+            device_platforms: values.device_platforms,
+          }),
+          // publisher_platforms: values.publisher_platforms,
+          // Facebook_positions: values.facebook_positions || [],
+          // instagram_positions: values.instagram_positions || [],
+          // audience_network_positions: values.audience_network_positions || [],
+          // messenger_positions: values.messenger_positions || [],
+          // device_platforms: values.device_platforms,
+          // position: values.positions,
           locales: values.Language,
-          device_platforms: values.device_platforms,
           buying_type: "AUCTION"
         }
       }
@@ -819,40 +838,58 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
             >
               <Select mode="multiple" placeholder="Select Language" options={localesdata.map(option => ({ label: option.name, value: option.key }))} />
             </Form.Item>
-
             <Form.Item
-              name="publisher_platforms"
-              label={<span style={{ color: "#B4B4B4" }}>Platforms</span>}
-              rules={[{ required: true, message: "Please select an option!" }]}
-              style={{ flex: "1 1 20%" }}
+              label="Placements"
+              name="placements"
+              rules={[{ required: true, message: 'Please select a mode!' }]}
             >
-              <Select mode="multiple" placeholder="Select Publishers" options={publisherOptions.map(option => ({ label: option.label, value: option.value }))} />
+              <Select placeholder="Select a mode" onChange={handleModeChange}>
+                <Option value="Advance">Advance</Option>
+                <Option value="manual">Manual</Option>
+
+              </Select>
             </Form.Item>
 
-            <Form.Item
-              name="positions"
-              label={<span style={{ color: "#B4B4B4" }}>Positions</span>}
-              rules={[{ required: true, message: "Please select an option!" }]}
-              style={{ flex: "1 1 30%" }}
-            >
-              <Select mode="multiple" placeholder="Select Positions" options={getPositionOptions().map(position => ({ label: position.label, value: position.key }))} />
-            </Form.Item>
+            {editadsetlevel?.placements === 'manual' || isManual && (
+              <>
+                <Form.Item
+                  name="publisher_platforms"
+                  label={<span style={{ color: "#B4B4B4" }}>Platforms</span>}
+                  rules={[{ required: true, message: "Please select an option!" }]}
+                  style={{ flex: "1 1 20%" }}
+                >
+                  <Select mode="multiple" placeholder="Select Publishers" options={publisherOptions?.map(option => ({ label: option.label, value: option.value }))} />
+                </Form.Item>
 
-            <Form.Item
-              name="device_platforms"
-              label={<span style={{ color: "#B4B4B4" }}>Device</span>}
-              rules={[{ required: true, message: "Please select an option!" }]}
-              style={{ flex: "1 1 20%" }}
-            >
-              <Select
-                mode="multiple"
-                placeholder="Please select"
-                options={[
-                  { value: "mobile", label: "Mobile" },
-                  { value: "desktop", label: "Desktop" }
-                ]}
-              />
-            </Form.Item>
+                <Form.Item
+                  name="positions"
+                  label={<span style={{ color: "#B4B4B4" }}>Positions</span>}
+                  rules={[{ required: true, message: "Please select an option!" }]}
+                  style={{ flex: "1 1 30%" }}
+                >
+                  <Select mode="multiple" placeholder="Select Positions" options={positionOptions[platform]?.map((position) => ({
+                    label: position.label,
+                    value: position.key
+                  }))} />
+                </Form.Item>
+
+                <Form.Item
+                  name="device_platforms"
+                  label={<span style={{ color: "#B4B4B4" }}>Device</span>}
+                  rules={[{ required: true, message: "Please select an option!" }]}
+                  style={{ flex: "1 1 20%" }}
+                >
+                  <Select
+                    mode="multiple"
+                    placeholder="Please select"
+                    options={[
+                      { value: "mobile", label: "Mobile" },
+                      { value: "desktop", label: "Desktop" }
+                    ]}
+                  />
+                </Form.Item>
+              </>
+            )}
           </div>
 
           <Form.Item>
@@ -878,9 +915,5 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
       </Modal>
     </>
   );
-  // return(
-  //     <>
-  //     <h1>hello Editadset ${selectedRow.campaignName}</h1>
-  //     </>
-  // )
+
 }

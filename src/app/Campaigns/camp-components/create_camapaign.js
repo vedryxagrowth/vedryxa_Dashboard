@@ -456,6 +456,12 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     const [currentFile, setCurrentFile] = useState(null); // File to be edited
     const [isImgEditorShown, setIsImgEditorShown] = useState(false);
     const [editedImages, setEditedImages] = useState({});
+    const [isManual, setIsManual] = useState(false);
+    const [campaignName, setCampaignName] = useState("");
+
+    const handleModeChange = (value) => {
+        setIsManual(value === "manual");
+    };
 
 
     // Function to handle edit icon click
@@ -561,6 +567,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     // }
     const handleNameChange = async (e) => {
         // console.log("Account Number:", accountNumber);
+        const newName = e.target.value;
+        setCampaignName(newName);
 
         try {
             const response = await axios.get(`https://www.testapi.adsgoat.in/api/hashimageidentity/${accountNumber}`,
@@ -630,7 +638,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                     formData.append('file', file);
                     formData.append('access_token', token);
 
-                    fbResponse = await axios.post(`https://graph.facebook.com/v19.0/act_${account}/adimages`, formData, {
+                    fbResponse = await axios.post(`https://graph.facebook.com/v20.0/act_${account}/adimages`, formData, {
                         headers: { 'Content-Type': 'multipart/form-data' }
                     });
 
@@ -656,7 +664,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
 
                     formData.append('access_token', token);
 
-                    fbResponse = await axios.post(`https://graph.facebook.com/v19.0/act_${account}/advideos`, formData, {
+                    fbResponse = await axios.post(`https://graph.facebook.com/v20.0/act_${account}/advideos`, formData, {
                         headers: { 'Content-Type': 'multipart/form-data' }
                     });
 
@@ -664,7 +672,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                         const videoid = fbResponse?.data?.id;
                         await new Promise(resolve => setTimeout(resolve, 10000));
 
-                        const thumbnailResponse = await axios.get(`https://graph.facebook.com/v19.0/${videoid}`, {
+                        const thumbnailResponse = await axios.get(`https://graph.facebook.com/v20.0/${videoid}`, {
                             params: {
                                 access_token: token,
                                 fields: 'thumbnails',
@@ -883,7 +891,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                     // This is an image
                     return {
                         id: uuidv4(),
-                        AddName: values.AddName,
+                        AddName: `${values.AddName}_${index + 1}`,
                         filename: media.filename,
                         imag_hash: media.imag_hash,
                         page_id: values.page_id,
@@ -898,7 +906,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                     // This is a video
                     return {
                         id: uuidv4(),
-                        AddName: values.AddName,
+                        AddName: `${values.AddName}_${index + 1}`,
                         filename: media.filename,
                         videoid: media.videoid,
                         thambnailurl: media.thambnailurl,
@@ -944,14 +952,17 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                     Min_Age: values.Min_Age,
                     Max_Age: values.Max_Age,
                     Gender: parseInt(values.Gender),
-                    publisher_platforms: values.publisher_platforms,
-                    Facebook_positions: values.facebook_positions || [],
-                    instagram_positions: values.instagram_positions || [],
-                    audience_network_positions: values.audience_network_positions || [],
-                    messenger_positions: values.messenger_positions || [],
-                    position: values.positions,
                     locales: values.Language,
-                    device_platforms: values.device_platforms,
+                    placements: values.placements,
+                    ...(values.placements !== 'Advance' && {
+                        publisher_platforms: values.publisher_platforms,
+                        Facebook_positions: values.facebook_positions || [],
+                        instagram_positions: values.instagram_positions || [],
+                        audience_network_positions: values.audience_network_positions || [],
+                        messenger_positions: values.messenger_positions || [],
+                        position: values.positions,
+                        device_platforms: values.device_platforms,
+                    }),
                     buying_type: "AUCTION"
                 },
                 addlevel: addLevelData
@@ -1008,7 +1019,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         publisher_platforms: ["facebook"],
         Account_Number: accountis == "All" ? '' : accountis,
         Language: [6],
-        Website_URL: websiteURL
+        Website_URL: websiteURL,
+        placements: "Advance"
         // device_platforms: "mobile",
 
     };
@@ -1168,6 +1180,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                             <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
                                 <Form.Item
                                     name="AdsetName"
+                                    initialValue={campaignName}
                                     label={<span style={{ color: "#B4B4B4" }}>Adset name</span>}
                                     rules={[
                                         {
@@ -1432,64 +1445,79 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     </Select>
                                 </Form.Item>
                                 <Form.Item
-                                    name="publisher_platforms"
-                                    label={<span style={{ color: "#B4B4B4" }}>Platforms</span>}
-                                    rules={[{ required: true, message: "Please select an option!" }]}
-                                    style={{ flex: '1 1 300px' }}
+                                    label="Placements"
+                                    name="placements"
+                                    rules={[{ required: true, message: 'Please select a mode!' }]}
                                 >
-                                    <Select
-                                        mode="multiple"
-                                        placeholder="Select Publishers"
-                                        onChange={handlePublisherChange}
-                                        value={selectedPublishers}
-                                    >
-                                        {publisherOptions.map(option => (
-                                            <Option key={option.value} value={option.value}>
-                                                {option.label}
-                                            </Option>
-                                        ))}
+                                    <Select placeholder="Select a mode" onChange={handleModeChange}>
+                                        <Option value="Advance">Advance</Option>
+                                        <Option value="manual">Manual</Option>
+
                                     </Select>
                                 </Form.Item>
-                                <Form.Item
-                                    name="positions"
-                                    label={<span style={{ color: "#B4B4B4" }}>Positions</span>}
-                                    rules={[{ required: true, message: "Please select an option!" }]}
-                                    style={{ flex: '1 1 400px' }}
-                                >
-                                    <Select
-                                        mode="multiple"
-                                        placeholder="Select Positions"
-                                        value={selectedPositions}
-                                        onChange={handlePositionChange}
-                                    >
-                                        {selectedPublishers.length > 0 && getPositionOptions().map(position => (
-                                            <Option key={`${position.key}_${position.label}`} value={position.key}>
-                                                {position.label}
-                                            </Option>
-                                        ))}
-                                    </Select>
-                                </Form.Item>
-                                <Form.Item
-                                    name="device_platforms"
-                                    label={<span style={{ color: "#B4B4B4" }}>Device</span>}
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: "Please select an option!",
-                                        },
-                                    ]}
-                                    style={{ flex: '1 1 200px' }}
-                                >
-                                    <Select
-                                        mode="multiple"
-                                        allowClear
-                                        placeholder="Please select"
-                                        options={[
-                                            { value: "mobile", label: "Mobile" },
-                                            { value: "desktop", label: "Desktop" }
-                                        ]}
-                                    />
-                                </Form.Item>
+                                {isManual && (
+                                    <>
+                                        <Form.Item
+                                            name="publisher_platforms"
+                                            label={<span style={{ color: "#B4B4B4" }}>Platforms</span>}
+                                            rules={[{ required: true, message: "Please select an option!" }]}
+                                            style={{ flex: '1 1 300px' }}
+                                        >
+                                            <Select
+                                                mode="multiple"
+                                                placeholder="Select Publishers"
+                                                onChange={handlePublisherChange}
+                                                value={selectedPublishers}
+                                            >
+                                                {publisherOptions.map(option => (
+                                                    <Option key={option.value} value={option.value}>
+                                                        {option.label}
+                                                    </Option>
+                                                ))}
+                                            </Select>
+                                        </Form.Item>
+                                        <Form.Item
+                                            name="positions"
+                                            label={<span style={{ color: "#B4B4B4" }}>Positions</span>}
+                                            rules={[{ required: true, message: "Please select an option!" }]}
+                                            style={{ flex: '1 1 400px' }}
+                                        >
+                                            <Select
+                                                mode="multiple"
+                                                placeholder="Select Positions"
+                                                value={selectedPositions}
+                                                onChange={handlePositionChange}
+                                            >
+                                                {selectedPublishers.length > 0 && getPositionOptions()?.map(position => (
+                                                    <Option key={`${position.key}_${position.label}`} value={position.key}>
+                                                        {position.label}
+                                                    </Option>
+                                                ))}
+                                            </Select>
+                                        </Form.Item>
+                                        <Form.Item
+                                            name="device_platforms"
+                                            label={<span style={{ color: "#B4B4B4" }}>Device</span>}
+                                            rules={[
+                                                {
+                                                    required: true,
+                                                    message: "Please select an option!",
+                                                },
+                                            ]}
+                                            style={{ flex: '1 1 200px' }}
+                                        >
+                                            <Select
+                                                mode="multiple"
+                                                allowClear
+                                                placeholder="Please select"
+                                                options={[
+                                                    { value: "mobile", label: "Mobile" },
+                                                    { value: "desktop", label: "Desktop" }
+                                                ]}
+                                            />
+                                        </Form.Item>
+                                    </>
+                                )}
                             </div>
                         </Panel>
 
@@ -1536,6 +1564,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     </div>
                                     <Form.Item
                                         name="AddName"
+                                        initialValue={campaignName}
                                         label={<span style={{ color: "#B4B4B4" }}>Add name</span>}
                                         rules={[
                                             {
