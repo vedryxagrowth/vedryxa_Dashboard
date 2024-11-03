@@ -53,7 +53,9 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
         publisher_platforms: viewadsetlevel?.publisher_platforms,
         device_platforms: viewadsetlevel?.device_platforms,
         Facebook_positions: viewadsetlevel?.Facebook_positions,
+        placements: viewadsetlevel?.placements
     };
+    console.log(initialValue, "initialValueinitialValueinitialValue")
 
     return (
         <>
@@ -220,59 +222,79 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                             />
                         </Form.Item>
                         <Form.Item
-                            name="publisher_platforms"
-                            label={<span style={{ color: "#B4B4B4" }}>Platforms</span>}
+                            label={<span style={{ color: "#B4B4B4" }}>Placements</span>}
+                            name="placements"
                             style={{ flex: 0.1, marginLeft: "2%" }}
                         >
                             <Select
+                                placeholder="Select placements"
                                 disabled
                                 options={[
-                                    { value: "facebook", label: "Facebook" },
-                                    { value: "instagram", label: "Instagram" },
+                                    { value: "Advance", label: "Advance" },
+                                    { value: "manual", label: "Manual" }
                                 ]}
                             />
                         </Form.Item>
-                        <Form.Item
-                            name="Facebook_positions"
-                            label={<span style={{ color: "#B4B4B4" }}>Positions</span>}
-                            style={{ flex: 0.25, marginLeft: "2%" }}
-                        >
-                            <Select
-                                disabled
-                                mode="multiple"
-                                allowClear
-                                style={{ width: "100%" }}
-                                placeholder="Please select"
-                                options={[
-                                    { value: "feed", label: "Facebook Feed" },
-                                    { value: "marketplace", label: "Facebook Marketplace" },
-                                    { value: "video_feeds", label: "Facebook Video Feeds" },
-                                    { value: "search", label: "Facebook Search Results" },
-                                    { value: "explore", label: "Facebook Explore" },
-                                    { value: "right_hand_column", label: "Facebook Right Column" },
-                                    { value: "story", label: "Facebook Stories" },
-                                    { value: "instream_video", label: "Facebook In-Stream Videos" },
-                                    { value: "reels", label: "Facebook Reels" },
-                                ]}
-                            />
-                        </Form.Item>
-                        <Form.Item
-                            name="device_platforms"
-                            label={<span style={{ color: "#B4B4B4" }}>Device</span>}
-                            style={{ flex: 0.18, marginLeft: "2%" }}
-                        >
-                            <Select
-                                disabled
-                                mode="multiple"
-                                allowClear
-                                style={{ width: "100%" }}
-                                placeholder="Please select"
-                                options={[
-                                    { value: "mobile", label: "Mobile" },
-                                    { value: "desktop", label: "Desktop" },
-                                ]}
-                            />
-                        </Form.Item>
+
+
+                        {viewadsetlevel?.placements === "manual" && (
+                            <>
+                                <Form.Item
+                                    name="publisher_platforms"
+                                    label={<span style={{ color: "#B4B4B4" }}>Platforms</span>}
+                                    style={{ flex: 0.1, marginLeft: "2%" }}
+                                >
+                                    <Select
+                                        disabled
+                                        options={[
+                                            { value: "facebook", label: "Facebook" },
+                                            { value: "instagram", label: "Instagram" },
+                                        ]}
+                                    />
+                                </Form.Item>
+                                <Form.Item
+                                    name="Facebook_positions"
+                                    label={<span style={{ color: "#B4B4B4" }}>Positions</span>}
+                                    style={{ flex: 0.25, marginLeft: "2%" }}
+                                >
+                                    <Select
+                                        disabled
+                                        mode="multiple"
+                                        allowClear
+                                        style={{ width: "100%" }}
+                                        placeholder="Please select"
+                                        options={[
+                                            { value: "feed", label: "Facebook Feed" },
+                                            { value: "marketplace", label: "Facebook Marketplace" },
+                                            { value: "video_feeds", label: "Facebook Video Feeds" },
+                                            { value: "search", label: "Facebook Search Results" },
+                                            { value: "explore", label: "Facebook Explore" },
+                                            { value: "right_hand_column", label: "Facebook Right Column" },
+                                            { value: "story", label: "Facebook Stories" },
+                                            { value: "instream_video", label: "Facebook In-Stream Videos" },
+                                            { value: "reels", label: "Facebook Reels" },
+                                        ]}
+                                    />
+                                </Form.Item>
+                                <Form.Item
+                                    name="device_platforms"
+                                    label={<span style={{ color: "#B4B4B4" }}>Device</span>}
+                                    style={{ flex: 0.18, marginLeft: "2%" }}
+                                >
+                                    <Select
+                                        disabled
+                                        mode="multiple"
+                                        allowClear
+                                        style={{ width: "100%" }}
+                                        placeholder="Please select"
+                                        options={[
+                                            { value: "mobile", label: "Mobile" },
+                                            { value: "desktop", label: "Desktop" },
+                                        ]}
+                                    />
+                                </Form.Item>
+                            </>
+                        )}
                     </div>
                 </Form>
             </Card>

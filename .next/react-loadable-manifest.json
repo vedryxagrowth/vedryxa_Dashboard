@@ -5,8 +5,6 @@
   },
   "app\\Campaigns\\camp-components\\create_camapaign.js -> ./Fabricanvas": {
     "id": "app\\Campaigns\\camp-components\\create_camapaign.js -> ./Fabricanvas",
-    "files": [
-      "static/chunks/_app-pages-browser_src_app_Campaigns_camp-components_Fabricanvas_js.js"
-    ]
+    "files": []
   }
 }

@@ -731,7 +731,7 @@ const App = () => {
         <div>
             <CreateCampaignDrawer visible={cdrawerVisible} accountis={createcamselectedacc} onClose={onCloseDrawer} changeRRefrst={changeRRefrst} network={selectedKey} />
 
-            <DuplicateCampaignDrawer visible={dupdrawerVisible} onClose={onCloseDrawer} selectedRow={duplicatenewcampaigns} changeRRefrst={changeRRefrst} />
+            <DuplicateCampaignDrawer visible={dupdrawerVisible} onClose={onCloseDrawer} selectedRow={duplicatenewcampaigns} changeRRefrst={changeRRefrst} network={selectedKey} />
             <ViewDrawer
                 rowData={selectedRowData}
                 visible={viewDrawerVisible}

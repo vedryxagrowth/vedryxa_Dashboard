@@ -92,7 +92,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders }) =
     //         formData.append("access_token", token);
 
     //         const hasrespons = await axios.post(
-    //             `https://graph.facebook.com/v19.0/act_${account}/adimages`,
+    //             `https://graph.facebook.com/v20.0/act_${account}/adimages`,
     //             formData,
     //             {
     //                 headers: {
@@ -135,7 +135,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders }) =
                 formData.append("access_token", token);
 
                 fbResponse = await axios.post(
-                    `https://graph.facebook.com/v19.0/act_${account}/adimages`,
+                    `https://graph.facebook.com/v20.0/act_${account}/adimages`,
                     formData,
                     {
                         headers: {
@@ -175,7 +175,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders }) =
                 formData.append("filename", selectedFile);
 
                 fbResponse = await axios.post(
-                    `https://graph.facebook.com/v19.0/act_${account}/advideos`,
+                    `https://graph.facebook.com/v20.0/act_${account}/advideos`,
                     formData,
                     {
                         headers: {
@@ -189,7 +189,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders }) =
                     await new Promise(resolve => setTimeout(resolve, 10000));
 
                     // Get thumbnail URL
-                    const thumbnailResponse = await axios.get(`https://graph.facebook.com/v19.0/${videoid}`, {
+                    const thumbnailResponse = await axios.get(`https://graph.facebook.com/v20.0/${videoid}`, {
                         params: {
                             access_token: token,
                             fields: 'thumbnails',

@@ -1,13 +1,17 @@
 "use client"
 import React from 'react';
-import { Drawer, Button, DatePicker, Space, Form, Input, Select, Collapse, Upload, Steps, Modal, message, Spin } from 'antd';
-import { PlusOutlined, UploadOutlined, ShareAltOutlined, CommentOutlined, LikeOutlined, MoreOutlined, CloseOutlined, GlobalOutlined } from '@ant-design/icons';
+import { Drawer, Button, DatePicker, Space, Form, Input, Select, Collapse, Upload, Steps, Modal, message, Spin, Badge, Tooltip } from 'antd';
+import { PlusOutlined, UploadOutlined, ShareAltOutlined, CommentOutlined, LikeOutlined, MoreOutlined, CloseOutlined, GlobalOutlined, EditOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import moment from 'moment-timezone';
 import { useState, useRef, useEffect } from 'react';
 import TextArea from 'antd/es/input/TextArea';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import { v4 as uuidv4 } from 'uuid';
+import FabricCanvas from './Fabricanvas';
+import MnetUrlBuilder from './urlbuilder/mnet';
+import TonicUrlBuilder from './urlbuilder/tonic';
+import System1UrlBuilder from './urlbuilder/system1';
 
 const { Panel } = Collapse;
 const { Option } = Select;
@@ -420,7 +424,7 @@ const localesdata = [
         "key": 1005
     }
 ]
-const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst }) => {
+const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst, network }) => {
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [imageshow, setimageshow] = useState(null);
@@ -451,6 +455,62 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
     const [description, setDescription] = useState('');
     const [websiteURL, setWebsiteURL] = useState('');
     const [loading, setLoading] = useState(false);
+    const [isManual, setIsManual] = useState(false);
+    const [campaignName, setCampaignName] = useState("");
+    const [currentFile, setCurrentFile] = useState(null); // File to be edited
+    const [isImgEditorShown, setIsImgEditorShown] = useState(false);
+    const [editedImages, setEditedImages] = useState({});
+    const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] = useState(false);
+
+
+    const handleEditClick = (file) => {
+        setCurrentFile(file); // Set the file to be edited
+        setIsImgEditorShown(true); // Open the image editor
+    };
+    const handleSaveEditedImage = (fileId, editedImageObject) => {
+        setEditedImages(prev => ({
+            ...prev,
+            [fileId]: editedImageObject.imageBase64 || editedImageObject.imageUrl
+        }));
+        closeCanvasModal();
+    };
+
+    const closeCanvasModal = () => {
+        setIsImgEditorShown(false); // Close the image editor
+    };
+    const onReturnUrl = (text) => {
+        setIsModalVisibleForURLBuilder(false);
+        setWebsiteURL(text);
+        // console.log(text, "text");
+    }
+
+
+    const getUrlBuilder = (network) => {
+        switch (network) {
+            case 'FB_Mnet':
+                return <MnetUrlBuilder onReturnMessage={onReturnUrl} />
+            case 'FB_Tonic':
+                return <TonicUrlBuilder onReturnMessage={onReturnUrl} />
+            case 'FB_System1':
+                return <System1UrlBuilder onReturnMessage={onReturnUrl} />
+        }
+    }
+
+
+
+    // const [imageHashes, setImageHashes] = useState([]);
+
+    const onClickEdit = () => {
+        setIsModalVisibleForURLBuilder(true);
+    };
+
+    const handleCancelForURLBuilder = () => {
+        setIsModalVisibleForURLBuilder(false);
+    };
+
+    const handleModeChange = (value) => {
+        setIsManual(value === "manual");
+    };
 
 
     useEffect(() => {
@@ -524,6 +584,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
     //     console.log(values, "handlepositionChange")
     // }
     const handleNameChange = async (e) => {
+        const newName = e.target.value;
+        setCampaignName(newName);
         // console.log("Account Number:", accountNumber);
 
         try {
@@ -546,7 +608,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
         try {
             // Make the GET request to the Facebook Graph API
             const Pixeldata = await axios.get(
-                `https://graph.facebook.com/v19.0/act_${imagehash.accountNumber}/adspixels`,
+                `https://graph.facebook.com/v20.0/act_${imagehash.accountNumber}/adspixels`,
                 {
                     params: {
                         fields: 'id,name',
@@ -566,7 +628,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
         try {
             // Make the GET request to the Facebook Graph API
             const pageiddata = await axios.get(
-                `https://graph.facebook.com/v19.0/act_${imagehash.accountNumber}/adcreatives`,
+                `https://graph.facebook.com/v20.0/act_${imagehash.accountNumber}/adcreatives`,
                 {
                     params: {
                         fields: 'object_story_spec{page_id}',
@@ -590,35 +652,52 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
         setIsFormComplete(isComplete);
     };
 
-    // let s3UrlPath = "";
-    // let hashid = "";
     const customRequest = async (onSuccess, onError) => {
         if (!imagehash || imagehash.length === 0) {
             onError("Image hash data not loaded");
             return [];
         }
+        const token = imagehash.token;
+        const account = imagehash.accountNumber;
 
-        const token = imagehash?.token;
-        const account = imagehash?.accountNumber;
-
-        // Create an array of upload promises
         const uploadPromises = selectedFiles.map(async (file) => {
-            const formData = new FormData();
-            formData.append("file", file);
-
             try {
+                const formData = new FormData();
+                const fileId = file.name;
+                const editedImage = editedImages[fileId];
+
+                // Use edited image if available, otherwise original file
+                const uploadFile = editedImage ? await fetch(editedImage).then(res => res.blob()) : file;
+
+                // Log the MIME type of the file
+                const fileType = uploadFile.type;
+                console.log("File type:", fileType);
+
+                if (!fileType.startsWith("image/") && !fileType.startsWith("video/")) {
+                    onError("Unsupported file type");
+                    return;
+                }
+
+                formData.append("file", uploadFile, `blob/${file.name}`);
+
+
                 let response, fbResponse;
 
                 if (file.type.startsWith('image/')) {
-                    // Upload image
-                    response = await axios.post("/api/uploadImage", formData, {
-                        headers: { "Content-Type": "multipart/form-data" },
+                    response = await axios.post('https://www.testapi.adsgoat.in/upload', formData, {
+                        headers: { 'Authorization': localStorage.getItem("token"), "Content-Type": "multipart/form-data" },
                     });
+                    if (!response.data.imageUrl) {
+                        onError("Error: Image URL not returned from custom API");
+                        throw new Error("Image upload to custom API failed, imageUrl missing");
+                    }
 
-                    formData.append('filename', file.name);
+                    console.log("Custom API response imageUrl:", response);
+
+                    formData.append('file', file);
                     formData.append('access_token', token);
 
-                    fbResponse = await axios.post(`https://graph.facebook.com/v19.0/act_${account}/adimages`, formData, {
+                    fbResponse = await axios.post(`https://graph.facebook.com/v20.0/act_${account}/adimages`, formData, {
                         headers: { 'Content-Type': 'multipart/form-data' }
                     });
 
@@ -632,10 +711,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
                         onError("error", response);
                         throw new Error("Image upload failed");
                     }
-
                 } else if (file.type.startsWith('video/')) {
-                    // Upload video
-                    response = await axios.post("https://www.testapi.adsgoat.in/upload", formData, {
+                    response = await axios.post('https://www.testapi.adsgoat.in/upload', formData, {
                         headers: { 'Authorization': localStorage.getItem("token"), "Content-Type": "multipart/form-data" },
                     });
 
@@ -646,8 +723,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
 
                     formData.append('access_token', token);
 
-                    // Upload video to Facebook
-                    fbResponse = await axios.post(`https://graph.facebook.com/v19.0/act_${account}/advideos`, formData, {
+                    fbResponse = await axios.post(`https://graph.facebook.com/v20.0/act_${account}/advideos`, formData, {
                         headers: { 'Content-Type': 'multipart/form-data' }
                     });
 
@@ -655,8 +731,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
                         const videoid = fbResponse?.data?.id;
                         await new Promise(resolve => setTimeout(resolve, 10000));
 
-                        // Get thumbnail URL
-                        const thumbnailResponse = await axios.get(`https://graph.facebook.com/v19.0/${videoid}`, {
+                        const thumbnailResponse = await axios.get(`https://graph.facebook.com/v20.0/${videoid}`, {
                             params: {
                                 access_token: token,
                                 fields: 'thumbnails',
@@ -688,11 +763,116 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
 
         try {
             const mediaHashArray = await Promise.all(uploadPromises);
+            console.log("All media files uploaded successfully. Media Hash Array:", mediaHashArray);
             return mediaHashArray;
         } catch (error) {
+            console.error("One or more media uploads failed:", error);
             return [];
         }
     };
+    // let s3UrlPath = "";
+    // let hashid = "";
+    // const customRequest = async (onSuccess, onError) => {
+    //     if (!imagehash || imagehash.length === 0) {
+    //         onError("Image hash data not loaded");
+    //         return [];
+    //     }
+
+    //     const token = imagehash?.token;
+    //     const account = imagehash?.accountNumber;
+
+    //     // Create an array of upload promises
+    //     const uploadPromises = selectedFiles.map(async (file) => {
+    //         const formData = new FormData();
+    //         formData.append("file", file);
+
+    //         try {
+    //             let response, fbResponse;
+
+    //             if (file.type.startsWith('image/')) {
+    //                 // Upload image
+    //                 response = await axios.post("/api/uploadImage", formData, {
+    //                     headers: { "Content-Type": "multipart/form-data" },
+    //                 });
+
+    //                 formData.append('filename', file.name);
+    //                 formData.append('access_token', token);
+
+    //                 fbResponse = await axios.post(`https://graph.facebook.com/v20.0/act_${account}/adimages`, formData, {
+    //                     headers: { 'Content-Type': 'multipart/form-data' }
+    //                 });
+
+    //                 if (response.status === 200 && fbResponse.status === 200) {
+    //                     onSuccess("ok", response);
+    //                     return {
+    //                         filename: response.data.imageUrl,
+    //                         imag_hash: fbResponse.data?.images?.[file.name]?.hash,
+    //                     };
+    //                 } else {
+    //                     onError("error", response);
+    //                     throw new Error("Image upload failed");
+    //                 }
+
+    //             } else if (file.type.startsWith('video/')) {
+    //                 // Upload video
+    //                 response = await axios.post("https://www.testapi.adsgoat.in/upload", formData, {
+    //                     headers: { 'Authorization': localStorage.getItem("token"), "Content-Type": "multipart/form-data" },
+    //                 });
+
+    //                 if (response.status !== 200) {
+    //                     onError("error", response);
+    //                     throw new Error("Video upload to custom API failed");
+    //                 }
+
+    //                 formData.append('access_token', token);
+
+    //                 // Upload video to Facebook
+    //                 fbResponse = await axios.post(`https://graph.facebook.com/v20.0/act_${account}/advideos`, formData, {
+    //                     headers: { 'Content-Type': 'multipart/form-data' }
+    //                 });
+
+    //                 if (fbResponse.status === 200) {
+    //                     const videoid = fbResponse?.data?.id;
+    //                     await new Promise(resolve => setTimeout(resolve, 10000));
+
+    //                     // Get thumbnail URL
+    //                     const thumbnailResponse = await axios.get(`https://graph.facebook.com/v20.0/${videoid}`, {
+    //                         params: {
+    //                             access_token: token,
+    //                             fields: 'thumbnails',
+    //                             is_preferred: true
+    //                         }
+    //                     });
+
+    //                     const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
+    //                     const uri = preferredThumbnail ? preferredThumbnail.uri : "";
+
+    //                     onSuccess("ok", fbResponse);
+
+    //                     return {
+    //                         filename: response.data.imageUrl,
+    //                         videoid: videoid,
+    //                         thambnailurl: uri,
+    //                     };
+    //                 } else {
+    //                     onError("error", fbResponse);
+    //                     throw new Error("Video upload to Facebook failed");
+    //                 }
+    //             }
+    //         } catch (error) {
+    //             console.error("Error uploading file:", error);
+    //             onError("error", error);
+    //             throw error;
+    //         }
+    //     });
+
+    //     try {
+    //         const mediaHashArray = await Promise.all(uploadPromises);
+    //         return mediaHashArray;
+    //     } catch (error) {
+    //         return [];
+    //     }
+    // };
 
     const handleBeforeUpload = (file) => {
         setfilesof(file);
@@ -721,11 +901,11 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
 
                 if (mediaHashArray.length > 0) {
                     // Create addlevel objects based on uploaded media
-                    const addLevelData = mediaHashArray.map((media) => {
+                    const addLevelData = mediaHashArray.map((media, index) => {
                         if (media.imag_hash) {
                             return {
                                 id: uuidv4(), // Unique ID for each ad
-                                AddName: formValues.AddName,
+                                AddName: `${formValues.AddName}_${index + 1}`,
                                 filename: media.filename,
                                 imag_hash: media.imag_hash,
                                 page_id: formValues.page_id,
@@ -739,7 +919,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
                         } else if (media.videoid) {
                             return {
                                 id: uuidv4(), // Unique ID for each ad
-                                AddName: formValues.AddName,
+                                AddName: `${formValues.AddName}_${index + 1}`,
                                 filename: media.filename,
                                 videoid: media.videoid,
                                 thambnailurl: media.thambnailurl,
@@ -781,23 +961,53 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
         form
             .validateFields()
             .then((values) => {
-                const selectedPlatforms = selectedPublishers.reduce((acc, publisher) => {
-                    acc[publisher + '_positions'] = values.positions.filter(position =>
-                        positionOptions[publisher].map(option => option.key).includes(position)
-                    );
-                    return acc;
-                }, {});
-                setFormValues({
-                    publisher_platforms: values.publisher_platforms,
-                    ...selectedPlatforms,
-                    ...values
-                });
+                let formData = { ...values };
+
+                if (isManual) {
+                    // Only process selectedPlatforms if isManual is true
+                    const selectedPlatforms = selectedPublishers.reduce((acc, publisher) => {
+                        acc[publisher + '_positions'] = values.positions.filter(position =>
+                            positionOptions[publisher]?.map(option => option.key).includes(position)
+                        );
+                        return acc;
+                    }, {});
+
+                    formData = {
+                        publisher_platforms: values.publisher_platforms,
+                        ...selectedPlatforms,
+                        ...values
+                    };
+                }
+
+                setFormValues(formData);
                 setIsModalVisible(true);
             })
             .catch((errorInfo) => {
                 console.log('Validation failed:', errorInfo);
             });
     };
+
+    // const onFinish = () => {
+    //     form
+    //         .validateFields()
+    //         .then((values) => {
+    //             const selectedPlatforms = selectedPublishers.reduce((acc, publisher) => {
+    //                 acc[publisher + '_positions'] = values.positions.filter(position =>
+    //                     positionOptions[publisher].map(option => option.key).includes(position)
+    //                 );
+    //                 return acc;
+    //             }, {});
+    //             setFormValues({
+    //                 publisher_platforms: values.publisher_platforms,
+    //                 ...selectedPlatforms,
+    //                 ...values
+    //             });
+    //             setIsModalVisible(true);
+    //         })
+    //         .catch((errorInfo) => {
+    //             console.log('Validation failed:', errorInfo);
+    //         });
+    // };
 
     const postData = async (values) => {
         setLoading(true); // Start the spinner
@@ -831,14 +1041,24 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
                     Min_Age: values.Min_Age,
                     Max_Age: values.Max_Age,
                     Gender: parseInt(values.Gender),
-                    publisher_platforms: values.publisher_platforms,
-                    Facebook_positions: values.facebook_positions || [],
-                    instagram_positions: values.instagram_positions || [],
-                    audience_network_positions: values.audience_network_positions || [],
-                    messenger_positions: values.messenger_positions || [],
-                    position: values.positions,
+                    placements: values.placements,
+                    // publisher_platforms: values.publisher_platforms,
+                    // Facebook_positions: values.facebook_positions || [],
+                    // instagram_positions: values.instagram_positions || [],
+                    // audience_network_positions: values.audience_network_positions || [],
+                    // messenger_positions: values.messenger_positions || [],
+                    // position: values.positions,
                     locales: values.Language,
-                    device_platforms: values.device_platforms,
+                    ...(values.placements !== 'Advance' && {
+                        publisher_platforms: values.publisher_platforms,
+                        Facebook_positions: values.facebook_positions || [],
+                        instagram_positions: values.instagram_positions || [],
+                        audience_network_positions: values.audience_network_positions || [],
+                        messenger_positions: values.messenger_positions || [],
+                        position: values.positions,
+                        device_platforms: values.device_platforms,
+                    }),
+                    // device_platforms: values.device_platforms,
                     buying_type: "AUCTION",
                 },
                 addlevel: values.addlevel, // Use the addlevel array created in handleOk
@@ -869,216 +1089,15 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
 
     };
 
-
-    // const customRequest = async (onSuccess, onError) => {
-    //     if (!imagehash || imagehash.length === 0) {
-    //         onError("Image hash data not loaded");
-    //         return [];
-    //     }
-
-    //     const token = imagehash[0].token;
-    //     const account = imagehash[0].extAccountId;
-
-    //     // Create an array of upload promises
-    //     const uploadPromises = selectedFiles.map(async (file) => {
-    //         const formData = new FormData();
-    //         formData.append("file", file);
-
-    //         try {
-    //             const response = await axios.post("/api/uploadImage", formData, {
-    //                 headers: { "Content-Type": "multipart/form-data" },
-    //             });
-
-    //             formData.append('filename', file);
-    //             formData.append('access_token', token);
-
-    //             const hasrespons = await axios.post(`https://graph.facebook.com/v19.0/act_${account}/adimages`, formData, {
-    //                 headers: { 'Content-Type': 'multipart/form-data' }
-    //             });
-
-    //             if (response.status === 200 && hasrespons.status === 200) {
-    //                 onSuccess("ok", response);
-    //                 return {
-    //                     filename: response.data.imageUrl,
-    //                     imag_hash: hasrespons.data?.images?.[file.name]?.hash,
-    //                 };
-    //             } else {
-    //                 onError("error", response);
-    //                 throw new Error("Image upload failed");
-    //             }
-    //         } catch (error) {
-    //             console.error("Error uploading file:", error);
-    //             onError("error", error);
-    //             throw error;
-    //         }
-    //     });
-
-    //     try {
-    //         const imageHashArray = await Promise.all(uploadPromises);
-    //         return imageHashArray;
-    //     } catch (error) {
-    //         return [];
-    //     }
-    // };
-
-
-    // const handleBeforeUpload = (file) => {
-    //     setfilesof(file)
-    //     const formData = new FormData();
-    //     formData.append("file", file);
-    //     setimageshow(formData);
-
-    //     return false;
-    // };
-
-    // const handleOk = async () => {
-    //     setIsModalVisible(false); // Close the modal
-
-    //     if (formValues) {
-    //         const onSuccess = (status, response) => {
-    //             console.log("Upload success:", response);
-    //         };
-
-    //         const onError = (status, error) => {
-    //             console.error("Upload error:", error);
-    //         };
-
-    //         try {
-    //             const imageHashArray = await customRequest(onSuccess, onError);
-
-    //             if (imageHashArray.length > 0) {
-    //                 // Create addlevel objects based on uploaded images
-    //                 const addLevelData = imageHashArray.map((image) => ({
-    //                     id: uuidv4(), // Unique ID for each ad
-    //                     AddName: formValues.AddName,
-    //                     filename: image.filename, // This changes per image
-    //                     imag_hash: image.imag_hash, // This changes per image
-    //                     page_id: formValues.page_id,
-    //                     message: formValues.message,
-    //                     headline: formValues.headline,
-    //                     Description: formValues.Description,
-    //                     Caption: formValues.Caption,
-    //                     Website_URL: formValues.Website_URL,
-    //                     urlParameters: formValues.urlParameters,
-    //                 }));
-
-    //                 // Proceed with posting data, including the addLevelData
-    //                 await postData({ ...formValues, addlevel: addLevelData });
-    //                 changeRRefrst();
-    //                 message.success("Campaign duplicated successfully");
-    //             } else {
-    //                 message.error("Failed to upload one or more images. Duplication aborted.");
-    //             }
-    //         } catch (error) {
-    //             message.error("An error occurred during the duplication process.");
-    //         }
-    //     }
-    // };
-
-
-    // const handleCancel = () => {
-    //     setIsModalVisible(false);
-    // };
-    // const onFinish = () => {
-    //     form
-    //         .validateFields()
-    //         .then((values) => {
-    //             const selectedPlatforms = selectedPublishers.reduce((acc, publisher) => {
-    //                 acc[publisher + '_positions'] = values.positions.filter(position =>
-    //                     positionOptions[publisher].map(option => option.key).includes(position)
-    //                 );
-    //                 return acc;
-    //             }, {});
-    //             console.log({
-    //                 publisher_platforms: values.publisher_platforms,
-    //                 ...selectedPlatforms, ...values
-    //             });
-
-    //             // setIsModalVisible(true);
-    //             setFormValues({
-    //                 publisher_platforms: values.publisher_platforms,
-    //                 ...selectedPlatforms,
-    //                 ...values
-    //             });
-    //             // setFormData(values);
-    //             setIsModalVisible(true)
-    //         })
-    //         .catch((errorInfo) => {
-    //             console.log('Validation failed:', errorInfo);
-    //         });
-    // };
-    // // const onFinish = (values) => {
-    // //     setIsModalVisible(true)
-    // //     console.log("Form values:", values);
-    // //     setFormValues(values);
-    // // };
-    // const postData = async (values) => {
-    //     try {
-    //         const dataToSubmit = {
-    //             campaign_name: values.Name,
-    //             Account_Number: values.Account_Number,
-    //             Approval: "PENDING_APPROVAL",
-    //             fbstatus: "No-Live",
-    //             camapaignlevel: {
-    //                 createdby: session?.user?.name,
-    //                 Name: values.Name,
-    //                 Objectives: values.Objectives,
-    //                 Special_categories: values.Special_categories,
-    //                 Bid_strategy: values.Bid_strategy,
-    //                 Daily_amount: parseInt(values.Daily_amount) * 100,
-    //                 Status: values.Status,
-    //             },
-    //             adsetlevel: {
-    //                 AdsetName: values.AdsetName,
-    //                 optimization_goal: values.optimization_goal,
-    //                 billing_event: values.billing_event,
-    //                 start_time: moment(values.DatePicker.$d).utc().format("YYYY-MM-DDTHH:mm:ssZ"),
-    //                 action_source: values.action_source,
-    //                 custom_event_type: values.custom_event_type,
-    //                 pixel_id: values.pixel_id,
-    //                 bid_amount: values.bid_amount ? parseFloat(values.bid_amount) * 100 : 0,
-    //                 countries: values.countries,
-    //                 Min_Age: values.Min_Age,
-    //                 Max_Age: values.Max_Age,
-    //                 Gender: parseInt(values.Gender),
-    //                 publisher_platforms: values.publisher_platforms,
-    //                 Facebook_positions: values.facebook_positions || [],
-    //                 instagram_positions: values.instagram_positions || [],
-    //                 audience_network_positions: values.audience_network_positions || [],
-    //                 messenger_positions: values.messenger_positions || [],
-    //                 position: values.positions,
-    //                 locales: values.Language,
-    //                 device_platforms: values.device_platforms,
-    //                 buying_type: "AUCTION",
-    //             },
-    //             addlevel: values.addlevel, // Use the addlevel array created in handleOk
-    //         };
-
-    //         const response = await fetch('https://www.testapi.adsgoat.in/api/submitFormData', {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //                 Authorization: token,
-    //             },
-    //             body: JSON.stringify(dataToSubmit),
-    //         });
-
-    //         if (response.ok) {
-    //             console.log('Form data submitted successfully');
-    //             onClose(); // Close the drawer or perform any other action
-    //             message.success("Campaign was created");
-    //         } else {
-    //             console.error('Failed to submit form data');
-    //         }
-    //     } catch (error) {
-    //         console.error('Error submitting form data:', error);
-    //     }
-    // };
-
     const handleChange = (info) => {
         setSelectedFiles(info.fileList.map(file => file.originFileObj));
     };
-
+    useEffect(() => {
+        // Update the Website_URL form field whenever websiteURL changes
+        if (websiteURL) {
+            form.setFieldsValue({ Website_URL: websiteURL });
+        }
+    }, [websiteURL, form]);
     const currentDate = moment();
     const initialValues = {
         Account_Number: DuplicatedampaignData?.Account_Number,
@@ -1105,6 +1124,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
         publisher_platforms: DuplicatedampaignData?.adsetlevel?.publisher_platforms,
         device_platforms: DuplicatedampaignData?.adsetlevel?.device_platforms,
         Language: DuplicatedampaignData?.adsetlevel?.locales,
+        placements: DuplicatedampaignData?.adsetlevel?.placements,
         // Facebook_positions: DuplicatedampaignData?.adsetlevel?.Facebook_positions,
         // buying_type: DuplicatedampaignData?.adsetlevel?.buying_type,
         AddName: DuplicatedampaignData?.addlevel[0]?.AddName,
@@ -1118,10 +1138,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
         // urlParameters: DuplicatedampaignData?.addlevel[0]?.urlParameters,
 
     };
-    // useEffect(() => {
-    //     // Update the form fields when accountis changes
-    //     form.setFieldsValue({ pixel_id: pixelids, page_id: pageid });
-    // }, [form]);
+
 
     return (
         <Drawer
@@ -1270,6 +1287,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
                                 <div style={{ display: "flex" }}>
                                     <Form.Item
                                         name="AdsetName"
+                                        initialValue={campaignName}
                                         label={<span style={{ color: "#B4B4B4" }}>Adset name</span>}
                                         rules={[
                                             {
@@ -1613,6 +1631,92 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
 
                                     </Form.Item>
                                     <Form.Item
+                                        label="Placements"
+                                        name="placements"
+                                        rules={[{ required: true, message: 'Please select a mode!' }]}
+                                    >
+                                        <Select placeholder="Select a mode" onChange={handleModeChange}>
+                                            <Option value="Advance">Advance</Option>
+                                            <Option value="manual">Manual</Option>
+
+                                        </Select>
+                                    </Form.Item>
+                                    {isManual && (
+                                        <>
+                                            <Form.Item
+                                                name="publisher_platforms"
+                                                label={<span style={{ color: "#B4B4B4" }}>Platforms</span>}
+                                                rules={[{ required: true, message: "Please select an option!" }]}
+                                                // style={{ marginRight: "10px" }}
+                                                style={{ flex: 0.18, marginLeft: "2%" }}
+                                            >
+
+                                                <Select
+                                                    mode="multiple"
+                                                    placeholder="Select Publishers"
+                                                    onChange={handlePublisherChange}
+                                                    value={selectedPublishers}
+                                                    style={{ width: 300 }}
+                                                >
+                                                    {publisherOptions.map(option => (
+                                                        <Option key={option.value} value={option.value}>
+                                                            {option.label}
+                                                        </Option>
+                                                    ))}
+                                                </Select>
+                                            </Form.Item>
+
+                                            <Form.Item
+                                                name="positions"
+                                                label={<span style={{ color: "#B4B4B4" }}>Positions</span>}
+                                                rules={[{ required: true, message: "Please select an option!" }]}
+                                                style={{ flex: 0.18, marginLeft: "2%" }}
+                                            // style={{ marginRight: "10px" }}
+                                            >
+                                                <Select
+                                                    mode="multiple"
+                                                    placeholder="Select Positions"
+                                                    value={selectedPositions}
+                                                    onChange={handlePositionChange}
+                                                    style={{ width: 400 }}
+                                                >
+                                                    {selectedPublishers && selectedPublishers.length > 0 ? (
+                                                        getPositionOptions()?.map(position => (
+                                                            <Option key={`${position.key}_${position.label}`} value={position.key}>
+                                                                {position.label}
+                                                            </Option>
+                                                        ))
+                                                    ) : (
+                                                        <Option value="">Empty</Option>
+                                                    )}
+
+                                                </Select>
+                                            </Form.Item>
+                                            <Form.Item
+                                                name="device_platforms"
+                                                label={<span style={{ color: "#B4B4B4" }}>Device</span>}
+                                                rules={[
+                                                    {
+                                                        required: true,
+                                                        message: "Please select an option!",
+                                                    },
+                                                ]}
+                                                style={{ flex: 0.18, marginLeft: "2%" }}>
+                                                <Select
+                                                    mode="multiple"
+                                                    variant="filled"
+                                                    allowClear
+                                                    style={{ width: 200 }}
+                                                    placeholder="Please select"
+                                                    options={[
+                                                        { value: "mobile", label: "Mobile" },
+                                                        { value: "desktop", label: "Desktop" }
+                                                    ]}
+                                                />
+                                            </Form.Item>
+                                        </>
+                                    )}
+                                    {/* <Form.Item
                                         name="publisher_platforms"
                                         label={<span style={{ color: "#B4B4B4" }}>Platforms</span>}
                                         rules={[{ required: true, message: "Please select an option!" }]}
@@ -1682,7 +1786,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
                                                 { value: "desktop", label: "Desktop" }
                                             ]}
                                         />
-                                    </Form.Item>
+                                    </Form.Item> */}
                                 </div>
                             </Panel>
                             <Panel header="ADD LEVEL" key="3">
@@ -1728,6 +1832,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
                                         </div>
                                         <Form.Item
                                             name="AddName"
+                                            initialValue={campaignName}
                                             label={<span style={{ color: "#B4B4B4" }}>Add name</span>}
                                             rules={[
                                                 {
@@ -1813,7 +1918,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
                                             />
                                         </Form.Item>
 
-                                        <Form.Item
+                                        {/* <Form.Item
                                             label="Website_URL"
                                             name="Website_URL"
                                             rules={[
@@ -1831,7 +1936,57 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
                                                 onChange={(e) => setWebsiteURL(e.target.value)}
 
                                             />
+                                        </Form.Item> */}
+                                        <Form.Item
+                                            label={
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', paddingRight: '50px' }}>
+                                                        <span>Website_URL</span>
+                                                        <Tooltip title="This is a required field">
+                                                            <QuestionCircleOutlined style={{ marginLeft: 4, cursor: 'pointer' }} />
+                                                        </Tooltip>
+                                                    </div>
+                                                    <EditOutlined style={{ cursor: 'pointer' }} onClick={onClickEdit} />
+                                                </div>
+                                            }
+                                            labelCol={{ style: { width: '100%' } }}  // Makes the label full width
+                                            wrapperCol={{ style: { width: '100%' } }}  // Ensures TextArea takes the same full width
+                                            name="Website_URL"
+                                            rules={[
+                                                {
+                                                    required: true,
+                                                    message: "Please select Website_URL!",
+                                                },
+                                            ]}
+                                            required
+                                        >
+                                            <TextArea
+                                                placeholder="Website_URL"
+                                                autoSize={{ minRows: 5, maxRows: 15 }}
+                                                value={websiteURL}
+                                                onChange={(e) => setWebsiteURL(e.target.value)}
+
+
+                                            />
                                         </Form.Item>
+                                        <Modal
+                                            title="URL Builder"
+                                            visible={isModalVisibleForURLBuilder}
+                                            onCancel={handleCancelForURLBuilder}
+                                            // footer={[
+                                            //     <Button key="cancel" onClick={handleCancel}>
+                                            //         Cancel
+                                            //     </Button>,
+                                            //     <Button key="submit" type="primary" onClick={() => setIsModalVisible(false)}>
+                                            //         Submit
+                                            //     </Button>
+                                            // ]}
+                                            footer={null}
+                                            width="80%" // Set width of the modal
+                                            bodyStyle={{ height: '50vh', overflowY: 'auto' }}
+                                        >
+                                            {getUrlBuilder(network)}
+                                        </Modal>
                                         {/* <Form.Item
                                         label="URL Parameters"
                                         name="urlParameters"
@@ -1847,180 +2002,114 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
                                     <div style={{ flex: "30%" }}>
                                         {selectedFiles && selectedFiles.length > 0 ? (
                                             selectedFiles.map((file, index) => (
-                                                <div key={index} className="container-ad-preview">
-                                                    <div className="ad-preview" style={{ width: "350px" }}>
-                                                        <div className="ad-heading">
-                                                            <div className="img">
+                                                <Badge
+                                                    count={
+                                                        <EditOutlined
+                                                            style={{ fontSize: '25px', color: '#fff' }}
+                                                            onClick={() => handleEditClick(file)} // Edit icon click handler
+                                                        />
+                                                    }
+                                                    style={{
+                                                        backgroundColor: '#52c41a',
+                                                        borderRadius: '50%',
+                                                        position: 'absolute',
+                                                        top: '5px',
+                                                        right: '5px',
+                                                        zIndex: 10,
+                                                        cursor: 'pointer',
+                                                    }}
+                                                    offset={[5, 5]}
+                                                    key={index}
+                                                >
+                                                    <div key={index} className="container-ad-preview">
+                                                        <div className="ad-preview" style={{ width: "350px" }}>
+                                                            <div className="ad-heading">
+                                                                <div className="img">
+                                                                    {file.type.startsWith('image/') ? (
+                                                                        <img
+                                                                            src={URL.createObjectURL(file)}
+                                                                            alt="page id"
+                                                                            width="40"
+                                                                            height="40"
+                                                                            style={{ objectFit: 'cover' }}
+                                                                        />
+                                                                    ) : (
+                                                                        <video
+                                                                            src={URL.createObjectURL(file)}
+                                                                            alt="page id"
+                                                                            width="40"
+                                                                            height="30"
+                                                                            style={{ objectFit: 'cover' }}
+                                                                            muted // Muted to prevent sound on preview
+                                                                        />
+                                                                    )}
+                                                                </div>
+
+                                                                <div className="title">
+                                                                    <div className="main" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
+                                                                        {addName}
+                                                                    </div>                                                            <div className="sub">
+                                                                        Sponsored <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                                    </div>
+                                                                </div>
+                                                                <div className="close">
+                                                                    <CloseOutlined style={{ fontSize: "20px" }} />
+                                                                </div>
+                                                                <div className="moreoptions">
+                                                                    <MoreOutlined style={{ fontSize: "20px" }} />
+                                                                </div>
+                                                            </div>
+                                                            <div className="ad-desc" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
+                                                                {primaryText}
+                                                            </div>
+                                                            <div className="ad-image" style={{ width: '350px', height: '200px' }}>
                                                                 {file.type.startsWith('image/') ? (
                                                                     <img
-                                                                        src={URL.createObjectURL(file)}
-                                                                        alt="page id"
-                                                                        width="40"
-                                                                        height="40"
-                                                                        style={{ objectFit: 'cover' }}
+                                                                        src={editedImages[file.name] || URL.createObjectURL(file)} // Use edited image if available
+                                                                        alt="ad content"
+                                                                        style={{ width: '350px', height: '200px', objectFit: 'cover' }}
                                                                     />
                                                                 ) : (
                                                                     <video
-                                                                        src={URL.createObjectURL(file)}
-                                                                        alt="page id"
-                                                                        width="40"
-                                                                        height="30"
-                                                                        style={{ objectFit: 'cover' }}
-                                                                        muted // Muted to prevent sound on preview
-                                                                    />
+                                                                        controls
+                                                                        style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                    >
+                                                                        <source src={URL.createObjectURL(file)} type={file.type} />
+                                                                        Your browser does not support the video tag.
+                                                                    </video>
                                                                 )}
                                                             </div>
 
-                                                            <div className="title">
-                                                                <div className="main" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
-                                                                    {addName}
-                                                                </div>                                                            <div className="sub">
-                                                                    Sponsored <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                            <div className="ad-cta">
+                                                                <div className="details">
+                                                                    <div className="link">{caption}</div>
+                                                                    <div className="title">{headline}</div>
+                                                                    <div className="desc">{description}</div>
+                                                                </div>
+                                                                <div className="ad-button">
+                                                                    <button type="button">Learn More</button>
                                                                 </div>
                                                             </div>
-                                                            <div className="close">
-                                                                <CloseOutlined style={{ fontSize: "20px" }} />
-                                                            </div>
-                                                            <div className="moreoptions">
-                                                                <MoreOutlined style={{ fontSize: "20px" }} />
-                                                            </div>
-                                                        </div>
-                                                        <div className="ad-desc" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
-                                                            {primaryText}
-                                                        </div>
-                                                        <div className="ad-image" style={{ width: '350px', height: '200px' }}>
-                                                            {file.type.startsWith('image/') ? (
-                                                                <img
-                                                                    src={URL.createObjectURL(file)}
-                                                                    alt="ad content"
-                                                                    style={{ width: '350px', height: '200px', objectFit: 'cover' }}
-                                                                />
-                                                            ) : (
-                                                                <video
-                                                                    controls
-                                                                    style={{ width: '350px', height: '200px', objectFit: 'cover' }}
-                                                                >
-                                                                    <source src={URL.createObjectURL(file)} type={file.type} />
-                                                                    Your browser does not support the video tag.
-                                                                </video>
-                                                            )}
-                                                        </div>
-
-                                                        <div className="ad-cta">
-                                                            <div className="details">
-                                                                <div className="link">{caption}</div>
-                                                                <div className="title">{headline}</div>
-                                                                <div className="desc">{description}</div>
-                                                            </div>
-                                                            <div className="ad-button">
-                                                                <button type="button">Learn More</button>
-                                                            </div>
-                                                        </div>
-                                                        <a href={websiteURL} target="_blank" rel="noopener noreferrer" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: '#0066cc', padding: '10px' }}>
-                                                            {websiteURL}
-                                                        </a>                                                <div className="icons">
-                                                            <div className="like">
-                                                                <LikeOutlined style={{ fontSize: "20px" }} />
-                                                                Like
-                                                            </div>
-                                                            <div className="comment">
-                                                                <CommentOutlined style={{ fontSize: "20px" }} />
-                                                                Comment
-                                                            </div>
-                                                            <div className="share">
-                                                                <ShareAltOutlined style={{ fontSize: "20px" }} />
-                                                                Share
+                                                            <a href={websiteURL} target="_blank" rel="noopener noreferrer" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: '#0066cc', padding: '10px' }}>
+                                                                {websiteURL}
+                                                            </a>                                                <div className="icons">
+                                                                <div className="like">
+                                                                    <LikeOutlined style={{ fontSize: "20px" }} />
+                                                                    Like
+                                                                </div>
+                                                                <div className="comment">
+                                                                    <CommentOutlined style={{ fontSize: "20px" }} />
+                                                                    Comment
+                                                                </div>
+                                                                <div className="share">
+                                                                    <ShareAltOutlined style={{ fontSize: "20px" }} />
+                                                                    Share
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                                // <div key={index} className="container-ad-preview">
-                                                //     <div className="ad-preview">
-                                                //         <div className="ad-heading">
-                                                //             <div className="img">
-                                                //                 {file.type.startsWith('image/') ? (
-                                                //                     <img
-                                                //                         src={URL.createObjectURL(file)}
-                                                //                         alt="page id"
-                                                //                         width="40"
-                                                //                         height="40"
-                                                //                         onLoad={(e) => URL.revokeObjectURL(e.target.src)} // Revoke URL after loading
-                                                //                     />
-                                                //                 ) : (
-                                                //                     <video
-                                                //                         width="40"
-                                                //                         height="30"
-                                                //                         muted // Ensures no sound plays in preview
-                                                //                         onLoadedData={(e) => URL.revokeObjectURL(e.target.src)} // Revoke URL after loading
-                                                //                         controls={false} // No controls for the small preview
-                                                //                     >
-                                                //                         <source src={URL.createObjectURL(file)} type={file.type} />
-                                                //                         Your browser does not support the video tag.
-                                                //                     </video>
-                                                //                 )}
-                                                //             </div>
-                                                //             <div className="title">
-                                                //                 <div className="main">{addName}</div>
-                                                //                 <div className="sub">
-                                                //                     Sponsored <GlobalOutlined style={{ opacity: "0.6" }} />
-                                                //                 </div>
-                                                //             </div>
-                                                //             <div className="close">
-                                                //                 <CloseOutlined style={{ fontSize: "20px" }} />
-                                                //             </div>
-                                                //             <div className="moreoptions">
-                                                //                 <MoreOutlined style={{ fontSize: "20px" }} />
-                                                //             </div>
-                                                //         </div>
-                                                //         <div className="ad-desc">{primaryText}</div>
-                                                //         <div className="ad-image" style={{ width: '400px', height: '200px' }}>
-                                                //             {file.type.startsWith('image/') ? (
-                                                //                 <img
-                                                //                     src={URL.createObjectURL(file)}
-                                                //                     onLoad={(e) => URL.revokeObjectURL(e.target.src)} // Revoke URL after loading
-                                                //                     style={{ width: '400px', height: '200px', objectFit: 'cover' }}
-                                                //                     alt="ad content"
-                                                //                 />
-                                                //             ) : (
-                                                //                 <video
-                                                //                     style={{ width: '400px', height: '200px', objectFit: 'cover' }}
-                                                //                     controls
-                                                //                     onLoadedData={(e) => URL.revokeObjectURL(e.target.src)} // Revoke URL after loading
-                                                //                 >
-                                                //                     <source src={URL.createObjectURL(file)} type={file.type} />
-                                                //                     Your browser does not support the video tag.
-                                                //                 </video>
-                                                //             )}
-                                                //         </div>
-                                                //         <div className="ad-cta">
-                                                //             <div className="details">
-                                                //                 <div className="link">{caption}</div>
-                                                //                 <div className="title">{headline}</div>
-                                                //                 <div className="desc">{description}</div>
-                                                //             </div>
-                                                //             <div className="ad-button">
-                                                //                 <button type="button">Learn More</button>
-                                                //             </div>
-                                                //         </div>
-                                                //         <a href={websiteURL} target="_blank" rel="noopener noreferrer" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: '#0066cc', padding: '10px' }}>
-                                                //             {websiteURL}
-                                                //         </a>
-                                                //         <div className="icons">
-                                                //             <div className="like">
-                                                //                 <LikeOutlined style={{ fontSize: "20px" }} />
-                                                //                 Like
-                                                //             </div>
-                                                //             <div className="comment">
-                                                //                 <CommentOutlined style={{ fontSize: "20px" }} />
-                                                //                 Comment
-                                                //             </div>
-                                                //             <div className="share">
-                                                //                 <ShareAltOutlined style={{ fontSize: "20px" }} />
-                                                //                 Share
-                                                //             </div>
-                                                //         </div>
-                                                //     </div>
-                                                // </div>
+                                                </Badge>
+
                                             ))
                                         ) : (
                                             <div className="container-ad-preview">
@@ -2094,6 +2183,14 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst 
                                 </Button>
                             )}
                         </Form.Item>
+                        {isImgEditorShown && currentFile && (
+                            <FabricCanvas
+                                fileId={currentFile.name} // Pass a unique identifier
+                                initialImage={URL.createObjectURL(currentFile)}
+                                closeCanvasModal={closeCanvasModal}
+                                onSaveEditedImage={handleSaveEditedImage}
+                            />
+                        )}
                         <Modal
                             title="Confirmation"
                             open={isModalVisible}
