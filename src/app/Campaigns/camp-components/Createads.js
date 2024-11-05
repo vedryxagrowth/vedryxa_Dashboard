@@ -1,5 +1,6 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import {
   Button,
   Card,
@@ -10,7 +11,9 @@ import {
   Modal,
   Space,
   message,
-  Spin
+  Spin,
+  Tooltip,
+  Badge
 } from 'antd';
 import {
   CheckOutlined,
@@ -21,14 +24,22 @@ import {
   MoreOutlined,
   ShareAltOutlined,
   UploadOutlined,
+  QuestionCircleOutlined,
+  EditOutlined
 } from '@ant-design/icons';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 
+import MnetUrlBuilder from './urlbuilder/mnet';
+import TonicUrlBuilder from './urlbuilder/tonic';
+import System1UrlBuilder from './urlbuilder/system1';
+
+const FabricCanvas = dynamic(() => import('./Fabricanvas'), { ssr: false });
+
 const { Option } = Select;
 const { TextArea } = Input;
 
-const Createnewads = ({ data, rerenders, onClose }) => {
+const Createnewads = ({ data, rerenders, onClose, network }) => {
   const [form] = Form.useForm();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [formData, setFormData] = useState(null);
@@ -42,6 +53,11 @@ const Createnewads = ({ data, rerenders, onClose }) => {
   const [description, setDescription] = useState('');
   const [websiteURL, setWebsiteURL] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] = useState(false);
+  const [editedImages, setEditedImages] = useState({});
+  // const [selectedFiles, setSelectedFiles] = useState([]);
+  const [isImgEditorShown, setIsImgEditorShown] = useState(false);
+  const [currentFile, setCurrentFile] = useState(null); // File to be edited
 
   var token = localStorage.getItem("token")
   console.log(data, "selectedRow")
@@ -67,6 +83,7 @@ const Createnewads = ({ data, rerenders, onClose }) => {
     if (info.fileList.length > 0) {
       // Update the selected file
       setSelectedFile(info.fileList[0].originFileObj);
+      // setSelectedFiles(info.fileList.map(file => file.originFileObj));
     } else {
       setSelectedFile(null); // Clear the selected file if fileList is empty
     }
@@ -310,6 +327,23 @@ const Createnewads = ({ data, rerenders, onClose }) => {
     }
   };
 
+  useEffect(() => {
+    // Update the form field value for Website_URL whenever websiteURL changes
+    form.setFieldsValue({ Website_URL: websiteURL });
+
+    // Check if all required fields are complete
+    // const checkFormCompletion = () => {
+    //     const allValues = form.getFieldsValue(true);
+    //     const isComplete = Object.keys(allValues).every(
+    //         key => allValues[key] !== undefined && allValues[key] !== ''
+    //     );
+    //     setIsFormComplete(isComplete);
+    // };
+
+    // // Trigger form completion check
+    // checkFormCompletion();
+
+  }, [websiteURL, form]);
 
 
   const postData = async (values) => {
@@ -362,6 +396,43 @@ const Createnewads = ({ data, rerenders, onClose }) => {
     }
   };
 
+  const onReturnUrl = (text) => {
+    setIsModalVisibleForURLBuilder(false);
+    setWebsiteURL(text);
+    form.setFieldsValue(initialValue);
+    form.resetFields()
+    // console.log(text, "text");
+  }
+
+  const getUrlBuilder = (network) => {
+    switch (network) {
+        case 'FB_Mnet':
+            return <MnetUrlBuilder onReturnMessage={onReturnUrl} />
+        case 'FB_Tonic':
+            return <TonicUrlBuilder onReturnMessage={onReturnUrl} />
+        case 'FB_System1':
+            return <System1UrlBuilder onReturnMessage={onReturnUrl} />
+    }
+  }
+
+
+
+  // const [imageHashes, setImageHashes] = useState([]);
+
+  const onClickEdit = () => {
+    setIsModalVisibleForURLBuilder(true);
+  };
+
+  const handleCancelForURLBuilder = () => {
+    setIsModalVisibleForURLBuilder(false);
+  };
+
+  const closeCanvasModal = () => {
+    console.log("Closing editor...");
+    // setIsImgEditorShown(false);
+    setIsImgEditorShown(false); // Close the image editor
+  };
+
 
 
   const handleModalCancel = () => {
@@ -369,8 +440,25 @@ const Createnewads = ({ data, rerenders, onClose }) => {
     console.log('Modal cancel clicked');
   };
   var initialValue = {
-    page_id: data?.addlevel[0]?.page_id
+    page_id: data?.addlevel[0]?.page_id,
+    Website_URL: websiteURL,
+    Description: "Find More"
   }
+
+  const handleEditClick = (file) => {
+    setCurrentFile(file); // Set the file to be edited
+    setIsImgEditorShown(true); // Open the image editor
+  };
+
+  const handleSaveEditedImage = (fileId, editedImageObject) => {
+    if (!editedImageObject) {
+      console.error("Edited image data is null or undefined");
+      return;
+    }
+    closeCanvasModal();
+  };
+
+  console.log(editedImages, "edit bro");
 
   return (
     <>
@@ -454,24 +542,7 @@ const Createnewads = ({ data, rerenders, onClose }) => {
 
                 />
               </Form.Item>
-              <Form.Item
-                label="Caption"
-                name="Caption"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please enter a Caption!",
-                  },
-                ]}
-                required
-                tooltip="This is a required field">
-                <TextArea
-                  placeholder="Caption"
-                  autoSize={{ minRows: 2, maxRows: 10 }}
-                  onChange={(e) => setCaption(e.target.value)}
-
-                />
-              </Form.Item>
+              
 
               <Form.Item
                 label="Headline"
@@ -511,7 +582,19 @@ const Createnewads = ({ data, rerenders, onClose }) => {
                 />
               </Form.Item>
               <Form.Item
-                label="Website_URL"
+                label={
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', paddingRight: '50px' }}>
+                        <span>Website_URL</span>
+                        <Tooltip title="This is a required field">
+                          <QuestionCircleOutlined style={{ marginLeft: 4, cursor: 'pointer' }} />
+                        </Tooltip>
+                    </div>
+                    <EditOutlined style={{ cursor: 'pointer' }} onClick={onClickEdit} />
+                  </div>
+                }
+                labelCol={{ style: { width: '100%' } }}  // Makes the label full width
+                wrapperCol={{ style: { width: '100%' } }}  // Ensures TextArea takes the same full width
                 name="Website_URL"
                 rules={[
                   {
@@ -520,12 +603,30 @@ const Createnewads = ({ data, rerenders, onClose }) => {
                   },
                 ]}
                 required
-                tooltip="This is a required field"
               >
                 <TextArea
                   placeholder="Website_URL"
                   autoSize={{ minRows: 5, maxRows: 15 }}
                   onChange={(e) => setWebsiteURL(e.target.value)}
+                  value={websiteURL}
+                />
+              </Form.Item>
+              <Form.Item
+                label="Display Link"
+                name="Caption"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please enter a Caption!",
+                  },
+                ]}
+                required
+                tooltip="This is a required field">
+                <TextArea
+                  placeholder="Display Link"
+                  autoSize={{ minRows: 2, maxRows: 10 }}
+                  onChange={(e) => setCaption(e.target.value)}
+
                 />
               </Form.Item>
               {/* <Form.Item
@@ -541,6 +642,25 @@ const Createnewads = ({ data, rerenders, onClose }) => {
             </div>
             <div style={{ flex: "30%" }}>
               {selectedFile && (
+               <Badge
+                    count={
+                        <EditOutlined
+                            style={{ fontSize: '25px', color: '#fff' }}
+                            onClick={() => handleEditClick(selectedFile)} // Edit icon click handler
+                        />
+                    }
+                    style={{
+                        backgroundColor: '#52c41a',
+                        borderRadius: '50%',
+                        position: 'absolute',
+                        top: '5px',
+                        right: '5px',
+                        zIndex: 10,
+                        cursor: 'pointer',
+                    }}
+                    offset={[5, 5]}
+                    // key={index}
+               >
                 <div className="container-ad-preview">
                   <div className="ad-preview">
                     <div className="ad-heading">
@@ -568,8 +688,15 @@ const Createnewads = ({ data, rerenders, onClose }) => {
                       <div className="title">
                         <div className="main" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
                           {addName}
-                        </div>                                                          <div className="sub">
-                          Sponsored <GlobalOutlined style={{ opacity: "0.6" }} />
+                        </div>                                                          
+                        <div className="sub">
+                          {imagehash?.pageName ? (
+                            <>
+                              {imagehash.pageName} <GlobalOutlined style={{ opacity: "0.6" }} />
+                            </>
+                            ) : (
+                              <GlobalOutlined style={{ opacity: "0.6" }} />
+                          )}
                         </div>
                       </div>
                       <div className="close">
@@ -628,6 +755,7 @@ const Createnewads = ({ data, rerenders, onClose }) => {
                     </div>
                   </div>
                 </div>
+               </Badge>
               )}
             </div>
 
@@ -642,6 +770,14 @@ const Createnewads = ({ data, rerenders, onClose }) => {
           </Form.Item>
         </Form>
       </Spin>
+      {isImgEditorShown && currentFile && (
+                        <FabricCanvas
+                            fileId={currentFile.name} // Pass a unique identifier
+                            initialImage={URL.createObjectURL(currentFile)}
+                            closeCanvasModal={closeCanvasModal}
+                            onSaveEditedImage={handleSaveEditedImage}
+                        />
+      )}
       <Modal
         title="Form Data"
         visible={isModalVisible}
@@ -652,6 +788,17 @@ const Createnewads = ({ data, rerenders, onClose }) => {
         {/* {formData && (
           <pre>{JSON.stringify(formData, null, 2)}</pre>
         )} */}
+      </Modal>
+      <Modal
+        title="URL Builder"
+        visible={isModalVisibleForURLBuilder}
+        onCancel={handleCancelForURLBuilder}
+                                        
+        footer={null}
+        width="80%" // Set width of the modal
+        bodyStyle={{ height: '50vh', overflowY: 'auto' }}
+      >
+        {getUrlBuilder(network)}
       </Modal>
     </>
   );

@@ -45,7 +45,7 @@ const { TabPane } = Tabs;
 const { Title, Text } = Typography;
 
 
-export default function Adsets({ selectedRow, onClose, changeRRefrst }) {
+export default function Adsets({ selectedRow, onClose, changeRRefrst, network }) {
   // const [isDrawerVisible, setIsDrawerVisible] = useState(false);
   const [adsetsDrawerVisible, setadsetsDrawerVisible] = useState(false);
   const [editadsetsDrawerVisible, seteditadsetsDrawerVisible] = useState(false);
@@ -78,6 +78,7 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst }) {
             Authorization: token,
           }
         });
+        console.log(response?.data, "response data");
         setovrallcampdetal(response?.data[0]);
         setCampaignDetails(response?.data[0].adsetlevel);
       } catch (error) {
@@ -211,6 +212,8 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst }) {
 
       setEditing(false);
     };
+
+    console.log(network, "network from adsets.js");
 
     return (
       <div>
@@ -394,7 +397,7 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst }) {
         open={adsDrawerVisible}
         width="90%" // Adjust width as needed
       >
-        <Createads selectedRow={ovrallcampdetal} />
+        <Createads selectedRow={ovrallcampdetal} network={network}/>
 
       </Drawer>
       <Drawer

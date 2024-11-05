@@ -46,7 +46,7 @@ const { TabPane } = Tabs;
 const { Title, Text } = Typography;
 
 
-export default function Createads({ selectedRow }) {
+export default function Createads({ selectedRow, network }) {
 
   const [newadsDrawerVisible, setnewadsDrawerVisible] = useState(false);
   const [duplicateDrawerVisible, setduplicateDrawerVisible] = useState(false);
@@ -57,6 +57,7 @@ export default function Createads({ selectedRow }) {
   const [viewadsdata, setviewadsdata] = useState(null)
   var token = localStorage.getItem("token")
   const [data, setData] = useState(selectedRow?.addlevel);
+  const [selectedKey, setSelectedKey] = useState(null);
   const [refrst, setRefrst] = useState(false)
 
 
@@ -86,6 +87,7 @@ export default function Createads({ selectedRow }) {
   }
 
   const createnewads = () => {
+    console.log(network, "network ads");
     setnewadsDrawerVisible(true)
   };
   const duplicatenewads = (record) => {
@@ -203,6 +205,7 @@ export default function Createads({ selectedRow }) {
     },
 
   ];
+  console.log(selectedRow, "selected rows");
   return (
     <>
       <Flex justify="space-between" align="center">
@@ -252,7 +255,7 @@ export default function Createads({ selectedRow }) {
         open={newadsDrawerVisible}
         width="90%" // Adjust width as needed
       >
-        <Createnewads data={selectedRow} onClose={onCloseDrawer} rerenders={rerenders} />
+        <Createnewads data={selectedRow} onClose={onCloseDrawer} rerenders={rerenders} network={network} />
       </Drawer>
 
       <Drawer
