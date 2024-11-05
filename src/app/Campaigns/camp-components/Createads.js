@@ -55,6 +55,7 @@ const Createnewads = ({ data, rerenders, onClose, network }) => {
   const [loading, setLoading] = useState(false);
   const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] = useState(false);
   const [editedImages, setEditedImages] = useState({});
+  const [imagehash, setimagehash] = useState('')
   // const [selectedFiles, setSelectedFiles] = useState([]);
   const [isImgEditorShown, setIsImgEditorShown] = useState(false);
   const [currentFile, setCurrentFile] = useState(null); // File to be edited
@@ -690,13 +691,14 @@ const Createnewads = ({ data, rerenders, onClose, network }) => {
                           {addName}
                         </div>                                                          
                         <div className="sub">
-                          {imagehash?.pageName ? (
+                          {/* {imagehash?.pageName ? (
                             <>
                               {imagehash.pageName} <GlobalOutlined style={{ opacity: "0.6" }} />
                             </>
                             ) : (
                               <GlobalOutlined style={{ opacity: "0.6" }} />
-                          )}
+                          )} */}
+                          Sponsored <GlobalOutlined style={{ opacity: "0.6" }} />
                         </div>
                       </div>
                       <div className="close">
@@ -771,12 +773,12 @@ const Createnewads = ({ data, rerenders, onClose, network }) => {
         </Form>
       </Spin>
       {isImgEditorShown && currentFile && (
-                        <FabricCanvas
-                            fileId={currentFile.name} // Pass a unique identifier
-                            initialImage={URL.createObjectURL(currentFile)}
-                            closeCanvasModal={closeCanvasModal}
-                            onSaveEditedImage={handleSaveEditedImage}
-                        />
+        <FabricCanvas
+          fileId={currentFile.name} // Pass a unique identifier
+          initialImage={URL.createObjectURL(currentFile)}
+          closeCanvasModal={closeCanvasModal}
+          onSaveEditedImage={handleSaveEditedImage}
+        />
       )}
       <Modal
         title="Form Data"

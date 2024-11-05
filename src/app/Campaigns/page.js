@@ -54,6 +54,8 @@ const App = () => {
     const [valueOptions, setValueOptions] = useState([]);
     const [error, setError] = useState(false);
     const { theme } = useTokenContext();
+    const [isOpen, setIsOpen] = useState(false); // State to track if dropdown is open
+
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
 
 
@@ -138,6 +140,8 @@ const App = () => {
             const accountNumbers = userdetails.adAccounts[selectedKey]?.map(account => ({
                 value: account.accountNumber,  // Set value as accountNumber
                 label: account.accountNumber,  // Set label as accountNumber
+                accountName: account.accountName,     // Include accountName for conditional rendering
+                status: account.status
             }));
             setValueOptions(accountNumbers);  // Update valueOptions with account numbers
         } else {
@@ -765,19 +769,8 @@ const App = () => {
                             ))}
                         </Select>
                     </Col>
-                    {/* <button onClick={changeRRefrst}>Test Refresh</button> */}
-                    <Col span={4}>
-                        {/* <Select
-                            placeholder="Select Account"
-                            style={{ width: '100%' }}
-                            onChange={handleValueChange}
-                            disabled={!selectedKey}
-                            value={selectedValue}
-                        >
-                            {valueOptions.map(option => (
-                                <Option key={option.value} value={option.value}>{option.label}</Option>
-                            ))}
-                        </Select> */}
+                    {/* <Col span={4}>
+
                         <Select
                             showSearch
                             placeholder="Select Account"
@@ -799,7 +792,72 @@ const App = () => {
                         </Select>
 
 
+
+
+
+                    </Col> */}
+                    <Col span={4}>
+                        <Select
+                            showSearch
+                            placeholder="Select Account"
+                            style={{ width: '100%' }}
+                            onChange={handleValueChange}
+                            disabled={!selectedKey}
+                            value={selectedValue}
+                            optionFilterProp="children"
+                            filterOption={(input, option) => /^[0-9]*$/.test(input) && option?.value.toString().includes(input)}
+                            onDropdownVisibleChange={(open) => setIsOpen(open)} // Track dropdown visibility
+                        >
+                            {valueOptions.map(option => (
+                                <Select.Option key={option.value} value={option.value}>
+                                    <div style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        width: '100%',
+                                        padding: '5px 0',
+                                        overflow: 'hidden',
+                                    }}>
+                                        <div style={{
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            maxWidth: '70%'
+                                        }}>
+                                            <p style={{
+                                                margin: '0px',
+                                                fontWeight: 'bold',
+                                                overflow: 'hidden',
+                                                whiteSpace: 'nowrap',
+                                                textOverflow: 'ellipsis'
+                                            }}>
+                                                {option.label}
+                                            </p>
+                                            {isOpen && (
+                                                <p style={{
+                                                    margin: '0px',
+                                                    fontSize: '12px',
+                                                    color: 'gray',
+                                                    overflow: 'hidden',
+                                                    whiteSpace: 'nowrap',
+                                                    textOverflow: 'ellipsis'
+                                                }}>
+                                                    {option.accountName || ''}
+                                                </p>
+                                            )}
+                                        </div>
+                                        <span style={{ marginLeft: '10px', flexShrink: 0 }}>
+                                            {option.status === "Active" ? (
+                                                <CheckCircleFilled style={{ color: 'green', fontSize: '15px' }} />
+                                            ) : (
+                                                <CloseCircleFilled style={{ color: 'red', fontSize: '15px' }} />
+                                            )}
+                                        </span>
+                                    </div>
+                                </Select.Option>
+                            ))}
+                        </Select>
                     </Col>
+
                     <Col span={4}>
 
                         <Input
