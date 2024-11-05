@@ -734,7 +734,7 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
             {initialValue.bid_amount > 0 && (
               <Form.Item
                 name="bid_amount"
-                label={<span style={{ color: "#B4B4B4" }}>Bid amount</span>}
+                label={<span style={{ color: "#B4B4B4" }}>Cost Per Result Goal</span>}
                 rules={[
                   { required: true, message: "Please enter a bid amount!" },
                   {

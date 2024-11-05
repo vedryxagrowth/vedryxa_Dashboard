@@ -439,7 +439,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     const formRef = useRef(null);
     const [isFormComplete, setIsFormComplete] = useState(false);
     const [accountNumber, setAccountNumber] = useState(accountis);
-    const [imagehash, setimagehash] = useState(null)
+    const [imagehash, setimagehash] = useState('')
     const { data: session } = useSession();
     var token = localStorage.getItem("token")
     const [showBidAmount, setShowBidAmount] = useState(false);
@@ -462,6 +462,25 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     const handleModeChange = (value) => {
         setIsManual(value === "manual");
     };
+    useEffect(() => {
+        if (visible) {
+            form.resetFields();          // Reset form fields to their initialValues
+            setWebsiteURL('');           // Clear website URL
+            setSelectedFiles([]);        // Clear selected files
+            setCampaignName('');         // Clear campaign name
+            setPrimaryText('');          // Clear primary text field
+            setCaption('');              // Clear caption field
+            setHeadline('');             // Clear headline field
+            setDescription('');          // Clear description field
+            setSelectedPublishers([]);   // Clear selected publishers
+            setSelectedPositions({});    // Clear selected positions
+            setIsFormComplete(false);    // Reset form completion state
+            setCampaignName('')
+            setAddName('')
+        }
+    }, [visible]);
+
+
 
 
     // Function to handle edit icon click
@@ -1020,7 +1039,9 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         Account_Number: accountis == "All" ? '' : accountis,
         Language: [6],
         Website_URL: websiteURL,
-        placements: "Advance"
+        placements: "Advance",
+        DailyAdd_amount: 0,
+        Description: "Find More"
         // device_platforms: "mobile",
 
     };
@@ -1031,11 +1052,22 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
 
 
     const handleDrawerClose = () => {
-        form.setFieldsValue(initialValues);
-        form.resetFields()
-        setWebsiteURL('')
+        form.resetFields();          // Reset form fields to their initialValues
+        setWebsiteURL('');           // Clear website URL
+        setSelectedFiles([]);        // Clear selected files
+        setCampaignName('');         // Clear campaign name
+        setPrimaryText('');          // Clear primary text field
+        setCaption('');              // Clear caption field
+        setHeadline('');             // Clear headline field
+        setDescription('');          // Clear description field
+        setSelectedPublishers([]);   // Clear selected publishers
+        setSelectedPositions({});    // Clear selected positions
+        setIsFormComplete(false);    // Reset form completion state
+        setCampaignName('')
+        setAddName('')
         onClose(); // Call onClose handler to close the drawer
     };
+
 
     return (
         <Drawer
@@ -1139,7 +1171,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         options={[
                                             { value: "LOWEST_COST_WITHOUT_CAP", label: "Highest Volume" },
                                             { value: "LOWEST_COST_WITH_BID_CAP", label: "Bid Cap" },
-                                            { value: "COST_CAP", label: "Cost Cap" },
+                                            { value: "COST_CAP", label: "Cost per Result Goal" },
                                             { value: "LOWEST_COST_WITH_MIN_ROAS", label: "ROAS Goal" }
                                         ]}
                                         onChange={handleBidStrategyChange}
@@ -1310,7 +1342,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 {showBidAmount && (
                                     <Form.Item
                                         name="bid_amount"
-                                        label={<span style={{ color: "#B4B4B4" }}>Bid amount</span>}
+                                        label={<span style={{ color: "#B4B4B4" }}>Cost per Result Goal</span>}
                                         rules={[
                                             {
                                                 required: true,
@@ -1598,7 +1630,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
 
                                         />
                                     </Form.Item>
-                                    <Form.Item
+                                    {/* <Form.Item
                                         label="Caption"
                                         name="Caption"
                                         rules={[
@@ -1615,7 +1647,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             onChange={(e) => setCaption(e.target.value)}
 
                                         />
-                                    </Form.Item>
+                                    </Form.Item> */}
                                     <Form.Item
                                         label="Headline"
                                         name="headline"
@@ -1681,6 +1713,24 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             autoSize={{ minRows: 5, maxRows: 15 }}
                                             onChange={(e) => setWebsiteURL(e.target.value)}
 
+
+                                        />
+                                    </Form.Item>
+                                    <Form.Item
+                                        label="Display Link"
+                                        name="Caption"
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Please enter a Caption!",
+                                            },
+                                        ]}
+                                        required
+                                        tooltip="This is a required field">
+                                        <TextArea
+                                            placeholder="Display Link"
+                                            autoSize={{ minRows: 2, maxRows: 10 }}
+                                            onChange={(e) => setCaption(e.target.value)}
 
                                         />
                                     </Form.Item>
@@ -1766,8 +1816,15 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                                             <div className="title">
                                                                 <div className="main">{addName}</div>
                                                                 <div className="sub">
-                                                                    Sponsored <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                                    {imagehash?.pageName ? (
+                                                                        <>
+                                                                            {imagehash.pageName} <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                                        </>
+                                                                    ) : (
+                                                                        <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                                    )}
                                                                 </div>
+
                                                             </div>
                                                             <div className="close">
                                                                 <CloseOutlined style={{ fontSize: "20px" }} />
