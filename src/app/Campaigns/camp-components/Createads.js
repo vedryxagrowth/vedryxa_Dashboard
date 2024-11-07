@@ -1,5 +1,6 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import {
   Button,
   Card,
@@ -10,7 +11,9 @@ import {
   Modal,
   Space,
   message,
-  Spin
+  Spin,
+  Tooltip,
+  Badge
 } from 'antd';
 import {
   CheckOutlined,
@@ -21,30 +24,79 @@ import {
   MoreOutlined,
   ShareAltOutlined,
   UploadOutlined,
+  QuestionCircleOutlined,
+  EditOutlined
 } from '@ant-design/icons';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 
+import MnetUrlBuilder from './urlbuilder/mnet';
+import TonicUrlBuilder from './urlbuilder/tonic';
+import System1UrlBuilder from './urlbuilder/system1';
+
+const FabricCanvas = dynamic(() => import('./Fabricanvas'), { ssr: false });
+
 const { Option } = Select;
 const { TextArea } = Input;
 
-const Createnewads = ({ data, rerenders, onClose }) => {
+const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) => {
   const [form] = Form.useForm();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [formData, setFormData] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [imageshow, setimageshow] = useState(null);
   const [filesof, setfilesof] = useState(null)
-  const [addName, setAddName] = useState('');
   const [primaryText, setPrimaryText] = useState('');
   const [caption, setCaption] = useState('');
   const [headline, setHeadline] = useState('');
-  const [description, setDescription] = useState('');
+  const [description, setDescription] = useState('Find More');
   const [websiteURL, setWebsiteURL] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] = useState(false);
+  const [editedImages, setEditedImages] = useState({});
+  const [imagehash, setimagehash] = useState('')
+  // const [selectedFiles, setSelectedFiles] = useState([]);
+  const [isImgEditorShown, setIsImgEditorShown] = useState(false);
+  const [currentFile, setCurrentFile] = useState(null); // File to be edited
+  const [editedImageUrl, setEditedImageUrl] = useState(null);
 
   var token = localStorage.getItem("token")
   console.log(data, "selectedRow")
+  function getNextAddName(data) {
+    let maxNumber = -Infinity;
+    let prefix = "";
+  
+    data.forEach(obj => {
+      const parts = obj.AddName.split("_");
+      const lastIndex = parseInt(parts[parts.length - 1], 10);
+  
+      if (!isNaN(lastIndex) && lastIndex > maxNumber) {
+        maxNumber = lastIndex;
+        prefix = parts.slice(0, -1).join("_"); // Get prefix (all parts except the last)
+      }
+    });
+  
+    return `${prefix}_${maxNumber + 1}`; // Return prefix with incremented max number
+  }
+  const [addName, setAddName] = useState(getNextAddName(adsData));
+  console.log(addName,"data");
+
+  useEffect(()=>{
+      if (visible) {
+        form.resetFields();          // Reset form fields to their initialValues
+        setWebsiteURL(''); 
+        setPrimaryText('');          // Clear primary text field
+        setCaption('');              // Clear caption field
+        setHeadline('');             // Clear headline field
+        setDescription('');          // Clear description field
+        setSelectedFile(null)
+        // setSelectedPublishers([]);   // Clear selected publishers
+        // setSelectedPositions({});    // Clear selected positions
+        // setIsFormComplete(false);
+        setAddName(getNextAddName(adsData))
+        form.setFieldsValue({ AddName: getNextAddName(adsData) });
+    }
+  },[visible])
 
   const handleSubmit = () => {
     form
@@ -67,6 +119,7 @@ const Createnewads = ({ data, rerenders, onClose }) => {
     if (info.fileList.length > 0) {
       // Update the selected file
       setSelectedFile(info.fileList[0].originFileObj);
+      // setSelectedFiles(info.fileList.map(file => file.originFileObj));
     } else {
       setSelectedFile(null); // Clear the selected file if fileList is empty
     }
@@ -310,6 +363,46 @@ const Createnewads = ({ data, rerenders, onClose }) => {
     }
   };
 
+  useEffect(() => {
+    // Update the form field value for Website_URL whenever websiteURL changes
+    form.setFieldsValue({ Website_URL: websiteURL, Caption: caption });
+
+    // Check if all required fields are complete
+    // const checkFormCompletion = () => {
+    //     const allValues = form.getFieldsValue(true);
+    //     const isComplete = Object.keys(allValues).every(
+    //         key => allValues[key] !== undefined && allValues[key] !== ''
+    //     );
+    //     setIsFormComplete(isComplete);
+    // };
+
+    // // Trigger form completion check
+    // checkFormCompletion();
+
+  }, [websiteURL, form]);
+
+  const imageHashCaller = async()=>{
+    try {
+      const response = await axios.get(`https://www.testapi.adsgoat.in/api/hashimageidentity/${data.Account_Number}`,
+          {
+              headers: {
+                  'Authorization': token
+              }
+          }
+      );
+      console.log("account data", ...response?.data);
+      setimagehash(...response?.data)
+    } catch (error) {
+        console.error("Error fetching campaign data:", error);
+        // Handle error
+    }
+  }
+
+  useEffect(()=>{
+    if(visible){
+      imageHashCaller();
+    }
+  },[visible])
 
 
   const postData = async (values) => {
@@ -362,6 +455,44 @@ const Createnewads = ({ data, rerenders, onClose }) => {
     }
   };
 
+  const onReturnUrl = (text) => {
+    setIsModalVisibleForURLBuilder(false);
+    setWebsiteURL(text);
+    setCaption(text.split('//')[1].split("/")[0]);
+    form.setFieldsValue(initialValue);
+    // form.resetFields()
+    // console.log(text, "text");
+  }
+
+  const getUrlBuilder = (network) => {
+    switch (network) {
+        case 'FB_Mnet':
+            return <MnetUrlBuilder onReturnMessage={onReturnUrl} />
+        case 'FB_Tonic':
+            return <TonicUrlBuilder onReturnMessage={onReturnUrl} />
+        case 'FB_System1':
+            return <System1UrlBuilder onReturnMessage={onReturnUrl} />
+    }
+  }
+
+
+
+  // const [imageHashes, setImageHashes] = useState([]);
+
+  const onClickEdit = () => {
+    setIsModalVisibleForURLBuilder(true);
+  };
+
+  const handleCancelForURLBuilder = () => {
+    setIsModalVisibleForURLBuilder(false);
+  };
+
+  const closeCanvasModal = () => {
+    console.log("Closing editor...");
+    // setIsImgEditorShown(false);
+    setIsImgEditorShown(false); // Close the image editor
+  };
+
 
 
   const handleModalCancel = () => {
@@ -369,8 +500,33 @@ const Createnewads = ({ data, rerenders, onClose }) => {
     console.log('Modal cancel clicked');
   };
   var initialValue = {
-    page_id: data?.addlevel[0]?.page_id
+    page_id: data?.addlevel[0]?.page_id,
+    Website_URL: websiteURL,
+    Description: "Find More",
+    Caption: caption,
+    AddName: addName
   }
+
+  const handleEditClick = (file) => {
+    setCurrentFile(file); // Set the file to be edited
+    setIsImgEditorShown(true); // Open the image editor
+  };
+
+  const handleSaveEditedImage = (fileId, editedImageObject) => {
+    if (!editedImageObject) {
+      console.error("Edited image data is null or undefined");
+      return;
+    }
+  
+    // Set the new edited image URL
+    const editedImageURL = URL.createObjectURL(editedImageObject);
+    setEditedImageUrl(editedImageURL);
+  
+    // Close FabricCanvas immediately, allowing its "Save As" modal to show on top
+    setIsImgEditorShown(false);
+  };
+
+  // console.log(editedImages, "edit bro");
 
   return (
     <>
@@ -454,24 +610,7 @@ const Createnewads = ({ data, rerenders, onClose }) => {
 
                 />
               </Form.Item>
-              <Form.Item
-                label="Caption"
-                name="Caption"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please enter a Caption!",
-                  },
-                ]}
-                required
-                tooltip="This is a required field">
-                <TextArea
-                  placeholder="Caption"
-                  autoSize={{ minRows: 2, maxRows: 10 }}
-                  onChange={(e) => setCaption(e.target.value)}
-
-                />
-              </Form.Item>
+              
 
               <Form.Item
                 label="Headline"
@@ -511,7 +650,19 @@ const Createnewads = ({ data, rerenders, onClose }) => {
                 />
               </Form.Item>
               <Form.Item
-                label="Website_URL"
+                label={
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', paddingRight: '50px' }}>
+                        <span>Website_URL</span>
+                        <Tooltip title="This is a required field">
+                          <QuestionCircleOutlined style={{ marginLeft: 4, cursor: 'pointer' }} />
+                        </Tooltip>
+                    </div>
+                    <EditOutlined style={{ cursor: 'pointer' }} onClick={onClickEdit} />
+                  </div>
+                }
+                labelCol={{ style: { width: '100%' } }}  // Makes the label full width
+                wrapperCol={{ style: { width: '100%' } }}  // Ensures TextArea takes the same full width
                 name="Website_URL"
                 rules={[
                   {
@@ -520,12 +671,30 @@ const Createnewads = ({ data, rerenders, onClose }) => {
                   },
                 ]}
                 required
-                tooltip="This is a required field"
               >
                 <TextArea
                   placeholder="Website_URL"
                   autoSize={{ minRows: 5, maxRows: 15 }}
                   onChange={(e) => setWebsiteURL(e.target.value)}
+                  value={websiteURL}
+                />
+              </Form.Item>
+              <Form.Item
+                label="Display Link"
+                name="Caption"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please enter a Caption!",
+                  },
+                ]}
+                required
+                tooltip="This is a required field">
+                <TextArea
+                  placeholder="Display Link"
+                  autoSize={{ minRows: 2, maxRows: 10 }}
+                  onChange={(e) => setCaption(e.target.value)}
+
                 />
               </Form.Item>
               {/* <Form.Item
@@ -541,6 +710,25 @@ const Createnewads = ({ data, rerenders, onClose }) => {
             </div>
             <div style={{ flex: "30%" }}>
               {selectedFile && (
+              //  <Badge
+              //       count={
+              //           <EditOutlined
+              //               style={{ fontSize: '25px', color: '#fff' }}
+              //               onClick={() => handleEditClick(selectedFile)} // Edit icon click handler
+              //           />
+              //       }
+              //       style={{
+              //           backgroundColor: '#52c41a',
+              //           borderRadius: '50%',
+              //           position: 'absolute',
+              //           top: '5px',
+              //           right: '5px',
+              //           zIndex: 10,
+              //           cursor: 'pointer',
+              //       }}
+              //       offset={[5, 5]}
+              //       // key={index}
+              //  >
                 <div className="container-ad-preview">
                   <div className="ad-preview">
                     <div className="ad-heading">
@@ -568,8 +756,16 @@ const Createnewads = ({ data, rerenders, onClose }) => {
                       <div className="title">
                         <div className="main" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
                           {addName}
-                        </div>                                                          <div className="sub">
-                          Sponsored <GlobalOutlined style={{ opacity: "0.6" }} />
+                        </div>                                                          
+                        <div className="sub">
+                          {imagehash?.pageName ? (
+                            <>
+                              {imagehash.pageName} <GlobalOutlined style={{ opacity: "0.6" }} />
+                            </>
+                            ) : (
+                              <GlobalOutlined style={{ opacity: "0.6" }} />
+                          )}
+                          {/* Sponsored <GlobalOutlined style={{ opacity: "0.6" }} /> */}
                         </div>
                       </div>
                       <div className="close">
@@ -585,7 +781,7 @@ const Createnewads = ({ data, rerenders, onClose }) => {
                     <div className="ad-image" style={{ width: '400px', height: '400px' }}>
                       {selectedFile.type.startsWith('image/') ? (
                         <img
-                          src={URL.createObjectURL(selectedFile)}
+                          src={editedImageUrl || URL.createObjectURL(selectedFile)}
                           alt="ad content"
                           style={{ width: '400px', height: '400px', objectFit: 'cover' }}
                         />
@@ -628,6 +824,7 @@ const Createnewads = ({ data, rerenders, onClose }) => {
                     </div>
                   </div>
                 </div>
+              //  </Badge>
               )}
             </div>
 
@@ -642,6 +839,17 @@ const Createnewads = ({ data, rerenders, onClose }) => {
           </Form.Item>
         </Form>
       </Spin>
+      {isImgEditorShown && currentFile && (
+        // <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 9999, backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+          <FabricCanvas
+            fileId={currentFile.name} // Pass a unique identifier
+            initialImage={URL.createObjectURL(currentFile)}
+            closeCanvasModal={closeCanvasModal}
+            onSaveEditedImage={handleSaveEditedImage}
+            style={{ width: '100%', height: '100%', zIndex: 10000 }}
+          />
+        // </div>
+      )}
       <Modal
         title="Form Data"
         visible={isModalVisible}
@@ -652,6 +860,17 @@ const Createnewads = ({ data, rerenders, onClose }) => {
         {/* {formData && (
           <pre>{JSON.stringify(formData, null, 2)}</pre>
         )} */}
+      </Modal>
+      <Modal
+        title="URL Builder"
+        visible={isModalVisibleForURLBuilder}
+        onCancel={handleCancelForURLBuilder}
+                                        
+        footer={null}
+        width="80%" // Set width of the modal
+        bodyStyle={{ height: '50vh', overflowY: 'auto' }}
+      >
+        {getUrlBuilder(network)}
       </Modal>
     </>
   );
