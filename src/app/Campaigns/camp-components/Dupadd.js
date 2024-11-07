@@ -1,5 +1,6 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import {
     Button,
     Card,
@@ -10,7 +11,9 @@ import {
     Modal,
     Space,
     message,
-    Spin
+    Spin,
+    Tooltip,
+    Badge
 } from 'antd';
 import {
     CheckOutlined,
@@ -21,14 +24,22 @@ import {
     MoreOutlined,
     ShareAltOutlined,
     UploadOutlined,
+    QuestionCircleOutlined,
+    EditOutlined
 } from '@ant-design/icons';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 
+import MnetUrlBuilder from './urlbuilder/mnet';
+import TonicUrlBuilder from './urlbuilder/tonic';
+import System1UrlBuilder from './urlbuilder/system1';
+
+const FabricCanvas = dynamic(() => import('./Fabricanvas'), { ssr: false });
+
 const { Option } = Select;
 const { TextArea } = Input;
 
-const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders }) => {
+const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, network, visible, adsData }) => {
     const [form] = Form.useForm();
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [formData, setFormData] = useState(null);
@@ -36,16 +47,58 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders }) =
     const [imageshow, setimageshow] = useState(null);
     const [filesof, setfilesof] = useState(null)
     var token = localStorage.getItem("token")
-    const [addName, setAddName] = useState('');
     const [primaryText, setPrimaryText] = useState('');
-    const [caption, setCaption] = useState('');
+    const [caption, setCaption] = useState(dupdata.Caption);
     const [headline, setHeadline] = useState('');
     const [description, setDescription] = useState('');
-    const [websiteURL, setWebsiteURL] = useState('');
+    const [websiteURL, setWebsiteURL] = useState(dupdata.Website_URL);
     const [loading, setLoading] = useState(false);
-
+    const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] = useState(false);
+    const [editedImages, setEditedImages] = useState({});
+    const [imagehash, setimagehash] = useState('')
+    // const [selectedFiles, setSelectedFiles] = useState([]);
+    const [isImgEditorShown, setIsImgEditorShown] = useState(false);
+    const [currentFile, setCurrentFile] = useState(null); // File to be edited
+    const [editedImageUrl, setEditedImageUrl] = useState(null);
+    console.log(network);
     console.log(dupdata, "duplicatedata")
     console.log(selectedFile, "selectedFileselectedFile")
+    function getNextAddName(data) {
+      let maxNumber = -Infinity;
+      let prefix = "";
+    
+      data.forEach(obj => {
+        const parts = obj.AddName.split("_");
+        const lastIndex = parseInt(parts[parts.length - 1], 10);
+    
+        if (!isNaN(lastIndex) && lastIndex > maxNumber) {
+          maxNumber = lastIndex;
+          prefix = parts.slice(0, -1).join("_"); // Get prefix (all parts except the last)
+        }
+      });
+    
+      return `${prefix}_${maxNumber + 1}`; // Return prefix with incremented max number
+    }
+    const [addName, setAddName] = useState(getNextAddName(adsData));
+
+    useEffect(()=>{
+        if (visible) {
+          form.resetFields();          // Reset form fields to their initialValues
+          setWebsiteURL(dupdata.Website_URL); 
+          setPrimaryText(dupdata.message);          // Clear primary text field
+          setCaption(dupdata.Caption);              // Clear caption field
+          setHeadline(dupdata.headline);             // Clear headline field
+          setDescription(dupdata.Description);          // Clear description field
+          setSelectedFile(null)
+          setAddName(getNextAddName(adsData))
+          form.setFieldsValue({ AddName: getNextAddName(adsData) });
+      }
+    },[visible])
+
+    useEffect(() => {
+        form.setFieldsValue({ Website_URL: websiteURL, Caption: caption });
+    
+      }, [websiteURL, form]);
 
     const handleSubmit = () => {
         form
@@ -115,6 +168,32 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders }) =
     //         onError("error", error);
     //     }
     // };
+    
+    const handleEditClick = (file) => {
+        setCurrentFile(file); // Set the file to be edited
+        setIsImgEditorShown(true); // Open the image editor
+    };
+
+    const handleSaveEditedImage = (fileId, editedImageObject) => {
+        if (!editedImageObject) {
+          console.error("Edited image data is null or undefined");
+          return;
+        }
+      
+        // Set the new edited image URL
+        const editedImageURL = URL.createObjectURL(editedImageObject);
+        setEditedImageUrl(editedImageURL);
+      
+        // Close FabricCanvas immediately, allowing its "Save As" modal to show on top
+        setIsImgEditorShown(false);
+    };
+
+    const closeCanvasModal = () => {
+        console.log("Closing editor...");
+        // setIsImgEditorShown(false);
+        setIsImgEditorShown(false); // Close the image editor
+    };
+
     const customRequest = async (imageshow, imagehash, onSuccess, onError) => {
         const token = imagehash.token;
         const account = imagehash.accountNumber;
@@ -380,6 +459,30 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders }) =
     //         console.error("Error submitting form data:", error);
     //     }
     // };
+
+    const imageHashCaller = async()=>{
+        try {
+          const response = await axios.get(`https://www.testapi.adsgoat.in/api/hashimageidentity/${data.Account_Number}`,
+              {
+                  headers: {
+                      'Authorization': token
+                  }
+              }
+          );
+          console.log("account data", ...response?.data);
+          setimagehash(...response?.data)
+        } catch (error) {
+            console.error("Error fetching campaign data:", error);
+            // Handle error
+        }
+      }
+    
+      useEffect(()=>{
+        if(visible){
+          imageHashCaller();
+        }
+      },[visible])
+
     const postData = async (values) => {
         try {
             const data1 = {
@@ -430,6 +533,38 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders }) =
         }
     };
 
+    const onReturnUrl = (text) => {
+        setIsModalVisibleForURLBuilder(false);
+        setWebsiteURL(text);
+        setCaption(text.split('//')[1].split("/")[0]);
+        form.setFieldsValue(initialValue);
+        // form.resetFields()
+        // console.log(text, "text");
+      }
+    
+      const getUrlBuilder = (network) => {
+        switch (network) {
+            case 'FB_Mnet':
+                return <MnetUrlBuilder onReturnMessage={onReturnUrl} />
+            case 'FB_Tonic':
+                return <TonicUrlBuilder onReturnMessage={onReturnUrl} />
+            case 'FB_System1':
+                return <System1UrlBuilder onReturnMessage={onReturnUrl} />
+        }
+      }
+    
+    
+    
+      // const [imageHashes, setImageHashes] = useState([]);
+    
+      const onClickEdit = () => {
+        setIsModalVisibleForURLBuilder(true);
+      };
+    
+      const handleCancelForURLBuilder = () => {
+        setIsModalVisibleForURLBuilder(false);
+      };
+
 
     const handleModalCancel = () => {
         setIsModalVisible(false);
@@ -437,10 +572,10 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders }) =
     };
     var initialValue = {
         page_id: dupdata.page_id,
-        AddName: dupdata.AddName,
-        Caption: dupdata.Caption,
+        AddName: addName,
+        Caption: caption,
         Description: dupdata.Description,
-        Website_URL: dupdata.Website_URL,
+        Website_URL: websiteURL,
         headline: dupdata.headline,
         id: dupdata.id,
         filename: dupdata.filename,
@@ -531,24 +666,6 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders }) =
 
                                 />
                             </Form.Item>
-                            <Form.Item
-                                label="Caption"
-                                name="Caption"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: "Please enter a Caption!",
-                                    },
-                                ]}
-                                required
-                                tooltip="This is a required field">
-                                <TextArea
-                                    placeholder="Caption"
-                                    autoSize={{ minRows: 2, maxRows: 10 }}
-                                    onChange={(e) => setCaption(e.target.value)}
-
-                                />
-                            </Form.Item>
 
                             <Form.Item
                                 label="Headline"
@@ -587,24 +704,51 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders }) =
 
                                 />
                             </Form.Item>
-
                             <Form.Item
-                                label="Website_URL"
+                                label={
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', paddingRight: '50px' }}>
+                                        <span>Website_URL</span>
+                                        <Tooltip title="This is a required field">
+                                        <QuestionCircleOutlined style={{ marginLeft: 4, cursor: 'pointer' }} />
+                                        </Tooltip>
+                                    </div>
+                                    <EditOutlined style={{ cursor: 'pointer' }} onClick={onClickEdit} />
+                                </div>
+                                }
+                                labelCol={{ style: { width: '100%' } }}  // Makes the label full width
+                                wrapperCol={{ style: { width: '100%' } }}  // Ensures TextArea takes the same full width
                                 name="Website_URL"
+                                rules={[
+                                {
+                                    required: true,
+                                    message: "Please select Website_URL!",
+                                },
+                                ]}
+                                required
+                            >
+                                <TextArea
+                                placeholder="Website_URL"
+                                autoSize={{ minRows: 5, maxRows: 15 }}
+                                onChange={(e) => setWebsiteURL(e.target.value)}
+                                value={websiteURL}
+                                />
+                            </Form.Item>
+                            <Form.Item
+                                label="Display Link"
+                                name="Caption"
                                 rules={[
                                     {
                                         required: true,
-                                        message: "Please select Website_URL!",
+                                        message: "Please enter a Caption!",
                                     },
                                 ]}
                                 required
-                                tooltip="This is a required field"
-                            >
+                                tooltip="This is a required field">
                                 <TextArea
-                                    placeholder="Website_URL"
-                                    autoSize={{ minRows: 5, maxRows: 15 }}
-                                    onChange={(e) => setWebsiteURL(e.target.value)}
-
+                                    placeholder="Display Link"
+                                    autoSize={{ minRows: 2, maxRows: 10 }}
+                                    onChange={(e) => setCaption(e.target.value)}
 
                                 />
                             </Form.Item>
@@ -703,6 +847,25 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders }) =
                                 //         </div>
                                 //     </div>
                                 // </div>
+                                // <Badge
+                                //         count={
+                                //             <EditOutlined
+                                //                 style={{ fontSize: '25px', color: '#fff' }}
+                                //                 onClick={() => handleEditClick(selectedFile)} // Edit icon click handler
+                                //             />
+                                //         }
+                                //         style={{
+                                //             backgroundColor: '#52c41a',
+                                //             borderRadius: '50%',
+                                //             position: 'absolute',
+                                //             top: '5px',
+                                //             right: '5px',
+                                //             zIndex: 10,
+                                //             cursor: 'pointer',
+                                //         }}
+                                //         offset={[5, 5]}
+                                //         // key={index}
+                                // >
                                 <div className="container-ad-preview">
                                     <div className="ad-preview" style={{ width: "350px" }}>
                                         <div className="ad-heading">
@@ -730,8 +893,15 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders }) =
                                             <div className="title">
                                                 <div className="main" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
                                                     {addName}
-                                                </div>                                                          <div className="sub">
-                                                    Sponsored <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                </div>           
+                                                    {imagehash?.pageName ? (
+                                                        <>
+                                                        {imagehash.pageName} <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                        </>
+                                                        ) : (
+                                                        <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                    )}                                               <div className="sub">
+                                                    {/* Sponsored <GlobalOutlined style={{ opacity: "0.6" }} /> */}
                                                 </div>
                                             </div>
                                             <div className="close">
@@ -747,7 +917,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders }) =
                                         <div className="ad-image" style={{ width: '300px', height: '300px' }}>
                                             {selectedFile.type.startsWith('image/') ? (
                                                 <img
-                                                    src={URL.createObjectURL(selectedFile)}
+                                                    src={editedImageUrl || URL.createObjectURL(selectedFile)}
                                                     alt="ad content"
                                                     style={{ width: '300px', height: '200px', objectFit: 'cover' }}
                                                 />
@@ -790,6 +960,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders }) =
                                         </div>
                                     </div>
                                 </div>
+                                // {/* </Badge> */}
                             ) :
                                 <div className="container-ad-preview">
                                     <div className="ad-preview" style={{ width: "350px" }}>
@@ -819,7 +990,14 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders }) =
                                             <div className="title">
                                                 <div className="main">{"Facebook Page"}</div>
                                                 <div className="sub">
-                                                    Sponsored <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                    {imagehash?.pageName ? (
+                                                        <>
+                                                        {imagehash.pageName} <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                        </>
+                                                        ) : (
+                                                        <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                    )}
+                                                    {/* Sponsored <GlobalOutlined style={{ opacity: "0.6" }} /> */}
                                                 </div>
                                             </div>
                                             <div className="close">
@@ -888,6 +1066,28 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders }) =
                     </Form.Item>
                 </Form>
             </Spin>
+            {isImgEditorShown && currentFile && (
+                // <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 9999, backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+                <FabricCanvas
+                    fileId={currentFile.name} // Pass a unique identifier
+                    initialImage={URL.createObjectURL(currentFile)}
+                    closeCanvasModal={closeCanvasModal}
+                    onSaveEditedImage={handleSaveEditedImage}
+                    style={{ width: '100%', height: '100%', zIndex: 10000 }}
+                />
+                // </div>
+            )}
+            <Modal
+                title="URL Builder"
+                visible={isModalVisibleForURLBuilder}
+                onCancel={handleCancelForURLBuilder}
+                                                
+                footer={null}
+                width="80%" // Set width of the modal
+                bodyStyle={{ height: '50vh', overflowY: 'auto' }}
+            >
+                {getUrlBuilder(network)}
+            </Modal>
             <Modal
                 title="Form Data"
                 visible={isModalVisible}

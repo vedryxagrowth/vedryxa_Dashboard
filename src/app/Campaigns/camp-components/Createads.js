@@ -39,18 +39,17 @@ const FabricCanvas = dynamic(() => import('./Fabricanvas'), { ssr: false });
 const { Option } = Select;
 const { TextArea } = Input;
 
-const Createnewads = ({ data, rerenders, onClose, network }) => {
+const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) => {
   const [form] = Form.useForm();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [formData, setFormData] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [imageshow, setimageshow] = useState(null);
   const [filesof, setfilesof] = useState(null)
-  const [addName, setAddName] = useState('');
   const [primaryText, setPrimaryText] = useState('');
   const [caption, setCaption] = useState('');
   const [headline, setHeadline] = useState('');
-  const [description, setDescription] = useState('');
+  const [description, setDescription] = useState('Find More');
   const [websiteURL, setWebsiteURL] = useState('');
   const [loading, setLoading] = useState(false);
   const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] = useState(false);
@@ -59,9 +58,45 @@ const Createnewads = ({ data, rerenders, onClose, network }) => {
   // const [selectedFiles, setSelectedFiles] = useState([]);
   const [isImgEditorShown, setIsImgEditorShown] = useState(false);
   const [currentFile, setCurrentFile] = useState(null); // File to be edited
+  const [editedImageUrl, setEditedImageUrl] = useState(null);
 
   var token = localStorage.getItem("token")
   console.log(data, "selectedRow")
+  function getNextAddName(data) {
+    let maxNumber = -Infinity;
+    let prefix = "";
+  
+    data.forEach(obj => {
+      const parts = obj.AddName.split("_");
+      const lastIndex = parseInt(parts[parts.length - 1], 10);
+  
+      if (!isNaN(lastIndex) && lastIndex > maxNumber) {
+        maxNumber = lastIndex;
+        prefix = parts.slice(0, -1).join("_"); // Get prefix (all parts except the last)
+      }
+    });
+  
+    return `${prefix}_${maxNumber + 1}`; // Return prefix with incremented max number
+  }
+  const [addName, setAddName] = useState(getNextAddName(adsData));
+  console.log(addName,"data");
+
+  useEffect(()=>{
+      if (visible) {
+        form.resetFields();          // Reset form fields to their initialValues
+        setWebsiteURL(''); 
+        setPrimaryText('');          // Clear primary text field
+        setCaption('');              // Clear caption field
+        setHeadline('');             // Clear headline field
+        setDescription('');          // Clear description field
+        setSelectedFile(null)
+        // setSelectedPublishers([]);   // Clear selected publishers
+        // setSelectedPositions({});    // Clear selected positions
+        // setIsFormComplete(false);
+        setAddName(getNextAddName(adsData))
+        form.setFieldsValue({ AddName: getNextAddName(adsData) });
+    }
+  },[visible])
 
   const handleSubmit = () => {
     form
@@ -330,7 +365,7 @@ const Createnewads = ({ data, rerenders, onClose, network }) => {
 
   useEffect(() => {
     // Update the form field value for Website_URL whenever websiteURL changes
-    form.setFieldsValue({ Website_URL: websiteURL });
+    form.setFieldsValue({ Website_URL: websiteURL, Caption: caption });
 
     // Check if all required fields are complete
     // const checkFormCompletion = () => {
@@ -345,6 +380,29 @@ const Createnewads = ({ data, rerenders, onClose, network }) => {
     // checkFormCompletion();
 
   }, [websiteURL, form]);
+
+  const imageHashCaller = async()=>{
+    try {
+      const response = await axios.get(`https://www.testapi.adsgoat.in/api/hashimageidentity/${data.Account_Number}`,
+          {
+              headers: {
+                  'Authorization': token
+              }
+          }
+      );
+      console.log("account data", ...response?.data);
+      setimagehash(...response?.data)
+    } catch (error) {
+        console.error("Error fetching campaign data:", error);
+        // Handle error
+    }
+  }
+
+  useEffect(()=>{
+    if(visible){
+      imageHashCaller();
+    }
+  },[visible])
 
 
   const postData = async (values) => {
@@ -400,8 +458,9 @@ const Createnewads = ({ data, rerenders, onClose, network }) => {
   const onReturnUrl = (text) => {
     setIsModalVisibleForURLBuilder(false);
     setWebsiteURL(text);
+    setCaption(text.split('//')[1].split("/")[0]);
     form.setFieldsValue(initialValue);
-    form.resetFields()
+    // form.resetFields()
     // console.log(text, "text");
   }
 
@@ -443,7 +502,9 @@ const Createnewads = ({ data, rerenders, onClose, network }) => {
   var initialValue = {
     page_id: data?.addlevel[0]?.page_id,
     Website_URL: websiteURL,
-    Description: "Find More"
+    Description: "Find More",
+    Caption: caption,
+    AddName: addName
   }
 
   const handleEditClick = (file) => {
@@ -456,10 +517,16 @@ const Createnewads = ({ data, rerenders, onClose, network }) => {
       console.error("Edited image data is null or undefined");
       return;
     }
-    closeCanvasModal();
+  
+    // Set the new edited image URL
+    const editedImageURL = URL.createObjectURL(editedImageObject);
+    setEditedImageUrl(editedImageURL);
+  
+    // Close FabricCanvas immediately, allowing its "Save As" modal to show on top
+    setIsImgEditorShown(false);
   };
 
-  console.log(editedImages, "edit bro");
+  // console.log(editedImages, "edit bro");
 
   return (
     <>
@@ -643,25 +710,25 @@ const Createnewads = ({ data, rerenders, onClose, network }) => {
             </div>
             <div style={{ flex: "30%" }}>
               {selectedFile && (
-               <Badge
-                    count={
-                        <EditOutlined
-                            style={{ fontSize: '25px', color: '#fff' }}
-                            onClick={() => handleEditClick(selectedFile)} // Edit icon click handler
-                        />
-                    }
-                    style={{
-                        backgroundColor: '#52c41a',
-                        borderRadius: '50%',
-                        position: 'absolute',
-                        top: '5px',
-                        right: '5px',
-                        zIndex: 10,
-                        cursor: 'pointer',
-                    }}
-                    offset={[5, 5]}
-                    // key={index}
-               >
+              //  <Badge
+              //       count={
+              //           <EditOutlined
+              //               style={{ fontSize: '25px', color: '#fff' }}
+              //               onClick={() => handleEditClick(selectedFile)} // Edit icon click handler
+              //           />
+              //       }
+              //       style={{
+              //           backgroundColor: '#52c41a',
+              //           borderRadius: '50%',
+              //           position: 'absolute',
+              //           top: '5px',
+              //           right: '5px',
+              //           zIndex: 10,
+              //           cursor: 'pointer',
+              //       }}
+              //       offset={[5, 5]}
+              //       // key={index}
+              //  >
                 <div className="container-ad-preview">
                   <div className="ad-preview">
                     <div className="ad-heading">
@@ -691,14 +758,14 @@ const Createnewads = ({ data, rerenders, onClose, network }) => {
                           {addName}
                         </div>                                                          
                         <div className="sub">
-                          {/* {imagehash?.pageName ? (
+                          {imagehash?.pageName ? (
                             <>
                               {imagehash.pageName} <GlobalOutlined style={{ opacity: "0.6" }} />
                             </>
                             ) : (
                               <GlobalOutlined style={{ opacity: "0.6" }} />
-                          )} */}
-                          Sponsored <GlobalOutlined style={{ opacity: "0.6" }} />
+                          )}
+                          {/* Sponsored <GlobalOutlined style={{ opacity: "0.6" }} /> */}
                         </div>
                       </div>
                       <div className="close">
@@ -714,7 +781,7 @@ const Createnewads = ({ data, rerenders, onClose, network }) => {
                     <div className="ad-image" style={{ width: '400px', height: '400px' }}>
                       {selectedFile.type.startsWith('image/') ? (
                         <img
-                          src={URL.createObjectURL(selectedFile)}
+                          src={editedImageUrl || URL.createObjectURL(selectedFile)}
                           alt="ad content"
                           style={{ width: '400px', height: '400px', objectFit: 'cover' }}
                         />
@@ -757,7 +824,7 @@ const Createnewads = ({ data, rerenders, onClose, network }) => {
                     </div>
                   </div>
                 </div>
-               </Badge>
+              //  </Badge>
               )}
             </div>
 
@@ -773,12 +840,15 @@ const Createnewads = ({ data, rerenders, onClose, network }) => {
         </Form>
       </Spin>
       {isImgEditorShown && currentFile && (
-        <FabricCanvas
-          fileId={currentFile.name} // Pass a unique identifier
-          initialImage={URL.createObjectURL(currentFile)}
-          closeCanvasModal={closeCanvasModal}
-          onSaveEditedImage={handleSaveEditedImage}
-        />
+        // <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 9999, backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+          <FabricCanvas
+            fileId={currentFile.name} // Pass a unique identifier
+            initialImage={URL.createObjectURL(currentFile)}
+            closeCanvasModal={closeCanvasModal}
+            onSaveEditedImage={handleSaveEditedImage}
+            style={{ width: '100%', height: '100%', zIndex: 10000 }}
+          />
+        // </div>
       )}
       <Modal
         title="Form Data"

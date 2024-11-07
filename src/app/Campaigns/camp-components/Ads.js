@@ -58,7 +58,9 @@ export default function Createads({ selectedRow, network }) {
   var token = localStorage.getItem("token")
   const [data, setData] = useState(selectedRow?.addlevel);
   const [selectedKey, setSelectedKey] = useState(null);
-  const [refrst, setRefrst] = useState(false)
+  const [refrst, setRefrst] = useState(false);
+  const [visibleNewAdset, setVisibleNewAdset] = useState(false);
+  const [visibleDuplicateAdd, setVisibleDuplicateAdd] = useState(false);
 
 
   // console.log(selectedRow, "selectedRow")
@@ -89,11 +91,13 @@ export default function Createads({ selectedRow, network }) {
   const createnewads = () => {
     console.log(network, "network ads");
     setnewadsDrawerVisible(true)
+    setVisibleNewAdset(true)
   };
   const duplicatenewads = (record) => {
     console.log(record, "duplicated")
     setduplicatedata(record)
     setduplicateDrawerVisible(true)
+    setVisibleDuplicateAdd(true);
   };
 
   const onCloseDrawer = () => {
@@ -101,6 +105,8 @@ export default function Createads({ selectedRow, network }) {
     setviewadsDrawerVisible(false)
     seteditadsDrawerVisible(false)
     setduplicateDrawerVisible(false)
+    setVisibleNewAdset(false);
+    setVisibleDuplicateAdd(false);
 
   };
   const handleadsEdit = (record) => {
@@ -255,7 +261,7 @@ export default function Createads({ selectedRow, network }) {
         open={newadsDrawerVisible}
         width="90%" // Adjust width as needed
       >
-        <Createnewads data={selectedRow} onClose={onCloseDrawer} rerenders={rerenders} network={network} />
+        <Createnewads data={selectedRow} visible={visibleNewAdset} onClose={onCloseDrawer} rerenders={rerenders} network={network} adsData={data} />
       </Drawer>
 
       <Drawer
@@ -266,7 +272,7 @@ export default function Createads({ selectedRow, network }) {
         open={duplicateDrawerVisible}
         width="90%" // Adjust width as needed
       >
-        <Duplicatenewads data={selectedRow} dupdata={duplicatedata} onClose={onCloseDrawer} rerenders={rerenders} />
+        <Duplicatenewads data={selectedRow} dupdata={duplicatedata} onClose={onCloseDrawer} rerenders={rerenders} network={network} visible={visibleDuplicateAdd} adsData={data} />
       </Drawer>
 
       <Drawer
