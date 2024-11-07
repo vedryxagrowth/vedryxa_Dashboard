@@ -505,6 +505,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     const onReturnUrl = (text) => {
         setIsModalVisibleForURLBuilder(false);
         setWebsiteURL(text);
+        setCaption(text.split('//')[1].split("/")[0]);
         // console.log(text, "text");
     }
 
@@ -562,7 +563,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
 
     useEffect(() => {
         // Update the form field value for Website_URL whenever websiteURL changes
-        form.setFieldsValue({ Website_URL: websiteURL });
+        form.setFieldsValue({ Website_URL: websiteURL, Caption: caption });
 
         // Check if all required fields are complete
         const checkFormCompletion = () => {
@@ -1041,7 +1042,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         Website_URL: websiteURL,
         placements: "Advance",
         DailyAdd_amount: 0,
-        Description: "Find More"
+        Description: "Find More",
+        Caption: caption
         // device_platforms: "mobile",
 
     };

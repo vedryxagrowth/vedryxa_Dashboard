@@ -46,7 +46,7 @@ const { TabPane } = Tabs;
 const { Title, Text } = Typography;
 
 
-export default function Createads({ selectedRow }) {
+export default function Createads({ selectedRow, network }) {
 
   const [newadsDrawerVisible, setnewadsDrawerVisible] = useState(false);
   const [duplicateDrawerVisible, setduplicateDrawerVisible] = useState(false);
@@ -57,7 +57,10 @@ export default function Createads({ selectedRow }) {
   const [viewadsdata, setviewadsdata] = useState(null)
   var token = localStorage.getItem("token")
   const [data, setData] = useState(selectedRow?.addlevel);
-  const [refrst, setRefrst] = useState(false)
+  const [selectedKey, setSelectedKey] = useState(null);
+  const [refrst, setRefrst] = useState(false);
+  const [visibleNewAdset, setVisibleNewAdset] = useState(false);
+  const [visibleDuplicateAdd, setVisibleDuplicateAdd] = useState(false);
 
 
   // console.log(selectedRow, "selectedRow")
@@ -86,12 +89,15 @@ export default function Createads({ selectedRow }) {
   }
 
   const createnewads = () => {
+    console.log(network, "network ads");
     setnewadsDrawerVisible(true)
+    setVisibleNewAdset(true)
   };
   const duplicatenewads = (record) => {
     console.log(record, "duplicated")
     setduplicatedata(record)
     setduplicateDrawerVisible(true)
+    setVisibleDuplicateAdd(true);
   };
 
   const onCloseDrawer = () => {
@@ -99,6 +105,8 @@ export default function Createads({ selectedRow }) {
     setviewadsDrawerVisible(false)
     seteditadsDrawerVisible(false)
     setduplicateDrawerVisible(false)
+    setVisibleNewAdset(false);
+    setVisibleDuplicateAdd(false);
 
   };
   const handleadsEdit = (record) => {
@@ -203,6 +211,7 @@ export default function Createads({ selectedRow }) {
     },
 
   ];
+  console.log(selectedRow, "selected rows");
   return (
     <>
       <Flex justify="space-between" align="center">
@@ -252,7 +261,7 @@ export default function Createads({ selectedRow }) {
         open={newadsDrawerVisible}
         width="90%" // Adjust width as needed
       >
-        <Createnewads data={selectedRow} onClose={onCloseDrawer} rerenders={rerenders} />
+        <Createnewads data={selectedRow} visible={visibleNewAdset} onClose={onCloseDrawer} rerenders={rerenders} network={network} adsData={data} />
       </Drawer>
 
       <Drawer
@@ -263,7 +272,7 @@ export default function Createads({ selectedRow }) {
         open={duplicateDrawerVisible}
         width="90%" // Adjust width as needed
       >
-        <Duplicatenewads data={selectedRow} dupdata={duplicatedata} onClose={onCloseDrawer} rerenders={rerenders} />
+        <Duplicatenewads data={selectedRow} dupdata={duplicatedata} onClose={onCloseDrawer} rerenders={rerenders} network={network} visible={visibleDuplicateAdd} adsData={data} />
       </Drawer>
 
       <Drawer
