@@ -125,11 +125,7 @@
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-<<<<<<< HEAD
-/******/ 		__webpack_require__.h = () => ("73c7d96e5a2bc4bb")
-=======
-/******/ 		__webpack_require__.h = () => ("ff861f7e1218eada")
->>>>>>> DevUi
+/******/ 		__webpack_require__.h = () => ("d4a4224ecdc1d0aa")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/harmony module decorator */
