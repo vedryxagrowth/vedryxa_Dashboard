@@ -442,11 +442,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
     const { data: session } = useSession();
     const [DuplicatedampaignData, setDuplicatedampaignData] = useState(null);
     console.log(DuplicatedampaignData, "DuplicatedampaignData in clone")
-    // console.log("heyyypageid", pixelids)
-
     var token = localStorage.getItem("token")
     const [showBidAmount, setShowBidAmount] = useState(false);
-
     const [selectedPublishers, setSelectedPublishers] = useState([]);
     const [selectedPositions, setSelectedPositions] = useState(["feed"]);
     const [addName, setAddName] = useState('');
@@ -463,6 +460,23 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
     const [editedImages, setEditedImages] = useState({});
     const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] = useState(false);
 
+    useEffect(() => {
+        if (visible) {
+            form.resetFields();          // Reset form fields to their initialValues
+            setWebsiteURL('');           // Clear website URL
+            setSelectedFiles([]);        // Clear selected files
+            setCampaignName('');         // Clear campaign name
+            setPrimaryText('');          // Clear primary text field
+            setCaption('');              // Clear caption field
+            setHeadline('');             // Clear headline field
+            setDescription('');          // Clear description field
+            setSelectedPublishers([]);   // Clear selected publishers
+            setSelectedPositions({});    // Clear selected positions
+            setIsFormComplete(false);    // Reset form completion state
+            setCampaignName('')
+            setAddName('')
+        }
+    }, [visible]);
 
     const handleEditClick = (file) => {
         setCurrentFile(file); // Set the file to be edited
@@ -1110,8 +1124,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
         Bid_strategy: DuplicatedampaignData?.camapaignlevel?.Bid_strategy,
         Daily_amount: (DuplicatedampaignData?.camapaignlevel?.Daily_amount) / 100,
         Status: DuplicatedampaignData?.camapaignlevel?.Status,
-        AdsetName: DuplicatedampaignData?.adsetlevel?.AdsetName,
-        DailyAdd_amount: DuplicatedampaignData?.adsetlevel?.Daily_amount ? (DuplicatedampaignData?.adsetlevel?.Daily_amount) / 100 : null,
+        // AdsetName: DuplicatedampaignData?.adsetlevel?.AdsetName,
+        DailyAdd_amount: DuplicatedampaignData?.adsetlevel?.Daily_amount ? (DuplicatedampaignData?.adsetlevel?.Daily_amount) / 100 : 0,
         optimization_goal: DuplicatedampaignData?.adsetlevel?.optimization_goal,
         billing_event: DuplicatedampaignData?.adsetlevel?.billing_event,
         // start_time: DuplicatedampaignData?.adsetlevel?.start_time,
@@ -1129,25 +1143,40 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
         placements: DuplicatedampaignData?.adsetlevel?.placements,
         // Facebook_positions: DuplicatedampaignData?.adsetlevel?.Facebook_positions,
         // buying_type: DuplicatedampaignData?.adsetlevel?.buying_type,
-        AddName: DuplicatedampaignData?.addlevel[0]?.AddName,
+        // AddName: DuplicatedampaignData?.addlevel[0]?.AddName,
         filename: DuplicatedampaignData?.addlevel[0]?.filename,
         page_id: DuplicatedampaignData?.addlevel[0]?.page_id,
         message: DuplicatedampaignData?.addlevel[0]?.message,
         headline: DuplicatedampaignData?.addlevel[0]?.headline,
-        Description: DuplicatedampaignData?.addlevel[0]?.Description,
+        Description: "Find More",
         Caption: DuplicatedampaignData?.addlevel[0]?.Caption,
         Website_URL: DuplicatedampaignData?.addlevel[0]?.Website_URL,
         // urlParameters: DuplicatedampaignData?.addlevel[0]?.urlParameters,
 
     };
-
+    const handleDrawerClose = () => {
+        form.resetFields();          // Reset form fields to their initialValues
+        setWebsiteURL('');           // Clear website URL
+        setSelectedFiles([]);        // Clear selected files
+        setCampaignName('');         // Clear campaign name
+        setPrimaryText('');          // Clear primary text field
+        setCaption('');              // Clear caption field
+        setHeadline('');             // Clear headline field
+        setDescription('');          // Clear description field
+        setSelectedPublishers([]);   // Clear selected publishers
+        setSelectedPositions({});    // Clear selected positions
+        setIsFormComplete(false);    // Reset form completion state
+        setCampaignName('')
+        setAddName('')
+        onClose(); // Call onClose handler to close the drawer
+    };
 
     return (
         <Drawer
             title={selectedRow?.campaign_name}
             width="95%"
             open={visible}
-            onClose={onClose}
+            onClose={handleDrawerClose}
         >
             {DuplicatedampaignData?.identifier === selectedRow?.identifier ? (
                 <Spin spinning={loading}>
@@ -1247,7 +1276,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             options={[
                                                 { value: "LOWEST_COST_WITHOUT_CAP", label: "Highest Volume" },
                                                 { value: "LOWEST_COST_WITH_BID_CAP", label: "Bid Cap" },
-                                                { value: "COST_CAP", label: "Cost Cap" },
+                                                { value: "COST_CAP", label: "Cost Per Result Goal" },
                                                 { value: "LOWEST_COST_WITH_MIN_ROAS", label: "ROAS Goal" }
                                             ]}
                                             onChange={handleBidStrategyChange}
@@ -1428,7 +1457,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                         DuplicatedampaignData?.camapaignlevel?.Bid_strategy === "COST_CAP" || showBidAmount) && (
                                             <Form.Item
                                                 name="bid_amount"
-                                                label={<span style={{ color: "#B4B4B4" }}>Bid_amount</span>}
+                                                label={<span style={{ color: "#B4B4B4" }}>Cost Per Result Goal</span>}
                                                 rules={[
                                                     {
                                                         required: true,
@@ -1866,7 +1895,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
 
                                             />
                                         </Form.Item>
-                                        <Form.Item
+                                        {/* <Form.Item
                                             label="Caption"
                                             name="Caption"
                                             rules={[
@@ -1882,7 +1911,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 autoSize={{ minRows: 2, maxRows: 10 }}
                                                 onChange={(e) => setCaption(e.target.value)}
                                             />
-                                        </Form.Item>
+                                        </Form.Item> */}
 
                                         <Form.Item
                                             label="Headline"
@@ -1971,6 +2000,23 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
 
                                             />
                                         </Form.Item>
+                                        <Form.Item
+                                            label="Display Link"
+                                            name="Caption"
+                                            rules={[
+                                                {
+                                                    required: true,
+                                                    message: "Please enter a Display Link!",
+                                                },
+                                            ]}
+                                            required
+                                            tooltip="This is a required field">
+                                            <TextArea
+                                                placeholder="Display Link"
+                                                autoSize={{ minRows: 2, maxRows: 10 }}
+                                                onChange={(e) => setCaption(e.target.value)}
+                                            />
+                                        </Form.Item>
                                         <Modal
                                             title="URL Builder"
                                             visible={isModalVisibleForURLBuilder}
@@ -2050,8 +2096,17 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                                 <div className="title">
                                                                     <div className="main" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
                                                                         {addName}
-                                                                    </div>                                                            <div className="sub">
-                                                                        Sponsored <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                                        {/* </div>                                                            <div className="sub">
+                                                                        Sponsored <GlobalOutlined style={{ opacity: "0.6" }} /> */}
+                                                                        <div className="sub">
+                                                                            {imagehash?.pageName ? (
+                                                                                <>
+                                                                                    {imagehash.pageName} <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                                                </>
+                                                                            ) : (
+                                                                                <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                                            )}
+                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                                 <div className="close">

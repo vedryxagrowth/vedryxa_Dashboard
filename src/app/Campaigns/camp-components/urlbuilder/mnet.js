@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 const MnetUrlBuilder = ({ onReturnMessage }) => {
   // Initial data array
   const [domain, setDomain] = useState(null);
-  const [source, setSource] = useState(null);
+  const [source, setSource] = useState("FB");
   const [channel, setChannel] = useState(null);
   const [memberId, setMembetId] = useState('');
   const [geo, setGeo] = useState('');

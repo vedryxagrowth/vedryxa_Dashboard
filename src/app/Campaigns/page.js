@@ -828,6 +828,7 @@ const App = () => {
         }
 
     ];
+    console.log(selectedKey);
 
     return (
         <div>
@@ -954,6 +955,7 @@ const App = () => {
                             ))}
                         </Select>
                     </Col>
+
                     <Col span={4}>
                         <ConfigProvider>
                             <RangePicker
@@ -1021,7 +1023,7 @@ const App = () => {
                     open={adsetsdrawerVisible}
                     width="90%" // Adjust width as needed
                 >
-                    <Adsets selectedRow={adsetcampaigndata} onClose={onCloseDrawer} changeRRefrst={changeRRefrst} />
+                    <Adsets selectedRow={adsetcampaigndata} onClose={onCloseDrawer} changeRRefrst={changeRRefrst} network={selectedKey} />
                 </Drawer>
             )}
 

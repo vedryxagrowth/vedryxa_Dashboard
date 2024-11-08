@@ -1,8 +1,27 @@
 {
+<<<<<<< HEAD
   "app\\Campaigns\\camp-components\\Dupcampaign.js -> ./Fabricanvas": {
     "id": "app\\Campaigns\\camp-components\\Dupcampaign.js -> ./Fabricanvas",
     "files": [
       "static/chunks/_app-pages-browser_src_app_Campaigns_camp-components_Fabricanvas_js.js"
+=======
+  "app\\Campaigns\\camp-components\\Createads.js -> ./Fabricanvas": {
+    "id": "app\\Campaigns\\camp-components\\Createads.js -> ./Fabricanvas",
+    "files": [
+      "static/chunks/_app-pages-browser_src_app_Campaigns_camp-components_Fabricanvas_js.js"
+    ]
+  },
+  "app\\Campaigns\\camp-components\\Dupadd.js -> ./Fabricanvas": {
+    "id": "app\\Campaigns\\camp-components\\Dupadd.js -> ./Fabricanvas",
+    "files": [
+      "static/chunks/_app-pages-browser_src_app_Campaigns_camp-components_Fabricanvas_js.js"
+    ]
+  },
+  "app\\Campaigns\\camp-components\\Dupcampaign.js -> ./Fabricanvas": {
+    "id": "app\\Campaigns\\camp-components\\Dupcampaign.js -> ./Fabricanvas",
+    "files": [
+      "static/chunks/_app-pages-browser_src_app_Campaigns_camp-components_Fabricanvas_js.js"
+>>>>>>> DevUi
     ]
   },
   "app\\Campaigns\\camp-components\\Fabricanvas.js -> react-filerobot-image-editor": {

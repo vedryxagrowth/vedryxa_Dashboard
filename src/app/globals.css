@@ -929,3 +929,12 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 .custom-tabs .ant-tabs-nav {
   gap: 5;                 /* Ensure no gap between tabs */
 }
+.fabric-canvas-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999; /* Ensure FabricCanvas appears above everything */
+  background: rgba(0, 0, 0, 0.5); /* Optional: Dark overlay to highlight the editor */
+}
