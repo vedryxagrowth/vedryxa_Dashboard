@@ -496,6 +496,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
     const onReturnUrl = (text) => {
         setIsModalVisibleForURLBuilder(false);
         setWebsiteURL(text);
+        setCaption(text.split('//')[1].split("/")[0]);
         // console.log(text, "text");
     }
 
@@ -533,10 +534,66 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
             setSelectedPublishers(DuplicatedampaignData?.adsetlevel?.publisher_platforms || []);
             setSelectedPositions(DuplicatedampaignData?.adsetlevel?.position || ["feed"]);
             form.setFieldsValue({
-                positions: DuplicatedampaignData?.adsetlevel?.position || ["feed"]
+                positions: DuplicatedampaignData?.adsetlevel?.position || ["feed"],
+                Account_Number: DuplicatedampaignData?.Account_Number,
+                // createdby:DuplicatedampaignData?.camapaignlevel?.createdby,
+                // Name: DuplicatedampaignData?.camapaignlevel?.Name,
+                Objectives: DuplicatedampaignData?.camapaignlevel?.Objectives,
+                Special_categories: DuplicatedampaignData?.camapaignlevel?.Special_categories,
+                Bid_strategy: DuplicatedampaignData?.camapaignlevel?.Bid_strategy,
+                Daily_amount: (DuplicatedampaignData?.camapaignlevel?.Daily_amount) / 100,
+                Status: DuplicatedampaignData?.camapaignlevel?.Status,
+                // AdsetName: DuplicatedampaignData?.adsetlevel?.AdsetName,
+                DailyAdd_amount: DuplicatedampaignData?.adsetlevel?.Daily_amount ? (DuplicatedampaignData?.adsetlevel?.Daily_amount) / 100 : 0,
+                optimization_goal: DuplicatedampaignData?.adsetlevel?.optimization_goal,
+                billing_event: DuplicatedampaignData?.adsetlevel?.billing_event,
+                // start_time: DuplicatedampaignData?.adsetlevel?.start_time,
+                action_source: DuplicatedampaignData?.adsetlevel?.action_source,
+                custom_event_type: DuplicatedampaignData?.adsetlevel?.custom_event_type,
+                pixel_id: DuplicatedampaignData?.adsetlevel?.pixel_id,
+                bid_amount: (DuplicatedampaignData?.adsetlevel?.bid_amount) / 100,
+                countries: DuplicatedampaignData?.adsetlevel?.countries,
+                Min_Age: DuplicatedampaignData?.adsetlevel?.Min_Age,
+                Max_Age: DuplicatedampaignData?.adsetlevel?.Max_Age,
+                Gender: DuplicatedampaignData?.adsetlevel?.Gender,
+                publisher_platforms: DuplicatedampaignData?.adsetlevel?.publisher_platforms,
+                device_platforms: DuplicatedampaignData?.adsetlevel?.device_platforms,
+                Language: DuplicatedampaignData?.adsetlevel?.locales,
+                placements: DuplicatedampaignData?.adsetlevel?.placements,
+                // Facebook_positions: DuplicatedampaignData?.adsetlevel?.Facebook_positions,
+                // buying_type: DuplicatedampaignData?.adsetlevel?.buying_type,
+                // AddName: DuplicatedampaignData?.addlevel[0]?.AddName,
+                filename: DuplicatedampaignData?.addlevel[0]?.filename,
+                page_id: DuplicatedampaignData?.addlevel[0]?.page_id,
+                message: DuplicatedampaignData?.addlevel[0]?.message,
+                headline: DuplicatedampaignData?.addlevel[0]?.headline,
+                Description: "Find More",
+                Caption: DuplicatedampaignData?.addlevel[0]?.Caption,
+                Website_URL: DuplicatedampaignData?.addlevel[0]?.Website_URL,
+                Caption: DuplicatedampaignData?.addlevel[0]?.Caption,
+                pixel_id: DuplicatedampaignData?.addlevel[0]?.pixel_id,
+                page_id: DuplicatedampaignData?.addlevel[0]?.page_id
             });
         }
     }, [DuplicatedampaignData, form]);
+
+    useEffect(() => {
+        // Update the form field value for Website_URL whenever websiteURL changes
+        form.setFieldsValue({ Name: campaignName, AdsetName: campaignName, AddName: campaignName });
+
+        // Check if all required fields are complete
+        const checkFormCompletion = () => {
+            const allValues = form.getFieldsValue(true);
+            const isComplete = Object.keys(allValues).every(
+                key => allValues[key] !== undefined && allValues[key] !== ''
+            );
+            setIsFormComplete(isComplete);
+        };
+
+        // Trigger form completion check
+        checkFormCompletion();
+
+    }, [campaignName, form]);
 
     const handlePublisherChange = (value) => {
         setSelectedPublishers(value);
@@ -586,6 +643,54 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
         fetchData();
     }, [selectedRow]);
 
+    const fetchAccountDetails = async() =>{
+        try {
+            const response = await axios.get(`https://www.testapi.adsgoat.in/api/hashimageidentity/${selectedRow?.Account_Number}`,
+                {
+                    headers: {
+                        'Authorization': token
+                    }
+                }
+            );
+            console.log("account data", ...response?.data);
+            
+            
+            setimagehash(...response?.data)
+        } catch (error) {
+            console.error("Error fetching campaign data:", error);
+            // Handle error
+        }
+    }
+ 
+    useEffect(()=>{
+        if(selectedRow && visible){
+        fetchAccountDetails();
+        }
+    }, [selectedRow, visible]);
+
+    useEffect(() => {
+        // Update the form field value for Website_URL whenever websiteURL changes
+        form.setFieldsValue({ pixel_id: imagehash?.pixelID, page_id:imagehash?.pageID, });
+
+        // Check if all required fields are complete
+        const checkFormCompletion = () => {
+            const allValues = form.getFieldsValue(true);
+            const isComplete = Object.keys(allValues).every(
+                key => allValues[key] !== undefined && allValues[key] !== ''
+            );
+            setIsFormComplete(isComplete);
+        };
+
+        // Trigger form completion check
+        checkFormCompletion();
+        if (imagehash) {
+            if (imagehash.pixelID === null || imagehash.pixelID === undefined || imagehash.pixelID === "") {
+                message.error('There is no PageID and PixelID for this account. Contact your manager', 10);
+            }
+        }
+
+    }, [imagehash, form]);
+
     const handleBidStrategyChange = (value) => {
         // Show bid_amount if the selected bid strategy is "Bid Cap", otherwise hide it
         // setShowBidAmount(value === "LOWEST_COST_WITH_BID_CAP");
@@ -603,20 +708,20 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
         setCampaignName(newName);
         // console.log("Account Number:", accountNumber);
 
-        try {
-            const response = await axios.get(`https://www.testapi.adsgoat.in/api/hashimageidentity/${selectedRow?.Account_Number}`,
-                {
-                    headers: {
-                        'Authorization': token
-                    }
-                }
-            );
-            console.log("siddu account data", response.data);
-            setimagehash(...response?.data)
-        } catch (error) {
-            console.error("Error fetching campaign data:", error);
-            // Handle error
-        }
+        // try {
+        //     const response = await axios.get(`https://www.testapi.adsgoat.in/api/hashimageidentity/${selectedRow?.Account_Number}`,
+        //         {
+        //             headers: {
+        //                 'Authorization': token
+        //             }
+        //         }
+        //     );
+        //     console.log("siddu account data", response.data);
+        //     setimagehash(...response?.data)
+        // } catch (error) {
+        //     console.error("Error fetching campaign data:", error);
+        //     // Handle error
+        // }
     };
 
     const getpixelandpageid = async () => {
@@ -1111,7 +1216,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
     useEffect(() => {
         // Update the Website_URL form field whenever websiteURL changes
         if (websiteURL) {
-            form.setFieldsValue({ Website_URL: websiteURL });
+            form.setFieldsValue({ Website_URL: websiteURL, Caption: caption });
         }
     }, [websiteURL, form]);
     const currentDate = moment();
@@ -1151,6 +1256,12 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
         Description: "Find More",
         Caption: DuplicatedampaignData?.addlevel[0]?.Caption,
         Website_URL: DuplicatedampaignData?.addlevel[0]?.Website_URL,
+        Caption: DuplicatedampaignData?.addlevel[0]?.Caption,
+        pixel_id: DuplicatedampaignData?.addlevel[0]?.pixel_id,
+        page_id: DuplicatedampaignData?.addlevel[0]?.page_id,
+        Name: campaignName, 
+        AdsetName: campaignName, 
+        AddName: campaignName
         // urlParameters: DuplicatedampaignData?.addlevel[0]?.urlParameters,
 
     };

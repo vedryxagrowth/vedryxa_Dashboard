@@ -579,17 +579,55 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
 
     }, [websiteURL, form]);
 
+    useEffect(() => {
+        // Update the form field value for Website_URL whenever websiteURL changes
+        form.setFieldsValue({ Name: campaignName, AdsetName: campaignName, AddName: campaignName });
+
+        // Check if all required fields are complete
+        const checkFormCompletion = () => {
+            const allValues = form.getFieldsValue(true);
+            const isComplete = Object.keys(allValues).every(
+                key => allValues[key] !== undefined && allValues[key] !== ''
+            );
+            setIsFormComplete(isComplete);
+        };
+
+        // Trigger form completion check
+        checkFormCompletion();
+
+    }, [campaignName, form]);
+
+    useEffect(() => {
+        // Update the form field value for Website_URL whenever websiteURL changes
+        form.setFieldsValue({ pixel_id: imagehash?.pixelID, page_id:imagehash?.pageID, });
+
+        // Check if all required fields are complete
+        const checkFormCompletion = () => {
+            const allValues = form.getFieldsValue(true);
+            const isComplete = Object.keys(allValues).every(
+                key => allValues[key] !== undefined && allValues[key] !== ''
+            );
+            setIsFormComplete(isComplete);
+        };
+
+        // Trigger form completion check
+        checkFormCompletion();
+        if (imagehash) {
+            if (imagehash.pixelID === null || imagehash.pixelID === undefined || imagehash.pixelID === "") {
+                message.error('There is no PageID and PixelID for this account. Contact your manager', 10);
+            }
+        }
+
+    }, [imagehash, form]);
+
     const Accountchange = (e) => {
         setAccountNumber(e.target.value);
     };
     // const handlepositionChange = async (values) => {
     //     console.log(values, "handlepositionChange")
     // }
-    const handleNameChange = async (e) => {
-        // console.log("Account Number:", accountNumber);
-        const newName = e.target.value;
-        setCampaignName(newName);
 
+    const fetchAccountDetails = async() =>{
         try {
             const response = await axios.get(`https://www.testapi.adsgoat.in/api/hashimageidentity/${accountNumber}`,
                 {
@@ -599,11 +637,25 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                 }
             );
             console.log("account data", ...response?.data);
+            
+            
             setimagehash(...response?.data)
         } catch (error) {
             console.error("Error fetching campaign data:", error);
             // Handle error
         }
+    }
+ 
+    useEffect(()=>{
+        if(accountNumber && visible){
+        fetchAccountDetails();
+        }
+    }, [accountNumber, visible]);
+
+    const handleNameChange = async (e) => {
+        // console.log("Account Number:", accountNumber);
+        const newName = e.target.value;
+        setCampaignName(newName);
     };
 
     const handleFormChange = (changedValues, allValues) => {
@@ -1044,7 +1096,14 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         placements: "Advance",
         DailyAdd_amount: 0,
         Description: "Find More",
-        Caption: caption
+        Caption: caption,
+        Name: campaignName, 
+        AdsetName: campaignName, 
+        AddName: campaignName,
+        pixel_id: imagehash?.pixelID,
+        page_id: imagehash?.pageID
+        
+        // AddName: 
         // device_platforms: "mobile",
 
     };
@@ -1078,7 +1137,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
             width="95%"
             open={visible}
             onClose={handleDrawerClose}
-        >
+        >   
+            
             <Spin spinning={loading}>
                 <Form layout="vertical" form={form} onFinish={onFinish} onValuesChange={handleFormChange} initialValues={initialValues}>
                     <Collapse accordion defaultActiveKey={['1']} >
