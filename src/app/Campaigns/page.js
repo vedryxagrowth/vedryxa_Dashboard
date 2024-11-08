@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { Table, Tag, Button, Col, Card, Drawer, Dropdown, Flex, Input, Row, Select, Spin, Menu, Space, Modal, message, Switch, Tooltip } from 'antd';
+import { Table, Tag, Button, Col, Card, Drawer, Dropdown, Flex, Input, Row, Select, Spin, Menu, Space, Modal, message, Switch, Tooltip, ConfigProvider } from 'antd';
 import { EditOutlined, EyeOutlined, SearchOutlined, CloseOutlined, SwapRightOutlined, PlusOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, ExclamationCircleFilled, ReloadOutlined } from "@ant-design/icons";
 import CreateCampaignDrawer from './camp-components/create_camapaign';
 import ViewDrawer from './camp-components/view-campaign';
@@ -14,6 +14,9 @@ import DuplicateCampaignDrawer from './camp-components/Dupcampaign';
 import { redirect } from 'next/navigation';
 import ExpandedRowContent from './camp-components/expandcreatives';
 import moment from 'moment-timezone';
+import dayjs from 'dayjs';
+import { DatePicker } from 'antd';
+const { RangePicker } = DatePicker;
 
 const App = () => {
     const { userdetails } = useTokenContext();
@@ -55,6 +58,9 @@ const App = () => {
     const [error, setError] = useState(false);
     const { theme } = useTokenContext();
     const [isOpen, setIsOpen] = useState(false); // State to track if dropdown is open
+    const yesterday = dayjs().subtract(1, 'day').format('YYYY-MM-DD');
+    const [startDate, setStartDate] = useState(yesterday);
+    const [endDate, setEndDate] = useState(yesterday);
 
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
 
@@ -67,6 +73,51 @@ const App = () => {
         "shravan.k@winkleads.com",
         "abhynay.k@winkleads.com",
     ];
+
+    const rangePresets = [
+        {
+            label: 'Today',
+            value: [dayjs(), dayjs()],
+        },
+        {
+            label: 'Yesterday',
+            value: [dayjs().subtract(1, 'day'), dayjs().subtract(1, 'day')],
+        },
+        {
+            label: 'Last 7 Days',
+            value: [dayjs().subtract(7, 'day'), dayjs()],
+        },
+        {
+            label: 'Last 14 Days',
+            value: [dayjs().subtract(14, 'day'), dayjs()],
+        },
+        {
+            label: 'Last 30 Days',
+            value: [dayjs().subtract(30, 'day'), dayjs()],
+        },
+        {
+            label: 'Last 60 Days',
+            value: [dayjs().subtract(60, 'day'), dayjs()],
+        },
+        {
+            label: 'Last 90 Days',
+            value: [dayjs().subtract(90, 'day'), dayjs()],
+        },
+        {
+            label: 'This Month',
+            value: [dayjs().startOf('month'), dayjs()],
+        },
+        {
+            label: 'Last Month',
+            value: [dayjs().subtract(1, 'month').startOf('month'), dayjs().subtract(1, 'month').endOf('month')],
+        },
+    ];
+
+    // Function to disable future dates
+    const disabledDate = (current) => {
+        return current && current > dayjs().endOf('day');
+    };
+
 
 
     // Function to handle click on campaign name
@@ -150,11 +201,43 @@ const App = () => {
     }, [selectedKey, userdetails]);
 
     // Fetch campaign data based on selected value
-    const fetchData = async (accountNumber = null) => {
+    // const fetchData = async (accountNumber = null) => {
+    //     setLoading(true);
+    //     setError(null);
+    //     try {
+    //         const response = await axios.get(`https://www.testapi.adsgoat.in/api/getFormData?accountNumber=${accountNumber}`, {
+    //             headers: {
+    //                 'Authorization': localStorage.getItem("token"),
+    //             }
+    //         });
+    //         const allCampaigns = response?.data;
+
+    //         // Filter campaigns based on selected value && accountNumber !== 'All'
+    //         const filteredCampaignData = accountNumber
+    //             ? allCampaigns.filter(campaign => campaign.Account_Number === accountNumber)
+    //             : allCampaigns.filter(campaign => userdetails?.adAccounts[selectedKey]?.includes(campaign.Account_Number));
+
+    //         setcreatecamselectedacc(accountNumber)
+
+    //         setCampaignData(filteredCampaignData);
+    //     } catch (error) {
+    //         console.error("Error fetching campaign list:", error);
+    //         setError("Failed to fetch campaign data.");
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+    const fetchData = async (accountNumber = null, start = startDate, end = endDate) => {
         setLoading(true);
         setError(null);
         try {
-            const response = await axios.get(`https://www.testapi.adsgoat.in/api/getFormData?accountNumber=${accountNumber}`, {
+            // Construct URL with optional startDate and endDate
+            let url = `https://www.testapi.adsgoat.in/api/getFormData?accountNumber=${accountNumber}`;
+            if (start && end) {
+                url += `&startDate=${start}&endDate=${end}`;
+            }
+
+            const response = await axios.get(url, {
                 headers: {
                     'Authorization': localStorage.getItem("token"),
                 }
@@ -170,13 +253,28 @@ const App = () => {
 
             setCampaignData(filteredCampaignData);
         } catch (error) {
-            console.error("Error fetching campaign list:", error);
+            console.error("Error fetching campaign data:", error);
             setError("Failed to fetch campaign data.");
         } finally {
             setLoading(false);
         }
     };
 
+    // Handle date range change
+    const handleChange = (dates) => {
+        if (dates && dates.length === 2) {
+            const [start, end] = dates;
+            const formattedStart = start.format('YYYY-MM-DD');
+            const formattedEnd = end.format('YYYY-MM-DD');
+
+            setStartDate(formattedStart);
+            setEndDate(formattedEnd);
+
+            if (selectedValue) {
+                fetchData(selectedValue, formattedStart, formattedEnd);
+            }
+        }
+    };
     // Handle key change
     const handleKeyChange = (key) => {
         setSelectedKey(key);
@@ -856,6 +954,19 @@ const App = () => {
                                 </Select.Option>
                             ))}
                         </Select>
+                    </Col>
+
+                    <Col span={4}>
+                        <ConfigProvider>
+                            <RangePicker
+                                presets={rangePresets}
+                                onChange={handleChange}
+                                disabledDate={disabledDate}
+                                defaultValue={[dayjs().subtract(1, 'day'), dayjs().subtract(1, 'day')]}
+                                format="YYYY-MM-DD"
+                                style={{ width: '100%' }}
+                            />
+                        </ConfigProvider>
                     </Col>
 
                     <Col span={4}>

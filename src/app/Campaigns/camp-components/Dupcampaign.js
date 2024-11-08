@@ -1040,7 +1040,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                     Bid_strategy: values.Bid_strategy,
                     Daily_amount: parseInt(values.Daily_amount) * 100,
                     Status: values.Status,
-                    access_token: imagehash.token
+                    access_token: imagehash.token,
+                    createdDate: moment().tz('Asia/Kolkata').format('YYYY-MM-DD')
                 },
                 adsetlevel: {
                     AdsetName: values.AdsetName,
