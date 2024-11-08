@@ -368,8 +368,8 @@ const Dashboard = () => {
     function getTotalFbClicks(fullData) {
         const total = fullData.reduce((sum, item) => {
             // Check if 'estimated_revenue' exists in the object and is a number
-            if (item.fbLeads) {
-                return sum + parseInt(item.fbLeads);
+            if (item.fbClicks) {
+                return sum + parseInt(item.fbClicks);
             }
             return sum;
         }, 0); // Start the sum at 0
@@ -417,7 +417,11 @@ const Dashboard = () => {
                 const splitKey = key.split('_');
         
                 // Join the array back into a string for the new key
-                const newKey = "Facebook_" + splitKey[1];
+                let newKey;
+                if (key === "Newsbreak_DA"){
+                    newKey = "Newsbreak_DomainActive"
+                }
+                else{ newKey = "Facebook_" + splitKey[1];}
         
                 // Initialize the array if the key doesn't exist
                 if (!transformedObject[newKey]) {
@@ -623,7 +627,7 @@ const Dashboard = () => {
                         mediaBuyerName: obj.MediaBuyerName,
                         holder: obj.Holder,
                         rpc: parseFloat(((obj.estimated_revenue/obj.conversions)*100)/100).toFixed(2),
-                        cpl: parseFloat(((obj.spend/obj.fbLeads)*100)/100).toFixed(2)
+                        cpl: parseFloat(((obj.spend/obj.fbLeads)*100)/100).toFixed(2) || 0
                     });
                 } else {
                     // If found, sum the respective fields
@@ -1481,7 +1485,7 @@ const Dashboard = () => {
                                                 <span style={{ color: '#EC7117', fontWeight: 600 }}>CPL</span>
                                             </div>
                                         }
-                                        value={data.length > 0 ? cpl1.current : 0}
+                                        value={data.length > 0 ? cpl1.current !== Infinity ? cpl1.current: 0 : 0}
                                         valueStyle={{ color: '#3f8600' }}
                                     />
                                 </Card>
