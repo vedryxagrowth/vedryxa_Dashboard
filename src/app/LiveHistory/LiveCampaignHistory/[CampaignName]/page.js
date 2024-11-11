@@ -52,7 +52,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
 
     const [decode, setDebounc] = useState("");
 
-    const [chartData, setChartData] = useState({ dates: [], sortedData: [], sortedMarginData: [], rpcDate:[], hoursDate:[], hours: [], spend: [], revenue: [], profit: [], margin: [] });
+    const [chartData, setChartData] = useState({ dates: [], sortedData: [], sortedMarginData: [], rpcDate: [], hoursDate: [], hours: [], spend: [], revenue: [], profit: [], margin: [] });
 
     const timeZoneToDisplay = useRef();
 
@@ -366,7 +366,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
 
     const columnDefsObject = {
         date: {
-            headerName: 'Date', field: 'date', width: 120,
+            headerName: 'Date', field: 'date', width: 400,
             minWidth: 450,
             resizable: true,
             sortable: true,
@@ -375,7 +375,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
             rowGroup: true,
             enableRowGroup: true,
             pinned: 'left',
-            sort: 'asc' 
+            sort: 'desc'
         },
         campaignname: {
             headerName: 'CampaignName', field: 'campaignName', resizeble: true,
@@ -405,73 +405,90 @@ const MnetLiveCampaignHistory = ({ params }) => {
         },
         // { headerName: 'FB-Hour', field: 'fb-hour', width: 120 },
         // { headerName: 'MNet-Hour', field: 'mnet-hour', width: 120 },
-        spend: { headerName: 'Spend', field: 'spend', width: 120, aggFunc: spender,
+        spend: {
+            headerName: 'Spend', field: 'spend', width: 120, aggFunc: spender,
             comparator: defaultComparator,
-         },
-        revenue: { headerName: 'Revenue', field: 'revenue', width: 120, aggFunc: spender,
+        },
+        revenue: {
+            headerName: 'Revenue', field: 'revenue', width: 120, aggFunc: spender,
             comparator: defaultComparator,
-         },
+        },
         profit: {
             headerName: 'Profit', field: 'profit', width: 120, aggFunc: spender, cellClassRules: {
                 'font-red': p => p.value < 0
             },
             comparator: defaultComparator,
         },
-        margin: { headerName: 'Margin', field: 'margin', valueGetter: getMargin,
-            comparator: defaultComparator,
-            valueFormatter: (params) => `${params.value}%`,
-         },
-        fbleads: { headerName: 'FbLeads', field: 'fbleads', width: 120, aggFunc: spender,
-            comparator: defaultComparator,
-         },
-        conversions: { headerName: 'Conversions', field: 'conversions', width: 120, aggFunc: newSpender,
-            comparator: defaultComparator,
-         },
-        cpc: { headerName: 'cpc', field: 'cpc', aggFunc: cpcSpender,
-            comparator: defaultComparator,
-         },
-        fbclicks: { headerName: 'FbClicks', field: 'fbclicks', width: 120, aggFunc: spender,
-            comparator: defaultComparator,
-         },
-        impressions: { headerName: 'Impressions', field: 'impressions', width: 120, aggFunc: spender,
-            comparator: defaultComparator,
-         },
-        ctr: { headerName: 'Ctr', field: 'ctr', valueGetter: getCtr,
-            comparator: defaultComparator,
-            valueFormatter: (params) => `${params.value}%`,
-         },
-        rpc: { headerName: 'Rpc', field: 'rpc', valueGetter: getRpc,
-            comparator: defaultComparator,
-         },
-        cpl: { headerName: 'Cpl', field: 'cpl', valueGetter: getCpl,
-            comparator: defaultComparator,
-         },
-        ncpl: { headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl,
-            comparator: defaultComparator,
-         },
-        fmargin: { headerName: 'Fmargin', field: 'fmargin', valueGetter: getFmargin ,
+        margin: {
+            headerName: 'Margin', field: 'margin', valueGetter: getMargin,
             comparator: defaultComparator,
             valueFormatter: (params) => `${params.value}%`,
         },
-        roi: { headerName: 'ROI', field: 'roi', valueGetter: getROI,
+        fbleads: {
+            headerName: 'FbLeads', field: 'fbleads', width: 120, aggFunc: spender,
+            comparator: defaultComparator,
+        },
+        conversions: {
+            headerName: 'Conversions', field: 'conversions', width: 120, aggFunc: newSpender,
+            comparator: defaultComparator,
+        },
+        cpc: {
+            headerName: 'cpc', field: 'cpc', aggFunc: cpcSpender,
+            comparator: defaultComparator,
+        },
+        fbclicks: {
+            headerName: 'FbClicks', field: 'fbclicks', width: 120, aggFunc: spender,
+            comparator: defaultComparator,
+        },
+        impressions: {
+            headerName: 'Impressions', field: 'impressions', width: 120, aggFunc: spender,
+            comparator: defaultComparator,
+        },
+        ctr: {
+            headerName: 'Ctr', field: 'ctr', valueGetter: getCtr,
             comparator: defaultComparator,
             valueFormatter: (params) => `${params.value}%`,
-         },
-        adsetid: { headerName: 'AdsetId', field: 'adsetId',
+        },
+        rpc: {
+            headerName: 'Rpc', field: 'rpc', valueGetter: getRpc,
             comparator: defaultComparator,
-         },
-        campaignid: { headerName: 'CampaignId', field: 'campaignId',
+        },
+        cpl: {
+            headerName: 'Cpl', field: 'cpl', valueGetter: getCpl,
             comparator: defaultComparator,
-         },
-        timezone: { headerName: 'TimeZone', field: 'timezone',
+        },
+        ncpl: {
+            headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl,
             comparator: defaultComparator,
-         },
+        },
+        fmargin: {
+            headerName: 'Fmargin', field: 'fmargin', valueGetter: getFmargin,
+            comparator: defaultComparator,
+            valueFormatter: (params) => `${params.value}%`,
+        },
+        roi: {
+            headerName: 'ROI', field: 'roi', valueGetter: getROI,
+            comparator: defaultComparator,
+            valueFormatter: (params) => `${params.value}%`,
+        },
+        adsetid: {
+            headerName: 'AdsetId', field: 'adsetId',
+            comparator: defaultComparator,
+        },
+        campaignid: {
+            headerName: 'CampaignId', field: 'campaignId',
+            comparator: defaultComparator,
+        },
+        timezone: {
+            headerName: 'TimeZone', field: 'timezone',
+            comparator: defaultComparator,
+        },
         "fb-hour": {
-            headerName:'F-H', field: "hour",
+            headerName: 'F-H', field: "hour",
             comparator: defaultComparator,
         },
-        "mnet-hour":{
-            headerName:'N-H', field:"updatedHour",
+        "mnet-hour": {
+            headerName: 'N-H', field: "updatedHour",
             comparator: defaultComparator,
         }
     };
@@ -488,7 +505,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
         const mainData = fetchData.data;
         console.log(mainData);
         console.log(mainData.columnStructure, "columnStructure");
-        const filteredData = mainData.columnStructure?.filter((each) => each !== "actions" );
+        const filteredData = mainData.columnStructure?.filter((each) => each !== "actions");
         console.log(filteredData);
         setColumnStructure(getColumnDefs(filteredData));
         // setRowStructure(mainData.rows); 
@@ -652,20 +669,20 @@ const MnetLiveCampaignHistory = ({ params }) => {
 
         // Step 1: Find the highest date in the array
         const highestDate = filteredData?.reduce((max, item) => {
-        const itemDate = parseDate(item.date);
-        return itemDate > max ? itemDate : max;
+            const itemDate = parseDate(item.date);
+            return itemDate > max ? itemDate : max;
         }, new Date(0));
 
         // Step 2: Filter the array to include only objects within the last 10 days from the highest date
         const result2 = filteredData
-        ?.filter((item) => {
-            const itemDate = parseDate(item.date);
-            const timeDiff = highestDate - itemDate;
-            const daysDiff = timeDiff / (1000 * 60 * 60 * 24); // Convert milliseconds to days
-            return daysDiff >= 0 && daysDiff <= 10;
-        })
-        // Step 3: Sort the filtered results by date in ascending order
-        .sort((a, b) => parseDate(a.date) - parseDate(b.date));
+            ?.filter((item) => {
+                const itemDate = parseDate(item.date);
+                const timeDiff = highestDate - itemDate;
+                const daysDiff = timeDiff / (1000 * 60 * 60 * 24); // Convert milliseconds to days
+                return daysDiff >= 0 && daysDiff <= 10;
+            })
+            // Step 3: Sort the filtered results by date in ascending order
+            .sort((a, b) => parseDate(a.date) - parseDate(b.date));
 
         console.log(result2, "Last 10 days objects");
 
@@ -680,34 +697,34 @@ const MnetLiveCampaignHistory = ({ params }) => {
         const cpl = result2?.map(d => d.cpl);
 
         const margin = result2?.map(d => parseFloat(d.margin));
-            
-        const hoursDate = filteredData?.map(d => ({date: d.date, hour: d.hour, margin: parseFloat(d.margin)}));
+
+        const hoursDate = filteredData?.map(d => ({ date: d.date, hour: d.hour, margin: parseFloat(d.margin) }));
         const today = moment.tz('UTC').format('YYYY-MM-DD');
 
         console.log(filteredData);
         // Filter, map, sort, and slice the data
         const result = filteredData
-          ?.filter(item => item.date === today) // Filter to only today's data
-          ?.map(item => ({
-            date: item.date,
-            hour: item.timezone.split(" ")[1].split(":")[0],
-            margin: parseFloat(item.margin), // Ensure margin is a number
-          }))
-          ?.sort((a, b) => b.margin - a.margin) // Sort by margin in descending order
-          ?.slice(0, 5); // Get top 5 margins
+            ?.filter(item => item.date === today) // Filter to only today's data
+            ?.map(item => ({
+                date: item.date,
+                hour: item.timezone.split(" ")[1].split(":")[0],
+                margin: parseFloat(item.margin), // Ensure margin is a number
+            }))
+            ?.sort((a, b) => b.margin - a.margin) // Sort by margin in descending order
+            ?.slice(0, 5); // Get top 5 margins
 
         const result1 = filteredData
-          ?.filter(item => item.date === today) // Filter to only today's data
-          ?.map(item => ({
-            date: item.date,
-            hour: item.timezone.split(" ")[1].split(":")[0],
-            rpc: (item.rpc ? item.rpc : 0), // Ensure margin is a number
-          }))
-          ?.sort((a, b) => b.rpc - a.rpc) // Sort by margin in descending order
-          ?.slice(0, 5); // Get top 5 margins
+            ?.filter(item => item.date === today) // Filter to only today's data
+            ?.map(item => ({
+                date: item.date,
+                hour: item.timezone.split(" ")[1].split(":")[0],
+                rpc: (item.rpc ? item.rpc : 0), // Ensure margin is a number
+            }))
+            ?.sort((a, b) => b.rpc - a.rpc) // Sort by margin in descending order
+            ?.slice(0, 5); // Get top 5 margins
         console.log(result, "result");
 
-        const newDates = filteredData?.map(d => ({date: d.timezone, rpc: d.rpc}));
+        const newDates = filteredData?.map(d => ({ date: d.timezone, rpc: d.rpc }));
 
         const filteredArray = filteredData
             ?.map(item => ({
@@ -750,7 +767,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                 const tenDaysAgo = today.clone().subtract(10, 'days');
                 return moment(item.date).isBetween(tenDaysAgo, today, null, '[]');
             });
-        
+
         const aggregatedMarginData = filteredArrayForMargin?.reduce((acc, item) => {
             const key = item.hour; // Group by hour only
             if (!acc[key]) {
@@ -760,14 +777,14 @@ const MnetLiveCampaignHistory = ({ params }) => {
             acc[key].totalMargin += isNaN(item.margin) ? 0 : item.margin;  // Sum the margin values
             return acc;
         }, {});
-        
+
         // Sort Margin data and take top 5
         const sortedMarginData = Object?.values(aggregatedMarginData)
             .filter(item => !isNaN(item.totalMargin) && item.count > 0)  // Filter out invalid data
             .sort((a, b) => b.count - a.count) // Sort by frequency (count) descending
             .slice(0, 5); // Take top 5
 
-        setChartData({ dates, sortedData, sortedMarginData, rpcDate: result1, hoursDate: result,  spend, revenue, profit, margin, rpc, cpl });
+        setChartData({ dates, sortedData, sortedMarginData, rpcDate: result1, hoursDate: result, spend, revenue, profit, margin, rpc, cpl });
 
         console.log(filteredData, "filter");
         setTrue(false);
@@ -776,21 +793,21 @@ const MnetLiveCampaignHistory = ({ params }) => {
 
     const debouncedFunctionCallForUserColumnStructure = debounce(async () => {
         await functionCallForUserColumnStructure();
-      }, 1500);
-      
-      const debouncedFunctionCall = debounce(async () => {
+    }, 1500);
+
+    const debouncedFunctionCall = debounce(async () => {
         await functionCall();
-      }, 2000);
-      
-      useEffect(() => {
+    }, 2000);
+
+    useEffect(() => {
         if (userdetails?.adAccounts) {
-          const mainFunctionCall = async () => {
-            await debouncedFunctionCallForUserColumnStructure();
-            await debouncedFunctionCall();
-          };
-          mainFunctionCall();
+            const mainFunctionCall = async () => {
+                await debouncedFunctionCallForUserColumnStructure();
+                await debouncedFunctionCall();
+            };
+            mainFunctionCall();
         }
-      }, [userdetails]);
+    }, [userdetails]);
     // console.log(fetchvalue);
 
     // const selectElementData = ['674038077865381', '665204411821465', '364991119488050'];
@@ -811,16 +828,16 @@ const MnetLiveCampaignHistory = ({ params }) => {
         'DST'
     ];
 
-    
-    
-      // Default column definition with the updated comparator
-      const defaultColDef = useMemo(() => ({
+
+
+    // Default column definition with the updated comparator
+    const defaultColDef = useMemo(() => ({
         sortable: true,
         resizable: true,
         filter: true,
         floatingFilter: true,
         flex: 1,
-        minWidth: 150,
+        minWidth: 180,
         comparator: defaultComparator, // Use consistent comparator across columns
     }), []);
 
@@ -832,103 +849,103 @@ const MnetLiveCampaignHistory = ({ params }) => {
     console.log(columnDefs, "rowData");
 
     return (
-        <Row style={{display:'flex', flexDirection:'column'}}>
+        <Row style={{ display: 'flex', flexDirection: 'column' }}>
             {/* Chart.js integration */}
-            {isLoading === false && 
-                <Col style={{width:'100%', display:'flex', alignItems:'center'}}>
-                    <div style={{width:'100%'}}>
-                        <h3 style={{textAlign:'center'}}>{decode}</h3>
+            {isLoading === false &&
+                <Col style={{ width: '100%', display: 'flex', alignItems: 'center' }}>
+                    <div style={{ width: '100%' }}>
+                        <h3 style={{ textAlign: 'center' }}>{decode}</h3>
                     </div>
-                    <div style={{width:'120px'}}>
-                        <p>Timezone: <span style={{fontWeight:'bold'}}>{timeZoneToDisplay.current}</span></p>
+                    <div style={{ width: '120px' }}>
+                        <p>Timezone: <span style={{ fontWeight: 'bold' }}>{timeZoneToDisplay.current}</span></p>
                     </div>
-                    
+
                 </Col>}
             <Col style={{ height: '400px', marginBottom: '10px' }}> {/* Container with fixed height */}
-                {chartData.dates.length === 0 ? (<div style={{width:'100%', height:'100%', display:'flex', justifyContent:'center', alignItems:'center'}}><Spin size="large" /></div>):(
+                {chartData.dates.length === 0 ? (<div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><Spin size="large" /></div>) : (
                     <Line
-                    data={{
-                        labels: chartData.dates.sort((a,b)=> a.dates-b.dates),
-                        datasets: [
-                            {
-                                label: 'Spend',
-                                data: chartData.spend,
-                                borderColor: 'rgba(75, 192, 192, 1)',        // Teal
-                                backgroundColor: 'rgba(75, 192, 192, 0.2)',   // Light Teal
-                                fill: true,
-                                hidden: true,
-                                tension: 0.3
-                            },
-                            {
-                                label: 'Revenue',
-                                data: chartData.revenue,
-                                borderColor: 'rgba(54, 162, 235, 1)',        // Blue
-                                backgroundColor: 'rgba(54, 162, 235, 0.2)',   // Light Blue
-                                fill: true,
-                                hidden: true,
-                                tension: 0.3
+                        data={{
+                            labels: chartData.dates.sort((a, b) => a.dates - b.dates),
+                            datasets: [
+                                {
+                                    label: 'Spend',
+                                    data: chartData.spend,
+                                    borderColor: 'rgba(75, 192, 192, 1)',        // Teal
+                                    backgroundColor: 'rgba(75, 192, 192, 0.2)',   // Light Teal
+                                    fill: true,
+                                    hidden: true,
+                                    tension: 0.3
+                                },
+                                {
+                                    label: 'Revenue',
+                                    data: chartData.revenue,
+                                    borderColor: 'rgba(54, 162, 235, 1)',        // Blue
+                                    backgroundColor: 'rgba(54, 162, 235, 0.2)',   // Light Blue
+                                    fill: true,
+                                    hidden: true,
+                                    tension: 0.3
 
-                            },
-                            {
-                                label: 'RPC',
-                                data: chartData.rpc,
-                                borderColor: 'rgba(255, 99, 132, 1)',        // Red
-                                backgroundColor: 'rgba(255, 99, 132, 0.2)',   // Light Red
-                                fill: true,
-                                hidden: true,
-                                tension: 0.3
+                                },
+                                {
+                                    label: 'RPC',
+                                    data: chartData.rpc,
+                                    borderColor: 'rgba(255, 99, 132, 1)',        // Red
+                                    backgroundColor: 'rgba(255, 99, 132, 0.2)',   // Light Red
+                                    fill: true,
+                                    hidden: true,
+                                    tension: 0.3
 
-                            },
-                            {
-                                label: 'CPL',
-                                data: chartData.cpl,
-                                borderColor: 'rgba(255, 159, 64, 1)',        // Orange
-                                backgroundColor: 'rgba(255, 159, 64, 0.2)',   // Light Orange
-                                fill: true,
-                                hidden: true,
-                                tension: 0.3
+                                },
+                                {
+                                    label: 'CPL',
+                                    data: chartData.cpl,
+                                    borderColor: 'rgba(255, 159, 64, 1)',        // Orange
+                                    backgroundColor: 'rgba(255, 159, 64, 0.2)',   // Light Orange
+                                    fill: true,
+                                    hidden: true,
+                                    tension: 0.3
 
-                            },
-                            {
-                                label: 'Profit',
-                                data: chartData.profit,
-                                borderColor: 'rgba(255, 206, 86, 1)',        // Yellow
-                                backgroundColor: 'rgba(255, 206, 86, 0.2)',   // Light Yellow
-                                fill: true,
-                                tension: 0.2
+                                },
+                                {
+                                    label: 'Profit',
+                                    data: chartData.profit,
+                                    borderColor: 'rgba(255, 206, 86, 1)',        // Yellow
+                                    backgroundColor: 'rgba(255, 206, 86, 0.2)',   // Light Yellow
+                                    fill: true,
+                                    tension: 0.2
 
-                            },
-                            {
-                                label: 'Margin',
-                                data: chartData.margin,
-                                borderColor: 'rgba(153, 102, 255, 1)',       // Purple
-                                backgroundColor: 'rgba(153, 102, 255, 0.2)',  // Light Purple
-                                fill: true,
-                                hidden: true,
-                                tension: 0.2
+                                },
+                                {
+                                    label: 'Margin',
+                                    data: chartData.margin,
+                                    borderColor: 'rgba(153, 102, 255, 1)',       // Purple
+                                    backgroundColor: 'rgba(153, 102, 255, 0.2)',  // Light Purple
+                                    fill: true,
+                                    hidden: true,
+                                    tension: 0.2
 
-                            }
-                        ],
+                                }
+                            ],
 
-                    }}
-                    options={{
-                        responsive: true,
-                        maintainAspectRatio: false, // Allow the chart to take the full height of its container
-                        scales: {
-                            x: {
-                                ticks: {
-                                    // autoSkip: false,
-                                    // maxRotation: 0, // Keep labels horizontal
-                                    padding: 30, // Increase padding between labels and the axis
+                        }}
+                        options={{
+                            responsive: true,
+                            maintainAspectRatio: false, // Allow the chart to take the full height of its container
+                            scales: {
+                                x: {
+                                    ticks: {
+                                        // autoSkip: false,
+                                        // maxRotation: 0, // Keep labels horizontal
+                                        padding: 30, // Increase padding between labels and the axis
+                                    },
+                                },
+                                y: {
+                                    beginAtZero: true, // Ensure the y-axis starts at zero
                                 },
                             },
-                            y: {
-                                beginAtZero: true, // Ensure the y-axis starts at zero
-                            },
-                        },
-                    }}
-                    height={350} // Set the height of the chart
-                />
+                        }}
+                        height={350} // Set the height of the chart
+                    />
                 )}
             </Col>
             <Col style={{ display: 'flex', width: '100%', marginLeft: '2%' }}>
@@ -937,24 +954,24 @@ const MnetLiveCampaignHistory = ({ params }) => {
                     <h3>Top 5 Rpc Today</h3>
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
-                        <tr>
-                            <th style={{ border: '1px solid #ddd', padding: '3px' }}>Hour</th>
-                            <th style={{ border: '1px solid #ddd', padding: '3px' }}>Rpc</th>
-                        </tr>
+                            <tr>
+                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Hour</th>
+                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Rpc</th>
+                            </tr>
                         </thead>
                         <tbody>
-                        {chartData.rpcDate
-                            .filter(item => 
-                            item.date === moment.tz('UTC').format('YYYY-MM-DD') // Today's date
-                            )
-                            .sort((a, b) => b.rpc - a.rpc) // Sort by Margin descending
-                            .slice(0, 5) // Take top 5
-                            .map((item, index) => (
-                            <tr key={index}>
-                                <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.hour}</td> {/* Access item.hour */}
-                                <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.rpc}</td>
-                            </tr>
-                            ))}
+                            {chartData.rpcDate
+                                .filter(item =>
+                                    item.date === moment.tz('UTC').format('YYYY-MM-DD') // Today's date
+                                )
+                                .sort((a, b) => b.rpc - a.rpc) // Sort by Margin descending
+                                .slice(0, 5) // Take top 5
+                                .map((item, index) => (
+                                    <tr key={index}>
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.hour}</td> {/* Access item.hour */}
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.rpc}</td>
+                                    </tr>
+                                ))}
                         </tbody>
                     </table>
                 </div>
@@ -962,24 +979,24 @@ const MnetLiveCampaignHistory = ({ params }) => {
                     <h3>Top 5 Margin Today</h3>
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
-                        <tr>
-                            <th style={{ border: '1px solid #ddd', padding: '3px' }}>Hour</th>
-                            <th style={{ border: '1px solid #ddd', padding: '3px' }}>Margin</th>
-                        </tr>
+                            <tr>
+                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Hour</th>
+                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Margin</th>
+                            </tr>
                         </thead>
                         <tbody>
-                        {chartData.hoursDate
-                            .filter(item => 
-                            item.date === moment.tz('UTC').format('YYYY-MM-DD') // Today's date
-                            )
-                            .sort((a, b) => b.margin - a.margin) // Sort by Margin descending
-                            .slice(0, 5) // Take top 5
-                            .map((item, index) => (
-                            <tr key={index}>
-                                <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.hour}</td> {/* Access item.hour */}
-                                <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.margin}</td>
-                            </tr>
-                            ))}
+                            {chartData.hoursDate
+                                .filter(item =>
+                                    item.date === moment.tz('UTC').format('YYYY-MM-DD') // Today's date
+                                )
+                                .sort((a, b) => b.margin - a.margin) // Sort by Margin descending
+                                .slice(0, 5) // Take top 5
+                                .map((item, index) => (
+                                    <tr key={index}>
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.hour}</td> {/* Access item.hour */}
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.margin}</td>
+                                    </tr>
+                                ))}
                         </tbody>
                     </table>
                 </div>
@@ -995,20 +1012,20 @@ const MnetLiveCampaignHistory = ({ params }) => {
                             </tr>
                         </thead>
                         <tbody>
-                        {chartData.sortedData.map((item, index) => {
-                            const totalRpc = item.totalRpc || 0;  // Default to 0 if totalRpc is undefined or null
-                            const count = item.count || 1;        // Default to 1 if count is undefined or 0 to avoid division by zero
+                            {chartData.sortedData.map((item, index) => {
+                                const totalRpc = item.totalRpc || 0;  // Default to 0 if totalRpc is undefined or null
+                                const count = item.count || 1;        // Default to 1 if count is undefined or 0 to avoid division by zero
 
-                            return (
-                                <tr key={index}>
-                                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.hour}:00</td>
-                                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>
-                                        {count > 0 ? (totalRpc / count).toFixed(2) : 'N/A'}  {/* Avoid division by zero */}
-                                    </td>
-                                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.count}</td>
-                                </tr>
-                            );
-                        })}
+                                return (
+                                    <tr key={index}>
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.hour}:00</td>
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>
+                                            {count > 0 ? (totalRpc / count).toFixed(2) : 'N/A'}  {/* Avoid division by zero */}
+                                        </td>
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.count}</td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>
@@ -1023,23 +1040,23 @@ const MnetLiveCampaignHistory = ({ params }) => {
                             </tr>
                         </thead>
                         <tbody>
-                        {chartData.sortedMarginData.map((item, index) => {
-                            const totalMargin = item.totalMargin || 0;  // Default to 0 if totalMargin is undefined or null
-                            const count = item.count || 1;        // Default to 1 if count is undefined or 0 to avoid division by zero
+                            {chartData.sortedMarginData.map((item, index) => {
+                                const totalMargin = item.totalMargin || 0;  // Default to 0 if totalMargin is undefined or null
+                                const count = item.count || 1;        // Default to 1 if count is undefined or 0 to avoid division by zero
 
-                            return (
-                                <tr key={index}>
-                                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.hour}:00</td>
-                                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>
-                                        {count > 0 ? (totalMargin / count).toFixed(2) : 'N/A'}  {/* Avoid division by zero */}
-                                    </td>
-                                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.count}</td>
-                                </tr>
-                            );
-                        })}
+                                return (
+                                    <tr key={index}>
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.hour}:00</td>
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>
+                                            {count > 0 ? (totalMargin / count).toFixed(2) : 'N/A'}  {/* Avoid division by zero */}
+                                        </td>
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.count}</td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
-                    
+
                 </div>
 
 
@@ -1064,7 +1081,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                     </div>
                 ) : rowData?.length > 0 ? (
                     // <div className="ag-theme-alpine ag-container">
-                         <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
+                    <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
                         <AgGridReact
                             rowData={rowData}
                             columnDefs={columnDefs}
@@ -1078,7 +1095,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                                         color: theme === "dark" ? '#fff' : '#000',           // Text color should contrast with the background
                                     };
                                 }
-                                
+
                                 return null;
                             }}
                             pagination={true}

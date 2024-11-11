@@ -1,7 +1,7 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import { Table, Tag, Button, Col, Card, Drawer, Dropdown, Flex, Input, Row, Select, Spin, Menu, Space, Modal, message, Switch, Tooltip, ConfigProvider } from 'antd';
-import { EditOutlined, EyeOutlined, SearchOutlined, CloseOutlined, SwapRightOutlined, PlusOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, ExclamationCircleFilled, ReloadOutlined } from "@ant-design/icons";
+import { EditOutlined, EyeOutlined, SearchOutlined, CloseOutlined, SwapRightOutlined, PlusOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, ExclamationCircleFilled, ReloadOutlined, LinkOutlined } from "@ant-design/icons";
 import CreateCampaignDrawer from './camp-components/create_camapaign';
 import ViewDrawer from './camp-components/view-campaign';
 import axios from 'axios';
@@ -63,6 +63,7 @@ const App = () => {
     const [endDate, setEndDate] = useState(yesterday);
 
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
+    console.log(selectedKey, "selectedKeyselectedKeyselectedKey")
 
 
     // const [selectedAccount, setSelectedAccount] = useState('All');
@@ -232,7 +233,7 @@ const App = () => {
         setError(null);
         try {
             // Construct URL with optional startDate and endDate
-            let url = `https://www.testapi.adsgoat.in/api/getFormData?accountNumber=${accountNumber}`;
+            let url = `https://www.testapi.adsgoat.in/api/getFormData?accountNumber=${accountNumber}&network=${selectedKey}`;
             if (start && end) {
                 url += `&startDate=${start}&endDate=${end}`;
             }
@@ -611,24 +612,69 @@ const App = () => {
         setDrawerVisible(true);
         setdupDrawerVisible(true)
         setduplicatenewcampaigns(record)
+
+    }
+    const newtworkCollections = {
+        "FB_Mnet": "Facebook_Mnet",
+        "FB_MnetBing": "Facebook_MnetBing",
+        "FB_Enki": "Facebook_Enki",
+        "FB_System1": 'Facebook_System1',
+        "FB_Rsoc": 'Facebook_Rsoc',
+        "FB_Tonic": 'Facebook_Tonic',
+        "FB_DomainActive": "Facebook_DomainActive",
+        "FB_Bodies": "Facebook_Bodies",
+        "FB_Bodies1": "Facebook_Bodies1",
+        "Newsbreak_DA": "Newsbreak_DomainActive"
     }
     const columns = [
+        // {
+        //     title: '',
+        //     dataIndex: 'fbstatus',
+        //     key: 'fbstatus',
+        //     width: '5%',  // Adjust width
+        //     align: 'center',
+        //     render: (text, record) => (
+        //         <>
+        //             {record.fbstatus === 'Live' ? (
+        //                 <CheckCircleFilled style={{ color: 'green' }} />
+        //             ) : (
+        //                 <CloseCircleFilled style={{ color: 'red' }} />
+        //             )}
+        //         </>
+        //     ),
+        // },
         {
-            title: '',
+            title: 'status',
             dataIndex: 'fbstatus',
             key: 'fbstatus',
             width: '5%',  // Adjust width
             align: 'center',
             render: (text, record) => (
                 <>
+                    {/* Display green check or red close icon based on fbstatus */}
                     {record.fbstatus === 'Live' ? (
                         <CheckCircleFilled style={{ color: 'green' }} />
                     ) : (
                         <CloseCircleFilled style={{ color: 'red' }} />
                     )}
+
+                    {/* Display link icon if reports field is true */}
+                    {record.reports === true && (
+                        <LinkOutlined
+                            style={{ color: 'blue', marginLeft: '8px', cursor: 'pointer' }}
+                            onClick={() =>
+                                window.open(
+                                    `/LiveHistory/LiveCampaignHistory/${record?.campaign_name}-${record?.Account_Number}-UTC-${newtworkCollections[selectedKey]}`,
+                                    '_blank', // Opens in a new tab
+                                    'noopener,noreferrer' // Security and performance considerations
+                                )
+                            }
+                        />
+                    )}
                 </>
             ),
         },
+
         {
             title: "Campaign Name",
             dataIndex: "campaign_name",
@@ -697,9 +743,9 @@ const App = () => {
             ),
         },
         {
-            title: "Platform",
-            dataIndex: "Platform",
-            key: "Platform",
+            title: "Created Date",
+            dataIndex: "createdDate",
+            key: "createdDate",
             width: '10%',  // Adjust width
             align: 'center',
         },
@@ -829,6 +875,9 @@ const App = () => {
 
     ];
     console.log(selectedKey);
+    const totalDailySpend = (searchInput ? filteredData : campaignData).reduce((sum, record) => {
+        return sum + (record.Daily_amount || 0);
+    }, 0) / 100;  // Assuming Daily_amount is in cents
 
     return (
         <div>
@@ -987,6 +1036,11 @@ const App = () => {
                     )}
                     <Button type="primary" onClick={handleRefresh} icon={<ReloadOutlined />}>
                     </Button>
+                    <Col span={4}>
+                        <span style={{ fontWeight: 'bold', fontSize: '16px' }}>
+                            Total Daily Spend: ${totalDailySpend.toFixed(2)}
+                        </span>
+                    </Col>
 
                 </Row>
             </Card>
@@ -1011,6 +1065,22 @@ const App = () => {
                         />
                     ),
                     rowExpandable: (record) => !!record,
+                }}
+                summary={() => {
+                    const dataSource = searchInput ? filteredData : campaignData;
+
+                    // Calculate total daily budget
+                    const totalDailyBudget = dataSource.reduce((sum, record) => {
+                        return sum + (record.Daily_amount || 0);
+                    }, 0);
+
+                    return (
+                        <Table.Summary.Row >
+                            <Table.Summary.Cell colSpan={columns.length - 2} align="right">
+                                <strong>Total Daily Budget: ${(totalDailyBudget / 100).toFixed(2)}</strong>
+                            </Table.Summary.Cell>
+                        </Table.Summary.Row>
+                    );
                 }}
             />
 
