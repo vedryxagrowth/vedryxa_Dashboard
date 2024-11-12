@@ -19,8 +19,10 @@ const ExpandedRowContent = ({ record, changeRRefrst }) => {
     const [isDrawerVisible, setIsDrawerVisible] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
     const [newadsDrawerVisible, setnewadsDrawerVisible] = useState(false);
+    const [imagehash, setimagehash] = useState('')
 
     console.log(userdetails, "userdetails")
+    // console.log(record);
 
 
     const isMediaBuyer = userdetails.role === 'MEDIA_BUYER' || userdetails.role === "Special_User";
@@ -31,6 +33,29 @@ const ExpandedRowContent = ({ record, changeRRefrst }) => {
         "shravan.k@winkleads.com",
         "abhynay.k@winkleads.com"
     ];
+
+    const imageHashCaller = async(record)=>{
+        try {
+          const response = await axios.get(`https://www.testapi.adsgoat.in/api/hashimageidentity/${record.Account_Number}`,
+              {
+                  headers: {
+                      'Authorization': token
+                  }
+              }
+          );
+          console.log("account data", ...response?.data);
+          setimagehash(...response?.data)
+        } catch (error) {
+            console.error("Error fetching campaign data:", error);
+            // Handle error
+        }
+      }
+    
+      useEffect(()=>{
+        if(record){
+          imageHashCaller(record);
+        }
+      },[record])
 
 
 
@@ -203,7 +228,14 @@ const ExpandedRowContent = ({ record, changeRRefrst }) => {
                                             {item?.AddName || 'Consumer finds'}
                                         </div>
                                         <div style={{ fontSize: "12px", color: "#888" }}>
-                                            Sponsored <GlobalOutlined style={{ opacity: "0.6", marginLeft: "4px" }} />
+                                            {imagehash?.pageName ? (
+                                                <>
+                                                {imagehash.pageName} <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                </>
+                                                ) : (
+                                                <GlobalOutlined style={{ opacity: "0.6" }} />
+                                            )}
+                                            {/* Sponsored <GlobalOutlined style={{ opacity: "0.6", marginLeft: "4px" }} />/ */}
                                         </div>
                                     </div>
                                     <Tooltip title="More Options">

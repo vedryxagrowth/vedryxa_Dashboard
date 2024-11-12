@@ -996,9 +996,7 @@ const UsersTable = () => {
         setNetworkAccessDrawerVisible(false);
     };
 
-   
-      
-    
+
     
 
     return (

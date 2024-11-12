@@ -97,7 +97,8 @@ const newtworkCollections = {
     "FB_Tonic": 'Facebook_Tonic',
     "FB_DomainActive": "Facebook_DomainActive",
     "FB_Bodies": "Facebook_Bodies",
-    "FB_Bodies1": "Facebook_Bodies1"
+    "FB_Bodies1": "Facebook_Bodies1",
+    "Newsbreak_DA": "Newsbreak_DomainActive"
 }
 
 const MyTablePage = () => {

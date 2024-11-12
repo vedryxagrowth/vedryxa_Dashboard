@@ -1,7 +1,7 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { Table, Tag, Button, Col, Card, Drawer, Dropdown, Flex, Input, Row, Select, Spin, Menu, Space, Modal, message, Switch, Tooltip } from 'antd';
-import { EditOutlined, EyeOutlined, SearchOutlined, CloseOutlined, SwapRightOutlined, PlusOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, ExclamationCircleFilled, ReloadOutlined } from "@ant-design/icons";
+import { Table, Tag, Button, Col, Card, Drawer, Dropdown, Flex, Input, Row, Select, Spin, Menu, Space, Modal, message, Switch, Tooltip, ConfigProvider } from 'antd';
+import { EditOutlined, EyeOutlined, SearchOutlined, CloseOutlined, SwapRightOutlined, PlusOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, ExclamationCircleFilled, ReloadOutlined, LinkOutlined } from "@ant-design/icons";
 import CreateCampaignDrawer from './camp-components/create_camapaign';
 import ViewDrawer from './camp-components/view-campaign';
 import axios from 'axios';
@@ -14,6 +14,9 @@ import DuplicateCampaignDrawer from './camp-components/Dupcampaign';
 import { redirect } from 'next/navigation';
 import ExpandedRowContent from './camp-components/expandcreatives';
 import moment from 'moment-timezone';
+import dayjs from 'dayjs';
+import { DatePicker } from 'antd';
+const { RangePicker } = DatePicker;
 
 const App = () => {
     const { userdetails } = useTokenContext();
@@ -55,8 +58,12 @@ const App = () => {
     const [error, setError] = useState(false);
     const { theme } = useTokenContext();
     const [isOpen, setIsOpen] = useState(false); // State to track if dropdown is open
+    const yesterday = dayjs().subtract(1, 'day').format('YYYY-MM-DD');
+    const [startDate, setStartDate] = useState(yesterday);
+    const [endDate, setEndDate] = useState(yesterday);
 
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
+    console.log(selectedKey, "selectedKeyselectedKeyselectedKey")
 
 
     // const [selectedAccount, setSelectedAccount] = useState('All');
@@ -67,6 +74,51 @@ const App = () => {
         "shravan.k@winkleads.com",
         "abhynay.k@winkleads.com",
     ];
+
+    const rangePresets = [
+        {
+            label: 'Today',
+            value: [dayjs(), dayjs()],
+        },
+        {
+            label: 'Yesterday',
+            value: [dayjs().subtract(1, 'day'), dayjs().subtract(1, 'day')],
+        },
+        {
+            label: 'Last 7 Days',
+            value: [dayjs().subtract(7, 'day'), dayjs()],
+        },
+        {
+            label: 'Last 14 Days',
+            value: [dayjs().subtract(14, 'day'), dayjs()],
+        },
+        {
+            label: 'Last 30 Days',
+            value: [dayjs().subtract(30, 'day'), dayjs()],
+        },
+        {
+            label: 'Last 60 Days',
+            value: [dayjs().subtract(60, 'day'), dayjs()],
+        },
+        {
+            label: 'Last 90 Days',
+            value: [dayjs().subtract(90, 'day'), dayjs()],
+        },
+        {
+            label: 'This Month',
+            value: [dayjs().startOf('month'), dayjs()],
+        },
+        {
+            label: 'Last Month',
+            value: [dayjs().subtract(1, 'month').startOf('month'), dayjs().subtract(1, 'month').endOf('month')],
+        },
+    ];
+
+    // Function to disable future dates
+    const disabledDate = (current) => {
+        return current && current > dayjs().endOf('day');
+    };
+
 
 
     // Function to handle click on campaign name
@@ -150,11 +202,43 @@ const App = () => {
     }, [selectedKey, userdetails]);
 
     // Fetch campaign data based on selected value
-    const fetchData = async (accountNumber = null) => {
+    // const fetchData = async (accountNumber = null) => {
+    //     setLoading(true);
+    //     setError(null);
+    //     try {
+    //         const response = await axios.get(`https://www.testapi.adsgoat.in/api/getFormData?accountNumber=${accountNumber}`, {
+    //             headers: {
+    //                 'Authorization': localStorage.getItem("token"),
+    //             }
+    //         });
+    //         const allCampaigns = response?.data;
+
+    //         // Filter campaigns based on selected value && accountNumber !== 'All'
+    //         const filteredCampaignData = accountNumber
+    //             ? allCampaigns.filter(campaign => campaign.Account_Number === accountNumber)
+    //             : allCampaigns.filter(campaign => userdetails?.adAccounts[selectedKey]?.includes(campaign.Account_Number));
+
+    //         setcreatecamselectedacc(accountNumber)
+
+    //         setCampaignData(filteredCampaignData);
+    //     } catch (error) {
+    //         console.error("Error fetching campaign list:", error);
+    //         setError("Failed to fetch campaign data.");
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+    const fetchData = async (accountNumber = null, start = startDate, end = endDate) => {
         setLoading(true);
         setError(null);
         try {
-            const response = await axios.get(`https://www.testapi.adsgoat.in/api/getFormData?accountNumber=${accountNumber}`, {
+            // Construct URL with optional startDate and endDate
+            let url = `https://www.testapi.adsgoat.in/api/getFormData?accountNumber=${accountNumber}&network=${selectedKey}`;
+            if (start && end) {
+                url += `&startDate=${start}&endDate=${end}`;
+            }
+
+            const response = await axios.get(url, {
                 headers: {
                     'Authorization': localStorage.getItem("token"),
                 }
@@ -170,13 +254,28 @@ const App = () => {
 
             setCampaignData(filteredCampaignData);
         } catch (error) {
-            console.error("Error fetching campaign list:", error);
+            console.error("Error fetching campaign data:", error);
             setError("Failed to fetch campaign data.");
         } finally {
             setLoading(false);
         }
     };
 
+    // Handle date range change
+    const handleChange = (dates) => {
+        if (dates && dates.length === 2) {
+            const [start, end] = dates;
+            const formattedStart = start.format('YYYY-MM-DD');
+            const formattedEnd = end.format('YYYY-MM-DD');
+
+            setStartDate(formattedStart);
+            setEndDate(formattedEnd);
+
+            if (selectedValue) {
+                fetchData(selectedValue, formattedStart, formattedEnd);
+            }
+        }
+    };
     // Handle key change
     const handleKeyChange = (key) => {
         setSelectedKey(key);
@@ -513,24 +612,69 @@ const App = () => {
         setDrawerVisible(true);
         setdupDrawerVisible(true)
         setduplicatenewcampaigns(record)
+
+    }
+    const newtworkCollections = {
+        "FB_Mnet": "Facebook_Mnet",
+        "FB_MnetBing": "Facebook_MnetBing",
+        "FB_Enki": "Facebook_Enki",
+        "FB_System1": 'Facebook_System1',
+        "FB_Rsoc": 'Facebook_Rsoc',
+        "FB_Tonic": 'Facebook_Tonic',
+        "FB_DomainActive": "Facebook_DomainActive",
+        "FB_Bodies": "Facebook_Bodies",
+        "FB_Bodies1": "Facebook_Bodies1",
+        "Newsbreak_DA": "Newsbreak_DomainActive"
     }
     const columns = [
+        // {
+        //     title: '',
+        //     dataIndex: 'fbstatus',
+        //     key: 'fbstatus',
+        //     width: '5%',  // Adjust width
+        //     align: 'center',
+        //     render: (text, record) => (
+        //         <>
+        //             {record.fbstatus === 'Live' ? (
+        //                 <CheckCircleFilled style={{ color: 'green' }} />
+        //             ) : (
+        //                 <CloseCircleFilled style={{ color: 'red' }} />
+        //             )}
+        //         </>
+        //     ),
+        // },
         {
-            title: '',
+            title: 'status',
             dataIndex: 'fbstatus',
             key: 'fbstatus',
             width: '5%',  // Adjust width
             align: 'center',
             render: (text, record) => (
                 <>
+                    {/* Display green check or red close icon based on fbstatus */}
                     {record.fbstatus === 'Live' ? (
                         <CheckCircleFilled style={{ color: 'green' }} />
                     ) : (
                         <CloseCircleFilled style={{ color: 'red' }} />
                     )}
+
+                    {/* Display link icon if reports field is true */}
+                    {record.reports === true && (
+                        <LinkOutlined
+                            style={{ color: 'blue', marginLeft: '8px', cursor: 'pointer' }}
+                            onClick={() =>
+                                window.open(
+                                    `/LiveHistory/LiveCampaignHistory/${record?.campaign_name}-${record?.Account_Number}-UTC-${newtworkCollections[selectedKey]}`,
+                                    '_blank', // Opens in a new tab
+                                    'noopener,noreferrer' // Security and performance considerations
+                                )
+                            }
+                        />
+                    )}
                 </>
             ),
         },
+
         {
             title: "Campaign Name",
             dataIndex: "campaign_name",
@@ -599,9 +743,9 @@ const App = () => {
             ),
         },
         {
-            title: "Platform",
-            dataIndex: "Platform",
-            key: "Platform",
+            title: "Created Date",
+            dataIndex: "createdDate",
+            key: "createdDate",
             width: '10%',  // Adjust width
             align: 'center',
         },
@@ -731,6 +875,9 @@ const App = () => {
 
     ];
     console.log(selectedKey);
+    const totalDailySpend = (searchInput ? filteredData : campaignData).reduce((sum, record) => {
+        return sum + (record.Daily_amount || 0);
+    }, 0) / 100;  // Assuming Daily_amount is in cents
 
     return (
         <div>
@@ -859,6 +1006,19 @@ const App = () => {
                     </Col>
 
                     <Col span={4}>
+                        <ConfigProvider>
+                            <RangePicker
+                                presets={rangePresets}
+                                onChange={handleChange}
+                                disabledDate={disabledDate}
+                                defaultValue={[dayjs().subtract(1, 'day'), dayjs().subtract(1, 'day')]}
+                                format="YYYY-MM-DD"
+                                style={{ width: '100%' }}
+                            />
+                        </ConfigProvider>
+                    </Col>
+
+                    <Col span={4}>
 
                         <Input
                             placeholder="Search..."
@@ -876,6 +1036,11 @@ const App = () => {
                     )}
                     <Button type="primary" onClick={handleRefresh} icon={<ReloadOutlined />}>
                     </Button>
+                    <Col span={4}>
+                        <span style={{ fontWeight: 'bold', fontSize: '16px' }}>
+                            Total Daily Spend: ${totalDailySpend.toFixed(2)}
+                        </span>
+                    </Col>
 
                 </Row>
             </Card>
@@ -900,6 +1065,22 @@ const App = () => {
                         />
                     ),
                     rowExpandable: (record) => !!record,
+                }}
+                summary={() => {
+                    const dataSource = searchInput ? filteredData : campaignData;
+
+                    // Calculate total daily budget
+                    const totalDailyBudget = dataSource.reduce((sum, record) => {
+                        return sum + (record.Daily_amount || 0);
+                    }, 0);
+
+                    return (
+                        <Table.Summary.Row >
+                            <Table.Summary.Cell colSpan={columns.length - 2} align="right">
+                                <strong>Total Daily Budget: ${(totalDailyBudget / 100).toFixed(2)}</strong>
+                            </Table.Summary.Cell>
+                        </Table.Summary.Row>
+                    );
                 }}
             />
 
