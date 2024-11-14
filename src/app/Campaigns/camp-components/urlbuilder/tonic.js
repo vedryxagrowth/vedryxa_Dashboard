@@ -1,20 +1,33 @@
 "use client"
 import React from 'react';
 import { Button, Input, Row, Col } from 'antd';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 const TonicUrlBuilder = ({onReturnMessage}) => {
     const [siteName, setSiteName] = useState('');
     const [keywords, setKeyWords] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
-    const businessData = [
-        {
-          "id":5,
-          "name":"Tonic",
-          "code":"b6",
-          "account":"TO",
-          "url":"sitename_replace/?network=facebook&site=direct&dpco=1&adtitle=keywords_replace&subid1={{campaign.id}}&subid2={{adset.id}}"
+    const [NetworkData, setNetworkData]= useState([]);
+    // const businessData = [
+    //     {
+    //       "id":5,
+    //       "name":"Tonic",
+    //       "code":"b6",
+    //       "account":"TO",
+    //       "url":"sitename_replace/?network=facebook&site=direct&dpco=1&adtitle=keywords_replace&subid1={{campaign.id}}&subid2={{adset.id}}"
+    //     }
+    // ]
+
+    const getUrlBuilderData = async()=>{
+        const response = await axios.get(`https://prodapis.adsgoat.in/get/urlbuilderdata?network=Tonic`);
+        if(response?.status === 200){
+          setNetworkData(response?.data)
         }
-    ]
+      };
+    
+      useEffect(()=>{
+        getUrlBuilderData();
+      },[]);
 
     // Function to add a new item
     const onChangeSiteName = (event)=>{
@@ -34,7 +47,7 @@ const TonicUrlBuilder = ({onReturnMessage}) => {
     const onClickSubmit = () =>{
         
         if(keywords && siteName){
-            let url = businessData[0].url;
+            let url = NetworkData?.businessData[0]?.url;
 
             url = url
                 .replace("sitename_replace", siteName)
@@ -49,7 +62,7 @@ const TonicUrlBuilder = ({onReturnMessage}) => {
     const onClickGet = () =>{
         
         if(keywords && siteName){
-            let url = businessData[0].url;
+            let url = NetworkData?.businessData[0]?.url;
 
             url = url
                 .replace("sitename_replace", siteName)

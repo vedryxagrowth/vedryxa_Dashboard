@@ -13,6 +13,7 @@ const System1UrlBuilder = ({onReturnMessage}) => {
     const [pixelId, setPixelId] = useState('');
     const [keywords, setKeyWords] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const [NetworkData, setNetworkData]= useState([]);
     
 
     const MnetDomains = [
@@ -186,6 +187,17 @@ const System1UrlBuilder = ({onReturnMessage}) => {
     //     onReturnMessage("System1Text");
     // }
 
+    const getUrlBuilderData = async()=>{
+      const response = await axios.get(`https://prodapis.adsgoat.in/get/urlbuilderdata?network=System1`);
+      if(response?.status === 200){
+        setNetworkData(response?.data)
+      }
+    };
+  
+    useEffect(()=>{
+      getUrlBuilderData();
+    },[]);
+
     const onChangeSiteName = (event)=>{
         setSiteName(event.target.value);
     }
@@ -208,7 +220,7 @@ const System1UrlBuilder = ({onReturnMessage}) => {
     const onClickSubmit = () =>{
         
         if(keywords && pixelId && siteName){
-            let url = businessData[0].url;
+            let url = NetworkData?.businessData[0]?.url;
 
             url = url
                 .replace("sitename_replace", siteName)
@@ -224,7 +236,7 @@ const System1UrlBuilder = ({onReturnMessage}) => {
     const onClickGet = () =>{
         
         if(keywords && pixelId && siteName){
-            let url = businessData[0].url;
+            let url = NetworkData?.businessData[0]?.url;
 
             url = url
                 .replace("sitename_replace", siteName)
