@@ -496,7 +496,13 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
     const onReturnUrl = (text) => {
         setIsModalVisibleForURLBuilder(false);
         setWebsiteURL(text);
-        setCaption(text.split('//')[1].split("/")[0]);
+        if(network === "FB_Mnet"){
+            setCaption(text.split('//')[1].split("/")[0]);
+
+        }else{
+            setCaption(text.split('/')[0]);
+
+        }
         // console.log(text, "text");
     }
 
