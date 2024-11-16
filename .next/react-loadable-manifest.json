@@ -4,7 +4,7 @@
     "files": [
       "static/chunks/3458-3169bc118a4e9c0b.js",
       "static/chunks/290.a49368e08a40a289.js",
-      "static/chunks/170.02446e0afd4f03f1.js"
+      "static/chunks/170.b30d98706a28bccb.js"
     ]
   },
   "app\\Campaigns\\camp-components\\Dupadd.js -> ./Fabricanvas": {
@@ -12,7 +12,7 @@
     "files": [
       "static/chunks/3458-3169bc118a4e9c0b.js",
       "static/chunks/290.a49368e08a40a289.js",
-      "static/chunks/170.02446e0afd4f03f1.js"
+      "static/chunks/170.b30d98706a28bccb.js"
     ]
   },
   "app\\Campaigns\\camp-components\\Dupcampaign.js -> ./Fabricanvas": {
@@ -20,7 +20,7 @@
     "files": [
       "static/chunks/3458-3169bc118a4e9c0b.js",
       "static/chunks/290.a49368e08a40a289.js",
-      "static/chunks/170.02446e0afd4f03f1.js"
+      "static/chunks/170.b30d98706a28bccb.js"
     ]
   },
   "app\\Campaigns\\camp-components\\Fabricanvas.js -> react-filerobot-image-editor": {
@@ -32,7 +32,7 @@
     "files": [
       "static/chunks/3458-3169bc118a4e9c0b.js",
       "static/chunks/290.a49368e08a40a289.js",
-      "static/chunks/170.02446e0afd4f03f1.js"
+      "static/chunks/170.b30d98706a28bccb.js"
     ]
   },
   "app\\Creatives\\page.js -> ../Campaigns/camp-components/Fabricanvas": {
@@ -40,7 +40,7 @@
     "files": [
       "static/chunks/3458-3169bc118a4e9c0b.js",
       "static/chunks/290.a49368e08a40a289.js",
-      "static/chunks/7170.9b780e8f1f044254.js"
+      "static/chunks/7170.157014cc9a0a04a6.js"
     ]
   }
 }

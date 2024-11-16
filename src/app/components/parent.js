@@ -38,7 +38,7 @@
 // import "ag-grid-community/styles/ag-theme-alpine.css";
 // import 'ag-grid-enterprise';
 // export const TokenProvider = ({ children }) => {
-    
+
 //   const { data: session } = useSession();
 //   const [userdetails, setuserdetails] = useState(null);
 //   const [darkMode, setDarkMode] = useState(false);
@@ -67,12 +67,13 @@ import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import 'ag-grid-enterprise';
+import ChatWidget from './supportchat';
 
 export const TokenProvider = ({ children }) => {
   const { data: session } = useSession();
   const [cachedSession, setCachedSession] = useState(null);
   const [userdetails, setuserdetails] = useState(null);
-  
+
   // We need a flag to determine if we're on the client-side to avoid the hydration error
   const [isMounted, setIsMounted] = useState(false);
 
@@ -112,6 +113,7 @@ export const TokenProvider = ({ children }) => {
 
   return (
     <TokenContext.Provider value={{ userdetails, setuserdetails, darkMode, toggleTheme, theme }}>
+      <ChatWidget />
       {children}
     </TokenContext.Provider>
   );
