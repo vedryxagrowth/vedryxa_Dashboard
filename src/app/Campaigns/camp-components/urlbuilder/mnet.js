@@ -17,164 +17,176 @@ const MnetUrlBuilder = ({ onReturnMessage }) => {
   const [geo, setGeo] = useState('');
   const [keywords, setKeyWords] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [NetworkData, setNetworkData]= useState([]);
 
 
-  const MnetDomains = [
-    {
-      "id": 1,
-      "name": "POCKETFACTS",
-      "code": "PF",
-      "account": "MN",
-      "url": "https://top.pocketfacts.co/search/850/keywords_replace/?chanel_replace&chnm=business_code_replace_source_code_replace_region_code_replace&chnm2=campaign_id_replace&chnm3=adset_id_replace&trkfb=859792251778708"
-    },
-    {
-      "id": 2,
-      "name": "MOTORDIGEST",
-      "code": "MD",
-      "account": "MN",
-      "url": "https://top.motordigest.co/search/850/keywords_replace/?chanel_replace&chnm=business_code_replace_source_code_replace_region_code_replace&chnm2=campaign_id_replace&chnm3=adset_id_replace&trkfb=566855625308747"
-    },
-    {
-      "id": 3,
-      "name": "KNOW THE BUZZ",
-      "code": "KB",
-      "account": "MN",
-      "url": "https://top.knowthebuzz.co/search/850/keywords_replace/?chanel_replace&chnm=business_code_replace_source_code_replace_region_code_replace&chnm2=campaign_id_replace&chnm3=adset_id_replace&trkfb=859792251778708"
-    },
-    {
-      "id": 4,
-      "name": "Look Up Trends",
-      "code": "LT",
-      "account": "MN",
-      "url": "https://top.lookuptrends.co/search/850/keywords_replace/?chanel_replace&chnm=business_code_replace_source_code_replace_region_code_replace&chnm2=campaign_id_replace&chnm3=adset_id_replace&trkfb=859792251778708"
-    },
-    {
-      "id": 5,
-      "name": "ALLCARGUIDE",
-      "code": "AG",
-      "account": "MN",
-      "url": "https://search.allcarguide.co/search/850/keywords_replace/?chanel_replace&chnm=business_code_replace_source_code_replace_region_code_replace&chnm2=campaign_id_replace&chnm3=adset_id_replace&trkfb=566855625308747"
-    },
-    {
-      "id": 6,
-      "name": "GENIUSSEARCHES",
-      "code": "SG",
-      "account": "MN",
-      "url": "https://top.geniussearches.net/search/850/keywords_replace/?chanel_replace&chnm=business_code_replace_source_code_replace_region_code_replace&chnm2=campaign_id_replace&chnm3=adset_id_replace&trkfb=859792251778708"
-    },
-    {
-      "id": 7,
-      "name": "DAILYEZINE",
-      "code": "DZ",
-      "account": "MN",
-      "url": "https://top.dailyezine.net/search/556/keywords_replace/?chanel_replace&chnm=business_code_replace_source_code_replace_region_code_replace&chnm2=campaign_id_replace&chnm3=adset_id_replace&trkfb=859792251778708"
-    },
-    {
-      "id": 8,
-      "name": "READERARCHIVE",
-      "code": "RA",
-      "account": "MN",
-      "url": "https://top.readerarchive.co/search/556/keywords_replace/?chanel_replace&chnm=business_code_replace_source_code_replace_region_code_replace&chnm2=campaign_id_replace&chnm3=adset_id_replace&trkfb=859792251778708"
+  // const MnetDomains = [
+  //   {
+  //     "id": 1,
+  //     "name": "POCKETFACTS",
+  //     "code": "PF",
+  //     "account": "MN",
+  //     "url": "https://top.pocketfacts.co/search/850/keywords_replace/?chanel_replace&chnm=business_code_replace_source_code_replace_region_code_replace&chnm2=campaign_id_replace&chnm3=adset_id_replace&trkfb=859792251778708"
+  //   },
+  //   {
+  //     "id": 2,
+  //     "name": "MOTORDIGEST",
+  //     "code": "MD",
+  //     "account": "MN",
+  //     "url": "https://top.motordigest.co/search/850/keywords_replace/?chanel_replace&chnm=business_code_replace_source_code_replace_region_code_replace&chnm2=campaign_id_replace&chnm3=adset_id_replace&trkfb=566855625308747"
+  //   },
+  //   {
+  //     "id": 3,
+  //     "name": "KNOW THE BUZZ",
+  //     "code": "KB",
+  //     "account": "MN",
+  //     "url": "https://top.knowthebuzz.co/search/850/keywords_replace/?chanel_replace&chnm=business_code_replace_source_code_replace_region_code_replace&chnm2=campaign_id_replace&chnm3=adset_id_replace&trkfb=859792251778708"
+  //   },
+  //   {
+  //     "id": 4,
+  //     "name": "Look Up Trends",
+  //     "code": "LT",
+  //     "account": "MN",
+  //     "url": "https://top.lookuptrends.co/search/850/keywords_replace/?chanel_replace&chnm=business_code_replace_source_code_replace_region_code_replace&chnm2=campaign_id_replace&chnm3=adset_id_replace&trkfb=859792251778708"
+  //   },
+  //   {
+  //     "id": 5,
+  //     "name": "ALLCARGUIDE",
+  //     "code": "AG",
+  //     "account": "MN",
+  //     "url": "https://search.allcarguide.co/search/850/keywords_replace/?chanel_replace&chnm=business_code_replace_source_code_replace_region_code_replace&chnm2=campaign_id_replace&chnm3=adset_id_replace&trkfb=566855625308747"
+  //   },
+  //   {
+  //     "id": 6,
+  //     "name": "GENIUSSEARCHES",
+  //     "code": "SG",
+  //     "account": "MN",
+  //     "url": "https://top.geniussearches.net/search/850/keywords_replace/?chanel_replace&chnm=business_code_replace_source_code_replace_region_code_replace&chnm2=campaign_id_replace&chnm3=adset_id_replace&trkfb=859792251778708"
+  //   },
+  //   {
+  //     "id": 7,
+  //     "name": "DAILYEZINE",
+  //     "code": "DZ",
+  //     "account": "MN",
+  //     "url": "https://top.dailyezine.net/search/556/keywords_replace/?chanel_replace&chnm=business_code_replace_source_code_replace_region_code_replace&chnm2=campaign_id_replace&chnm3=adset_id_replace&trkfb=859792251778708"
+  //   },
+  //   {
+  //     "id": 8,
+  //     "name": "READERARCHIVE",
+  //     "code": "RA",
+  //     "account": "MN",
+  //     "url": "https://top.readerarchive.co/search/556/keywords_replace/?chanel_replace&chnm=business_code_replace_source_code_replace_region_code_replace&chnm2=campaign_id_replace&chnm3=adset_id_replace&trkfb=859792251778708"
+  //   }
+  // ];
+
+  // const Source = [
+  //   {
+  //     "id": 1,
+  //     "name": "facebook",
+  //     "code": "FB",
+  //     "campaignId": "{{campaign.id}}",
+  //     "AdsetId": "{{adset.id}}"
+  //   },
+  //   {
+  //     "id": 2,
+  //     "name": "Taboola",
+  //     "code": "TB",
+  //     "campaignId": "{{campaign.id}}",
+  //     "AdsetId": "{{adset.id}}"
+  //   }
+  // ];
+
+  // const channels = [
+  //   {
+  //     "id": 1,
+  //     "name": "T1",
+  //     "source": "FB",
+  //     "value": "t=1"
+  //   },
+  //   {
+  //     "id": 2,
+  //     "name": "T2",
+  //     "source": "FB",
+  //     "value": "t=2"
+  //   },
+  //   {
+  //     "id": 3,
+  //     "name": "T3",
+  //     "source": "FB",
+  //     "value": "t=3"
+  //   },
+  //   {
+  //     "id": 4,
+  //     "name": "T4",
+  //     "source": "FB",
+  //     "value": "t=4"
+  //   },
+  //   {
+  //     "id": 5,
+  //     "name": "T2",
+  //     "source": "TB",
+  //     "value": "t=2"
+  //   },
+  //   {
+  //     "id": 6,
+  //     "name": "T3",
+  //     "source": "TB",
+  //     "value": "t=3"
+  //   },
+  //   {
+  //     "id": 7,
+  //     "name": "T4",
+  //     "source": "TB",
+  //     "value": "t=4"
+  //   },
+  //   {
+  //     "id": 8,
+  //     "name": "T5",
+  //     "source": "TB",
+  //     "value": "t=5"
+  //   },
+  //   {
+  //     "id": 9,
+  //     "name": "T6",
+  //     "source": "TB",
+  //     "value": "t=6"
+  //   },
+  //   {
+  //     "id": 10,
+  //     "name": "T7",
+  //     "source": "TB",
+  //     "value": "t=7"
+  //   },
+  //   {
+  //     "id": 11,
+  //     "name": "T8",
+  //     "source": "TB",
+  //     "value": "t=8"
+  //   },
+  //   {
+  //     "id": 12,
+  //     "name": "T9",
+  //     "source": "TB",
+  //     "value": "t=9"
+  //   },
+  //   {
+  //     "id": 13,
+  //     "name": "T10",
+  //     "source": "TB",
+  //     "value": "t=10"
+  //   }
+  // ];
+
+  const getUrlBuilderData = async()=>{
+    const response = await axios.get(`https://prodapis.adsgoat.in/get/urlbuilderdata?network=Mnet`);
+    if(response?.status === 200){
+      setNetworkData(response?.data)
     }
-  ];
+  };
 
-  const Source = [
-    {
-      "id": 1,
-      "name": "facebook",
-      "code": "FB",
-      "campaignId": "{{campaign.id}}",
-      "AdsetId": "{{adset.id}}"
-    },
-    {
-      "id": 2,
-      "name": "Taboola",
-      "code": "TB",
-      "campaignId": "{{campaign.id}}",
-      "AdsetId": "{{adset.id}}"
-    }
-  ];
-
-  const channels = [
-    {
-      "id": 1,
-      "name": "T1",
-      "source": "FB",
-      "value": "t=1"
-    },
-    {
-      "id": 2,
-      "name": "T2",
-      "source": "FB",
-      "value": "t=2"
-    },
-    {
-      "id": 3,
-      "name": "T3",
-      "source": "FB",
-      "value": "t=3"
-    },
-    {
-      "id": 4,
-      "name": "T4",
-      "source": "FB",
-      "value": "t=4"
-    },
-    {
-      "id": 5,
-      "name": "T2",
-      "source": "TB",
-      "value": "t=2"
-    },
-    {
-      "id": 6,
-      "name": "T3",
-      "source": "TB",
-      "value": "t=3"
-    },
-    {
-      "id": 7,
-      "name": "T4",
-      "source": "TB",
-      "value": "t=4"
-    },
-    {
-      "id": 8,
-      "name": "T5",
-      "source": "TB",
-      "value": "t=5"
-    },
-    {
-      "id": 9,
-      "name": "T6",
-      "source": "TB",
-      "value": "t=6"
-    },
-    {
-      "id": 10,
-      "name": "T7",
-      "source": "TB",
-      "value": "t=7"
-    },
-    {
-      "id": 11,
-      "name": "T8",
-      "source": "TB",
-      "value": "t=8"
-    },
-    {
-      "id": 12,
-      "name": "T9",
-      "source": "TB",
-      "value": "t=9"
-    },
-    {
-      "id": 13,
-      "name": "T10",
-      "source": "TB",
-      "value": "t=10"
-    }
-  ];
+  useEffect(()=>{
+    getUrlBuilderData();
+  },[]);
 
   // Function to add a new item
 
@@ -192,8 +204,8 @@ const MnetUrlBuilder = ({ onReturnMessage }) => {
 
     if (keywords && channel && memberId && geo && domain && source) {
       const formattedKeywords = keywords.replace(/\s+/g, '+');
-      const campaign_id = Source.find(item => item.code === source).campaignId;
-      const adset_id = Source.find(item => item.code === source).AdsetId;
+      const campaign_id = NetworkData?.Source?.find(item => item.code === source).campaignId;
+      const adset_id = NetworkData?.Source?.find(item => item.code === source).AdsetId;
       const mem_source_geo = `${memberId}_${source}_${geo}`
       let url = domain;
 
@@ -214,8 +226,8 @@ const MnetUrlBuilder = ({ onReturnMessage }) => {
 
     if (keywords && channel && memberId && geo && domain && source) {
       const formattedKeywords = keywords.replace(/\s+/g, '+');
-      const campaign_id = Source.find(item => item.code === source).campaignId;
-      const adset_id = Source.find(item => item.code === source).AdsetId;
+      const campaign_id = NetworkData?.Source?.find(item => item.code === source).campaignId;
+      const adset_id = NetworkData?.Source?.find(item => item.code === source).AdsetId;
       const mem_source_geo = `${memberId}_${source}_${geo}`
       let url = domain;
 
@@ -267,7 +279,7 @@ const MnetUrlBuilder = ({ onReturnMessage }) => {
             value={domain}
             style={{ width: '100%' }}
             onChange={onChangeDomian}
-            options={MnetDomains.map((item) => ({
+            options={NetworkData?.Domains?.map((item) => ({
               value: item.url,
               label: item.name,
             }))}
@@ -281,7 +293,7 @@ const MnetUrlBuilder = ({ onReturnMessage }) => {
             placeholder="Source"
             value={source}
             onChange={onChangeSource}
-            options={Source.map((item) => ({
+            options={NetworkData?.Source?.map((item) => ({
               value: item.code,
               label: item.name,
             }))}
@@ -295,9 +307,9 @@ const MnetUrlBuilder = ({ onReturnMessage }) => {
             value={channel}
             required
             onChange={onChangeChannel}
-            options={channels
-              .filter((item) => item.source === source)
-              .map((item) => ({
+            options={NetworkData?.channels
+              ?.filter((item) => item.source === source)
+              ?.map((item) => ({
                 value: item.value,
                 label: item.name,
               }))}
