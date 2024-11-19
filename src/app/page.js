@@ -7,7 +7,7 @@ export default function page() {
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
       <h1 style={{ color: "red" }}>
-        Welcome to Adsgoat Media Pvt Ltd
+        Welcome to vyaktimetrics.
       </h1>
     </div>
   );
