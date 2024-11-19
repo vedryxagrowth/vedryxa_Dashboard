@@ -1,10 +1,11 @@
 "use client"
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
-import { Table, Button, Col, Card, Input, Row, Select, Result, Spin, Space, Modal, message, Menu, Switch, Search, Tooltip } from 'antd';
+import { Table, Button, Col, Card, Input, Row, Select, Result, Spin, Space, Modal, message, Menu, Switch, Search, Tooltip, Tabs } from 'antd';
 import { ReloadOutlined, HighlightOutlined, LeftOutlined, RightOutlined, SearchOutlined, SwapRightOutlined, DownOutlined, EditOutlined, EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
 import { Carousel } from 'react-responsive-carousel';
 import { MailOutlined, SettingOutlined } from '@ant-design/icons';
+import StickyBox from 'react-sticky-box';
 
 // import { , Select } from 'antd';
 import { useTokenContext } from '../components/parent';
@@ -16,6 +17,7 @@ import Newaddaccounts from './users-components/add-newaccount';
 import Edituseraccesses from './users-components/edit-usersaccess';
 import EditAccountAccess from './users-components/edit-accountaccess';
 import EditNetworkAccess from './users-components/edit-network';
+import EditUrlBuilder from './users-components/edit-urlbulder';
 
 import debounce from 'lodash.debounce';
 
@@ -37,10 +39,12 @@ const UsersTable = () => {
     const [isSearchingNetwork, setIsSearchingNetwork] = useState(false); //prudhvi
     const [netSearchInput, setNetSearchInput] = useState(""); //prudhvi
     const [networkAccessDrawerkVisible, setNetworkAccessDrawerVisible] = useState(false); //prudhvi
+    const [urlBuliderAccessDrawerkVisible, setUrlBuliderAccessDrawerkVisible] = useState(false);//Praveen
     const [networkFilteredData, setNetworkFilteredData] = useState([]); //prudhvi
     const [networksData, setNetworksData] = useState([]); //prudhvi
+    const [urlBuilderData, setUrlBuilderData] = useState([]);
     const [networkAccessData, setNetworkAccessData] = useState(null);
-
+    const [urlBuilderAccessData, setUrlBuilderAccessData] = useState(null);//Praveen
     const [usersData, setUsersData] = useState([]);
     const [AccountsData, setAccountsData] = useState([]);
     const [searchInput, setSearchInput] = useState("");
@@ -55,6 +59,7 @@ const UsersTable = () => {
     const [usersaccessData, setusersaccessData] = useState(null);
     const [accountaccessData, setaccountaccessData] = useState(null);
     const [newSearchInput, setNewSearchInput] = useState("");
+    const [newRefreshUrlBuilder, setNewRefreshUrlbuilder] = useState(null);
 
     const [role, setRole] = useState('');
     const [status, setStatus] = useState('All');
@@ -62,8 +67,9 @@ const UsersTable = () => {
     const [isSearching, setIsSearching] = useState(false);
     const [isSearchingAccount, setIsSearchingAccount] = useState(false);
 
-    const carouselRef = useRef(null);
+    const carouselRef = useRef();
     const [currentSlide, setCurrentSlide] = useState(0);
+    const [activeSlide, setActiveSlide] = useState(0);
     const { theme } = useTokenContext();
 
     const handleDotClick = (index) => {
@@ -104,6 +110,35 @@ const UsersTable = () => {
             setIsSearchingAccount(false);
         }
     };
+
+    const items = [
+        { key: '1', label: 'Users', content: 'Content for Live data' },
+        { key: '2', label: 'Accounts', content: 'Content for Daily data' },
+        { key: '3', label: 'Networks', content: 'Content for Campaign data' },
+        { key: '4', label: 'UrlBuilder', content: 'Content for Campaign data' }
+    ];
+
+    const handleTabChange = (key) => {
+        const index = parseInt(key, 10) - 1; // Convert tab key to slide index
+        setActiveSlide(index); // Update the active slide
+    };
+
+    const handleCarouselChange = (index) => {
+        setActiveSlide(index); // Update the active tab based on the carousel's current slide
+    };
+
+    const renderCarouselNav = () => (
+        <div style={{marginLeft:'10px'}}>
+            <Tabs
+                activeKey={(activeSlide + 1).toString()} // Sync the active tab with the slide
+                onChange={handleTabChange} // Update the slide on tab change
+                items={items.map((item) => ({
+                    key: item.key,
+                    label: item.label,
+                }))}
+            />
+        </div>
+    );
 
     // const handleChangeInput1 = (e) => {
     //     setInputValue(e.target.value);
@@ -179,6 +214,7 @@ const UsersTable = () => {
             const debouncedFetchData = debounce(fetchusersData, 1200);
             const debouncedFetchData1 = debounce(fetchAccountsData, 2500);
             const debouncedFetchData2 = debounce(fetchNetworksData, 3500);
+            const debouncedFetchData4 = debounce(fetchUrlBuilderData, 4500);
     
             const functionaCall = async () => {
                 const retryWithDelay = async (fn, retries = 3, delay = 1000) => {
@@ -201,6 +237,7 @@ const UsersTable = () => {
                     await retryWithDelay(debouncedFetchData);
                     await retryWithDelay(debouncedFetchData1);
                     await retryWithDelay(debouncedFetchData2);
+                    await retryWithDelay(debouncedFetchData4);
                 } catch (error) {
                     console.error('Failed to fetch data:', error);
                 }
@@ -380,6 +417,27 @@ const UsersTable = () => {
             console.log("Response:", response.data);
             if (response.status === 200) {
                 setNetworksData(response.data);
+                console.log(response.data, "Networks Data");
+            } else {
+                console.error('Failed to fetch Networks data');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const fetchUrlBuilderData = async () => {
+        try{
+            const response = await axios.get('https://prodapis.adsgoat.in/get/allurlbuilderdata/', {
+                headers: {
+                    Authorization: token
+                }
+            });
+            console.log("Response:", response.data);
+            if (response.status === 200) {
+                setUrlBuilderData(response.data);
                 console.log(response.data, "Networks Data");
             } else {
                 console.error('Failed to fetch Networks data');
@@ -793,6 +851,314 @@ const UsersTable = () => {
         },
     ];
 
+    const urlbuilder = [
+        {
+            title: 'Network',
+            dataIndex: 'Network',
+            key: 'Network',
+        },
+        {
+            title: 'Domains',
+            dataIndex: 'Domains',
+            key: 'Domains',
+            render: Domains => {
+                const newDomains = Domains;
+                if (Domains && Domains.length > 0) {
+                    return (
+                        <Select
+                            defaultValue={'Domains'}
+                            style={{ width: '200px' }}
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                            onChange={handleSelectChange}
+                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                            dropdownRender={(menu) => (
+                                <Menu
+                                    onClick={() => {}}
+                                    style={{ width: 256, maxHeight: 300, overflowY: 'auto' }}
+                                    mode="inline"
+                                    // defaultSelectedKeys={['2']}
+                                >
+                                    {newDomains.map(item => (
+                                        <SubMenu
+                                            key={item.key}
+                                            title={
+                                                <span style={{ width: '150px', display: 'flex', justifyContent: 'space-between' }}>
+                                                    {item.name} <DownOutlined size={10} />
+                                                </span>
+                                            }
+                                            className="custom-submenu"
+                                        >
+                                            <div style={{ padding: '10px', display: 'flex', flexDirection: 'column', gap: '8px', marginLeft:'25px' }}>
+                                                <p><strong>ID:</strong> {item.id}</p>
+                                                <p><strong>Name:</strong> {item.name}</p>
+                                                <p><strong>Code:</strong> {item.code}</p>
+                                                <p><strong>Account:</strong> {item.account}</p>
+                                                <div style={{ display: 'flex', marginRight:'25px' }}>
+                                                    <div style={{ paddingRight: '8px', paddingTop:'10px' }}><strong>URL:</strong></div>
+                                                    <div style={{
+                                                        marginRight:'25px',
+                                                        display: 'block',
+                                                        maxWidth: '200px',       // Limit max width
+                                                        whiteSpace: 'normal',    // Allows text to wrap to new lines
+                                                        wordBreak: 'break-word', // Forces breaks within long words
+                                                        overflowWrap: 'break-word', // Ensures breaking at any possible point
+                                                        lineHeight: '1.5', // Space out lines for readability
+                                                        color: '#000', // Adjust text color if needed
+                                                    }}>
+                                                        {item.url}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </SubMenu>
+                                    ))}
+                                </Menu>
+                            )}
+                        >
+                            {/* Placeholder for Select options if needed */}
+                        </Select>
+                    );
+                } else {
+                    return (
+                        <Select
+                            style={{ width: '200px' }}
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                            defaultValue={'No Data'}
+                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                        >
+                            <Select.Option key="empty" value="">
+                            No Data
+                            </Select.Option>
+                        </Select>
+                    );
+                }
+            }
+        },
+        {
+            title: 'Source',
+            dataIndex: 'Source',
+            key: 'Source',
+            render: Source => {
+                // console.log(adAccounts, "adding the accounts");
+                // const menuItems = transformData(adAccounts);
+                const newSource = Source;
+                if(Source && Source.length >0){
+                    return((
+                        <Select
+                            defaultValue={'Source'}
+                            style={{ width: '200px',
+                            }}
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                            onChange={handleSelectChange}
+                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                            dropdownRender={(menu) => (
+                                <Menu
+                                onClick={() => {}}
+                                style={{ width: 256, maxHeight: 300, overflowY: 'auto'  }}
+                                mode="inline"
+                                // defaultSelectedKeys={['2']}
+                                >
+                                {newSource.map(item => (
+                                    <SubMenu
+                                        key={item.key}
+                                        title={
+                                            <span style={{ width: '150px', display: 'flex', justifyContent: 'space-between' }}>
+                                                {item.name} <DownOutlined size={10} />
+                                            </span>
+                                        }
+                                        className="custom-submenu"
+                                    >
+                                        <div style={{ padding: '10px', display: 'flex', flexDirection: 'column', gap: '8px', marginLeft:'25px' }}>
+                                            <p><strong>ID:</strong> {item.id}</p>
+                                            <p><strong>Name:</strong> {item.name}</p>
+                                            <p><strong>Code:</strong> {item.code}</p>
+                                            <p><strong>CampaignID:</strong> {item.campaignId}</p>
+                                            <p><strong>CampaignID:</strong> {item.AdsetId}</p>
+                                        </div>
+                                    </SubMenu>
+                                ))}
+                                </Menu>
+                            )}
+                            >
+                            {/* {menuItems.map(item => (
+                                <Select.Option key={item.key} value={item.key}>
+                                {item.label}
+                                </Select.Option>
+                            ))} */}
+                        </Select>
+    
+                    ))
+                }else{
+                    return(
+                        <Select style={{ width: '200px'
+                         }}
+                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                        defaultValue={'No Data'} 
+                        dropdownClassName={theme === 'dark' && "custom-dropdown"}>
+                            <Select.Option key="empty" value="">
+                            No Data
+                            </Select.Option>
+                        </Select>
+                    );
+                }
+           }
+        },
+        {
+            title: 'channels',
+            dataIndex: 'channels',
+            key: 'channels',
+            render: channels => {
+                // console.log(adAccounts, "adding the accounts");
+                // const menuItems = transformData(adAccounts);
+                const newChannels = channels;
+                if(channels && channels.length >0){
+                    return((
+                        <Select
+                            defaultValue={'channels'}
+                            style={{ width: '200px',
+                            }}
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                            onChange={handleSelectChange}
+                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                            dropdownRender={(menu) => (
+                                <Menu
+                                onClick={() => {}}
+                                style={{ width: 256, maxHeight: 300, overflowY: 'auto'  }}
+                                mode="inline"
+                                // defaultSelectedKeys={['2']}
+                                >
+                                {newChannels.map(item => (
+                                    <SubMenu
+                                        key={item.key}
+                                        title={
+                                            <span style={{ width: '150px', display: 'flex', justifyContent: 'space-between' }}>
+                                                {item.name} <DownOutlined size={10} />
+                                            </span>
+                                        }
+                                        className="custom-submenu"
+                                    >
+                                        <div style={{ padding: '10px', display: 'flex', flexDirection: 'column', gap: '8px', marginLeft:'25px' }}>
+                                            <p><strong>ID:</strong> {item.id}</p>
+                                            <p><strong>Name:</strong> {item.name}</p>
+                                            <p><strong>Source:</strong> {item.source}</p>
+                                            <p><strong>Value:</strong> {item.value}</p>
+                                        </div>
+                                    </SubMenu>
+                                ))}
+                                </Menu>
+                            )}
+                            >
+                            {/* {menuItems.map(item => (
+                                <Select.Option key={item.key} value={item.key}>
+                                {item.label}
+                                </Select.Option>
+                            ))} */}
+                        </Select>
+    
+                    ))
+                }else{
+                    return(
+                        <Select style={{ width: '200px'
+                         }}
+                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                        defaultValue={'No Data'} 
+                        dropdownClassName={theme === 'dark' && "custom-dropdown"}>
+                            <Select.Option key="empty" value="">
+                            No Data
+                            </Select.Option>
+                        </Select>
+                    );
+                }
+            }
+        },
+        {
+            title: 'BusinessData',
+            dataIndex: 'businessData',
+            key: 'businessData',
+            render: businessData => {
+                const newBusinessData = businessData;
+                // console.log(adAccounts, "adding the accounts");
+                // const menuItems = transformData(adAccounts);
+                if(businessData && businessData.length >0){
+                    return((
+                        <Select
+                            defaultValue={'BusinessData'}
+                            style={{ width: '200px' }}
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                            onChange={handleSelectChange}
+                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                            dropdownRender={(menu) => (
+                                <Menu
+                                    onClick={() => {}}
+                                    style={{ width: 256, maxHeight: 300, overflowY: 'auto' }}
+                                    mode="inline"
+                                >
+                                    {newBusinessData.map(item => (
+                                        <SubMenu
+                                            key={item.key}
+                                            title={
+                                                <span style={{ width: '150px', display: 'flex', justifyContent: 'space-between' }}>
+                                                    {item.name} <DownOutlined size={10} />
+                                                </span>
+                                            }
+                                            className="custom-submenu"
+                                        >
+                                            <div style={{ padding: '10px', display: 'flex', flexDirection: 'column', gap: '8px', marginLeft: '25px' }}>
+                                                <p><strong>ID:</strong> {item.id}</p>
+                                                <p><strong>Name:</strong> {item.name}</p>
+                                                <p><strong>Code:</strong> {item.code}</p>
+                                                <p><strong>Account:</strong> {item.account}</p>
+                                                <div style={{ display: 'flex', marginRight:'25px' }}>
+                                                    <div style={{ paddingRight: '8px', paddingTop:'10px' }}><strong>URL:</strong></div>
+                                                    <div style={{
+                                                        marginRight:'25px',
+                                                        display: 'block',
+                                                        maxWidth: '200px',       // Limit max width
+                                                        whiteSpace: 'normal',    // Allows text to wrap to new lines
+                                                        wordBreak: 'break-word', // Forces breaks within long words
+                                                        overflowWrap: 'break-word', // Ensures breaking at any possible point
+                                                        lineHeight: '1.5', // Space out lines for readability
+                                                        color: '#000', // Adjust text color if needed
+                                                    }}>
+                                                        {item.url}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </SubMenu>
+                                    ))}
+                                </Menu>
+                            )}
+                        >
+                        </Select>
+    
+                    ))
+                }else{
+                    return(
+                        <Select style={{ width: '200px'
+                         }}
+                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                        defaultValue={'No Data'} 
+                        dropdownClassName={theme === 'dark' && "custom-dropdown"}>
+                            <Select.Option key="empty" value="">
+                                No Data
+                            </Select.Option>
+                        </Select>
+                    );
+                }
+            }
+        },
+        {
+            title: 'Action',
+            key: 'action',
+            width: 100,
+            render: (text, record) => (
+                <Space size="middle">
+                    <Button type="primary" onClick={()=>handleEditUrlBuilder(record)}>Edit</Button>
+                    {/* <Button type="dashed" onClick={() => handleDelete(record)}>Remove Access</Button> */}
+                </Space>
+            ),
+        },
+    ];
+
     const handleSearchChange = (e) => {
         const searchValue = e.target.value.toLowerCase();
         setSearchInput(searchValue);
@@ -829,7 +1195,7 @@ const UsersTable = () => {
     };
 
     const showNetworkDrawer = () => {
-        setNetworkDrawerVisible(true)
+        // setNetworkDrawerVisible(true)
     }
 
     useEffect(() => {
@@ -860,6 +1226,11 @@ const UsersTable = () => {
         setusersaccessDrawerVisible(true)
         setusersaccessData(values)
         // console.log(values, "Edit")
+    }
+
+    const handleEditUrlBuilder = (record) =>{
+        setUrlBuliderAccessDrawerkVisible(true);
+        setUrlBuilderAccessData(record);
     }
 
     const handleEditAccount = (values) => {
@@ -961,6 +1332,24 @@ const UsersTable = () => {
         }
     };
 
+    const refreshUrlBuilder = async () => {
+        try {
+            setLoading(true);
+            const response = await fetchUrlBuilderData();  
+            setUrlBuilderData(response.data); 
+        } catch (error) {
+            console.error("Error fetching network data:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
+    useEffect(()=>{
+        if(newRefreshUrlBuilder !== null){
+            refreshUrlBuilder();
+        }
+    },[newRefreshUrlBuilder]);
 
     const onCloseDrawer = (updatedData) => {
         if (updatedData) {
@@ -985,6 +1374,8 @@ const UsersTable = () => {
                 network.revenuePartner === updatedData.revenuePartner ? updatedData : network
               )
             );
+          }else {
+            setNewRefreshUrlbuilder(updatedData);
           }
         }
       
@@ -994,6 +1385,7 @@ const UsersTable = () => {
         setusersaccessDrawerVisible(false);
         setaccountaccessDrawerVisible(false);
         setNetworkAccessDrawerVisible(false);
+        setUrlBuliderAccessDrawerkVisible(false);
     };
 
 
@@ -1006,16 +1398,24 @@ const UsersTable = () => {
             <Edituseraccesses editeddata={usersaccessData} visible={usersaccessDrawerVisible} onClose={onCloseDrawer} />
             <EditAccountAccess editeddata={accountaccessData} visible={accountaccessDrawerVisible} onClose={onCloseDrawer} />
             <EditNetworkAccess editeddata={networkAccessData} visible={networkAccessDrawerkVisible} onClose={onCloseDrawer} />
+            <EditUrlBuilder editeddata={urlBuilderAccessData} visible={urlBuliderAccessDrawerkVisible} onClose={onCloseDrawer} />
 
+            <div style={{padding:'0px', margin:'0px'}}>
+                    {renderCarouselNav()}
+            </div>
             <Carousel
                 // className="custom-carousel"
-                
-                ref={carouselRef}
-                dotPosition="bottom"
-                afterChange={setCurrentSlide}
-                dots={false}
+                showArrows={false}
                 showThumbs={false}
-            >
+                showIndicators={false}
+                showStatus={false}
+                selectedItem={activeSlide} // Control the active slide
+                onChange={handleCarouselChange} // Sync the tab when the slide changes
+                // showThumbs={false}
+                // showIndicators={false}
+                // showStatus={false}
+            >   
+                
                 <div style={{width:'100%'}}>
                     <Card title="Users Access" size="small" className={theme === 'dark' ? 'dark-theme' : 'light-theme'}>
                         <Row align={"bottom"} gutter={[16, 16]}>
@@ -1131,7 +1531,7 @@ const UsersTable = () => {
                                     <Col xs={24} sm={12} md={8}>
                                         <span style={{ color: "#B4B4B4", display: 'block' }}>Search</span>
                                         <div style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
-                                            <Button  style={{color: theme === "dark" ? "#333": "#fff"}} icon={<SearchOutlined  style={{color: theme === "dark" ? "#333": "#fff"}}/>} onClick={handleSearchClick1} />
+                                            <Button  style={{color: theme === "dark" ? "#333": "#fff"}} icon={<SearchOutlined  style={{color: theme === "dark" ? "#fff": "#333"}} />} onClick={handleSearchClick1} />
                                             <Input
                                                 placeholder="Search here"
                                                 autoFocus={isSearchingAccount}  // Only autofocus when searching
@@ -1196,11 +1596,11 @@ const UsersTable = () => {
                             </Col>
                         </Row>
                     </Card>
-                    {loading ? (
+                    {(loading) ? (
                         <Spin />
                     ) : AccountsData.length > 0 ? (
                         <Table
-                            bordered
+                            // bordered
                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             dataSource={newSearchInput ? accFilteredData.map((item, index) => ({ ...item, key: index })) : filteredAccountData.map((item, index) => ({ ...item, key: index }))}
                             columns={Accountscolumn}
@@ -1293,11 +1693,11 @@ const UsersTable = () => {
                             </Col>
                         </Row>
                     </Card>
-                    {loading ? (
+                    {(loading) ? (
                         <Spin />
                     ) : networksData.length > 0 ? ( 
                         <Table
-                            bordered
+                            // bordered
                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             dataSource={netSearchInput ? networkFilteredData.map((item, index) => ({ ...item, key: item.key, id: index })) : filteredNetworkData.map((item, index) => ({ ...item, key: item.key, id: index }))}
                             columns={networksColumn}
@@ -1314,6 +1714,104 @@ const UsersTable = () => {
                             subTitle="Sorry, this page contains no data."
                             extra={<Button type="primary" onClick={showNetworkDrawer}>
                                 Add New Network
+                            </Button>}
+                        />
+                    )}
+                </div>
+                <div>
+                    <Card title="URL Builder" size="small" className={theme === 'dark' ? 'dark-theme' : 'light-theme'}>
+                        <Row align={"bottom"} gutter={[16, 16]}>
+                            <Col xs={24} md={16}>
+                                <Row gutter={[16, 16]}>
+                                    
+                                    <Col xs={24} sm={12} md={8}>
+                                        <span style={{ color: "#B4B4B4", display: 'block' }}>Search</span>
+                                        <div style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
+                                            <Button  style={{color: theme === "dark" ? "#333": "#fff"}} icon={<SearchOutlined  style={{color: theme === "dark" ? "#fff": "#333"}} />} onClick={handleSearchClick1} />
+                                            <Input
+                                                placeholder="Search here"
+                                                autoFocus={isSearchingAccount}  // Only autofocus when searching
+                                                value={newSearchInput}
+                                                // onChange={handleaccountSearchChange}
+                                                // onBlur={handleBlur1}
+                                                style={{
+                                                    width: '100%',
+                                                    borderRadius: '5px',
+                                                    marginLeft: '8px',
+                                                    backgroundColor: theme === 'dark' ? '#333' : '#ffffff',  // Dark theme: dark background, Light theme: white background
+                                                    color: theme === 'dark' ? '#ffffff' : '#333',            // Dark theme: white text, Light theme: dark text
+                                                    borderColor: theme === 'dark' ? '#444444' : '#d9d9d9'       // Optional: adjust border color as well
+                                                }} // Adjust input width and margin dynamically
+                                            />
+                                        </div>
+                                    </Col>
+                                    <Col xs={24} sm={12} md={8}>
+                                        <span style={{ color: "#B4B4B4", display: 'block' }}>Network</span>
+                                        <Select
+                                            // onChange={onChangeNetwork}
+                                            defaultValue="All"
+                                            style={{ width: "100%", marginTop: '8px'
+                                            }}
+                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                            options={availableNetworks.map((item) => ({
+                                                value: item,
+                                                label: item,
+                                            }))}
+                                        />
+                                    </Col>
+                                    {/* <Col xs={24} sm={12} md={8}>
+                                        <span style={{ color: "#B4B4B4", display: 'block' }}>Status</span>
+                                        <Select
+                                            // onChange={onChangeStatus}
+                                            defaultValue="All"
+                                            style={{ width: "100%", marginTop: '8px'
+                                            }}
+                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                            options={accountStatus.map((item) => ({
+                                                value: item,
+                                                label: item,
+                                            }))}
+                                        />
+                                    </Col> */}
+                                    
+                                </Row>
+                            </Col>
+                            <Col xs={24} md={8}>
+                                <Button 
+                                    type="default" 
+                                    icon={<ReloadOutlined />} 
+                                    style={{ float: "right", marginLeft: "10px", backgroundColor: '#C7F39A' }} 
+                                    onClick={refreshUrlBuilder}  // Call refresh function when clicked
+                                >
+                                </Button>
+                                <Button type="primary" style={{ float: "right", marginLeft: "5%" }}>
+                                    Add New URL Builder
+                                </Button>
+                            </Col>
+                        </Row>
+                    </Card>
+                    {(loading) ? (
+                        <Spin />
+                    ) : urlBuilderData.length > 0 ? (
+                        <Table
+                            // bordered
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                            dataSource={urlBuilderData}
+                            // dataSource={newSearchInput ? accFilteredData.map((item, index) => ({ ...item, key: index })) : filteredAccountData.map((item, index) => ({ ...item, key: index }))}
+                            columns={urlbuilder}
+                            pagination={{ pageSize: paginationSize }}
+                            scroll={{ y: 'calc(80vh - 200px)' }}
+                        />
+                    ) : (
+                        <Result
+                            status="404"
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                            title="No Accounts Data Available"
+                            subTitle="Sorry, this page contains no data."
+                            extra={<Button type="primary" onClick={shownnewaccountdrawar}>
+                                Add New Account
                             </Button>}
                         />
                     )}

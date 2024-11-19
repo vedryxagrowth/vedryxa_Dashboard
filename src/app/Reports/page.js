@@ -192,6 +192,7 @@ const MyTablePage = () => {
     const [inputValue, setInputValue] = useState('');
     const [isSecondRowVisible, setIsSecondRowVisible] = useState(false);
     const [refrst, setRefrst] = useState(false);
+    const [activeTab, setActiveTab] = useState("1");
 
     // Toggle function
 
@@ -2796,16 +2797,19 @@ const MyTablePage = () => {
 
     const handleCustomerServiceClick = () => {
         console.log('Customer Service button clicked');
+        setActiveTab('2');
         carouselRef.current.goTo(1); // Change to the first slide
     };
 
     const handleCommentClick = () => {
         console.log('Comment button clicked');
+        setActiveTab('1');
         carouselRef.current.goTo(0); // Change to the second slide
     };
 
     const handleCommentClick1 = () => {
         console.log('Comment button clicked');
+        setActiveTab('3');
         carouselRef.current.goTo(2);
     }
 
@@ -4441,18 +4445,21 @@ const MyTablePage = () => {
         { key: '2', label: 'Daily', content: 'Content for Daily data' },
         { key: '3', label: 'Campaigns', content: 'Content for Campaign data' }
     ];
+    const handleSlideChange = (from, to) => {
+        setActiveTab((parseInt(to)+1).toString());
+        // console.log((parseInt(to)+1).toString());
+    };
     
     const handleCarouselChange = (index) => {
-        if (carouselRef.current) {
-          carouselRef.current.goTo(index);
-        }
+        setActiveTab(index);
+        carouselRef.current.goTo(parseInt(index)-1)
     };
     
     const renderCarouselNav = () => (
             <StickyBox offsetTop={64} offsetBottom={20} style={{ zIndex: 1, padding: '0px', margin: '0px', paddingLeft: '12px' }}>
                 <Tabs
-                    defaultActiveKey="1"
-                    onChange={(key) => handleCarouselChange(Number(key) - 1)}
+                    activeKey={activeTab}
+                    onChange={(key) => handleCarouselChange(key)}
                     items={items.map((item) => ({
                     key: item.key,
                     label: item.label,
@@ -4640,7 +4647,8 @@ const MyTablePage = () => {
                     </Row>
                 </div>
 
-                <Carousel afterChange={onChange1} ref={carouselRef}>
+                <Carousel ref={carouselRef}
+                beforeChange={handleSlideChange} >
                     <div style={{ height: "100%", marginBottom: '20px' }}>
                         <div style={contentStyle}>
                             {isLoading === true ? (
