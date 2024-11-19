@@ -4445,6 +4445,10 @@ const MyTablePage = () => {
         { key: '2', label: 'Daily', content: 'Content for Daily data' },
         { key: '3', label: 'Campaigns', content: 'Content for Campaign data' }
     ];
+    const handleSlideChange = (from, to) => {
+        setActiveTab((parseInt(to)+1).toString());
+        // console.log((parseInt(to)+1).toString());
+    };
     
     const handleCarouselChange = (index) => {
         setActiveTab(index);
@@ -4643,7 +4647,8 @@ const MyTablePage = () => {
                     </Row>
                 </div>
 
-                <Carousel afterChange={onChange1} ref={carouselRef}>
+                <Carousel ref={carouselRef}
+                beforeChange={handleSlideChange} >
                     <div style={{ height: "100%", marginBottom: '20px' }}>
                         <div style={contentStyle}>
                             {isLoading === true ? (
