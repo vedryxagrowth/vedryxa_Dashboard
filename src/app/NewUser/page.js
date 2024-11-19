@@ -17,6 +17,7 @@ import Newaddaccounts from './users-components/add-newaccount';
 import Edituseraccesses from './users-components/edit-usersaccess';
 import EditAccountAccess from './users-components/edit-accountaccess';
 import EditNetworkAccess from './users-components/edit-network';
+import EditUrlBuilder from './users-components/edit-urlbulder';
 
 import debounce from 'lodash.debounce';
 
@@ -38,11 +39,12 @@ const UsersTable = () => {
     const [isSearchingNetwork, setIsSearchingNetwork] = useState(false); //prudhvi
     const [netSearchInput, setNetSearchInput] = useState(""); //prudhvi
     const [networkAccessDrawerkVisible, setNetworkAccessDrawerVisible] = useState(false); //prudhvi
+    const [urlBuliderAccessDrawerkVisible, setUrlBuliderAccessDrawerkVisible] = useState(false);//Praveen
     const [networkFilteredData, setNetworkFilteredData] = useState([]); //prudhvi
     const [networksData, setNetworksData] = useState([]); //prudhvi
     const [urlBuilderData, setUrlBuilderData] = useState([]);
     const [networkAccessData, setNetworkAccessData] = useState(null);
-
+    const [urlBuilderAccessData, setUrlBuilderAccessData] = useState(null);//Praveen
     const [usersData, setUsersData] = useState([]);
     const [AccountsData, setAccountsData] = useState([]);
     const [searchInput, setSearchInput] = useState("");
@@ -57,6 +59,7 @@ const UsersTable = () => {
     const [usersaccessData, setusersaccessData] = useState(null);
     const [accountaccessData, setaccountaccessData] = useState(null);
     const [newSearchInput, setNewSearchInput] = useState("");
+    const [newRefreshUrlBuilder, setNewRefreshUrlbuilder] = useState(null);
 
     const [role, setRole] = useState('');
     const [status, setStatus] = useState('All');
@@ -1149,7 +1152,7 @@ const UsersTable = () => {
             width: 100,
             render: (text, record) => (
                 <Space size="middle">
-                    <Button type="primary">Edit</Button>
+                    <Button type="primary" onClick={()=>handleEditUrlBuilder(record)}>Edit</Button>
                     {/* <Button type="dashed" onClick={() => handleDelete(record)}>Remove Access</Button> */}
                 </Space>
             ),
@@ -1192,7 +1195,7 @@ const UsersTable = () => {
     };
 
     const showNetworkDrawer = () => {
-        setNetworkDrawerVisible(true)
+        // setNetworkDrawerVisible(true)
     }
 
     useEffect(() => {
@@ -1223,6 +1226,11 @@ const UsersTable = () => {
         setusersaccessDrawerVisible(true)
         setusersaccessData(values)
         // console.log(values, "Edit")
+    }
+
+    const handleEditUrlBuilder = (record) =>{
+        setUrlBuliderAccessDrawerkVisible(true);
+        setUrlBuilderAccessData(record);
     }
 
     const handleEditAccount = (values) => {
@@ -1337,7 +1345,11 @@ const UsersTable = () => {
     };
 
 
-
+    useEffect(()=>{
+        if(newRefreshUrlBuilder !== null){
+            refreshUrlBuilder();
+        }
+    },[newRefreshUrlBuilder]);
 
     const onCloseDrawer = (updatedData) => {
         if (updatedData) {
@@ -1362,6 +1374,8 @@ const UsersTable = () => {
                 network.revenuePartner === updatedData.revenuePartner ? updatedData : network
               )
             );
+          }else {
+            setNewRefreshUrlbuilder(updatedData);
           }
         }
       
@@ -1371,6 +1385,7 @@ const UsersTable = () => {
         setusersaccessDrawerVisible(false);
         setaccountaccessDrawerVisible(false);
         setNetworkAccessDrawerVisible(false);
+        setUrlBuliderAccessDrawerkVisible(false);
     };
 
 
@@ -1383,12 +1398,14 @@ const UsersTable = () => {
             <Edituseraccesses editeddata={usersaccessData} visible={usersaccessDrawerVisible} onClose={onCloseDrawer} />
             <EditAccountAccess editeddata={accountaccessData} visible={accountaccessDrawerVisible} onClose={onCloseDrawer} />
             <EditNetworkAccess editeddata={networkAccessData} visible={networkAccessDrawerkVisible} onClose={onCloseDrawer} />
+            <EditUrlBuilder editeddata={urlBuilderAccessData} visible={urlBuliderAccessDrawerkVisible} onClose={onCloseDrawer} />
 
             <div style={{padding:'0px', margin:'0px'}}>
                     {renderCarouselNav()}
             </div>
             <Carousel
                 // className="custom-carousel"
+                showArrows={false}
                 showThumbs={false}
                 showIndicators={false}
                 showStatus={false}
@@ -1579,7 +1596,7 @@ const UsersTable = () => {
                             </Col>
                         </Row>
                     </Card>
-                    {loading ? (
+                    {(loading) ? (
                         <Spin />
                     ) : AccountsData.length > 0 ? (
                         <Table
@@ -1676,7 +1693,7 @@ const UsersTable = () => {
                             </Col>
                         </Row>
                     </Card>
-                    {loading ? (
+                    {(loading) ? (
                         <Spin />
                     ) : networksData.length > 0 ? ( 
                         <Table
@@ -1775,7 +1792,7 @@ const UsersTable = () => {
                             </Col>
                         </Row>
                     </Card>
-                    {loading ? (
+                    {(loading) ? (
                         <Spin />
                     ) : urlBuilderData.length > 0 ? (
                         <Table
