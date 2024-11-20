@@ -1061,7 +1061,7 @@ const Dashboard = () => {
                                 const url = `/Reports?${queryString}`;
 
                                 // Open the URL in a new tab
-                                window.open(url, '_blank');
+                                window.open(url, '_blank', 'noopener');
                             }}
                         >
                             {valueWithCount}
