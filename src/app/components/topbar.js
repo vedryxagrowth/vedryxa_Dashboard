@@ -146,27 +146,41 @@ const Topbar = () => {
 
 
   // Fetch notifications function
-  const fetchNotifications = async () => {
-    try {
-      console.log(tokenForAuth);
-      const response = await axios.get(`https://prodapis.adsgoat.in/Notifications/get?email=${userdetails?.email}`,
-        {
-          headers: {
-            Authorization: tokenForAuth,
-          }
+  const fetchNotificationsWithRetry = async (retries = 3, delay = 5000) => {
+    const makeRequest = async (retryAttempt) => {
+      try {
+        console.log(tokenForAuth);
+        let response;
+        if(isNotificationsFetched.current === false){
+          response = await axios.get(
+            `https://prodapis.adsgoat.in/Notifications/get?email=${userdetails?.email}`,
+            {
+              headers: {
+                Authorization: tokenForAuth,
+              }
+            }
+          );
         }
-      );
-      if (response.status === 200) {
-        setNotifications(response.data.notifications);
+        if (response.status === 200) {
+          setNotifications(response.data.notifications);
+        }
+      } catch (error) {
+        if (retryAttempt > 0 && error.response?.status === 500) {
+          // Retry after delay for 500 errors
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          return makeRequest(retryAttempt - 1); // Retry
+        }
+        console.error('Error fetching notifications:', error); // Log error if no retries left or other status
       }
-    } catch (error) {
-      console.error('Error fetching notifications:', error);
-    }
+    };
+  
+    // First attempt without delay
+    await makeRequest(retries);
   };
 
   useEffect(() => {
     if (userdetails?.email && status === "authenticated") {
-      fetchNotifications();
+      fetchNotificationsWithRetry();
     }
   }, [userdetails?.email]);
 
@@ -217,7 +231,7 @@ const Topbar = () => {
         setTitle('');
         setDescription('');
         setIsAddNotificationModalVisible(false);
-        fetchNotifications(); // Refetch notifications to update the list
+        fetchNotificationsWithRetry(); // Refetch notifications to update the list
       } else {
         message.error('Failed to add notification');
       }
