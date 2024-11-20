@@ -165,7 +165,7 @@ const Topbar = () => {
   };
 
   useEffect(() => {
-    if (userdetails?.email) {
+    if (userdetails?.email && status === "authenticated") {
       fetchNotifications();
     }
   }, [userdetails?.email]);
