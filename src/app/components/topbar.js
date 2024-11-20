@@ -882,14 +882,23 @@ const LayoutWrapper = ({ children }) => {
   const isCalledRef = useRef(false);  // To ensure getUsersData API is called only once
 
   // Generic retry mechanism for any API
+  const debouncedRetry = debounce((fetchFunc, retries, resolve, reject) => {
+    retryFetch(fetchFunc, retries - 1).then(resolve).catch(reject);
+  }, 2000);
+
   const retryFetch = async (fetchFunc, retries = 3) => {
-    try {
-      return await fetchFunc();  // Try the API call
-    } catch (error) {
-      if (retries === 1) throw error;  // Throw error if no retries left
-      console.log(`Retrying... Attempts left: ${retries - 1}`);
-      return retryFetch(fetchFunc, retries - 1);  // Recursive retry
-    }
+      try {
+          return await fetchFunc();  // Try the API call
+      } catch (error) {
+          if (retries === 1) throw error;  // Throw error if no retries left
+
+          console.log(`Retrying... Attempts left: ${retries - 1}`);
+          
+          // Use debounce for a delay before retrying
+          return new Promise((resolve, reject) => {
+              debouncedRetry(fetchFunc, retries, resolve, reject);
+          });
+      }
   };
 
   useEffect(() => {
