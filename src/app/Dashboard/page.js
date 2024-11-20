@@ -18,6 +18,15 @@ Chart.register(...registerables);
 //     label: i.toString(36) + i,
 //   });
 // }
+const revenuePartnerNames = {
+    "MEDIA_DOT_NET": "FB_Mnet",
+    "Bodies": "FB_Bodies",
+    "TONIC": "FB_Tonic",
+    "DActive":"FB_DomainActive",
+    "ENKI":"FB_Enki",
+    "System1":"FB_System1",
+    "Domain_Active":"Newsbreak_DA",
+};
 
 import { DatePicker, Space, ConfigProvider, Flex, Spin, Skeleton } from 'antd';
 import { generate } from '@ant-design/colors'; // For dynamic color generation
@@ -645,6 +654,7 @@ const Dashboard = () => {
             });
         }
 
+        console.log(responseData[0], "hi");
         const groupedData = groupByAccountNumberAndDate(responseData, time);
         setRowData(groupedData);
 
@@ -927,6 +937,135 @@ const Dashboard = () => {
         // Return the average rounded to two decimal places
         return parseFloat(average);
     };
+
+    const autoGroupColumnDefProfit = {
+        headerName: 'AccountNumber',
+        minWidth: 200,
+        sortable: true,
+        cellRendererParams: {
+            suppressCount: false,
+            innerRenderer: (params) => {
+                if (params.node.footer) {
+                    return 'Total';
+                }
+
+                const firstColumnValue = params.node.key;  // campaign name
+                const campaignName = params.node.key;
+                const groupedData = params.node.allLeafChildren
+                ? params.node.allLeafChildren.map(childNode => childNode.data)
+                : [];
+
+                // Ensure groupedData has at least one element
+                if (groupedData.length === 0) {
+                    return '';
+                }
+
+                // Safeguard against undefined or missing properties
+                const firstGroupedItem = groupedData[0] || {};
+                const revenuePartnerNameToPassToReports = firstGroupedItem.revenuePartner
+                    ? revenuePartnerNames[firstGroupedItem.revenuePartner]
+                    : 'Unknown Partner';
+
+                const accountNumberToPassToReports = firstGroupedItem.accountNumber || 'Unknown Account';
+                
+                const valueWithCount = `${firstColumnValue}`;
+                return (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                        
+                        <span
+                            onClick={() => {
+                                // const url = `/Reports`;
+                                // window.open(url, '_blank');
+                                const data = {
+                                    network: revenuePartnerNameToPassToReports,
+                                    accountNumber: accountNumberToPassToReports,
+                                    time: time,
+                                    startDate: startDate,
+                                    endDate: endDate,
+                                };
+                        
+                                // Convert data to query string
+                                const queryString = new URLSearchParams(data).toString();
+                                const url = `/Reports?${queryString}`;
+
+                                // Open the URL in a new tab
+                                window.open(url, '_blank');
+                                // console.log(revenuePartnerNameToPassToReports);
+                                // console.log(accountNumberToPassToReports);
+                                // console.log(time);
+                                // console.log(startDate);
+                                // console.log(endDate);
+                            }}
+                        >
+                            {valueWithCount}
+                        </span>
+                        
+                    </div>
+                );
+            }
+        }
+    };
+
+    const autoGroupColumnDefLoss = {
+        headerName: 'AccountNumber',
+        minWidth: 200,
+        sortable: true,
+        cellRendererParams: {
+            suppressCount: false,
+            innerRenderer: (params) => {
+                if (params.node.footer) {
+                    return 'Total';
+                }
+
+                const firstColumnValue = params.node.key;  // campaign name
+                const campaignName = params.node.key;
+                const groupedData = params.node.allLeafChildren
+                ? params.node.allLeafChildren.map(childNode => childNode.data)
+                : [];
+
+                // Ensure groupedData has at least one element
+                if (groupedData.length === 0) {
+                    return '';
+                }
+
+                // Safeguard against undefined or missing properties
+                const firstGroupedItem = groupedData[0] || {};
+                const revenuePartnerNameToPassToReports = firstGroupedItem.revenuePartner
+                    ? revenuePartnerNames[firstGroupedItem.revenuePartner]
+                    : 'Unknown Partner';
+
+                const accountNumberToPassToReports = firstGroupedItem.accountNumber || 'Unknown Account';
+                
+                const valueWithCount = `${firstColumnValue}`;
+                return (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                        
+                        <span
+                            onClick={() => {
+                                const data = {
+                                    network: revenuePartnerNameToPassToReports,
+                                    accountNumber: accountNumberToPassToReports,
+                                    time: time,
+                                    startDate: startDate,
+                                    endDate: endDate,
+                                };
+                        
+                                // Convert data to query string
+                                const queryString = new URLSearchParams(data).toString();
+                                const url = `/Reports?${queryString}`;
+
+                                // Open the URL in a new tab
+                                window.open(url, '_blank');
+                            }}
+                        >
+                            {valueWithCount}
+                        </span>
+                        
+                    </div>
+                );
+            }
+        }
+    };
     
 
     const [columnDefs] = useState([
@@ -993,12 +1132,14 @@ const Dashboard = () => {
 
     const [columnDefs1] = useState([
         {
+            headerName: "AccountNumber",
             field: "accountNumber",
             resizable: true,
             sortable: true,
             hide: true, // Hide column as it's grouped
             rowGroup: true,
             enableRowGroup: true,
+            
 
         }, // Group by Network
         {field:'specifiedDate', headerName:'Date'},
@@ -1851,6 +1992,7 @@ const Dashboard = () => {
                                         suppressAggFuncInHeader={true}
                                         groupIncludeFooter={true}
                                         groupIncludeTotalFooter={true}
+                                        autoGroupColumnDef={autoGroupColumnDefProfit}
                                     />
                                 </div>
                             </Col>
@@ -1872,6 +2014,7 @@ const Dashboard = () => {
                                         suppressAggFuncInHeader={true}
                                         groupIncludeFooter={true}
                                         groupIncludeTotalFooter={true}
+                                        autoGroupColumnDef={autoGroupColumnDefLoss}
                                     />
                                 </div>
                             </Col>
