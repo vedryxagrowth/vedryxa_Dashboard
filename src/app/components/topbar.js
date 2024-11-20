@@ -924,8 +924,8 @@ const LayoutWrapper = ({ children, usersDataForLogin }) => {
         setLoading(false);
         const path = typeof window !== "undefined" ? window.location.pathname : null;
         console.log(path.split("/"));
-
-        if (usersDataForLogin && path.split("/")[1] !== "DailyAndCampaignHistory" && path.split("/")[1] !== "AllCampaigns" && path.split("/")[1] !== "LiveHistory") {
+        //  && path.split("/")[1] !== "DailyAndCampaignHistory" && path.split("/")[1] !== "AllCampaigns" && path.split("/")[1] !== "LiveHistory"
+        if (usersDataForLogin) {
           // console.log(usersDataForLogin);
           // Case Media_Buyer
           switch (usersDataForLogin[0].role) {
