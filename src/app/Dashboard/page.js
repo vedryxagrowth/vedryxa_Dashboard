@@ -463,7 +463,13 @@ const Dashboard = () => {
         const transformedObject = transformObjectKeys(data);
         // console.log(moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A'), "end");
         // console.log(transformedObject);
-        const response = await axios.post(`https://prodapis.adsgoat.in/Dashboard?timezone=${time}&start_date=${startDate}&end_date=${endDate}`, { formattedData: [transformedObject] });
+        let response;
+        try{
+            response = await axios.post(`https://prodapis.adsgoat.in/Dashboard?timezone=${time}&start_date=${startDate}&end_date=${endDate}`, { formattedData: [transformedObject] });
+
+        }catch(error){
+            message.error('API failed to fetch the data please click the reload button', 8);
+        }
         const responseData = response.data;
         console.log(responseData, "response");
         // console.log(moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A'), "deadend");
