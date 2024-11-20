@@ -871,7 +871,7 @@ const Topbar = () => {
 //   );
 // };
 
-const LayoutWrapper = ({ children }) => {
+const LayoutWrapper = ({ children, usersDataForLogin }) => {
   const router = useRouter();
   const [darkMode, setDarkMode] = useState(false);
   const { data: session, status: sessionStatus } = useSession();
@@ -906,6 +906,10 @@ const LayoutWrapper = ({ children }) => {
       try {
         console.log("Session Status: ", sessionStatus);
         console.log("Session Data: ", session);
+        setUsersData(usersDataForLogin);
+        setLoading(false);
+        const path = typeof window !== "undefined" ? window.location.pathname : null;
+        console.log(path.split("/"));
 
         if (usersDataForLogin && path.split("/")[1] !== "DailyAndCampaignHistory" && path.split("/")[1] !== "AllCampaigns" && path.split("/")[1] !== "LiveHistory") {
           // console.log(usersDataForLogin);
