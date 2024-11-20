@@ -9,6 +9,7 @@ import React from 'react';
 import axios from 'axios';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
+import { useSearchParams } from 'next/navigation';
 // import { Select } from 'antd';
 import { Carousel, Input, Button, Pagination, Row, Col, Typography, Result, Modal, message, ConfigProvider, Switch, Divider, Flex, Spin, Tabs  } from 'antd';
 
@@ -101,9 +102,22 @@ const newtworkCollections = {
     "Newsbreak_DA": "Newsbreak_DomainActive"
 }
 
+
+
 const MyTablePage = () => {
     const { userdetails } = useTokenContext();
-    // const router = useRouter();
+    const params = new URLSearchParams(window.location.search);
+
+    const networkFromDashboard = params.get('network');
+    const accountNumberFromDashboard = params.get('accountNumber');
+    const timeFromDashboard = params.get('time');
+    const startDateFromDashboard = params.get('startDate');
+    const endDateFromDashboard = params.get('endDate');
+    console.log(networkFromDashboard);
+    console.log(accountNumberFromDashboard);
+    console.log(timeFromDashboard);
+    console.log(startDateFromDashboard);
+    console.log(endDateFromDashboard);
 
     const { theme } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -117,7 +131,7 @@ const MyTablePage = () => {
         </div>;
     }
     console.log(userdetails, "userDetails");
-    const [darkMode, setDarkMode] = useState(false);
+    // const [darkMode, setDarkMode] = useState(false);
     // console.log(userdetails._id, "id");
 
     const { adAccounts } = userdetails;
@@ -162,6 +176,8 @@ const MyTablePage = () => {
         "timezone"
     ];
 
+    const [accountNumberToPass, setAccountNumberToPass] = useState(accountNumberFromDashboard);
+
     const [initialRowData, setInitialRowData] = useState([]);
 
     const [rowData, setRowData] = useState([]);
@@ -180,18 +196,19 @@ const MyTablePage = () => {
 
     const [dailyData, setdailyData] = useState([]);
 
-    const [startDate, setStartDate] = useState(yesterday);
+    const [startDate, setStartDate] = useState(startDateFromDashboard ? startDateFromDashboard : yesterday);
 
-    const [endDate, setEndDate] = useState(yesterday);
+    const [endDate, setEndDate] = useState(endDateFromDashboard ? endDateFromDashboard : yesterday);
 
-    const [revenuePratner, setRevenuePartner] = useState([networks[0]]);
+    const [revenuePratner, setRevenuePartner] = useState(networkFromDashboard ? networkFromDashboard : [networks[0]]);
 
-    const [newRevenuePratner, setNewRevenuePartner] = useState([networks[0]]);
+    const [newRevenuePratner, setNewRevenuePartner] = useState(networkFromDashboard ? networkFromDashboard : [networks[0]]);
 
     const [isSearching, setIsSearching] = useState(false);
     const [inputValue, setInputValue] = useState('');
     const [isSecondRowVisible, setIsSecondRowVisible] = useState(false);
     const [refrst, setRefrst] = useState(false);
+    const [activeTab, setActiveTab] = useState("1");
 
     // Toggle function
 
@@ -223,7 +240,7 @@ const MyTablePage = () => {
     // const [columnOrder, setColumnOrder] = useState(JSON.parse(localStorage.getItem("columnState")));
 
 
-
+    console.log(revenuePratner);
     const accountsForAccess = adAccounts[revenuePratner];
     console.log(accountsForAccess, "accounts Access");
     console.log(accountsForAccess[0], "accountFor Access");
@@ -240,16 +257,16 @@ const MyTablePage = () => {
 
     const [isTrue, setTrue] = useState(false);
 
-    const [account, setAccount] = useState(typeof accountsForAccess[0] === 'string' ? accountsForAccess[0] : accountsForAccess[0].accountNumber);
+    const [account, setAccount] = useState( accountNumberFromDashboard ? accountNumberFromDashboard : accountsForAccess[0].accountNumber);
 
-    const [time, setTime] = useState('UTC');
+    const [time, setTime] = useState(timeFromDashboard ? timeFromDashboard : 'UTC');
 
-    const [newaccount, setNewAccount] = useState(typeof accountsForAccess[0] === 'string' ? accountsForAccess[0] : accountsForAccess[0].accountNumber);
+    const [newaccount, setNewAccount] = useState(accountNumberFromDashboard ? accountNumberFromDashboard : accountsForAccess[0].accountNumber);
 
-    const [accountName, setAccountName] = useState(typeof accountsForAccess[0] === 'string' ? accountsForAccess[0] : accountsForAccess[0].accountName);
+    const [accountName, setAccountName] = useState(accountsForAccess[0].accountName);
 
-    const [newAccountName, setnewAccountName] = useState(typeof accountsForAccess[0] === 'string' ? accountsForAccess[0] : accountsForAccess[0].accountName);
-    const [newtime, setNewTime] = useState('UTC');
+    const [newAccountName, setnewAccountName] = useState(accountsForAccess[0].accountName);
+    const [newtime, setNewTime] = useState(timeFromDashboard ? timeFromDashboard : 'UTC');
 
     const [pageSize, setPageSize] = useState(1);
 
@@ -2796,16 +2813,19 @@ const MyTablePage = () => {
 
     const handleCustomerServiceClick = () => {
         console.log('Customer Service button clicked');
+        setActiveTab('2');
         carouselRef.current.goTo(1); // Change to the first slide
     };
 
     const handleCommentClick = () => {
         console.log('Comment button clicked');
+        setActiveTab('1');
         carouselRef.current.goTo(0); // Change to the second slide
     };
 
     const handleCommentClick1 = () => {
         console.log('Comment button clicked');
+        setActiveTab('3');
         carouselRef.current.goTo(2);
     }
 
@@ -3963,7 +3983,7 @@ const MyTablePage = () => {
 
 
 
-    const defaultDates = [dayjs(yesterday), dayjs(yesterday)];
+    const defaultDates = [dayjs(startDateFromDashboard ? startDateFromDashboard : yesterday), dayjs(endDateFromDashboard ? endDateFromDashboard : yesterday)];
 
     // const onFilterChanged = (params) => {
     //     const allData = params.api.rowModel.rowsToDisplay.map(node => node.data); // Get all row data from the grid
@@ -4280,6 +4300,7 @@ const MyTablePage = () => {
     // Handle dropdown open/close state
     const handleDropdownVisibleChange = (open) => {
         setIsOpen(open); // Set dropdown open state
+        setAccountNumberToPass(null);
     };
 
     // Handle option selection
@@ -4441,18 +4462,21 @@ const MyTablePage = () => {
         { key: '2', label: 'Daily', content: 'Content for Daily data' },
         { key: '3', label: 'Campaigns', content: 'Content for Campaign data' }
     ];
+    const handleSlideChange = (from, to) => {
+        setActiveTab((parseInt(to)+1).toString());
+        // console.log((parseInt(to)+1).toString());
+    };
     
     const handleCarouselChange = (index) => {
-        if (carouselRef.current) {
-          carouselRef.current.goTo(index);
-        }
+        setActiveTab(index);
+        carouselRef.current.goTo(parseInt(index)-1)
     };
     
     const renderCarouselNav = () => (
             <StickyBox offsetTop={64} offsetBottom={20} style={{ zIndex: 1, padding: '0px', margin: '0px', paddingLeft: '12px' }}>
                 <Tabs
-                    defaultActiveKey="1"
-                    onChange={(key) => handleCarouselChange(Number(key) - 1)}
+                    activeKey={activeTab}
+                    onChange={(key) => handleCarouselChange(key)}
                     items={items.map((item) => ({
                     key: item.key,
                     label: item.label,
@@ -4475,6 +4499,10 @@ const MyTablePage = () => {
             </StickyBox>
     );
 
+
+    console.log(networksData[0])
+    console.log(accountNumberFromDashboard);
+
     return (
         <div className='reports-container'>
             {/* className='select-container' */}
@@ -4494,7 +4522,7 @@ const MyTablePage = () => {
 
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
                             optionFilterProp="label"
-                            defaultValue={networks[0]}
+                            defaultValue={networkFromDashboard ? networkFromDashboard : networks[0]}
                             options={networks.map((item) => ({
                                 value: item,
                                 label: item,
@@ -4517,8 +4545,13 @@ const MyTablePage = () => {
                             }} // Prevent overflow with ellipsis
                             placeholder="Select Account"
                             optionFilterProp="value"
-                            value={selectedValue}  // Set selected value
-                            defaultValue={typeof networksData[0] === 'string' ? networksData[0] : networksData[0].accountNumber}
+                            value={accountNumberToPass ? accountNumberToPass : selectedValue}  // Set selected value
+                            defaultValue={accountNumberFromDashboard ? accountNumberFromDashboard : networksData[0].accountNumber}//typeof networksData[0] === 'string' ? networksData[0] : 
+                            // defaultValue={
+                            //     accountNumberFromDashboard && accountNumberFromDashboard !== '' 
+                            //         ? accountNumberFromDashboard 
+                            //         : networksData[0]?.accountNumber // Fallback to networksData[0].accountNumber
+                            // }
                             options={accountsAccess.map((item) => createOption(item))} // Create options dynamically
                             onDropdownVisibleChange={handleDropdownVisibleChange} // Toggle dropdown state
                         />
@@ -4640,7 +4673,8 @@ const MyTablePage = () => {
                     </Row>
                 </div>
 
-                <Carousel afterChange={onChange1} ref={carouselRef}>
+                <Carousel ref={carouselRef}
+                beforeChange={handleSlideChange} >
                     <div style={{ height: "100%", marginBottom: '20px' }}>
                         <div style={contentStyle}>
                             {isLoading === true ? (

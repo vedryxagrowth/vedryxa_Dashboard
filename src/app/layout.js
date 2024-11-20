@@ -8,6 +8,8 @@ import TopBar1 from "./components/topbar1";
 import { SessionProvider, useSession } from 'next-auth/react';
 import Parent, { TokenProvider, useTokenContext } from "./components/parent";
 import { useEffect, useState, useMemo } from "react";
+// import { useTokenContext } from "./components/parent";
+// const { setuserdetails } = useTokenContext();
 
 import {Spin} from 'antd';
 
@@ -38,33 +40,53 @@ const ContentWrapper = ({ children }) => {
   console.log(session?.user?.email);
 
   // useEffect to fetch user data
+  const fetchDataUntilSuccess = async (email, delay = 1500) => {
+    while (true) {
+      try {
+        const response = await axios.get(`https://prodapis.adsgoat.in/api/getusersData?email=${email}`);
+        if (response.status === 200) {
+          return response.data; // Exit loop if successful
+        }
+      } catch (error) {
+        if (!error.response || error.response.status !== 500) {
+          console.error("Non-retryable error encountered:", error);
+          throw error; // Stop retrying if the error is not a 500 status
+        }
+        console.error("500 error encountered, retrying...");
+      }
+      // Wait before the next attempt
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  };
+  
   useEffect(() => {
     let isMounted = true;
-
+  
     const fetchUserData = async () => {
       if (session?.user?.email) {
         try {
           setLoading(true);
-          const userResponse = await axios.get(`https://prodapis.adsgoat.in/api/getusersData?email=${session?.user?.email}`);
+          const userData = await fetchDataUntilSuccess(session?.user?.email);
           if (isMounted) {
-            setusersDataForLogin(userResponse.data);
+            setusersDataForLogin(userData);
             setLoading(false);
           }
         } catch (error) {
           console.error("Error fetching user data:", error);
-          setLoading(false); // Stop loading on error
+          if (isMounted) setLoading(false); // Stop loading on error
         }
       } else {
-        setLoading(false); // Stop loading if no session
+        if (isMounted) setLoading(false); // Stop loading if no session
       }
     };
-
+  
     fetchUserData();
-
+  
     return () => {
-      isMounted = false; // Cleanup function
+      isMounted = false; // Cleanup on component unmount
     };
   }, [session?.user?.email]);
+  
 
   useEffect(() => {
     // Mark component as mounted after all initial effects are done
@@ -92,8 +114,9 @@ const ContentWrapper = ({ children }) => {
     }
 
     if (status === "authenticated" && usersDataForLogin?.length !== 0) {
+      console.log(usersDataForLogin);
       return (
-        <Appbar darkMode={darkMode} toggleTheme={toggleTheme}>
+        <Appbar darkMode={darkMode} toggleTheme={toggleTheme} usersDataForLogin={usersDataForLogin}>
           {children}
         </Appbar>
       );
@@ -118,7 +141,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <head></head>
       <body className={`${inter.className} full-width`}>
-        <SessionProvider refetchOnWindowFocus={false} refetchInterval={0}>
+        <SessionProvider refetchOnWindowFocus={false} refetchInterval={0} broadcast={false} >
           <TokenProvider>
             <BodyWrapper>
               <ContentWrapper>
