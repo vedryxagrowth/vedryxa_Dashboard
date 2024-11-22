@@ -7,6 +7,15 @@ const nextConfig = {
         });
         return config;
     },
+    async redirects() {
+        return [
+          {
+            source: '/',
+            destination: '/Dashboard',
+            permanent: true, // Set to true if this is a permanent redirect (HTTP 308)
+          },
+        ];
+    },
 
 };
 

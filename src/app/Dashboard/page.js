@@ -136,6 +136,27 @@ const rangePresets = [
 
 // }
 
+
+// const { userdetails } = useTokenContext();
+
+// if (!userdetails?.adAccounts) {
+//     return <div style={{ width: '100%', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+//         <Flex align="center" gap="middle">
+//             {/* <Spin size="small" />
+//             <Spin /> */}
+//             <Spin size="large" />
+//         </Flex>
+//     </div>;
+// }
+
+const RevenuePartnerDashboard = () => {
+    return(
+        <div>
+            <h1>hi</h1>
+        </div>
+    )
+}
+
 const Dashboard = () => {
     const { userdetails } = useTokenContext();
     const { theme } = useTokenContext();
@@ -164,6 +185,12 @@ const Dashboard = () => {
             </Flex>
         </div>;
     }
+
+    if(userdetails?.role === "Revenue_Partner"){
+        return(
+            <RevenuePartnerDashboard />
+        )
+    };
 
     const transformData = (data) => {
         return Object.fromEntries(
@@ -1327,6 +1354,9 @@ const Dashboard = () => {
     // console.log(chartData.revenue, "data");
     return (
         <div>
+            {/* {userdetails?.role === "Revenue_Partner" && <div><h1>hello</h1></div>}
+            {userdetails?.role !== "Revenue_Partner" &&  */}
+            <div>
             {rendering === true ? <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><Spin size="large"/></div> : (
                 <div style={{ padding: '20px' }}>
                 <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -2053,6 +2083,8 @@ const Dashboard = () => {
                 )}
             </div>
             )}
+            </div>
+            {/* } */}
         </div>
         
 

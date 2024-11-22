@@ -954,6 +954,27 @@ const LayoutWrapper = ({ children, usersDataForLogin }) => {
               setuserdetails({ ...usersDataForLogin[0], adAccounts: MediaBuyernewObject });
               break;
 
+              case 'Revenue_Partner':
+                const RevenuePartneradAccounts = usersDataForLogin[0].adAccounts;
+                const RevenuePartnerkeysOfAdAccounts = Object.keys(RevenuePartneradAccounts);
+                const RevenuePartnernewObject = {};
+                console.log(RevenuePartnerkeysOfAdAccounts, "keys");
+  
+                // for (let item of RevenuePartnerkeysOfAdAccounts) {
+                //   if (RevenuePartneradAccounts[item][0] === "All") {
+                //     // Retry logic for Accounts API
+                //     const networkResponse = await retryFetch(() => axios.get(`https://prodapis.adsgoat.in/network/Accounts?network=${item}`));
+                //     RevenuePartnernewObject[item] = networkResponse.data;
+                //   } else {
+                //     const response = await retryFetch(() =>
+                //       axios.post('https://prodapis.adsgoat.in/getAccountNameandStatusofNetwork/', { updatedNetwork: RevenuePartneradAccounts[item] })
+                //     );
+                //     RevenuePartnernewObject[item] = response.data;
+                //   }
+                // }
+                setuserdetails({ ...usersDataForLogin[0], adAccounts: RevenuePartnernewObject });
+                break;
+
             // Case Special_User
             case 'Special_User':
               const SpecialUseradAccounts = usersDataForLogin[0].adAccounts;
