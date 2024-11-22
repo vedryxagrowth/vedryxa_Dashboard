@@ -145,6 +145,7 @@ const Topbar = () => {
     }
   };
 
+  const isNotificationsFetched = useRef(false);
 
   // Fetch notifications function
   const fetchNotificationsWithRetry = async (retries = 3, delay = 5000) => {
@@ -164,6 +165,7 @@ const Topbar = () => {
         }
         if (response.status === 200) {
           setNotifications(response.data.notifications);
+          isNotificationsFetched.current = true;
         }
       } catch (error) {
         if (retryAttempt > 0 && error.response?.status === 500) {

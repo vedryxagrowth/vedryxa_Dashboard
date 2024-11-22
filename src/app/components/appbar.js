@@ -66,10 +66,10 @@ const Appbar = ({ children, usersDataForLogin }) => {
     const menuItems = [
         getItem('Dashboard', '/Dashboard', <HomeOutlined />),
         getItem('Reports', '/Reports', <DatabaseOutlined />),
-        userdetails?.role === 'Admin' && getItem('Creatives', '/Creatives', <PieChartOutlined />),
+        usersDataForLogin[0]?.role === 'Admin' && getItem('Creatives', '/Creatives', <PieChartOutlined />),
         getItem('Campaigns', '/Campaigns', <DesktopOutlined />),
         // getItem('Users', '/Users', <ContainerOutlined />),
-        userdetails?.role === 'Admin' && getItem('NewUser', '/NewUser', <UserOutlined />),
+        usersDataForLogin[0]?.role === 'Admin' && getItem('NewUser', '/NewUser', <UserOutlined />),
         // getItem('Setting', '/setting', <SettingOutlined />),
         // getItem('Password', '/password', <LockOutlined />),
         // getItem('Sign Out', '/signout', <LogoutOutlined />),
