@@ -85,7 +85,7 @@ const Topbar = () => {
   const [selectedNotification, setSelectedNotification] = useState(null); // For the notification to be displayed in modal
   const [isViewNotificationModalVisible, setIsViewNotificationModalVisible] = useState(false); // View notification moda
 
-  console.log(userdetails);
+  // console.log(userdetails);
 
   const tokenForAuth = localStorage.getItem('token');
 
@@ -145,12 +145,13 @@ const Topbar = () => {
     }
   };
 
+  const isNotificationsFetched = useRef(false);
 
   // Fetch notifications function
   const fetchNotificationsWithRetry = async (retries = 3, delay = 5000) => {
     const makeRequest = async (retryAttempt) => {
       try {
-        console.log(tokenForAuth);
+        // console.log(tokenForAuth);
         let response;
         if(isNotificationsFetched.current === false){
           response = await axios.get(
@@ -164,6 +165,7 @@ const Topbar = () => {
         }
         if (response.status === 200) {
           setNotifications(response.data.notifications);
+          isNotificationsFetched.current = true;
         }
       } catch (error) {
         if (retryAttempt > 0 && error.response?.status === 500) {
@@ -180,7 +182,7 @@ const Topbar = () => {
   };
 
   useEffect(() => {
-    if (userdetails?.email && status === "authenticated") {
+    if (userdetails?.email && status === "authenticated" && userdetails?.role !== "Revenue_Partner") {
       fetchNotificationsWithRetry();
     }
   }, [userdetails?.email]);
@@ -919,12 +921,12 @@ const LayoutWrapper = ({ children, usersDataForLogin }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log("Session Status: ", sessionStatus);
-        console.log("Session Data: ", session);
+        // console.log("Session Status: ", sessionStatus);
+        // console.log("Session Data: ", session);
         setUsersData(usersDataForLogin);
         setLoading(false);
         const path = typeof window !== "undefined" ? window.location.pathname : null;
-        console.log(path.split("/"));
+        // console.log(path.split("/"));
         //  && path.split("/")[1] !== "DailyAndCampaignHistory" && path.split("/")[1] !== "AllCampaigns" && path.split("/")[1] !== "LiveHistory"
         if (usersDataForLogin) {
           // console.log(usersDataForLogin);
@@ -935,7 +937,7 @@ const LayoutWrapper = ({ children, usersDataForLogin }) => {
               const MediaBuyeradAccounts = usersDataForLogin[0].adAccounts;
               const MediaBuyerkeysOfAdAccounts = Object.keys(MediaBuyeradAccounts);
               const MediaBuyernewObject = {};
-              console.log(MediaBuyerkeysOfAdAccounts, "keys");
+              // console.log(MediaBuyerkeysOfAdAccounts, "keys");
 
               for (let item of MediaBuyerkeysOfAdAccounts) {
                 if (MediaBuyeradAccounts[item][0] === "All") {
@@ -952,12 +954,33 @@ const LayoutWrapper = ({ children, usersDataForLogin }) => {
               setuserdetails({ ...usersDataForLogin[0], adAccounts: MediaBuyernewObject });
               break;
 
+              case 'Revenue_Partner':
+                // const RevenuePartneradAccounts = usersDataForLogin[0].adAccounts;
+                // const RevenuePartnerkeysOfAdAccounts = Object.keys(RevenuePartneradAccounts);
+                // const RevenuePartnernewObject = {};
+                // console.log(RevenuePartnerkeysOfAdAccounts, "keys");
+  
+                // for (let item of RevenuePartnerkeysOfAdAccounts) {
+                //   if (RevenuePartneradAccounts[item][0] === "All") {
+                //     // Retry logic for Accounts API
+                //     const networkResponse = await retryFetch(() => axios.get(`https://prodapis.adsgoat.in/network/Accounts?network=${item}`));
+                //     RevenuePartnernewObject[item] = networkResponse.data;
+                //   } else {
+                //     const response = await retryFetch(() =>
+                //       axios.post('https://prodapis.adsgoat.in/getAccountNameandStatusofNetwork/', { updatedNetwork: RevenuePartneradAccounts[item] })
+                //     );
+                //     RevenuePartnernewObject[item] = response.data;
+                //   }
+                // }
+                setuserdetails({ ...usersDataForLogin[0]});
+                break;
+
             // Case Special_User
             case 'Special_User':
               const SpecialUseradAccounts = usersDataForLogin[0].adAccounts;
               const SpecialUserkeysOfAdAccounts = Object.keys(SpecialUseradAccounts);
               const SpecialUsernewObject = {};
-              console.log(SpecialUserkeysOfAdAccounts, "keys");
+              // console.log(SpecialUserkeysOfAdAccounts, "keys");
 
               for (let item of SpecialUserkeysOfAdAccounts) {
                 if (SpecialUseradAccounts[item][0] === "All") {
@@ -979,7 +1002,7 @@ const LayoutWrapper = ({ children, usersDataForLogin }) => {
               const ManageradAccounts = usersDataForLogin[0].adAccounts;
               const ManagerkeysOfAdAccounts = Object.keys(ManageradAccounts);
               const ManagernewObject = {};
-              console.log(ManagerkeysOfAdAccounts, "keys");
+              // console.log(ManagerkeysOfAdAccounts, "keys");
 
               for (let item of ManagerkeysOfAdAccounts) {
                 if (ManageradAccounts[item][0] === "All") {
@@ -1001,7 +1024,7 @@ const LayoutWrapper = ({ children, usersDataForLogin }) => {
               // Retry logic for All Accounts API
               const AllAccountsData = await retryFetch(() => axios.get(`https://prodapis.adsgoat.in/All/Accounts/`));
               const responseData = AllAccountsData.data;
-              console.log(responseData, "responseData");
+              // console.log(responseData, "responseData");
               setuserdetails({ ...usersDataForLogin[0], adAccounts: responseData });
               break;
 
@@ -1016,7 +1039,7 @@ const LayoutWrapper = ({ children, usersDataForLogin }) => {
         // const localstorageItem = localStorage.getItem("token");
         // console.log(localstorageItem)
         const decodedToken = jwt.decode(localStorage.getItem("token"));
-        console.log(decodedToken);
+        // console.log(decodedToken);
         // console.log(decodedToken.exp);
         // console.log(Math.floor(Date.now() / 1000));
         // if (decodedToken && decodedToken.exp < Math.floor(Date.now() / 1000)) {
