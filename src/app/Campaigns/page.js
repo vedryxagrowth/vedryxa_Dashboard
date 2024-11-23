@@ -17,6 +17,7 @@ import moment from 'moment-timezone';
 import dayjs from 'dayjs';
 import { DatePicker } from 'antd';
 const { RangePicker } = DatePicker;
+// import { redirect } from 'next/navigation';
 
 const App = () => {
     const { userdetails } = useTokenContext();
@@ -30,6 +31,9 @@ const App = () => {
                 <Spin size="large" />
             </Flex>
         </div>;
+    }
+    if(userdetails?.role === "Revenue_Partner"){
+        redirect("/Dashboard");
     }
 
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);

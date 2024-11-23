@@ -47,9 +47,9 @@ const Appbar = ({ children, usersDataForLogin }) => {
     const router = useRouter();
     const pathname = usePathname();
     const [height, setHeight] = useState(0);
-    console.log(session?.user?.email)
+    // console.log(session?.user?.email)
     const { userdetails } = useTokenContext();
-    console.log(userdetails);
+    // console.log(userdetails);
 
     useEffect(() => {
         const handleResize = () => {

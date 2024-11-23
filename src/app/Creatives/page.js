@@ -1,5 +1,6 @@
 "use client"
 import { useTokenContext } from "../components/parent";
+import { redirect } from 'next/navigation';
 // pages/image-upload.js
 // pages/image-upload.js
 // import React, { useState } from 'react';
@@ -126,6 +127,7 @@ import { Upload, Modal, Input, Button } from 'antd';
 import { EditOutlined, UploadOutlined, PlusOutlined } from '@ant-design/icons';
 import Image from 'next/image';
 import dynamic from "next/dynamic";
+import { DatePicker, Space, ConfigProvider, Flex, Spin, Skeleton } from 'antd';
 
 // Dynamically import the FabricCanvas to avoid SSR issues
 const FabricCanvas = dynamic(() => import("../Campaigns/camp-components/Fabricanvas"), { ssr: false });
@@ -136,6 +138,39 @@ const ImageUploadPage = () => {
     const [selectedImage, setSelectedImage] = useState(null);
     const [isEditorVisible, setIsEditorVisible] = useState(false);
     const [urlInput, setUrlInput] = useState('');
+    const { userdetails } = useTokenContext();
+    const { theme } = useTokenContext();
+    // const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
+    // console.log(userdetails);
+    // console.log(userdetails?.adAccounts, "f1");
+    // const { adAccounts } = userdetails;
+    // const handleAsyncLogic = async () => {
+    //     // Wait for async function to finish
+    //     const data = await functionForFetchingUsersData();
+    
+    //     // After async function resolves, do something with the data
+    //     const anotherVariable = `User count: ${data.length}`;
+    
+    //     console.log('Fetched Data:', data);
+    //     console.log('Another Variable:', anotherVariable);
+    //     return data
+    // };
+
+    if (!userdetails?.adAccounts) {
+        return <div style={{ width: '100%', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <Flex align="center" gap="middle">
+                {/* <Spin size="small" />
+                <Spin /> */}
+                <Spin size="large" />
+            </Flex>
+        </div>;
+    }
+
+    if(userdetails?.role !== "Admin"){
+        return(
+            redirect("/Dashboard")
+        )
+    };
 
     // Handle image upload from files
     const handleFileChange = ({ fileList }) => {

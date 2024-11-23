@@ -17,7 +17,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 const BodyWrapper = ({ children }) => {
   const { darkMode, userdetails } = useTokenContext();
-  console.log(userdetails);
+  // console.log(userdetails);
 
   useEffect(() => {
     if (darkMode) {
@@ -37,7 +37,7 @@ const ContentWrapper = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isComponentMounted, setIsComponentMounted] = useState(false); // To prevent initial rendering issues
 
-  console.log(session?.user?.email);
+  // console.log(session?.user?.email);
 
   // useEffect to fetch user data
   const fetchDataUntilSuccess = async (email, delay = 1500) => {
@@ -97,7 +97,7 @@ const ContentWrapper = ({ children }) => {
     setDarkMode(!darkMode);
   };
 
-  console.log(usersDataForLogin, "usersLogin");
+  // console.log(usersDataForLogin, "usersLogin");
 
   // Unified conditional logic to show either Topbar or Appbar
   const shouldRenderTopbarOrAppbar = useMemo(() => {
@@ -114,7 +114,7 @@ const ContentWrapper = ({ children }) => {
     }
 
     if (status === "authenticated" && usersDataForLogin?.length !== 0) {
-      console.log(usersDataForLogin);
+      // console.log(usersDataForLogin);
       return (
         <Appbar darkMode={darkMode} toggleTheme={toggleTheme} usersDataForLogin={usersDataForLogin}>
           {children}

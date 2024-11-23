@@ -25,7 +25,7 @@ export default function ChatWidget() {
 
     // Ref to detect clicks outside of the chat
     const chatRef = useRef(null);
-    console.log(userdetails, "siddu")
+    // console.log(userdetails, "siddu")
 
     const toggleChat = () => {
         setIsOpen(!isOpen);

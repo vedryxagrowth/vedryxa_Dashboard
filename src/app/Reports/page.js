@@ -130,6 +130,9 @@ const MyTablePage = () => {
             </Flex>
         </div>;
     }
+    if(userdetails?.role === "Revenue_Partner"){
+        redirect("/Dashboard");
+    }
     console.log(userdetails, "userDetails");
     // const [darkMode, setDarkMode] = useState(false);
     // console.log(userdetails._id, "id");

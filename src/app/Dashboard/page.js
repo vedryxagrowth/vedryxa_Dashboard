@@ -52,6 +52,8 @@ import {
     Typography,
     Checkbox
 } from 'antd';
+
+import { LoadingOutlined } from '@ant-design/icons';
 // import {
 //     TrophyOutlined,
 //     ArrowUpOutlined,
@@ -150,18 +152,273 @@ const rangePresets = [
 // }
 
 const RevenuePartnerDashboard = () => {
-    return(
+    const { userdetails } = useTokenContext();
+    const { theme } = useTokenContext();
+    const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
+    const [loading, setLoading] = useState(false);
+    const [timeZone, setTimeZone] = useState('UTC');
+    const networks = Object.keys(userdetails?.adAccounts);
+    const [revenuePratner, setRevenuePartner] = useState(networks[0]);
+
+    const [startDate, setStartDate] = useState(yesterday);
+
+    const [endDate, setEndDate] = useState(yesterday);
+
+    const [revenuePartnerData, setRevenuePartnerData] = useState([]);
+
+    const [fetchData, setFetchData] = useState(false);
+
+    const [fixedFooter, setFixedFooter] = useState([]);
+
+    const timeZoneForColumnDefs = useRef('UTC');
+
+    const onChangeTime = (value) => {
+        setTimeZone(value);
+        timeZoneForColumnDefs.current = value;
+    };
+
+    const onChangeRevenuePartner = (value) => {
+        setRevenuePartner(value);
+    };
+
+    const handleChange = (dates) => {
+        if (dates && dates.length === 2) {
+            const [start, end] = dates;
+            setStartDate(start.format('YYYY-MM-DD'));
+            setEndDate(end.format('YYYY-MM-DD'));
+        }
+    };
+
+    const onClickSubmit = () => {
+        setFetchData(true);
+        setLoading(true);
+    };
+
+    const spender = (params) => {
+        const total = params.values.reduce((acc, value) => acc + parseFloat(value || 0), 0);
+        return Math.round(total * 100) / 100; // Round to 2 decimal places
+    };
+
+    const rpcCplFormatter = (params) => {
+        const value = params.value;
+        return isNaN(value) || !isFinite(value) ? '0' : parseFloat(value).toFixed(2);
+    };
+
+    const avgRpcCpl = (params) => {
+        const validValues = params.values.filter(value => !isNaN(value) && isFinite(value));
+        if (validValues.length === 0) {
+            return 0;
+        }
+        const sum = validValues.reduce((acc, value) => acc + value, 0);
+        const average = sum / validValues.length;
+        return parseFloat(average);
+    };
+
+    const [columnDefs, setColumnDefs] = useState([]);
+
+    const [defaultColDef] = useState({
+        flex: 4,
+        sortable: true,
+        filter: true,
+        resizable: true,
+        enableRowGroup: true,
+    });
+
+    const functionForFetchingRevenuePartnerData = async () => {
+        const fetchRevenueData = await axios.get(`https://prodapis.adsgoat.in/revenuePartnerData?timezone=${timeZone}&startDate=${startDate}&endDate=${endDate}&network=${revenuePratner}`);
+        const response = fetchRevenueData.data;
+        setRevenuePartnerData(response);
+        setFetchData(false);
+        setLoading(false);
+        setColumnDefs([
+            {
+                field: `${timeZoneForColumnDefs.current}Date`,
+                headerName: 'Date',
+                minWidth: 150,
+                cellRenderer: params => params.value === 'Totals' ? 'Totals' : params.value
+            },
+            {
+                field: "spend",
+                resizable: true,
+                sortable: true,
+                minWidth: 150
+            },
+            {
+                field: "revenue",
+                resizable: true,
+                sortable: true,
+                minWidth: 150
+            },
+            { 
+                field: 'profit', 
+                resizable: true,
+                sortable: true,
+                minWidth: 150,
+                cellClassRules: {
+                    'font-red': p => p.value < 0
+                }
+            },
+            {
+                field: "margin",
+                aggFunc: spender,
+                cellClassRules: {
+                    'font-red': p => p.value < 0
+                },
+                minWidth: 150
+            },
+            {
+                field: 'rpc',
+                headerName: 'RPC',
+                aggFunc: avgRpcCpl,
+                valueFormatter: rpcCplFormatter,
+                minWidth: 150
+            },
+            {
+                field: 'cpl',
+                headerName: 'CPL',
+                aggFunc: avgRpcCpl,
+                valueFormatter: rpcCplFormatter,
+                minWidth: 150
+            }
+        ]);
+        setFixedFooter([
+            {
+                [`${timeZoneForColumnDefs.current}Date`]: 'Totals',
+                spend: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0).toFixed(2)),
+                revenue: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0).toFixed(2)),
+                profit: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0).toFixed(2)),
+                margin: parseFloat((response?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / response?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
+                rpc: parseFloat((response?.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / response?.length).toFixed(2)),
+                cpl: parseFloat((response?.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / response?.length).toFixed(2)),
+                conversions: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0).toFixed(2)),
+                clicks: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr.clicks), 0).toFixed(2)),
+                impressions: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
+            }
+        ]);
+    };
+
+    useEffect(() => {
+        if (fetchData) {    
+            functionForFetchingRevenuePartnerData();
+        }
+    }, [fetchData]);
+
+    return (
         <div>
-            <h1>hi</h1>
+            <Space direction="vertical" style={{ width: '100%', paddingBottom: "1%" }}>
+                {/* Filters */}
+                <Row gutter={[16, 16]}>
+                    <Col xs={8} sm={8} md={4} lg={3}>
+                        <Select
+                            className='select-element'
+                            style={{ width: '100%' }}
+                            placeholder="Select Network"
+                            onChange={onChangeRevenuePartner}
+                            defaultValue={networks[0]}
+                            options={networks.map((item) => ({ value: item, label: item }))}
+                        />
+                    </Col>
+                    <Col xs={16} sm={16} md={10} lg={8}>
+                        <ConfigProvider locale={locale}>
+                            <RangePicker
+                                presets={rangePresets}
+                                onChange={handleChange}
+                                disabledDate={disabledDate}
+                                defaultValue={defaultDates}
+                                format="YYYY-MM-DD"
+                                style={{
+                                    width: '100%',
+                                    backgroundColor: theme === 'dark' ? '#555' : undefined,
+                                    color: theme === 'dark' ? 'white' : undefined,
+                                }}
+                                dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}
+                            />
+                        </ConfigProvider>
+                    </Col>
+                    <Col xs={12} sm={12} md={4} lg={3}>
+                        <Select
+                            placeholder="Select Timezone"
+                            onChange={onChangeTime}
+                            value={timeZone}
+                            options={timezones.map((item) => ({ value: item, label: item }))}
+                        />
+                    </Col>
+                    <Col xs={12} sm={12} md={2}>
+                        <Button onClick={onClickSubmit} type='primary' block>
+                            Submit
+                        </Button>
+                    </Col>
+                </Row>
+            </Space>
+            {/* Table */}
+            {loading ? (
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+                    <Spin indicator={<LoadingOutlined spin />} size="large" />
+                </div>
+            ) : (
+                revenuePartnerData.length > 0 && (
+                    <div
+                        className={`ag-theme-alpine ${gridThemeClass}`}
+                        style={{ width: '100%', height: '70vh' }}
+                    >
+                        <AgGridReact
+                            rowData={revenuePartnerData}
+                            columnDefs={columnDefs}
+                            defaultColDef={defaultColDef}
+                            suppressAggFuncInHeader={true}
+                            pinnedBottomRowData={fixedFooter}
+                            getRowStyle={(params) => {
+                                if (params.node.rowPinned) {
+                                    return {
+                                        fontWeight: 'bold',
+                                        // backgroundColor: theme === "dark" ? '#000' : '#fff',
+                                        // color: theme === "dark" ? '#fff' : '#000',
+                                    };
+                                }
+                                return null;
+                            }}
+                            onFilterChanged={(params) => {
+                                const api = params.api;
+                                const filteredData = [];
+                                api.forEachNodeAfterFilterAndSort((node) => {
+                                    if (!node.rowPinned) {
+                                        filteredData.push(node.data);
+                                    }
+                                });
+
+                                const updatedFooter = [
+                                    {
+                                        [`${timeZoneForColumnDefs.current}Date`]: 'Totals',
+                                        spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr.spend || 0), 0).toFixed(2)),
+                                        revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr.revenue || 0), 0).toFixed(2)),
+                                        profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr.profit || 0), 0).toFixed(2)),
+                                        margin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
+                                        rpc: parseFloat(
+                                            (filteredData.reduce((acc, curr) => acc + parseFloat(curr.rpc || 0), 0) / filteredData.length || 0).toFixed(2)
+                                        ),
+                                        cpl: parseFloat(
+                                            (filteredData.reduce((acc, curr) => acc + parseFloat(curr.cpl || 0), 0) / filteredData.length || 0).toFixed(2)
+                                        ),
+                                        impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr.impressions || 0), 0).toFixed(2)),
+                                    },
+                                ];
+
+                                setFixedFooter(updatedFooter);
+                            }}
+                        />
+                    </div>
+                )
+            )}
         </div>
-    )
-}
+    );
+};
+
 
 const Dashboard = () => {
     const { userdetails } = useTokenContext();
     const { theme } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
-    console.log(userdetails);
+    // console.log(userdetails);
     // console.log(userdetails?.adAccounts, "f1");
     // const { adAccounts } = userdetails;
     // const handleAsyncLogic = async () => {

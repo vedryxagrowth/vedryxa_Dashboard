@@ -56,7 +56,7 @@ const TopBar1 = () => {
     const handleCancel = () => {
       setOpen(false);
     };
-    console.log('Session Status:', status);
+    // console.log('Session Status:', status);
     const [notifications, setNotifications] = useState([
       {
         key: '1',
