@@ -201,11 +201,17 @@ const MyTablePage = () => {
 
     const [keywordData, setKeywordData] = useState([]);
 
+    const [isSubmitted, setIsSubmitted] = useState(false);
+
     const [isKeywordsTabActive, setIsKeywordsTabActive] = useState(""); // Track if the 'Keywords' tab is selected
 
     const [startDate, setStartDate] = useState(startDateFromDashboard ? startDateFromDashboard : yesterday);
 
+    const [newStartDate, setNewStartDate] = useState(startDateFromDashboard ? startDateFromDashboard : yesterday);
+
     const [endDate, setEndDate] = useState(endDateFromDashboard ? endDateFromDashboard : yesterday);
+
+    const [newendDate, setNewEndDate] = useState(endDateFromDashboard ? endDateFromDashboard : yesterday);
 
     const [revenuePratner, setRevenuePartner] = useState(networkFromDashboard ? networkFromDashboard : [networks[0]]);
 
@@ -3184,6 +3190,9 @@ const MyTablePage = () => {
 
             // setDailyColumn(columnDefs);
             setKeywordData(fullData);
+            // if (gridRef3.current && gridRef3.current.api) {
+            //     gridRef3.current.api.refreshCells();  // Refresh AgGrid after setting new data
+            // }
             newDailyData.current = fullData;
             setTrue(false);
             setLoading3(false);
@@ -3192,15 +3201,13 @@ const MyTablePage = () => {
         }
     }
 
-
      // Trigger functionCall4 when the "Keywords" tab is clicked
      useEffect(() => {
         if (isKeywordsTabActive === "keyword") {
             setLoading3(true);
             functionCall4();
         }
-    }, [isKeywordsTabActive]); 
-    
+    }, [isKeywordsTabActive, newStartDate, newendDate, newaccount, newtime, newRevenuePratner]); 
 
     useEffect(() => {
         const functionCall = async () => {
@@ -3302,6 +3309,8 @@ const MyTablePage = () => {
         console.log(url2);
         console.log(startDate, "start");
         console.log(endDate, "end");
+        setNewEndDate(endDate);
+        setNewStartDate(startDate);
         setPageSize(1);
         setTrue(true);
         setRowData([]);
