@@ -848,6 +848,24 @@ const MnetLiveCampaignHistory = ({ params }) => {
     // };
     console.log(columnDefs, "rowData");
 
+    const getRandomColor = () => {
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    };
+      
+    const colorMap = {};
+      
+    const getColorForValue = (value) => {
+        if (!colorMap[value]) {
+          colorMap[value] = getRandomColor(); // Generate and assign a color
+        }
+        return colorMap[value]; // Return the assigned color
+    };
+
     return (
         <Row style={{ display: 'flex', flexDirection: 'column' }}>
             {/* Chart.js integration */}
@@ -864,88 +882,146 @@ const MnetLiveCampaignHistory = ({ params }) => {
             <Col style={{ height: '400px', marginBottom: '10px' }}> {/* Container with fixed height */}
                 {chartData.dates.length === 0 ? (<div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><Spin size="large" /></div>) : (
                     <Line
-                        data={{
-                            labels: chartData.dates.sort((a, b) => a.dates - b.dates),
-                            datasets: [
-                                {
-                                    label: 'Spend',
-                                    data: chartData.spend,
-                                    borderColor: 'rgba(75, 192, 192, 1)',        // Teal
-                                    backgroundColor: 'rgba(75, 192, 192, 0.2)',   // Light Teal
-                                    fill: true,
-                                    hidden: true,
-                                    tension: 0.3
-                                },
-                                {
-                                    label: 'Revenue',
-                                    data: chartData.revenue,
-                                    borderColor: 'rgba(54, 162, 235, 1)',        // Blue
-                                    backgroundColor: 'rgba(54, 162, 235, 0.2)',   // Light Blue
-                                    fill: true,
-                                    hidden: true,
-                                    tension: 0.3
-
-                                },
-                                {
-                                    label: 'RPC',
-                                    data: chartData.rpc,
-                                    borderColor: 'rgba(255, 99, 132, 1)',        // Red
-                                    backgroundColor: 'rgba(255, 99, 132, 0.2)',   // Light Red
-                                    fill: true,
-                                    hidden: true,
-                                    tension: 0.3
-
-                                },
-                                {
-                                    label: 'CPL',
-                                    data: chartData.cpl,
-                                    borderColor: 'rgba(255, 159, 64, 1)',        // Orange
-                                    backgroundColor: 'rgba(255, 159, 64, 0.2)',   // Light Orange
-                                    fill: true,
-                                    hidden: true,
-                                    tension: 0.3
-
-                                },
-                                {
-                                    label: 'Profit',
-                                    data: chartData.profit,
-                                    borderColor: 'rgba(255, 206, 86, 1)',        // Yellow
-                                    backgroundColor: 'rgba(255, 206, 86, 0.2)',   // Light Yellow
-                                    fill: true,
-                                    tension: 0.2
-
-                                },
-                                {
-                                    label: 'Margin',
-                                    data: chartData.margin,
-                                    borderColor: 'rgba(153, 102, 255, 1)',       // Purple
-                                    backgroundColor: 'rgba(153, 102, 255, 0.2)',  // Light Purple
-                                    fill: true,
-                                    hidden: true,
-                                    tension: 0.2
-
-                                }
-                            ],
-
-                        }}
-                        options={{
-                            responsive: true,
-                            maintainAspectRatio: false, // Allow the chart to take the full height of its container
-                            scales: {
-                                x: {
-                                    ticks: {
-                                        // autoSkip: false,
-                                        // maxRotation: 0, // Keep labels horizontal
-                                        padding: 30, // Increase padding between labels and the axis
-                                    },
-                                },
-                                y: {
-                                    beginAtZero: true, // Ensure the y-axis starts at zero
-                                },
+                    data={{
+                      labels: chartData.dates, // X-axis labels (dates)
+                      datasets: [
+                        {
+                          label: 'Spend',
+                          data: chartData.spend,
+                          borderColor: 'rgba(75, 192, 192, 1)', // Teal
+                          backgroundColor: 'rgba(75, 192, 192, 0.2)', // Light Teal
+                          fill: true,
+                          hidden: true,
+                          tension: 0.3,
+                          pointRadius: 5,
+                          pointHoverRadius: 8,
+                          pointBackgroundColor: 'rgba(75, 192, 192, 1)',
+                          pointHoverBackgroundColor: 'rgba(75, 192, 192, 1)',
+                        },
+                        {
+                          label: 'Revenue',
+                          data: chartData.revenue,
+                          borderColor: 'rgba(54, 162, 235, 1)', // Blue
+                          backgroundColor: 'rgba(54, 162, 235, 0.2)', // Light Blue
+                          fill: true,
+                          hidden: true,
+                          tension: 0.3,
+                          pointRadius: 5,
+                          pointHoverRadius: 8,
+                          pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                          pointHoverBackgroundColor: 'rgba(54, 162, 235, 1)',
+                        },
+                        {
+                          label: 'RPC',
+                          data: chartData.rpc,
+                          borderColor: 'rgba(255, 99, 132, 1)', // Red
+                          backgroundColor: 'rgba(255, 99, 132, 0.2)', // Light Red
+                          fill: true,
+                          hidden: true,
+                          tension: 0.3,
+                          pointRadius: 5,
+                          pointHoverRadius: 8,
+                          pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+                          pointHoverBackgroundColor: 'rgba(255, 99, 132, 1)',
+                        },
+                        {
+                          label: 'CPL',
+                          data: chartData.cpl,
+                          borderColor: 'rgba(255, 159, 64, 1)', // Orange
+                          backgroundColor: 'rgba(255, 159, 64, 0.2)', // Light Orange
+                          fill: true,
+                          hidden: true,
+                          tension: 0.3,
+                          pointRadius: 5,
+                          pointHoverRadius: 8,
+                          pointBackgroundColor: 'rgba(255, 159, 64, 1)',
+                          pointHoverBackgroundColor: 'rgba(255, 159, 64, 1)',
+                        },
+                        {
+                          label: 'Profit',
+                          data: chartData.profit,
+                          borderColor: 'rgba(255, 206, 86, 1)', // Yellow
+                          backgroundColor: 'rgba(255, 206, 86, 0.2)', // Light Yellow
+                          fill: true,
+                          tension: 0.3,
+                          pointRadius: 5,
+                          pointHoverRadius: 8,
+                          pointBackgroundColor: 'rgba(255, 206, 86, 1)',
+                          pointHoverBackgroundColor: 'rgba(255, 206, 86, 1)',
+                        },
+                        {
+                          label: 'Margin',
+                          data: chartData.margin,
+                          borderColor: 'rgba(153, 102, 255, 1)', // Purple
+                          backgroundColor: 'rgba(153, 102, 255, 0.2)', // Light Purple
+                          fill: true,
+                          hidden: true,
+                          tension: 0.3,
+                          pointRadius: 5,
+                          pointHoverRadius: 8,
+                          pointBackgroundColor: 'rgba(153, 102, 255, 1)',
+                          pointHoverBackgroundColor: 'rgba(153, 102, 255, 1)',
+                        },
+                      ],
+                    }}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false, // Allow the chart to take the full height of its container
+                      scales: {
+                        x: {
+                          ticks: {
+                            padding: 30, // Increase padding between labels and the axis
+                            color: (context) => {
+                              // Dynamically set color for x-axis labels based on theme
+                              const label = chartData.dates[context.index];
+                              return theme === 'dark' ? '#fff' : '#000'; // Adjust label color
                             },
-                        }}
-                        height={350} // Set the height of the chart
-                    />
+                          },
+                          grid: {
+                            color: theme === 'dark' ? '#444' : '#e0e0e0', // Adjust gridline color based on theme
+                          },
+                        },
+                        y: {
+                          beginAtZero: true, // Ensure the y-axis starts at zero
+                          ticks: {
+                            callback: function (value) {
+                              return value.toFixed(2); // Format y-axis values to 2 decimal places
+                            },
+                            color: theme === 'dark' ? '#fff' : '#000', // Adjust tick color based on theme
+                          },
+                          grid: {
+                            color: theme === 'dark' ? '#444' : '#e0e0e0', // Adjust gridline color based on theme
+                          },
+                        },
+                      },
+                      plugins: {
+                        legend: {
+                          labels: {
+                            color: theme === 'dark' ? '#fff' : '#000', // Legend text color based on theme
+                          },
+                        },
+                        tooltip: {
+                          mode: 'index', // Ensure all datasets at this x-axis point are shown
+                          intersect: true, // Show tooltip only when hovering directly over a point
+                          callbacks: {
+                            label: function (tooltipItem) {
+                              const index = tooltipItem.dataIndex;
+                              const dataset = tooltipItem.dataset;
+                              const value = dataset.data[index];
+                              const datasetLabel = dataset.label || '';
+                  
+                              // Return label with value and date
+                              return `${datasetLabel}: ${value} (Date: ${chartData.dates[index]})`;
+                            },
+                          },
+                          displayColors: true, // Enable color box for each dataset
+                          boxWidth: 15, // Adjust the width of the color box
+                          boxHeight: 15, // Adjust the height of the color box
+                        },
+                      },
+                    }}
+                    height={350} // Set the height of the chart
+                  />
                 )}
             </Col>
             <Col style={{ display: 'flex', width: '100%', marginLeft: '2%' }}>

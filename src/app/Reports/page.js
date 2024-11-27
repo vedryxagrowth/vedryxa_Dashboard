@@ -5573,8 +5573,7 @@ const MyTablePage = () => {
                     </Row>
                 </div>
 
-                <Carousel ref={carouselRef}
-                beforeChange={handleSlideChange} >
+                <Carousel ref={carouselRef} beforeChange={handleSlideChange} >
                     <div style={{ height: "100%", marginBottom: '20px' }}>
                         <div style={contentStyle}>
                             {isLoading === true ? (

@@ -113,7 +113,7 @@ export const TokenProvider = ({ children }) => {
 
   return (
     <TokenContext.Provider value={{ userdetails, setuserdetails, darkMode, toggleTheme, theme }}>
-      {userdetails && <ChatWidget />}
+      {userdetails && !userdetails.role === "Revenue_Partner" && <ChatWidget />}
       {children}
     </TokenContext.Provider>
   );
