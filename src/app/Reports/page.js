@@ -96,7 +96,7 @@ const newtworkCollections = {
     "FB_System1": 'Facebook_System1',
     "FB_Rsoc": 'Facebook_Rsoc',
     "FB_Tonic": 'Facebook_Tonic',
-    "FB_DomainActive": "Facebook_DomainActive",
+    "FB_DomainActive": "Facebook_DActive",
     "FB_Bodies": "Facebook_Bodies",
     "FB_Bodies1": "Facebook_Bodies1",
     "Newsbreak_DA": "Newsbreak_DomainActive"
@@ -4676,8 +4676,7 @@ const MyTablePage = () => {
                     </Row>
                 </div>
 
-                <Carousel ref={carouselRef}
-                beforeChange={handleSlideChange} >
+                <Carousel ref={carouselRef} beforeChange={handleSlideChange} >
                     <div style={{ height: "100%", marginBottom: '20px' }}>
                         <div style={contentStyle}>
                             {isLoading === true ? (

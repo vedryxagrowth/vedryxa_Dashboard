@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 // pages/index.js
 import React from 'react';
 import axios from 'axios';
-import { Select, Tag, theme, Button } from 'antd';
+import { Select, Tag, theme, Button,Carousel,Tabs, Tooltip } from 'antd';
+import StickyBox from 'react-sticky-box';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
 import debounce from 'lodash.debounce';
@@ -54,6 +55,7 @@ import {
 } from 'antd';
 
 import { LoadingOutlined } from '@ant-design/icons';
+import { PiWarningCircleFill } from "react-icons/pi";
 // import {
 //     TrophyOutlined,
 //     ArrowUpOutlined,
@@ -154,23 +156,43 @@ const rangePresets = [
 const RevenuePartnerDashboard = () => {
     const { userdetails } = useTokenContext();
     const { theme } = useTokenContext();
+    const carouselRef = useRef();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [loading1, setLoading1] = useState(false);
     const [timeZone, setTimeZone] = useState('UTC');
     const networks = Object.keys(userdetails?.adAccounts);
-    const [revenuePratner, setRevenuePartner] = useState(networks[0]);
+    const [revenuePratner, setRevenuePartner] = useState(networks);
+    
+    const last7Days = dayjs().subtract(7, 'days').format('YYYY-MM-DD');
 
-    const [startDate, setStartDate] = useState(yesterday);
+    const today = dayjs().subtract(0, 'days').format('YYYY-MM-DD');
 
-    const [endDate, setEndDate] = useState(yesterday);
+    const defaultDates = [dayjs(last7Days), dayjs(today)];
+
+    const [startDate, setStartDate] = useState(last7Days);
+
+    const [endDate, setEndDate] = useState(today);
 
     const [revenuePartnerData, setRevenuePartnerData] = useState([]);
 
-    const [fetchData, setFetchData] = useState(false);
+    const [revenuePartnerDomainData, setRevenuePartnerDomainData] = useState([]);
+
+    const [fetchData, setFetchData] = useState(true);
 
     const [fixedFooter, setFixedFooter] = useState([]);
 
+    const [domainFixedFooter, setDomainFixedFooter] = useState([]);
+
     const timeZoneForColumnDefs = useRef('UTC');
+
+    const [activeTab, setActiveTab] = useState("1");
+
+    const [columnDefs, setColumnDefs] = useState([]);
+
+    const [domainColumnDefs, setDomainColumnDefs] = useState([]);
+
+    const [isDomain, setIsDomain] = useState("");
 
     const onChangeTime = (value) => {
         setTimeZone(value);
@@ -192,6 +214,17 @@ const RevenuePartnerDashboard = () => {
     const onClickSubmit = () => {
         setFetchData(true);
         setLoading(true);
+    
+        // Update to "Domain" only if the previous value is "Domain"
+        setIsDomain((prevState) => {
+            if (prevState === "Domain") {
+                setIsDomain(""); // Reset state to empty string
+                setTimeout(() => {
+                    setIsDomain("Domain"); // Update to "Domain" after 1 second
+                }, 1000);
+            }
+            return prevState; // Return the previous state unchanged
+        });
     };
 
     const spender = (params) => {
@@ -214,8 +247,6 @@ const RevenuePartnerDashboard = () => {
         return parseFloat(average);
     };
 
-    const [columnDefs, setColumnDefs] = useState([]);
-
     const [defaultColDef] = useState({
         flex: 4,
         sortable: true,
@@ -224,30 +255,242 @@ const RevenuePartnerDashboard = () => {
         enableRowGroup: true,
     });
 
+    console.log(revenuePratner);
+
+    const items = [
+        { key: '1', label: 'Data', content: 'Content for Dat' },
+        revenuePratner && revenuePratner.length === 1 && revenuePratner[0] === "Mnet" && { key: '2', label: 'Domain', content: 'Content for Domain data' }
+
+        // { key: '3', label: 'Campaigns', content: 'Content for Campaign data' }
+    ];
+
+    const handleCarouselChange = (index) => {
+        setActiveTab(index);
+        carouselRef.current.goTo(parseInt(index)-1)
+        console.log(index);
+        if(index == 2){
+            setIsDomain("Domain");
+        }
+    };
+
+    const handleSlideChange = (from, to) => {
+        setActiveTab((parseInt(to)+1).toString());
+        // console.log((parseInt(to)+1).toString());
+    };
+
+    const marginFormatter = (params) => {
+        return `${parseFloat(params.value || 0).toFixed(2)}%`; // Ensure 2 decimal places in currency format
+    };
+
+    const currencyFormatter = (params) => {
+        return `$${parseFloat(params.value || 0).toFixed(2)}`; // Ensure 2 decimal places in currency format
+    };
+
+    const renderCarouselNav = () => (
+        <StickyBox offsetTop={64} offsetBottom={20} style={{ zIndex: 1, padding: '0px', margin: '0px' }}>
+            <Tabs
+                activeKey={activeTab}
+                onChange={(key) => handleCarouselChange(key)}
+                items={items.map((item) => ({
+                key: item.key,
+                label: item.label,
+                }))}
+                className="custom-tabs" // Apply custom CSS class
+                style={{
+                backgroundColor: '#f0f2f5',
+                padding: '0',       
+                marginBottom: '0',  
+                }}
+                tabBarStyle={{
+                fontSize: '12px',      
+                padding: '0',          
+                height: '30px',        
+                lineHeight: '30px',    
+                marginBottom: '-1px',  
+                borderBottom: 'none',  
+                }}
+            />
+        </StickyBox>
+    );
+
     const functionForFetchingRevenuePartnerData = async () => {
-        const fetchRevenueData = await axios.get(`https://prodapis.adsgoat.in/revenuePartnerData?timezone=${timeZone}&startDate=${startDate}&endDate=${endDate}&network=${revenuePratner}`);
+        const token = localStorage.getItem("token")
+        console.log(token);
+        const fetchRevenueData = await axios.get(`https://prodapis.adsgoat.in/revenuePartnerData?timezone=${timeZone}&startDate=${startDate}&endDate=${endDate}&network=${revenuePratner}`,{
+            headers: {
+                Authorization: token,
+            },
+        });
         const response = fetchRevenueData.data;
         setRevenuePartnerData(response);
         setFetchData(false);
         setLoading(false);
         setColumnDefs([
             {
+                field:"network",
+                resizable: true,
+                sortable: true,
+                hide: true, // Hide column as it's grouped
+                rowGroup: true,
+                enableRowGroup: true,
+                minWidth: 150,
+                flex:5,
+
+            },
+            {
                 field: `${timeZoneForColumnDefs.current}Date`,
                 headerName: 'Date',
-                minWidth: 150,
-                cellRenderer: params => params.value === 'Totals' ? 'Totals' : params.value
+                flex: 5,
+                minWidth: 200,
+                valueFormatter: (params) => {
+                  // Format the date with the short weekday
+                  if (params.value !== 'Totals') {
+                    const date = dayjs(params.value); // Assuming you are using dayjs
+                    const weekday = date.format('ddd'); // Short weekday (e.g., Mon, Tue)
+                    return `${params.value} (${weekday})`; // e.g., "2023-11-25 (Sat)"
+                  }
+                  return params.value; // For 'Totals' row
+                },
+                cellRenderer: (params) => {
+                  if (params.value !== 'Totals') {
+                    const date = dayjs(params.value); // Assuming you are using dayjs
+                    const weekday = date.format('ddd'); // Short weekday (e.g., Mon, Tue)
+                    
+                    return (
+                      <div style={{display:'flex', alignItems:'center'}}>
+                        {/* Display Date and Weekday */}
+                        {/* <span>{`${weekday}, ${params.value}`}</span> */}
+                        <span>{params.value}</span>
+                        {/* Display "Not Finalised" if finalised is false */}
+                        {params.data?.finalised === false && (
+                          <span style={{ color: 'red', marginLeft: '5px' }}>(Not Finalized)</span>
+                        //   <span style={{ color: 'red', marginLeft: '5px' }}>
+                        //     <Tooltip title={"The Data is not finalized yet for this date"}>
+                        //         <PiWarningCircleFill />
+                        //     </Tooltip>
+                        //   </span>
+                        )}
+                      </div>
+                    );
+                  }
+                  return params.value; // Return for 'Totals' row
+                },
             },
             {
                 field: "spend",
                 resizable: true,
                 sortable: true,
-                minWidth: 150
+                minWidth: 150,
+                aggFunc:spender,
+                valueFormatter:currencyFormatter
             },
             {
                 field: "revenue",
                 resizable: true,
                 sortable: true,
-                minWidth: 150
+                minWidth: 150,
+                aggFunc:spender,
+                valueFormatter:currencyFormatter
+            },
+            { 
+                field: 'profit', 
+                resizable: true,
+                sortable: true,
+                minWidth: 150,
+                aggFunc:spender,
+                cellClassRules: {
+                    'font-red': p => p.value < 0
+                },
+                valueFormatter:currencyFormatter
+            },
+            {
+                field: "margin",
+                headerName:"Margin(%)",
+                aggFunc: spender,
+                cellClassRules: {
+                    'font-red': p => p.value < 0
+                },
+                minWidth: 150,
+                valueFormatter: marginFormatter
+            },
+            {
+                field: 'rpc',
+                headerName: 'RPC',
+                aggFunc: avgRpcCpl,
+                valueFormatter: rpcCplFormatter,
+                minWidth: 100,
+                flex: 3
+            },
+            {
+                field: 'cpl',
+                headerName: 'CPL',
+                aggFunc: avgRpcCpl,
+                valueFormatter: rpcCplFormatter,
+                minWidth: 100,
+                flex: 3
+            }
+        ]);
+        setFixedFooter([
+            {
+                [`${timeZoneForColumnDefs.current}Date`]: 'Totals',
+                spend: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0).toFixed(2)),
+                revenue: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0).toFixed(2)),
+                profit: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0).toFixed(2)),
+                margin: parseFloat((response?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / response?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
+                rpc: parseFloat((response?.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / response?.length).toFixed(2)),
+                cpl: parseFloat((response?.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / response?.length).toFixed(2)),
+                conversions: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
+                clicks: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.clicks), 0).toFixed(2)),
+                impressions: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
+            }
+        ]);
+    };
+
+    const functionForFetchingRevenuePartnerDomainData = async () => {
+        setLoading1(true);
+        const token = localStorage.getItem("token")
+        console.log(token);
+        const fetchRevenueData = await axios.get(`https://prodapis.adsgoat.in/revenuePartner/DomainData?timezone=${timeZone}&startDate=${startDate}&endDate=${endDate}&network=${revenuePratner}`,{
+            headers: {
+                Authorization: token,
+            },
+        });
+        const response = fetchRevenueData.data;
+        setRevenuePartnerDomainData(response);
+        setFetchData(false);
+        setLoading1(false);
+        setDomainColumnDefs([
+            {
+                field:'domain',
+                headerName:'Domain',
+                minWidth: 400,
+                // resizable: true,
+                sortable: true,
+                hide: true, // Hide column as it's grouped
+                rowGroup: true,
+                enableRowGroup: true,
+                flex: 8
+
+            },
+            {
+                field: `${timeZoneForColumnDefs.current}Date`,
+                headerName: 'Date',
+                flex: 6,
+                minWidth: 200,
+            },
+            {
+                field: "spend",
+                resizable: true,
+                sortable: true,
+                minWidth: 150,
+                aggFunc:spender
+            },
+            {
+                field: "revenue",
+                resizable: true,
+                sortable: true,
+                minWidth: 150,
+                aggFunc:spender
             },
             { 
                 field: 'profit', 
@@ -256,7 +499,8 @@ const RevenuePartnerDashboard = () => {
                 minWidth: 150,
                 cellClassRules: {
                     'font-red': p => p.value < 0
-                }
+                },
+                aggFunc:spender
             },
             {
                 field: "margin",
@@ -271,28 +515,31 @@ const RevenuePartnerDashboard = () => {
                 headerName: 'RPC',
                 aggFunc: avgRpcCpl,
                 valueFormatter: rpcCplFormatter,
-                minWidth: 150
+                minWidth: 100,
+                flex: 3
             },
             {
                 field: 'cpl',
                 headerName: 'CPL',
                 aggFunc: avgRpcCpl,
                 valueFormatter: rpcCplFormatter,
-                minWidth: 150
+                minWidth: 100,
+                flex: 3
             }
         ]);
-        setFixedFooter([
+        setDomainFixedFooter([
             {
+                // domain:'Totals',
                 [`${timeZoneForColumnDefs.current}Date`]: 'Totals',
-                spend: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0).toFixed(2)),
-                revenue: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0).toFixed(2)),
-                profit: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0).toFixed(2)),
-                margin: parseFloat((response?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / response?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
-                rpc: parseFloat((response?.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / response?.length).toFixed(2)),
-                cpl: parseFloat((response?.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / response?.length).toFixed(2)),
-                conversions: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0).toFixed(2)),
-                clicks: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr.clicks), 0).toFixed(2)),
-                impressions: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
+                spend: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0).toFixed(2)),
+                revenue: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0).toFixed(2)),
+                profit: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0).toFixed(2)),
+                margin: parseFloat((response?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / response?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
+                rpc: parseFloat((response?.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / response?.length).toFixed(2)),
+                cpl: parseFloat((response?.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / response?.length).toFixed(2)),
+                conversions: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
+                clicks: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.clicks), 0).toFixed(2)),
+                impressions: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
             }
         ]);
     };
@@ -303,20 +550,59 @@ const RevenuePartnerDashboard = () => {
         }
     }, [fetchData]);
 
+    useEffect(()=>{
+        if(isDomain === "Domain"){
+            functionForFetchingRevenuePartnerDomainData();
+        }
+    },[isDomain]);
+
+    const [dropdownVisible, setDropdownVisible] = useState(false);
+
+    const handleDropdownVisibleChange = (open) => {
+        setDropdownVisible(open);
+    };
+
+    // const onChangeRevenuePartner = (selectedValues) => {
+    //     console.log('Selected Values:', selectedValues);
+    // };
+
+    const options = networks.map((network) => ({
+        label: network,
+        value: network,
+    }));
+
+    const sharedProps = {
+        mode: 'multiple',
+        style: {
+            width: '100%',
+        },
+        options,
+        placeholder: 'Select Item...',
+        maxTagCount: 'responsive',
+    };
+
+    // Initialize with all options selected
+    // const [revenuePratner, setRevenuePartner] = useState(networks);
+
+    const selectProps = {
+        value: revenuePratner,
+        onChange: setRevenuePartner,
+    };
+
     return (
-        <div>
+        <div style={{ width: '100%', margin:'0px', padding:'0px'}}>
             <Space direction="vertical" style={{ width: '100%', paddingBottom: "1%" }}>
                 {/* Filters */}
                 <Row gutter={[16, 16]}>
-                    <Col xs={8} sm={8} md={4} lg={3}>
-                        <Select
-                            className='select-element'
-                            style={{ width: '100%' }}
-                            placeholder="Select Network"
-                            onChange={onChangeRevenuePartner}
-                            defaultValue={networks[0]}
-                            options={networks.map((item) => ({ value: item, label: item }))}
-                        />
+                    <Col xs={8} sm={8} md={5} lg={4}>
+                        <Space
+                            direction="vertical"
+                            style={{
+                                width: '100%',
+                            }}
+                        >
+                            <Select {...sharedProps} {...selectProps} />
+                        </Space>
                     </Col>
                     <Col xs={16} sm={16} md={10} lg={8}>
                         <ConfigProvider locale={locale}>
@@ -351,64 +637,136 @@ const RevenuePartnerDashboard = () => {
                 </Row>
             </Space>
             {/* Table */}
-            {loading ? (
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
-                    <Spin indicator={<LoadingOutlined spin />} size="large" />
+            {/* <div 
+            // style={{padding:'0px', margin:'0px'}}
+            >
+                {renderCarouselNav()}
+            </div> */}
+            <Carousel dots={false}  ref={carouselRef} beforeChange={handleSlideChange}>
+                <div>
+                    {loading ? (
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+                            <Spin indicator={<LoadingOutlined spin />} size="large" />
+                        </div>
+                    ) : (
+                        revenuePartnerData.length > 0 && (
+                            <div
+                                className={`ag-theme-alpine ${gridThemeClass}`}
+                                style={{ width: '100%', height: '70vh' }}
+                            >
+                                <AgGridReact
+                                    rowData={revenuePartnerData}
+                                    columnDefs={columnDefs}
+                                    defaultColDef={defaultColDef}
+                                    suppressAggFuncInHeader={true}
+                                    pinnedBottomRowData={fixedFooter}
+                                    getRowStyle={(params) => {
+                                        if (params.node.rowPinned) {
+                                            return {
+                                                fontWeight: 'bold',
+                                                // backgroundColor: theme === "dark" ? '#000' : '#fff',
+                                                // color: theme === "dark" ? '#fff' : '#000',
+                                            };
+                                        }
+                                        return null;
+                                    }}
+                                    onFilterChanged={(params) => {
+                                        const api = params.api;
+                                        const filteredData = [];
+                                        api.forEachNodeAfterFilterAndSort((node) => {
+                                            if (!node.rowPinned) {
+                                                filteredData.push(node.data);
+                                            }
+                                        });
+
+                                        const updatedFooter = [
+                                            {
+                                                [`${timeZoneForColumnDefs.current}Date`]: 'Totals',
+                                                spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
+                                                revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
+                                                profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
+                                                margin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
+                                                rpc: parseFloat(
+                                                    (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc || 0), 0) / filteredData.length || 0).toFixed(2)
+                                                ),
+                                                cpl: parseFloat(
+                                                    (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl || 0), 0) / filteredData.length || 0).toFixed(2)
+                                                ),
+                                                impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0).toFixed(2)),
+                                            },
+                                        ];
+
+                                        setFixedFooter(updatedFooter);
+                                    }}
+                                />
+                            </div>
+                        )
+                    )}
                 </div>
-            ) : (
-                revenuePartnerData.length > 0 && (
-                    <div
-                        className={`ag-theme-alpine ${gridThemeClass}`}
-                        style={{ width: '100%', height: '70vh' }}
-                    >
-                        <AgGridReact
-                            rowData={revenuePartnerData}
-                            columnDefs={columnDefs}
-                            defaultColDef={defaultColDef}
-                            suppressAggFuncInHeader={true}
-                            pinnedBottomRowData={fixedFooter}
-                            getRowStyle={(params) => {
-                                if (params.node.rowPinned) {
-                                    return {
-                                        fontWeight: 'bold',
-                                        // backgroundColor: theme === "dark" ? '#000' : '#fff',
-                                        // color: theme === "dark" ? '#fff' : '#000',
-                                    };
-                                }
-                                return null;
-                            }}
-                            onFilterChanged={(params) => {
-                                const api = params.api;
-                                const filteredData = [];
-                                api.forEachNodeAfterFilterAndSort((node) => {
-                                    if (!node.rowPinned) {
-                                        filteredData.push(node.data);
-                                    }
-                                });
+                {revenuePratner && revenuePratner.length === 1 && revenuePratner[0] === "Mnet" && 
+                
+                    <div>
+                        {loading1 ? (
+                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+                                <Spin indicator={<LoadingOutlined spin />} size="large" />
+                            </div>
+                        ) : (
+                            revenuePartnerDomainData.length > 0 ? (
+                                <div
+                                    className={`ag-theme-alpine ${gridThemeClass}`}
+                                    style={{ width: '100%', height: '70vh' }}
+                                >
+                                    <AgGridReact
+                                        rowData={revenuePartnerDomainData}
+                                        columnDefs={domainColumnDefs}
+                                        defaultColDef={defaultColDef}
+                                        suppressAggFuncInHeader={true}
+                                        pinnedBottomRowData={domainFixedFooter}
+                                        getRowStyle={(params) => {
+                                            if (params.node.rowPinned) {
+                                                return {
+                                                    fontWeight: 'bold',
+                                                    // backgroundColor: theme === "dark" ? '#000' : '#fff',
+                                                    // color: theme === "dark" ? '#fff' : '#000',
+                                                };
+                                            }
+                                            return null;
+                                        }}
+                                        onFilterChanged={(params) => {
+                                            const api = params.api;
+                                            const filteredData = [];
+                                            api.forEachNodeAfterFilterAndSort((node) => {
+                                                if (!node.rowPinned) {
+                                                    filteredData.push(node.data);
+                                                }
+                                            });
 
-                                const updatedFooter = [
-                                    {
-                                        [`${timeZoneForColumnDefs.current}Date`]: 'Totals',
-                                        spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr.spend || 0), 0).toFixed(2)),
-                                        revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr.revenue || 0), 0).toFixed(2)),
-                                        profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr.profit || 0), 0).toFixed(2)),
-                                        margin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
-                                        rpc: parseFloat(
-                                            (filteredData.reduce((acc, curr) => acc + parseFloat(curr.rpc || 0), 0) / filteredData.length || 0).toFixed(2)
-                                        ),
-                                        cpl: parseFloat(
-                                            (filteredData.reduce((acc, curr) => acc + parseFloat(curr.cpl || 0), 0) / filteredData.length || 0).toFixed(2)
-                                        ),
-                                        impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr.impressions || 0), 0).toFixed(2)),
-                                    },
-                                ];
+                                            const updatedFooter = [
+                                                {
+                                                    [`${timeZoneForColumnDefs.current}Date`]: 'Totals',
+                                                    spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
+                                                    revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
+                                                    profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
+                                                    margin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
+                                                    rpc: parseFloat(
+                                                        (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc || 0), 0) / filteredData.length || 0).toFixed(2)
+                                                    ),
+                                                    cpl: parseFloat(
+                                                        (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl || 0), 0) / filteredData.length || 0).toFixed(2)
+                                                    ),
+                                                    impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0).toFixed(2)),
+                                                },
+                                            ];
 
-                                setFixedFooter(updatedFooter);
-                            }}
-                        />
-                    </div>
-                )
-            )}
+                                            setDomainFixedFooter(updatedFooter);
+                                        }}
+                                    />
+                                </div>
+                            ) : null
+                        )}
+                
+                    </div>}
+            </Carousel>
         </div>
     );
 };
