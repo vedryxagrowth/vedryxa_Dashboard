@@ -113,11 +113,11 @@ const MyTablePage = () => {
     const timeFromDashboard = params.get('time');
     const startDateFromDashboard = params.get('startDate');
     const endDateFromDashboard = params.get('endDate');
-    console.log(networkFromDashboard);
-    console.log(accountNumberFromDashboard);
-    console.log(timeFromDashboard);
-    console.log(startDateFromDashboard);
-    console.log(endDateFromDashboard);
+    // console.log(networkFromDashboard);
+    // console.log(accountNumberFromDashboard);
+    // console.log(timeFromDashboard);
+    // console.log(startDateFromDashboard);
+    // console.log(endDateFromDashboard);
 
     const { theme } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -133,18 +133,18 @@ const MyTablePage = () => {
     if(userdetails?.role === "Revenue_Partner"){
         redirect("/Dashboard");
     }
-    console.log(userdetails, "userDetails");
+    // console.log(userdetails, "userDetails");
     // const [darkMode, setDarkMode] = useState(false);
     // console.log(userdetails._id, "id");
 
     const { adAccounts } = userdetails;
 
-    console.log(adAccounts, "addAccounts");
+    // console.log(adAccounts, "addAccounts");
 
     const networks = Object.keys(adAccounts);
 
     const yesterday = dayjs().subtract(1, 'days').format('YYYY-MM-DD');
-    console.log('Yesterday\'s date:', yesterday);
+    // console.log('Yesterday\'s date:', yesterday);
 
 
     // console.log(networks,"networks");
@@ -213,9 +213,9 @@ const MyTablePage = () => {
 
     const [newendDate, setNewEndDate] = useState(endDateFromDashboard ? endDateFromDashboard : yesterday);
 
-    const [revenuePratner, setRevenuePartner] = useState(networkFromDashboard ? networkFromDashboard : [networks[0]]);
+    const [revenuePratner, setRevenuePartner] = useState(networkFromDashboard ? networkFromDashboard : networks[0]);
 
-    const [newRevenuePratner, setNewRevenuePartner] = useState(networkFromDashboard ? networkFromDashboard : [networks[0]]);
+    const [newRevenuePratner, setNewRevenuePartner] = useState(networkFromDashboard ? networkFromDashboard : networks[0]);
 
     const [isSearching, setIsSearching] = useState(false);
     const [inputValue, setInputValue] = useState('');
@@ -253,10 +253,10 @@ const MyTablePage = () => {
     // const [columnOrder, setColumnOrder] = useState(JSON.parse(localStorage.getItem("columnState")));
 
 
-    console.log(revenuePratner);
+    // console.log(revenuePratner);
     const accountsForAccess = adAccounts[revenuePratner];
-    console.log(accountsForAccess, "accounts Access");
-    console.log(accountsForAccess[0], "accountFor Access");
+    // console.log(accountsForAccess, "accounts Access");
+    // console.log(accountsForAccess[0], "accountFor Access");
 
     const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
 
@@ -339,11 +339,17 @@ const MyTablePage = () => {
     const [newColumnName, setNewColumnName] = useState('');
     const [formula, setFormula] = useState('');
 
-    const onChange1 = (currentSlide) => {
-        console.log(currentSlide);
-    };
+    // const onChange1 = (currentSlide) => {
+    //     console.log(currentSlide);
+    // };
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const [domainData, setDomainData] = useState([]);
+
+    const [domainColumnDefs, setDomainColumnDefs] = useState([]);
+
+    const [domainFixedFooter, setDomainFixedFooter] = useState([]);
     const showModal = () => {
         setIsModalOpen(true);
     };
@@ -375,8 +381,8 @@ const MyTablePage = () => {
                         const values = Object.values(params.data);
 
                         // Log the sanitized keys
-                        console.log('Original Keys:', originalKeys);
-                        console.log('Sanitized Keys:', sanitizedKeys);
+                        // console.log('Original Keys:', originalKeys);
+                        // console.log('Sanitized Keys:', sanitizedKeys);
 
                         const keyMapping = {};
                         sanitizedKeys.forEach((key, index) => {
@@ -403,7 +409,7 @@ const MyTablePage = () => {
                         const values = params.values;
 
                         // Log the values to be aggregated
-                        console.log('Values to aggregate:', values);
+                        // console.log('Values to aggregate:', values);
 
                         // Define how you want to aggregate these values.
                         // Example: You might want to sum them, average them, etc.
@@ -434,7 +440,7 @@ const MyTablePage = () => {
                         const originalKeys = Object.keys(row);
                         const sanitizedKeys = originalKeys.map(key => key.replace(/[^a-zA-Z_$0-9]/g, '_'));
                         const values = Object.values(row);
-                        console.log(values, "values1");
+                        // console.log(values, "values1");
 
                         const keyMapping = {};
                         sanitizedKeys.forEach((key, index) => {
@@ -502,7 +508,7 @@ const MyTablePage = () => {
                 name: 'Reset Columns (Custom)',
                 action: () => {
                     // Your custom logic here
-                    console.log('Custom Reset Columns logic');
+                    // console.log('Custom Reset Columns logic');
                     updatingColumnsStructure(columnStructure)
                     // setTimeout(() => {
                     //     window.location.reload();
@@ -520,6 +526,12 @@ const MyTablePage = () => {
         }
 
         return defaultItems;
+    };
+
+    const average = (params) => {
+        const total = params.values.reduce((acc, value) => acc + parseFloat(value || 0), 0);
+        const count = params.values.filter(value => value !== null && value !== undefined).length;  // Count non-null/undefined values
+        return count > 0 ? Math.round((total / count) * 100) / 100 : 0;  // Avoid division by zero
     };
 
     const liveSpender = (params) => {
@@ -807,6 +819,25 @@ const MyTablePage = () => {
         return sum;
     };
 
+    const marginFormatter = (params) => {
+        return `${parseFloat(params.value || 0).toFixed(2)}%`; // Ensure 2 decimal places in currency format
+    };
+
+    const rpcCplFormatter = (params) => {
+        const value = params.value;
+        return isNaN(value) || !isFinite(value) ? '0' : parseFloat(value).toFixed(2);
+    };
+
+    const avgRpcCpl = (params) => {
+        const validValues = params.values.filter(value => !isNaN(value) && isFinite(value));
+        if (validValues.length === 0) {
+            return 0;
+        }
+        const sum = validValues.reduce((acc, value) => acc + value, 0);
+        const average = sum / validValues.length;
+        return parseFloat(average);
+    };
+
 
     // (["campaignName", 
     // "adsetname",
@@ -998,9 +1029,9 @@ const MyTablePage = () => {
     //     return `$${value}`; // Format the value as currency
     // }
 
-    const onChangeSpendAndStatus = () => {
-        console.log("hi hello one");
-    };
+    // const onChangeSpendAndStatus = () => {
+    //     console.log("hi hello one");
+    // };
 
     const isYesterday = () => {
         const startDate1 = moment(startDate); // Convert to moment object
@@ -1069,7 +1100,7 @@ const MyTablePage = () => {
                 const onChangeSpendAndStatus = async () => {
                     // Check if it's a group footer row (for groupIncludeFooter)
                     if (params?.node?.footer) {
-                        console.log("This is a groupIncludeFooter row. Modal will not open.");
+                        // console.log("This is a groupIncludeFooter row. Modal will not open.");
                         return; // Prevent modal from opening for group footer rows
                     }
 
@@ -1111,14 +1142,14 @@ const MyTablePage = () => {
                         budget: changeBudget * 100,
                         status: campaignStatus
                     };
-                    console.log(object);
+                    // console.log(object);
                     const requestResponse = await axios.post('https://prodapis.adsgoat.in/Comments/accountNumber/campaign', { formattedData: object }, {
                         headers: {
                             Authorization: token,
                         },
                     });
                     const responseData = requestResponse.data;
-                    console.log(responseData, "response");
+                    // console.log(responseData, "response");
                     message.success("Budget and Status Updated");
                     changeRRefrst();
                 };
@@ -1144,7 +1175,7 @@ const MyTablePage = () => {
                     setCampaignStatus((prev) => !prev);
                 }
 
-                console.log(groupedData);
+                // console.log(groupedData);
 
                 return (
                     <div>
@@ -1563,9 +1594,9 @@ const MyTablePage = () => {
             pinned: 'left',
             enableRowGroup: true,
             onClick: (event) => {
-                console.log(event, "event");
-                console.log('Group row clicked:', event);
-                console.log(event);
+                // console.log(event, "event");
+                // console.log('Group row clicked:', event);
+                // console.log(event);
                 const url = `/history/${event}-${account}-${time}`;
                 window.open(url, '_blank');
             },
@@ -1592,7 +1623,7 @@ const MyTablePage = () => {
                 const onChangeSpendAndStatus = async () => {
                     // Check if it's a group footer row (for groupIncludeFooter)
                     if (params?.node?.footer) {
-                        console.log("This is a groupIncludeFooter row. Modal will not open.");
+                        // console.log("This is a groupIncludeFooter row. Modal will not open.");
                         return; // Prevent modal from opening for group footer rows
                     }
 
@@ -1617,7 +1648,7 @@ const MyTablePage = () => {
                         }
                         else {
                             setGroupedData(groupedData);
-                            console.log("dailyadd");
+                            // console.log("dailyadd");
                         }
                         // Set the grouped data for the modal
                         setIsModalVisible(true); // Show the modal for non-footer rows
@@ -1642,7 +1673,7 @@ const MyTablePage = () => {
                         },
                     });
                     const responseData = requestResponse.data;
-                    console.log(responseData, "response");
+                    // console.log(responseData, "response");
                     message.success("Budget and Status Updated");
                     changeRRefrst();
                 };
@@ -1669,7 +1700,7 @@ const MyTablePage = () => {
                 }
 
 
-                console.log(groupedData);
+                // console.log(groupedData);
 
                 return (
                     <div>
@@ -1879,9 +1910,9 @@ const MyTablePage = () => {
             // lockposition: true,
             enableRowGroup: true,
             onClick: (event) => {
-                console.log(event, "event");
-                console.log('Group row clicked:', event);
-                console.log(event);
+                // console.log(event, "event");
+                // console.log('Group row clicked:', event);
+                // console.log(event);
                 // const url = `/history/${event}-${account}-${time}`;
                 // window.open(url, '_blank');
 
@@ -1920,7 +1951,7 @@ const MyTablePage = () => {
                 const onChangeSpendAndStatus = async () => {
                     // Check if it's a group footer row (for groupIncludeFooter)
                     if (params?.node?.footer) {
-                        console.log("This is a groupIncludeFooter row. Modal will not open.");
+                        // console.log("This is a groupIncludeFooter row. Modal will not open.");
                         return; // Prevent modal from opening for group footer rows
                     }
 
@@ -1962,14 +1993,14 @@ const MyTablePage = () => {
                         budget: changeBudget * 100,
                         status: campaignStatus
                     };
-                    console.log(object);
+                    // console.log(object);
                     const requestResponse = await axios.post('https://prodapis.adsgoat.in/Comments/accountNumber/campaign', { formattedData: object }, {
                         headers: {
                             Authorization: token,
                         },
                     });
                     const responseData = requestResponse.data;
-                    console.log(responseData, "response");
+                    // console.log(responseData, "response");
                     message.success("Budget and Status Updated");
                     changeRRefrst();
                 };
@@ -1995,7 +2026,7 @@ const MyTablePage = () => {
                     setCampaignStatus((prev) => !prev);
                 }
 
-                console.log(groupedData);
+                // console.log(groupedData);
 
                 return (
                     <div>
@@ -2223,9 +2254,9 @@ const MyTablePage = () => {
             pinned: 'left',
             enableRowGroup: true,
             onClick: (event) => {
-                console.log(event, "event");
-                console.log('Group row clicked:', event);
-                console.log(event);
+                // console.log(event, "event");
+                // console.log('Group row clicked:', event);
+                // console.log(event);
                 const url = `/history/${event}-${account}-${time}`;
                 window.open(url, '_blank');
             },
@@ -2301,7 +2332,7 @@ const MyTablePage = () => {
                 const onChangeSpendAndStatus = async () => {
                     // Check if it's a group footer row (for groupIncludeFooter)
                     if (params?.node?.footer) {
-                        console.log("This is a groupIncludeFooter row. Modal will not open.");
+                        // console.log("This is a groupIncludeFooter row. Modal will not open.");
                         return; // Prevent modal from opening for group footer rows
                     }
 
@@ -2326,7 +2357,7 @@ const MyTablePage = () => {
                         }
                         else {
                             setGroupedData(groupedData);
-                            console.log("dailyadd");
+                            // console.log("dailyadd");
                         }
                         // Set the grouped data for the modal
                         setIsModalVisible(true); // Show the modal for non-footer rows
@@ -2344,14 +2375,14 @@ const MyTablePage = () => {
                         budget: changeBudget * 100,
                         status: campaignStatus
                     };
-                    console.log(object);
+                    // console.log(object);
                     const requestResponse = await axios.post('https://prodapis.adsgoat.in/Comments/accountNumber/campaign', { formattedData: object }, {
                         headers: {
                             Authorization: token,
                         },
                     });
                     const responseData = requestResponse.data;
-                    console.log(responseData, "response");
+                    // console.log(responseData, "response");
                     message.success("Budget and Status Updated");
                     changeRRefrst();
                 };
@@ -2378,7 +2409,7 @@ const MyTablePage = () => {
                 }
 
 
-                console.log(groupedData);
+                // console.log(groupedData);
 
                 return (
                     <div>
@@ -2637,7 +2668,7 @@ const MyTablePage = () => {
             return hourAsNumber > max ? hourAsNumber : max;
         }, -Infinity);  // Initialize with -Infinity to ensure proper comparison
 
-        console.log("Maximum hour:", String(maxHour).padStart(2, '0'));  // Format it back to string with leading zero if necessary
+        // console.log("Maximum hour:", String(maxHour).padStart(2, '0'));  // Format it back to string with leading zero if necessary
         return String(maxHour).padStart(2, '0');  // Return the max hour as a string with leading zero
     }
 
@@ -2656,7 +2687,7 @@ const MyTablePage = () => {
         const fetchData = await axios.get(`https://prodapis.adsgoat.in/api/singleUserData?email=${userdetails.email}`);
         // const data = await fetchData.json();
         const mainData = fetchData.data;
-        console.log(mainData.columnStructure, "columnStructure");
+        // console.log(mainData.columnStructure, "columnStructure");
         // setRowStructure(mainData.rows); 
         setColumnDefs(getColumnDefs(mainData.columnStructure));
         columnDefs1.current = getColumnDefs2(mainData.columnStructure);
@@ -2664,11 +2695,45 @@ const MyTablePage = () => {
         columnDefs3.current = (getColumnDefs3(mainData.columnStructure))
     }
 
+    function groupAndCalculateProfit(data) {
+        const groupedData = data.reduce((acc, item) => {
+            const key = `${item.domain}-${item[`${newtime}Date`]}`;
+            
+            if (!acc[key]) {
+                acc[key] = {
+                    domain: item.domain,
+                    [`${newtime}Date`]: item[`${newtime}Date`],
+                    estimated_revenue: 0,
+                    spend: 0,
+                    conversions: 0,
+                    fbLeads: 0,
+                };
+            }
+    
+            acc[key].estimated_revenue += item.estimated_revenue;
+            acc[key].spend += parseFloat(item.spend);
+            acc[key].conversions += item.conversions || 0;  // Default to 0 if undefined
+            acc[key].fbLeads += parseInt(item.fbLeads) || 0;        // Default to 0 if undefined
+    
+            return acc;
+        }, {});
+    
+        return Object.values(groupedData).map(item => ({
+            ...item,
+            profit: item.estimated_revenue - item.spend,
+            margin: item.estimated_revenue > 0 ? ((item.estimated_revenue - item.spend) / item.estimated_revenue) * 100 : 0,
+            rpc: item.conversions > 0 ? (item.estimated_revenue / item.conversions) : 0, // Revenue per Conversion
+            cpl: item.fbLeads > 0 ? (item.spend / item.fbLeads) : 0,  // Cost per Lead
+        }));
+    }
+    
+
     const functionCall1 = async () => {
         if (!token) {
             console.error("Token not available. Please log in.");
             return;  // Stop execution if token is missing
         }
+        // console.log(newRevenuePratner);
         const fetchData = await axios.get(`https://prodapis.adsgoat.in/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`, {
             headers: {
                 Authorization: token,
@@ -2676,6 +2741,106 @@ const MyTablePage = () => {
         });
         const mainData = fetchData.data;
         let campaignComments = [];
+
+        if (fetchData.status === 200 && mainData.length > 0 && newRevenuePratner === "FB_Mnet") {
+            const groupAndCalculateProfit1 = groupAndCalculateProfit(mainData);
+
+            setDomainData(groupAndCalculateProfit1);
+            setDomainColumnDefs([
+                {
+                    field:'domain',
+                    headerName:'Domain',
+                    minWidth: 400,
+                    // resizable: true,
+                    sortable: true,
+                    hide: true, // Hide column as it's grouped
+                    rowGroup: true,
+                    enableRowGroup: true,
+                    flex: 8
+    
+                },
+                {
+                    field: `${newtime}Date`,
+                    headerName: 'Date',
+                    flex: 6,
+                    minWidth: 200,
+                    filter: true,
+                },
+                {
+                    field: "spend",
+                    resizable: true,
+                    sortable: true,
+                    filter: true,
+                    minWidth: 150,
+                    aggFunc:spender
+                },
+                {
+                    field: "estimated_revenue",
+                    headerName: "Revenue",
+                    resizable: true,
+                    sortable: true,
+                    filter: true,
+                    minWidth: 150,
+                    aggFunc:spender,
+                },
+                { 
+                    field: 'profit', 
+                    resizable: true,
+                    sortable: true,
+                    minWidth: 150,
+                    cellClassRules: {
+                        'font-red': p => p.value < 0
+                    },
+                    aggFunc:spender,
+                    filter: true,
+                },
+                {
+                    field: "margin",
+                    headerName:'Margin(%)',
+                    aggFunc: average,
+                    cellClassRules: {
+                        'font-red': p => p.value < 0
+                    },
+                    minWidth: 150,
+                    valueFormatter: marginFormatter,
+                    filter: true,
+                },
+                {
+                    field: 'rpc',
+                    headerName: 'RPC',
+                    aggFunc: avgRpcCpl,
+                    valueFormatter: rpcCplFormatter,
+                    minWidth: 100,
+                    flex: 3,
+                    filter: true,
+                },
+                {
+                    field: 'cpl',
+                    headerName: 'CPL',
+                    aggFunc: avgRpcCpl,
+                    valueFormatter: rpcCplFormatter,
+                    minWidth: 100,
+                    flex: 3,
+                    filter: true,
+                }
+            ]);
+            setDomainFixedFooter([
+                {
+                    // domain:'Totals',
+                    [`${newtime}Date`]: 'Totals',
+                    spend: parseFloat(groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0).toFixed(2)),
+                    estimated_revenue: parseFloat(groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.estimated_revenue), 0).toFixed(2)),
+                    profit: parseFloat(groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0).toFixed(2)),
+                    margin: parseFloat((groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr.estimated_revenue), 0) * 100).toFixed(2)),
+                    rpc: parseFloat((groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / groupAndCalculateProfit1?.length).toFixed(2)),
+                    cpl: parseFloat((groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / groupAndCalculateProfit1?.length).toFixed(2)),
+                    conversions: parseFloat(groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
+                    // clicks: parseFloat(groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.clicks), 0).toFixed(2)),
+                    // impressions: parseFloat(groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
+                }
+            ]);
+            // console.log(groupAndCalculateProfit1);
+        }
         if (fetchData.status === 200 && mainData.length > 0) {
             try {
                 const commentFetch = await axios.get(`https://prodapis.adsgoat.in/Comments/${account}`, {
@@ -2889,7 +3054,7 @@ const MyTablePage = () => {
                 },
             });
             const mainData = fetchData.data;
-            console.log(mainData, "mainData of functionCall2");
+            // console.log(mainData, "mainData of functionCall2");
             let totalSpend = 0;
             let totalRevenue = 0;
             let totalProfit = 0;
@@ -2899,7 +3064,7 @@ const MyTablePage = () => {
             let totalImpressions = 0;
             let totalConversions = 0;
             const specifiedTimeZone = selectTimezone[time];
-            console.log(mainData[0], "one");
+            // console.log(mainData[0], "one");
             const totalRow = mainData && mainData.length > 0 ?
                 mainData.map((eachData) => {
                     const Revenue = eachData.estimated_revenue !== undefined ? (eachData.estimated_revenue) : 0;
@@ -2954,7 +3119,7 @@ const MyTablePage = () => {
                     ncpl = !isNaN(ncpl) ? ncpl : 0;
                     fMargin = !isNaN(fMargin) ? `${fMargin}%` : '0%';
 
-                    console.log(eachData.campaign_name, "campaign_name");
+                    // console.log(eachData.campaign_name, "campaign_name");
                     return (
                         {
                             campaignname: eachData.campaign_name,
@@ -2986,10 +3151,10 @@ const MyTablePage = () => {
                     )
                 }) : null;
             // console.log(filteredData[0],"one");
-            console.log(filteredData, "filter");
+            // console.log(filteredData, "filter");
 
             const fullData = filteredData?.length > 0 ? [...filteredData] : [];
-            console.log(fullData, "full");
+            // console.log(fullData, "full");
 
             // setDailyColumn(columnDefs);
             setdailyData(fullData);
@@ -3007,14 +3172,14 @@ const MyTablePage = () => {
                 Authorization: token,
             },
         });
-        console.log(fetchData, "f1");
+        // console.log(fetchData, "f1");
         const mainData = fetchData.data.items;
 
         const url = `https://prodapis.adsgoat.in/AllCampaigns?accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}&page=${pageSize}&limit=100`;
 
         const specifiedTimeZone = selectTimezone[time];
-        console.log(specifiedTimeZone, "spe");
-        console.log(mainData, "maindata of functionCall3");
+        // console.log(specifiedTimeZone, "spe");
+        // console.log(mainData, "maindata of functionCall3");
         const filteredData = mainData && mainData.length > 0 ?
             mainData.map((eachData) => {
                 let revenueData;
@@ -3066,7 +3231,7 @@ const MyTablePage = () => {
             })
             : null;
         totalItems.current = fetchData.data.totalItems;
-        console.log(mainData);
+        // console.log(mainData);
         setCampaignData(filteredData);
         setFixedFooter([
             {
@@ -3102,7 +3267,7 @@ const MyTablePage = () => {
                 },
             });
             const mainData = fetchData.data;
-            console.log(mainData, "mainData of functionCall4");
+            // console.log(mainData, "mainData of functionCall4");
             let totalSpend = 0;
             let totalRevenue = 0;
             let totalProfit = 0;
@@ -3112,7 +3277,7 @@ const MyTablePage = () => {
             let totalImpressions = 0;
             let totalConversions = 0;
             const specifiedTimeZone = selectTimezone[time];
-            console.log(mainData[0], "one");
+            // console.log(mainData[0], "one");
             const totalRow = mainData && mainData.length > 0 ?
                 mainData.map((eachData) => {
                     const Revenue = eachData.estimated_revenue !== undefined ? (eachData.estimated_revenue) : 0;
@@ -3146,9 +3311,9 @@ const MyTablePage = () => {
                     ncpl = !isNaN(ncpl) ? ncpl : 0;
                     fMargin = !isNaN(fMargin) ? `${fMargin}%` : '0%';
 
-                    console.log(eachData.campaign_name, "campaign_name");
-                    console.log(eachData.landerKeyword, "Keyword");
-                    console.log((eachData.tg7, "adid"));
+                    // console.log(eachData.campaign_name, "campaign_name");
+                    // console.log(eachData.landerKeyword, "Keyword");
+                    // console.log((eachData.tg7, "adid"));
                     return (
                         {
                             campaignname: eachData.campaign_name,
@@ -3183,10 +3348,10 @@ const MyTablePage = () => {
                     )
                 }) : null;
             // console.log(filteredData[0],"one");
-            console.log(filteredData, "filter");
+            // console.log(filteredData, "filter");
 
             const fullData = filteredData?.length > 0 ? [...filteredData] : [];
-            console.log(fullData, "full");
+            // console.log(fullData, "full");
 
             // setDailyColumn(columnDefs);
             setKeywordData(fullData);
@@ -3218,13 +3383,13 @@ const MyTablePage = () => {
                     await functionCall1();
                     await functionCall2();
                     // await functionCall4();
-                    console.log("Initial functions executed successfully.");
+                    // console.log("Initial functions executed successfully.");
                     isInitialLoad.current = false; // Set to false after initial load
                 }
 
                 // Run this function on initial load and whenever pageSize changes
                 await functionCall3();
-                console.log("functionCall3 executed successfully.");
+                // console.log("functionCall3 executed successfully.");
             } catch (error) {
                 console.error("Error in function calls:", error);
                 // Optionally, handle the error (e.g., show a notification to the user)
@@ -3283,15 +3448,15 @@ const MyTablePage = () => {
 
     const onChangeSelectRevenue = (value) => {
         const accountsForAccess = adAccounts[value];
-        console.log(accountsForAccess, "accounts Access");
-        console.log(accountsForAccess[0], "accountFor Access");
+        // console.log(accountsForAccess, "accounts Access");
+        // console.log(accountsForAccess[0], "accountFor Access");
 
         const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
 
         // console.log(accountsAccess, "accountsAccess");
         setNetworksData(accountsAccess);
         setRevenuePartner(value);
-        value === "FB_Tonic" ? console.log("PDT") : null;
+        // value === "FB_Tonic" ? console.log("PDT") : null;
         value === "FB_Rsoc" || value === "FB_Tonic" || value === "FB_DomainActive" ? setTime('PDT') : setTime('UTC')
     }
     const onChangeSelect = (value) => {
@@ -3303,12 +3468,12 @@ const MyTablePage = () => {
     }
 
     const onClickButton = () => {
-        console.log(account, "account");
-        console.log(time, "time");
-        console.log(url1);
-        console.log(url2);
-        console.log(startDate, "start");
-        console.log(endDate, "end");
+        // console.log(account, "account");
+        // console.log(time, "time");
+        // console.log(url1);
+        // console.log(url2);
+        // console.log(startDate, "start");
+        // console.log(endDate, "end");
         setNewEndDate(endDate);
         setNewStartDate(startDate);
         setPageSize(1);
@@ -3373,19 +3538,19 @@ const MyTablePage = () => {
     }
 
     const handleCustomerServiceClick = () => {
-        console.log('Customer Service button clicked');
+        // console.log('Customer Service button clicked');
         setActiveTab('2');
         carouselRef.current.goTo(1); // Change to the first slide
     };
 
     const handleCommentClick = () => {
-        console.log('Comment button clicked');
+        // console.log('Comment button clicked');
         setActiveTab('1');
         carouselRef.current.goTo(0); // Change to the second slide
     };
 
     const handleCommentClick1 = () => {
-        console.log('Comment button clicked');
+        // console.log('Comment button clicked');
         setActiveTab('3');
         carouselRef.current.goTo(2);
     }
@@ -3393,8 +3558,8 @@ const MyTablePage = () => {
     const handleChange = (dates) => {
         if (dates && dates.length === 2) {
             const [start, end] = dates;
-            console.log('Start Date:', start.format('YYYY-MM-DD'));
-            console.log('End Date:', end.format('YYYY-MM-DD'));
+            // console.log('Start Date:', start.format('YYYY-MM-DD'));
+            // console.log('End Date:', end.format('YYYY-MM-DD'));
             setStartDate(start.format('YYYY-MM-DD'));
             setEndDate(end.format('YYYY-MM-DD'));
         }
@@ -3418,7 +3583,7 @@ const MyTablePage = () => {
             if (value !== undefined) {
                 const url = `/DailyAndCampaignHistory/AdsetHistory/${value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                 window.open(url, '_blank');
-                console.log(`Price clicked: ${value}`);
+                // console.log(`Price clicked: ${value}`);
             }
         }
 
@@ -3430,7 +3595,7 @@ const MyTablePage = () => {
             if (value !== undefined) {
                 const url = `/AllCampaigns/AdsetHistory/${value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                 window.open(url, '_blank');
-                console.log(`Adset clicked: ${value}`);
+                // console.log(`Adset clicked: ${value}`);
             }
         }
     };
@@ -3441,7 +3606,7 @@ const MyTablePage = () => {
             if (value !== undefined) {
                 const url = `/LiveHistory/LiveAdsetHistory/${value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                 window.open(url, '_blank');
-                console.log(`Adset clicked: ${value}`);
+                // console.log(`Adset clicked: ${value}`);
             }
         }
     };
@@ -3545,7 +3710,7 @@ const MyTablePage = () => {
 
                 const getEditedUserAndTime = (campaignName, newaccount) => {
                     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
-                    console.log(relatedStatus, "relatedStatus");
+                    // console.log(relatedStatus, "relatedStatus");
                     const relatedStatusEditedTime = relatedStatus ? relatedStatus : null;
                     // console.log(relatedStatusTrue);
                     return relatedStatusEditedTime;
@@ -3553,7 +3718,7 @@ const MyTablePage = () => {
 
                 const getStatusForCampaign = (campaignName, newaccount) => {
                     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
-                    console.log(relatedStatus, "relatedStatus");
+                    // console.log(relatedStatus, "relatedStatus");
                     const relatedStatusTrue = relatedStatus !== undefined && relatedStatus.status === true ? true : relatedStatus !== undefined ? false : null;
                     // console.log(relatedStatusTrue);
                     return relatedStatusTrue;
@@ -3605,11 +3770,11 @@ const MyTablePage = () => {
                             }
                         });
 
-                        console.log('Response from server:', response.data);
+                        // console.log('Response from server:', response.data);
                     } catch (error) {
                         console.error('Error sending data to server:', error);
                     }
-                    console.log(logData);
+                    // console.log(logData);
                 };
 
                 const sendEditedCommentToAPI = async (logData) => {
@@ -3627,7 +3792,7 @@ const MyTablePage = () => {
                                 Authorization: token,
                             }
                         });
-                        console.log('Response from server (edited comment):', response.data);
+                        // console.log('Response from server (edited comment):', response.data);
                         return response.data;
                     } catch (error) {
                         console.error('Error sending edited comment to server:', error);
@@ -3652,7 +3817,7 @@ const MyTablePage = () => {
                                 Authorization: token,
                             }
                         });
-                        console.log('Response from server (starred status):', response.data);
+                        // console.log('Response from server (starred status):', response.data);
                     } catch (error) {
                         console.error('Error updating star status:', error);
                     }
@@ -3835,14 +4000,14 @@ const MyTablePage = () => {
                 }
                 const getEditedUserAndTime = (campaignName, newaccount) => {
                     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
-                    console.log(relatedStatus, "relatedStatus");
+                    // console.log(relatedStatus, "relatedStatus");
                     const relatedStatusEditedTime = relatedStatus ? relatedStatus : null;
                     // console.log(relatedStatusTrue);
                     return relatedStatusEditedTime;
                 }
                 const getStatusForCampaign = (campaignName, newaccount) => {
                     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
-                    console.log(relatedStatus, "relatedStatus");
+                    // console.log(relatedStatus, "relatedStatus");
                     const relatedStatusTrue = relatedStatus !== undefined && relatedStatus.status === true ? true : relatedStatus !== undefined ? false : null;
                     // console.log(relatedStatusTrue);
                     return relatedStatusTrue;
@@ -3892,7 +4057,7 @@ const MyTablePage = () => {
                                 Authorization: token,
                             }
                         });
-                        console.log('Response from server:', response.data);
+                        // console.log('Response from server:', response.data);
                     } catch (error) {
                         console.error('Error sending data to server:', error);
                     }
@@ -3912,7 +4077,7 @@ const MyTablePage = () => {
                                 Authorization: token,
                             }
                         });
-                        console.log('Response from server (edited comment):', response.data);
+                        // console.log('Response from server (edited comment):', response.data);
                         return response.data;
                     } catch (error) {
                         console.error('Error sending edited comment to server:', error);
@@ -3934,7 +4099,7 @@ const MyTablePage = () => {
                                 Authorization: token,
                             }
                         });
-                        console.log('Response from server (starred status):', response.data);
+                        // console.log('Response from server (starred status):', response.data);
                     } catch (error) {
                         console.error('Error updating star status:', error);
                     }
@@ -4096,14 +4261,14 @@ const MyTablePage = () => {
                     );
                 } const getEditedUserAndTime = (campaignName, newaccount) => {
                     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
-                    console.log(relatedStatus, "relatedStatus");
+                    // console.log(relatedStatus, "relatedStatus");
                     const relatedStatusEditedTime = relatedStatus ? relatedStatus : null;
                     // console.log(relatedStatusTrue);
                     return relatedStatusEditedTime;
                 }
                 const getStatusForCampaign = (campaignName, newaccount) => {
                     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
-                    console.log(relatedStatus, "relatedStatus");
+                    // console.log(relatedStatus, "relatedStatus");
                     const relatedStatusTrue = relatedStatus !== undefined && relatedStatus.status === true ? true : relatedStatus !== undefined ? false : null;
                     // console.log(relatedStatusTrue);
                     return relatedStatusTrue;
@@ -4370,14 +4535,14 @@ const MyTablePage = () => {
                 }
                 const getEditedUserAndTime = (campaignName, newaccount) => {
                     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
-                    console.log(relatedStatus, "relatedStatus");
+                    // console.log(relatedStatus, "relatedStatus");
                     const relatedStatusEditedTime = relatedStatus ? relatedStatus : null;
                     // console.log(relatedStatusTrue);
                     return relatedStatusEditedTime;
                 }
                 const getStatusForCampaign = (campaignName, newaccount) => {
                     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
-                    console.log(relatedStatus, "relatedStatus");
+                    // console.log(relatedStatus, "relatedStatus");
                     const relatedStatusTrue = relatedStatus !== undefined && relatedStatus.status === true ? true : relatedStatus !== undefined ? false : null;
                     // console.log(relatedStatusTrue);
                     return relatedStatusTrue;
@@ -4774,12 +4939,12 @@ const MyTablePage = () => {
 
     const handleColumnMove = (params, gridId) => {
         const columnState = params.api.getColumnState();
-        console.log('Column moved in grid:', gridId);
+        // console.log('Column moved in grid:', gridId);
         const fieldOrder = columnState.map(col => col.colId);
         const newFieldOrder = fieldOrder.filter(item => item !== 'ag-Grid-AutoColumn-campaignname' && item !== 'ag-Grid-AutoColumn' && columnStructure.includes(item));
         localStorage.setItem('columnState', JSON.stringify(newFieldOrder));
         updatingColumnsStructure(newFieldOrder);
-        console.log(`Updating columns structure for grid: ${gridId}`);
+        // console.log(`Updating columns structure for grid: ${gridId}`);
     };
 
     const debouncedHandleColumnMove = useCallback(debounce((params, gridId) => handleColumnMove(params, gridId), 600), []);
@@ -4826,9 +4991,9 @@ const MyTablePage = () => {
         }
     };
 
-    console.log(columnDefs);
-    console.log(columnDefs1);
-    console.log(columnDefs2);
+    // console.log(columnDefs);
+    // console.log(columnDefs1);
+    // console.log(columnDefs2);
 
 
 
@@ -4976,7 +5141,7 @@ const MyTablePage = () => {
     };
 
     const handlePageClick = (page, pageSize) => {
-        console.log(`Clicked page: ${page}, Page size: ${pageSize}`);
+        // console.log(`Clicked page: ${page}, Page size: ${pageSize}`);
         setLoading2(true);
         setPageSize(page);
         // Add your custom onClick functionality here
@@ -5024,10 +5189,10 @@ const MyTablePage = () => {
         },
     ];
 
-    console.log(rowData, "rowData");
-    console.log(dailyData, "dailyData");
-    console.log(campaignData, "campaignData");
-    console.log(keywordData, "KeywordData");
+    // console.log(rowData, "rowData");
+    // console.log(dailyData, "dailyData");
+    // console.log(campaignData, "campaignData");
+    // console.log(keywordData, "KeywordData");
 
     // console.log(rowData, "rowData");
     // console.log(dailyData, "dailyData");
@@ -5161,8 +5326,8 @@ const MyTablePage = () => {
         return current && current > dayjs().endOf('day');
     };
 
-    console.log(revenuePratner);
-    console.log(time);
+    // console.log(revenuePratner);
+    // console.log(time);
 
     const [isOpen, setIsOpen] = useState(false); // State to track if dropdown is open
     const [selectedValue, setSelectedValue] = useState(
@@ -5348,25 +5513,29 @@ const MyTablePage = () => {
 
     // console.log(fixedFooter, "fixed");
 
-    console.log(dailyData, "Daily");
+   
+    // console.log(dailyData, "Daily");
 
 
     const items = [
         { key: '1', label: 'Live', content: 'Content for Live data' },
         { key: '2', label: 'Daily', content: 'Content for Daily data' },
         { key: '3', label: 'Campaigns', content: 'Content for Campaign data' },
-        revenuePratner === "FB_DomainActive" && { key: '4', label: 'Keywords', content: 'Content for Keyword data'}
+        ...(revenuePratner === "FB_Mnet" ? [{ key: '4', label: 'Domain', content: 'Content for Domain data' }] : []),
+        ...(revenuePratner === "FB_DomainActive" ? [{ key: '4', label: 'Keywords', content: 'Content for Keyword data' }] : []),
     ];
     const handleSlideChange = (from, to) => {
+        // console.log(to, "to");
         setActiveTab((parseInt(to)+1).toString());
         // console.log((parseInt(to)+1).toString());
     };
     
     const handleCarouselChange = (index) => {
         setActiveTab(index);
-        console.log(index);
+        // console.log(index);
+        // console.log(parseInt(index)-1);
         carouselRef.current.goTo(parseInt(index)-1)
-        if(index == 4){
+        if(index == 4 && revenuePratner === "FB_DomainActive"){
             // console.log("hello praveen");
             setIsKeywordsTabActive("keyword");
         }
@@ -5400,8 +5569,10 @@ const MyTablePage = () => {
     );
 
 
-    console.log(networksData[0])
-    console.log(accountNumberFromDashboard);
+    // console.log(networksData[0])
+    // console.log(accountNumberFromDashboard);
+
+    // console.log(activeTab);
 
     return (
         <div className='reports-container'>
@@ -5474,7 +5645,7 @@ const MyTablePage = () => {
                         </ConfigProvider>
                     </Col>
 
-                    <Col xs={24} sm={12} md={3}>
+                    <Col xs={24} sm={12} md={3} lg={6} xl={4}>
                         <Select
                             showSearch
                             onChange={onChangeTime}
@@ -5487,6 +5658,9 @@ const MyTablePage = () => {
                                 value: item,
                                 label: item,
                             }))}
+                            style={{
+                                width: '100%'
+                            }}
                         />
                     </Col>
 
@@ -5573,7 +5747,7 @@ const MyTablePage = () => {
                     </Row>
                 </div>
 
-                <Carousel ref={carouselRef} beforeChange={handleSlideChange} >
+                <Carousel ref={carouselRef} beforeChange={handleSlideChange} dots={false}>
                     <div style={{ height: "100%", marginBottom: '20px' }}>
                         <div style={contentStyle}>
                             {isLoading === true ? (
@@ -5995,11 +6169,98 @@ const MyTablePage = () => {
                         </div>
                     </div>
                     }
+                    {revenuePratner === "FB_Mnet" && 
+                        <div style={{ height: "100%", marginBottom: '20px' }}>
+                            <div style={contentStyle}>
+                                {isLoading === true ? (
+                                    <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>
+                                        <div className="ag-grid-Loader">
+                                            <Audio
+                                                height="80"
+                                                width="80"
+                                                radius="9"
+                                                color="green"
+                                                ariaLabel="loading"
+                                                wrapperStyle
+                                                wrapperClass
+                                            />
+                                        </div>
+                                    </div>
+                                ) : domainData.length > 0 ? (
+
+                                    <div
+                                        className={`ag-theme-alpine ${gridThemeClass}`}
+                                        style={{ width: '100%', height:'500px'}}
+                                    >
+                                        <AgGridReact
+                                            rowData={domainData}
+                                            columnDefs={domainColumnDefs}
+                                            // defaultColDef={defaultColDef}
+                                            suppressAggFuncInHeader={true}
+                                            pinnedBottomRowData={domainFixedFooter}
+                                            getRowStyle={(params) => {
+                                                if (params.node.rowPinned) {
+                                                    return {
+                                                        fontWeight: 'bold',
+                                                        // backgroundColor: theme === "dark" ? '#000' : '#fff',
+                                                        // color: theme === "dark" ? '#fff' : '#000',
+                                                    };
+                                                }
+                                                return null;
+                                            }}
+                                            onFilterChanged={(params) => {
+                                                const api = params.api;
+                                                const filteredData = [];
+                                                api.forEachNodeAfterFilterAndSort((node) => {
+                                                    if (!node.rowPinned) {
+                                                        filteredData.push(node.data);
+                                                    }
+                                                });
+
+                                                const updatedFooter = [
+                                                    {
+                                                        [`${newtime}Date`]: 'Totals',
+                                                        spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
+                                                        estimated_revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.estimated_revenue || 0), 0).toFixed(2)),
+                                                        profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
+                                                        margin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.estimated_revenue), 0) * 100).toFixed(2)),
+                                                        rpc: parseFloat(
+                                                            (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc || 0), 0) / filteredData.length || 0).toFixed(2)
+                                                        ),
+                                                        // cpl: parseFloat(
+                                                        //     (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl || 0), 0) / filteredData.length || 0).toFixed(2)
+                                                        // ),
+                                                        // impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0).toFixed(2)),
+                                                    },
+                                                ];
+
+                                                setDomainFixedFooter(updatedFooter);
+                                            }}
+                                        />
+                                    </div>
+
+                                ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
+                                    {startDate !== endDate ? <Result
+                                        className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                        icon={<SmileOutlined />}
+                                        title={`No DomainData for ${newaccount} from ${startDate} to ${endDate}`}
+                                    // extra={<Button type="primary">Next</Button>}
+                                    /> : <Result
+                                        className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                        icon={<SmileOutlined />}
+                                        title={`No DomainData for ${newaccount} to ${startDate}`}
+                                    // extra={<Button type="primary">Next</Button>}
+                                    />}
+                                </div>}
+                            </div>
+                        </div>
+                    }
+                    {/* <div>hi</div> */}
 
                 </Carousel>
             </div>
 
-            <Draggable>
+            {/* <Draggable>
                 <FloatButton.Group
                     trigger="hover"
                     type="primary"
@@ -6016,7 +6277,7 @@ const MyTablePage = () => {
                     <FloatButton icon={<RiLiveFill />} onClick={handleCommentClick} />
 
                 </FloatButton.Group>
-            </Draggable>
+            </Draggable> */}
 
             <Modal
                 title="Basic Modal"

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 // pages/index.js
 import React from 'react';
 import axios from 'axios';
-import { Select, Tag, theme, Button,Carousel,Tabs, Tooltip } from 'antd';
+import { Select, Tag, theme, Button,Carousel,Tabs, Tooltip, message } from 'antd';
 import StickyBox from 'react-sticky-box';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
@@ -227,6 +227,12 @@ const RevenuePartnerDashboard = () => {
         });
     };
 
+    const average = (params) => {
+        const total = params.values.reduce((acc, value) => acc + parseFloat(value || 0), 0);
+        const count = params.values.filter(value => value !== null && value !== undefined).length;  // Count non-null/undefined values
+        return count > 0 ? Math.round((total / count) * 100) / 100 : 0;  // Avoid division by zero
+    };
+
     const spender = (params) => {
         const total = params.values.reduce((acc, value) => acc + parseFloat(value || 0), 0);
         return Math.round(total * 100) / 100; // Round to 2 decimal places
@@ -258,10 +264,10 @@ const RevenuePartnerDashboard = () => {
     console.log(revenuePratner);
 
     const items = [
-        { key: '1', label: 'Data', content: 'Content for Dat' },
-        revenuePratner && revenuePratner.length === 1 && revenuePratner[0] === "Mnet" && { key: '2', label: 'Domain', content: 'Content for Domain data' }
-
-        // { key: '3', label: 'Campaigns', content: 'Content for Campaign data' }
+        { key: '1', label: 'Data', content: 'Content for Data' },
+        ...(revenuePratner && revenuePratner.length === 1 && revenuePratner[0] === "Mnet"
+            ? [{ key: '2', label: 'Domain', content: 'Content for Domain data' }]
+            : [])
     ];
 
     const handleCarouselChange = (index) => {
@@ -406,7 +412,7 @@ const RevenuePartnerDashboard = () => {
             {
                 field: "margin",
                 headerName:"Margin(%)",
-                aggFunc: spender,
+                aggFunc: average,
                 cellClassRules: {
                     'font-red': p => p.value < 0
                 },
@@ -504,11 +510,13 @@ const RevenuePartnerDashboard = () => {
             },
             {
                 field: "margin",
-                aggFunc: spender,
+                headerName:'Margin(%)',
+                aggFunc: average,
                 cellClassRules: {
                     'font-red': p => p.value < 0
                 },
-                minWidth: 150
+                minWidth: 150,
+                valueFormatter: marginFormatter
             },
             {
                 field: 'rpc',
@@ -637,11 +645,11 @@ const RevenuePartnerDashboard = () => {
                 </Row>
             </Space>
             {/* Table */}
-            {/* <div 
+            <div 
             // style={{padding:'0px', margin:'0px'}}
             >
                 {renderCarouselNav()}
-            </div> */}
+            </div>
             <Carousel dots={false}  ref={carouselRef} beforeChange={handleSlideChange}>
                 <div>
                     {loading ? (
