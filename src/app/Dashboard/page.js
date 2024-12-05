@@ -489,14 +489,16 @@ const RevenuePartnerDashboard = () => {
                 resizable: true,
                 sortable: true,
                 minWidth: 150,
-                aggFunc:spender
+                aggFunc:spender,
+                valueFormatter:currencyFormatter
             },
             {
                 field: "revenue",
                 resizable: true,
                 sortable: true,
                 minWidth: 150,
-                aggFunc:spender
+                aggFunc:spender,
+                valueFormatter:currencyFormatter
             },
             { 
                 field: 'profit', 
@@ -506,7 +508,8 @@ const RevenuePartnerDashboard = () => {
                 cellClassRules: {
                     'font-red': p => p.value < 0
                 },
-                aggFunc:spender
+                aggFunc:spender,
+                valueFormatter:currencyFormatter
             },
             {
                 field: "margin",

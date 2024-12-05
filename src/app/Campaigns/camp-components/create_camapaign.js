@@ -458,6 +458,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     const [editedImages, setEditedImages] = useState({});
     const [isManual, setIsManual] = useState(false);
     const [campaignName, setCampaignName] = useState("");
+    const [campaignLevelDailyBudget, setCampaignLevelDailyBudget] = useState(0);
+    const [adsetLevelDailyBudget, setAdsetLevelDailyBudget] = useState(0);
 
     const handleModeChange = (value) => {
         setIsManual(value === "manual");
@@ -475,8 +477,11 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
             setSelectedPublishers([]);   // Clear selected publishers
             setSelectedPositions({});    // Clear selected positions
             setIsFormComplete(false);    // Reset form completion state
-            setCampaignName('')
-            setAddName('')
+            setCampaignName('');
+            setAddName('');
+            setAdsetLevelDailyBudget(0);
+            setCampaignLevelDailyBudget(0);
+            
         }
     }, [visible]);
 
@@ -513,6 +518,15 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
 
         }
         // console.log(text, "text");
+    }
+
+    const onChangeCampaignLevelDailyBudget = (event) =>{
+        setCampaignLevelDailyBudget(parseInt(event.target.value));
+        console.log(event.target.value);
+    }
+
+    const onChangeAdsetLevelDailyBudget = (event) =>{
+        setAdsetLevelDailyBudget(parseInt(event.target.value));
     }
 
 
@@ -602,6 +616,43 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         checkFormCompletion();
 
     }, [campaignName, form]);
+
+
+    useEffect(() => {
+        // Update the form field value for Website_URL whenever websiteURL changes
+        form.setFieldsValue({ Daily_amount: campaignLevelDailyBudget, DailyAdd_amount: adsetLevelDailyBudget });
+
+        // Check if all required fields are complete
+        const checkFormCompletion = () => {
+            const allValues = form.getFieldsValue(true);
+            const isComplete = Object.keys(allValues).every(
+                key => allValues[key] !== undefined && allValues[key] !== ''
+            );
+            setIsFormComplete(isComplete);
+        };
+
+        // Trigger form completion check
+        checkFormCompletion();
+
+    }, [campaignLevelDailyBudget, form]);
+
+    useEffect(() => {
+        // Update the form field value for Website_URL whenever websiteURL changes
+        form.setFieldsValue({ Daily_amount: campaignLevelDailyBudget, DailyAdd_amount: adsetLevelDailyBudget });
+
+        // Check if all required fields are complete
+        const checkFormCompletion = () => {
+            const allValues = form.getFieldsValue(true);
+            const isComplete = Object.keys(allValues).every(
+                key => allValues[key] !== undefined && allValues[key] !== ''
+            );
+            setIsFormComplete(isComplete);
+        };
+
+        // Trigger form completion check
+        checkFormCompletion();
+
+    }, [adsetLevelDailyBudget, form]);
 
     useEffect(() => {
         // Update the form field value for Website_URL whenever websiteURL changes
@@ -1019,7 +1070,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                 },
                 adsetlevel: {
                     AdsetName: values.AdsetName,
-                    Daily_amount: values.DailyAdd_amount ? parseInt(values.DailyAdd_amount) * 100 : '',
+                    Daily_amount: values.DailyAdd_amount ? parseInt(values.DailyAdd_amount) * 100 : "",
                     optimization_goal: values.optimization_goal,
                     billing_event: values.billing_event,
                     start_time: moment(values.DatePicker.$d).utc().format("YYYY-MM-DDTHH:mm:ssZ"),
@@ -1100,7 +1151,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         Language: [6],
         Website_URL: websiteURL,
         placements: "Advance",
-        DailyAdd_amount: 0,
+        DailyAdd_amount: adsetLevelDailyBudget,
         Description: "Find More",
         Caption: caption,
         Name: campaignName, 
@@ -1131,8 +1182,10 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         setSelectedPublishers([]);   // Clear selected publishers
         setSelectedPositions({});    // Clear selected positions
         setIsFormComplete(false);    // Reset form completion state
-        setCampaignName('')
-        setAddName('')
+        setCampaignName('');
+        setAddName('');
+        setAdsetLevelDailyBudget(0);
+        setCampaignLevelDailyBudget(0);
         onClose(); // Call onClose handler to close the drawer
     };
 
@@ -1249,13 +1302,19 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 <Form.Item
                                     name="Daily_amount"
                                     label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
-                                    style={{ flex: 0.1, marginLeft: "2%" }}>
-                                    <Input
-                                        type="number"
-                                        placeholder="$"
-
-                                    />
-                                </Form.Item>
+                                    style={{ flex: 0.1, marginLeft: "2%" }}
+                                    // tooltip={adsetLevelDailyBudget !== "" ? "You have enabled daily budget in the Adset Level" : ""}
+                                    >
+                                    <Tooltip title={adsetLevelDailyBudget !== 0 ? "You have enabled daily budget in the Adset Level" : ""}>
+                                        <Input
+                                            type="number"
+                                            placeholder="$"
+                                            value={campaignLevelDailyBudget}
+                                            onChange={onChangeCampaignLevelDailyBudget}
+                                            readOnly={adsetLevelDailyBudget !== 0 ? true : false}
+                                        />
+                                    </Tooltip>
+                                </Form.Item> {/*pk*/}
                                 <Form.Item
                                     name="Status"
                                     label={<span style={{ color: "#B4B4B4" }}>Status</span>}
@@ -1399,14 +1458,21 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 >
                                     <Input />
                                 </Form.Item>
+                                 {/*pk*/}
                                 <Form.Item
-                                    name="DailyAdd_amount"
+                                    name="DailyAdd_amount" // Make sure this name matches the field you want to capture
                                     label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
-                                    style={{ flex: '1 1 200px' }}>
-                                    <Input
+                                    style={{ flex: '1 1 200px' }}
+                                >
+                                    <Tooltip title={campaignLevelDailyBudget !== 0 ? "You have enabled daily budget in the Campaign Level" : ""}>
+                                        <Input
                                         type="number"
                                         placeholder="$"
-                                    />
+                                        value={adsetLevelDailyBudget}
+                                        onChange={onChangeAdsetLevelDailyBudget}
+                                        readOnly={campaignLevelDailyBudget !== 0} // This will keep the field readonly
+                                        />
+                                    </Tooltip>
                                 </Form.Item>
                                 {showBidAmount && (
                                     <Form.Item

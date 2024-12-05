@@ -2772,7 +2772,8 @@ const MyTablePage = () => {
                     sortable: true,
                     filter: true,
                     minWidth: 150,
-                    aggFunc:spender
+                    aggFunc:spender,
+                    valueFormatter: currencyFormatter
                 },
                 {
                     field: "estimated_revenue",
@@ -2782,6 +2783,7 @@ const MyTablePage = () => {
                     filter: true,
                     minWidth: 150,
                     aggFunc:spender,
+                    valueFormatter: currencyFormatter
                 },
                 { 
                     field: 'profit', 
@@ -2793,6 +2795,7 @@ const MyTablePage = () => {
                     },
                     aggFunc:spender,
                     filter: true,
+                    valueFormatter: currencyFormatter
                 },
                 {
                     field: "margin",
@@ -5645,7 +5648,7 @@ const MyTablePage = () => {
                         </ConfigProvider>
                     </Col>
 
-                    <Col xs={24} sm={12} md={3} lg={6} xl={4}>
+                    <Col xs={24} sm={12} md={3}>
                         <Select
                             showSearch
                             onChange={onChangeTime}
@@ -5658,9 +5661,9 @@ const MyTablePage = () => {
                                 value: item,
                                 label: item,
                             }))}
-                            style={{
-                                width: '100%'
-                            }}
+                            // style={{
+                            //     width: '100%'
+                            // }}
                         />
                     </Col>
 
