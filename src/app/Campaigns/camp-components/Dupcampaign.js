@@ -459,6 +459,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
     const [isImgEditorShown, setIsImgEditorShown] = useState(false);
     const [editedImages, setEditedImages] = useState({});
     const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] = useState(false);
+    const [campaignLevelDailyBudget, setCampaignLevelDailyBudget] = useState(0);
+    const [adsetLevelDailyBudget, setAdsetLevelDailyBudget] = useState(0);
 
     useEffect(() => {
         if (visible) {
@@ -473,8 +475,10 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
             setSelectedPublishers([]);   // Clear selected publishers
             setSelectedPositions({});    // Clear selected positions
             setIsFormComplete(false);    // Reset form completion state
-            setCampaignName('')
-            setAddName('')
+            setCampaignName('');
+            setAddName('');
+            setCampaignLevelDailyBudget(0);
+            setAdsetLevelDailyBudget(0);
         }
     }, [visible]);
 
@@ -504,6 +508,15 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
 
         }
         // console.log(text, "text");
+    }
+
+    const onChangeCampaignLevelDailyBudget = (event) =>{
+        setCampaignLevelDailyBudget(parseInt(event.target.value));
+        console.log(event.target.value);
+    }
+
+    const onChangeAdsetLevelDailyBudget = (event) =>{
+        setAdsetLevelDailyBudget(parseInt(event.target.value));
     }
 
 
@@ -539,6 +552,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
         if (DuplicatedampaignData) {
             setSelectedPublishers(DuplicatedampaignData?.adsetlevel?.publisher_platforms || []);
             setSelectedPositions(DuplicatedampaignData?.adsetlevel?.position || ["feed"]);
+            setAdsetLevelDailyBudget(DuplicatedampaignData?.adsetlevel?.Daily_amount ? (DuplicatedampaignData?.adsetlevel?.Daily_amount) / 100 : 0);
+            setCampaignLevelDailyBudget((DuplicatedampaignData?.camapaignlevel?.Daily_amount) / 100);
             form.setFieldsValue({
                 positions: DuplicatedampaignData?.adsetlevel?.position || ["feed"],
                 Account_Number: DuplicatedampaignData?.Account_Number,
@@ -600,6 +615,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
         checkFormCompletion();
 
     }, [campaignName, form]);
+
+    
 
     const handlePublisherChange = (value) => {
         setSelectedPublishers(value);
@@ -1149,14 +1166,14 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                     Objectives: values.Objectives,
                     Special_categories: values.Special_categories,
                     Bid_strategy: values.Bid_strategy,
-                    Daily_amount: parseInt(values.Daily_amount) * 100,
+                    Daily_amount: campaignLevelDailyBudget * 100,
                     Status: values.Status,
                     access_token: imagehash.token,
                     createdDate: moment().tz('Asia/Kolkata').format('YYYY-MM-DD')
                 },
                 adsetlevel: {
                     AdsetName: values.AdsetName,
-                    Daily_amount: values.DailyAdd_amount ? parseInt(values.DailyAdd_amount) * 100 : null,
+                    Daily_amount: adsetLevelDailyBudget !== 0 ? adsetLevelDailyBudget * 100 : "",
                     optimization_goal: values.optimization_goal,
                     billing_event: values.billing_event,
                     start_time: moment(values.DatePicker.$d).utc().format("YYYY-MM-DDTHH:mm:ssZ"),
@@ -1190,7 +1207,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                 },
                 addlevel: values.addlevel, // Use the addlevel array created in handleOk
             };
-
+            console.log(dataToSubmit);
             const response = await fetch('https://www.testapi.adsgoat.in/api/submitFormData', {
                 method: 'POST',
                 headers: {
@@ -1233,10 +1250,10 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
         Objectives: DuplicatedampaignData?.camapaignlevel?.Objectives,
         Special_categories: DuplicatedampaignData?.camapaignlevel?.Special_categories,
         Bid_strategy: DuplicatedampaignData?.camapaignlevel?.Bid_strategy,
-        Daily_amount: (DuplicatedampaignData?.camapaignlevel?.Daily_amount) / 100,
+        Daily_amount: campaignLevelDailyBudget,
         Status: DuplicatedampaignData?.camapaignlevel?.Status,
         // AdsetName: DuplicatedampaignData?.adsetlevel?.AdsetName,
-        DailyAdd_amount: DuplicatedampaignData?.adsetlevel?.Daily_amount ? (DuplicatedampaignData?.adsetlevel?.Daily_amount) / 100 : 0,
+        DailyAdd_amount: adsetLevelDailyBudget,
         optimization_goal: DuplicatedampaignData?.adsetlevel?.optimization_goal,
         billing_event: DuplicatedampaignData?.adsetlevel?.billing_event,
         // start_time: DuplicatedampaignData?.adsetlevel?.start_time,
@@ -1283,8 +1300,10 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
         setSelectedPublishers([]);   // Clear selected publishers
         setSelectedPositions({});    // Clear selected positions
         setIsFormComplete(false);    // Reset form completion state
-        setCampaignName('')
-        setAddName('')
+        setCampaignName('');
+        setAddName('');
+        setCampaignLevelDailyBudget(0);
+        setAdsetLevelDailyBudget(0);
         onClose(); // Call onClose handler to close the drawer
     };
 
@@ -1402,13 +1421,19 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                     <Form.Item
                                         name="Daily_amount"
                                         label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
-                                        style={{ flex: 0.1, marginLeft: "2%" }}>
-                                        <Input
-                                            type="number"
-                                            placeholder="$"
-
-                                        />
-                                    </Form.Item>
+                                        style={{ flex: 0.1, marginLeft: "2%" }}
+                                        // tooltip={adsetLevelDailyBudget !== "" ? "You have enabled daily budget in the Adset Level" : ""}
+                                        >
+                                        <Tooltip title={adsetLevelDailyBudget !== 0 ? "You have enabled daily budget in the Adset Level" : ""}>
+                                            <Input
+                                                type="number"
+                                                placeholder="$"
+                                                value={campaignLevelDailyBudget}
+                                                onChange={onChangeCampaignLevelDailyBudget}
+                                                readOnly={adsetLevelDailyBudget !== 0 ? true : false}
+                                            />
+                                        </Tooltip>
+                                    </Form.Item> {/*pk*/}
                                     <Form.Item
                                         name="Status"
                                         label={<span style={{ color: "#B4B4B4" }}>Status</span>}
@@ -1560,15 +1585,21 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             style={{ width: "100%" }}
                                         />
                                     </Form.Item>
+                                    {/*pk*/}
                                     <Form.Item
-                                        name="DailyAdd_amount"
+                                        name="DailyAdd_amount" // Make sure this name matches the field you want to capture
                                         label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
-                                        style={{ flex: 0.15, marginLeft: "2%" }}>
-                                        <Input style={{ width: "100%" }}
+                                        style={{ flex: '1 1 200px' }}
+                                    >
+                                        <Tooltip title={campaignLevelDailyBudget !== 0 ? "You have enabled daily budget in the Campaign Level" : ""}>
+                                            <Input
                                             type="number"
                                             placeholder="$"
-
-                                        />
+                                            value={adsetLevelDailyBudget}
+                                            onChange={onChangeAdsetLevelDailyBudget}
+                                            readOnly={campaignLevelDailyBudget !== 0} // This will keep the field readonly
+                                            />
+                                        </Tooltip>
                                     </Form.Item>
                                     {(DuplicatedampaignData?.camapaignlevel?.Bid_strategy === "LOWEST_COST_WITH_BID_CAP" ||
                                         DuplicatedampaignData?.camapaignlevel?.Bid_strategy === "COST_CAP" || showBidAmount) && (
