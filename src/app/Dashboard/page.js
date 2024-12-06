@@ -896,6 +896,7 @@ const Dashboard = () => {
     const [selectedDates, setSelectedDates] = useState(defaultDates);
     const [isPickerOpen, setIsPickerOpen] = useState(false);
     const [submitted, setSubmitted] = useState(false);
+    const [domainWiseData, setDomainWiseData] = useState([]);
 
     // const functionalCall = (data) => {
     //     setData(data);
@@ -1118,7 +1119,7 @@ const Dashboard = () => {
         // console.log(transformedObject);
         let response;
         try{
-            response = await axios.post(`https://prodapis.adsgoat.in/Dashboard?timezone=${time}&start_date=${startDate}&end_date=${endDate}`, { formattedData: [transformedObject] });
+            response = await axios.post(`http://localhost:8000/Dashboard?timezone=${time}&start_date=${startDate}&end_date=${endDate}`, { formattedData: [transformedObject] });
 
         }catch(error){
             message.error('API failed to fetch the data please click the reload button', 8);
@@ -1319,6 +1320,53 @@ const Dashboard = () => {
 
 
         console.log(groupedData);
+
+        function groupDataByDomainAndAccount(data, dateField) {
+            console.log(dateField);
+            const DomainGroupedData = data.reduce((acc, obj) => {
+              const { domain, accountNumber, spend, estimated_revenue, revenuePartner, MediaBuyerName, Holder } = obj;
+              const specifiedDate = obj[dateField]; // Dynamically get the date based on the field
+          
+              // Create a unique key for grouping by domain, specifiedDate, and accountNumber
+              const key = `${specifiedDate}-${domain}-${accountNumber}`;
+          
+              if (!acc[key]) {
+                acc[key] = {
+                  specifiedDate,
+                  domain,
+                  accountNumber,
+                  revenuePartner,   // Store the revenuePartner for the group
+                  MediaBuyerName,   // Store the MediaBuyerName for the group
+                  Holder,           // Store the Holder for the group
+                  spend: 0,
+                  estimated_revenue: 0,
+                };
+              }
+          
+              // Sum the fields (spend, estimated_revenue) based on the new grouping
+              acc[key].spend += spend;
+              acc[key].estimated_revenue += estimated_revenue;
+          
+              return acc;
+            }, {});
+          
+            // Convert the grouped data object back to an array and add the profit field
+            const domainResult = Object.values(DomainGroupedData).map(item => {
+              item.profit = item.estimated_revenue - item.spend; // Calculate profit
+              return item;
+            });
+          
+            return domainResult;
+        }
+          
+          
+          
+          
+        const domainResult = groupDataByDomainAndAccount(responseData, `${time}Date`);
+
+        setDomainWiseData(domainResult);
+          
+        console.log(domainResult, "domain Result");
 
         const sortedData = groupedData.sort((a, b) => {
             if (a.accountNumber < b.accountNumber) {
@@ -1882,10 +1930,75 @@ const Dashboard = () => {
             minWidth: 125// Group by MediaBuyerName
         },
     ]);
+    const [columnDefs3] = useState([
+        {   
+            field: 'domain', minWidth: 200, suppressAutoSize: true,  
+            resizable: true,
+            sortable: true,
+            hide: true, // Hide column as it's grouped
+            rowGroup: true,
+            enableRowGroup: true,
+        },
+        {
+            field: "accountNumber", minWidth:180,
+            resizable: true,
+            sortable: true,
+            hide: true, // Hide column as it's grouped
+            rowGroup: true,
+            enableRowGroup: true,
+
+        }, // Group by Network
+        {field:'specifiedDate', headerName:"Date",
+        minWidth: 125},
+        {
+            field: "spend",
+            aggFunc: spender,
+            valueFormatter: currencyFormatter,
+            minWidth: 125
+        }, // Summing Spend column
+        {
+            headerName: 'Revenue',
+            field: "estimated_revenue",
+            aggFunc: spender,
+            valueFormatter: currencyFormatter,
+            minWidth: 125
+        }, // Summing Revenue column
+        {
+            field: "profit",
+            aggFunc: spender,
+            cellClassRules: {
+                'font-red': p => p.value < 0
+            },
+            valueFormatter: currencyFormatter,
+            minWidth: 125
+        },
+        {
+            field: "revenuePartner",
+            minWidth: 180
+        }, // Group by Holder
+        {
+            field: "Holder",
+            minWidth: 125// Group by MediaBuyerName
+        },
+        {
+            field: "MediaBuyerName", headerName:'User',
+            minWidth: 125// Group by MediaBuyerName
+        },
+    ]);
 
     const autoGroupColumnDef = {
         headerName: 'Campaign Name', // Display name for the grouped column
         minWidth: 430, // Set width for grouped rows
+        resizable: true, // Enable resizing
+        sortable: true, // Enable sorting
+        cellRendererParams: {
+          suppressCount: true, // Suppress row count in the grouped column
+        },
+      };
+
+    const autoGroupColumnDefDomain = {
+        headerName: 'Domain', // Display name for the grouped column
+        minWidth: 250, // Set width for grouped rows
         resizable: true, // Enable resizing
         sortable: true, // Enable sorting
         cellRendererParams: {
@@ -2698,6 +2811,27 @@ const Dashboard = () => {
                                         groupIncludeFooter={true}
                                         groupIncludeTotalFooter={true}
                                         autoGroupColumnDef={autoGroupColumnDef}
+                                    />
+                                </div>
+                            </Col>
+                        </Row>
+                        <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                            <Col>
+                                <h2>Domain Level</h2>
+                            </Col>
+                            <Col>
+                                <div
+                                    className={`ag-theme-alpine ${gridThemeClass}`}
+                                    style={{ width: '100%', height: '400px' }}
+                                >             <AgGridReact
+                                        rowData={domainWiseData}
+                                        columnDefs={columnDefs3}
+                                        defaultColDef={defaultColDef}
+                                        // rowGroupPanelShow="always"
+                                        suppressAggFuncInHeader={true}
+                                        // groupIncludeFooter={true}
+                                        groupIncludeTotalFooter={true}
+                                        autoGroupColumnDef={autoGroupColumnDefDomain}
                                     />
                                 </div>
                             </Col>
