@@ -342,6 +342,8 @@ const MyTablePage = () => {
 
     const [fixedFooter, setFixedFooter] = useState([]);
 
+    const [sFixedFooter, setSFixedFooter] = useState([]);
+
     const isInitialLoad = useRef(true);
     //Modal States
     const [newColumnName, setNewColumnName] = useState('');
@@ -2616,11 +2618,11 @@ const MyTablePage = () => {
             field: 'domain',
             sortable: true,
             filter: 'agTextColumnFilter',
-            resizable: true,
-            minWidth: 350,
+            // resizable: false,
+            width: 350, // Fixed width for Domain column
             cellStyle: { textAlign: 'left' },
             rowGroup: true, // Grouping by DOMAIN
-            hide: true, // Hide this column as it's used for grouping
+            // hide: true, // Hide this column in the grid, but it will still be used for grouping
         },
         {
             headerName: 'Keyword',
@@ -3458,7 +3460,7 @@ const MyTablePage = () => {
             //     gridRef3.current.api.refreshCells();  // Refresh AgGrid after setting new data
             // }
             newDailyData.current = fullData;
-            setTrue(false);
+            // setTrue(false);
             setLoading3(false);
         } catch (error) {
             console.log(error);
@@ -3509,10 +3511,10 @@ const MyTablePage = () => {
             // Update state with new data
             setSystem1KeywordData(filteredData);
     
-            // Refresh grid after setting new data
-            if (gridRef4.current && gridRef4.current.api) {
-                gridRef4.current.api.refreshCells();  // Refresh AgGrid after setting new data
-            }
+            // // Refresh grid after setting new data
+            // if (gridRef4.current && gridRef4.current.api) {
+            //     gridRef4.current.api.refreshCells();  // Refresh AgGrid after setting new data
+            // }
     
             setSFixedFooter([
                 {
@@ -3521,22 +3523,16 @@ const MyTablePage = () => {
             ]);
 
             newDailyData.current = filteredData;
-            setTrue(false);
+            // setTrue(false);
             setLoading4(false); // Hide loading spinner
         } catch (error) {
+            setSystem1KeywordData([]);
+            setLoading4(false); 
             console.log(error);
             // setLoading4(false); // Hide loading spinner in case of error
         }
     };  
 
-
-    //  // Trigger functionCall4 when the "Keywords" tab is clicked
-    //  useEffect(() => {
-    //     if (isKeywordsTabActive === "keyword") {
-    //         setLoading3(true);
-    //         functionCall4();
-    //     }
-    // }, [isKeywordsTabActive, newStartDate, newendDate, newaccount, newtime, newRevenuePratner]); 
 
     useEffect(() => {
         const functionCall = async () => {
@@ -3553,9 +3549,9 @@ const MyTablePage = () => {
 
                 // Run this function on initial load and whenever pageSize changes
                 await functionCall3();
-                if(revenuePratner === "FB_DomainActive"){
+                if(newRevenuePratner === "FB_DomainActive"){
                     await functionCall4();
-                }else if(revenuePratner === "FB_System1"){
+                }else if(newRevenuePratner === "FB_System1"){
                     await functionCall5();
                 }
                 
@@ -3576,8 +3572,13 @@ const MyTablePage = () => {
                 await functionCall1();
                 await functionCall2();
                 await functionCall3();
-                await functionCall4();   
-                await functionCall5(); 
+                // await functionCall4();   
+                // await functionCall5(); 
+                if(newRevenuePratner === "FB_DomainActive"){
+                    await functionCall4();
+                }else if(newRevenuePratner === "FB_System1"){
+                    await functionCall5();
+                }
             }
             functionCall();
         }
@@ -3586,7 +3587,7 @@ const MyTablePage = () => {
     useEffect(() => {
         // Update the grid key to force a re-render when fixedFooter changes
         setGridKey((prevKey) => prevKey + 1);
-    }, [fixedFooter]);
+    }, [fixedFooter, sFixedFooter]);
 
     // useEffect(()=>{
     //     if(isTrue){
@@ -3654,8 +3655,8 @@ const MyTablePage = () => {
         setLoading(true);
         setLoading1(true);
         setLoading2(true);
-        setLoading3(true);
-        setLoading4(true);
+        newRevenuePratner === "FB_DomainActive" && setLoading3(true);    
+        newRevenuePratner === "FB_System1" && setLoading4(true);
         setNewAccount(account);
         setnewAccountName(accountName)
         setNewTime(time);
@@ -5164,13 +5165,18 @@ const MyTablePage = () => {
         }
     };
 
-    const gridOptions4 = {
-        onColumnMoved: (params) => debouncedHandleColumnMove(params, 'grid5'),
-        defaultColDef: {
-            suppressMenu: true,
-            headerClass: "custom-header" // Apply to all columns by default
+    // const gridOptions4 = {
+    //     onColumnMoved: (params) => debouncedHandleColumnMove(params, 'grid5'),
+    //     defaultColDef: {
+    //         suppressMenu: true,
+    //         headerClass: "custom-header" // Apply to all columns by default
 
-        }
+    //     }
+    // };
+
+    const gridOptions4 = {
+        groupUseEntireRow: true,  // Ensure the entire row is used for grouping
+        groupSuppressAutoColumn: true, // Hide the auto group column
     };
 
     // console.log(columnDefs);
@@ -5733,9 +5739,9 @@ const MyTablePage = () => {
         { key: '1', label: 'Live', content: 'Content for Live data' },
         { key: '2', label: 'Daily', content: 'Content for Daily data' },
         { key: '3', label: 'Campaigns', content: 'Content for Campaign data' },
-        ...(revenuePratner === "FB_Mnet" ? [{ key: '4', label: 'Domain', content: 'Content for Domain data' }] : []),
-        ...(revenuePratner === "FB_DomainActive" ? [{ key: '4', label: 'Keywords', content: 'Content for Keyword data' }] : []),
-        ...(revenuePratner === "FB_System1" ? [{ key: '4', label: 'Domain', content: 'Content for Domain data' }] : [])
+        ...(newRevenuePratner === "FB_Mnet" ? [{ key: '4', label: 'Domain', content: 'Content for Domain data' }] : []),
+        ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '4', label: 'Keywords', content: 'Content for Keyword data' }] : []),
+        ...(newRevenuePratner === "FB_System1" ? [{ key: '4', label: 'Domain', content: 'Content for Domain data' }] : [])
     ];
     const handleSlideChange = (from, to) => {
         // console.log(to, "to");
@@ -6401,7 +6407,7 @@ const MyTablePage = () => {
                                             />
                                         </div>
                                     </div>
-                                ) : System1KeywordData.filter((each) => each.domain.includes(inputValue))?.length > 0 ? (
+                                ) : system1KeywordData.filter((each) => each.domain.includes(inputValue))?.length > 0 ? (
                                 <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
                                 <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap' }}>
                                     <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
@@ -6446,8 +6452,12 @@ const MyTablePage = () => {
                                     groupSuppressBlankHeader={true}
                                     defaultColDef={defaultColDef}
                                     // autoGroupColumnDef={autoGroupColumnDef4}
-                                    onGridReady={(params) => onGridReady(params, 'grid5', gridRef4)}
-                                    gridOptions={gridOptions4}
+                                    // onGridReady={(params) => onGridReady(params, 'grid5', gridRef4)}
+                                    // gridOptions={gridOptions4}
+                                    gridOptions={{
+                                        groupUseEntireRow: true,  // Ensures the entire row is used for grouping
+                                        // groupSuppressAutoColumn: true,  // Removes the auto group column that appears with the group header
+                                    }}
                                     getMainMenuItems={getMainMenuItems}
                                     pinnedBottomRowData={system1KeywordData.length > 0 ? pinnedBottomRowData4 : []}
                                     getRowStyle={params => {

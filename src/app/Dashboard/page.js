@@ -1082,6 +1082,8 @@ const Dashboard = () => {
                 let newKey;
                 if (key === "Newsbreak_DA"){
                     newKey = "Newsbreak_DomainActive"
+                }else if (key === "FB_DomainActive"){
+                    newKey = "Facebook_DActive"
                 }
                 else{ newKey = "Facebook_" + splitKey[1];}
         
