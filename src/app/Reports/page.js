@@ -201,9 +201,13 @@ const MyTablePage = () => {
 
     const [keywordData, setKeywordData] = useState([]);
 
+    const [system1KeywordData, setSystem1KeywordData] = useState([]);
+
     const [isSubmitted, setIsSubmitted] = useState(false);
 
     const [isKeywordsTabActive, setIsKeywordsTabActive] = useState(""); // Track if the 'Keywords' tab is selected
+
+    const [isSystem1KeywordsTabActive, setIsSystem1KeywordsTabActive] = useState("");
 
     const [startDate, setStartDate] = useState(startDateFromDashboard ? startDateFromDashboard : yesterday);
 
@@ -270,6 +274,8 @@ const MyTablePage = () => {
 
     const [isLoading3, setLoading3] = useState(true);
 
+    const [isLoading4, setLoading4] = useState(true);
+
     const [isTrue, setTrue] = useState(false);
 
     const [account, setAccount] = useState( accountNumberFromDashboard ? accountNumberFromDashboard : accountsForAccess[0].accountNumber);
@@ -319,6 +325,8 @@ const MyTablePage = () => {
 
     const gridRef3 = useRef();
 
+    const gridRef4 = useRef();
+
     const [gridKey, setGridKey] = useState(0);
 
     const filterRef = useRef(null);
@@ -333,6 +341,8 @@ const MyTablePage = () => {
     const newCampaignData = useRef();
 
     const [fixedFooter, setFixedFooter] = useState([]);
+
+    const [sFixedFooter, setSFixedFooter] = useState([]);
 
     const isInitialLoad = useRef(true);
     //Modal States
@@ -463,6 +473,7 @@ const MyTablePage = () => {
             setdailyData((prevData) => updateData(prevData));
             setCampaignData((prevData) => updateData(prevData));
             setKeywordData((prevData) => updateData(prevData));
+            setSystem1KeywordData((prevData) => updateData(prevData));
 
         } catch (error) {
             console.error('Error adding column:', error);
@@ -1581,7 +1592,6 @@ const MyTablePage = () => {
         },
     };
 
-
     const columnDefsObject1 = {
         campaignname: {
             headerName: 'CampaignName',
@@ -2193,7 +2203,6 @@ const MyTablePage = () => {
         'mnet-hour': { headerName: 'M-H', field: 'mnet-hour', width: 85, sortable: true, hide: true, filter: "agTextColumnFilter", },
     };
 
-
     const KeywordCellRenderer = ({ params }) => {
         const [tooltipText, setTooltipText] = useState("Copy to clipboard");
     
@@ -2238,9 +2247,6 @@ const MyTablePage = () => {
             </Popover>
         );
     };
-    
-    
-    
 
     const columnDefsObject3 = {
         campaignname: {
@@ -2606,6 +2612,97 @@ const MyTablePage = () => {
         timezone: { headerName: 'TimeZone', field: 'timezone', sortable: true, hide: true, filter: "agTextColumnFilter", },
     };
 
+    const columnDefsObject4 = [
+        {
+            headerName: 'Domain',
+            field: 'domain',
+            sortable: true,
+            filter: 'agTextColumnFilter',
+            // resizable: false,
+            width: 350, // Fixed width for Domain column
+            cellStyle: { textAlign: 'left' },
+            rowGroup: true, // Grouping by DOMAIN
+            // hide: true, // Hide this column in the grid, but it will still be used for grouping
+        },
+        {
+            headerName: 'Keyword',
+            field: 'keyword',
+            sortable: true,
+            filter: 'agTextColumnFilter',
+            resizable: true,
+            minWidth: 350,
+            cellStyle: { textAlign: 'left' },
+        },
+        {
+            headerName: 'Date',
+            field: 'date',
+            width: 120,
+            sortable: true,
+            filter: 'agDateColumnFilter',
+            filterParams: {
+                comparator: (filterLocalDateAtMidnight, cellValue) => {
+                    const cellDate = new Date(cellValue); // Convert date string to Date object
+                    if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) return 0;
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
+                    return 0;
+                },
+            },
+        },
+        {
+            headerName: 'Revenue',
+            field: 'revenue',
+            sortable: true,
+            filter: 'agNumberColumnFilter',
+            resizable: true,
+            valueFormatter: (params) => params.value ? `$${params.value.toFixed(2)}` : '$0.00',
+            width: 200,
+            aggFunc: 'sum',
+        },
+        {
+            headerName: 'Vertical',
+            field: 'vertical',
+            sortable: true,
+            filter: 'agTextColumnFilter',
+            resizable: true,
+            minWidth: 250,
+        },
+        {
+            headerName: 'Country',
+            field: 'country',
+            sortable: true,
+            filter: 'agTextColumnFilter',
+            resizable: true,
+            minWidth: 150,
+        },
+        {
+            headerName: 'Device Type',
+            field: 'deviceType',
+            sortable: true,
+            filter: 'agTextColumnFilter',
+            resizable: true,
+            minWidth: 200,
+        },
+        {
+            headerName: 'Searches',
+            field: 'searches',
+            sortable: true,
+            filter: 'agNumberColumnFilter',
+            resizable: true,
+            width: 150,
+            aggFunc: 'sum',
+        },
+        {
+            headerName: 'Clicks',
+            field: 'clicks',
+            sortable: true,
+            filter: 'agNumberColumnFilter',
+            resizable: true,
+            width: 150,
+            aggFunc: 'sum',
+        },
+    ];
+
     const getColumnDefs = (order) => {
         return order?.map(colKey => columnDefsObject[colKey]);
     };
@@ -2965,6 +3062,7 @@ const MyTablePage = () => {
         setLoading(false);
 
     }
+
     // const functionCall1 = async () => {
     //     const fetchData = await axios.get(`https://prodapis.adsgoat.in/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${account}&timezone=${time}&network=${newtworkCollections[revenuePratner]}`, {
     //         headers: {
@@ -3362,20 +3460,79 @@ const MyTablePage = () => {
             //     gridRef3.current.api.refreshCells();  // Refresh AgGrid after setting new data
             // }
             newDailyData.current = fullData;
-            setTrue(false);
+            // setTrue(false);
             setLoading3(false);
         } catch (error) {
             console.log(error);
         }
     }
 
-     // Trigger functionCall4 when the "Keywords" tab is clicked
-     useEffect(() => {
-        if (isKeywordsTabActive === "keyword") {
-            setLoading3(true);
-            functionCall4();
+    const functionCall5 = async () => {
+        try { 
+            const fetchData = await axios.get(`https://prodapis.adsgoat.in/System1Keywords?startDate=${startDate}&endDate=${endDate}`, {
+                headers: {
+                    Authorization: token,
+                },
+            });
+            const mainData = fetchData.data;
+            console.log(mainData, "mainData of functionCall5");
+    
+            let totalSpend = 0;
+            let totalRevenue = 0;
+            let totalClicks = 0;
+            let totalSearches = 0;
+            
+            // Process the data if it's available
+            const filteredData = mainData && mainData.length > 0 ? mainData.map((eachData) => {
+                const Revenue = eachData.estimated_revenue || 0; // Make sure ESTIMATED_REVENUE exists
+                const clicks = eachData.clicks || 0;  // Default to 0 if undefined
+                const searches = eachData.searches || 0; // Default to 0 if undefined
+                totalRevenue += Revenue;
+                totalSpend += Revenue;
+                totalClicks += clicks;
+                totalSearches += searches;
+    
+                return {
+                    date: eachData.DATE,
+                    domain: eachData.DOMAIN,
+                    vertical: eachData.VERTICAL,
+                    keyword: eachData.KEYWORD,
+                    country: eachData.COUNTRY,
+                    deviceType: eachData.DEVICE_TYPE,
+                    searches: searches,
+                    clicks: clicks,
+                    revenue: Revenue,
+                };
+            }) : [];
+    
+            // Log filtered data to check
+            console.log(filteredData, "filteredData");
+    
+            // Update state with new data
+            setSystem1KeywordData(filteredData);
+    
+            // // Refresh grid after setting new data
+            // if (gridRef4.current && gridRef4.current.api) {
+            //     gridRef4.current.api.refreshCells();  // Refresh AgGrid after setting new data
+            // }
+    
+            setSFixedFooter([
+                {
+                    revenue: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0).toFixed(2)),
+                }
+            ]);
+
+            newDailyData.current = filteredData;
+            // setTrue(false);
+            setLoading4(false); // Hide loading spinner
+        } catch (error) {
+            setSystem1KeywordData([]);
+            setLoading4(false); 
+            console.log(error);
+            // setLoading4(false); // Hide loading spinner in case of error
         }
-    }, [isKeywordsTabActive, newStartDate, newendDate, newaccount, newtime, newRevenuePratner]); 
+    };  
+
 
     useEffect(() => {
         const functionCall = async () => {
@@ -3392,6 +3549,12 @@ const MyTablePage = () => {
 
                 // Run this function on initial load and whenever pageSize changes
                 await functionCall3();
+                if(newRevenuePratner === "FB_DomainActive"){
+                    await functionCall4();
+                }else if(newRevenuePratner === "FB_System1"){
+                    await functionCall5();
+                }
+                
                 // console.log("functionCall3 executed successfully.");
             } catch (error) {
                 console.error("Error in function calls:", error);
@@ -3410,6 +3573,12 @@ const MyTablePage = () => {
                 await functionCall2();
                 await functionCall3();
                 // await functionCall4();   
+                // await functionCall5(); 
+                if(newRevenuePratner === "FB_DomainActive"){
+                    await functionCall4();
+                }else if(newRevenuePratner === "FB_System1"){
+                    await functionCall5();
+                }
             }
             functionCall();
         }
@@ -3418,7 +3587,7 @@ const MyTablePage = () => {
     useEffect(() => {
         // Update the grid key to force a re-render when fixedFooter changes
         setGridKey((prevKey) => prevKey + 1);
-    }, [fixedFooter]);
+    }, [fixedFooter, sFixedFooter]);
 
     // useEffect(()=>{
     //     if(isTrue){
@@ -3486,6 +3655,8 @@ const MyTablePage = () => {
         setLoading(true);
         setLoading1(true);
         setLoading2(true);
+        newRevenuePratner === "FB_DomainActive" && setLoading3(true);    
+        newRevenuePratner === "FB_System1" && setLoading4(true);
         setNewAccount(account);
         setnewAccountName(accountName)
         setNewTime(time);
@@ -4994,6 +5165,20 @@ const MyTablePage = () => {
         }
     };
 
+    // const gridOptions4 = {
+    //     onColumnMoved: (params) => debouncedHandleColumnMove(params, 'grid5'),
+    //     defaultColDef: {
+    //         suppressMenu: true,
+    //         headerClass: "custom-header" // Apply to all columns by default
+
+    //     }
+    // };
+
+    const gridOptions4 = {
+        groupUseEntireRow: true,  // Ensure the entire row is used for grouping
+        groupSuppressAutoColumn: true, // Hide the auto group column
+    };
+
     // console.log(columnDefs);
     // console.log(columnDefs1);
     // console.log(columnDefs2);
@@ -5284,11 +5469,33 @@ const MyTablePage = () => {
         }
     };
 
+    const refreshGrid4 = (gridRef4) => {
+        setLoading4(true);
+        if (gridRef4.current) {
+            const gridApi = gridRef4.current.api;
+    
+            // Clear filters
+            gridApi.setFilterModel(null);
+    
+            // Temporarily clear the data and reset after a timeout
+            setSystem1KeywordData([]); // Temporarily clear the data
+            setTimeout(() => setSystem1KeywordData(newDailyData.current), 0); // Reset the data
+            setTimeout(() => setLoading4(false), 1500); // Stop loading after timeout
+    
+            // Force refresh the grid cells and redraw the rows
+            gridApi.refreshCells({ force: true });
+            gridApi.redrawRows();
+        } else {
+            console.error('Grid reference is not available.');
+        }
+    };
+
     const onClickRefresh = () => {
         refreshGrid(gridRef);  // Refresh gridRef
         refreshGrid1(gridRef1); // Refresh gridRef1
         refreshGrid2(gridRef2); // Refresh gridRef2
         refreshGrid3(gridRef3); // Refresh gridRef3
+        refreshGrid4(gridRef4);
     };
 
 
@@ -5491,6 +5698,14 @@ const MyTablePage = () => {
         }
     ];
 
+    const pinnedBottomRowData4 = [
+        {
+            searches: parseFloat(system1KeywordData.reduce((acc, curr) => acc + parseFloat(curr.searches), 0).toFixed(2)),
+            clicks: parseFloat(system1KeywordData.reduce((acc, curr) => acc + parseFloat(curr.clicks), 0).toFixed(2)),
+            revenue: parseFloat(system1KeywordData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0).toFixed(2)),
+        }
+    ];
+
     // const pinnedBottomRowData3 = (campaignData) =>{
     //     return([
     //         {
@@ -5524,8 +5739,9 @@ const MyTablePage = () => {
         { key: '1', label: 'Live', content: 'Content for Live data' },
         { key: '2', label: 'Daily', content: 'Content for Daily data' },
         { key: '3', label: 'Campaigns', content: 'Content for Campaign data' },
-        ...(revenuePratner === "FB_Mnet" ? [{ key: '4', label: 'Domain', content: 'Content for Domain data' }] : []),
-        ...(revenuePratner === "FB_DomainActive" ? [{ key: '4', label: 'Keywords', content: 'Content for Keyword data' }] : []),
+        ...(newRevenuePratner === "FB_Mnet" ? [{ key: '4', label: 'Domain', content: 'Content for Domain data' }] : []),
+        ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '4', label: 'Keywords', content: 'Content for Keyword data' }] : []),
+        ...(newRevenuePratner === "FB_System1" ? [{ key: '4', label: 'Domain', content: 'Content for Domain data' }] : [])
     ];
     const handleSlideChange = (from, to) => {
         // console.log(to, "to");
@@ -5541,6 +5757,8 @@ const MyTablePage = () => {
         if(index == 4 && revenuePratner === "FB_DomainActive"){
             // console.log("hello praveen");
             setIsKeywordsTabActive("keyword");
+        }else if(index === 4 && newRevenuePratner === "FB_System1"){
+            setIsSystem1KeywordsTabActive('Domain')
         }
     };
     
@@ -6076,102 +6294,204 @@ const MyTablePage = () => {
                         />
                     </div>
                     {revenuePratner === "FB_DomainActive" &&
-                    <div>
-                        <div style={contentStyle}>
-                            {isLoading3 === true ? (
-                                <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>
-                                    <div className="ag-grid-Loader">
-                                        <Audio
-                                            height="80"
-                                            width="80"
-                                            radius="9"
-                                            color="green"
-                                            ariaLabel="loading"
-                                            wrapperStyle
-                                            wrapperClass
+                        <div>
+                            <div style={contentStyle}>
+                                {isLoading3 === true ? (
+                                    <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>
+                                        <div className="ag-grid-Loader">
+                                            <Audio
+                                                height="80"
+                                                width="80"
+                                                radius="9"
+                                                color="green"
+                                                ariaLabel="loading"
+                                                wrapperStyle
+                                                wrapperClass
+                                            />
+                                        </div>
+                                    </div>
+                                ) : keywordData.filter((each) => each.campaignname.includes(inputValue))?.length > 0 ? (
+                                    <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
+                                        <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap' }}>
+                                            <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
+                                                <Space align="center" className='daily-contaier'>
+                                                    {/* <div className="blinking-circle"></div> */}
+                                                    <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600' }}>Keywords</Text>
+                                                </Space>
+                                            </Col>
+                                            <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                                <Text style={{ fontWeight: '600' }}>Acc: {newaccount}</Text>
+                                            </Col>
+                                            <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                                <Text style={{ fontWeight: '600' }}>AccName: {newAccountName}</Text>
+                                            </Col>
+                                            <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                                <Text style={{ fontWeight: '600' }}>Timezone: {timezone.current}</Text>
+                                            </Col>
+                                            <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                                <Text style={{ fontWeight: '600' }}>
+                                                    Cron/Acc status: {cronStatus.current} /{' '}
+                                                    <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
+                                                        {accountStatus.current}
+                                                    </span>
+                                                </Text>
+                                            </Col>
+                                            <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
+                                                <Tooltip title="Export to CSV">
+                                                    <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef3)} />
+                                                </Tooltip>
+                                            </Col>
+                                        </Row>
+                                        <AgGridReact
+                                            ref={gridRef3}
+                                            rowData={keywordData.filter((each) => each.campaignname.includes(inputValue))}
+                                            columnDefs={columnDefs3.current}
+                                            onCellClicked={onCellClicked}
+                                            pagination={true}
+                                            paginationPageSize={100}
+                                            paginationPageSizeSelector={[20, 40, 60, 80, 100]}
+                                            groupDisplayType='multipleColumns'
+                                            suppressAggFuncInHeader={true}
+                                            groupSuppressBlankHeader={true}
+                                            defaultColDef={defaultColDef}
+                                            // groupIncludeFooter={true}
+                                            // groupIncludeTotalFooter={true}
+                                            autoGroupColumnDef={autoGroupColumnDef3}
+                                            onGridReady={(params) => onGridReady(params, 'grid4', gridRef3)}
+                                            gridOptions={gridOptions3}
+                                            getMainMenuItems={getMainMenuItems}
+                                            pinnedBottomRowData={keywordData.length > 0 ? pinnedBottomRowData3 : []}
+                                            getRowStyle={params => {
+                                                if (params.node.rowPinned) {
+                                                    return {
+                                                        fontWeight: 'bold',
+                                                        backgroundColor: theme === "dark" ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
+                                                        color: theme === "dark" ? '#fff' : '#000',           // Text color should contrast with the background
+                                                    };
+                                                }
+
+                                                return null;
+                                            }}
                                         />
                                     </div>
-                                </div>
-                            ) : keywordData.filter((each) => each.campaignname.includes(inputValue))?.length > 0 ? (
-                                <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
-                                    <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap' }}>
-                                        <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
-                                            <Space align="center" className='daily-contaier'>
-                                                {/* <div className="blinking-circle"></div> */}
-                                                <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600' }}>Keywords</Text>
-                                            </Space>
-                                        </Col>
-                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600' }}>Acc: {newaccount}</Text>
-                                        </Col>
-                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600' }}>AccName: {newAccountName}</Text>
-                                        </Col>
-                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600' }}>Timezone: {timezone.current}</Text>
-                                        </Col>
-                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600' }}>
-                                                Cron/Acc status: {cronStatus.current} /{' '}
-                                                <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
-                                                    {accountStatus.current}
-                                                </span>
-                                            </Text>
-                                        </Col>
-                                        <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
-                                            <Tooltip title="Export to CSV">
-                                                <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef3)} />
-                                            </Tooltip>
-                                        </Col>
-                                    </Row>
-                                    <AgGridReact
-                                        ref={gridRef3}
-                                        rowData={keywordData.filter((each) => each.campaignname.includes(inputValue))}
-                                        columnDefs={columnDefs3.current}
-                                        onCellClicked={onCellClicked}
-                                        pagination={true}
-                                        paginationPageSize={100}
-                                        paginationPageSizeSelector={[20, 40, 60, 80, 100]}
-                                        groupDisplayType='multipleColumns'
-                                        suppressAggFuncInHeader={true}
-                                        groupSuppressBlankHeader={true}
-                                        defaultColDef={defaultColDef}
-                                        // groupIncludeFooter={true}
-                                        // groupIncludeTotalFooter={true}
-                                        autoGroupColumnDef={autoGroupColumnDef3}
-                                        onGridReady={(params) => onGridReady(params, 'grid4', gridRef3)}
-                                        gridOptions={gridOptions3}
-                                        getMainMenuItems={getMainMenuItems}
-                                        pinnedBottomRowData={keywordData.length > 0 ? pinnedBottomRowData3 : []}
-                                        getRowStyle={params => {
-                                            if (params.node.rowPinned) {
-                                                return {
-                                                    fontWeight: 'bold',
-                                                    backgroundColor: theme === "dark" ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
-                                                    color: theme === "dark" ? '#fff' : '#000',           // Text color should contrast with the background
-                                                };
-                                            }
-
-                                            return null;
-                                        }}
-                                    />
-                                </div>
-                            ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
-                                {startDate !== endDate ? <Result
-                                    className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                                    icon={<SmileOutlined />}
-                                    title={`No KeywordData for ${newaccount} from ${startDate} to ${endDate}`}
-                                // extra={<Button type="primary">Next</Button>}
-                                /> : <Result
-                                    className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                                    icon={<SmileOutlined />}
-                                    title={`No KeywordData for ${newaccount} to ${startDate}`}
-                                // extra={<Button type="primary">Next</Button>}
-                                />}
-                            </div>}
+                                ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
+                                    {startDate !== endDate ? <Result
+                                        className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                        icon={<SmileOutlined />}
+                                        title={`No KeywordData for ${newaccount} from ${startDate} to ${endDate}`}
+                                    // extra={<Button type="primary">Next</Button>}
+                                    /> : <Result
+                                        className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                        icon={<SmileOutlined />}
+                                        title={`No KeywordData for ${newaccount} to ${startDate}`}
+                                    // extra={<Button type="primary">Next</Button>}
+                                    />}
+                                </div>}
+                            </div>
                         </div>
-                    </div>
                     }
+                    {revenuePratner === "FB_System1" && (
+                        <div>
+                            <div style={contentStyle}>
+                            {isLoading4 === true ? (
+                                    <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>
+                                        <div className="ag-grid-Loader">
+                                            <Audio
+                                                height="80"
+                                                width="80"
+                                                radius="9"
+                                                color="green"
+                                                ariaLabel="loading"
+                                                wrapperStyle
+                                                wrapperClass
+                                            />
+                                        </div>
+                                    </div>
+                                ) : system1KeywordData.filter((each) => each.domain.includes(inputValue))?.length > 0 ? (
+                                <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
+                                <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap' }}>
+                                    <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
+                                    <Space align="center" className='daily-contaier'>
+                                        <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600' }}>Domain</Text>
+                                    </Space>
+                                    </Col>
+                                    <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                    <Text style={{ fontWeight: '600' }}>Acc: {newaccount}</Text>
+                                    </Col>
+                                    <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                    <Text style={{ fontWeight: '600' }}>AccName: {newAccountName}</Text>
+                                    </Col>
+                                    <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                    <Text style={{ fontWeight: '600' }}>Timezone: {timezone.current}</Text>
+                                    </Col>
+                                    <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                    <Text style={{ fontWeight: '600' }}>
+                                        Cron/Acc status: {cronStatus.current} /{' '}
+                                        <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
+                                        {accountStatus.current}
+                                        </span>
+                                    </Text>
+                                    </Col>
+                                    <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
+                                    <Tooltip title="Export to CSV">
+                                        <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef4)} />
+                                    </Tooltip>
+                                    </Col>
+                                </Row>
+
+                                <AgGridReact
+                                    ref={gridRef4}
+                                    rowData={system1KeywordData}
+                                    columnDefs={columnDefsObject4}
+                                    onCellClicked={onCellClicked}
+                                    pagination={true}
+                                    paginationPageSize={100}
+                                    paginationPageSizeSelector={[20, 40, 60, 80, 100]}
+                                    groupDisplayType="multipleColumns"
+                                    suppressAggFuncInHeader={true}
+                                    groupSuppressBlankHeader={true}
+                                    defaultColDef={defaultColDef}
+                                    // autoGroupColumnDef={autoGroupColumnDef4}
+                                    // onGridReady={(params) => onGridReady(params, 'grid5', gridRef4)}
+                                    // gridOptions={gridOptions4}
+                                    gridOptions={{
+                                        groupUseEntireRow: true,  // Ensures the entire row is used for grouping
+                                        // groupSuppressAutoColumn: true,  // Removes the auto group column that appears with the group header
+                                    }}
+                                    getMainMenuItems={getMainMenuItems}
+                                    pinnedBottomRowData={system1KeywordData.length > 0 ? pinnedBottomRowData4 : []}
+                                    getRowStyle={params => {
+                                    if (params.node.rowPinned) {
+                                        return {
+                                        fontWeight: 'bold',
+                                        backgroundColor: theme === "dark" ? '#000' : '#fff',
+                                        color: theme === "dark" ? '#fff' : '#000',
+                                        };
+                                    }
+                                    return null;
+                                    }}
+                                />
+                                </div>
+                            ) : (
+                                <div style={{ backgroundColor: theme === "dark" ? "#333" : "#fff" }}>
+                                {startDate !== endDate ? (
+                                    <Result
+                                    className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                    icon={<SmileOutlined />}
+                                    title={`No DomainData from ${startDate} to ${endDate}`}
+                                    />
+                                ) : (
+                                    <Result
+                                    className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                    icon={<SmileOutlined />}
+                                    title={`No DomainData for ${startDate}`}
+                                    />
+                                )}
+                                </div>
+                            )}
+                            </div>
+                        </div>
+                    )}
                     {revenuePratner === "FB_Mnet" && 
                         <div style={{ height: "100%", marginBottom: '20px' }}>
                             <div style={contentStyle}>
