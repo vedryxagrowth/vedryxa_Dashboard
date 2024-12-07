@@ -360,6 +360,12 @@ const MyTablePage = () => {
     const [domainColumnDefs, setDomainColumnDefs] = useState([]);
 
     const [domainFixedFooter, setDomainFixedFooter] = useState([]);
+
+    const [BMNameData, setBMNameData] = useState([]);
+
+    const [BMNameColumnDefs, setBMNameColumnDefs] = useState([]);
+
+    const [BMNameFixedFooter, setBMNameFixedFooter] = useState([]);
     const showModal = () => {
         setIsModalOpen(true);
     };
@@ -2618,11 +2624,11 @@ const MyTablePage = () => {
             field: 'domain',
             sortable: true,
             filter: 'agTextColumnFilter',
-            // resizable: false,
+            resizable: false,
             width: 350, // Fixed width for Domain column
             cellStyle: { textAlign: 'left' },
             rowGroup: true, // Grouping by DOMAIN
-            // hide: true, // Hide this column in the grid, but it will still be used for grouping
+            hide: true, // Hide this column in the grid, but it will still be used for grouping
         },
         {
             headerName: 'Keyword',
@@ -2823,6 +2829,38 @@ const MyTablePage = () => {
             cpl: item.fbLeads > 0 ? (item.spend / item.fbLeads) : 0,  // Cost per Lead
         }));
     }
+
+    function groupAndCalculateBMName(data) {
+        const groupedData = data.reduce((acc, item) => {
+            const key = `${item.BMName}-${item[`${newtime}Date`]}`;
+            
+            if (!acc[key]) {
+                acc[key] = {
+                    BMName: item.BMName,
+                    [`${newtime}Date`]: item[`${newtime}Date`],
+                    estimated_revenue: 0,
+                    spend: 0,
+                    conversions: 0,
+                    fbLeads: 0,
+                };
+            }
+    
+            acc[key].estimated_revenue += item.estimated_revenue;
+            acc[key].spend += parseFloat(item.spend);
+            acc[key].conversions += item.conversions || 0;  // Default to 0 if undefined
+            acc[key].fbLeads += parseInt(item.fbLeads) || 0;        // Default to 0 if undefined
+    
+            return acc;
+        }, {});
+    
+        return Object.values(groupedData).map(item => ({
+            ...item,
+            profit: item.estimated_revenue - item.spend,
+            margin: item.estimated_revenue > 0 ? ((item.estimated_revenue - item.spend) / item.estimated_revenue) * 100 : 0,
+            rpc: item.conversions > 0 ? (item.estimated_revenue / item.conversions) : 0, // Revenue per Conversion
+            cpl: item.fbLeads > 0 ? (item.spend / item.fbLeads) : 0,  // Cost per Lead
+        }));
+    }
     
 
     const functionCall1 = async () => {
@@ -2843,6 +2881,7 @@ const MyTablePage = () => {
             const groupAndCalculateProfit1 = groupAndCalculateProfit(mainData);
 
             setDomainData(groupAndCalculateProfit1);
+
             setDomainColumnDefs([
                 {
                     field:'domain',
@@ -2940,6 +2979,107 @@ const MyTablePage = () => {
                 }
             ]);
             // console.log(groupAndCalculateProfit1);
+        }
+
+        if(fetchData.status === 200 && mainData.length > 0){
+            const groupAndCalculateBMName1 = groupAndCalculateBMName(mainData);
+            setBMNameData(groupAndCalculateBMName1);
+            setBMNameColumnDefs([
+                {
+                    field:'BMName',
+                    headerName:'BMName',
+                    minWidth: 400,
+                    // resizable: true,
+                    sortable: true,
+                    hide: true, // Hide column as it's grouped
+                    rowGroup: true,
+                    enableRowGroup: true,
+                    flex: 9
+    
+                },
+                {
+                    field: `${newtime}Date`,
+                    headerName: 'Date',
+                    flex: 6,
+                    minWidth: 200,
+                    filter: true,
+                },
+                {
+                    field: "spend",
+                    resizable: true,
+                    sortable: true,
+                    filter: true,
+                    minWidth: 150,
+                    aggFunc:spender,
+                    valueFormatter: currencyFormatter
+                },
+                {
+                    field: "estimated_revenue",
+                    headerName: "Revenue",
+                    resizable: true,
+                    sortable: true,
+                    filter: true,
+                    minWidth: 150,
+                    aggFunc:spender,
+                    valueFormatter: currencyFormatter
+                },
+                { 
+                    field: 'profit', 
+                    resizable: true,
+                    sortable: true,
+                    minWidth: 150,
+                    cellClassRules: {
+                        'font-red': p => p.value < 0
+                    },
+                    aggFunc:spender,
+                    filter: true,
+                    valueFormatter: currencyFormatter
+                },
+                {
+                    field: "margin",
+                    headerName:'Margin(%)',
+                    aggFunc: average,
+                    cellClassRules: {
+                        'font-red': p => p.value < 0
+                    },
+                    minWidth: 150,
+                    valueFormatter: marginFormatter,
+                    filter: true,
+                },
+                {
+                    field: 'rpc',
+                    headerName: 'RPC',
+                    aggFunc: avgRpcCpl,
+                    valueFormatter: rpcCplFormatter,
+                    minWidth: 100,
+                    flex: 3,
+                    filter: true,
+                },
+                {
+                    field: 'cpl',
+                    headerName: 'CPL',
+                    aggFunc: avgRpcCpl,
+                    valueFormatter: rpcCplFormatter,
+                    minWidth: 100,
+                    flex: 3,
+                    filter: true,
+                }
+            ]);
+            setBMNameFixedFooter([
+                {
+                    // domain:'Totals',
+                    [`${newtime}Date`]: 'Totals',
+                    spend: parseFloat(groupAndCalculateBMName1?.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0).toFixed(2)),
+                    estimated_revenue: parseFloat(groupAndCalculateBMName1?.reduce((acc, curr) => acc + parseFloat(curr?.estimated_revenue), 0).toFixed(2)),
+                    profit: parseFloat(groupAndCalculateBMName1?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0).toFixed(2)),
+                    margin: parseFloat((groupAndCalculateBMName1?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / groupAndCalculateBMName1?.reduce((acc, curr) => acc + parseFloat(curr.estimated_revenue), 0) * 100).toFixed(2)),
+                    rpc: parseFloat((groupAndCalculateBMName1?.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / groupAndCalculateBMName1?.length).toFixed(2)),
+                    cpl: parseFloat((groupAndCalculateBMName1?.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / groupAndCalculateBMName1?.length).toFixed(2)),
+                    conversions: parseFloat(groupAndCalculateBMName1?.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
+                    // clicks: parseFloat(groupAndCalculateBMName1?.reduce((acc, curr) => acc + parseFloat(curr?.clicks), 0).toFixed(2)),
+                    // impressions: parseFloat(groupAndCalculateBMName1?.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
+                }
+            ]);
         }
         if (fetchData.status === 200 && mainData.length > 0) {
             try {
@@ -4934,6 +5074,15 @@ const MyTablePage = () => {
         }
     };
 
+    const autoGroupColumnDefDomain = {
+        headerName: 'Domain', // Display name for the grouped column
+        minWidth: 300, // Set width for grouped rows
+        resizable: true, // Enable resizing
+        sortable: true, // Enable sorting
+        cellRendererParams: {
+          suppressCount: true, // Suppress row count in the grouped column
+        },
+    };
 
 
     // const autoGroupColumnDefLive = {
@@ -5739,9 +5888,10 @@ const MyTablePage = () => {
         { key: '1', label: 'Live', content: 'Content for Live data' },
         { key: '2', label: 'Daily', content: 'Content for Daily data' },
         { key: '3', label: 'Campaigns', content: 'Content for Campaign data' },
-        ...(newRevenuePratner === "FB_Mnet" ? [{ key: '4', label: 'Domain', content: 'Content for Domain data' }] : []),
-        ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '4', label: 'Keywords', content: 'Content for Keyword data' }] : []),
-        ...(newRevenuePratner === "FB_System1" ? [{ key: '4', label: 'Domain', content: 'Content for Domain data' }] : [])
+        { key: '4', label: 'BMName', content: 'Content for BMName data' },
+        ...(newRevenuePratner === "FB_Mnet" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : []),
+        ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
+        ...(newRevenuePratner === "FB_System1" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : [])
     ];
     const handleSlideChange = (from, to) => {
         // console.log(to, "to");
@@ -5754,10 +5904,10 @@ const MyTablePage = () => {
         // console.log(index);
         // console.log(parseInt(index)-1);
         carouselRef.current.goTo(parseInt(index)-1)
-        if(index == 4 && revenuePratner === "FB_DomainActive"){
+        if(index == 5 && revenuePratner === "FB_DomainActive"){
             // console.log("hello praveen");
             setIsKeywordsTabActive("keyword");
-        }else if(index === 4 && newRevenuePratner === "FB_System1"){
+        }else if(index === 5 && newRevenuePratner === "FB_System1"){
             setIsSystem1KeywordsTabActive('Domain')
         }
     };
@@ -6293,6 +6443,124 @@ const MyTablePage = () => {
                             onChange={handlePageClick}
                         />
                     </div>
+                    <div style={{ height: "100%", marginBottom: '20px' }}>
+                        <div style={contentStyle}>
+                            {isLoading === true ? (
+                                <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>
+                                    <div className="ag-grid-Loader">
+                                        <Audio
+                                            height="80"
+                                            width="80"
+                                            radius="9"
+                                            color="green"
+                                            ariaLabel="loading"
+                                            wrapperStyle
+                                            wrapperClass
+                                        />
+                                    </div>
+                                </div>
+                            ) : BMNameData?.length > 0 ? (
+
+                                <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
+
+                                    {/* <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap' }}>
+                                        <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
+                                            <Space align="center">
+                                                <div className="blinking-circle-1"></div>
+                                                <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600' }}>Live</Text>
+                                            </Space>
+                                        </Col>
+                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                            <Text style={{ fontWeight: '600' }}>Acc: {newaccount}</Text>
+                                        </Col>
+                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                            <Text style={{ fontWeight: '600' }}>AccName: {newAccountName}</Text>
+                                        </Col>
+                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                            <Text style={{ fontWeight: '600' }}>Timezone: {timezone.current}</Text>
+                                        </Col>
+                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                            <Text style={{ fontWeight: '600' }}>F/N Hour: {maxHour.current}:00 / {maxNetworkHour.current}:00</Text>
+                                        </Col>
+                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                            <Text style={{ fontWeight: '600' }}>
+                                                Cron/Acc status: {cronStatus.current} /{' '}
+                                                <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
+                                                    {accountStatus.current}
+                                                </span>
+                                            </Text>
+                                        </Col>
+                                        <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
+                                            <Tooltip title="Export to CSV">
+                                                <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={onBtExport1} />
+                                            </Tooltip>
+                                        </Col>
+                                    </Row> */}
+
+
+                                        <AgGridReact
+                                            rowData={BMNameData}
+                                            columnDefs={BMNameColumnDefs}
+                                            // defaultColDef={defaultColDef}
+                                            suppressAggFuncInHeader={true}
+                                            pinnedBottomRowData={BMNameFixedFooter}
+                                            getRowStyle={(params) => {
+                                                if (params.node.rowPinned) {
+                                                    return {
+                                                        fontWeight: 'bold',
+                                                        // backgroundColor: theme === "dark" ? '#000' : '#fff',
+                                                        // color: theme === "dark" ? '#fff' : '#000',
+                                                    };
+                                                }
+                                                return null;
+                                            }}
+                                            onFilterChanged={(params) => {
+                                                const api = params.api;
+                                                const filteredData = [];
+                                                api.forEachNodeAfterFilterAndSort((node) => {
+                                                    if (!node.rowPinned) {
+                                                        filteredData.push(node.data);
+                                                    }
+                                                });
+
+                                                const updatedFooter = [
+                                                    {
+                                                        [`${newtime}Date`]: 'Totals',
+                                                        spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
+                                                        estimated_revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.estimated_revenue || 0), 0).toFixed(2)),
+                                                        profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
+                                                        margin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.estimated_revenue), 0) * 100).toFixed(2)),
+                                                        rpc: parseFloat(
+                                                            (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc || 0), 0) / filteredData.length || 0).toFixed(2)
+                                                        ),
+                                                        // cpl: parseFloat(
+                                                        //     (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl || 0), 0) / filteredData.length || 0).toFixed(2)
+                                                        // ),
+                                                        // impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0).toFixed(2)),
+                                                    },
+                                                ];
+
+                                                setBMNameFixedFooter(updatedFooter);
+                                            }}
+                                        />
+
+                                </div>
+                            ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
+                                {startDate !== endDate ? <Result
+                                    className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                    icon={<SmileOutlined />}
+                                    title={`No BMName for ${newaccount} from ${startDate} to ${endDate}`}
+                                // extra={<Button type="primary">Next</Button>}
+                                /> : <Result
+                                    className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                    icon={<SmileOutlined />}
+                                    title={`No BMName for ${newaccount} to ${startDate}`}
+                                // extra={<Button type="primary">Next</Button>}
+                                />}
+                            </div>}
+                        </div>
+                    </div>
+
                     {revenuePratner === "FB_DomainActive" &&
                         <div>
                             <div style={contentStyle}>
@@ -6451,7 +6719,7 @@ const MyTablePage = () => {
                                     suppressAggFuncInHeader={true}
                                     groupSuppressBlankHeader={true}
                                     defaultColDef={defaultColDef}
-                                    // autoGroupColumnDef={autoGroupColumnDef4}
+                                    autoGroupColumnDef={autoGroupColumnDefDomain}
                                     // onGridReady={(params) => onGridReady(params, 'grid5', gridRef4)}
                                     // gridOptions={gridOptions4}
                                     gridOptions={{
