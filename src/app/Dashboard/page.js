@@ -1121,7 +1121,7 @@ const Dashboard = () => {
         // console.log(transformedObject);
         let response;
         try{
-            response = await axios.post(`http://localhost:8000/Dashboard?timezone=${time}&start_date=${startDate}&end_date=${endDate}`, { formattedData: [transformedObject] });
+            response = await axios.post(`https://prodapis.adsgoat.in/Dashboard?timezone=${time}&start_date=${startDate}&end_date=${endDate}`, { formattedData: [transformedObject] });
 
         }catch(error){
             message.error('API failed to fetch the data please click the reload button', 8);

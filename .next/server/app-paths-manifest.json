@@ -1,7 +1,4 @@
 {
-<<<<<<< HEAD
-=======
-  "/Reports/page": "app/Reports/page.js",
->>>>>>> DevUi
-  "/Dashboard/page": "app/Dashboard/page.js"
+  "/Dashboard/page": "app/Dashboard/page.js",
+  "/Reports/page": "app/Reports/page.js"
 }
