@@ -92,14 +92,23 @@ const Createnewuser = ({ visible, onClose }) => {
             onOk: async() => {
                 try {
                     let data = {};
-                    additionalAccounts.map((each)=>{
-                        data[each.network] = each.inputs;
-                    });
+                    // if(values)
+                    if(values.role !== "Revenue_Partner"){
+                        additionalAccounts.map((each)=>{
+                            data[each.network] = each.inputs;
+                        });
+                    }
+                    else{
+                        additionalAccounts.map((each)=>{
+                            data[each.network.split("_")[1]] = each.inputs;
+                        });   
+                    }
                     
                     const formattedData = {
                         ...values,
                         adAccounts: additionalAccounts.length > 0 ? data : [],
                     };
+                    // console.log(formattedData);
                     // console.log(formattedData, "formatted Data");
                     const response = await axios.post('https://prodapis.adsgoat.in/api/createUser/', {formattedData},
                         {
@@ -189,6 +198,7 @@ const Createnewuser = ({ visible, onClose }) => {
                     >
                         <Select.Option value="Media_Buyer">Media_Buyer</Select.Option>
                         <Select.Option value="Special_User">Special_User</Select.Option>
+                        <Select.Option value="Revenue_Partner">Revenue_Partner</Select.Option>
                         <Select.Option value="Admin">Admin</Select.Option>
                         <Select.Option value="Manager">Manager</Select.Option>
                     </Select>

@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 // pages/index.js
 import React from 'react';
 import axios from 'axios';
-import { Select, Tag, theme, Button } from 'antd';
+import { Select, Tag, theme, Button,Carousel,Tabs, Tooltip, message } from 'antd';
+import StickyBox from 'react-sticky-box';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
 import debounce from 'lodash.debounce';
@@ -52,6 +53,9 @@ import {
     Typography,
     Checkbox
 } from 'antd';
+
+import { LoadingOutlined } from '@ant-design/icons';
+import { PiWarningCircleFill } from "react-icons/pi";
 // import {
 //     TrophyOutlined,
 //     ArrowUpOutlined,
@@ -136,11 +140,654 @@ const rangePresets = [
 
 // }
 
+
+// const { userdetails } = useTokenContext();
+
+// if (!userdetails?.adAccounts) {
+//     return <div style={{ width: '100%', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+//         <Flex align="center" gap="middle">
+//             {/* <Spin size="small" />
+//             <Spin /> */}
+//             <Spin size="large" />
+//         </Flex>
+//     </div>;
+// }
+
+const RevenuePartnerDashboard = () => {
+    const { userdetails } = useTokenContext();
+    const { theme } = useTokenContext();
+    const carouselRef = useRef();
+    const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
+    const [loading, setLoading] = useState(true);
+    const [loading1, setLoading1] = useState(false);
+    const [timeZone, setTimeZone] = useState('UTC');
+    const networks = Object.keys(userdetails?.adAccounts);
+    const [revenuePratner, setRevenuePartner] = useState(networks);
+    
+    const last7Days = dayjs().subtract(7, 'days').format('YYYY-MM-DD');
+
+    const today = dayjs().subtract(0, 'days').format('YYYY-MM-DD');
+
+    const defaultDates = [dayjs(last7Days), dayjs(today)];
+
+    const [startDate, setStartDate] = useState(last7Days);
+
+    const [endDate, setEndDate] = useState(today);
+
+    const [revenuePartnerData, setRevenuePartnerData] = useState([]);
+
+    const [revenuePartnerDomainData, setRevenuePartnerDomainData] = useState([]);
+
+    const [fetchData, setFetchData] = useState(true);
+
+    const [fixedFooter, setFixedFooter] = useState([]);
+
+    const [domainFixedFooter, setDomainFixedFooter] = useState([]);
+
+    const timeZoneForColumnDefs = useRef('UTC');
+
+    const [activeTab, setActiveTab] = useState("1");
+
+    const [columnDefs, setColumnDefs] = useState([]);
+
+    const [domainColumnDefs, setDomainColumnDefs] = useState([]);
+
+    const [isDomain, setIsDomain] = useState("");
+
+    const onChangeTime = (value) => {
+        setTimeZone(value);
+        timeZoneForColumnDefs.current = value;
+    };
+
+    const onChangeRevenuePartner = (value) => {
+        setRevenuePartner(value);
+    };
+
+    const handleChange = (dates) => {
+        if (dates && dates.length === 2) {
+            const [start, end] = dates;
+            setStartDate(start.format('YYYY-MM-DD'));
+            setEndDate(end.format('YYYY-MM-DD'));
+        }
+    };
+
+    const onClickSubmit = () => {
+        setFetchData(true);
+        setLoading(true);
+    
+        // Update to "Domain" only if the previous value is "Domain"
+        setIsDomain((prevState) => {
+            if (prevState === "Domain") {
+                setIsDomain(""); // Reset state to empty string
+                setTimeout(() => {
+                    setIsDomain("Domain"); // Update to "Domain" after 1 second
+                }, 1000);
+            }
+            return prevState; // Return the previous state unchanged
+        });
+    };
+
+    const average = (params) => {
+        const total = params.values.reduce((acc, value) => acc + parseFloat(value || 0), 0);
+        const count = params.values.filter(value => value !== null && value !== undefined).length;  // Count non-null/undefined values
+        return count > 0 ? Math.round((total / count) * 100) / 100 : 0;  // Avoid division by zero
+    };
+
+    const spender = (params) => {
+        const total = params.values.reduce((acc, value) => acc + parseFloat(value || 0), 0);
+        return Math.round(total * 100) / 100; // Round to 2 decimal places
+    };
+
+    const rpcCplFormatter = (params) => {
+        const value = params.value;
+        return isNaN(value) || !isFinite(value) ? '0' : parseFloat(value).toFixed(2);
+    };
+
+    const avgRpcCpl = (params) => {
+        const validValues = params.values.filter(value => !isNaN(value) && isFinite(value));
+        if (validValues.length === 0) {
+            return 0;
+        }
+        const sum = validValues.reduce((acc, value) => acc + value, 0);
+        const average = sum / validValues.length;
+        return parseFloat(average);
+    };
+
+    const [defaultColDef] = useState({
+        flex: 4,
+        sortable: true,
+        filter: true,
+        resizable: true,
+        enableRowGroup: true,
+    });
+
+    console.log(revenuePratner);
+
+    const items = [
+        { key: '1', label: 'Data', content: 'Content for Data' },
+        ...(revenuePratner && revenuePratner.length === 1 && revenuePratner[0] === "Mnet"
+            ? [{ key: '2', label: 'Domain', content: 'Content for Domain data' }]
+            : [])
+    ];
+
+    const handleCarouselChange = (index) => {
+        setActiveTab(index);
+        carouselRef.current.goTo(parseInt(index)-1)
+        console.log(index);
+        if(index == 2){
+            setIsDomain("Domain");
+        }
+    };
+
+    const handleSlideChange = (from, to) => {
+        setActiveTab((parseInt(to)+1).toString());
+        // console.log((parseInt(to)+1).toString());
+    };
+
+    const marginFormatter = (params) => {
+        return `${parseFloat(params.value || 0).toFixed(2)}%`; // Ensure 2 decimal places in currency format
+    };
+
+    const currencyFormatter = (params) => {
+        return `$${parseFloat(params.value || 0).toFixed(2)}`; // Ensure 2 decimal places in currency format
+    };
+
+    const renderCarouselNav = () => (
+        <StickyBox offsetTop={64} offsetBottom={20} style={{ zIndex: 1, padding: '0px', margin: '0px' }}>
+            <Tabs
+                activeKey={activeTab}
+                onChange={(key) => handleCarouselChange(key)}
+                items={items.map((item) => ({
+                key: item.key,
+                label: item.label,
+                }))}
+                className="custom-tabs" // Apply custom CSS class
+                style={{
+                backgroundColor: '#f0f2f5',
+                padding: '0',       
+                marginBottom: '0',  
+                }}
+                tabBarStyle={{
+                fontSize: '12px',      
+                padding: '0',          
+                height: '30px',        
+                lineHeight: '30px',    
+                marginBottom: '-1px',  
+                borderBottom: 'none',  
+                }}
+            />
+        </StickyBox>
+    );
+
+    const functionForFetchingRevenuePartnerData = async () => {
+        const token = localStorage.getItem("token")
+        console.log(token);
+        const fetchRevenueData = await axios.get(`https://prodapis.adsgoat.in/revenuePartnerData?timezone=${timeZone}&startDate=${startDate}&endDate=${endDate}&network=${revenuePratner}`,{
+            headers: {
+                Authorization: token,
+            },
+        });
+        const response = fetchRevenueData.data;
+        setRevenuePartnerData(response);
+        setFetchData(false);
+        setLoading(false);
+        setColumnDefs([
+            {
+                field:"network",
+                resizable: true,
+                sortable: true,
+                hide: true, // Hide column as it's grouped
+                rowGroup: true,
+                enableRowGroup: true,
+                minWidth: 150,
+                flex:5,
+
+            },
+            {
+                field: `${timeZoneForColumnDefs.current}Date`,
+                headerName: 'Date',
+                flex: 5,
+                minWidth: 200,
+                valueFormatter: (params) => {
+                  // Format the date with the short weekday
+                  if (params.value !== 'Totals') {
+                    const date = dayjs(params.value); // Assuming you are using dayjs
+                    const weekday = date.format('ddd'); // Short weekday (e.g., Mon, Tue)
+                    return `${params.value} (${weekday})`; // e.g., "2023-11-25 (Sat)"
+                  }
+                  return params.value; // For 'Totals' row
+                },
+                cellRenderer: (params) => {
+                  if (params.value !== 'Totals') {
+                    const date = dayjs(params.value); // Assuming you are using dayjs
+                    const weekday = date.format('ddd'); // Short weekday (e.g., Mon, Tue)
+                    
+                    return (
+                      <div style={{display:'flex', alignItems:'center'}}>
+                        {/* Display Date and Weekday */}
+                        {/* <span>{`${weekday}, ${params.value}`}</span> */}
+                        <span>{params.value}</span>
+                        {/* Display "Not Finalised" if finalised is false */}
+                        {params.data?.finalised === false && (
+                          <span style={{ color: 'red', marginLeft: '5px' }}>(Not Finalized)</span>
+                        //   <span style={{ color: 'red', marginLeft: '5px' }}>
+                        //     <Tooltip title={"The Data is not finalized yet for this date"}>
+                        //         <PiWarningCircleFill />
+                        //     </Tooltip>
+                        //   </span>
+                        )}
+                      </div>
+                    );
+                  }
+                  return params.value; // Return for 'Totals' row
+                },
+            },
+            {
+                field: "spend",
+                resizable: true,
+                sortable: true,
+                minWidth: 150,
+                aggFunc:spender,
+                valueFormatter:currencyFormatter
+            },
+            {
+                field: "revenue",
+                resizable: true,
+                sortable: true,
+                minWidth: 150,
+                aggFunc:spender,
+                valueFormatter:currencyFormatter
+            },
+            { 
+                field: 'profit', 
+                resizable: true,
+                sortable: true,
+                minWidth: 150,
+                aggFunc:spender,
+                cellClassRules: {
+                    'font-red': p => p.value < 0
+                },
+                valueFormatter:currencyFormatter
+            },
+            {
+                field: "margin",
+                headerName:"Margin(%)",
+                aggFunc: average,
+                cellClassRules: {
+                    'font-red': p => p.value < 0
+                },
+                minWidth: 150,
+                valueFormatter: marginFormatter
+            },
+            {
+                field: 'rpc',
+                headerName: 'RPC',
+                aggFunc: avgRpcCpl,
+                valueFormatter: rpcCplFormatter,
+                minWidth: 100,
+                flex: 3
+            },
+            {
+                field: 'cpl',
+                headerName: 'CPL',
+                aggFunc: avgRpcCpl,
+                valueFormatter: rpcCplFormatter,
+                minWidth: 100,
+                flex: 3
+            }
+        ]);
+        setFixedFooter([
+            {
+                [`${timeZoneForColumnDefs.current}Date`]: 'Totals',
+                spend: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0).toFixed(2)),
+                revenue: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0).toFixed(2)),
+                profit: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0).toFixed(2)),
+                margin: parseFloat((response?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / response?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
+                rpc: parseFloat((response?.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / response?.length).toFixed(2)),
+                cpl: parseFloat((response?.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / response?.length).toFixed(2)),
+                conversions: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
+                clicks: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.clicks), 0).toFixed(2)),
+                impressions: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
+            }
+        ]);
+    };
+
+    const functionForFetchingRevenuePartnerDomainData = async () => {
+        setLoading1(true);
+        const token = localStorage.getItem("token")
+        console.log(token);
+        const fetchRevenueData = await axios.get(`https://prodapis.adsgoat.in/revenuePartner/DomainData?timezone=${timeZone}&startDate=${startDate}&endDate=${endDate}&network=${revenuePratner}`,{
+            headers: {
+                Authorization: token,
+            },
+        });
+        const response = fetchRevenueData.data;
+        setRevenuePartnerDomainData(response);
+        setFetchData(false);
+        setLoading1(false);
+        setDomainColumnDefs([
+            {
+                field:'domain',
+                headerName:'Domain',
+                minWidth: 400,
+                // resizable: true,
+                sortable: true,
+                hide: true, // Hide column as it's grouped
+                rowGroup: true,
+                enableRowGroup: true,
+                flex: 8
+
+            },
+            {
+                field: `${timeZoneForColumnDefs.current}Date`,
+                headerName: 'Date',
+                flex: 6,
+                minWidth: 200,
+            },
+            {
+                field: "spend",
+                resizable: true,
+                sortable: true,
+                minWidth: 150,
+                aggFunc:spender,
+                valueFormatter:currencyFormatter
+            },
+            {
+                field: "revenue",
+                resizable: true,
+                sortable: true,
+                minWidth: 150,
+                aggFunc:spender,
+                valueFormatter:currencyFormatter
+            },
+            { 
+                field: 'profit', 
+                resizable: true,
+                sortable: true,
+                minWidth: 150,
+                cellClassRules: {
+                    'font-red': p => p.value < 0
+                },
+                aggFunc:spender,
+                valueFormatter:currencyFormatter
+            },
+            {
+                field: "margin",
+                headerName:'Margin(%)',
+                aggFunc: average,
+                cellClassRules: {
+                    'font-red': p => p.value < 0
+                },
+                minWidth: 150,
+                valueFormatter: marginFormatter
+            },
+            {
+                field: 'rpc',
+                headerName: 'RPC',
+                aggFunc: avgRpcCpl,
+                valueFormatter: rpcCplFormatter,
+                minWidth: 100,
+                flex: 3
+            },
+            {
+                field: 'cpl',
+                headerName: 'CPL',
+                aggFunc: avgRpcCpl,
+                valueFormatter: rpcCplFormatter,
+                minWidth: 100,
+                flex: 3
+            }
+        ]);
+        setDomainFixedFooter([
+            {
+                // domain:'Totals',
+                [`${timeZoneForColumnDefs.current}Date`]: 'Totals',
+                spend: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0).toFixed(2)),
+                revenue: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0).toFixed(2)),
+                profit: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0).toFixed(2)),
+                margin: parseFloat((response?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / response?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
+                rpc: parseFloat((response?.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / response?.length).toFixed(2)),
+                cpl: parseFloat((response?.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / response?.length).toFixed(2)),
+                conversions: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
+                clicks: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.clicks), 0).toFixed(2)),
+                impressions: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
+            }
+        ]);
+    };
+
+    useEffect(() => {
+        if (fetchData) {    
+            functionForFetchingRevenuePartnerData();
+        }
+    }, [fetchData]);
+
+    useEffect(()=>{
+        if(isDomain === "Domain"){
+            functionForFetchingRevenuePartnerDomainData();
+        }
+    },[isDomain]);
+
+    const [dropdownVisible, setDropdownVisible] = useState(false);
+
+    const handleDropdownVisibleChange = (open) => {
+        setDropdownVisible(open);
+    };
+
+    // const onChangeRevenuePartner = (selectedValues) => {
+    //     console.log('Selected Values:', selectedValues);
+    // };
+
+    const options = networks.map((network) => ({
+        label: network,
+        value: network,
+    }));
+
+    const sharedProps = {
+        mode: 'multiple',
+        style: {
+            width: '100%',
+        },
+        options,
+        placeholder: 'Select Item...',
+        maxTagCount: 'responsive',
+    };
+
+    // Initialize with all options selected
+    // const [revenuePratner, setRevenuePartner] = useState(networks);
+
+    const selectProps = {
+        value: revenuePratner,
+        onChange: setRevenuePartner,
+    };
+
+    return (
+        <div style={{ width: '100%', margin:'0px', padding:'0px'}}>
+            <Space direction="vertical" style={{ width: '100%', paddingBottom: "1%" }}>
+                {/* Filters */}
+                <Row gutter={[16, 16]}>
+                    <Col xs={8} sm={8} md={5} lg={4}>
+                        <Space
+                            direction="vertical"
+                            style={{
+                                width: '100%',
+                            }}
+                        >
+                            <Select {...sharedProps} {...selectProps} />
+                        </Space>
+                    </Col>
+                    <Col xs={16} sm={16} md={10} lg={8}>
+                        <ConfigProvider locale={locale}>
+                            <RangePicker
+                                presets={rangePresets}
+                                onChange={handleChange}
+                                disabledDate={disabledDate}
+                                defaultValue={defaultDates}
+                                format="YYYY-MM-DD"
+                                style={{
+                                    width: '100%',
+                                    backgroundColor: theme === 'dark' ? '#555' : undefined,
+                                    color: theme === 'dark' ? 'white' : undefined,
+                                }}
+                                dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}
+                            />
+                        </ConfigProvider>
+                    </Col>
+                    <Col xs={12} sm={12} md={4} lg={3}>
+                        <Select
+                            placeholder="Select Timezone"
+                            onChange={onChangeTime}
+                            value={timeZone}
+                            options={timezones.map((item) => ({ value: item, label: item }))}
+                        />
+                    </Col>
+                    <Col xs={12} sm={12} md={2}>
+                        <Button onClick={onClickSubmit} type='primary' block>
+                            Submit
+                        </Button>
+                    </Col>
+                </Row>
+            </Space>
+            {/* Table */}
+            <div 
+            // style={{padding:'0px', margin:'0px'}}
+            >
+                {renderCarouselNav()}
+            </div>
+            <Carousel dots={false}  ref={carouselRef} beforeChange={handleSlideChange}>
+                <div>
+                    {loading ? (
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+                            <Spin indicator={<LoadingOutlined spin />} size="large" />
+                        </div>
+                    ) : (
+                        revenuePartnerData.length > 0 && (
+                            <div
+                                className={`ag-theme-alpine ${gridThemeClass}`}
+                                style={{ width: '100%', height: '70vh' }}
+                            >
+                                <AgGridReact
+                                    rowData={revenuePartnerData}
+                                    columnDefs={columnDefs}
+                                    defaultColDef={defaultColDef}
+                                    suppressAggFuncInHeader={true}
+                                    pinnedBottomRowData={fixedFooter}
+                                    getRowStyle={(params) => {
+                                        if (params.node.rowPinned) {
+                                            return {
+                                                fontWeight: 'bold',
+                                                // backgroundColor: theme === "dark" ? '#000' : '#fff',
+                                                // color: theme === "dark" ? '#fff' : '#000',
+                                            };
+                                        }
+                                        return null;
+                                    }}
+                                    onFilterChanged={(params) => {
+                                        const api = params.api;
+                                        const filteredData = [];
+                                        api.forEachNodeAfterFilterAndSort((node) => {
+                                            if (!node.rowPinned) {
+                                                filteredData.push(node.data);
+                                            }
+                                        });
+
+                                        const updatedFooter = [
+                                            {
+                                                [`${timeZoneForColumnDefs.current}Date`]: 'Totals',
+                                                spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
+                                                revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
+                                                profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
+                                                margin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
+                                                rpc: parseFloat(
+                                                    (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc || 0), 0) / filteredData.length || 0).toFixed(2)
+                                                ),
+                                                cpl: parseFloat(
+                                                    (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl || 0), 0) / filteredData.length || 0).toFixed(2)
+                                                ),
+                                                impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0).toFixed(2)),
+                                            },
+                                        ];
+
+                                        setFixedFooter(updatedFooter);
+                                    }}
+                                />
+                            </div>
+                        )
+                    )}
+                </div>
+                {revenuePratner && revenuePratner.length === 1 && revenuePratner[0] === "Mnet" && 
+                
+                    <div>
+                        {loading1 ? (
+                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+                                <Spin indicator={<LoadingOutlined spin />} size="large" />
+                            </div>
+                        ) : (
+                            revenuePartnerDomainData.length > 0 ? (
+                                <div
+                                    className={`ag-theme-alpine ${gridThemeClass}`}
+                                    style={{ width: '100%', height: '70vh' }}
+                                >
+                                    <AgGridReact
+                                        rowData={revenuePartnerDomainData}
+                                        columnDefs={domainColumnDefs}
+                                        defaultColDef={defaultColDef}
+                                        suppressAggFuncInHeader={true}
+                                        pinnedBottomRowData={domainFixedFooter}
+                                        getRowStyle={(params) => {
+                                            if (params.node.rowPinned) {
+                                                return {
+                                                    fontWeight: 'bold',
+                                                    // backgroundColor: theme === "dark" ? '#000' : '#fff',
+                                                    // color: theme === "dark" ? '#fff' : '#000',
+                                                };
+                                            }
+                                            return null;
+                                        }}
+                                        onFilterChanged={(params) => {
+                                            const api = params.api;
+                                            const filteredData = [];
+                                            api.forEachNodeAfterFilterAndSort((node) => {
+                                                if (!node.rowPinned) {
+                                                    filteredData.push(node.data);
+                                                }
+                                            });
+
+                                            const updatedFooter = [
+                                                {
+                                                    [`${timeZoneForColumnDefs.current}Date`]: 'Totals',
+                                                    spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
+                                                    revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
+                                                    profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
+                                                    margin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
+                                                    rpc: parseFloat(
+                                                        (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc || 0), 0) / filteredData.length || 0).toFixed(2)
+                                                    ),
+                                                    cpl: parseFloat(
+                                                        (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl || 0), 0) / filteredData.length || 0).toFixed(2)
+                                                    ),
+                                                    impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0).toFixed(2)),
+                                                },
+                                            ];
+
+                                            setDomainFixedFooter(updatedFooter);
+                                        }}
+                                    />
+                                </div>
+                            ) : null
+                        )}
+                
+                    </div>}
+            </Carousel>
+        </div>
+    );
+};
+
+
 const Dashboard = () => {
     const { userdetails } = useTokenContext();
     const { theme } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
-    console.log(userdetails);
+    // console.log(userdetails);
     // console.log(userdetails?.adAccounts, "f1");
     // const { adAccounts } = userdetails;
     // const handleAsyncLogic = async () => {
@@ -164,6 +811,12 @@ const Dashboard = () => {
             </Flex>
         </div>;
     }
+
+    if(userdetails?.role === "Revenue_Partner"){
+        return(
+            <RevenuePartnerDashboard />
+        )
+    };
 
     const transformData = (data) => {
         return Object.fromEntries(
@@ -243,6 +896,7 @@ const Dashboard = () => {
     const [selectedDates, setSelectedDates] = useState(defaultDates);
     const [isPickerOpen, setIsPickerOpen] = useState(false);
     const [submitted, setSubmitted] = useState(false);
+    const [domainWiseData, setDomainWiseData] = useState([]);
 
     // const functionalCall = (data) => {
     //     setData(data);
@@ -429,6 +1083,8 @@ const Dashboard = () => {
                 let newKey;
                 if (key === "Newsbreak_DA"){
                     newKey = "Newsbreak_DomainActive"
+                }else if (key === "FB_DomainActive"){
+                    newKey = "Facebook_DActive"
                 }
                 else{ newKey = "Facebook_" + splitKey[1];}
         
@@ -666,6 +1322,53 @@ const Dashboard = () => {
 
 
         console.log(groupedData);
+
+        function groupDataByDomainAndAccount(data, dateField) {
+            console.log(dateField);
+            const DomainGroupedData = data.reduce((acc, obj) => {
+              const { domain, accountNumber, spend, estimated_revenue, revenuePartner, MediaBuyerName, Holder } = obj;
+              const specifiedDate = obj[dateField]; // Dynamically get the date based on the field
+          
+              // Create a unique key for grouping by domain, specifiedDate, and accountNumber
+              const key = `${specifiedDate}-${domain}-${accountNumber}`;
+          
+              if (!acc[key]) {
+                acc[key] = {
+                  specifiedDate,
+                  domain,
+                  accountNumber,
+                  revenuePartner,   // Store the revenuePartner for the group
+                  MediaBuyerName,   // Store the MediaBuyerName for the group
+                  Holder,           // Store the Holder for the group
+                  spend: 0,
+                  estimated_revenue: 0,
+                };
+              }
+          
+              // Sum the fields (spend, estimated_revenue) based on the new grouping
+              acc[key].spend += spend;
+              acc[key].estimated_revenue += estimated_revenue;
+          
+              return acc;
+            }, {});
+          
+            // Convert the grouped data object back to an array and add the profit field
+            const domainResult = Object.values(DomainGroupedData).map(item => {
+              item.profit = item.estimated_revenue - item.spend; // Calculate profit
+              return item;
+            });
+          
+            return domainResult;
+        }
+          
+          
+          
+          
+        const domainResult = groupDataByDomainAndAccount(responseData, `${time}Date`);
+
+        setDomainWiseData(domainResult);
+          
+        console.log(domainResult, "domain Result");
 
         const sortedData = groupedData.sort((a, b) => {
             if (a.accountNumber < b.accountNumber) {
@@ -1229,10 +1932,75 @@ const Dashboard = () => {
             minWidth: 125// Group by MediaBuyerName
         },
     ]);
+    const [columnDefs3] = useState([
+        {   
+            field: 'domain', minWidth: 200, suppressAutoSize: true,  
+            resizable: true,
+            sortable: true,
+            hide: true, // Hide column as it's grouped
+            rowGroup: true,
+            enableRowGroup: true,
+        },
+        {
+            field: "accountNumber", minWidth:180,
+            resizable: true,
+            sortable: true,
+            hide: true, // Hide column as it's grouped
+            rowGroup: true,
+            enableRowGroup: true,
+
+        }, // Group by Network
+        {field:'specifiedDate', headerName:"Date",
+        minWidth: 125},
+        {
+            field: "spend",
+            aggFunc: spender,
+            valueFormatter: currencyFormatter,
+            minWidth: 125
+        }, // Summing Spend column
+        {
+            headerName: 'Revenue',
+            field: "estimated_revenue",
+            aggFunc: spender,
+            valueFormatter: currencyFormatter,
+            minWidth: 125
+        }, // Summing Revenue column
+        {
+            field: "profit",
+            aggFunc: spender,
+            cellClassRules: {
+                'font-red': p => p.value < 0
+            },
+            valueFormatter: currencyFormatter,
+            minWidth: 125
+        },
+        {
+            field: "revenuePartner",
+            minWidth: 180
+        }, // Group by Holder
+        {
+            field: "Holder",
+            minWidth: 125// Group by MediaBuyerName
+        },
+        {
+            field: "MediaBuyerName", headerName:'User',
+            minWidth: 125// Group by MediaBuyerName
+        },
+    ]);
 
     const autoGroupColumnDef = {
         headerName: 'Campaign Name', // Display name for the grouped column
         minWidth: 430, // Set width for grouped rows
+        resizable: true, // Enable resizing
+        sortable: true, // Enable sorting
+        cellRendererParams: {
+          suppressCount: true, // Suppress row count in the grouped column
+        },
+      };
+
+    const autoGroupColumnDefDomain = {
+        headerName: 'Domain', // Display name for the grouped column
+        minWidth: 250, // Set width for grouped rows
         resizable: true, // Enable resizing
         sortable: true, // Enable sorting
         cellRendererParams: {
@@ -1327,6 +2095,9 @@ const Dashboard = () => {
     // console.log(chartData.revenue, "data");
     return (
         <div>
+            {/* {userdetails?.role === "Revenue_Partner" && <div><h1>hello</h1></div>}
+            {userdetails?.role !== "Revenue_Partner" &&  */}
+            <div>
             {rendering === true ? <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><Spin size="large"/></div> : (
                 <div style={{ padding: '20px' }}>
                 <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -2046,6 +2817,27 @@ const Dashboard = () => {
                                 </div>
                             </Col>
                         </Row>
+                        <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                            <Col>
+                                <h2>Domain Level</h2>
+                            </Col>
+                            <Col>
+                                <div
+                                    className={`ag-theme-alpine ${gridThemeClass}`}
+                                    style={{ width: '100%', height: '400px' }}
+                                >             <AgGridReact
+                                        rowData={domainWiseData}
+                                        columnDefs={columnDefs3}
+                                        defaultColDef={defaultColDef}
+                                        // rowGroupPanelShow="always"
+                                        suppressAggFuncInHeader={true}
+                                        // groupIncludeFooter={true}
+                                        groupIncludeTotalFooter={true}
+                                        autoGroupColumnDef={autoGroupColumnDefDomain}
+                                    />
+                                </div>
+                            </Col>
+                        </Row>
                         <Row></Row>
     
     
@@ -2053,6 +2845,8 @@ const Dashboard = () => {
                 )}
             </div>
             )}
+            </div>
+            {/* } */}
         </div>
         
 

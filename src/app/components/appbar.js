@@ -47,9 +47,9 @@ const Appbar = ({ children, usersDataForLogin }) => {
     const router = useRouter();
     const pathname = usePathname();
     const [height, setHeight] = useState(0);
-    console.log(session?.user?.email)
+    // console.log(session?.user?.email)
     const { userdetails } = useTokenContext();
-    console.log(userdetails);
+    // console.log(userdetails);
 
     useEffect(() => {
         const handleResize = () => {
@@ -65,11 +65,11 @@ const Appbar = ({ children, usersDataForLogin }) => {
     }, []);
     const menuItems = [
         getItem('Dashboard', '/Dashboard', <HomeOutlined />),
-        getItem('Reports', '/Reports', <DatabaseOutlined />),
-        userdetails?.role === 'Admin' && getItem('Creatives', '/Creatives', <PieChartOutlined />),
-        getItem('Campaigns', '/Campaigns', <DesktopOutlined />),
+        usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Reports', '/Reports', <DatabaseOutlined />),
+        usersDataForLogin[0]?.role === 'Admin' && getItem('Creatives', '/Creatives', <PieChartOutlined />),
+        usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Campaigns', '/Campaigns', <DesktopOutlined />),
         // getItem('Users', '/Users', <ContainerOutlined />),
-        userdetails?.role === 'Admin' && getItem('NewUser', '/NewUser', <UserOutlined />),
+        usersDataForLogin[0]?.role === 'Admin' && getItem('NewUser', '/NewUser', <UserOutlined />),
         // getItem('Setting', '/setting', <SettingOutlined />),
         // getItem('Password', '/password', <LockOutlined />),
         // getItem('Sign Out', '/signout', <LogoutOutlined />),

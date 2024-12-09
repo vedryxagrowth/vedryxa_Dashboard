@@ -1,11 +1,12 @@
 "use client"
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
-import { Table, Button, Col, Card, Input, Row, Select, Result, Spin, Space, Modal, message, Menu, Switch, Search, Tooltip, Tabs } from 'antd';
+import { Table, Button, Col, Card, Input, Row, Select, Result, Spin, Space, Modal, message, Menu, Switch, Search, Tooltip, Tabs, Flex } from 'antd';
 import { ReloadOutlined, HighlightOutlined, LeftOutlined, RightOutlined, SearchOutlined, SwapRightOutlined, DownOutlined, EditOutlined, EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
 import { Carousel } from 'react-responsive-carousel';
 import { MailOutlined, SettingOutlined } from '@ant-design/icons';
 import StickyBox from 'react-sticky-box';
+import { redirect } from 'next/navigation';
 
 // import { , Select } from 'antd';
 import { useTokenContext } from '../components/parent';
@@ -29,13 +30,30 @@ const contentStyle = {
     textAlign: 'center',
     background: '#fbfcfa',
 };
-const roles = ['All', 'Media_Buyer', 'Admin', 'Manager', 'Special_User'];
+const roles = ['All', 'Media_Buyer', 'Admin', 'Manager', 'Special_User', "Revenue_Partner"];
 const accountStatus = ['All', 'Active', 'InActive'];
 const availableNetworks = ['All', "MEDIA_DOT_NET", "MEDIA_DOT_NET_BING", "ENKI", "TONIC", "System1", "Bodies", "Bodies1", "Rsoc", "Domain Active"];
 const networkStatus = ['All', 'Active', 'InActive'];
 
 const UsersTable = () => {
     const { userdetails } = useTokenContext();
+
+    if (!userdetails?.adAccounts) {
+        return <div style={{ width: '100%', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <Flex align="center" gap="middle">
+                {/* <Spin size="small" />
+                <Spin /> */}
+                <Spin size="large" />
+            </Flex>
+        </div>;
+    }
+
+    if(userdetails?.role !== "Admin"){
+        redirect("/Dashboard");
+        // return(
+        //     <RevenuePartnerDashboard />
+        // )
+    };
     const [isSearchingNetwork, setIsSearchingNetwork] = useState(false); //prudhvi
     const [netSearchInput, setNetSearchInput] = useState(""); //prudhvi
     const [networkAccessDrawerkVisible, setNetworkAccessDrawerVisible] = useState(false); //prudhvi

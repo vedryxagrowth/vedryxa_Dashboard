@@ -15,7 +15,7 @@ import { Carousel, Input, Button, Pagination, Row, Col, Typography, Result, Moda
 
 // import 'antd/dist/reset.css';
 import { CommentOutlined, CustomerServiceOutlined, MenuOutlined, InfoCircleOutlined, DownloadOutlined, SearchOutlined, ArrowLeftOutlined, ArrowRightOutlined, SmileOutlined, ReloadOutlined, CopyOutlined, StarOutlined, StarFilled, EditOutlined, CheckCircleFilled, CloseCircleFilled, MessageOutlined, SubnodeOutlined } from '@ant-design/icons';
-import { FloatButton, Tooltip } from 'antd';
+import { FloatButton, Tooltip, Popover } from 'antd';
 import Draggable from 'react-draggable';
 import StickyBox from 'react-sticky-box';
 // import FormControl from '@mui/material/FormControl';
@@ -96,7 +96,7 @@ const newtworkCollections = {
     "FB_System1": 'Facebook_System1',
     "FB_Rsoc": 'Facebook_Rsoc',
     "FB_Tonic": 'Facebook_Tonic',
-    "FB_DomainActive": "Facebook_DomainActive",
+    "FB_DomainActive": "Facebook_DActive",
     "FB_Bodies": "Facebook_Bodies",
     "FB_Bodies1": "Facebook_Bodies1",
     "Newsbreak_DA": "Newsbreak_DomainActive"
@@ -113,11 +113,11 @@ const MyTablePage = () => {
     const timeFromDashboard = params.get('time');
     const startDateFromDashboard = params.get('startDate');
     const endDateFromDashboard = params.get('endDate');
-    console.log(networkFromDashboard);
-    console.log(accountNumberFromDashboard);
-    console.log(timeFromDashboard);
-    console.log(startDateFromDashboard);
-    console.log(endDateFromDashboard);
+    // console.log(networkFromDashboard);
+    // console.log(accountNumberFromDashboard);
+    // console.log(timeFromDashboard);
+    // console.log(startDateFromDashboard);
+    // console.log(endDateFromDashboard);
 
     const { theme } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -130,18 +130,21 @@ const MyTablePage = () => {
             </Flex>
         </div>;
     }
-    console.log(userdetails, "userDetails");
+    if(userdetails?.role === "Revenue_Partner"){
+        redirect("/Dashboard");
+    }
+    // console.log(userdetails, "userDetails");
     // const [darkMode, setDarkMode] = useState(false);
     // console.log(userdetails._id, "id");
 
     const { adAccounts } = userdetails;
 
-    console.log(adAccounts, "addAccounts");
+    // console.log(adAccounts, "addAccounts");
 
     const networks = Object.keys(adAccounts);
 
     const yesterday = dayjs().subtract(1, 'days').format('YYYY-MM-DD');
-    console.log('Yesterday\'s date:', yesterday);
+    // console.log('Yesterday\'s date:', yesterday);
 
 
     // console.log(networks,"networks");
@@ -196,13 +199,27 @@ const MyTablePage = () => {
 
     const [dailyData, setdailyData] = useState([]);
 
+    const [keywordData, setKeywordData] = useState([]);
+
+    const [system1KeywordData, setSystem1KeywordData] = useState([]);
+
+    const [isSubmitted, setIsSubmitted] = useState(false);
+
+    const [isKeywordsTabActive, setIsKeywordsTabActive] = useState(""); // Track if the 'Keywords' tab is selected
+
+    const [isSystem1KeywordsTabActive, setIsSystem1KeywordsTabActive] = useState("");
+
     const [startDate, setStartDate] = useState(startDateFromDashboard ? startDateFromDashboard : yesterday);
+
+    const [newStartDate, setNewStartDate] = useState(startDateFromDashboard ? startDateFromDashboard : yesterday);
 
     const [endDate, setEndDate] = useState(endDateFromDashboard ? endDateFromDashboard : yesterday);
 
-    const [revenuePratner, setRevenuePartner] = useState(networkFromDashboard ? networkFromDashboard : [networks[0]]);
+    const [newendDate, setNewEndDate] = useState(endDateFromDashboard ? endDateFromDashboard : yesterday);
 
-    const [newRevenuePratner, setNewRevenuePartner] = useState(networkFromDashboard ? networkFromDashboard : [networks[0]]);
+    const [revenuePratner, setRevenuePartner] = useState(networkFromDashboard ? networkFromDashboard : networks[0]);
+
+    const [newRevenuePratner, setNewRevenuePartner] = useState(networkFromDashboard ? networkFromDashboard : networks[0]);
 
     const [isSearching, setIsSearching] = useState(false);
     const [inputValue, setInputValue] = useState('');
@@ -240,10 +257,10 @@ const MyTablePage = () => {
     // const [columnOrder, setColumnOrder] = useState(JSON.parse(localStorage.getItem("columnState")));
 
 
-    console.log(revenuePratner);
+    // console.log(revenuePratner);
     const accountsForAccess = adAccounts[revenuePratner];
-    console.log(accountsForAccess, "accounts Access");
-    console.log(accountsForAccess[0], "accountFor Access");
+    // console.log(accountsForAccess, "accounts Access");
+    // console.log(accountsForAccess[0], "accountFor Access");
 
     const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
 
@@ -254,6 +271,10 @@ const MyTablePage = () => {
     const [isLoading1, setLoading1] = useState(true);
 
     const [isLoading2, setLoading2] = useState(true);
+
+    const [isLoading3, setLoading3] = useState(true);
+
+    const [isLoading4, setLoading4] = useState(true);
 
     const [isTrue, setTrue] = useState(false);
 
@@ -302,6 +323,10 @@ const MyTablePage = () => {
 
     const gridRef2 = useRef();
 
+    const gridRef3 = useRef();
+
+    const gridRef4 = useRef();
+
     const [gridKey, setGridKey] = useState(0);
 
     const filterRef = useRef(null);
@@ -317,16 +342,30 @@ const MyTablePage = () => {
 
     const [fixedFooter, setFixedFooter] = useState([]);
 
+    const [sFixedFooter, setSFixedFooter] = useState([]);
+
     const isInitialLoad = useRef(true);
     //Modal States
     const [newColumnName, setNewColumnName] = useState('');
     const [formula, setFormula] = useState('');
 
-    const onChange1 = (currentSlide) => {
-        console.log(currentSlide);
-    };
+    // const onChange1 = (currentSlide) => {
+    //     console.log(currentSlide);
+    // };
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const [domainData, setDomainData] = useState([]);
+
+    const [domainColumnDefs, setDomainColumnDefs] = useState([]);
+
+    const [domainFixedFooter, setDomainFixedFooter] = useState([]);
+
+    const [BMNameData, setBMNameData] = useState([]);
+
+    const [BMNameColumnDefs, setBMNameColumnDefs] = useState([]);
+
+    const [BMNameFixedFooter, setBMNameFixedFooter] = useState([]);
     const showModal = () => {
         setIsModalOpen(true);
     };
@@ -358,8 +397,8 @@ const MyTablePage = () => {
                         const values = Object.values(params.data);
 
                         // Log the sanitized keys
-                        console.log('Original Keys:', originalKeys);
-                        console.log('Sanitized Keys:', sanitizedKeys);
+                        // console.log('Original Keys:', originalKeys);
+                        // console.log('Sanitized Keys:', sanitizedKeys);
 
                         const keyMapping = {};
                         sanitizedKeys.forEach((key, index) => {
@@ -386,7 +425,7 @@ const MyTablePage = () => {
                         const values = params.values;
 
                         // Log the values to be aggregated
-                        console.log('Values to aggregate:', values);
+                        // console.log('Values to aggregate:', values);
 
                         // Define how you want to aggregate these values.
                         // Example: You might want to sum them, average them, etc.
@@ -407,6 +446,7 @@ const MyTablePage = () => {
             setColumnDefs((prevDefs) => [...prevDefs, newColumnDef]);
             columnDefs1.current = [...columnDefs1.current, newColumnDef];
             columnDefs2.current = [...columnDefs2.current, newColumnDef];
+            columnDefs3.current = [...columnDefs3.current, newColumnDef];
 
             // Common function to update data
             const updateData = (prevData) => {
@@ -416,7 +456,7 @@ const MyTablePage = () => {
                         const originalKeys = Object.keys(row);
                         const sanitizedKeys = originalKeys.map(key => key.replace(/[^a-zA-Z_$0-9]/g, '_'));
                         const values = Object.values(row);
-                        console.log(values, "values1");
+                        // console.log(values, "values1");
 
                         const keyMapping = {};
                         sanitizedKeys.forEach((key, index) => {
@@ -438,6 +478,8 @@ const MyTablePage = () => {
             setRowData((prevData) => updateData(prevData));
             setdailyData((prevData) => updateData(prevData));
             setCampaignData((prevData) => updateData(prevData));
+            setKeywordData((prevData) => updateData(prevData));
+            setSystem1KeywordData((prevData) => updateData(prevData));
 
         } catch (error) {
             console.error('Error adding column:', error);
@@ -483,7 +525,7 @@ const MyTablePage = () => {
                 name: 'Reset Columns (Custom)',
                 action: () => {
                     // Your custom logic here
-                    console.log('Custom Reset Columns logic');
+                    // console.log('Custom Reset Columns logic');
                     updatingColumnsStructure(columnStructure)
                     // setTimeout(() => {
                     //     window.location.reload();
@@ -501,6 +543,12 @@ const MyTablePage = () => {
         }
 
         return defaultItems;
+    };
+
+    const average = (params) => {
+        const total = params.values.reduce((acc, value) => acc + parseFloat(value || 0), 0);
+        const count = params.values.filter(value => value !== null && value !== undefined).length;  // Count non-null/undefined values
+        return count > 0 ? Math.round((total / count) * 100) / 100 : 0;  // Avoid division by zero
     };
 
     const liveSpender = (params) => {
@@ -788,6 +836,25 @@ const MyTablePage = () => {
         return sum;
     };
 
+    const marginFormatter = (params) => {
+        return `${parseFloat(params.value || 0).toFixed(2)}%`; // Ensure 2 decimal places in currency format
+    };
+
+    const rpcCplFormatter = (params) => {
+        const value = params.value;
+        return isNaN(value) || !isFinite(value) ? '0' : parseFloat(value).toFixed(2);
+    };
+
+    const avgRpcCpl = (params) => {
+        const validValues = params.values.filter(value => !isNaN(value) && isFinite(value));
+        if (validValues.length === 0) {
+            return 0;
+        }
+        const sum = validValues.reduce((acc, value) => acc + value, 0);
+        const average = sum / validValues.length;
+        return parseFloat(average);
+    };
+
 
     // (["campaignName", 
     // "adsetname",
@@ -979,9 +1046,9 @@ const MyTablePage = () => {
     //     return `$${value}`; // Format the value as currency
     // }
 
-    const onChangeSpendAndStatus = () => {
-        console.log("hi hello one");
-    };
+    // const onChangeSpendAndStatus = () => {
+    //     console.log("hi hello one");
+    // };
 
     const isYesterday = () => {
         const startDate1 = moment(startDate); // Convert to moment object
@@ -1050,7 +1117,7 @@ const MyTablePage = () => {
                 const onChangeSpendAndStatus = async () => {
                     // Check if it's a group footer row (for groupIncludeFooter)
                     if (params?.node?.footer) {
-                        console.log("This is a groupIncludeFooter row. Modal will not open.");
+                        // console.log("This is a groupIncludeFooter row. Modal will not open.");
                         return; // Prevent modal from opening for group footer rows
                     }
 
@@ -1092,14 +1159,14 @@ const MyTablePage = () => {
                         budget: changeBudget * 100,
                         status: campaignStatus
                     };
-                    console.log(object);
+                    // console.log(object);
                     const requestResponse = await axios.post('https://prodapis.adsgoat.in/Comments/accountNumber/campaign', { formattedData: object }, {
                         headers: {
                             Authorization: token,
                         },
                     });
                     const responseData = requestResponse.data;
-                    console.log(responseData, "response");
+                    // console.log(responseData, "response");
                     message.success("Budget and Status Updated");
                     changeRRefrst();
                 };
@@ -1125,7 +1192,7 @@ const MyTablePage = () => {
                     setCampaignStatus((prev) => !prev);
                 }
 
-                console.log(groupedData);
+                // console.log(groupedData);
 
                 return (
                     <div>
@@ -1531,7 +1598,6 @@ const MyTablePage = () => {
         },
     };
 
-
     const columnDefsObject1 = {
         campaignname: {
             headerName: 'CampaignName',
@@ -1544,9 +1610,9 @@ const MyTablePage = () => {
             pinned: 'left',
             enableRowGroup: true,
             onClick: (event) => {
-                console.log(event, "event");
-                console.log('Group row clicked:', event);
-                console.log(event);
+                // console.log(event, "event");
+                // console.log('Group row clicked:', event);
+                // console.log(event);
                 const url = `/history/${event}-${account}-${time}`;
                 window.open(url, '_blank');
             },
@@ -1573,7 +1639,7 @@ const MyTablePage = () => {
                 const onChangeSpendAndStatus = async () => {
                     // Check if it's a group footer row (for groupIncludeFooter)
                     if (params?.node?.footer) {
-                        console.log("This is a groupIncludeFooter row. Modal will not open.");
+                        // console.log("This is a groupIncludeFooter row. Modal will not open.");
                         return; // Prevent modal from opening for group footer rows
                     }
 
@@ -1598,7 +1664,7 @@ const MyTablePage = () => {
                         }
                         else {
                             setGroupedData(groupedData);
-                            console.log("dailyadd");
+                            // console.log("dailyadd");
                         }
                         // Set the grouped data for the modal
                         setIsModalVisible(true); // Show the modal for non-footer rows
@@ -1623,7 +1689,7 @@ const MyTablePage = () => {
                         },
                     });
                     const responseData = requestResponse.data;
-                    console.log(responseData, "response");
+                    // console.log(responseData, "response");
                     message.success("Budget and Status Updated");
                     changeRRefrst();
                 };
@@ -1650,7 +1716,7 @@ const MyTablePage = () => {
                 }
 
 
-                console.log(groupedData);
+                // console.log(groupedData);
 
                 return (
                     <div>
@@ -1860,9 +1926,9 @@ const MyTablePage = () => {
             // lockposition: true,
             enableRowGroup: true,
             onClick: (event) => {
-                console.log(event, "event");
-                console.log('Group row clicked:', event);
-                console.log(event);
+                // console.log(event, "event");
+                // console.log('Group row clicked:', event);
+                // console.log(event);
                 // const url = `/history/${event}-${account}-${time}`;
                 // window.open(url, '_blank');
 
@@ -1901,7 +1967,7 @@ const MyTablePage = () => {
                 const onChangeSpendAndStatus = async () => {
                     // Check if it's a group footer row (for groupIncludeFooter)
                     if (params?.node?.footer) {
-                        console.log("This is a groupIncludeFooter row. Modal will not open.");
+                        // console.log("This is a groupIncludeFooter row. Modal will not open.");
                         return; // Prevent modal from opening for group footer rows
                     }
 
@@ -1943,14 +2009,14 @@ const MyTablePage = () => {
                         budget: changeBudget * 100,
                         status: campaignStatus
                     };
-                    console.log(object);
+                    // console.log(object);
                     const requestResponse = await axios.post('https://prodapis.adsgoat.in/Comments/accountNumber/campaign', { formattedData: object }, {
                         headers: {
                             Authorization: token,
                         },
                     });
                     const responseData = requestResponse.data;
-                    console.log(responseData, "response");
+                    // console.log(responseData, "response");
                     message.success("Budget and Status Updated");
                     changeRRefrst();
                 };
@@ -1976,7 +2042,7 @@ const MyTablePage = () => {
                     setCampaignStatus((prev) => !prev);
                 }
 
-                console.log(groupedData);
+                // console.log(groupedData);
 
                 return (
                     <div>
@@ -2143,6 +2209,506 @@ const MyTablePage = () => {
         'mnet-hour': { headerName: 'M-H', field: 'mnet-hour', width: 85, sortable: true, hide: true, filter: "agTextColumnFilter", },
     };
 
+    const KeywordCellRenderer = ({ params }) => {
+        const [tooltipText, setTooltipText] = useState("Copy to clipboard");
+    
+        const keyword = params.value;
+        const adId = params.data?.adId; 
+    
+        const handleCopy = () => {
+            navigator.clipboard.writeText(adId).then(() => {
+                setTooltipText("Copied!");
+                setTimeout(() => setTooltipText("Copy to clipboard"), 2000); 
+            }).catch(() => {
+                alert('Failed to copy!');
+            });
+        };
+    
+        const popoverContent = (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>{adId}</span>
+                <Tooltip title={tooltipText}>
+                    <CopyOutlined
+                        onClick={handleCopy}
+                        style={{
+                            cursor: 'pointer',
+                            fontSize: '16px',
+                            // color: '#007BFF'
+                        }}
+                    />
+                </Tooltip>
+            </div>
+        );
+    
+        return (
+            <Popover
+                content={popoverContent}
+                trigger="hover" 
+                placement="topLeft" 
+                // title="Ad ID"
+            >
+                <span style={{ cursor: 'pointer' }}>
+                    {keyword}
+                </span>
+            </Popover>
+        );
+    };
+
+    const columnDefsObject3 = {
+        campaignname: {
+            headerName: 'CampaignName',
+            field: 'campaignname',
+            resizable: true,
+            sortable: true,
+            width: 500,
+            hide: true,
+            rowGroup: true,
+            pinned: 'left',
+            enableRowGroup: true,
+            onClick: (event) => {
+                // console.log(event, "event");
+                // console.log('Group row clicked:', event);
+                // console.log(event);
+                const url = `/history/${event}-${account}-${time}`;
+                window.open(url, '_blank');
+            },
+            cellRenderer: campaignNameRenderer,
+        },
+        keyword: {
+            headerName: 'Keywords',
+            field: 'keyword',
+            sortable: true,
+            filter: 'agTextColumnFilter',
+            resizable: true,
+            minWidth: 350, 
+            cellStyle: { textAlign: 'left' },
+            cellRenderer: (params) => <KeywordCellRenderer params={params} />,
+        },
+        searchKeyword: {
+            headerName: 'S_Keywords',
+            field: 'searchKeyword',
+            sortable: true,
+            filter: 'agTextColumnFilter',
+            minWidth: 350,
+            resizable: true,
+            cellStyle: { textAlign: 'left' },
+            cellRenderer: (params) => {
+                return params.value;
+            },
+            // Include this column only in expanded rows
+        },
+        // adId: {
+        //     headerName: 'Ad ID',
+        //     field: 'adId',
+        //     sortable: true,
+        //     filter: 'agTextColumnFilter',
+        //     hide: true, // Hide since we handle this in the keyword tooltip
+        // },
+        // keyword: {
+        //     headerName: 'Keywords',
+        //     field: 'keyword',
+        //     sortable: true,
+        //     filter: 'agTextColumnFilter',
+        //     width: 300,
+        //     resizable: true,
+        //     cellRenderer: (params) => {
+        //         return params.value;
+        //     },
+        //     // Include this column only in expanded rows
+        // },
+        adId: { 
+            headerName: 'adId', 
+            field: 'adId', 
+            sortable: true, 
+            filter: "agTextColumnFilter", 
+            hide: false 
+        },
+        actions: {
+            headerName: 'Actions',
+            field: 'actions',
+            minWidth: 90,
+            sortable: false,    // Ensure sorting is disabled
+            filter: false,      // Ensure filtering is disabled
+            enableSorting: false,  // Disable sorting at the column level
+            enableFilter: false,
+            hide: false,
+            suppressMenu: true,
+            hide: !isYesterday(),
+            cellRenderer: (params) => {
+                const [isModalVisible, setIsModalVisible] = useState(false);
+                const [newgroupedData, setNewGroupedData] = useState([]);
+                const [groupedData, setGroupedData] = useState([]);
+                const [changeBudget, onChangeBudget] = useState();
+                const [campaignStatus, setCampaignStatus] = useState(true);
+
+                const onChangeSpendAndStatus = async () => {
+                    // Check if it's a group footer row (for groupIncludeFooter)
+                    if (params?.node?.footer) {
+                        // console.log("This is a groupIncludeFooter row. Modal will not open.");
+                        return; // Prevent modal from opening for group footer rows
+                    }
+
+                    // Ensure allLeafChildren exists and is an array before proceeding
+                    const allLeafChildren = params.node?.allLeafChildren || [];
+                    setNewGroupedData(groupedData);
+
+                    // Fetch all the rows under the current group
+                    const groupedData = allLeafChildren.map(node => node.data) || [];
+
+                    // Only show the modal if there is data (groupedData length is greater than 0)
+                    if (groupedData.length > 0) {
+                        const getCampaignResponse = await axios.get(`https://prodapis.adsgoat.in/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`, {
+                            headers: {
+                                Authorization: token,
+                            },
+                        });
+                        if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
+                            setGroupedData(getCampaignResponse.data);
+                            setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
+                            onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
+                        }
+                        else {
+                            setGroupedData(groupedData);
+                            // console.log("dailyadd");
+                        }
+                        // Set the grouped data for the modal
+                        setIsModalVisible(true); // Show the modal for non-footer rows
+                    }
+                };
+
+                const handleOk = async () => {
+                    setIsModalVisible(false); // Close the modal
+                    const object = {
+                        campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname : groupedData[0]?.campaignname,
+                        adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
+                        campaignid: !Array.isArray(groupedData) ? groupedData?.campaignid : groupedData[0]?.campaignid,
+                        usercommit: userdetails?.email,
+                        accountNumber: newaccount,
+                        budget: changeBudget * 100,
+                        status: campaignStatus
+                    };
+                    // console.log(object);
+                    const requestResponse = await axios.post('https://prodapis.adsgoat.in/Comments/accountNumber/campaign', { formattedData: object }, {
+                        headers: {
+                            Authorization: token,
+                        },
+                    });
+                    const responseData = requestResponse.data;
+                    // console.log(responseData, "response");
+                    message.success("Budget and Status Updated");
+                    changeRRefrst();
+                };
+
+                const handleCancel = () => {
+                    setIsModalVisible(false);
+                    // console.log(changeBudget); // Close the modal
+                };
+
+                const getTotalSpend = (data) => {
+                    if (!data || data.length === 0) return 0;
+                    const total = data.reduce((total, item) => {
+                        return total + (item?.spend || 0);
+                    }, 0);
+                    return Math.round(total * 100) / 100; // Round to 2 decimal places
+                };
+
+                const onChangeBudgetValue = event => {
+                    onChangeBudget(event.target.value)
+                }
+
+                const onChangeCampaignStatus = () => {
+                    setCampaignStatus((prev) => !prev);
+                }
+
+
+                // console.log(groupedData);
+
+                return (
+                    <div>
+                        {/* Click action for status cell */}
+                        <div onClick={onChangeSpendAndStatus}>
+                            <span>{params.value || "..."}</span> {/* Fallback to '...' if status is not available */}
+                        </div>
+                        {/* Modal should only be shown for non-footer rows and when groupedData length is greater than 0 */}
+                        {isModalVisible && (
+                            <Modal
+                                title={groupedData?.length > 0 && groupedData?.length !== 0 ? groupedData[0]?.campaignname : groupedData?.campaignname}
+                                visible={isModalVisible}
+                                onOk={handleOk}
+                                onCancel={handleCancel}
+                                width={600}  // Set a custom width for the modal
+                                style={{ padding: '20px' }}  // Adjust body padding
+                            >
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                    {/* Campaign Name and Switch */}
+                                    {/* <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <Typography.Text strong>Campaign Name:</Typography.Text>
+                                        <Typography.Text strong style={{ paddingLeft: '5px' }}>
+                                            {`${groupedData[0]?.campaignname || "N/A"}`}
+                                        </Typography.Text>
+                                    </div> */}
+                                    <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                                        <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
+                                        <Switch checked={campaignStatus} onChange={onChangeCampaignStatus} />
+                                    </div>
+
+                                    {/* Input Field */}
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <Typography.Text strong style={{ marginBottom: '10px' }}>Budget:</Typography.Text>
+                                        <Input placeholder="Enter your value here" defaultValue={groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData)} onChange={onChangeBudgetValue} />
+                                    </div>
+
+                                    {/* Campaign ID */}
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <Typography.Text strong>Campaign ID:</Typography.Text>
+                                        <p>{groupedData?.length > 0 && groupedData?.length !== 0 ? groupedData[0]?.campaignid : groupedData.campaignid}</p>
+                                    </div>
+                                </div>
+                            </Modal>
+                        )}
+                    </div>
+                );
+            },
+            filterParams: { filterEnabled: false },
+
+        },
+
+        adsetname: {
+            headerName: 'AdsetName', field: 'adsetname',
+            // resizeble: true,
+            sortable: true,
+            width: 350,
+            filter: 'agSetColumnFilter',
+            filterParams: {
+                comparator: (a, b) => a.localeCompare(b),
+                suppressAndOrCondition: true,
+            },
+            // hide: true,
+            // // resizable:false,
+            // rowGroup: true,
+            // filter: true,
+            // pinned: 'left',
+            // enableRowGroup: true,
+            // autoHeight: true, 
+        },
+        date: {
+            headerName: 'Date', field: 'date', width: 120, sortable: true,
+            filter: "agDateColumnFilter",
+            filterParams: {
+                comparator: (filterLocalDateAtMidnight, cellValue) => {
+                    const dateAsString = cellValue;
+                    if (dateAsString == null) return -1;
+                    const dateParts = dateAsString.split("/");
+                    const cellDate = new Date(
+                        Number(dateParts[2]),
+                        Number(dateParts[1]) - 1,
+                        Number(dateParts[0])
+                    );
+
+                    if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
+                        return 0;
+                    }
+
+                    if (cellDate < filterLocalDateAtMidnight) {
+                        return -1;
+                    }
+
+                    if (cellDate > filterLocalDateAtMidnight) {
+                        return 1;
+                    }
+                    return 0;
+                }
+            }
+        },
+        'fb-hour': { headerName: 'F-H', field: 'fb-hour', width: 85, sortable: true, hide: true, filter: 'agNumberColumnFilter' },
+        'mnet-hour': { headerName: 'M-H', field: 'mnet-hour', width: 85, sortable: true, hide: true, filter: 'agNumberColumnFilter' },
+        spend: {
+            headerName: 'Spend($)',
+            field: 'spend',
+            width: 120,
+            aggFunc: liveSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            valueFormatter: currencyFormatter, // Format display as currency
+            comparator: numberComparator,
+        },
+        revenue: {
+            headerName: 'Revenue($)',
+            field: 'revenue',
+            width: 120,
+            aggFunc: liveSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            valueFormatter: currencyFormatter,
+            comparator: numberComparator,
+        },
+        profit: {
+            headerName: 'Profit($)',
+            field: 'profit',
+            width: 120,
+            aggFunc: liveSpender,
+            sortable: true,
+            cellClassRules: {
+                'font-red': p => p.value < 0 // Conditional formatting for negative profit
+            },
+            filter: "agNumberColumnFilter",
+            valueFormatter: currencyFormatter,
+            comparator: numberComparator,
+        },
+        margin: {
+            headerName: 'Margin(%)', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: 'Profit/Revenue', filter: 'agNumberColumnFilter',
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+
+        },
+        fbleads: { headerName: 'FbLeads', field: 'fbleads', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
+        conversions: { headerName: 'Conversions', field: 'conversions', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
+        cpc: {
+            headerName: 'cpc', field: 'cpc',
+            aggFunc: (params) => {
+                const sum = params.values.reduce((sum, value) => sum + parseFloat(value), 0);
+                return sum / params.values.length;
+            },
+            valueFormatter: params => params.value !== undefined ? Math.round(params.value * 100) / 100 : '',
+            sortable: true, filter: 'agNumberColumnFilter'
+
+        },
+        fbclicks: { headerName: 'FbClicks', field: 'fbclicks', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
+        impressions: { headerName: 'Impressions', field: 'impressions', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
+        ctr: {
+            headerName: 'Ctr', field: 'ctr', valueGetter: getCtr, sortable: true,
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+        },
+        rpc: { headerName: 'Rpc', field: 'rpc', valueGetter: getRpc, sortable: true, filter: 'agNumberColumnFilter' },
+        cpl: { headerName: 'Cpl', field: 'cpl', valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter' },
+        ncpl: { headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter' },
+        fmargin: {
+            headerName: 'Fmargin(%)', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: true,
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+        },
+        roi: {
+            headerName: 'ROI(%)', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: 'Profit/Spend', filter: true,
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+        },
+        adsetid: { headerName: 'AdsetId', field: 'adsetid', sortable: true, filter: "agTextColumnFilter", hide: false },
+        campaignid: { headerName: 'CampaignId', field: 'campaignid', sortable: true, filter: "agTextColumnFilter", },
+        timezone: { headerName: 'TimeZone', field: 'timezone', sortable: true, hide: true, filter: "agTextColumnFilter", },
+    };
+
+    const columnDefsObject4 = [
+        {
+            headerName: 'Domain',
+            field: 'domain',
+            sortable: true,
+            filter: 'agTextColumnFilter',
+            resizable: false,
+            width: 350, // Fixed width for Domain column
+            cellStyle: { textAlign: 'left' },
+            rowGroup: true, // Grouping by DOMAIN
+            hide: true, // Hide this column in the grid, but it will still be used for grouping
+        },
+        {
+            headerName: 'Keyword',
+            field: 'keyword',
+            sortable: true,
+            filter: 'agTextColumnFilter',
+            resizable: true,
+            minWidth: 350,
+            cellStyle: { textAlign: 'left' },
+        },
+        {
+            headerName: 'Date',
+            field: 'date',
+            width: 120,
+            sortable: true,
+            filter: 'agDateColumnFilter',
+            filterParams: {
+                comparator: (filterLocalDateAtMidnight, cellValue) => {
+                    const cellDate = new Date(cellValue); // Convert date string to Date object
+                    if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) return 0;
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
+                    return 0;
+                },
+            },
+        },
+        {
+            headerName: 'Revenue',
+            field: 'revenue',
+            sortable: true,
+            filter: 'agNumberColumnFilter',
+            resizable: true,
+            valueFormatter: (params) => params.value ? `$${params.value.toFixed(2)}` : '$0.00',
+            width: 200,
+            aggFunc: 'sum',
+        },
+        {
+            headerName: 'Vertical',
+            field: 'vertical',
+            sortable: true,
+            filter: 'agTextColumnFilter',
+            resizable: true,
+            minWidth: 250,
+        },
+        {
+            headerName: 'Country',
+            field: 'country',
+            sortable: true,
+            filter: 'agTextColumnFilter',
+            resizable: true,
+            minWidth: 150,
+        },
+        {
+            headerName: 'Device Type',
+            field: 'deviceType',
+            sortable: true,
+            filter: 'agTextColumnFilter',
+            resizable: true,
+            minWidth: 200,
+        },
+        {
+            headerName: 'Searches',
+            field: 'searches',
+            sortable: true,
+            filter: 'agNumberColumnFilter',
+            resizable: true,
+            width: 150,
+            aggFunc: 'sum',
+        },
+        {
+            headerName: 'Clicks',
+            field: 'clicks',
+            sortable: true,
+            filter: 'agNumberColumnFilter',
+            resizable: true,
+            width: 150,
+            aggFunc: 'sum',
+        },
+    ];
+
     const getColumnDefs = (order) => {
         return order?.map(colKey => columnDefsObject[colKey]);
     };
@@ -2157,11 +2723,20 @@ const MyTablePage = () => {
         return order?.map(colKey => columnDefsObject2[colKey]);
     };
 
+    const getColumnDefs3 = (order) => {
+        // console.log(order);
+        const orderItems = order?.map(colKey => columnDefsObject3[colKey]);
+        const newOrderItems = [columnDefsObject3["keyword"], columnDefsObject3["searchKeyword"],  ...orderItems, columnDefsObject3["adId"]];
+        return newOrderItems;
+    };
+
     const [columnDefs, setColumnDefs] = useState();
 
     const columnDefs1 = useRef();
 
     const columnDefs2 = useRef();
+
+    const columnDefs3 = useRef();
 
     var token = localStorage.getItem("token")
 
@@ -2180,6 +2755,7 @@ const MyTablePage = () => {
         setColumnDefs(getColumnDefs(updateDataArray));
         columnDefs1.current = (getColumnDefs1(updateDataArray));
         columnDefs2.current = (getColumnDefs2(updateDataArray));
+        columnDefs3.current = (getColumnDefs3(updateDataArray));
         // const data = await fetchData.json();
         // const mainData = await data;
         // console.log(mainData.rows, "rows");
@@ -2195,7 +2771,7 @@ const MyTablePage = () => {
             return hourAsNumber > max ? hourAsNumber : max;
         }, -Infinity);  // Initialize with -Infinity to ensure proper comparison
 
-        console.log("Maximum hour:", String(maxHour).padStart(2, '0'));  // Format it back to string with leading zero if necessary
+        // console.log("Maximum hour:", String(maxHour).padStart(2, '0'));  // Format it back to string with leading zero if necessary
         return String(maxHour).padStart(2, '0');  // Return the max hour as a string with leading zero
     }
 
@@ -2214,18 +2790,85 @@ const MyTablePage = () => {
         const fetchData = await axios.get(`https://prodapis.adsgoat.in/api/singleUserData?email=${userdetails.email}`);
         // const data = await fetchData.json();
         const mainData = fetchData.data;
-        console.log(mainData.columnStructure, "columnStructure");
+        // console.log(mainData.columnStructure, "columnStructure");
         // setRowStructure(mainData.rows); 
         setColumnDefs(getColumnDefs(mainData.columnStructure));
         columnDefs1.current = getColumnDefs2(mainData.columnStructure);
         columnDefs2.current = (getColumnDefs2(mainData.columnStructure))
+        columnDefs3.current = (getColumnDefs3(mainData.columnStructure))
     }
+
+    function groupAndCalculateProfit(data) {
+        const groupedData = data.reduce((acc, item) => {
+            const key = `${item.domain}-${item[`${newtime}Date`]}`;
+            
+            if (!acc[key]) {
+                acc[key] = {
+                    domain: item.domain,
+                    [`${newtime}Date`]: item[`${newtime}Date`],
+                    estimated_revenue: 0,
+                    spend: 0,
+                    conversions: 0,
+                    fbLeads: 0,
+                };
+            }
+    
+            acc[key].estimated_revenue += item.estimated_revenue;
+            acc[key].spend += parseFloat(item.spend);
+            acc[key].conversions += item.conversions || 0;  // Default to 0 if undefined
+            acc[key].fbLeads += parseInt(item.fbLeads) || 0;        // Default to 0 if undefined
+    
+            return acc;
+        }, {});
+    
+        return Object.values(groupedData).map(item => ({
+            ...item,
+            profit: item.estimated_revenue - item.spend,
+            margin: item.estimated_revenue > 0 ? ((item.estimated_revenue - item.spend) / item.estimated_revenue) * 100 : 0,
+            rpc: item.conversions > 0 ? (item.estimated_revenue / item.conversions) : 0, // Revenue per Conversion
+            cpl: item.fbLeads > 0 ? (item.spend / item.fbLeads) : 0,  // Cost per Lead
+        }));
+    }
+
+    function groupAndCalculateBMName(data) {
+        const groupedData = data.reduce((acc, item) => {
+            const key = `${item.BMName}-${item[`${newtime}Date`]}`;
+            
+            if (!acc[key]) {
+                acc[key] = {
+                    BMName: item.BMName,
+                    [`${newtime}Date`]: item[`${newtime}Date`],
+                    estimated_revenue: 0,
+                    spend: 0,
+                    conversions: 0,
+                    fbLeads: 0,
+                };
+            }
+    
+            acc[key].estimated_revenue += item.estimated_revenue;
+            acc[key].spend += parseFloat(item.spend);
+            acc[key].conversions += item.conversions || 0;  // Default to 0 if undefined
+            acc[key].fbLeads += parseInt(item.fbLeads) || 0;        // Default to 0 if undefined
+    
+            return acc;
+        }, {});
+    
+        return Object.values(groupedData).map(item => ({
+            ...item,
+            profit: item.estimated_revenue - item.spend,
+            margin: item.estimated_revenue > 0 ? ((item.estimated_revenue - item.spend) / item.estimated_revenue) * 100 : 0,
+            rpc: item.conversions > 0 ? (item.estimated_revenue / item.conversions) : 0, // Revenue per Conversion
+            cpl: item.fbLeads > 0 ? (item.spend / item.fbLeads) : 0,  // Cost per Lead
+        }));
+    }
+    
 
     const functionCall1 = async () => {
         if (!token) {
             console.error("Token not available. Please log in.");
             return;  // Stop execution if token is missing
         }
+        // console.log(newRevenuePratner);
         const fetchData = await axios.get(`https://prodapis.adsgoat.in/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`, {
             headers: {
                 Authorization: token,
@@ -2233,6 +2876,211 @@ const MyTablePage = () => {
         });
         const mainData = fetchData.data;
         let campaignComments = [];
+
+        if (fetchData.status === 200 && mainData.length > 0 && newRevenuePratner === "FB_Mnet") {
+            const groupAndCalculateProfit1 = groupAndCalculateProfit(mainData);
+
+            setDomainData(groupAndCalculateProfit1);
+
+            setDomainColumnDefs([
+                {
+                    field:'domain',
+                    headerName:'Domain',
+                    minWidth: 400,
+                    // resizable: true,
+                    sortable: true,
+                    hide: true, // Hide column as it's grouped
+                    rowGroup: true,
+                    enableRowGroup: true,
+                    flex: 8
+    
+                },
+                {
+                    field: `${newtime}Date`,
+                    headerName: 'Date',
+                    flex: 6,
+                    minWidth: 200,
+                    filter: true,
+                },
+                {
+                    field: "spend",
+                    resizable: true,
+                    sortable: true,
+                    filter: true,
+                    minWidth: 150,
+                    aggFunc:spender,
+                    valueFormatter: currencyFormatter
+                },
+                {
+                    field: "estimated_revenue",
+                    headerName: "Revenue",
+                    resizable: true,
+                    sortable: true,
+                    filter: true,
+                    minWidth: 150,
+                    aggFunc:spender,
+                    valueFormatter: currencyFormatter
+                },
+                { 
+                    field: 'profit', 
+                    resizable: true,
+                    sortable: true,
+                    minWidth: 150,
+                    cellClassRules: {
+                        'font-red': p => p.value < 0
+                    },
+                    aggFunc:spender,
+                    filter: true,
+                    valueFormatter: currencyFormatter
+                },
+                {
+                    field: "margin",
+                    headerName:'Margin(%)',
+                    aggFunc: average,
+                    cellClassRules: {
+                        'font-red': p => p.value < 0
+                    },
+                    minWidth: 150,
+                    valueFormatter: marginFormatter,
+                    filter: true,
+                },
+                {
+                    field: 'rpc',
+                    headerName: 'RPC',
+                    aggFunc: avgRpcCpl,
+                    valueFormatter: rpcCplFormatter,
+                    minWidth: 100,
+                    flex: 3,
+                    filter: true,
+                },
+                {
+                    field: 'cpl',
+                    headerName: 'CPL',
+                    aggFunc: avgRpcCpl,
+                    valueFormatter: rpcCplFormatter,
+                    minWidth: 100,
+                    flex: 3,
+                    filter: true,
+                }
+            ]);
+            setDomainFixedFooter([
+                {
+                    // domain:'Totals',
+                    [`${newtime}Date`]: 'Totals',
+                    spend: parseFloat(groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0).toFixed(2)),
+                    estimated_revenue: parseFloat(groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.estimated_revenue), 0).toFixed(2)),
+                    profit: parseFloat(groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0).toFixed(2)),
+                    margin: parseFloat((groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr.estimated_revenue), 0) * 100).toFixed(2)),
+                    rpc: parseFloat((groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / groupAndCalculateProfit1?.length).toFixed(2)),
+                    cpl: parseFloat((groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / groupAndCalculateProfit1?.length).toFixed(2)),
+                    conversions: parseFloat(groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
+                    // clicks: parseFloat(groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.clicks), 0).toFixed(2)),
+                    // impressions: parseFloat(groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
+                }
+            ]);
+            // console.log(groupAndCalculateProfit1);
+        }
+
+        if(fetchData.status === 200 && mainData.length > 0){
+            const groupAndCalculateBMName1 = groupAndCalculateBMName(mainData);
+            setBMNameData(groupAndCalculateBMName1);
+            setBMNameColumnDefs([
+                {
+                    field:'BMName',
+                    headerName:'BMName',
+                    minWidth: 400,
+                    // resizable: true,
+                    sortable: true,
+                    hide: true, // Hide column as it's grouped
+                    rowGroup: true,
+                    enableRowGroup: true,
+                    flex: 9
+    
+                },
+                {
+                    field: `${newtime}Date`,
+                    headerName: 'Date',
+                    flex: 6,
+                    minWidth: 200,
+                    filter: true,
+                },
+                {
+                    field: "spend",
+                    resizable: true,
+                    sortable: true,
+                    filter: true,
+                    minWidth: 150,
+                    aggFunc:spender,
+                    valueFormatter: currencyFormatter
+                },
+                {
+                    field: "estimated_revenue",
+                    headerName: "Revenue",
+                    resizable: true,
+                    sortable: true,
+                    filter: true,
+                    minWidth: 150,
+                    aggFunc:spender,
+                    valueFormatter: currencyFormatter
+                },
+                { 
+                    field: 'profit', 
+                    resizable: true,
+                    sortable: true,
+                    minWidth: 150,
+                    cellClassRules: {
+                        'font-red': p => p.value < 0
+                    },
+                    aggFunc:spender,
+                    filter: true,
+                    valueFormatter: currencyFormatter
+                },
+                {
+                    field: "margin",
+                    headerName:'Margin(%)',
+                    aggFunc: average,
+                    cellClassRules: {
+                        'font-red': p => p.value < 0
+                    },
+                    minWidth: 150,
+                    valueFormatter: marginFormatter,
+                    filter: true,
+                },
+                {
+                    field: 'rpc',
+                    headerName: 'RPC',
+                    aggFunc: avgRpcCpl,
+                    valueFormatter: rpcCplFormatter,
+                    minWidth: 100,
+                    flex: 3,
+                    filter: true,
+                },
+                {
+                    field: 'cpl',
+                    headerName: 'CPL',
+                    aggFunc: avgRpcCpl,
+                    valueFormatter: rpcCplFormatter,
+                    minWidth: 100,
+                    flex: 3,
+                    filter: true,
+                }
+            ]);
+            setBMNameFixedFooter([
+                {
+                    // domain:'Totals',
+                    [`${newtime}Date`]: 'Totals',
+                    spend: parseFloat(groupAndCalculateBMName1?.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0).toFixed(2)),
+                    estimated_revenue: parseFloat(groupAndCalculateBMName1?.reduce((acc, curr) => acc + parseFloat(curr?.estimated_revenue), 0).toFixed(2)),
+                    profit: parseFloat(groupAndCalculateBMName1?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0).toFixed(2)),
+                    margin: parseFloat((groupAndCalculateBMName1?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / groupAndCalculateBMName1?.reduce((acc, curr) => acc + parseFloat(curr.estimated_revenue), 0) * 100).toFixed(2)),
+                    rpc: parseFloat((groupAndCalculateBMName1?.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / groupAndCalculateBMName1?.length).toFixed(2)),
+                    cpl: parseFloat((groupAndCalculateBMName1?.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / groupAndCalculateBMName1?.length).toFixed(2)),
+                    conversions: parseFloat(groupAndCalculateBMName1?.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
+                    // clicks: parseFloat(groupAndCalculateBMName1?.reduce((acc, curr) => acc + parseFloat(curr?.clicks), 0).toFixed(2)),
+                    // impressions: parseFloat(groupAndCalculateBMName1?.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
+                }
+            ]);
+        }
         if (fetchData.status === 200 && mainData.length > 0) {
             try {
                 const commentFetch = await axios.get(`https://prodapis.adsgoat.in/Comments/${account}`, {
@@ -2354,6 +3202,7 @@ const MyTablePage = () => {
         setLoading(false);
 
     }
+
     // const functionCall1 = async () => {
     //     const fetchData = await axios.get(`https://prodapis.adsgoat.in/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${account}&timezone=${time}&network=${newtworkCollections[revenuePratner]}`, {
     //         headers: {
@@ -2446,7 +3295,7 @@ const MyTablePage = () => {
                 },
             });
             const mainData = fetchData.data;
-            console.log(mainData, "mainData of functionCall2");
+            // console.log(mainData, "mainData of functionCall2");
             let totalSpend = 0;
             let totalRevenue = 0;
             let totalProfit = 0;
@@ -2456,7 +3305,7 @@ const MyTablePage = () => {
             let totalImpressions = 0;
             let totalConversions = 0;
             const specifiedTimeZone = selectTimezone[time];
-            console.log(mainData[0], "one");
+            // console.log(mainData[0], "one");
             const totalRow = mainData && mainData.length > 0 ?
                 mainData.map((eachData) => {
                     const Revenue = eachData.estimated_revenue !== undefined ? (eachData.estimated_revenue) : 0;
@@ -2511,7 +3360,7 @@ const MyTablePage = () => {
                     ncpl = !isNaN(ncpl) ? ncpl : 0;
                     fMargin = !isNaN(fMargin) ? `${fMargin}%` : '0%';
 
-                    console.log(eachData.campaign_name, "campaign_name");
+                    // console.log(eachData.campaign_name, "campaign_name");
                     return (
                         {
                             campaignname: eachData.campaign_name,
@@ -2543,10 +3392,10 @@ const MyTablePage = () => {
                     )
                 }) : null;
             // console.log(filteredData[0],"one");
-            console.log(filteredData, "filter");
+            // console.log(filteredData, "filter");
 
             const fullData = filteredData?.length > 0 ? [...filteredData] : [];
-            console.log(fullData, "full");
+            // console.log(fullData, "full");
 
             // setDailyColumn(columnDefs);
             setdailyData(fullData);
@@ -2564,14 +3413,14 @@ const MyTablePage = () => {
                 Authorization: token,
             },
         });
-        console.log(fetchData, "f1");
+        // console.log(fetchData, "f1");
         const mainData = fetchData.data.items;
 
         const url = `https://prodapis.adsgoat.in/AllCampaigns?accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}&page=${pageSize}&limit=100`;
 
         const specifiedTimeZone = selectTimezone[time];
-        console.log(specifiedTimeZone, "spe");
-        console.log(mainData, "maindata of functionCall3");
+        // console.log(specifiedTimeZone, "spe");
+        // console.log(mainData, "maindata of functionCall3");
         const filteredData = mainData && mainData.length > 0 ?
             mainData.map((eachData) => {
                 let revenueData;
@@ -2623,7 +3472,7 @@ const MyTablePage = () => {
             })
             : null;
         totalItems.current = fetchData.data.totalItems;
-        console.log(mainData);
+        // console.log(mainData);
         setCampaignData(filteredData);
         setFixedFooter([
             {
@@ -2651,6 +3500,179 @@ const MyTablePage = () => {
     }
 
 
+    const functionCall4 = async () => {
+        try {
+            const fetchData = await axios.get(`https://prodapis.adsgoat.in/DAKeywords?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`, {
+                headers: {
+                    Authorization: token,
+                },
+            });
+            const mainData = fetchData.data;
+            // console.log(mainData, "mainData of functionCall4");
+            let totalSpend = 0;
+            let totalRevenue = 0;
+            let totalProfit = 0;
+            let totalCpc = 0;
+            let totalFbleads = 0;
+            let totalFbclicks = 0;
+            let totalImpressions = 0;
+            let totalConversions = 0;
+            const specifiedTimeZone = selectTimezone[time];
+            // console.log(mainData[0], "one");
+            const totalRow = mainData && mainData.length > 0 ?
+                mainData.map((eachData) => {
+                    const Revenue = eachData.estimated_revenue !== undefined ? (eachData.estimated_revenue) : 0;
+                    const profit = (Revenue - eachData.spend);
+                    const conversions = eachData.conversions !== undefined ? eachData.conversions : 0;
+                    totalRevenue += Revenue;
+                    totalSpend += parseFloat(eachData.spend);
+                    totalProfit += profit;
+                    totalConversions += conversions;
+                    totalCpc += eachData.cpc;
+                    totalFbclicks += eachData.fbClicks;
+                    totalFbleads += eachData.fbLeads;
+                    totalImpressions += eachData.impressions;
+                }) : null;
+          
+            const filteredData = mainData && mainData.length > 0 ?
+                mainData.map((eachData) => {
+                    const Revenue = eachData.estimated_revenue !== undefined ? (eachData.estimated_revenue) : 0;
+                    const profit = Math.round((Revenue - eachData.spend) * 100) / 100;
+                    const margin = Revenue !== 0 ? `${Math.round((((Revenue - eachData.spend) / eachData.estimated_revenue) * 100) * 100) / 100}%` : '0%'
+                    let rpc = eachData.conversions !== 0 ? (Math.round((Revenue / eachData.conversions) * 100) / 100) : 0;
+                    const revenue = ((eachData.estimated_revenue - eachData.spend) / (eachData.fbLeads * rpc)) * 100;
+                    let fMargin = revenue !== 0 ? Math.round(((profit / revenue) * 100) * 100) / 100 : 0;
+                    const cpl = eachData.fbLeads !== 0 ? Math.round((eachData.spend / eachData.fbLeads) * 100) / 100 : 0;
+                    let ncpl = eachData.conversions !== 0 ? Math.round((eachData.spend / eachData.conversions) * 100) / 100 : 0;
+                    const roi = eachData.spend !== 0 ? `${Math.round((((Revenue - eachData.spend) / eachData.spend) * 100) * 100) / 100}%` : '0%';
+                    const ctr = eachData.impressions !== 0 ? `${Math.round(((eachData.fbClicks / eachData.impressions) * 100) * 100) / 100}%` : '0%';
+                    const mainRvenue = ((Math.round(Revenue * 100) / 100)).toString();
+                    const conversions = eachData.conversions !== undefined ? eachData.conversions : '0';
+                    rpc = !isNaN(rpc) ? rpc : 0;
+                    ncpl = !isNaN(ncpl) ? ncpl : 0;
+                    fMargin = !isNaN(fMargin) ? `${fMargin}%` : '0%';
+
+                    // console.log(eachData.campaign_name, "campaign_name");
+                    // console.log(eachData.landerKeyword, "Keyword");
+                    // console.log((eachData.tg7, "adid"));
+                    return (
+                        {
+                            campaignname: eachData.campaign_name,
+                            keyword: eachData.landerKeyword,
+                            adsetname: eachData.adsetName,
+                            date: eachData[specifiedTimeZone],
+                            'fb-hour': eachData.campaign_id,
+                            'mnet-hour': eachData.campaign_id,
+                            spend: parseFloat(eachData.spend),
+                            revenue: parseFloat(mainRvenue),
+                            profit: parseFloat(profit),
+                            margin: margin,
+                            fbleads: parseInt(eachData.fbLeads),
+                            conversions: parseInt(conversions),
+                            cpc: parseFloat(eachData.cpc),
+                            fbclicks: parseInt(eachData.fbClicks),
+                            impressions: parseInt(eachData.impressions),
+                            ctr: ctr,
+                            rpc: parseFloat(rpc),
+                            cpl: parseFloat(cpl),
+                            ncpl: parseFloat(cpl),
+                            roi: roi,
+                            fmargin: fMargin,
+                            campaignid: eachData.campaign_id,
+                            adsetid: eachData.adset_id,
+                            timezone: 'UTC',
+                            actions: '...',
+                            adId: eachData.tg7,
+                            searchKeyword: eachData.searchKeyword
+                            // compaignid: eachData.campaign_id,
+                        }
+                    )
+                }) : null;
+            // console.log(filteredData[0],"one");
+            // console.log(filteredData, "filter");
+
+            const fullData = filteredData?.length > 0 ? [...filteredData] : [];
+            // console.log(fullData, "full");
+
+            // setDailyColumn(columnDefs);
+            setKeywordData(fullData);
+            // if (gridRef3.current && gridRef3.current.api) {
+            //     gridRef3.current.api.refreshCells();  // Refresh AgGrid after setting new data
+            // }
+            newDailyData.current = fullData;
+            // setTrue(false);
+            setLoading3(false);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const functionCall5 = async () => {
+        try { 
+            const fetchData = await axios.get(`https://prodapis.adsgoat.in/System1Keywords?startDate=${startDate}&endDate=${endDate}`, {
+                headers: {
+                    Authorization: token,
+                },
+            });
+            const mainData = fetchData.data;
+            console.log(mainData, "mainData of functionCall5");
+    
+            let totalSpend = 0;
+            let totalRevenue = 0;
+            let totalClicks = 0;
+            let totalSearches = 0;
+            
+            // Process the data if it's available
+            const filteredData = mainData && mainData.length > 0 ? mainData.map((eachData) => {
+                const Revenue = eachData.estimated_revenue || 0; // Make sure ESTIMATED_REVENUE exists
+                const clicks = eachData.clicks || 0;  // Default to 0 if undefined
+                const searches = eachData.searches || 0; // Default to 0 if undefined
+                totalRevenue += Revenue;
+                totalSpend += Revenue;
+                totalClicks += clicks;
+                totalSearches += searches;
+    
+                return {
+                    date: eachData.DATE,
+                    domain: eachData.DOMAIN,
+                    vertical: eachData.VERTICAL,
+                    keyword: eachData.KEYWORD,
+                    country: eachData.COUNTRY,
+                    deviceType: eachData.DEVICE_TYPE,
+                    searches: searches,
+                    clicks: clicks,
+                    revenue: Revenue,
+                };
+            }) : [];
+    
+            // Log filtered data to check
+            console.log(filteredData, "filteredData");
+    
+            // Update state with new data
+            setSystem1KeywordData(filteredData);
+    
+            // // Refresh grid after setting new data
+            // if (gridRef4.current && gridRef4.current.api) {
+            //     gridRef4.current.api.refreshCells();  // Refresh AgGrid after setting new data
+            // }
+    
+            setSFixedFooter([
+                {
+                    revenue: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0).toFixed(2)),
+                }
+            ]);
+
+            newDailyData.current = filteredData;
+            // setTrue(false);
+            setLoading4(false); // Hide loading spinner
+        } catch (error) {
+            setSystem1KeywordData([]);
+            setLoading4(false); 
+            console.log(error);
+            // setLoading4(false); // Hide loading spinner in case of error
+        }
+    };  
+
 
     useEffect(() => {
         const functionCall = async () => {
@@ -2660,13 +3682,20 @@ const MyTablePage = () => {
                     await functionCallForUserColumnStructure();
                     await functionCall1();
                     await functionCall2();
-                    console.log("Initial functions executed successfully.");
+                    // await functionCall4();
+                    // console.log("Initial functions executed successfully.");
                     isInitialLoad.current = false; // Set to false after initial load
                 }
 
                 // Run this function on initial load and whenever pageSize changes
                 await functionCall3();
-                console.log("functionCall3 executed successfully.");
+                if(newRevenuePratner === "FB_DomainActive"){
+                    await functionCall4();
+                }else if(newRevenuePratner === "FB_System1"){
+                    await functionCall5();
+                }
+                
+                // console.log("functionCall3 executed successfully.");
             } catch (error) {
                 console.error("Error in function calls:", error);
                 // Optionally, handle the error (e.g., show a notification to the user)
@@ -2683,6 +3712,13 @@ const MyTablePage = () => {
                 await functionCall1();
                 await functionCall2();
                 await functionCall3();
+                // await functionCall4();   
+                // await functionCall5(); 
+                if(newRevenuePratner === "FB_DomainActive"){
+                    await functionCall4();
+                }else if(newRevenuePratner === "FB_System1"){
+                    await functionCall5();
+                }
             }
             functionCall();
         }
@@ -2691,7 +3727,7 @@ const MyTablePage = () => {
     useEffect(() => {
         // Update the grid key to force a re-render when fixedFooter changes
         setGridKey((prevKey) => prevKey + 1);
-    }, [fixedFooter]);
+    }, [fixedFooter, sFixedFooter]);
 
     // useEffect(()=>{
     //     if(isTrue){
@@ -2724,15 +3760,15 @@ const MyTablePage = () => {
 
     const onChangeSelectRevenue = (value) => {
         const accountsForAccess = adAccounts[value];
-        console.log(accountsForAccess, "accounts Access");
-        console.log(accountsForAccess[0], "accountFor Access");
+        // console.log(accountsForAccess, "accounts Access");
+        // console.log(accountsForAccess[0], "accountFor Access");
 
         const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
 
         // console.log(accountsAccess, "accountsAccess");
         setNetworksData(accountsAccess);
         setRevenuePartner(value);
-        value === "FB_Tonic" ? console.log("PDT") : null;
+        // value === "FB_Tonic" ? console.log("PDT") : null;
         value === "FB_Rsoc" || value === "FB_Tonic" || value === "FB_DomainActive" ? setTime('PDT') : setTime('UTC')
     }
     const onChangeSelect = (value) => {
@@ -2744,12 +3780,14 @@ const MyTablePage = () => {
     }
 
     const onClickButton = () => {
-        console.log(account, "account");
-        console.log(time, "time");
-        console.log(url1);
-        console.log(url2);
-        console.log(startDate, "start");
-        console.log(endDate, "end");
+        // console.log(account, "account");
+        // console.log(time, "time");
+        // console.log(url1);
+        // console.log(url2);
+        // console.log(startDate, "start");
+        // console.log(endDate, "end");
+        setNewEndDate(endDate);
+        setNewStartDate(startDate);
         setPageSize(1);
         setTrue(true);
         setRowData([]);
@@ -2757,6 +3795,8 @@ const MyTablePage = () => {
         setLoading(true);
         setLoading1(true);
         setLoading2(true);
+        newRevenuePratner === "FB_DomainActive" && setLoading3(true);    
+        newRevenuePratner === "FB_System1" && setLoading4(true);
         setNewAccount(account);
         setnewAccountName(accountName)
         setNewTime(time);
@@ -2812,19 +3852,19 @@ const MyTablePage = () => {
     }
 
     const handleCustomerServiceClick = () => {
-        console.log('Customer Service button clicked');
+        // console.log('Customer Service button clicked');
         setActiveTab('2');
         carouselRef.current.goTo(1); // Change to the first slide
     };
 
     const handleCommentClick = () => {
-        console.log('Comment button clicked');
+        // console.log('Comment button clicked');
         setActiveTab('1');
         carouselRef.current.goTo(0); // Change to the second slide
     };
 
     const handleCommentClick1 = () => {
-        console.log('Comment button clicked');
+        // console.log('Comment button clicked');
         setActiveTab('3');
         carouselRef.current.goTo(2);
     }
@@ -2832,8 +3872,8 @@ const MyTablePage = () => {
     const handleChange = (dates) => {
         if (dates && dates.length === 2) {
             const [start, end] = dates;
-            console.log('Start Date:', start.format('YYYY-MM-DD'));
-            console.log('End Date:', end.format('YYYY-MM-DD'));
+            // console.log('Start Date:', start.format('YYYY-MM-DD'));
+            // console.log('End Date:', end.format('YYYY-MM-DD'));
             setStartDate(start.format('YYYY-MM-DD'));
             setEndDate(end.format('YYYY-MM-DD'));
         }
@@ -2857,7 +3897,7 @@ const MyTablePage = () => {
             if (value !== undefined) {
                 const url = `/DailyAndCampaignHistory/AdsetHistory/${value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                 window.open(url, '_blank');
-                console.log(`Price clicked: ${value}`);
+                // console.log(`Price clicked: ${value}`);
             }
         }
 
@@ -2869,7 +3909,7 @@ const MyTablePage = () => {
             if (value !== undefined) {
                 const url = `/AllCampaigns/AdsetHistory/${value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                 window.open(url, '_blank');
-                console.log(`Adset clicked: ${value}`);
+                // console.log(`Adset clicked: ${value}`);
             }
         }
     };
@@ -2880,7 +3920,7 @@ const MyTablePage = () => {
             if (value !== undefined) {
                 const url = `/LiveHistory/LiveAdsetHistory/${value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                 window.open(url, '_blank');
-                console.log(`Adset clicked: ${value}`);
+                // console.log(`Adset clicked: ${value}`);
             }
         }
     };
@@ -2984,7 +4024,7 @@ const MyTablePage = () => {
 
                 const getEditedUserAndTime = (campaignName, newaccount) => {
                     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
-                    console.log(relatedStatus, "relatedStatus");
+                    // console.log(relatedStatus, "relatedStatus");
                     const relatedStatusEditedTime = relatedStatus ? relatedStatus : null;
                     // console.log(relatedStatusTrue);
                     return relatedStatusEditedTime;
@@ -2992,7 +4032,7 @@ const MyTablePage = () => {
 
                 const getStatusForCampaign = (campaignName, newaccount) => {
                     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
-                    console.log(relatedStatus, "relatedStatus");
+                    // console.log(relatedStatus, "relatedStatus");
                     const relatedStatusTrue = relatedStatus !== undefined && relatedStatus.status === true ? true : relatedStatus !== undefined ? false : null;
                     // console.log(relatedStatusTrue);
                     return relatedStatusTrue;
@@ -3044,11 +4084,11 @@ const MyTablePage = () => {
                             }
                         });
 
-                        console.log('Response from server:', response.data);
+                        // console.log('Response from server:', response.data);
                     } catch (error) {
                         console.error('Error sending data to server:', error);
                     }
-                    console.log(logData);
+                    // console.log(logData);
                 };
 
                 const sendEditedCommentToAPI = async (logData) => {
@@ -3066,7 +4106,7 @@ const MyTablePage = () => {
                                 Authorization: token,
                             }
                         });
-                        console.log('Response from server (edited comment):', response.data);
+                        // console.log('Response from server (edited comment):', response.data);
                         return response.data;
                     } catch (error) {
                         console.error('Error sending edited comment to server:', error);
@@ -3091,7 +4131,7 @@ const MyTablePage = () => {
                                 Authorization: token,
                             }
                         });
-                        console.log('Response from server (starred status):', response.data);
+                        // console.log('Response from server (starred status):', response.data);
                     } catch (error) {
                         console.error('Error updating star status:', error);
                     }
@@ -3274,14 +4314,549 @@ const MyTablePage = () => {
                 }
                 const getEditedUserAndTime = (campaignName, newaccount) => {
                     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
-                    console.log(relatedStatus, "relatedStatus");
+                    // console.log(relatedStatus, "relatedStatus");
                     const relatedStatusEditedTime = relatedStatus ? relatedStatus : null;
                     // console.log(relatedStatusTrue);
                     return relatedStatusEditedTime;
                 }
                 const getStatusForCampaign = (campaignName, newaccount) => {
                     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
-                    console.log(relatedStatus, "relatedStatus");
+                    // console.log(relatedStatus, "relatedStatus");
+                    const relatedStatusTrue = relatedStatus !== undefined && relatedStatus.status === true ? true : relatedStatus !== undefined ? false : null;
+                    // console.log(relatedStatusTrue);
+                    return relatedStatusTrue;
+                }
+
+                const getCommentForCampaign = (campaignName) => {
+                    const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+                    return relatedComment ? relatedComment.comment : null;
+                };
+
+                const getStarredForCampaign = (campaignName) => {
+                    const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+                    return relatedComment ? relatedComment.starred : false;
+                };
+                const editUserANdTime = getEditedUserAndTime(campaignName, newaccount);
+                const relatedStatus = getStatusForCampaign(campaignName, newaccount);
+                const relatedComment = getCommentForCampaign(campaignName);
+                const isStarred = getStarredForCampaign(campaignName);
+                const valueWithCount = `${firstColumnValue}`;
+
+                const [tooltipText, setTooltipText] = useState("Click to Copy");
+                const [isModalVisibles, setIsModalVisibles] = useState(false);
+                const [comment, setComment] = useState(relatedComment || '');
+                const [starred, setStarred] = useState(isStarred);
+
+                const copyToClipboard = () => {
+                    navigator.clipboard.writeText(firstColumnValue)
+                        .then(() => {
+                            setTooltipText("Copied!");
+                            setTimeout(() => setTooltipText("Click to Copy"), 2000);
+                        })
+                        .catch(() => {
+                            console.error('Failed to copy to clipboard');
+                        });
+                };
+
+                const handleEditClick = () => {
+                    setIsModalVisibles(true);
+                };
+
+                const sendNewCommentToAPI = async (logData) => {
+                    try {
+                        const response = await axios.post('https://prodapis.adsgoat.in/Comments', {
+                            commentsdatas: logData,
+                        }, {
+                            headers: {
+                                Authorization: token,
+                            }
+                        });
+                        // console.log('Response from server:', response.data);
+                    } catch (error) {
+                        console.error('Error sending data to server:', error);
+                    }
+                };
+
+                const sendEditedCommentToAPI = async (logData) => {
+                    try {
+                        const response = await axios.post('https://prodapis.adsgoat.in/Comments/edit', {
+                            campaignname: logData.campaignname,
+                            comment: logData.comment,
+                            Account: logData.Account,
+                            adsetid: logData.adsetid,
+                            campaignid: logData.campaignid,
+                            status: true
+                        }, {
+                            headers: {
+                                Authorization: token,
+                            }
+                        });
+                        // console.log('Response from server (edited comment):', response.data);
+                        return response.data;
+                    } catch (error) {
+                        console.error('Error sending edited comment to server:', error);
+                        throw error;
+                    }
+                };
+
+                const sendStarStatusToAPI = async (campaignname, isStarred) => {
+                    try {
+                        const endpoint = isStarred ? 'https://prodapis.adsgoat.in/Star' : 'https://prodapis.adsgoat.in/Unstar';
+                        const response = await axios.post(endpoint, {
+                            campaignname: campaignname,
+                            Account: account,
+                            usercommit: userdetails?.email,
+                            campaignid: campaignid,
+                            adsetid: adsetid
+                        }, {
+                            headers: {
+                                Authorization: token,
+                            }
+                        });
+                        // console.log('Response from server (starred status):', response.data);
+                    } catch (error) {
+                        console.error('Error updating star status:', error);
+                    }
+                };
+
+                const handleStarClick = async () => {
+                    const updatedStarred = !starred;
+                    setStarred(updatedStarred);
+                    await sendStarStatusToAPI(firstColumnValue, updatedStarred);
+                    message.success(updatedStarred ? "Campaign starred!" : "Campaign unstarred!");
+
+                    const updatedComments = campaignComments.map(cmt =>
+                        cmt.campaignname === firstColumnValue ? { ...cmt, starred: updatedStarred } : cmt
+                    );
+                    setCampaignComments(updatedComments);
+                    changeRRefrst();
+                };
+
+                const handleOks = async () => {
+                    try {
+                        const logData = {
+                            Account: newaccount,
+                            usercommit: userdetails?.email,
+                            campaignname: firstColumnValue,
+                            comment: comment,
+                            campaignid: campaignid,
+                            adsetid: adsetid
+                        };
+
+                        if (relatedComment) {
+                            await sendEditedCommentToAPI(logData);
+                            message.success("Comment updated successfully!");
+                        } else {
+                            await sendNewCommentToAPI(logData);
+                            message.success("New comment added successfully!");
+                        }
+
+                        const updatedComments = relatedComment
+                            ? campaignComments.map(cmt => (cmt.campaignname === firstColumnValue ? { ...cmt, comment } : cmt))
+                            : [...campaignComments, logData];
+                        setCampaignComments(updatedComments);
+
+                        changeRRefrst();
+                        setIsModalVisibles(false);
+                    } catch (error) {
+                        console.error('Error while submitting comment:', error);
+                        message.error("Error while submitting the comment.");
+                    }
+                };
+
+                const handleCancels = () => {
+                    setIsModalVisibles(false);
+                };
+
+                const CustomTooltipContent = ({ editedTime, usercommit }) => (
+                    <div style={{ padding: '5px', borderRadius: '5px' }}>
+                        <p style={{ margin: 0, color: "#ffffff" }}>{usercommit}</p>
+                        <p style={{ margin: 0, color: "#ffffff" }}>{editedTime}</p>
+                    </div>
+                );
+
+                return (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                        {relatedStatus === true &&
+                            <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit} />}>
+                                <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }} />
+                            </Tooltip>
+                        }
+                        {relatedStatus === false &&
+                            <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit} />}>
+                                <CloseCircleFilled style={{ color: 'red', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }} />
+                            </Tooltip>
+                        }
+                        {relatedComment && (
+                            starred ? (
+                                <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: "gold" }} />
+                            ) : (
+                                <StarOutlined className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px' }} />
+                            )
+                        )}
+                        {relatedComment ? (
+                            <Tooltip title={(
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <span>{relatedComment || 'No comment available'}</span>
+                                    <EditOutlined onClick={handleEditClick} style={{ marginLeft: '10px', color: 'blue', cursor: 'pointer' }} />
+                                </div>
+                            )}>
+                                <MessageOutlined className='Message' style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
+                                <Tooltip title={tooltipText}></Tooltip>
+                            </Tooltip>
+                        ) : (
+                            <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
+                        )}
+                        <Tooltip title={tooltipText}>
+                            <CopyOutlined
+                                onClick={copyToClipboard}
+                                style={{ cursor: 'pointer', marginLeft: '8px', color: "#1e1e1f", marginRight: '10px' }}
+                            />
+                        </Tooltip>
+                        <span
+                            onClick={() => {
+                                const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                                window.open(url, '_blank');
+                            }}
+                        >
+                            {valueWithCount}
+                        </span>
+                        <Modal
+                            title={firstColumnValue}
+                            visible={isModalVisibles}
+                            onOk={handleOks}
+                            onCancel={handleCancels}
+                        >
+                            <Input.TextArea
+                                placeholder="Enter your comments here"
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                            />
+                        </Modal>
+                    </div>
+                );
+            }
+        }
+    };
+
+
+
+
+
+    const autoGroupColumnDef2 = {
+        headerName: 'CampaignName',
+        minWidth: 450,
+        pinned: 'left',
+        cellRendererParams: {
+            suppressCount: false, // Allow count to be shown
+            innerRenderer: (params) => {
+                if (params.node.footer) {
+                    return 'Total'; // Custom footer label
+                }
+
+                const firstColumnValue = params.node.key; // This should give you the campaign name
+                const campaignName = params.node.key;
+
+                let campaignid, adsetid;
+
+                if (params.node.group && params.node.childrenAfterGroup && params.node.childrenAfterGroup.length > 0) {
+                    const firstChild = params.node.childrenAfterGroup[0].data;
+                    campaignid = firstChild.campaignid;
+                    adsetid = firstChild.adsetid;
+                } else if (params.data) {
+                    campaignid = params.data.campaignid;
+                    adsetid = params.data.adsetid;
+                } else {
+                    console.error('Missing campaignid or adsetid for campaign:', campaignName);
+                    return (
+                        <div style={{ color: 'red' }}>
+                            Error: campaignid or adsetid missing for {campaignName}
+                        </div>
+                    );
+                } const getEditedUserAndTime = (campaignName, newaccount) => {
+                    const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
+                    // console.log(relatedStatus, "relatedStatus");
+                    const relatedStatusEditedTime = relatedStatus ? relatedStatus : null;
+                    // console.log(relatedStatusTrue);
+                    return relatedStatusEditedTime;
+                }
+                const getStatusForCampaign = (campaignName, newaccount) => {
+                    const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
+                    // console.log(relatedStatus, "relatedStatus");
+                    const relatedStatusTrue = relatedStatus !== undefined && relatedStatus.status === true ? true : relatedStatus !== undefined ? false : null;
+                    // console.log(relatedStatusTrue);
+                    return relatedStatusTrue;
+                }
+
+                const getCommentForCampaign = (campaignName) => {
+                    const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+                    return relatedComment ? relatedComment.comment : null;
+                };
+
+                const getStarredForCampaign = (campaignName) => {
+                    const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+                    return relatedComment ? relatedComment.starred : false;
+                };
+                const editUserANdTime = getEditedUserAndTime(campaignName, newaccount);
+                const relatedStatus = getStatusForCampaign(campaignName, newaccount);
+                const relatedComment = getCommentForCampaign(campaignName);
+                const isStarred = getStarredForCampaign(campaignName);
+                const valueWithCount = `${firstColumnValue}`;
+
+                const [tooltipText, setTooltipText] = useState("Click to Copy");
+                const [isModalVisible, setIsModalVisible] = useState(false);
+                const [comment, setComment] = useState(relatedComment || '');
+                const [starred, setStarred] = useState(isStarred);
+
+                const copyToClipboard = () => {
+                    navigator.clipboard.writeText(firstColumnValue)
+                        .then(() => {
+                            setTooltipText("Copied!");
+                            setTimeout(() => setTooltipText("Click to Copy"), 2000);
+                        })
+                        .catch(() => {
+                            console.error('Failed to copy to clipboard');
+                        });
+                };
+
+                const handleEditClick = () => {
+                    setIsModalVisible(true);
+                };
+
+                const sendNewCommentToAPI = async (logData) => {
+                    try {
+                        const response = await axios.post('https://prodapis.adsgoat.in/Comments', {
+                            commentsdatas: logData,
+                        }, {
+                            headers: {
+                                Authorization: token,
+                            }
+                        });
+                        console.log('Response from server:', response.data);
+                    } catch (error) {
+                        console.error('Error sending data to server:', error);
+                    }
+                };
+
+                const sendEditedCommentToAPI = async (logData) => {
+                    try {
+                        const response = await axios.post('https://prodapis.adsgoat.in/Comments/edit', {
+                            campaignname: logData.campaignname,
+                            comment: logData.comment,
+                            Account: logData.Account,
+                            adsetid: logData.adsetid,
+                            campaignid: logData.campaignid,
+                            status: true
+                        }, {
+                            headers: {
+                                Authorization: token,
+                            }
+                        });
+                        console.log('Response from server (edited comment):', response.data);
+                        return response.data;
+                    } catch (error) {
+                        console.error('Error sending edited comment to server:', error);
+                        throw error;
+                    }
+                };
+
+                const sendStarStatusToAPI = async (campaignname, isStarred) => {
+                    try {
+                        const endpoint = isStarred ? 'https://prodapis.adsgoat.in/Star' : 'https://prodapis.adsgoat.in/Unstar';
+                        const response = await axios.post(endpoint, {
+                            campaignname: campaignname,
+                            Account: account,
+                            usercommit: userdetails?.email,
+                            campaignid: campaignid,
+                            adsetid: adsetid
+                        }, {
+                            headers: {
+                                Authorization: token,
+                            }
+                        });
+                        console.log('Response from server (starred status):', response.data);
+                    } catch (error) {
+                        console.error('Error updating star status:', error);
+                    }
+                };
+
+                const handleStarClick = async () => {
+                    const updatedStarred = !starred;
+                    setStarred(updatedStarred);
+                    await sendStarStatusToAPI(firstColumnValue, updatedStarred);
+                    message.success(updatedStarred ? "Campaign starred!" : "Campaign unstarred!");
+
+                    const updatedComments = campaignComments.map(cmt =>
+                        cmt.campaignname === firstColumnValue ? { ...cmt, starred: updatedStarred } : cmt
+                    );
+                    setCampaignComments(updatedComments);
+                    changeRRefrst();
+                };
+
+                const handleOk = async () => {
+                    const logData = {
+                        Account: account,
+                        usercommit: userdetails?.email,
+                        campaignname: firstColumnValue,
+                        comment: comment,
+                        campaignid: campaignid,
+                        adsetid: adsetid
+                    };
+
+                    if (relatedComment) {
+                        await sendEditedCommentToAPI(logData);
+                        message.success("Comment updated successfully!");
+                    } else {
+                        await sendNewCommentToAPI(logData);
+                        message.success("New comment added successfully!");
+                    }
+
+                    const updatedComments = relatedComment
+                        ? campaignComments.map(cmt => (cmt.campaignname === firstColumnValue ? { ...cmt, comment } : cmt))
+                        : [...campaignComments, logData];
+                    setCampaignComments(updatedComments);
+
+                    changeRRefrst();
+                    setIsModalVisible(false);
+                };
+
+                const handleCancel = () => {
+                    setIsModalVisible(false);
+                };
+
+                const CustomTooltipContent = ({ editedTime, usercommit }) => (
+                    <div style={{ padding: '5px', borderRadius: '5px' }}>
+                        <p style={{ margin: 0, color: "#ffffff" }}>{usercommit}</p>
+                        <p style={{ margin: 0, color: "#ffffff" }}>{editedTime}</p>
+                    </div>
+                );
+
+                return (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                        {relatedStatus === true &&
+                            <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit} />}>
+                                <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }} />
+                            </Tooltip>
+                        }
+                        {relatedStatus === false &&
+                            <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit} />}>
+                                <CloseCircleFilled style={{ color: 'red', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }} />
+                            </Tooltip>
+                        }
+                        {relatedComment && (
+                            starred ? (
+                                <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: 'gold' }} />
+                            ) : (
+                                <StarOutlined className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px' }} />
+                            )
+                        )}
+                        {relatedComment ? (
+                            <Tooltip title={(
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <span>{relatedComment || 'No comment available'}</span>
+                                    <EditOutlined onClick={handleEditClick} style={{ marginLeft: '10px', color: 'blue', cursor: 'pointer' }} />
+                                </div>
+                            )}>
+                                <MessageOutlined className='Message' style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
+                                <Tooltip title={tooltipText}></Tooltip>
+                            </Tooltip>
+                        ) : (
+                            <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
+                        )}
+                        <Tooltip title={tooltipText}>
+                            <CopyOutlined
+                                onClick={copyToClipboard}
+                                style={{ cursor: 'pointer', marginLeft: '8px', color: "#1e1e1f", marginRight: '10px' }}
+                            />
+                        </Tooltip>
+                        <span
+                            onClick={() => {
+                                const url = `/AllCampaigns/CampaignHistory/${params.value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                                window.open(url, '_blank');
+                            }}
+                        >
+                            {valueWithCount}
+                        </span>
+                        <Modal
+                            title={firstColumnValue}
+                            visible={isModalVisible}
+                            onOk={handleOk}
+                            onCancel={handleCancel}
+                        >
+                            <Input.TextArea
+                                placeholder="Enter your comments here"
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                            />
+                        </Modal>
+                    </div>
+                );
+            }
+        }
+    };
+
+
+    const autoGroupColumnDef3 = {
+        headerName: 'CampaignName',
+        minWidth: 450,
+        pinned: 'left',
+        sortable: true, // Enable sorting
+
+        comparator: (campaignA, campaignB) => {
+            if (!campaignA) return 1;
+            if (!campaignB) return -1;
+
+            const getStarredForCampaign = (campaignName) => {
+                const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+                return relatedComment ? relatedComment.starred : false;
+            };
+
+            const isStarredA = getStarredForCampaign(campaignA);
+            const isStarredB = getStarredForCampaign(campaignB);
+
+            if (isStarredA === isStarredB) {
+                return campaignA.localeCompare(campaignB);
+            }
+            return isStarredA ? -1 : 1;
+        },
+
+        cellRendererParams: {
+            suppressCount: false,
+            innerRenderer: (params) => {
+                if (params.node.footer) {
+                    return 'Total';
+                }
+
+                const firstColumnValue = params.node.key;  // campaign name
+                const campaignName = params.node.key;
+
+                let campaignid, adsetid;
+
+                if (params.node.group && params.node.childrenAfterGroup && params.node.childrenAfterGroup.length > 0) {
+                    const firstChild = params.node.childrenAfterGroup[0].data;
+                    campaignid = firstChild.campaignid;
+                    adsetid = firstChild.adsetid;
+                } else if (params.data) {
+                    campaignid = params.data.campaignid;
+                    adsetid = params.data.adsetid;
+                } else {
+                    console.error('Missing campaignid or adsetid for campaign:', campaignName);
+                    return (
+                        <div style={{ color: 'red' }}>
+                            Error: campaignid or adsetid missing for {campaignName}
+                        </div>
+                    );
+                }
+                const getEditedUserAndTime = (campaignName, newaccount) => {
+                    const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
+                    // console.log(relatedStatus, "relatedStatus");
+                    const relatedStatusEditedTime = relatedStatus ? relatedStatus : null;
+                    // console.log(relatedStatusTrue);
+                    return relatedStatusEditedTime;
+                }
+                const getStatusForCampaign = (campaignName, newaccount) => {
+                    const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
+                    // console.log(relatedStatus, "relatedStatus");
                     const relatedStatusTrue = relatedStatus !== undefined && relatedStatus.status === true ? true : relatedStatus !== undefined ? false : null;
                     // console.log(relatedStatusTrue);
                     return relatedStatusTrue;
@@ -3499,262 +5074,15 @@ const MyTablePage = () => {
         }
     };
 
-
-
-
-
-    const autoGroupColumnDef2 = {
-        headerName: 'CampaignName',
-        minWidth: 450,
-        pinned: 'left',
+    const autoGroupColumnDefDomain = {
+        headerName: 'Domain', // Display name for the grouped column
+        minWidth: 300, // Set width for grouped rows
+        resizable: true, // Enable resizing
+        sortable: true, // Enable sorting
         cellRendererParams: {
-            suppressCount: false, // Allow count to be shown
-            innerRenderer: (params) => {
-                if (params.node.footer) {
-                    return 'Total'; // Custom footer label
-                }
-
-                const firstColumnValue = params.node.key; // This should give you the campaign name
-                const campaignName = params.node.key;
-
-                let campaignid, adsetid;
-
-                if (params.node.group && params.node.childrenAfterGroup && params.node.childrenAfterGroup.length > 0) {
-                    const firstChild = params.node.childrenAfterGroup[0].data;
-                    campaignid = firstChild.campaignid;
-                    adsetid = firstChild.adsetid;
-                } else if (params.data) {
-                    campaignid = params.data.campaignid;
-                    adsetid = params.data.adsetid;
-                } else {
-                    console.error('Missing campaignid or adsetid for campaign:', campaignName);
-                    return (
-                        <div style={{ color: 'red' }}>
-                            Error: campaignid or adsetid missing for {campaignName}
-                        </div>
-                    );
-                } const getEditedUserAndTime = (campaignName, newaccount) => {
-                    const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
-                    console.log(relatedStatus, "relatedStatus");
-                    const relatedStatusEditedTime = relatedStatus ? relatedStatus : null;
-                    // console.log(relatedStatusTrue);
-                    return relatedStatusEditedTime;
-                }
-                const getStatusForCampaign = (campaignName, newaccount) => {
-                    const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
-                    console.log(relatedStatus, "relatedStatus");
-                    const relatedStatusTrue = relatedStatus !== undefined && relatedStatus.status === true ? true : relatedStatus !== undefined ? false : null;
-                    // console.log(relatedStatusTrue);
-                    return relatedStatusTrue;
-                }
-
-                const getCommentForCampaign = (campaignName) => {
-                    const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
-                    return relatedComment ? relatedComment.comment : null;
-                };
-
-                const getStarredForCampaign = (campaignName) => {
-                    const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
-                    return relatedComment ? relatedComment.starred : false;
-                };
-                const editUserANdTime = getEditedUserAndTime(campaignName, newaccount);
-                const relatedStatus = getStatusForCampaign(campaignName, newaccount);
-                const relatedComment = getCommentForCampaign(campaignName);
-                const isStarred = getStarredForCampaign(campaignName);
-                const valueWithCount = `${firstColumnValue}`;
-
-                const [tooltipText, setTooltipText] = useState("Click to Copy");
-                const [isModalVisible, setIsModalVisible] = useState(false);
-                const [comment, setComment] = useState(relatedComment || '');
-                const [starred, setStarred] = useState(isStarred);
-
-                const copyToClipboard = () => {
-                    navigator.clipboard.writeText(firstColumnValue)
-                        .then(() => {
-                            setTooltipText("Copied!");
-                            setTimeout(() => setTooltipText("Click to Copy"), 2000);
-                        })
-                        .catch(() => {
-                            console.error('Failed to copy to clipboard');
-                        });
-                };
-
-                const handleEditClick = () => {
-                    setIsModalVisible(true);
-                };
-
-                const sendNewCommentToAPI = async (logData) => {
-                    try {
-                        const response = await axios.post('https://prodapis.adsgoat.in/Comments', {
-                            commentsdatas: logData,
-                        }, {
-                            headers: {
-                                Authorization: token,
-                            }
-                        });
-                        console.log('Response from server:', response.data);
-                    } catch (error) {
-                        console.error('Error sending data to server:', error);
-                    }
-                };
-
-                const sendEditedCommentToAPI = async (logData) => {
-                    try {
-                        const response = await axios.post('https://prodapis.adsgoat.in/Comments/edit', {
-                            campaignname: logData.campaignname,
-                            comment: logData.comment,
-                            Account: logData.Account,
-                            adsetid: logData.adsetid,
-                            campaignid: logData.campaignid,
-                            status: true
-                        }, {
-                            headers: {
-                                Authorization: token,
-                            }
-                        });
-                        console.log('Response from server (edited comment):', response.data);
-                        return response.data;
-                    } catch (error) {
-                        console.error('Error sending edited comment to server:', error);
-                        throw error;
-                    }
-                };
-
-                const sendStarStatusToAPI = async (campaignname, isStarred) => {
-                    try {
-                        const endpoint = isStarred ? 'https://prodapis.adsgoat.in/Star' : 'https://prodapis.adsgoat.in/Unstar';
-                        const response = await axios.post(endpoint, {
-                            campaignname: campaignname,
-                            Account: account,
-                            usercommit: userdetails?.email,
-                            campaignid: campaignid,
-                            adsetid: adsetid
-                        }, {
-                            headers: {
-                                Authorization: token,
-                            }
-                        });
-                        console.log('Response from server (starred status):', response.data);
-                    } catch (error) {
-                        console.error('Error updating star status:', error);
-                    }
-                };
-
-                const handleStarClick = async () => {
-                    const updatedStarred = !starred;
-                    setStarred(updatedStarred);
-                    await sendStarStatusToAPI(firstColumnValue, updatedStarred);
-                    message.success(updatedStarred ? "Campaign starred!" : "Campaign unstarred!");
-
-                    const updatedComments = campaignComments.map(cmt =>
-                        cmt.campaignname === firstColumnValue ? { ...cmt, starred: updatedStarred } : cmt
-                    );
-                    setCampaignComments(updatedComments);
-                    changeRRefrst();
-                };
-
-                const handleOk = async () => {
-                    const logData = {
-                        Account: account,
-                        usercommit: userdetails?.email,
-                        campaignname: firstColumnValue,
-                        comment: comment,
-                        campaignid: campaignid,
-                        adsetid: adsetid
-                    };
-
-                    if (relatedComment) {
-                        await sendEditedCommentToAPI(logData);
-                        message.success("Comment updated successfully!");
-                    } else {
-                        await sendNewCommentToAPI(logData);
-                        message.success("New comment added successfully!");
-                    }
-
-                    const updatedComments = relatedComment
-                        ? campaignComments.map(cmt => (cmt.campaignname === firstColumnValue ? { ...cmt, comment } : cmt))
-                        : [...campaignComments, logData];
-                    setCampaignComments(updatedComments);
-
-                    changeRRefrst();
-                    setIsModalVisible(false);
-                };
-
-                const handleCancel = () => {
-                    setIsModalVisible(false);
-                };
-
-                const CustomTooltipContent = ({ editedTime, usercommit }) => (
-                    <div style={{ padding: '5px', borderRadius: '5px' }}>
-                        <p style={{ margin: 0, color: "#ffffff" }}>{usercommit}</p>
-                        <p style={{ margin: 0, color: "#ffffff" }}>{editedTime}</p>
-                    </div>
-                );
-
-                return (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                        {relatedStatus === true &&
-                            <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit} />}>
-                                <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }} />
-                            </Tooltip>
-                        }
-                        {relatedStatus === false &&
-                            <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit} />}>
-                                <CloseCircleFilled style={{ color: 'red', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }} />
-                            </Tooltip>
-                        }
-                        {relatedComment && (
-                            starred ? (
-                                <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: 'gold' }} />
-                            ) : (
-                                <StarOutlined className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px' }} />
-                            )
-                        )}
-                        {relatedComment ? (
-                            <Tooltip title={(
-                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                    <span>{relatedComment || 'No comment available'}</span>
-                                    <EditOutlined onClick={handleEditClick} style={{ marginLeft: '10px', color: 'blue', cursor: 'pointer' }} />
-                                </div>
-                            )}>
-                                <MessageOutlined className='Message' style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
-                                <Tooltip title={tooltipText}></Tooltip>
-                            </Tooltip>
-                        ) : (
-                            <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
-                        )}
-                        <Tooltip title={tooltipText}>
-                            <CopyOutlined
-                                onClick={copyToClipboard}
-                                style={{ cursor: 'pointer', marginLeft: '8px', color: "#1e1e1f", marginRight: '10px' }}
-                            />
-                        </Tooltip>
-                        <span
-                            onClick={() => {
-                                const url = `/AllCampaigns/CampaignHistory/${params.value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
-                                window.open(url, '_blank');
-                            }}
-                        >
-                            {valueWithCount}
-                        </span>
-                        <Modal
-                            title={firstColumnValue}
-                            visible={isModalVisible}
-                            onOk={handleOk}
-                            onCancel={handleCancel}
-                        >
-                            <Input.TextArea
-                                placeholder="Enter your comments here"
-                                value={comment}
-                                onChange={(e) => setComment(e.target.value)}
-                            />
-                        </Modal>
-                    </div>
-                );
-            }
-        }
+          suppressCount: true, // Suppress row count in the grouped column
+        },
     };
-
 
 
     // const autoGroupColumnDefLive = {
@@ -3934,12 +5262,12 @@ const MyTablePage = () => {
 
     const handleColumnMove = (params, gridId) => {
         const columnState = params.api.getColumnState();
-        console.log('Column moved in grid:', gridId);
+        // console.log('Column moved in grid:', gridId);
         const fieldOrder = columnState.map(col => col.colId);
         const newFieldOrder = fieldOrder.filter(item => item !== 'ag-Grid-AutoColumn-campaignname' && item !== 'ag-Grid-AutoColumn' && columnStructure.includes(item));
         localStorage.setItem('columnState', JSON.stringify(newFieldOrder));
         updatingColumnsStructure(newFieldOrder);
-        console.log(`Updating columns structure for grid: ${gridId}`);
+        // console.log(`Updating columns structure for grid: ${gridId}`);
     };
 
     const debouncedHandleColumnMove = useCallback(debounce((params, gridId) => handleColumnMove(params, gridId), 600), []);
@@ -3977,9 +5305,32 @@ const MyTablePage = () => {
         }
     };
 
-    console.log(columnDefs);
-    console.log(columnDefs1);
-    console.log(columnDefs2);
+    const gridOptions3 = {
+        onColumnMoved: (params) => debouncedHandleColumnMove(params, 'grid4'),
+        defaultColDef: {
+            suppressMenu: true,
+            headerClass: "custom-header" // Apply to all columns by default
+
+        }
+    };
+
+    // const gridOptions4 = {
+    //     onColumnMoved: (params) => debouncedHandleColumnMove(params, 'grid5'),
+    //     defaultColDef: {
+    //         suppressMenu: true,
+    //         headerClass: "custom-header" // Apply to all columns by default
+
+    //     }
+    // };
+
+    const gridOptions4 = {
+        groupUseEntireRow: true,  // Ensure the entire row is used for grouping
+        groupSuppressAutoColumn: true, // Hide the auto group column
+    };
+
+    // console.log(columnDefs);
+    // console.log(columnDefs1);
+    // console.log(columnDefs2);
 
 
 
@@ -4127,7 +5478,7 @@ const MyTablePage = () => {
     };
 
     const handlePageClick = (page, pageSize) => {
-        console.log(`Clicked page: ${page}, Page size: ${pageSize}`);
+        // console.log(`Clicked page: ${page}, Page size: ${pageSize}`);
         setLoading2(true);
         setPageSize(page);
         // Add your custom onClick functionality here
@@ -4175,9 +5526,10 @@ const MyTablePage = () => {
         },
     ];
 
-    console.log(rowData, "rowData");
-    console.log(dailyData, "dailyData");
-    console.log(campaignData, "campaignData");
+    // console.log(rowData, "rowData");
+    // console.log(dailyData, "dailyData");
+    // console.log(campaignData, "campaignData");
+    // console.log(keywordData, "KeywordData");
 
     // console.log(rowData, "rowData");
     // console.log(dailyData, "dailyData");
@@ -4245,10 +5597,54 @@ const MyTablePage = () => {
         }
     };
 
+
+    const refreshGrid3 = (gridRef3) => {
+        setLoading1(true);
+        if (gridRef3.current) {
+            const gridApi = gridRef3.current.api;
+
+            // Clear filters
+            gridApi.setFilterModel(null);
+
+            // Clear sorting by resetting the row data state
+            setKeywordData([]); // Temporarily clear the data
+            setTimeout(() => setKeywordData(newDailyData.current), 0); // Reset the data
+            setTimeout(() => setLoading1(false), 1500);
+            // Force refresh the grid cells and redraw the rows
+            gridApi.refreshCells({ force: true });
+            gridApi.redrawRows();
+        } else {
+            console.error('Grid reference is not available.');
+        }
+    };
+
+    const refreshGrid4 = (gridRef4) => {
+        setLoading4(true);
+        if (gridRef4.current) {
+            const gridApi = gridRef4.current.api;
+    
+            // Clear filters
+            gridApi.setFilterModel(null);
+    
+            // Temporarily clear the data and reset after a timeout
+            setSystem1KeywordData([]); // Temporarily clear the data
+            setTimeout(() => setSystem1KeywordData(newDailyData.current), 0); // Reset the data
+            setTimeout(() => setLoading4(false), 1500); // Stop loading after timeout
+    
+            // Force refresh the grid cells and redraw the rows
+            gridApi.refreshCells({ force: true });
+            gridApi.redrawRows();
+        } else {
+            console.error('Grid reference is not available.');
+        }
+    };
+
     const onClickRefresh = () => {
         refreshGrid(gridRef);  // Refresh gridRef
         refreshGrid1(gridRef1); // Refresh gridRef1
         refreshGrid2(gridRef2); // Refresh gridRef2
+        refreshGrid3(gridRef3); // Refresh gridRef3
+        refreshGrid4(gridRef4);
     };
 
 
@@ -4289,8 +5685,8 @@ const MyTablePage = () => {
         return current && current > dayjs().endOf('day');
     };
 
-    console.log(revenuePratner);
-    console.log(time);
+    // console.log(revenuePratner);
+    // console.log(time);
 
     const [isOpen, setIsOpen] = useState(false); // State to track if dropdown is open
     const [selectedValue, setSelectedValue] = useState(
@@ -4429,6 +5825,36 @@ const MyTablePage = () => {
         }
     ];
 
+
+    const pinnedBottomRowData3 = [
+        {
+            campaignName: 'Total',
+            spend: parseFloat(keywordData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0).toFixed(2)),
+            revenue: parseFloat(keywordData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0).toFixed(2)),
+            profit: parseFloat(keywordData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0).toFixed(2)),
+            margin: parseFloat((keywordData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / keywordData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
+            rpc: parseFloat((keywordData.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / keywordData.length).toFixed(2)),
+            cpl: parseFloat((keywordData.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / keywordData.length).toFixed(2)),
+            ncpl: parseFloat((keywordData.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / keywordData.length).toFixed(2)),
+            fbleads: parseFloat(keywordData.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0).toFixed(2)),
+            conversions: parseFloat(keywordData.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0).toFixed(2)),
+            fmargin: parseFloat((keywordData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / keywordData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+            roi: parseFloat(((keywordData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - keywordData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / keywordData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+            cpc: parseFloat((keywordData.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / keywordData.length).toFixed(2)),
+            fbclicks: parseFloat(keywordData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
+            impressions: parseFloat(keywordData.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
+            ctr: parseFloat((keywordData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / keywordData.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
+        }
+    ];
+
+    const pinnedBottomRowData4 = [
+        {
+            searches: parseFloat(system1KeywordData.reduce((acc, curr) => acc + parseFloat(curr.searches), 0).toFixed(2)),
+            clicks: parseFloat(system1KeywordData.reduce((acc, curr) => acc + parseFloat(curr.clicks), 0).toFixed(2)),
+            revenue: parseFloat(system1KeywordData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0).toFixed(2)),
+        }
+    ];
+
     // const pinnedBottomRowData3 = (campaignData) =>{
     //     return([
     //         {
@@ -4454,22 +5880,36 @@ const MyTablePage = () => {
 
     // console.log(fixedFooter, "fixed");
 
-    console.log(dailyData, "Daily");
+   
+    // console.log(dailyData, "Daily");
 
 
     const items = [
         { key: '1', label: 'Live', content: 'Content for Live data' },
         { key: '2', label: 'Daily', content: 'Content for Daily data' },
-        { key: '3', label: 'Campaigns', content: 'Content for Campaign data' }
+        { key: '3', label: 'Campaigns', content: 'Content for Campaign data' },
+        { key: '4', label: 'BMName', content: 'Content for BMName data' },
+        ...(newRevenuePratner === "FB_Mnet" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : []),
+        ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
+        ...(newRevenuePratner === "FB_System1" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : [])
     ];
     const handleSlideChange = (from, to) => {
+        // console.log(to, "to");
         setActiveTab((parseInt(to)+1).toString());
         // console.log((parseInt(to)+1).toString());
     };
     
     const handleCarouselChange = (index) => {
         setActiveTab(index);
+        // console.log(index);
+        // console.log(parseInt(index)-1);
         carouselRef.current.goTo(parseInt(index)-1)
+        if(index == 5 && revenuePratner === "FB_DomainActive"){
+            // console.log("hello praveen");
+            setIsKeywordsTabActive("keyword");
+        }else if(index === 5 && newRevenuePratner === "FB_System1"){
+            setIsSystem1KeywordsTabActive('Domain')
+        }
     };
     
     const renderCarouselNav = () => (
@@ -4500,8 +5940,10 @@ const MyTablePage = () => {
     );
 
 
-    console.log(networksData[0])
-    console.log(accountNumberFromDashboard);
+    // console.log(networksData[0])
+    // console.log(accountNumberFromDashboard);
+
+    // console.log(activeTab);
 
     return (
         <div className='reports-container'>
@@ -4587,6 +6029,9 @@ const MyTablePage = () => {
                                 value: item,
                                 label: item,
                             }))}
+                            // style={{
+                            //     width: '100%'
+                            // }}
                         />
                     </Col>
 
@@ -4673,8 +6118,7 @@ const MyTablePage = () => {
                     </Row>
                 </div>
 
-                <Carousel ref={carouselRef}
-                beforeChange={handleSlideChange} >
+                <Carousel ref={carouselRef} beforeChange={handleSlideChange} dots={false}>
                     <div style={{ height: "100%", marginBottom: '20px' }}>
                         <div style={contentStyle}>
                             {isLoading === true ? (
@@ -4999,11 +6443,415 @@ const MyTablePage = () => {
                             onChange={handlePageClick}
                         />
                     </div>
+                    <div style={{ height: "100%", marginBottom: '20px' }}>
+                        <div style={contentStyle}>
+                            {isLoading === true ? (
+                                <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>
+                                    <div className="ag-grid-Loader">
+                                        <Audio
+                                            height="80"
+                                            width="80"
+                                            radius="9"
+                                            color="green"
+                                            ariaLabel="loading"
+                                            wrapperStyle
+                                            wrapperClass
+                                        />
+                                    </div>
+                                </div>
+                            ) : BMNameData?.length > 0 ? (
+
+                                <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
+
+                                    {/* <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap' }}>
+                                        <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
+                                            <Space align="center">
+                                                <div className="blinking-circle-1"></div>
+                                                <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600' }}>Live</Text>
+                                            </Space>
+                                        </Col>
+                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                            <Text style={{ fontWeight: '600' }}>Acc: {newaccount}</Text>
+                                        </Col>
+                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                            <Text style={{ fontWeight: '600' }}>AccName: {newAccountName}</Text>
+                                        </Col>
+                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                            <Text style={{ fontWeight: '600' }}>Timezone: {timezone.current}</Text>
+                                        </Col>
+                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                            <Text style={{ fontWeight: '600' }}>F/N Hour: {maxHour.current}:00 / {maxNetworkHour.current}:00</Text>
+                                        </Col>
+                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                            <Text style={{ fontWeight: '600' }}>
+                                                Cron/Acc status: {cronStatus.current} /{' '}
+                                                <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
+                                                    {accountStatus.current}
+                                                </span>
+                                            </Text>
+                                        </Col>
+                                        <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
+                                            <Tooltip title="Export to CSV">
+                                                <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={onBtExport1} />
+                                            </Tooltip>
+                                        </Col>
+                                    </Row> */}
+
+
+                                        <AgGridReact
+                                            rowData={BMNameData}
+                                            columnDefs={BMNameColumnDefs}
+                                            // defaultColDef={defaultColDef}
+                                            suppressAggFuncInHeader={true}
+                                            pinnedBottomRowData={BMNameFixedFooter}
+                                            getRowStyle={(params) => {
+                                                if (params.node.rowPinned) {
+                                                    return {
+                                                        fontWeight: 'bold',
+                                                        // backgroundColor: theme === "dark" ? '#000' : '#fff',
+                                                        // color: theme === "dark" ? '#fff' : '#000',
+                                                    };
+                                                }
+                                                return null;
+                                            }}
+                                            onFilterChanged={(params) => {
+                                                const api = params.api;
+                                                const filteredData = [];
+                                                api.forEachNodeAfterFilterAndSort((node) => {
+                                                    if (!node.rowPinned) {
+                                                        filteredData.push(node.data);
+                                                    }
+                                                });
+
+                                                const updatedFooter = [
+                                                    {
+                                                        [`${newtime}Date`]: 'Totals',
+                                                        spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
+                                                        estimated_revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.estimated_revenue || 0), 0).toFixed(2)),
+                                                        profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
+                                                        margin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.estimated_revenue), 0) * 100).toFixed(2)),
+                                                        rpc: parseFloat(
+                                                            (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc || 0), 0) / filteredData.length || 0).toFixed(2)
+                                                        ),
+                                                        // cpl: parseFloat(
+                                                        //     (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl || 0), 0) / filteredData.length || 0).toFixed(2)
+                                                        // ),
+                                                        // impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0).toFixed(2)),
+                                                    },
+                                                ];
+
+                                                setBMNameFixedFooter(updatedFooter);
+                                            }}
+                                        />
+
+                                </div>
+                            ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
+                                {startDate !== endDate ? <Result
+                                    className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                    icon={<SmileOutlined />}
+                                    title={`No BMName for ${newaccount} from ${startDate} to ${endDate}`}
+                                // extra={<Button type="primary">Next</Button>}
+                                /> : <Result
+                                    className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                    icon={<SmileOutlined />}
+                                    title={`No BMName for ${newaccount} to ${startDate}`}
+                                // extra={<Button type="primary">Next</Button>}
+                                />}
+                            </div>}
+                        </div>
+                    </div>
+
+                    {revenuePratner === "FB_DomainActive" &&
+                        <div>
+                            <div style={contentStyle}>
+                                {isLoading3 === true ? (
+                                    <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>
+                                        <div className="ag-grid-Loader">
+                                            <Audio
+                                                height="80"
+                                                width="80"
+                                                radius="9"
+                                                color="green"
+                                                ariaLabel="loading"
+                                                wrapperStyle
+                                                wrapperClass
+                                            />
+                                        </div>
+                                    </div>
+                                ) : keywordData.filter((each) => each.campaignname.includes(inputValue))?.length > 0 ? (
+                                    <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
+                                        <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap' }}>
+                                            <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
+                                                <Space align="center" className='daily-contaier'>
+                                                    {/* <div className="blinking-circle"></div> */}
+                                                    <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600' }}>Keywords</Text>
+                                                </Space>
+                                            </Col>
+                                            <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                                <Text style={{ fontWeight: '600' }}>Acc: {newaccount}</Text>
+                                            </Col>
+                                            <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                                <Text style={{ fontWeight: '600' }}>AccName: {newAccountName}</Text>
+                                            </Col>
+                                            <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                                <Text style={{ fontWeight: '600' }}>Timezone: {timezone.current}</Text>
+                                            </Col>
+                                            <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                                <Text style={{ fontWeight: '600' }}>
+                                                    Cron/Acc status: {cronStatus.current} /{' '}
+                                                    <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
+                                                        {accountStatus.current}
+                                                    </span>
+                                                </Text>
+                                            </Col>
+                                            <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
+                                                <Tooltip title="Export to CSV">
+                                                    <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef3)} />
+                                                </Tooltip>
+                                            </Col>
+                                        </Row>
+                                        <AgGridReact
+                                            ref={gridRef3}
+                                            rowData={keywordData.filter((each) => each.campaignname.includes(inputValue))}
+                                            columnDefs={columnDefs3.current}
+                                            onCellClicked={onCellClicked}
+                                            pagination={true}
+                                            paginationPageSize={100}
+                                            paginationPageSizeSelector={[20, 40, 60, 80, 100]}
+                                            groupDisplayType='multipleColumns'
+                                            suppressAggFuncInHeader={true}
+                                            groupSuppressBlankHeader={true}
+                                            defaultColDef={defaultColDef}
+                                            // groupIncludeFooter={true}
+                                            // groupIncludeTotalFooter={true}
+                                            autoGroupColumnDef={autoGroupColumnDef3}
+                                            onGridReady={(params) => onGridReady(params, 'grid4', gridRef3)}
+                                            gridOptions={gridOptions3}
+                                            getMainMenuItems={getMainMenuItems}
+                                            pinnedBottomRowData={keywordData.length > 0 ? pinnedBottomRowData3 : []}
+                                            getRowStyle={params => {
+                                                if (params.node.rowPinned) {
+                                                    return {
+                                                        fontWeight: 'bold',
+                                                        backgroundColor: theme === "dark" ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
+                                                        color: theme === "dark" ? '#fff' : '#000',           // Text color should contrast with the background
+                                                    };
+                                                }
+
+                                                return null;
+                                            }}
+                                        />
+                                    </div>
+                                ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
+                                    {startDate !== endDate ? <Result
+                                        className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                        icon={<SmileOutlined />}
+                                        title={`No KeywordData for ${newaccount} from ${startDate} to ${endDate}`}
+                                    // extra={<Button type="primary">Next</Button>}
+                                    /> : <Result
+                                        className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                        icon={<SmileOutlined />}
+                                        title={`No KeywordData for ${newaccount} to ${startDate}`}
+                                    // extra={<Button type="primary">Next</Button>}
+                                    />}
+                                </div>}
+                            </div>
+                        </div>
+                    }
+                    {revenuePratner === "FB_System1" && (
+                        <div>
+                            <div style={contentStyle}>
+                            {isLoading4 === true ? (
+                                    <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>
+                                        <div className="ag-grid-Loader">
+                                            <Audio
+                                                height="80"
+                                                width="80"
+                                                radius="9"
+                                                color="green"
+                                                ariaLabel="loading"
+                                                wrapperStyle
+                                                wrapperClass
+                                            />
+                                        </div>
+                                    </div>
+                                ) : system1KeywordData.filter((each) => each.domain.includes(inputValue))?.length > 0 ? (
+                                <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
+                                <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap' }}>
+                                    <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
+                                    <Space align="center" className='daily-contaier'>
+                                        <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600' }}>Domain</Text>
+                                    </Space>
+                                    </Col>
+                                    <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                    <Text style={{ fontWeight: '600' }}>Acc: {newaccount}</Text>
+                                    </Col>
+                                    <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                    <Text style={{ fontWeight: '600' }}>AccName: {newAccountName}</Text>
+                                    </Col>
+                                    <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                    <Text style={{ fontWeight: '600' }}>Timezone: {timezone.current}</Text>
+                                    </Col>
+                                    <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                    <Text style={{ fontWeight: '600' }}>
+                                        Cron/Acc status: {cronStatus.current} /{' '}
+                                        <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
+                                        {accountStatus.current}
+                                        </span>
+                                    </Text>
+                                    </Col>
+                                    <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
+                                    <Tooltip title="Export to CSV">
+                                        <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef4)} />
+                                    </Tooltip>
+                                    </Col>
+                                </Row>
+
+                                <AgGridReact
+                                    ref={gridRef4}
+                                    rowData={system1KeywordData}
+                                    columnDefs={columnDefsObject4}
+                                    onCellClicked={onCellClicked}
+                                    pagination={true}
+                                    paginationPageSize={100}
+                                    paginationPageSizeSelector={[20, 40, 60, 80, 100]}
+                                    groupDisplayType="multipleColumns"
+                                    suppressAggFuncInHeader={true}
+                                    groupSuppressBlankHeader={true}
+                                    defaultColDef={defaultColDef}
+                                    autoGroupColumnDef={autoGroupColumnDefDomain}
+                                    // onGridReady={(params) => onGridReady(params, 'grid5', gridRef4)}
+                                    // gridOptions={gridOptions4}
+                                    gridOptions={{
+                                        groupUseEntireRow: true,  // Ensures the entire row is used for grouping
+                                        // groupSuppressAutoColumn: true,  // Removes the auto group column that appears with the group header
+                                    }}
+                                    getMainMenuItems={getMainMenuItems}
+                                    pinnedBottomRowData={system1KeywordData.length > 0 ? pinnedBottomRowData4 : []}
+                                    getRowStyle={params => {
+                                    if (params.node.rowPinned) {
+                                        return {
+                                        fontWeight: 'bold',
+                                        backgroundColor: theme === "dark" ? '#000' : '#fff',
+                                        color: theme === "dark" ? '#fff' : '#000',
+                                        };
+                                    }
+                                    return null;
+                                    }}
+                                />
+                                </div>
+                            ) : (
+                                <div style={{ backgroundColor: theme === "dark" ? "#333" : "#fff" }}>
+                                {startDate !== endDate ? (
+                                    <Result
+                                    className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                    icon={<SmileOutlined />}
+                                    title={`No DomainData from ${startDate} to ${endDate}`}
+                                    />
+                                ) : (
+                                    <Result
+                                    className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                    icon={<SmileOutlined />}
+                                    title={`No DomainData for ${startDate}`}
+                                    />
+                                )}
+                                </div>
+                            )}
+                            </div>
+                        </div>
+                    )}
+                    {revenuePratner === "FB_Mnet" && 
+                        <div style={{ height: "100%", marginBottom: '20px' }}>
+                            <div style={contentStyle}>
+                                {isLoading === true ? (
+                                    <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>
+                                        <div className="ag-grid-Loader">
+                                            <Audio
+                                                height="80"
+                                                width="80"
+                                                radius="9"
+                                                color="green"
+                                                ariaLabel="loading"
+                                                wrapperStyle
+                                                wrapperClass
+                                            />
+                                        </div>
+                                    </div>
+                                ) : domainData.length > 0 ? (
+
+                                    <div
+                                        className={`ag-theme-alpine ${gridThemeClass}`}
+                                        style={{ width: '100%', height:'500px'}}
+                                    >
+                                        <AgGridReact
+                                            rowData={domainData}
+                                            columnDefs={domainColumnDefs}
+                                            // defaultColDef={defaultColDef}
+                                            suppressAggFuncInHeader={true}
+                                            pinnedBottomRowData={domainFixedFooter}
+                                            getRowStyle={(params) => {
+                                                if (params.node.rowPinned) {
+                                                    return {
+                                                        fontWeight: 'bold',
+                                                        // backgroundColor: theme === "dark" ? '#000' : '#fff',
+                                                        // color: theme === "dark" ? '#fff' : '#000',
+                                                    };
+                                                }
+                                                return null;
+                                            }}
+                                            onFilterChanged={(params) => {
+                                                const api = params.api;
+                                                const filteredData = [];
+                                                api.forEachNodeAfterFilterAndSort((node) => {
+                                                    if (!node.rowPinned) {
+                                                        filteredData.push(node.data);
+                                                    }
+                                                });
+
+                                                const updatedFooter = [
+                                                    {
+                                                        [`${newtime}Date`]: 'Totals',
+                                                        spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
+                                                        estimated_revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.estimated_revenue || 0), 0).toFixed(2)),
+                                                        profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
+                                                        margin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.estimated_revenue), 0) * 100).toFixed(2)),
+                                                        rpc: parseFloat(
+                                                            (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc || 0), 0) / filteredData.length || 0).toFixed(2)
+                                                        ),
+                                                        // cpl: parseFloat(
+                                                        //     (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl || 0), 0) / filteredData.length || 0).toFixed(2)
+                                                        // ),
+                                                        // impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0).toFixed(2)),
+                                                    },
+                                                ];
+
+                                                setDomainFixedFooter(updatedFooter);
+                                            }}
+                                        />
+                                    </div>
+
+                                ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
+                                    {startDate !== endDate ? <Result
+                                        className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                        icon={<SmileOutlined />}
+                                        title={`No DomainData for ${newaccount} from ${startDate} to ${endDate}`}
+                                    // extra={<Button type="primary">Next</Button>}
+                                    /> : <Result
+                                        className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                        icon={<SmileOutlined />}
+                                        title={`No DomainData for ${newaccount} to ${startDate}`}
+                                    // extra={<Button type="primary">Next</Button>}
+                                    />}
+                                </div>}
+                            </div>
+                        </div>
+                    }
+                    {/* <div>hi</div> */}
 
                 </Carousel>
             </div>
 
-            <Draggable>
+            {/* <Draggable>
                 <FloatButton.Group
                     trigger="hover"
                     type="primary"
@@ -5020,7 +6868,7 @@ const MyTablePage = () => {
                     <FloatButton icon={<RiLiveFill />} onClick={handleCommentClick} />
 
                 </FloatButton.Group>
-            </Draggable>
+            </Draggable> */}
 
             <Modal
                 title="Basic Modal"
