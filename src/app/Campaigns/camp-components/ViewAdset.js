@@ -175,6 +175,7 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                                     { value: "AU", label: "Australia" },
                                     { value: "IN", label: "India" },
                                     { value: "AE", label: "United Arab Emirates" },
+                                    { value: "CA", label:"Canada"},
                                 ]}
                             />
                         </Form.Item>

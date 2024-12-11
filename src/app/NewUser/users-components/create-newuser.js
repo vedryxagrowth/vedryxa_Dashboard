@@ -124,7 +124,7 @@ const Createnewuser = ({ visible, onClose }) => {
                             window.location.reload();
                         }, 1500);
                         setIsModalVisible(false); // Close modal after success
-                        onClose(); // Close drawer
+                        onClose("email"); // Close drawer
                     } else {
                         console.error('Failed to create user');
                         // Handle error, show error message

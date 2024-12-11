@@ -1370,21 +1370,23 @@ const UsersTable = () => {
     },[newRefreshUrlBuilder]);
 
     const onCloseDrawer = (updatedData) => {
+        console.log(updatedData);
         if (updatedData) {
-          if (updatedData.email) {
+          if (updatedData.email || updatedData === "email") {
             // Handle user data update
             setUsersData((prevData) =>
               prevData.map((user) =>
                 user.email === updatedData.email ? updatedData : user
               )
             );
-          } else if (updatedData.accountNumber) {
+          } else if (updatedData === "AccountNumber" || updatedData.accountNumber) {
             // Handle account data update
-            setAccountsData((prevData) =>
-              prevData.map((account) =>
-                account.accountNumber === updatedData.accountNumber ? updatedData : account
-              )
-            );
+            // setAccountsData((prevData) =>
+            //   prevData.map((account) =>
+            //     account.accountNumber === updatedData.accountNumber ? updatedData : account
+            //   )
+            // );
+            refreshAccounts();
           } else if (updatedData.revenuePartner) {
             // Handle network data update
             setNetworksData((prevData) =>
@@ -1392,7 +1394,7 @@ const UsersTable = () => {
                 network.revenuePartner === updatedData.revenuePartner ? updatedData : network
               )
             );
-          }else {
+          }else if(newRefreshUrlBuilder !== null){
             setNewRefreshUrlbuilder(updatedData);
           }
         }
@@ -1406,7 +1408,7 @@ const UsersTable = () => {
         setUrlBuliderAccessDrawerkVisible(false);
     };
 
-
+    console.log(accFilteredData);
     
 
     return (
