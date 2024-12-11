@@ -87,6 +87,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
         timeZone: timeZoneShortNames[editeddata.timeZone],
         pixelID: editeddata?.pixelID || "",
         pageID: editeddata?.pageID || "",
+        AgencyName: editeddata?.AgencyName || ""
       });
     }
   }, [editeddata, form]);
@@ -113,7 +114,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
       );
 
       if (response.status === 200) {
-        message.success("Account created successfully");
+        message.success("Account Updated successfully");
 
         
 
@@ -178,6 +179,10 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
             <Input   disabled  style={{backgroundColor:'transparent', color: theme === "dark" ? 'white' : "black"}}/>
           </Form.Item>
 
+          <Form.Item label="Account Name" name="accountName">
+            <Input style={{backgroundColor:'transparent', color: theme === "dark" ? 'white' : "black"}}/>
+          </Form.Item>
+
           <Form.Item label="Pixel ID" name="pixelID">
             <Input style={{backgroundColor:'transparent', color: theme === "dark" ? 'white' : "black"}}/>
           </Form.Item>
@@ -187,6 +192,10 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
           </Form.Item>
 
           <Form.Item label="Page Name" name="pageName">
+            <Input style={{backgroundColor:'transparent', color: theme === "dark" ? 'white' : "black"}}/>
+          </Form.Item>
+
+          <Form.Item label="Agency Name" name="AgencyName">
             <Input style={{backgroundColor:'transparent', color: theme === "dark" ? 'white' : "black"}}/>
           </Form.Item>
 
@@ -255,6 +264,14 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
                 label: item,
               }))}
             />
+          </Form.Item>
+
+          <Form.Item label="Media Buyer" name="MediaBuyerName">
+            <Input style={{backgroundColor:'transparent', color: theme === "dark" ? 'white' : "black"}}/>
+          </Form.Item>
+
+          <Form.Item label="Holder" name="Holder">
+            <Input style={{backgroundColor:'transparent', color: theme === "dark" ? 'white' : "black"}}/>
           </Form.Item>
 
           <Form.Item>
