@@ -12,7 +12,7 @@ import { useTokenContext } from '../../../components/parent'
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
 import { color } from 'chart.js/helpers';
-import { Spin, Row, Col } from 'antd';
+import { Spin, Row, Col, Select } from 'antd';
 import debounce from 'lodash.debounce';
 
 Chart.register(...registerables);
@@ -48,7 +48,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
 
     const [endDate1, setEndDate1] = useState();
 
-    const [columnDefs, setColumnStructure] = useState([]);
+    // const [columnDefs, setColumnStructure] = useState([]);
 
     const [decode, setDebounc] = useState("");
 
@@ -323,26 +323,26 @@ const MnetLiveCampaignHistory = ({ params }) => {
 
 
 
-    const pinnedBottomRowData = [
-        {
-            campaignName: 'Total',
-            spend: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0).toFixed(2)),
-            revenue: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0).toFixed(2)),
-            profit: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0).toFixed(2)),
-            margin: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
-            rpc: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / rowData?.length).toFixed(2)),
-            cpl: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / rowData?.length).toFixed(2)),
-            ncpl: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / rowData?.length).toFixed(2)),
-            fbleads: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0).toFixed(2)),
-            conversions: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0).toFixed(2)),
-            fmargin: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
-            roi: parseFloat(((rowData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - rowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
-            cpc: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / rowData?.length).toFixed(2)),
-            fbclicks: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
-            impressions: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
-            ctr: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
-        }
-    ];
+    // const pinnedBottomRowData = [
+    //     {
+    //         campaignName: 'Total',
+    //         spend: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0).toFixed(2)),
+    //         revenue: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0).toFixed(2)),
+    //         profit: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0).toFixed(2)),
+    //         margin: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
+    //         rpc: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / rowData?.length).toFixed(2)),
+    //         cpl: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / rowData?.length).toFixed(2)),
+    //         ncpl: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / rowData?.length).toFixed(2)),
+    //         fbleads: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0).toFixed(2)),
+    //         conversions: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0).toFixed(2)),
+    //         fmargin: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+    //         roi: parseFloat(((rowData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - rowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+    //         cpc: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / rowData?.length).toFixed(2)),
+    //         fbclicks: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
+    //         impressions: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
+    //         ctr: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
+    //     }
+    // ];
 
     const defaultComparator = (valueA, valueB) => {
         if (valueA == null && valueB == null) return 0; // Both values are null/undefined
@@ -364,9 +364,138 @@ const MnetLiveCampaignHistory = ({ params }) => {
     };
 
 
-    const columnDefsObject = {
-        date: {
-            headerName: 'Date', field: 'date', width: 400,
+    // const columnDefsObject = {
+    //     date: {
+    //         headerName: 'Date', field: 'date', width: 400,
+    //         minWidth: 450,
+    //         resizable: true,
+    //         sortable: true,
+    //         // width: 500,
+    //         hide: true,
+    //         rowGroup: true,
+    //         enableRowGroup: true,
+    //         pinned: 'left',
+    //         sort: 'desc'
+    //     },
+    //     campaignname: {
+    //         headerName: 'CampaignName', field: 'campaignName', resizeble: true,
+    //         // sortable: true,
+    //         minWidth: 400,
+    //         // hide: true,
+    //         // // // resizable:false,
+    //         // rowGroup: true,
+    //         // filter: true,
+    //         // groupDisplayType: 'group',
+    //         // pinned: 'left',
+    //         // enableRowGroup: true,
+    //         // autoHeight: true, 
+    //     },
+    //     adsetname: {
+    //         headerName: 'AdsetName', field: 'adsetName',
+    //         // resizeble: true,
+    //         // // sortable: true,
+    //         minWidth: 350,
+    //         // hide: true,
+    //         // // // resizable:false,
+    //         // // rowGroup: true,
+    //         // filter: true,
+    //         // pinned: 'left',
+    //         // enableRowGroup: true,
+    //         // autoHeight: true, 
+    //     },
+    //     // { headerName: 'FB-Hour', field: 'fb-hour', width: 120 },
+    //     // { headerName: 'MNet-Hour', field: 'mnet-hour', width: 120 },
+    //     spend: {
+    //         headerName: 'Spend', field: 'spend', width: 120, aggFunc: spender,
+    //         comparator: defaultComparator,
+    //     },
+    //     revenue: {
+    //         headerName: 'Revenue', field: 'revenue', width: 120, aggFunc: spender,
+    //         comparator: defaultComparator,
+    //     },
+    //     profit: {
+    //         headerName: 'Profit', field: 'profit', width: 120, aggFunc: spender, cellClassRules: {
+    //             'font-red': p => p.value < 0
+    //         },
+    //         comparator: defaultComparator,
+    //     },
+    //     margin: {
+    //         headerName: 'Margin', field: 'margin', valueGetter: getMargin,
+    //         comparator: defaultComparator,
+    //         valueFormatter: (params) => `${params.value}%`,
+    //     },
+    //     fbleads: {
+    //         headerName: 'FbLeads', field: 'fbleads', width: 120, aggFunc: spender,
+    //         comparator: defaultComparator,
+    //     },
+    //     conversions: {
+    //         headerName: 'Conversions', field: 'conversions', width: 120, aggFunc: newSpender,
+    //         comparator: defaultComparator,
+    //     },
+    //     cpc: {
+    //         headerName: 'cpc', field: 'cpc', aggFunc: cpcSpender,
+    //         comparator: defaultComparator,
+    //     },
+    //     fbclicks: {
+    //         headerName: 'FbClicks', field: 'fbclicks', width: 120, aggFunc: spender,
+    //         comparator: defaultComparator,
+    //     },
+    //     impressions: {
+    //         headerName: 'Impressions', field: 'impressions', width: 120, aggFunc: spender,
+    //         comparator: defaultComparator,
+    //     },
+    //     ctr: {
+    //         headerName: 'Ctr', field: 'ctr', valueGetter: getCtr,
+    //         comparator: defaultComparator,
+    //         valueFormatter: (params) => `${params.value}%`,
+    //     },
+    //     rpc: {
+    //         headerName: 'Rpc', field: 'rpc', valueGetter: getRpc,
+    //         comparator: defaultComparator,
+    //     },
+    //     cpl: {
+    //         headerName: 'Cpl', field: 'cpl', valueGetter: getCpl,
+    //         comparator: defaultComparator,
+    //     },
+    //     ncpl: {
+    //         headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl,
+    //         comparator: defaultComparator,
+    //     },
+    //     fmargin: {
+    //         headerName: 'Fmargin', field: 'fmargin', valueGetter: getFmargin,
+    //         comparator: defaultComparator,
+    //         valueFormatter: (params) => `${params.value}%`,
+    //     },
+    //     roi: {
+    //         headerName: 'ROI', field: 'roi', valueGetter: getROI,
+    //         comparator: defaultComparator,
+    //         valueFormatter: (params) => `${params.value}%`,
+    //     },
+    //     adsetid: {
+    //         headerName: 'AdsetId', field: 'adsetId',
+    //         comparator: defaultComparator,
+    //     },
+    //     campaignid: {
+    //         headerName: 'CampaignId', field: 'campaignId',
+    //         comparator: defaultComparator,
+    //     },
+    //     timezone: {
+    //         headerName: 'TimeZone', field: 'timezone',
+    //         comparator: defaultComparator,
+    //     },
+    //     "fb-hour": {
+    //         headerName: 'F-H', field: "hour",
+    //         comparator: defaultComparator,
+    //     },
+    //     "mnet-hour": {
+    //         headerName: 'N-H', field: "updatedHour",
+    //         comparator: defaultComparator,
+    //     }
+    // };
+
+    const columnDefs = [
+        {
+            headerName: 'Date_N', field: 'date', minWidth: 250,
             minWidth: 450,
             resizable: true,
             sortable: true,
@@ -375,22 +504,24 @@ const MnetLiveCampaignHistory = ({ params }) => {
             rowGroup: true,
             enableRowGroup: true,
             pinned: 'left',
-            sort: 'desc'
+            sort: 'desc',
+            
+            // valueFormatter: (params) => `${params.value} (${moment(params.value).format('ddd')}) `,
         },
-        campaignname: {
-            headerName: 'CampaignName', field: 'campaignName', resizeble: true,
-            // sortable: true,
-            minWidth: 400,
-            // hide: true,
-            // // // resizable:false,
-            // rowGroup: true,
-            // filter: true,
-            // groupDisplayType: 'group',
-            // pinned: 'left',
-            // enableRowGroup: true,
-            // autoHeight: true, 
-        },
-        adsetname: {
+        // {
+        //     headerName: 'CampaignName', field: 'campaignName', resizeble: true,
+        //     // sortable: true,
+        //     minWidth: 400,
+        //     // hide: true,
+        //     // // // resizable:false,
+        //     // rowGroup: true,
+        //     // filter: true,
+        //     // groupDisplayType: 'group',
+        //     // pinned: 'left',
+        //     // enableRowGroup: true,
+        //     // autoHeight: true, 
+        // },
+        {
             headerName: 'AdsetName', field: 'adsetName',
             // resizeble: true,
             // // sortable: true,
@@ -405,111 +536,284 @@ const MnetLiveCampaignHistory = ({ params }) => {
         },
         // { headerName: 'FB-Hour', field: 'fb-hour', width: 120 },
         // { headerName: 'MNet-Hour', field: 'mnet-hour', width: 120 },
-        spend: {
-            headerName: 'Spend', field: 'spend', width: 120, aggFunc: spender,
+        {
+            headerName: 'Hour_N', field: "updatedHour",
             comparator: defaultComparator,
         },
-        revenue: {
-            headerName: 'Revenue', field: 'revenue', width: 120, aggFunc: spender,
+        
+        {
+            headerName: 'Hour_F', field: "hour",
             comparator: defaultComparator,
         },
-        profit: {
-            headerName: 'Profit', field: 'profit', width: 120, aggFunc: spender, cellClassRules: {
-                'font-red': p => p.value < 0
+        {
+            headerName: 'Date_F', field: 'date', 
+            minWidth: 150,
+            resizable: true,
+            sortable: true,
+            valueFormatter: (params) => {
+                // If the row is grouped or pinned, return the original value (or empty for pinned rows)
+                if (params.node.group) {
+                    return "";
+                }
+                if (params.node.rowPinned) {
+                    return ''; // Return an empty value for pinnedBottomRowData
+                }
+                // Format the value for leaf nodes
+                return `${params.value} (${moment(params.value).format('ddd')})`;
             },
-            comparator: defaultComparator,
         },
-        margin: {
-            headerName: 'Margin', field: 'margin', valueGetter: getMargin,
-            comparator: defaultComparator,
-            valueFormatter: (params) => `${params.value}%`,
+        {
+            headerName: 'Spend',
+            field: 'spend',
+            width: 120,
+            aggFunc: spender, // Ensure spender aggregates numeric values
+            comparator: (valueA, valueB) => {
+                if (valueA == null && valueB == null) return 0; // Both are null
+                if (valueA == null) return -1; // Null first
+                if (valueB == null) return 1; // Null last
+                return valueA - valueB; // Numeric comparison
+            },
+            filter: true, // Use numeric filtering
+            valueFormatter: (params) => {
+                const value = parseFloat(params.value);
+                return !isNaN(value) ? `$${value.toFixed(2)}` : ''; // Format only if it's a valid number
+            }, // Format as currency with 2 decimals
         },
-        fbleads: {
-            headerName: 'FbLeads', field: 'fbleads', width: 120, aggFunc: spender,
-            comparator: defaultComparator,
+        {
+            headerName: 'Revenue',
+            field: 'revenue',
+            width: 120,
+            aggFunc: spender, // Ensure spender aggregates numeric values
+            filter: true, 
+            valueParser: (params) => {
+                // Parse the revenue value as a number
+                return parseFloat(params.newValue) || 0; // Default to 0 if invalid
+            },
+            comparator: (valueA, valueB) => {
+                if (valueA == null && valueB == null) return 0; // Both are null
+                if (valueA == null) return -1; // Null first
+                if (valueB == null) return 1; // Null last
+                return valueA - valueB; // Numeric comparison
+            },
+            valueFormatter: (params) => {
+                const value = parseFloat(params.value);
+                return !isNaN(value) ? `$${value.toFixed(2)}` : ''; // Format only if it's a valid number
+            }, // Format as currency with 2 decimals
         },
-        conversions: {
-            headerName: 'Conversions', field: 'conversions', width: 120, aggFunc: newSpender,
-            comparator: defaultComparator,
+        {
+            headerName: 'Profit',
+            field: 'profit',
+            width: 120,
+            aggFunc: spender, // Ensure `spender` returns numeric values
+            cellClassRules: {
+                'font-red': (params) => params.value < 0, // Highlight negative values
+            },
+            comparator: (valueA, valueB) => {
+                if (valueA == null && valueB == null) return 0; // Both are null/undefined
+                if (valueA == null) return -1; // Null/undefined first
+                if (valueB == null) return 1; // Null/undefined last
+        
+                // Ensure numeric comparison
+                return valueA - valueB;
+            },
+            valueFormatter: (params) =>
+                params.value != null ? Math.round(params.value * 100) / 100 : '', // Format to 2 decimal places
         },
-        cpc: {
-            headerName: 'cpc', field: 'cpc', aggFunc: cpcSpender,
-            comparator: defaultComparator,
+        {
+            headerName: 'Margin',
+            field: 'margin',
+            valueGetter: getMargin, // Custom logic to calculate margin
+            comparator: (valueA, valueB) => {
+                const numA = parseFloat(valueA);
+                const numB = parseFloat(valueB);
+                if (isNaN(numA) && isNaN(numB)) return 0;
+                if (isNaN(numA)) return -1;
+                if (isNaN(numB)) return 1;
+                return numA - numB;
+            },
+            valueFormatter: (params) => {
+                const value = parseFloat(params.value);
+                return !isNaN(value) ? `${value.toFixed(2)}%` : '';
+            },
         },
-        fbclicks: {
-            headerName: 'FbClicks', field: 'fbclicks', width: 120, aggFunc: spender,
-            comparator: defaultComparator,
+        {
+            headerName: 'Rpc',
+            field: 'rpc',
+            valueGetter: getRpc, // Custom logic to calculate RPC
+            comparator: (valueA, valueB) => {
+                const numA = parseFloat(valueA);
+                const numB = parseFloat(valueB);
+                if (isNaN(numA) && isNaN(numB)) return 0;
+                if (isNaN(numA)) return -1;
+                if (isNaN(numB)) return 1;
+                return numA - numB;
+            },
+            valueFormatter: (params) => {
+                const value = parseFloat(params.value);
+                return !isNaN(value) ? `$${value.toFixed(2)}` : ''; // Format as currency
+            },
         },
-        impressions: {
-            headerName: 'Impressions', field: 'impressions', width: 120, aggFunc: spender,
-            comparator: defaultComparator,
+        {
+            headerName: 'Cpl',
+            field: 'cpl',
+            valueGetter: getCpl, // Custom logic to calculate CPL
+            comparator: (valueA, valueB) => {
+                const numA = parseFloat(valueA);
+                const numB = parseFloat(valueB);
+                if (isNaN(numA) && isNaN(numB)) return 0;
+                if (isNaN(numA)) return -1;
+                if (isNaN(numB)) return 1;
+                return numA - numB;
+            },
+            valueFormatter: (params) => {
+                const value = parseFloat(params.value);
+                return !isNaN(value) ? `$${value.toFixed(2)}` : ''; // Format as currency
+            },
         },
-        ctr: {
-            headerName: 'Ctr', field: 'ctr', valueGetter: getCtr,
-            comparator: defaultComparator,
-            valueFormatter: (params) => `${params.value}%`,
-        },
-        rpc: {
-            headerName: 'Rpc', field: 'rpc', valueGetter: getRpc,
-            comparator: defaultComparator,
-        },
-        cpl: {
-            headerName: 'Cpl', field: 'cpl', valueGetter: getCpl,
-            comparator: defaultComparator,
-        },
-        ncpl: {
+        {
             headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl,
             comparator: defaultComparator,
         },
-        fmargin: {
+        {
+            headerName: 'FbLeads', field: 'fbleads', width: 120, aggFunc: spender,
+            comparator: defaultComparator,
+        },
+        {
+            headerName: 'Conversions', field: 'conversions', width: 120, aggFunc: newSpender,
+            comparator: defaultComparator,
+        },
+        {
             headerName: 'Fmargin', field: 'fmargin', valueGetter: getFmargin,
             comparator: defaultComparator,
             valueFormatter: (params) => `${params.value}%`,
         },
-        roi: {
+        {
             headerName: 'ROI', field: 'roi', valueGetter: getROI,
             comparator: defaultComparator,
             valueFormatter: (params) => `${params.value}%`,
         },
-        adsetid: {
-            headerName: 'AdsetId', field: 'adsetId',
+        {
+            headerName: 'cpc', field: 'cpc', aggFunc: cpcSpender,
             comparator: defaultComparator,
         },
-        campaignid: {
-            headerName: 'CampaignId', field: 'campaignId',
+        {
+            headerName: 'FbClicks', field: 'fbclicks', width: 120, aggFunc: spender,
             comparator: defaultComparator,
         },
-        timezone: {
-            headerName: 'TimeZone', field: 'timezone',
+        {
+            headerName: 'Impressions', field: 'impressions', width: 120, aggFunc: spender,
             comparator: defaultComparator,
         },
-        "fb-hour": {
-            headerName: 'F-H', field: "hour",
+        {
+            headerName: 'Ctr', field: 'ctr', valueGetter: getCtr,
             comparator: defaultComparator,
+            valueFormatter: (params) => `${params.value}%`,
         },
-        "mnet-hour": {
-            headerName: 'N-H', field: "updatedHour",
-            comparator: defaultComparator,
-        }
+        // {
+        //     headerName: 'AdsetId', field: 'adsetId',
+        //     comparator: defaultComparator,
+        // },
+        // {
+        //     headerName: 'CampaignId', field: 'campaignId',
+        //     comparator: defaultComparator,
+        // },
+        // {
+        //     headerName: 'TimeZone', field: 'timezone',
+        //     comparator: defaultComparator,
+        // },
+    ];
+
+    // const getColumnDefs = (order) => {
+    //     return order?.map(colKey => columnDefsObject[colKey]);
+    // };
+
+    const dateOptions = [
+        "All",
+        "Today",
+        "Yesterday",
+        "Last 7 Days",
+        "Last 15 Days",
+        "Last 20 Days",
+        "Last 25 Days",
+        "Last 30 Days",
+        "Last 60 Days",
+        "Last 90 Days",
+        "This Month",
+        "Last Month",
+    ];
+    
+    const [selectedValue, setSelectedValue] = useState("All");
+    const [filteredData, setFilteredData] = useState(rowData);
+
+    const [domainFixedFooter, setDomainFixedFooter] = useState([]);
+    
+    const handleChange = (value) => {
+        setSelectedValue(value);
+    
+        const today = moment();
+        const startOfMonth = moment().startOf("month");
+        const endOfMonth = moment().endOf("month");
+        const startOfLastMonth = moment().subtract(1, "month").startOf("month");
+        const endOfLastMonth = moment().subtract(1, "month").endOf("month");
+    
+        const dynamicDaysFilter = (days) =>
+            rowData.filter((item) =>
+            moment(item.date).isBetween(
+              moment().subtract(days, "days"),
+              today,
+              undefined,
+              "[]"
+            )
+          );
+    
+        const filterLogic = {
+          All: () => rowData,
+          Today: () => rowData.filter((item) => item.date === today.format("YYYY-MM-DD")),
+          Yesterday: () =>
+            rowData.filter(
+              (item) =>
+                item.date === today.clone().subtract(1, "days").format("YYYY-MM-DD")
+            ),
+          "Last 7 Days": () => dynamicDaysFilter(7),
+          "Last 15 Days": () => dynamicDaysFilter(15),
+          "Last 20 Days": () => dynamicDaysFilter(20),
+          "Last 25 Days": () => dynamicDaysFilter(25),
+          "Last 30 Days": () => dynamicDaysFilter(30),
+          "Last 60 Days": () => dynamicDaysFilter(60),
+          "Last 90 Days": () => dynamicDaysFilter(90),
+          "This Month": () =>
+            rowData.filter((item) =>
+              moment(item.date).isBetween(startOfMonth, endOfMonth, undefined, "[]")
+            ),
+          "Last Month": () =>
+            rowData.filter((item) =>
+              moment(item.date).isBetween(
+                startOfLastMonth,
+                endOfLastMonth,
+                undefined,
+                "[]"
+              )
+            ),
+        };
+    
+        const filtered = filterLogic[value] ? filterLogic[value]() : data;
+        setFilteredData(filtered);
     };
 
-    const getColumnDefs = (order) => {
-        return order?.map(colKey => columnDefsObject[colKey]);
-    };
     const token = localStorage.getItem("token")
 
-    const functionCallForUserColumnStructure = async () => {
-        console.log(user, "user email");
-        const fetchData = await axios.get(`https://prodapis.adsgoat.in/api/singleUserData?email=${user}`);
-        // const data = await fetchData.json();
-        const mainData = fetchData.data;
-        console.log(mainData);
-        console.log(mainData.columnStructure, "columnStructure");
-        const filteredData = mainData.columnStructure?.filter((each) => each !== "actions");
-        console.log(filteredData);
-        setColumnStructure(getColumnDefs(filteredData));
-        // setRowStructure(mainData.rows); 
-    }
+    // const functionCallForUserColumnStructure = async () => {
+    //     console.log(user, "user email");
+    //     const fetchData = await axios.get(`https://prodapis.adsgoat.in/api/singleUserData?email=${user}`);
+    //     // const data = await fetchData.json();
+    //     const mainData = fetchData.data;
+    //     console.log(mainData);
+    //     console.log(mainData.columnStructure, "columnStructure");
+    //     const filteredData = mainData.columnStructure?.filter((each) => each !== "actions");
+    //     console.log(filteredData);
+    //     setColumnStructure(getColumnDefs(filteredData));
+    //     // setRowStructure(mainData.rows); 
+    // }
 
 
     // const functionCall = async () => {
@@ -620,7 +924,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
 
         const filteredData = mainData && mainData.length > 0 ?
             mainData.map((eachData) => {
-                const revenueData = eachData.estimated_revenue || '0.00';
+                const revenueData = parseFloat(eachData.estimated_revenue) || '0.00';
                 const profit = (revenueData - eachData.spend).toFixed(2);
                 const margin = revenueData !== '0.00' ? `${((revenueData - eachData.spend) / revenueData * 100).toFixed(2)}%` : "0%";
 
@@ -660,6 +964,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
             : null;
 
         setRowData(filteredData);
+        setFilteredData(filteredData);
         setValue(mainData);
         setLoading(false);
 
@@ -791,18 +1096,41 @@ const MnetLiveCampaignHistory = ({ params }) => {
     }
 
 
-    const debouncedFunctionCallForUserColumnStructure = debounce(async () => {
-        await functionCallForUserColumnStructure();
-    }, 1500);
+    // const debouncedFunctionCallForUserColumnStructure = debounce(async () => {
+    //     await functionCallForUserColumnStructure();
+    // }, 1500);
+
+    useEffect(()=>{
+        setDomainFixedFooter([
+            {
+                adsetName: 'Total',
+                spend: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0),
+                revenue: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0),
+                profit: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0),
+                margin: `${(filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)}%`,
+                rpc: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / filteredData?.length,
+                cpl: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / filteredData?.length,
+                ncpl: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.ncpl), 0) / filteredData?.length,
+                fbleads: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.fbleads), 0),
+                conversions: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0),
+                fmargin: `${(filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)}%`,
+                roi: `${(filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) - filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0)) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100}%`,
+                cpc: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.cpc), 0) / filteredData?.length,
+                fbclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0),
+                impressions: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0),
+                ctr: `${(filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2)}%`
+            }
+        ]);
+    },[filteredData])
 
     const debouncedFunctionCall = debounce(async () => {
         await functionCall();
-    }, 2000);
+    }, 1500);
 
     useEffect(() => {
         if (userdetails?.adAccounts) {
             const mainFunctionCall = async () => {
-                await debouncedFunctionCallForUserColumnStructure();
+                // await debouncedFunctionCallForUserColumnStructure();
                 await debouncedFunctionCall();
             };
             mainFunctionCall();
@@ -1139,6 +1467,21 @@ const MnetLiveCampaignHistory = ({ params }) => {
 
 
             </Col>
+            <Col style={{display:'flex', justifyContent:'flex-end'}}>
+                <Select
+                    placeholder="Select a range"
+                    value={selectedValue}
+                    onChange={handleChange}
+                    style={{ width: "200px" }}
+                    allowClear
+                >
+                    {dateOptions.map((option, index) => (
+                    <Option key={index} value={option}>
+                        {option}
+                    </Option>
+                    ))}
+                </Select>
+            </Col>
 
             <Col>
                 {isLoading === true ? (
@@ -1155,36 +1498,91 @@ const MnetLiveCampaignHistory = ({ params }) => {
                             />
                         </div>
                     </div>
-                ) : rowData?.length > 0 ? (
-                    // <div className="ag-theme-alpine ag-container">
+                ) : (
+                    // <div className="ag-theme-alpine ag-container" >
                     <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
                         <AgGridReact
-                            rowData={rowData}
+                            rowData={filteredData}
                             columnDefs={columnDefs}
                             defaultColDef={defaultColDef}
-                            pinnedBottomRowData={pinnedBottomRowData}
-                            getRowStyle={params => {
+                            pinnedBottomRowData={domainFixedFooter}
+                            // pagination={true} // Enable pagination
+                            // paginationPageSize={5} // Set rows per page
+                            // paginationNumberFormatter={(params) => `${params.value}`}
+                            getRowStyle={(params) => {
                                 if (params.node.rowPinned) {
                                     return {
                                         fontWeight: 'bold',
-                                        backgroundColor: theme === "dark" ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
-                                        color: theme === "dark" ? '#fff' : '#000',           // Text color should contrast with the background
+                                        backgroundColor: theme === 'dark' ? '#000' : '#fff',
+                                        color: theme === 'dark' ? '#fff' : '#000',
                                     };
                                 }
-
                                 return null;
                             }}
-                            pagination={true}
-                            paginationPageSize={30}
-                            paginationPageSizeSelector={[10, 20, 30]}
+                            groupDisplayType="multipleColumns"
                             suppressAggFuncInHeader={true}
-                            groupDisplayType='multipleColumns'
-                        // groupIncludeTotalFooter={true}
-                        // rowGroupPanelShow='always'
-                        // groupIncludeFooter={true}
+                            groupSuppressBlankHeader={true}
+                            onFilterChanged={(params) => {
+                                const api = params.api;
+                                const filteredData = [];
+                                api.forEachNodeAfterFilterAndSort((node) => {
+                                    if (!node.rowPinned) {
+                                        filteredData.push(node.data);
+                                    }
+                                });
+
+                                const totalRevenue = filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0) || 0;
+                                const totalProfit = filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0) || 0;
+                                const totalSpend = filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0) || 0;
+
+                                const updatedFooter = [
+                                    {
+                                        adsetName: 'Total',
+                                        spend: totalSpend.toFixed(2),
+                                        revenue: totalRevenue.toFixed(2),
+                                        profit: totalProfit.toFixed(2),
+                                        margin: totalRevenue ? `${((totalProfit / totalRevenue) * 100).toFixed(2)}%` : '0%',
+                                        rpc: (
+                                            filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.rpc || 0), 0) /
+                                            (filteredData?.length || 1)
+                                        ).toFixed(2),
+                                        cpl: (
+                                            filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.cpl || 0), 0) /
+                                            (filteredData?.length || 1)
+                                        ).toFixed(2),
+                                        ncpl: (
+                                            filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.ncpl || 0), 0) /
+                                            (filteredData?.length || 1)
+                                        ).toFixed(2),
+                                        fbleads: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.fbleads || 0), 0),
+                                        conversions: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.conversions || 0), 0),
+                                        fmargin: totalSpend ? `${((totalProfit / totalSpend) * 100).toFixed(2)}%` : '0%',
+                                        roi: totalSpend
+                                            ? `${(((totalRevenue - totalSpend) / totalSpend) * 100).toFixed(2)}%`
+                                            : '0%',
+                                        cpc: (
+                                            filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.cpc || 0), 0) /
+                                            (filteredData?.length || 1)
+                                        ).toFixed(2),
+                                        fbclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks || 0), 0),
+                                        impressions: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0),
+                                        ctr: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0)
+                                            ? `${(
+                                                (filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks || 0), 0) /
+                                                    filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0)) *
+                                                100
+                                            ).toFixed(2)}%`
+                                            : '0%',
+                                    },
+                                ];
+
+                                if (JSON.stringify(domainFixedFooter) !== JSON.stringify(updatedFooter)) {
+                                    setDomainFixedFooter(updatedFooter);
+                                }
+                            }}
                         />
                     </div>
-                ) : null}
+                )}
             </Col>
         </Row>
     );

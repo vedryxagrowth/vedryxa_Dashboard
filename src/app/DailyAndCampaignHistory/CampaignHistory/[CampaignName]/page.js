@@ -11,7 +11,7 @@ import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { useTokenContext } from '../../../components/parent'
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
-import { Spin, Row, Col } from 'antd';
+import { Spin, Row, Col, Select } from 'antd';
 Chart.register(...registerables);
 import debounce from 'lodash.debounce';
 
@@ -23,7 +23,7 @@ export default function CampaignAndAccount({ params }) {
 
     const user = userdetails?.email;
 
-    const [columnDefs, setColumnStructure] = useState([]);
+    // const [columnDefs, setColumnStructure] = useState([]);
 
     const [isLoading, setLoading] = useState(true);
     const [dailyData, setdailyData] = useState([]);
@@ -152,6 +152,29 @@ export default function CampaignAndAccount({ params }) {
         return 0;
     }
 
+    const getFilteration = (params) => {
+        if (params.data !== undefined) {
+            const { fbLeads, conversions } = params.data;
+            if (fbLeads !== 0) {
+                const RPC = ((parseInt(fbLeads)-parseInt(conversions)) / parseInt(fbLeads))*100;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return Number(RPC.toFixed(2));
+
+            }
+        }
+        if (params.node.aggData !== undefined) {
+            const { fbLeads, conversions } = params.node.aggData;
+            if (fbLeads !== 0) {
+                const RPC = ((parseInt(fbLeads)-parseInt(conversions)) / parseInt(fbLeads))*100;
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        return 0;
+    }
+
     const getDev = (params) => {
         const rpc = getRpc(params);
         if (params.data !== undefined) {
@@ -262,22 +285,95 @@ export default function CampaignAndAccount({ params }) {
         return sum;
     }
 
-    const getColumnDefs = (order) => {
-        return order?.map(colKey => columnDefsObject[colKey]);
+    // const getColumnDefs = (order) => {
+    //     return order?.map(colKey => columnDefsObject[colKey]);
+    // };
+
+    const dateOptions = [
+        "All",
+        "Today",
+        "Yesterday",
+        "Last 7 Days",
+        "Last 15 Days",
+        "Last 20 Days",
+        "Last 25 Days",
+        "Last 30 Days",
+        "Last 60 Days",
+        "Last 90 Days",
+        "This Month",
+        "Last Month",
+    ];
+    
+    const [selectedValue, setSelectedValue] = useState("All");
+    const [filteredData, setFilteredData] = useState(dailyData);
+
+    const [domainFixedFooter, setDomainFixedFooter] = useState([]);
+    
+    const handleChange = (value) => {
+        setSelectedValue(value);
+    
+        const today = moment();
+        const startOfMonth = moment().startOf("month");
+        const endOfMonth = moment().endOf("month");
+        const startOfLastMonth = moment().subtract(1, "month").startOf("month");
+        const endOfLastMonth = moment().subtract(1, "month").endOf("month");
+    
+        const dynamicDaysFilter = (days) =>
+            dailyData.filter((item) =>
+            moment(item.date).isBetween(
+              moment().subtract(days, "days"),
+              today,
+              undefined,
+              "[]"
+            )
+          );
+    
+        const filterLogic = {
+          All: () => dailyData,
+          Today: () => dailyData.filter((item) => item.date === today.format("YYYY-MM-DD")),
+          Yesterday: () =>
+            dailyData.filter(
+              (item) =>
+                item.date === today.clone().subtract(1, "days").format("YYYY-MM-DD")
+            ),
+          "Last 7 Days": () => dynamicDaysFilter(7),
+          "Last 15 Days": () => dynamicDaysFilter(15),
+          "Last 20 Days": () => dynamicDaysFilter(20),
+          "Last 25 Days": () => dynamicDaysFilter(25),
+          "Last 30 Days": () => dynamicDaysFilter(30),
+          "Last 60 Days": () => dynamicDaysFilter(60),
+          "Last 90 Days": () => dynamicDaysFilter(90),
+          "This Month": () =>
+            dailyData.filter((item) =>
+              moment(item.date).isBetween(startOfMonth, endOfMonth, undefined, "[]")
+            ),
+          "Last Month": () =>
+            dailyData.filter((item) =>
+              moment(item.date).isBetween(
+                startOfLastMonth,
+                endOfLastMonth,
+                undefined,
+                "[]"
+              )
+            ),
+        };
+    
+        const filtered = filterLogic[value] ? filterLogic[value]() : data;
+        setFilteredData(filtered);
     };
 
     const token = localStorage.getItem("token")
 
-    const functionCallForUserColumnStructure = async () => {
-        const fetchData = await axios.get(`https://prodapis.adsgoat.in/api/singleUserData?email=${user}`);
-        // const data = await fetchData.json();
-        const mainData = fetchData.data;
-        console.log(mainData.columnStructure, "columnStructure");
-        const filteredData = mainData.columnStructure.filter((each) => each !== "fb-hour" && each !== "mnet-hour" && each !== "timezone" && each !== "actions" );
-        console.log(filteredData);
-        setColumnStructure(getColumnDefs(filteredData));
-        // setRowStructure(mainData.rows); 
-    }
+    // const functionCallForUserColumnStructure = async () => {
+    //     const fetchData = await axios.get(`https://prodapis.adsgoat.in/api/singleUserData?email=${user}`);
+    //     // const data = await fetchData.json();
+    //     const mainData = fetchData.data;
+    //     console.log(mainData.columnStructure, "columnStructure");
+    //     const filteredData = mainData.columnStructure.filter((each) => each !== "fb-hour" && each !== "mnet-hour" && each !== "timezone" && each !== "actions" );
+    //     console.log(filteredData);
+    //     setColumnStructure(getColumnDefs(filteredData));
+    //     // setRowStructure(mainData.rows); 
+    // }
 
     const getHistoryData = async () => {
         // const fetchData = await fetch(`http://localhost:8000/MnetCampaignDailyHistory?accountNumber=${accountNumber}&timezone=${timeZone}&campaignName=${decodedString}`);
@@ -328,6 +424,7 @@ export default function CampaignAndAccount({ params }) {
                         roi: roi,
                         cpc: (eachData.cpc).toString(),
                         fbleads: (eachData.fbLeads).toString(),
+                        filterarion: parseInt(eachData.fbLeads) !== 0 ? Math.round((((parseInt(eachData.fbLeads)-parseInt(eachData.conversions))/parseInt(eachData.fbLeads))*100)*100)/100 : 0,
                         fbclicks: (eachData.fbClicks).toString(),
                         impressions: (eachData.impressions).toString(),
                         conversions: conversions.toString(),
@@ -341,57 +438,64 @@ export default function CampaignAndAccount({ params }) {
                 )
             })
             : null;
-        setdailyData(filteredData);
         setLoading(false);
-        const dates = filteredData.map(d => d.date);
-        const spend = filteredData.map(d => d.spend);
-        const revenue = filteredData.map(d => d.revenue);
-        const profit = filteredData.map(d => d.profit);
-        const rpc = filteredData.map(d => d.rpc);
-        const cpl = filteredData.map(d => d.cpl);
+        const newFilterData = filteredData.sort((a, b) => new Date(a.date) - new Date(b.date));
+        setdailyData(newFilterData);
+        setFilteredData(newFilterData);
+        const dates = newFilterData.map(d => d.date);
+        const spend = newFilterData.map(d => d.spend);
+        const revenue = newFilterData.map(d => d.revenue);
+        const profit = newFilterData.map(d => d.profit);
+        const rpc = newFilterData.map(d => d.rpc);
+        const cpl = newFilterData.map(d => d.cpl);
 
-        const margin = filteredData.map(d => parseFloat(d.margin));
+        const margin = newFilterData.map(d => parseFloat(d.margin));
 
         setChartData({ dates, spend, revenue, profit, margin, rpc, cpl });
+        
     }
 
-    const debouncedFunctionCallForUserColumnStructure = debounce(async () => {
-        await functionCallForUserColumnStructure();
-      }, 1500);
+    useEffect(()=>{
+        setDomainFixedFooter([
+            {
+                adsetName: 'Total',
+                spend: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0),
+                revenue: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0),
+                profit: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0),
+                margin: `${(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)}%`,
+                rpc: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / filteredData?.length,
+                cpl: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / filteredData?.length,
+                ncpl: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / filteredData?.length,
+                fbleads: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0),
+                conversions: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0),
+                fmargin: `${(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)}%`,
+                roi: `${(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100}%`,
+                cpc: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / filteredData?.length,
+                fbclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0),
+                impressions: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0),
+                ctr: `${(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)}%`
+            }
+        ]);
+    },[filteredData])
+
+    // const debouncedFunctionCallForUserColumnStructure = debounce(async () => {
+    //     await functionCallForUserColumnStructure();
+    //   }, 1500);
       
       const debouncedFunctionCall = debounce(async () => {
         await getHistoryData();
-      }, 3000);
+      }, 1500);
 
     useEffect(() => {
         if (userdetails?.adAccounts) {
             const functionCall = async () => {
-                await debouncedFunctionCallForUserColumnStructure();
+                // await debouncedFunctionCallForUserColumnStructure();
                 await debouncedFunctionCall();
             }
             functionCall();
         }
     }, [userdetails]);
-    const pinnedBottomRowData = [
-        {
-            campaignName: 'Total',
-            spend: dailyData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0),
-            revenue: dailyData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0),
-            profit: dailyData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0),
-            margin: `${(dailyData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / dailyData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)}%`,
-            rpc: dailyData.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / dailyData.length,
-            cpl: dailyData.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / dailyData.length,
-            ncpl: dailyData.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / dailyData.length,
-            fbleads: dailyData.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0),
-            conversions: dailyData.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0),
-            fmargin: `${(dailyData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / dailyData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)}%`,
-            roi: `${(dailyData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - dailyData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / dailyData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100}%`,
-            cpc: dailyData.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / dailyData.length,
-            fbclicks: dailyData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0),
-            impressions: dailyData.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0),
-            ctr: `${(dailyData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / dailyData.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)}%`
-        }
-    ];
+    
 
     const defaultComparator = (valueA, valueB) => {
         if (valueA == null && valueB == null) return 0;
@@ -412,135 +516,234 @@ export default function CampaignAndAccount({ params }) {
         filter: true,    // Enable filtering for all columns
     };
 
-    const columnDefsObject = {
-        campaignname: {
-            headerName: 'CampaignName', field: 'campaignName',
-            // rowGroup: true,
-            // filter: true,
-            // hide: true,
-            // resizable: true,
-            // enableRowGroup: true,
-            // groupDisplayType: 'group',
-            width: 400,
+    // const columnDefsObject = {
+    //     campaignname: {
+    //         headerName: 'CampaignName', field: 'campaignName',
+    //         // rowGroup: true,
+    //         // filter: true,
+    //         // hide: true,
+    //         // resizable: true,
+    //         // enableRowGroup: true,
+    //         // groupDisplayType: 'group',
+    //         width: 400,
+    //     },
+    //     date: { headerName: 'Date', field: 'date', width: 120, sort: 'asc',
+    //     comparator: (valueA, valueB) => {
+    //         if (valueA == null && valueB == null) return 0;
+    //         if (valueA == null) return -1;
+    //         if (valueB == null) return 1;
+
+    //         const dateA = new Date(valueA);
+    //         const dateB = new Date(valueB);
+
+    //         // Compare valid dates
+    //         if (!isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) {
+    //             return dateA - dateB;
+    //         }
+
+    //         // Fallback for invalid dates (compare as strings)
+    //         return valueA.toString().localeCompare(valueB.toString());
+    //     }
+    //      },
+    //     spend: {
+    //         headerName: 'Spend', field: 'spend', width: 120,
+    //         aggFunc: agFunc,
+    //         valueFormatter: params => params.value ? Math.round(params.value * 100) / 100 : '',
+            
+    //     },
+    //     revenue: {
+    //         headerName: 'Revenue', field: 'revenue', width: 120,
+    //         aggFunc: agFunc,
+    //         valueFormatter: params => params.value ? Math.round(params.value * 100) / 100 : '',
+            
+    //     },
+    //     profit: {
+    //         headerName: 'Profit', field: 'profit', width: 120, cellClassRules: {
+    //             'font-red': p => p.value < 0
+    //         },
+    //         aggFunc: agFunc,
+    //         valueFormatter: params => params.value ? Math.round(params.value * 100) / 100 : '',
+            
+    //     },
+    //     margin: {
+    //         headerName: 'Margin', field: 'margin', valueGetter: getMargin, width: 120,
+            
+    //         valueFormatter: (params) => `${params.value}%`,
+
+    //     },
+    //     rpc: { headerName: 'Rpc', field: 'rpc', valueGetter: getRpc, width: 120,
+            
+    //      },
+    //     cpl: { headerName: 'Cpl', field: 'cpl', valueGetter: getCpl, width: 120,
+            
+    //      },
+    //     ncpl: { headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl, width: 120,
+            
+    //      },
+    //     fbleads: { headerName: 'FbLeads', field: 'fbleads', width: 150, aggFunc: agFunc,
+            
+    //      },
+    //     conversions: { headerName: 'Conversions', field: 'conversions', width: 150, aggFunc: agFunc,
+            
+    //      },
+    //     fmargin: { headerName: 'Fmargin', field: 'fmargin', valueGetter: getFmargin,
+            
+    //         valueFormatter: (params) => `${params.value}%`,
+    //      },
+    //     roi: { headerName: 'ROI', field: 'roi', valueGetter: getROI, width: 120,
+            
+    //         valueFormatter: (params) => `${params.value}%`,
+    //      },
+    //     cpc: {
+    //         headerName: 'cpc', width: 120, field: 'cpc',
+    //         aggFunc: (params) => {
+    //             const sum = params.values.reduce((sum, value) => sum + parseFloat(value), 0);
+    //             return sum / params.values.length;
+    //         },
+    //         valueFormatter: params => params.value !== undefined ? Math.round(params.value * 100) / 100 : '',
+            
+
+    //     },
+    //     fbclicks: { headerName: 'FbClicks', field: 'fbclicks', width: 150, aggFunc: agFunc, 
+    //     comparator: (valueA, valueB) => {
+    //         // Default comparator for handling null or undefined values
+    //         if (valueA == null) return -1;
+    //         if (valueB == null) return 1;
+    //         return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
+    //     },
+    //     },
+    //     impressions: { headerName: 'Impressions', field: 'impressions', width: 150, aggFunc: agFunc, 
+    //     comparator: (valueA, valueB) => {
+    //         // Default comparator for handling null or undefined values
+    //         if (valueA == null) return -1;
+    //         if (valueB == null) return 1;
+    //         return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
+    //     },
+    //     },
+    //     ctr: { headerName: 'Ctr', field: 'ctr', valueGetter: getCtr,
+            
+    //         valueFormatter: (params) => `${params.value}%`,
+    //      },
+    //     adsetname: {
+    //         headerName: 'AdsetName', field: 'adsetName',
+    //         // resizeble: true,
+    //         // sortable: true,
+    //         width: 500,
+    //         // hide: true,
+    //         // // resizable:false,
+    //         // rowGroup: true,
+    //         // filter: true,
+    //         // pinned: 'left',
+    //         // enableRowGroup: true,
+    //         // autoHeight: true, 
+            
+    //     },
+    //     adsetid: { headerName: 'AdsetId', field: 'adsetId',
+        
+    //      },
+    //     campaignid: { headerName: 'CampaignId', field: 'campaignId',
+        
+    //      }
+    // };
+
+
+    const columnDefs = [
+        // {headerName:'CampaignName', field:'campaignName',
+        //     // rowGroup: true,
+        //     // filter: true,
+        //     // hide: true,
+        //     // resizable: true,
+        //     // enableRowGroup: true,
+        //     // groupDisplayType: 'group',
+        //     width: 450,
+        // },
+        { headerName: 'Adset-Name', field: 'adsetName',
+        // resizeble: true,
+        // sortable: true,
+        width: 425,
+        // hide: true,
+        // // resizable:false,
+        // rowGroup: true,
+        // filter: true,
+        // pinned: 'left',
+        // enableRowGroup: true,
+        // autoHeight: true, 
         },
-        date: { headerName: 'Date', field: 'date', width: 120, sort: 'asc',
+        { headerName: 'Date', field: 'date', minWidth: 120, sort: 'asc',
         comparator: (valueA, valueB) => {
             if (valueA == null && valueB == null) return 0;
             if (valueA == null) return -1;
             if (valueB == null) return 1;
-
+  
             const dateA = new Date(valueA);
             const dateB = new Date(valueB);
-
+  
             // Compare valid dates
             if (!isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) {
                 return dateA - dateB;
             }
-
+  
             // Fallback for invalid dates (compare as strings)
             return valueA.toString().localeCompare(valueB.toString());
-        }
+        },
+        cellStyle: {
+            fontWeight: 'bold', // Makes the cell text bold
+        },
+        valueFormatter: (params) => {
+            // If the row is grouped or pinned, return the original value (or empty for pinned rows)
+            if (params.node.group) {
+                return "";
+            }
+            if (params.node.rowPinned) {
+                return ''; // Return an empty value for pinnedBottomRowData
+            }
+            // Format the value for leaf nodes
+            return `${params.value} (${moment(params.value).format('ddd')})`;
+        },
          },
-        spend: {
-            headerName: 'Spend', field: 'spend', width: 120,
-            aggFunc: agFunc,
-            valueFormatter: params => params.value ? Math.round(params.value * 100) / 100 : '',
-            
+        { headerName: 'Spend', field: 'spend', minWidth: 80,
+            aggFunc: agFunc, 
+            valueFormatter: params => params.value ? Math.round(params.value*100)/100 : '',
         },
-        revenue: {
-            headerName: 'Revenue', field: 'revenue', width: 120,
+        { headerName: 'Revenue', field: 'revenue', minWidth: 80,
             aggFunc: agFunc,
-            valueFormatter: params => params.value ? Math.round(params.value * 100) / 100 : '',
-            
+            valueFormatter: params => params.value ? Math.round(params.value*100)/100 : '', 
         },
-        profit: {
-            headerName: 'Profit', field: 'profit', width: 120, cellClassRules: {
-                'font-red': p => p.value < 0
+        { headerName: 'Profit', field: 'profit', minWidth: 80, cellClassRules:{
+            'font-red': p => p.value < 0
             },
             aggFunc: agFunc,
-            valueFormatter: params => params.value ? Math.round(params.value * 100) / 100 : '',
+            valueFormatter: params => params.value ? Math.round(params.value*100)/100 : '',
+        },
+        { headerName: 'Margin', field: 'margin', valueGetter: getMargin,
             
         },
-        margin: {
-            headerName: 'Margin', field: 'margin', valueGetter: getMargin, width: 120,
-            
-            valueFormatter: (params) => `${params.value}%`,
-
+        { headerName: 'Rpc', field: 'rpc', valueGetter: getRpc},
+        { headerName: 'Cpl', field: 'cpl', valueGetter: getCpl},
+        { headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl },
+        { headerName: 'Leads', field: 'fbleads', width: 120, aggFunc: agFunc,   },
+        // { headerName: "Filteration", field:'filterarion', width: 120,  valueGetter: getFilteration},
+        { headerName: "Filteration", field:'filterarion', minWidth: 120, 
+            valueFormatter: params => params.value ? `${params.value}%` : '0%',
         },
-        rpc: { headerName: 'Rpc', field: 'rpc', valueGetter: getRpc, width: 120,
-            
-         },
-        cpl: { headerName: 'Cpl', field: 'cpl', valueGetter: getCpl, width: 120,
-            
-         },
-        ncpl: { headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl, width: 120,
-            
-         },
-        fbleads: { headerName: 'FbLeads', field: 'fbleads', width: 150, aggFunc: agFunc,
-            
-         },
-        conversions: { headerName: 'Conversions', field: 'conversions', width: 150, aggFunc: agFunc,
-            
-         },
-        fmargin: { headerName: 'Fmargin', field: 'fmargin', valueGetter: getFmargin,
-            
-            valueFormatter: (params) => `${params.value}%`,
-         },
-        roi: { headerName: 'ROI', field: 'roi', valueGetter: getROI, width: 120,
-            
-            valueFormatter: (params) => `${params.value}%`,
-         },
-        cpc: {
-            headerName: 'cpc', width: 120, field: 'cpc',
+        { headerName: 'Conversions', field: 'conversions', minWidth: 120, aggFunc: agFunc,   },
+        { headerName: 'Fmargin', field: 'fmargin', valueGetter: getFmargin},
+        { headerName: 'ROI', field: 'roi', valueGetter: getROI},
+        { headerName: 'cpc', field: 'cpc',
             aggFunc: (params) => {
                 const sum = params.values.reduce((sum, value) => sum + parseFloat(value), 0);
                 return sum / params.values.length;
             },
-            valueFormatter: params => params.value !== undefined ? Math.round(params.value * 100) / 100 : '',
-            
-
+            valueFormatter: params => params.value !== undefined ? Math.round(params.value*100)/100 : '',
+  
         },
-        fbclicks: { headerName: 'FbClicks', field: 'fbclicks', width: 150, aggFunc: agFunc, 
-        comparator: (valueA, valueB) => {
-            // Default comparator for handling null or undefined values
-            if (valueA == null) return -1;
-            if (valueB == null) return 1;
-            return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
-        },
-        },
-        impressions: { headerName: 'Impressions', field: 'impressions', width: 150, aggFunc: agFunc, 
-        comparator: (valueA, valueB) => {
-            // Default comparator for handling null or undefined values
-            if (valueA == null) return -1;
-            if (valueB == null) return 1;
-            return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
-        },
-        },
-        ctr: { headerName: 'Ctr', field: 'ctr', valueGetter: getCtr,
-            
-            valueFormatter: (params) => `${params.value}%`,
-         },
-        adsetname: {
-            headerName: 'AdsetName', field: 'adsetName',
-            // resizeble: true,
-            // sortable: true,
-            width: 500,
-            // hide: true,
-            // // resizable:false,
-            // rowGroup: true,
-            // filter: true,
-            // pinned: 'left',
-            // enableRowGroup: true,
-            // autoHeight: true, 
-            
-        },
-        adsetid: { headerName: 'AdsetId', field: 'adsetId',
+        { headerName: 'FbClicks', field: 'fbclicks', minWidth: 80, aggFunc: agFunc,  },
+        { headerName: 'Impressions', field: 'impressions', minWidth: 80, aggFunc: agFunc,   },
+        { headerName: 'Ctr', field: 'ctr', valueGetter: getCtr},
         
-         },
-        campaignid: { headerName: 'CampaignId', field: 'campaignId',
-        
-         }
-    };
+        // { headerName: 'AdsetId', field: 'adsetId' },
+        // {headerName: "CampaignId", field:'campaignId'}
+    ];
 
     const getRandomColor = () => {
         const letters = '0123456789ABCDEF';
@@ -559,6 +762,9 @@ export default function CampaignAndAccount({ params }) {
         }
         return colorMap[value]; // Return the assigned color
     };
+
+    console.log(filteredData);
+    console.log(dailyData);
 
     return (
         <Row style={{display:'flex', flexDirection:'column'}}>
@@ -663,35 +869,35 @@ export default function CampaignAndAccount({ params }) {
                       maintainAspectRatio: false, // Allow the chart to take the full height of its container
                       scales: {
                         x: {
-                          ticks: {
-                            padding: 30, // Increase padding between labels and the axis
-                            color: (context) => {
-                              // Dynamically set color for x-axis labels based on theme
-                              const label = chartData.dates[context.index];
-                              return theme === 'dark' ? '#fff' : '#000'; // Adjust label color
-                            },
-                          },
+                        //   ticks: {
+                        //     padding: 30, // Increase padding between labels and the axis
+                        //     color: (context) => {
+                        //       // Dynamically set color for x-axis labels
+                        //       const label = chartData.dates[context.index];
+                        //       return getColorForValue(label); // Add your custom color logic here
+                        //     },
+                        //   },
                           grid: {
-                            color: theme === 'dark' ? '#444' : '#e0e0e0', // Adjust gridline color based on theme
+                            color: theme === "dark" ? '#444' : '#e0e0e0', // Adjust gridline color based on theme
                           },
                         },
                         y: {
                           beginAtZero: true, // Ensure the y-axis starts at zero
                           ticks: {
                             callback: function (value) {
-                              return value.toFixed(2); // Format y-axis values to 2 decimal places
+                              return value.toFixed(2); // Format y-axis values to 2 decimals
                             },
-                            color: theme === 'dark' ? '#fff' : '#000', // Adjust tick color based on theme
+                            color: theme === "dark" ? '#e0e0e0':'#050505', // Axis label color based on theme
                           },
                           grid: {
-                            color: theme === 'dark' ? '#444' : '#e0e0e0', // Adjust gridline color based on theme
+                            color: theme === "dark" ? '#444' : '#e0e0e0', // Adjust gridline color based on theme
                           },
                         },
                       },
                       plugins: {
                         legend: {
                           labels: {
-                            color: theme === 'dark' ? '#fff' : '#000', // Legend text color based on theme
+                            color: theme === "dark" ? '#faf7f7' : '#050505', // Legend text color
                           },
                         },
                         tooltip: {
@@ -780,6 +986,21 @@ export default function CampaignAndAccount({ params }) {
                     </table>
                 </div>
             </Col>
+            <Col style={{display:'flex', justifyContent:'flex-end'}}>
+                <Select
+                    placeholder="Select a range"
+                    value={selectedValue}
+                    onChange={handleChange}
+                    style={{ width: "200px" }}
+                    allowClear
+                >
+                    {dateOptions.map((option, index) => (
+                    <Option key={index} value={option}>
+                        {option}
+                    </Option>
+                    ))}
+                </Select>
+            </Col>
             <Col>
             {isLoading === true ? (
                 <div className="loader-container ag-container">
@@ -795,54 +1016,95 @@ export default function CampaignAndAccount({ params }) {
                         />
                     </div>
                 </div>
-            ) : dailyData?.length > 0 ? (
+            ) :  (
                 // <div className="ag-theme-alpine ag-container" >
-                     <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
-                    <AgGridReact
-                        rowData={dailyData}
-                        columnDefs={columnDefs}
-                        defaultColDef={defaultColDef}
-                        // grandTotalRow="bottom"
-                        pinnedBottomRowData={pinnedBottomRowData}
-                        getRowStyle={params => {
-                            if (params.node.rowPinned) {
-                                return {
-                                    fontWeight: 'bold',
-                                    backgroundColor: darkMode ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
-                                    color: darkMode ? '#fff' : '#000',           // Text color should contrast with the background
-                                };
-                            }
-                            return null;
-                        }}
-                        // onCellClicked={onCellClicked}
-                        // height={520}
-                        // pagination={true}
-                        // paginationPageSize={30}
-                        // paginationPageSizeSelector={[10,20,30]}
-                        groupDisplayType='multipleColumns'
-                        suppressAggFuncInHeader={true}
-                        groupSuppressBlankHeader={true}
-                        // groupIncludeTotalFooter={true}
-                        // rowGroupPanelShow='always'
-                    // groupIncludeFooter={true}
-                    // autoGroupColumnDef={autoGroupColumnDef}
-                    // statusBar={{
-                    //     statusPanels: [
-                    //       {
-                    //         statusPanel: 'agTotalAndFilteredRowCountComponent',
-                    //         align: 'left',
-                    //       },
-                    //       {
-                    //         statusPanel: 'agAggregationComponent',
-                    //         statusPanelParams: {
-                    //           aggFuncs: ['sum', 'avg'],
-                    //         },
-                    //       },
-                    //     ],
-                    // }}
-                    />
+                <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
+                        <AgGridReact
+                            rowData={filteredData}
+                            columnDefs={columnDefs}
+                            defaultColDef={defaultColDef}
+                            pinnedBottomRowData={domainFixedFooter}
+                            getRowStyle={(params) => {
+                                if (params.node.rowPinned) {
+                                    return {
+                                        fontWeight: 'bold',
+                                        backgroundColor: darkMode ? '#000' : '#fff',
+                                        color: darkMode ? '#fff' : '#000',
+                                    };
+                                }
+                                return null;
+                            }}
+                            groupDisplayType="multipleColumns"
+                            suppressAggFuncInHeader={true}
+                            groupSuppressBlankHeader={true}
+                            onFilterChanged={(params) => {
+                                const api = params.api;
+                                const filteredData = [];
+                                api.forEachNodeAfterFilterAndSort((node) => {
+                                    if (!node.rowPinned) {
+                                        filteredData.push(node.data);
+                                    }
+                                });
+
+                                const fieldValueFilter = (field, value) =>
+                                    filteredData.filter((item) => item[field] && item[field] === value);
+
+                                const updatedFooter = [
+                                    {
+                                        adsetName: 'Total',
+                                        spend: filteredData.reduce((acc, curr) => acc + parseFloat(curr.spend || 0), 0).toFixed(2),
+                                        revenue: filteredData.reduce((acc, curr) => acc + parseFloat(curr.revenue || 0), 0).toFixed(2),
+                                        profit: filteredData.reduce((acc, curr) => acc + parseFloat(curr.profit || 0), 0).toFixed(2),
+                                        margin: `${(
+                                            (filteredData.reduce((acc, curr) => acc + parseFloat(curr.profit || 0), 0) /
+                                                filteredData.reduce((acc, curr) => acc + parseFloat(curr.revenue || 0), 0)) *
+                                            100
+                                        ).toFixed(2)}%`,
+                                        rpc: (
+                                            filteredData.reduce((acc, curr) => acc + parseFloat(curr.rpc || 0), 0) / filteredData.length || 0
+                                        ).toFixed(2),
+                                        cpl: (
+                                            filteredData.reduce((acc, curr) => acc + parseFloat(curr.cpl || 0), 0) / filteredData.length || 0
+                                        ).toFixed(2),
+                                        ncpl: (
+                                            filteredData.reduce((acc, curr) => acc + parseFloat(curr.ncpl || 0), 0) / filteredData.length || 0
+                                        ).toFixed(2),
+                                        fbleads: filteredData.reduce((acc, curr) => acc + parseFloat(curr.fbleads || 0), 0),
+                                        conversions: filteredData.reduce((acc, curr) => acc + parseFloat(curr.conversions || 0), 0),
+                                        fmargin: `${(
+                                            (filteredData.reduce((acc, curr) => acc + parseFloat(curr.profit || 0), 0) /
+                                                filteredData.reduce((acc, curr) => acc + parseFloat(curr.spend || 0), 0)) *
+                                            100
+                                        ).toFixed(2)}%`,
+                                        roi: `${(
+                                            ((filteredData.reduce((acc, curr) => acc + parseFloat(curr.revenue || 0), 0) -
+                                                filteredData.reduce((acc, curr) => acc + parseFloat(curr.spend || 0), 0)) /
+                                                filteredData.reduce((acc, curr) => acc + parseFloat(curr.spend || 0), 0)) *
+                                            100
+                                        ).toFixed(2)}%`,
+                                        cpc: (
+                                            filteredData.reduce((acc, curr) => acc + parseFloat(curr.cpc || 0), 0) / filteredData.length || 0
+                                        ).toFixed(2),
+                                        fbclicks: filteredData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks || 0), 0),
+                                        impressions: filteredData.reduce((acc, curr) => acc + parseFloat(curr.impressions || 0), 0),
+                                        ctr: `${(
+                                            (filteredData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks || 0), 0) /
+                                                filteredData.reduce((acc, curr) => acc + parseFloat(curr.impressions || 0), 0)) *
+                                            100
+                                        ).toFixed(2)}%`,
+                                    },
+                                ];
+
+                                // setFilteredData(filteredData);
+                                setDomainFixedFooter(updatedFooter);
+
+                                // Example field-based filtering logic
+                                const specificFieldData = fieldValueFilter('status', 'Active'); // Replace 'status' and 'Active' with your field and value
+                                console.log('Filtered by status (Active):', specificFieldData);
+                            }}
+                        />
                 </div>
-            ) : null}
+            )}
             </Col>
         </Row>
     )

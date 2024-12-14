@@ -985,6 +985,7 @@ const LayoutWrapper = ({ children, usersDataForLogin }) => {
               for (let item of SpecialUserkeysOfAdAccounts) {
                 if (SpecialUseradAccounts[item][0] === "All") {
                   // Retry logic for Accounts API
+                  console.log(item);
                   const networkResponse = await retryFetch(() => axios.get(`https://prodapis.adsgoat.in/network/Accounts?network=${item}`));
                   SpecialUsernewObject[item] = networkResponse.data;
                 } else {
