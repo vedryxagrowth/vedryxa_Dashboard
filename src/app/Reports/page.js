@@ -259,7 +259,7 @@ const MyTablePage = () => {
 
     // console.log(revenuePratner);
     const accountsForAccess = adAccounts[revenuePratner];
-    // console.log(accountsForAccess, "accounts Access");
+    console.log(accountsForAccess, "accounts Access");
     // console.log(accountsForAccess[0], "accountFor Access");
 
     const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
@@ -284,9 +284,9 @@ const MyTablePage = () => {
 
     const [newaccount, setNewAccount] = useState(accountNumberFromDashboard ? accountNumberFromDashboard : accountsForAccess[0].accountNumber);
 
-    const [accountName, setAccountName] = useState(accountsForAccess[0].accountName);
+    const [accountName, setAccountName] = useState(accountsForAccess[0]?.accountName);
 
-    const [newAccountName, setnewAccountName] = useState(accountsForAccess[0].accountName);
+    const [newAccountName, setnewAccountName] = useState(accountsForAccess[0]?.accountName);
     const [newtime, setNewTime] = useState(timeFromDashboard ? timeFromDashboard : 'UTC');
 
     const [pageSize, setPageSize] = useState(1);
@@ -5945,6 +5945,8 @@ const MyTablePage = () => {
 
     // console.log(activeTab);
 
+    const sanitizedInput = inputValue.replace(/_/g, '\\_');
+
     return (
         <div className='reports-container'>
             {/* className='select-container' */}
@@ -6135,7 +6137,16 @@ const MyTablePage = () => {
                                         />
                                     </div>
                                 </div>
-                            ) : rowData?.filter((each) => each.campaignname.includes(inputValue))?.length > 0 ? (
+                            ) : rowData?.filter((each) => {
+                                const normalizedCampaign = each.campaignname.trim().toLowerCase();
+                                const normalizedInput = inputValue.trim().toLowerCase();
+                                return (
+                                    normalizedCampaign.startsWith(normalizedInput) ||
+                                    normalizedCampaign.includes(normalizedInput) ||
+                                    normalizedCampaign.endsWith(normalizedInput)
+                                );
+                            }
+                            )?.length > 0 ? (
 
                                 <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
 
@@ -6176,7 +6187,16 @@ const MyTablePage = () => {
 
                                     <AgGridReact
                                         ref={gridRef}
-                                        rowData={rowData ? rowData?.filter((each) => each.campaignname.includes(inputValue)) : []}
+                                        rowData={rowData ? rowData?.filter((each) => {
+                                            const normalizedCampaign = each.campaignname.trim().toLowerCase();
+                                            const normalizedInput = inputValue.trim().toLowerCase();
+                                            return (
+                                                normalizedCampaign.startsWith(normalizedInput) ||
+                                                normalizedCampaign.includes(normalizedInput) ||
+                                                normalizedCampaign.endsWith(normalizedInput)
+                                            );
+                                        }
+                                        ) : []}
                                         rowSelection='multiple'
                                         columnDefs={columnDefs}
                                         defaultColDef={{ ...defaultColDef, suppressMenu: true }}
@@ -6256,7 +6276,16 @@ const MyTablePage = () => {
                                         />
                                     </div>
                                 </div>
-                            ) : dailyData.filter((each) => each.campaignname.includes(inputValue))?.length > 0 ? (
+                            ) : dailyData?.filter((each) => {
+                                const normalizedCampaign = each.campaignname.trim().toLowerCase();
+                                const normalizedInput = inputValue.trim().toLowerCase();
+                                return (
+                                    normalizedCampaign.startsWith(normalizedInput) ||
+                                    normalizedCampaign.includes(normalizedInput) ||
+                                    normalizedCampaign.endsWith(normalizedInput)
+                                );
+                            }
+                            )?.length > 0 ? (
                                 <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
                                     <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap' }}>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
@@ -6290,7 +6319,16 @@ const MyTablePage = () => {
                                     </Row>
                                     <AgGridReact
                                         ref={gridRef1}
-                                        rowData={dailyData.filter((each) => each.campaignname.includes(inputValue))}
+                                        rowData={dailyData?.filter((each) => {
+                                            const normalizedCampaign = each.campaignname.trim().toLowerCase();
+                                            const normalizedInput = inputValue.trim().toLowerCase();
+                                            return (
+                                                normalizedCampaign.startsWith(normalizedInput) ||
+                                                normalizedCampaign.includes(normalizedInput) ||
+                                                normalizedCampaign.endsWith(normalizedInput)
+                                            );
+                                        }
+                                        )}
                                         columnDefs={columnDefs1.current}
                                         onCellClicked={onCellClicked}
                                         pagination={true}
@@ -6351,7 +6389,15 @@ const MyTablePage = () => {
                                         />
                                     </div>
                                 </div>
-                            ) : campaignData.filter((each) => each.campaignname.includes(inputValue))?.length > 0 ? (
+                            ) : campaignData.filter((each) =>  {
+                                const normalizedCampaign = each.campaignname.trim().toLowerCase();
+                                const normalizedInput = inputValue.trim().toLowerCase();
+                                return (
+                                    normalizedCampaign.startsWith(normalizedInput) ||
+                                    normalizedCampaign.includes(normalizedInput) ||
+                                    normalizedCampaign.endsWith(normalizedInput)
+                                );
+                            })?.length > 0 ? (
                                 <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
                                     <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap' }}>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
@@ -6387,7 +6433,16 @@ const MyTablePage = () => {
                                     <div style={{ height: '90%' }}>
                                         <AgGridReact
                                             ref={gridRef2}
-                                            rowData={campaignData.filter((each) => each.campaignname.includes(inputValue))}
+                                            rowData={campaignData.filter((each) => {
+                                                const normalizedCampaign = each.campaignname.trim().toLowerCase();
+                                                const normalizedInput = inputValue.trim().toLowerCase();
+                                                return (
+                                                    normalizedCampaign.startsWith(normalizedInput) ||
+                                                    normalizedCampaign.includes(normalizedInput) ||
+                                                    normalizedCampaign.endsWith(normalizedInput)
+                                                );
+                                            }
+                                            )}
                                             columnDefs={columnDefs2.current}
                                             onCellClicked={onCellClickedAllCampaigns}
                                             autoGroupColumnDef={autoGroupColumnDef2}
