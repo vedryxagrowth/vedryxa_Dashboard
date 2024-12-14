@@ -1820,7 +1820,7 @@ const MyTablePage = () => {
         spend: {
             headerName: 'Spend($)',
             field: 'spend',
-            width: 120,
+            width: 240,
             aggFunc: liveSpender,
             sortable: true,
             filter: "agNumberColumnFilter",
@@ -1830,7 +1830,7 @@ const MyTablePage = () => {
         revenue: {
             headerName: 'Revenue($)',
             field: 'revenue',
-            width: 120,
+            width: 240,
             aggFunc: liveSpender,
             sortable: true,
             filter: "agNumberColumnFilter",
@@ -1840,7 +1840,7 @@ const MyTablePage = () => {
         profit: {
             headerName: 'Profit($)',
             field: 'profit',
-            width: 120,
+            width: 240,
             aggFunc: liveSpender,
             sortable: true,
             cellClassRules: {
@@ -1852,6 +1852,7 @@ const MyTablePage = () => {
         },
         margin: {
             headerName: 'Margin(%)', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: 'Profit/Revenue', filter: 'agNumberColumnFilter',
+            width: 240,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -1865,6 +1866,7 @@ const MyTablePage = () => {
         conversions: { headerName: 'Conversions', field: 'conversions', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
         cpc: {
             headerName: 'cpc', field: 'cpc',
+            width: 240,
             aggFunc: (params) => {
                 const sum = params.values.reduce((sum, value) => sum + parseFloat(value), 0);
                 return sum / params.values.length;
@@ -1885,7 +1887,8 @@ const MyTablePage = () => {
             },
             valueFormatter: (params) => `${params.value}%`,
         },
-        rpc: { headerName: 'Rpc', field: 'rpc', valueGetter: getRpc, sortable: true, filter: 'agNumberColumnFilter' },
+        rpc: { headerName: 'Rpc', field: 'rpc', valueGetter: getRpc, sortable: true, filter: 'agNumberColumnFilter',
+            width: 240, },
         cpl: { headerName: 'Cpl', field: 'cpl', valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter' },
         ncpl: { headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter' },
         fmargin: {
@@ -2141,21 +2144,22 @@ const MyTablePage = () => {
             },
         },
         spend: {
-            headerName: 'Spend($)', field: 'spend', width: 150, aggFunc: spender, sortable: true, filter: 'agNumberColumnFilter',
+            headerName: 'Spend($)', field: 'spend', width: 240, aggFunc: spender, sortable: true, filter: 'agNumberColumnFilter',
             valueFormatter: currencyFormatter, comparator: numberComparator
         },
         revenue: {
-            headerName: 'Revenue($)', field: 'revenue', width: 150, aggFunc: spender, sortable: true, filter: 'agNumberColumnFilter',
+            headerName: 'Revenue($)', field: 'revenue', width: 240, aggFunc: spender, sortable: true, filter: 'agNumberColumnFilter',
             valueFormatter: currencyFormatter, comparator: numberComparator
         },
         profit: {
-            headerName: 'Profit($)', field: 'profit', width: 150, aggFunc: spender, cellClassRules: {
+            headerName: 'Profit($)', field: 'profit', width: 240, aggFunc: spender, cellClassRules: {
                 'font-red': p => p.value < 0
             }, sortable: true, headerTooltip: 'Revenue - Spend', filter: 'agNumberColumnFilter',
             valueFormatter: currencyFormatter, comparator: numberComparator
         },
         margin: {
             headerName: 'Margin(%)', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: 'Profit/Revenue', filter: true,
+            width: 240,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -2166,7 +2170,8 @@ const MyTablePage = () => {
         },
         fbleads: { headerName: 'FbLeads', field: 'fbleads', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
         conversions: { headerName: 'Conversions', field: 'conversions', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
-        cpc: { headerName: 'cpc', field: 'cpc', aggFunc: cpcSpender, sortable: true, filter: 'agNumberColumnFilter' },
+        cpc: { headerName: 'cpc', field: 'cpc', aggFunc: cpcSpender, sortable: true, filter: 'agNumberColumnFilter',
+            width: 150, },
         fbclicks: { headerName: 'FbClicks', field: 'fbclicks', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
         impressions: { headerName: 'Impressions', field: 'impressions', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
         ctr: {
@@ -2179,7 +2184,8 @@ const MyTablePage = () => {
             },
             valueFormatter: (params) => `${params.value}%`,
         },
-        rpc: { headerName: 'Rpc', field: 'rpc', valueGetter: getRpc, sortable: true, filter: 'agNumberColumnFilter' },
+        rpc: { headerName: 'Rpc', field: 'rpc', valueGetter: getRpc, sortable: true, filter: 'agNumberColumnFilter',
+            width: 150, },
         cpl: { headerName: 'Cpl', field: 'cpl', valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter' },
         ncpl: { headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter' },
         fmargin: {
@@ -2525,7 +2531,7 @@ const MyTablePage = () => {
         spend: {
             headerName: 'Spend($)',
             field: 'spend',
-            width: 120,
+            width: 240,
             aggFunc: liveSpender,
             sortable: true,
             filter: "agNumberColumnFilter",
@@ -2535,7 +2541,7 @@ const MyTablePage = () => {
         revenue: {
             headerName: 'Revenue($)',
             field: 'revenue',
-            width: 120,
+            width: 240,
             aggFunc: liveSpender,
             sortable: true,
             filter: "agNumberColumnFilter",
@@ -2545,7 +2551,7 @@ const MyTablePage = () => {
         profit: {
             headerName: 'Profit($)',
             field: 'profit',
-            width: 120,
+            width: 240,
             aggFunc: liveSpender,
             sortable: true,
             cellClassRules: {
