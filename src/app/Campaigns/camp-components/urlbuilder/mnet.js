@@ -8,7 +8,7 @@ import TextArea from 'antd/es/input/TextArea';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import { v4 as uuidv4 } from 'uuid';
-const MnetUrlBuilder = ({ onReturnMessage }) => {
+const MnetUrlBuilder = ({ onReturnMessage, showSubmitButton }) => {
   // Initial data array
   const [domain, setDomain] = useState(null);
   const [source, setSource] = useState("FB");
@@ -199,6 +199,7 @@ const MnetUrlBuilder = ({ onReturnMessage }) => {
     setKeyWords('');
     setErrorMessage('');
   }
+  console.log(showSubmitButton);
 
   const onClickSubmit = () => {
 
@@ -344,7 +345,7 @@ const MnetUrlBuilder = ({ onReturnMessage }) => {
         </Col>
         <Col>
           <Button onClick={onClickGet} style={{ marginRight: '10px', backgroundColor: '#b7e8c6', borderColor: '#b7e8c6', color: 'black' }}>Get</Button>
-          <Button type="primary" onClick={onClickSubmit}>Submit</Button>
+          {!showSubmitButton && <Button type="primary" onClick={onClickSubmit}>Submit</Button>}
         </Col>
       </Row>
       <Row justify="center" style={{ marginTop: '10px' }}>

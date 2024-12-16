@@ -643,7 +643,7 @@ const MnetLiveAdsetHistory = ({params}) => {
         {
             headerName: 'Ctr', field: 'ctr', valueGetter: getCtr,
             comparator: defaultComparator,
-            valueFormatter: (params) => `${params.value}%`,
+            // valueFormatter: (params) => `${params.value}%`,
         },
         // {
         //     headerName: 'AdsetId', field: 'adsetId',

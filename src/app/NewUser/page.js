@@ -20,6 +20,12 @@ import EditAccountAccess from './users-components/edit-accountaccess';
 import EditNetworkAccess from './users-components/edit-network';
 import EditUrlBuilder from './users-components/edit-urlbulder';
 
+//UrlBuilder Components
+import MnetUrlBuilder from '../Campaigns/camp-components/urlbuilder/mnet';
+import System1UrlBuilder from '../Campaigns/camp-components/urlbuilder/system1'
+import TonicUrlBuilder from '../Campaigns/camp-components/urlbuilder/tonic';
+//
+
 import debounce from 'lodash.debounce';
 
 const contentStyle = {
@@ -85,9 +91,17 @@ const UsersTable = () => {
     const [isSearching, setIsSearching] = useState(false);
     const [isSearchingAccount, setIsSearchingAccount] = useState(false);
 
+    
+    const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] = useState(false);
+
+    const handleCancelForURLBuilder = () => {
+        setIsModalVisibleForURLBuilder(false);
+    };
+
     const carouselRef = useRef();
     const [currentSlide, setCurrentSlide] = useState(0);
     const [activeSlide, setActiveSlide] = useState(0);
+    const [network, setNetwork] = useState("");
     const { theme } = useTokenContext();
 
     const handleDotClick = (index) => {
@@ -157,6 +171,11 @@ const UsersTable = () => {
             />
         </div>
     );
+
+    const onClickOpenUrlBuilder = (action) =>{
+        setNetwork(action.Network);
+        setIsModalVisibleForURLBuilder(true);
+    }
 
     // const handleChangeInput1 = (e) => {
     //     setInputValue(e.target.value);
@@ -970,31 +989,85 @@ const UsersTable = () => {
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
                             dropdownRender={(menu) => (
                                 <Menu
-                                onClick={() => {}}
-                                style={{ width: 256, maxHeight: 300, overflowY: 'auto'  }}
-                                mode="inline"
-                                // defaultSelectedKeys={['2']}
+                                    onClick={() => {}}
+                                    style={{ width: 256, maxHeight: 300, overflowY: 'auto' }}
+                                    mode="inline"
+                                    // defaultSelectedKeys={['2']}
                                 >
-                                {newSource.map(item => (
-                                    <SubMenu
-                                        key={item.key}
-                                        title={
-                                            <span style={{ width: '150px', display: 'flex', justifyContent: 'space-between' }}>
-                                                {item.name} <DownOutlined size={10} />
-                                            </span>
-                                        }
-                                        className="custom-submenu"
-                                    >
-                                        <div style={{ padding: '10px', display: 'flex', flexDirection: 'column', gap: '8px', marginLeft:'25px' }}>
-                                            <p><strong>ID:</strong> {item.id}</p>
-                                            <p><strong>Name:</strong> {item.name}</p>
-                                            <p><strong>Code:</strong> {item.code}</p>
-                                            <p><strong>CampaignID:</strong> {item.campaignId}</p>
-                                            <p><strong>CampaignID:</strong> {item.AdsetId}</p>
-                                        </div>
-                                    </SubMenu>
-                                ))}
+                                    {newSource.map(item => (
+                                        <SubMenu
+                                            key={item.key}
+                                            title={
+                                                <span style={{ width: '150px', display: 'flex', justifyContent: 'space-between' }}>
+                                                    {item.name} <DownOutlined size={10} />
+                                                </span>
+                                            }
+                                            className="custom-submenu"
+                                        >
+                                            <div style={{ padding: '10px', display: 'flex', flexDirection: 'column', gap: '8px', marginLeft:'25px' }}>
+                                                <p><strong>ID:</strong> {item.id}</p>
+                                                <p><strong>Name:</strong> {item.name}</p>
+                                                <p><strong>Code:</strong> {item.code}</p>
+                                                <div style={{ display: 'flex', marginRight:'25px' }}>
+                                                    <div style={{ paddingRight: '10px', paddingTop:'10px' }}><strong>CampaignID:</strong></div>
+                                                    <div style={{
+                                                        marginRight:'25px',
+                                                        display: 'block',
+                                                        maxWidth: '200px',       // Limit max width
+                                                        whiteSpace: 'normal',    // Allows text to wrap to new lines
+                                                        wordBreak: 'break-word', // Forces breaks within long words
+                                                        overflowWrap: 'break-word', // Ensures breaking at any possible point
+                                                        lineHeight: '1.5', // Space out lines for readability
+                                                        color: '#000', // Adjust text color if needed
+                                                    }}>
+                                                        {item.campaignId}
+                                                    </div>
+                                                </div>
+                                                <div style={{ display: 'flex', marginRight:'25px' }}>
+                                                    <div style={{ paddingRight: '10px', paddingTop:'10px' }}><strong>AdsetID:</strong></div>
+                                                    <div style={{
+                                                        marginRight:'25px',
+                                                        display: 'block',
+                                                        maxWidth: '200px',       // Limit max width
+                                                        whiteSpace: 'normal',    // Allows text to wrap to new lines
+                                                        wordBreak: 'break-word', // Forces breaks within long words
+                                                        overflowWrap: 'break-word', // Ensures breaking at any possible point
+                                                        lineHeight: '1.5', // Space out lines for readability
+                                                        color: '#000', // Adjust text color if needed
+                                                    }}>
+                                                        {item.AdsetId}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </SubMenu>
+                                    ))}
                                 </Menu>
+                                // <Menu
+                                // onClick={() => {}}
+                                // style={{ width: 256, maxHeight: 300, overflowY: 'auto'  }}
+                                // mode="inline"
+                                // // defaultSelectedKeys={['2']}
+                                // >
+                                // {newSource.map(item => (
+                                //     <SubMenu
+                                //         key={item.key}
+                                //         title={
+                                //             <span style={{ width: '150px', display: 'flex', justifyContent: 'space-between' }}>
+                                //                 {item.name} <DownOutlined size={10} />
+                                //             </span>
+                                //         }
+                                //         className="custom-submenu"
+                                //     >
+                                //         <div style={{ padding: '10px', display: 'flex', flexDirection: 'column', gap: '8px', marginLeft:'25px' }}>
+                                //             <p><strong>ID:</strong> {item.id}</p>
+                                //             <p><strong>Name:</strong> {item.name}</p>
+                                //             <p><strong>Code:</strong> {item.code}</p>
+                                //             <p><strong>CampaignID:</strong> {item.campaignId}</p>
+                                //             <p><strong>CampaignID:</strong> {item.AdsetId}</p>
+                                //         </div>
+                                //     </SubMenu>
+                                // ))}
+                                // </Menu>
                             )}
                             >
                             {/* {menuItems.map(item => (
@@ -1167,11 +1240,14 @@ const UsersTable = () => {
         {
             title: 'Action',
             key: 'action',
-            width: 100,
+            width: 150,
             render: (text, record) => (
                 <Space size="middle">
                     <Button type="primary" onClick={()=>handleEditUrlBuilder(record)}>Edit</Button>
                     {/* <Button type="dashed" onClick={() => handleDelete(record)}>Remove Access</Button> */}
+                    
+                    <EditOutlined style={{ fontSize: '20px', cursor: 'pointer'}} onClick={()=>onClickOpenUrlBuilder(record)}  />
+                    
                 </Space>
             ),
         },
@@ -1410,6 +1486,16 @@ const UsersTable = () => {
 
     console.log(accFilteredData);
     
+    const getUrlBuilder = (network) => {
+        switch (network) {
+            case 'Mnet':
+                return <MnetUrlBuilder showSubmitButton={true} />
+            case 'Tonic':
+                return <TonicUrlBuilder showSubmitButton={true}  />
+            case 'System1':
+                return <System1UrlBuilder showSubmitButton={true}  /> //onReturnMessage={onReturnUrl}
+        }
+    }
 
     return (
         <>
@@ -1835,6 +1921,24 @@ const UsersTable = () => {
                             </Button>}
                         />
                     )}
+                    <Modal
+                        title="URL Builder"
+                        visible={isModalVisibleForURLBuilder}
+                        onCancel={handleCancelForURLBuilder}
+                        // footer={[
+                        //     <Button key="cancel" onClick={handleCancel}>
+                        //         Cancel
+                        //     </Button>,
+                        //     <Button key="submit" type="primary" onClick={() => setIsModalVisible(false)}>
+                        //         Submit
+                        //     </Button>
+                        // ]}
+                        footer={null}
+                        width="80%" // Set width of the modal
+                        bodyStyle={{ height: '50vh', overflowY: 'auto' }}
+                        >
+                            {getUrlBuilder(network)}
+                    </Modal>
                 </div>
             </Carousel>
         </>

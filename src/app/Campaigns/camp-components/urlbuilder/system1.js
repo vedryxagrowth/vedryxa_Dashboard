@@ -8,7 +8,7 @@ import TextArea from 'antd/es/input/TextArea';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import { v4 as uuidv4 } from 'uuid';
-const System1UrlBuilder = ({onReturnMessage}) => {
+const System1UrlBuilder = ({onReturnMessage, showSubmitButton}) => {
     const [siteName, setSiteName] = useState('');
     const [pixelId, setPixelId] = useState('');
     const [keywords, setKeyWords] = useState('');
@@ -298,7 +298,7 @@ const System1UrlBuilder = ({onReturnMessage}) => {
                 </Col>
                 <Col>
                     <Button onClick={onClickGet} style={{ marginRight: '10px', backgroundColor: '#b7e8c6', borderColor: '#b7e8c6', color: 'black' }}>Get</Button>
-                    <Button type="primary" onClick={onClickSubmit}>Submit</Button>
+                    {!showSubmitButton && <Button type="primary" onClick={onClickSubmit}>Submit</Button>}
                 </Col>
             </Row>
             <Row justify="center" style={{marginTop:'10px'}}>
