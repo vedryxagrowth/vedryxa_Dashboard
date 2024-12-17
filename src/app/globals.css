@@ -938,3 +938,8 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
   z-index: 9999; /* Ensure FabricCanvas appears above everything */
   background: rgba(0, 0, 0, 0.5); /* Optional: Dark overlay to highlight the editor */
 }
+
+.ag-pinned-row {
+  background-color: #f9f9f9;
+  font-weight: bold;
+}
