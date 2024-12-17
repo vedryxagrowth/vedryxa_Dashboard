@@ -3,7 +3,7 @@ import React from 'react';
 import { Button, Input, Row, Col } from 'antd';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-const TonicUrlBuilder = ({onReturnMessage}) => {
+const TonicUrlBuilder = ({onReturnMessage, showSubmitButton}) => {
     const [siteName, setSiteName] = useState('');
     const [keywords, setKeyWords] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
@@ -119,7 +119,7 @@ const TonicUrlBuilder = ({onReturnMessage}) => {
                 </Col>
                 <Col>
                     <Button onClick={onClickGet} style={{ marginRight: '10px', backgroundColor: '#b7e8c6', borderColor: '#b7e8c6', color: 'black' }}>Get</Button>
-                    <Button type="primary" onClick={onClickSubmit}>Submit</Button>
+                    {!showSubmitButton && <Button type="primary" onClick={onClickSubmit}>Submit</Button>}
                 </Col>
             </Row>
             <Row justify="center" style={{marginTop:'10px'}}>

@@ -1,11 +1,11 @@
 "use client"
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Form, Input, Button, Drawer, Modal, message, Select } from 'antd';
 import axios from 'axios';
 import { useTokenContext } from '../../components/parent';
 
 const { Option } = Select;
-import { CloseOutlined } from '@ant-design/icons';
+import { CloseOutlined, PlusOutlined } from '@ant-design/icons';
 
 const timezones = [
     "UTC",
@@ -55,11 +55,83 @@ const Newaddaccounts = ({ visible, onClose }) => {
     const [revenuePartner, setRevenuePartner] = useState("MEDIA_DOT_NET");
     const [BMName, setBMName] = useState("Winkleads Search");
     const [accountNumber, setAccountNumber] = useState();
+    const [accountName, setAccountName] = useState();
     const [pixelId, setPixelId] = useState('');
     const [pageName, setPageName] = useState('');
+    const [AgencyName, setAgencyName] = useState('');
     const [pageId, setPageId] = useState('');
+    const [isVisibleBMId, setIsVisibleBMId] = useState(null);
     var token = localStorage.getItem("token");
     const { theme } = useTokenContext();
+
+    const [options, setOptions] = useState([
+        "Winkleads Search",
+        "MODO LEO BM X1",
+    ]);
+
+    const [newOptions, setNewOptions] = useState([
+        "Winkleads Search",
+        "MODO LEO BM X1",
+    ]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [newValue, setNewValue] = useState("");
+    const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
+
+    const containerRef = useRef(null); // Reference to the container div
+
+    // Calculate modal position based on the container
+    useEffect(() => {
+        if (isModalOpen && containerRef.current) {
+            const rect = containerRef.current.getBoundingClientRect();
+            setModalPosition({ top: rect.top, left: rect.left });
+        }
+    }, [isModalOpen]);
+
+    const handleAddNewValue = () => {
+        if (newValue && !options.includes(newValue)) {
+            setOptions([...options, newValue]);
+            setBMName(newValue);
+        }
+        setNewValue("");
+        setIsVisibleBMId("visible");
+        setIsModalOpen(false);
+    };
+
+    useEffect(() => {
+        // Update the form field value for Website_URL whenever websiteURL changes
+        form.setFieldsValue({ BMName: BMName });
+
+        // Check if all required fields are complete
+        setIsVisibleBMId("visible");
+        
+
+    }, [newValue, form]);
+    useEffect(() => {
+        // Update the form field value for Website_URL whenever websiteURL changes
+        form.setFieldsValue({ BMName: BMName });
+        // setIsVisibleBMId(null);
+
+        // Check if all required fields are complete
+        
+
+    }, [BMName, form]);
+
+    const functionCallBMNames = async() =>{
+        const fetchData = await axios.get(`https://prodapis.adsgoat.in/getBMNames/`, {
+            headers: {
+                Authorization: token,
+            },
+        });
+        const mainData = fetchData.data;
+        setOptions(mainData);
+        setNewOptions(mainData);
+    }
+
+    useEffect(()=>{
+        if(visible){
+            functionCallBMNames()
+        }
+    }, [visible]);
 
     const onFinish = async (values) => {
         try {
@@ -70,7 +142,7 @@ const Newaddaccounts = ({ visible, onClose }) => {
             //             'Authorization': token
             //         }
             //     });
-            const newValues = {...values, timeZone: timeZoneFullNames[values.timeZone], pageName: values.pageName ? values.pageName : '', pageID: values.pageID ? values.pageID : '' , pixelID: values.pixelID ? values.pixelID : ''}
+            const newValues = {...values, timeZone: timeZoneFullNames[values.timeZone], pageName: values.pageName ? values.pageName : '', pageID: values.pageID ? values.pageID : '' , pixelID: values.pixelID ? values.pixelID : '', AgencyName: values?.AgencyName ? values?.AgencyName: ""}
             console.log(newValues, "newValues");
             const response = await axios.post('https://prodapis.adsgoat.in/createNewAccount/', {newAccount: newValues},
                 {
@@ -83,7 +155,8 @@ const Newaddaccounts = ({ visible, onClose }) => {
                 // console.log('Account created successfully');
                 message.success('Account created successfully');
                 form.resetFields();
-                onClose(); // Close the drawer after successful submission
+                setBMName("Winkleads Search");
+                onClose("AccountNumber"); // Close the drawer after successful submission
             } else {
                 message.error('Failed to create account');
             }
@@ -109,12 +182,21 @@ const Newaddaccounts = ({ visible, onClose }) => {
         setAccountNumber(event.target.value);
         // console.log(event.target.value);
     }
+    const onChangeAccountName = (event) => {
+        setAccountName(event.target.value);
+        // console.log(event.target.value);
+    }
     const onChangePagelId = (event) => {
         setPageId(event.target.value);
         // console.log(event.target.value);
     }
     const onChangePageName = (event) => {
         setPageName(event.target.value);
+        // console.log(event.target.value);
+    }
+
+    const onChangeAgencyName = (event) => {
+        setAgencyName(event.target.value);
         // console.log(event.target.value);
     }
     const onChangePixelId = (event) => {
@@ -159,6 +241,9 @@ const Newaddaccounts = ({ visible, onClose }) => {
                     <Form.Item label="Spend Account ID" name="accountNumber" rules={[{ required: true, message: 'Please input the Spend Account ID!' }]}>
                         <Input value={accountNumber} onChange={onChangeAccountNumber} style={{color: theme === "dark" ? 'white' : "black"}}/>
                     </Form.Item>
+                    <Form.Item label="Spend Account Name" name="accountName" rules={[{ required: true, message: 'Please input the Spend Account ID!' }]}>
+                        <Input value={accountName} onChange={onChangeAccountName} style={{color: theme === "dark" ? 'white' : "black"}}/>
+                    </Form.Item>
                     <Form.Item label="Pixel ID" name="pixelID">
                         <Input value={pixelId} onChange={onChangePixelId}  style={{color: theme === "dark" ? 'white' : "black"}}/>
                     </Form.Item>
@@ -168,18 +253,65 @@ const Newaddaccounts = ({ visible, onClose }) => {
                     <Form.Item label="Page Name" name="pageName">
                         <Input value={pageName} onChange={onChangePageName}  style={{color: theme === "dark" ? 'white' : "black"}}/>
                     </Form.Item>
-                    <Form.Item label="BM Name" name="BMName" value={BMName}>
-                        <Select placeholder="Select a status" 
-                            style={{
-                                backgroundColor: theme === 'dark' && '#333', // Background color
-                                color: theme === 'dark' && '#fff',
-                            }}
-                            defaultValue="Winkleads Search" onChange={onChangeBMName}
-                            dropdownClassName={theme === 'dark' && "custom-dropdown"}>
-                            <Option value="Winkleads Search" defaultValue>Winkleads Search</Option>
-                            <Option value="MODO LEO BM X1">MODO LEO BM X1</Option>
-                        </Select>
+                    <Form.Item label="Agency Name" name="AgencyName">
+                        <Input value={AgencyName} onChange={onChangeAgencyName}  style={{color: theme === "dark" ? 'white' : "black"}}/>
                     </Form.Item>
+                    <Form.Item label="BM Name" name="BMName">
+                        <div ref={containerRef} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                            <Select
+                                placeholder="Select or add a value"
+                                value={BMName}
+                                onChange={onChangeBMName}
+                                style={{
+                                    flex: 1,
+                                    backgroundColor: theme === "dark" ? "#333" : undefined,
+                                    color: theme === "dark" ? "#fff" : undefined,
+                                }}
+                                dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
+                                allowClear
+                            >
+                                {options.map((option) => (
+                                    <Option key={option} value={option}>
+                                        {option}
+                                    </Option>
+                                ))}
+                            </Select>
+                            <Button style={{backgroundColor:'#C7F39A', width:'24px'}} onClick={() => setIsModalOpen(true)}>
+                                <PlusOutlined />
+                            </Button>
+                        </div>
+
+                        {/* Modal for adding new value */}
+                        <Modal
+                            title="Add New Value"
+                            visible={isModalOpen}
+                            onOk={handleAddNewValue}
+                            onCancel={() => setIsModalOpen(false)}
+                            okText="Add"
+                            cancelText="Cancel"
+                            centered={false} // Prevent centering
+                            getContainer={false} // Render modal within the same DOM hierarchy
+                            style={{
+                                position: "absolute",
+                                top: `${modalPosition.top - 50}px`, // Offset the modal above the Select
+                                left: `${modalPosition.left}px`,
+                                transform: "translateY(0)",
+                                width:'200px'
+                            }}
+                        >
+                            <Input
+                                placeholder="Enter new value"
+                                value={newValue}
+                                onChange={(e) => setNewValue(e.target.value)}
+                            />
+                        </Modal>
+                    </Form.Item>
+                    { !(newOptions.includes(BMName)) && 
+                    <Form.Item label="BM ID" name="BMId" rules={[{ required: true, message: 'Please input the BM ID!' }]}>
+                        <Input style={{color: theme === "dark" ? 'white' : "black"}}/>
+                    </Form.Item>
+                    }
+
                     <Form.Item label="Time Zone" name="timeZone" value={timeZone}>
                         <Select
                             showSearch
@@ -229,6 +361,12 @@ const Newaddaccounts = ({ visible, onClose }) => {
                                 label: item,
                             }))}
                         />
+                    </Form.Item>
+                    <Form.Item label="MediaBuyerName" name="MediaBuyerName" rules={[{ required: true, message: 'Please input the Media Buyer Name ID!' }]}>
+                        <Input style={{color: theme === "dark" ? 'white' : "black"}}/>
+                    </Form.Item>
+                    <Form.Item label="Holder" name="Holder" rules={[{ required: true, message: 'Please input the Holder Name ID!' }]}>
+                        <Input style={{color: theme === "dark" ? 'white' : "black"}}/>
                     </Form.Item>
                     {/* <Form.Item label="Revenue Account ID" name="revenueAccountId" rules={[{ required: true, message: 'Please input the revenue account ID!' }]}>
                         <Input />

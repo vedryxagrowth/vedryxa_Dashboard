@@ -860,6 +860,9 @@ const Dashboard = () => {
 
     const [darkMode, setDarkMode] = useState(false);
     const [data, setData] = useState([]);
+    const [activeTab, setActiveTab] = useState("1");
+
+    const [activeTab1, setActiveTab1] = useState("1");
     // const toggleTheme = () => {
     //     setDarkMode(!darkMode);
     // };
@@ -869,6 +872,9 @@ const Dashboard = () => {
         setSkeletonLoading(true);
         setTime(value);
     }
+    const carouselRef = useRef();
+
+    const carouselRef1 = useRef();
 
     const revenue1 = useRef(0);
     const spend1 = useRef(0);
@@ -893,6 +899,8 @@ const Dashboard = () => {
 
     const [rowData, setRowData] = useState([]);
     const [top5Campaigns, setTop5Campaigns] = useState([]);
+    const [top5RevenueCampaigns, setTop5RevenueCampaigns] = useState([]);
+    const [top5ProfitCampaigns, setTop5ProfitCampaigns] = useState([])
     const [selectedDates, setSelectedDates] = useState(defaultDates);
     const [isPickerOpen, setIsPickerOpen] = useState(false);
     const [submitted, setSubmitted] = useState(false);
@@ -1219,11 +1227,76 @@ const Dashboard = () => {
         
             return topFiveCampaigns; // Return a combined array of top 5 campaigns across all dates
         }
+
+        function getTopFiveRevenueCampaignsByDate(data) {
+            // Step 1: Group objects by specifiedDate using a Map
+            const groupedByDate = data.reduce((acc, curr) => {
+                const date = curr.Date; // Use specifiedDate directly from the object
+        
+                if (!acc.has(date)) {
+                    acc.set(date, []);
+                }
+                acc.get(date).push(curr); // Add campaigns to the date group
+        
+                return acc;
+            }, new Map());
+        
+            // Step 2: Prepare an array to hold the top 5 campaigns across all dates
+            const topFiveCampaigns = [];
+        
+            // Step 3: Iterate through each date group and get the top 5 campaigns by spend
+            groupedByDate.forEach(campaigns => {
+                // Sort the campaigns by spend in descending order and take the top 5
+                const topFive = campaigns
+                    .sort((a, b) => b.estimated_revenue - a.estimated_revenue) // Sort by spend descending
+                    .slice(0, 5); // Take top 5 campaigns for each date
+        
+                // Add the top 5 campaigns to the final result array
+                topFiveCampaigns.push(...topFive);
+            });
+        
+            return topFiveCampaigns; // Return a combined array of top 5 campaigns across all dates
+        }
+
+        function getTopFiveProfitCampaignsByDate(data) {
+            // Step 1: Group objects by specifiedDate using a Map
+            const groupedByDate = data.reduce((acc, curr) => {
+                const date = curr.Date; // Use specifiedDate directly from the object
+        
+                if (!acc.has(date)) {
+                    acc.set(date, []);
+                }
+                acc.get(date).push(curr); // Add campaigns to the date group
+        
+                return acc;
+            }, new Map());
+        
+            // Step 2: Prepare an array to hold the top 5 campaigns across all dates
+            const topFiveCampaigns = [];
+        
+            // Step 3: Iterate through each date group and get the top 5 campaigns by spend
+            groupedByDate.forEach(campaigns => {
+                // Sort the campaigns by spend in descending order and take the top 5
+                const topFive = campaigns
+                    .sort((a, b) => b.profit - a.profit) // Sort by spend descending
+                    .slice(0, 5); // Take top 5 campaigns for each date
+        
+                // Add the top 5 campaigns to the final result array
+                topFiveCampaigns.push(...topFive);
+            });
+        
+            return topFiveCampaigns; // Return a combined array of top 5 campaigns across all dates
+        }
         
 
         const top5SpendCampaignsByDate = getTopFiveSpendCampaignsByDate(groupByCampaignAndDate(responseData));
+        const top5RevenueCampaignsByDate = getTopFiveRevenueCampaignsByDate(groupByCampaignAndDate(responseData));
+        const top5ProfitCampaignsByDate = getTopFiveProfitCampaignsByDate(groupByCampaignAndDate(responseData));
+
 
         setTop5Campaigns(top5SpendCampaignsByDate);
+        setTop5RevenueCampaigns(top5RevenueCampaignsByDate);
+        setTop5ProfitCampaigns(top5ProfitCampaignsByDate);
         console.log(top5SpendCampaignsByDate);
 
         // function groupAndSortByCampaignSpend(data) {
@@ -1657,34 +1730,31 @@ const Dashboard = () => {
                 if (params.node.footer) {
                     return 'Total';
                 }
-
-                const firstColumnValue = params.node.key;  // campaign name
+    
+                const firstColumnValue = params.node.key; // campaign name
                 const campaignName = params.node.key;
                 const groupedData = params.node.allLeafChildren
-                ? params.node.allLeafChildren.map(childNode => childNode.data)
-                : [];
-
+                    ? params.node.allLeafChildren.map(childNode => childNode.data)
+                    : [];
+    
                 // Ensure groupedData has at least one element
                 if (groupedData.length === 0) {
                     return '';
                 }
-
+    
                 // Safeguard against undefined or missing properties
                 const firstGroupedItem = groupedData[0] || {};
                 const revenuePartnerNameToPassToReports = firstGroupedItem.revenuePartner
                     ? revenuePartnerNames[firstGroupedItem.revenuePartner]
                     : 'Unknown Partner';
-
+    
                 const accountNumberToPassToReports = firstGroupedItem.accountNumber || 'Unknown Account';
-                
+    
                 const valueWithCount = `${firstColumnValue}`;
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                        
                         <span
                             onClick={() => {
-                                // const url = `/Reports`;
-                                // window.open(url, '_blank');
                                 const data = {
                                     network: revenuePartnerNameToPassToReports,
                                     accountNumber: accountNumberToPassToReports,
@@ -1692,26 +1762,52 @@ const Dashboard = () => {
                                     startDate: startDate,
                                     endDate: endDate,
                                 };
-                        
+    
                                 // Convert data to query string
                                 const queryString = new URLSearchParams(data).toString();
                                 const url = `/Reports?${queryString}`;
-
+    
                                 // Open the URL in a new tab
                                 window.open(url, '_blank');
-                                // console.log(revenuePartnerNameToPassToReports);
-                                // console.log(accountNumberToPassToReports);
-                                // console.log(time);
-                                // console.log(startDate);
-                                // console.log(endDate);
                             }}
                         >
                             {valueWithCount}
                         </span>
-                        
                     </div>
                 );
             }
+        },
+        cellRendererFramework: (params) => {
+            if (params.node.group) {
+                // Keep the original logic for grouped rows
+                return params.valueFormatted || params.value || params.node.key;
+            }
+    
+            // For ungrouped rows, handle navigation directly
+            const accountNumber = params.data?.accountNumber || 'Unknown Account';
+            const revenuePartner = params.data?.revenuePartner || 'Unknown Partner';
+    
+            const data = {
+                network: revenuePartner,
+                accountNumber,
+                time,
+                startDate,
+                endDate,
+            };
+    
+            const queryString = new URLSearchParams(data).toString();
+            const url = `/Reports?${queryString}`;
+    
+            return (
+                <span
+                    style={{ cursor: 'pointer', color: '#1890ff' }}
+                    onClick={() => {
+                        window.open(url, '_blank');
+                    }}
+                >
+                    {accountNumber}
+                </span>
+            );
         }
     };
 
@@ -1838,6 +1934,102 @@ const Dashboard = () => {
         }
     ]);
 
+    const items = [
+        { key: '1', label: 'Profit', content: 'Content for Profit Accounts' },
+        { key: '2', label: 'Loss', content: 'Content for Loss Accounts' },
+        { key: '3', label: 'Top 5 Spend', content: 'Content for Top 5 Spend Accounts' },
+        { key: '4', label: 'Top 5 Revenue', content: 'Content for Top 5 Revenue Accounts' },
+        { key: '5', label: 'Top 5 Profit', content: 'Content for Top 5 Profit Accounts' },
+    ];
+
+    const items1 = [
+        { key: '1', label: 'Spend', content: 'Content for Top 5 Spend Campaigns' },
+        { key: '2', label: 'Revenue', content: 'Content for Top 5 Revenue Campaigns' },
+        { key: '3', label: 'Profit', content: 'Content for Top 5 Profit Campaigns' },
+    ];
+
+    const handleSlideChange = (from, to) => {
+        // console.log(to, "to");
+        setActiveTab((parseInt(to)+1).toString());
+        // console.log((parseInt(to)+1).toString());
+    };
+
+    const handleCarouselChange = (index) => {
+        setActiveTab(index);
+        // console.log(index);
+        // console.log(parseInt(index)-1);
+        carouselRef.current.goTo(parseInt(index)-1)
+        
+    };
+
+    const handleSlideChange1 = (from, to) => {
+        // console.log(to, "to");
+        setActiveTab1((parseInt(to)+1).toString());
+        // console.log((parseInt(to)+1).toString());
+    };
+
+    const handleCarouselChange1 = (index) => {
+        setActiveTab1(index);
+        // console.log(index);
+        // console.log(parseInt(index)-1);
+        carouselRef1.current.goTo(parseInt(index)-1)
+        
+    };
+
+    const renderCarouselNav1 = () => (
+        <StickyBox offsetTop={64} offsetBottom={20} style={{ zIndex: 1, padding: '0px', margin: '0px', paddingLeft: '0px' }}>
+            <Tabs
+                activeKey={activeTab1}
+                onChange={(key) => handleCarouselChange1(key)}
+                items={items1.map((item) => ({
+                key: item.key,
+                label: item.label,
+                }))}
+                className="custom-tabs" // Apply custom CSS class
+                style={{
+                backgroundColor: '#f0f2f5',
+                padding: '0',       
+                marginBottom: '0',  
+                }}
+                tabBarStyle={{
+                fontSize: '12px',      
+                padding: '0',          
+                height: '30px',        
+                lineHeight: '30px',    
+                marginBottom: '-1px',  
+                borderBottom: 'none',  
+                }}
+            />
+        </StickyBox>
+    );
+
+    const renderCarouselNav = () => (
+            <StickyBox offsetTop={64} offsetBottom={20} style={{ zIndex: 1, padding: '0px', margin: '0px', paddingLeft: '0px' }}>
+                <Tabs
+                    activeKey={activeTab}
+                    onChange={(key) => handleCarouselChange(key)}
+                    items={items.map((item) => ({
+                    key: item.key,
+                    label: item.label,
+                    }))}
+                    className="custom-tabs" // Apply custom CSS class
+                    style={{
+                    backgroundColor: '#f0f2f5',
+                    padding: '0',       
+                    marginBottom: '0',  
+                    }}
+                    tabBarStyle={{
+                    fontSize: '12px',      
+                    padding: '0',          
+                    height: '30px',        
+                    lineHeight: '30px',    
+                    marginBottom: '-1px',  
+                    borderBottom: 'none',  
+                    }}
+                />
+            </StickyBox>
+    );
+
 
     const [columnDefs1] = useState([
         {
@@ -1882,6 +2074,7 @@ const Dashboard = () => {
             field: "mediaBuyerName", headerName:'User'// Group by MediaBuyerName
         },
     ]);
+    
 
     const [columnDefs2] = useState([
         {   field: 'campaign_name', headerName:'CampaignName', minWidth: 430, suppressAutoSize: true,  
@@ -2750,73 +2943,191 @@ const Dashboard = () => {
                             </Col>
     
                         </Row>
+                        <h1>Accounts</h1>
+                        <div style={{padding:'0px', margin:'0px'}}>
+                            {renderCarouselNav()}
+                        </div>
+                        <Carousel ref={carouselRef} beforeChange={handleSlideChange} dots={false}>
+                            <div>
+                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                    <Col>
+                                        <div
+                                            className={`ag-theme-alpine ${gridThemeClass}`}
+                                            style={{ width: '100%', height: '400px' }}
+                                        >
+                                            <AgGridReact
+                                                rowData={rowData?.filter((each) => each.profit > 0)}
+                                                columnDefs={columnDefs1}
+                                                defaultColDef={defaultColDef}
+                                                rowGroupPanelShow="always"
+                                                suppressAggFuncInHeader={true}
+                                                groupIncludeFooter={true}
+                                                groupIncludeTotalFooter={true}
+                                                autoGroupColumnDef={autoGroupColumnDefProfit}
+                                            />
+                                        </div>
+                                    </Col>
+            
+                                </Row>
+                            </div>
+                            <div>
+                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                    <Col>
+                                        <div
+                                            className={`ag-theme-alpine ${gridThemeClass}`}
+                                            style={{ width: '100%', height: '400px' }}
+                                        >             <AgGridReact
+                                                rowData={rowData?.filter(each => each.profit < 0)}
+                                                columnDefs={columnDefs1}
+                                                defaultColDef={defaultColDef}
+                                                rowGroupPanelShow="always"
+                                                suppressAggFuncInHeader={true}
+                                                groupIncludeFooter={true}
+                                                groupIncludeTotalFooter={true}
+                                                autoGroupColumnDef={autoGroupColumnDefLoss}
+                                            />
+                                        </div>
+                                    </Col>
+                                </Row>
+                            </div>
+                            <div>
+                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                    <Col>
+                                        <div
+                                            className={`ag-theme-alpine ${gridThemeClass}`}
+                                            style={{ width: '100%', height: '400px' }}
+                                        >
+                                            <AgGridReact
+                                                rowData={rowData?.slice().sort((a, b) => b.spend - a.spend).slice(0, 5)}
+                                                columnDefs={columnDefs1}
+                                                defaultColDef={defaultColDef}
+                                                rowGroupPanelShow="always"
+                                                suppressAggFuncInHeader={true}
+                                                groupIncludeFooter={true}
+                                                groupIncludeTotalFooter={true}
+                                                autoGroupColumnDef={autoGroupColumnDefProfit}
+                                            />
+                                        </div>
+                                    </Col>
+            
+                                </Row>
+                            </div>
+                            <div>
+                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                    <Col>
+                                        <div
+                                            className={`ag-theme-alpine ${gridThemeClass}`}
+                                            style={{ width: '100%', height: '400px' }}
+                                        >
+                                            <AgGridReact
+                                                rowData={rowData?.slice().sort((a, b) => b.estimated_revenue - a.estimated_revenue).slice(0, 5)}
+                                                columnDefs={columnDefs1}
+                                                defaultColDef={defaultColDef}
+                                                rowGroupPanelShow="always"
+                                                suppressAggFuncInHeader={true}
+                                                groupIncludeFooter={true}
+                                                groupIncludeTotalFooter={true}
+                                                autoGroupColumnDef={autoGroupColumnDefProfit}
+                                            />
+                                        </div>
+                                    </Col>
+            
+                                </Row>
+                            </div>
+                            <div>
+                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                    <Col>
+                                        <div
+                                            className={`ag-theme-alpine ${gridThemeClass}`}
+                                            style={{ width: '100%', height: '400px' }}
+                                        >
+                                            <AgGridReact
+                                                rowData={rowData?.slice().sort((a, b) => b.profit - a.profit).slice(0, 5)}
+                                                columnDefs={columnDefs1}
+                                                defaultColDef={defaultColDef}
+                                                rowGroupPanelShow="always"
+                                                suppressAggFuncInHeader={true}
+                                                groupIncludeFooter={true}
+                                                groupIncludeTotalFooter={true}
+                                                autoGroupColumnDef={autoGroupColumnDefProfit}
+                                            />
+                                        </div>
+                                    </Col>
+            
+                                </Row>
+                            </div>
+                        </Carousel>
+
+                        <h1>Top 5 Campaigns</h1>
+
+                        <div style={{padding:'0px', margin:'0px'}}>
+                            {renderCarouselNav1()}
+                        </div>
     
-                        <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                            <Col>
-                                <h2>Profit Accounts</h2>
-                            </Col>
-    
-                            <Col>
-                                <div
-                                    className={`ag-theme-alpine ${gridThemeClass}`}
-                                    style={{ width: '100%', height: '400px' }}
-                                >
-                                    <AgGridReact
-                                        rowData={rowData?.filter((each) => each.profit > 0)}
-                                        columnDefs={columnDefs1}
-                                        defaultColDef={defaultColDef}
-                                        rowGroupPanelShow="always"
-                                        suppressAggFuncInHeader={true}
-                                        groupIncludeFooter={true}
-                                        groupIncludeTotalFooter={true}
-                                        autoGroupColumnDef={autoGroupColumnDefProfit}
-                                    />
-                                </div>
-                            </Col>
-    
-                        </Row>
-                        <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                            <Col>
-                                <h2>Loss Accounts</h2>
-                            </Col>
-                            <Col>
-                                <div
-                                    className={`ag-theme-alpine ${gridThemeClass}`}
-                                    style={{ width: '100%', height: '400px' }}
-                                >             <AgGridReact
-                                        rowData={rowData?.filter(each => each.profit < 0)}
-                                        columnDefs={columnDefs1}
-                                        defaultColDef={defaultColDef}
-                                        rowGroupPanelShow="always"
-                                        suppressAggFuncInHeader={true}
-                                        groupIncludeFooter={true}
-                                        groupIncludeTotalFooter={true}
-                                        autoGroupColumnDef={autoGroupColumnDefLoss}
-                                    />
-                                </div>
-                            </Col>
-                        </Row>
-                        <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                            <Col>
-                                <h2>Top 5 Campaigns</h2>
-                            </Col>
-                            <Col>
-                                <div
-                                    className={`ag-theme-alpine ${gridThemeClass}`}
-                                    style={{ width: '100%', height: '400px' }}
-                                >             <AgGridReact
-                                        rowData={top5Campaigns}
-                                        columnDefs={columnDefs2}
-                                        defaultColDef={defaultColDef}
-                                        rowGroupPanelShow="always"
-                                        suppressAggFuncInHeader={true}
-                                        groupIncludeFooter={true}
-                                        groupIncludeTotalFooter={true}
-                                        autoGroupColumnDef={autoGroupColumnDef}
-                                    />
-                                </div>
-                            </Col>
-                        </Row>
+                        <Carousel ref={carouselRef1} beforeChange={handleSlideChange1} dots={false}>
+                            <div>
+                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                    <Col>
+                                        <div
+                                            className={`ag-theme-alpine ${gridThemeClass}`}
+                                            style={{ width: '100%', height: '400px' }}
+                                        >             <AgGridReact
+                                                rowData={top5Campaigns}
+                                                columnDefs={columnDefs2}
+                                                defaultColDef={defaultColDef}
+                                                rowGroupPanelShow="always"
+                                                suppressAggFuncInHeader={true}
+                                                groupIncludeFooter={true}
+                                                groupIncludeTotalFooter={true}
+                                                autoGroupColumnDef={autoGroupColumnDef}
+                                            />
+                                        </div>
+                                    </Col>
+                                </Row>
+                            </div>
+                            <div>
+                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                    <Col>
+                                        <div
+                                            className={`ag-theme-alpine ${gridThemeClass}`}
+                                            style={{ width: '100%', height: '400px' }}
+                                        >             <AgGridReact
+                                                rowData={top5RevenueCampaigns}
+                                                columnDefs={columnDefs2}
+                                                defaultColDef={defaultColDef}
+                                                rowGroupPanelShow="always"
+                                                suppressAggFuncInHeader={true}
+                                                groupIncludeFooter={true}
+                                                groupIncludeTotalFooter={true}
+                                                autoGroupColumnDef={autoGroupColumnDef}
+                                            />
+                                        </div>
+                                    </Col>
+                                </Row>
+                            </div>
+                            <div>
+                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                    <Col>
+                                        <div
+                                            className={`ag-theme-alpine ${gridThemeClass}`}
+                                            style={{ width: '100%', height: '400px' }}
+                                        >             <AgGridReact
+                                                rowData={top5ProfitCampaigns}
+                                                columnDefs={columnDefs2}
+                                                defaultColDef={defaultColDef}
+                                                rowGroupPanelShow="always"
+                                                suppressAggFuncInHeader={true}
+                                                groupIncludeFooter={true}
+                                                groupIncludeTotalFooter={true}
+                                                autoGroupColumnDef={autoGroupColumnDef}
+                                            />
+                                        </div>
+                                    </Col>
+                                </Row>
+                            </div>
+                        </Carousel>
+                        
+                        
                         <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
                             <Col>
                                 <h2>Domain Level</h2>
