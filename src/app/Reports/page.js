@@ -13,7 +13,7 @@ import dayjs from 'dayjs';
 import { Carousel, Input, Button, Pagination, Row, Col, Typography, Result, Modal, message, ConfigProvider, Switch, Divider, Flex, Spin, Tabs } from 'antd';
 
 // import 'antd/dist/reset.css';
-import { CommentOutlined, CustomerServiceOutlined, MenuOutlined, InfoCircleOutlined, DownloadOutlined, SearchOutlined, ArrowLeftOutlined, ArrowRightOutlined, SmileOutlined, ReloadOutlined, CopyOutlined, StarOutlined, StarFilled, EditOutlined, CheckCircleFilled, CloseCircleFilled, MessageOutlined, SubnodeOutlined } from '@ant-design/icons';
+import { CommentOutlined, CustomerServiceOutlined, MenuOutlined, InfoCircleOutlined, DownloadOutlined, SearchOutlined, ArrowLeftOutlined, ArrowRightOutlined, SmileOutlined, ReloadOutlined, CopyOutlined, StarOutlined, StarFilled, EditOutlined, CheckCircleFilled, CloseCircleFilled, MessageOutlined, SubnodeOutlined, PushpinFilled, PushpinOutlined} from '@ant-design/icons';
 import { FloatButton, Tooltip } from 'antd';
 import Draggable from 'react-draggable';
 import StickyBox from 'react-sticky-box';
@@ -2907,6 +2907,29 @@ const MyTablePage = () => {
     //     fetchCampaignComments(); // Fetch comments on initial load
     // }, []); // Run this effect on component mount
 
+    const [pinnedRowData, setPinnedRowData] = useState([]);
+    const [unpinnedRowData, setUnpinnedRowData] = useState([]);
+
+    useEffect(() => {
+        if (rowData && campaignComments) {
+            console.log(rowData,"RowData");
+
+            // Separate pinned and unpinned campaigns
+            const pinnedRows = rowData.filter((row) => {
+                const relatedComment = campaignComments.find(comment => comment.campaignname === row.campaignname);
+                return relatedComment?.pinned === true;
+            });
+
+            const unpinnedRows = rowData.filter((row) => {
+                const relatedComment = campaignComments.find(comment => comment.campaignname === row.campaignname);
+                return !relatedComment?.pinned;
+            });
+
+            setPinnedRowData(pinnedRows);
+            setUnpinnedRowData(unpinnedRows);
+        }
+    }, [rowData, campaignComments]);
+
 
 
     const autoGroupColumnDefLive = {
@@ -2914,24 +2937,60 @@ const MyTablePage = () => {
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting
-
         comparator: (campaignA, campaignB) => {
             if (!campaignA) return 1;
             if (!campaignB) return -1;
-
+    
+            // Function to get the 'pinned' status of a campaign
+            const getPinStatusForCampaign = (campaignName) => {
+                const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+                return relatedComment ? relatedComment.pinned : false;
+            };
+    
+            // Prioritize pinned campaigns first (pinned campaigns should come to the top)
+            const isPinnedA = getPinStatusForCampaign(campaignA);
+            const isPinnedB = getPinStatusForCampaign(campaignB);
+    
+            if (isPinnedA !== isPinnedB) {
+                return isPinnedA ? -1 : 1;  // Pinned campaigns should come first
+            }
+    
+            // If both campaigns have the same pinned status, fall back to other sorting logic
+    
+            // For example: Prioritize by starred status
             const getStarredForCampaign = (campaignName) => {
                 const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                 return relatedComment ? relatedComment.starred : false;
             };
-
+    
             const isStarredA = getStarredForCampaign(campaignA);
             const isStarredB = getStarredForCampaign(campaignB);
-
-            if (isStarredA === isStarredB) {
-                return campaignA.localeCompare(campaignB);
+    
+            if (isStarredA !== isStarredB) {
+                return isStarredA ? -1 : 1;  // Starred campaigns should come first
             }
-            return isStarredA ? -1 : 1;
+    
+            // Finally, fallback to alphabetical sorting if no pinned or starred criteria
+            return campaignA.localeCompare(campaignB);
         },
+
+        // comparator: (campaignA, campaignB) => {
+        //     if (!campaignA) return 1;
+        //     if (!campaignB) return -1;
+
+        //     const getStarredForCampaign = (campaignName) => {
+        //         const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+        //         return relatedComment ? relatedComment.starred : false;
+        //     };
+
+        //     const isStarredA = getStarredForCampaign(campaignA);
+        //     const isStarredB = getStarredForCampaign(campaignB);
+
+        //     if (isStarredA === isStarredB) {
+        //         return campaignA.localeCompare(campaignB);
+        //     }
+        //     return isStarredA ? -1 : 1;
+        // },
 
         cellRendererParams: {
             suppressCount: false,
@@ -2990,6 +3049,11 @@ const MyTablePage = () => {
                     return relatedComment ? relatedComment.starred : false;
                 };
 
+                const getPinStatusForCampaign = (campaignName) => {
+                    const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+                    return relatedComment ? relatedComment.pinned : false;
+                };
+
                 const editUserANdTime = getEditedUserAndTime(campaignName, newaccount);
                 const relatedStatus = getStatusForCampaign(campaignName, newaccount);
                 const relatedComment = getCommentForCampaign(campaignName);
@@ -3000,6 +3064,7 @@ const MyTablePage = () => {
                 const [isModalVisibles, setIsModalVisibles] = useState(false);
                 const [comment, setComment] = useState(relatedComment || '');
                 const [starred, setStarred] = useState(isStarred);
+                const [pinned, setPinned] = useState(getPinStatusForCampaign(campaignName));
 
                 const copyToClipboard = () => {
                     navigator.clipboard.writeText(firstColumnValue)
@@ -3135,8 +3200,71 @@ const MyTablePage = () => {
                     </div>
                 );
 
+                const handlePinClick = async (campaignName, campaignid, adsetid, currentPinStatus) => {
+                    const updatedPinStatus = !currentPinStatus;
+    
+                    try {
+                        let response;
+                        if (updatedPinStatus) {
+                            response = await axios.post('http://localhost:8000/Pin', {
+                                campaignname: campaignName,
+                                Account: account,
+                                campaignid: campaignid,
+                                adsetid: adsetid,
+                                usercommit: userdetails?.email,
+                                comment: comment || ''
+                            }, { headers: { Authorization: token } });
+    
+                            message.success("Campaign pinned!");
+                        } else {
+                            response = await axios.post('http://localhost:8000/Unpin', {
+                                campaignname: campaignName,
+                                Account: account,
+                                campaignid: campaignid,
+                                adsetid: adsetid
+                            }, { headers: { Authorization: token } });
+    
+                            message.success("Campaign unpinned!");
+                        }
+    
+                        const updatedComments = campaignComments.some(cmt => cmt.campaignname === campaignName)
+                            ? campaignComments.map(cmt =>
+                                  cmt.campaignname === campaignName ? { ...cmt, pinned: updatedPinStatus } : cmt
+                              )
+                            : [...campaignComments, { campaignname: campaignName, pinned: updatedPinStatus }];
+    
+                        // Update pinned campaigns to stay at the top
+                        const sortedComments = updatedComments.sort((a, b) => b.pinned - a.pinned);
+                        setCampaignComments(sortedComments);
+                        setPinned(updatedPinStatus);
+                    } catch (error) {
+                        console.error('Error toggling pin status:', error);
+                        message.error('Error while updating pin status.');
+                    }
+                };
+                
+                const PinIcon = ({ campaignName, campaignid, adsetid, pinned }) => {
+                    return (
+                        <div onClick={() => handlePinClick(campaignName, campaignid, adsetid, pinned)}>
+                            {pinned ? (
+                                <PushpinFilled style={{ color: 'blue' }} />  // Blue for pinned
+                            ) : (
+                                <PushpinOutlined style={{ color: 'gray' }} />  // Gray for unpinned
+                            )}
+                        </div>
+                    );
+                };
+
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                        <PinIcon 
+                            campaignName={campaignName} 
+                            campaignid={campaignid}
+                            adsetid={adsetid}
+                            // pinned={getPinStatusForCampaign(campaignName)}
+                            pinned={pinned}
+                        />
+
                         {relatedStatus === true &&
                             <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit} />}>
                                 <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }} />
