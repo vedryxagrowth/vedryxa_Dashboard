@@ -17,7 +17,7 @@ const MnetUrlBuilder = ({ onReturnMessage, showSubmitButton }) => {
   const [geo, setGeo] = useState('');
   const [keywords, setKeyWords] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  const [NetworkData, setNetworkData]= useState([]);
+  const [NetworkData, setNetworkData] = useState([]);
 
 
   // const MnetDomains = [
@@ -177,16 +177,16 @@ const MnetUrlBuilder = ({ onReturnMessage, showSubmitButton }) => {
   //   }
   // ];
 
-  const getUrlBuilderData = async()=>{
+  const getUrlBuilderData = async () => {
     const response = await axios.get(`https://prodapis.adsgoat.in/get/urlbuilderdata?network=Mnet`);
-    if(response?.status === 200){
+    if (response?.status === 200) {
       setNetworkData(response?.data)
     }
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     getUrlBuilderData();
-  },[]);
+  }, []);
 
   // Function to add a new item
 
@@ -204,7 +204,9 @@ const MnetUrlBuilder = ({ onReturnMessage, showSubmitButton }) => {
   const onClickSubmit = () => {
 
     if (keywords && channel && memberId && geo && domain && source) {
-      const formattedKeywords = keywords.replace(/\s+/g, '+');
+      // const formattedKeywords = keywords.replace(/\s+/g, '+'); praveen 
+      const formattedKeywords = keywords.trimEnd().replace(/\s+/g, '+'); //s
+
       const campaign_id = NetworkData?.Source?.find(item => item.code === source).campaignId;
       const adset_id = NetworkData?.Source?.find(item => item.code === source).AdsetId;
       const mem_source_geo = `${memberId}_${source}_${geo}`
@@ -226,7 +228,7 @@ const MnetUrlBuilder = ({ onReturnMessage, showSubmitButton }) => {
   const onClickGet = () => {
 
     if (keywords && channel && memberId && geo && domain && source) {
-      const formattedKeywords = keywords.replace(/\s+/g, '+');
+      const formattedKeywords = keywords.trimEnd().replace(/\s+/g, '+');
       const campaign_id = NetworkData?.Source?.find(item => item.code === source).campaignId;
       const adset_id = NetworkData?.Source?.find(item => item.code === source).AdsetId;
       const mem_source_geo = `${memberId}_${source}_${geo}`

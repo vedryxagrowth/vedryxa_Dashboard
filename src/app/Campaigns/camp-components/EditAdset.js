@@ -46,8 +46,10 @@ const positionOptions = {
     { key: "instream_video", label: "Facebook In-Stream Videos" },
     { key: "facebook_reels", label: "Facebook Reels" },
     { key: "profile_feed", label: "Facebook Profile Feed" },
-    { key: "search", label: "Facebook search" },
-    { key: "story_fb", label: "Facebook Stories" }
+    { key: "search", label: "Facebook Search" },
+    { key: "story_fb", label: "Facebook Stories" },
+    { key: "right_column", label: "Facebook Right Column" }, // Added
+    { key: "instant_articles", label: "Facebook Instant Articles" } // Added
   ],
   instagram: [
     { key: "stream", label: "Instagram Stream" },
@@ -62,13 +64,16 @@ const positionOptions = {
   messenger: [
     { key: "messenger_home", label: "Messenger Home" },
     { key: "story_ms", label: "Messenger Story" },
-    { key: "sponsored_messages", label: "Messenger sponsored messages" }
+    { key: "sponsored_messages", label: "Messenger Sponsored Messages" },
+    { key: "messenger_inbox", label: "Messenger Inbox" } // Added
   ],
   audience_network: [
     { key: "classic", label: "Audience Network Classic" },
-    { key: "rewarded_video", label: "Audience Network Rewarded Video" }
+    { key: "rewarded_video", label: "Audience Network Rewarded Video" },
+    { key: "in_stream", label: "Audience Network In-Stream Video" } // Added
   ]
 };
+
 
 const localesdata = [
   {
@@ -779,7 +784,19 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
                   { value: "AU", label: "Australia" },
                   { value: "IN", label: "India" },
                   { value: "AE", label: "United Arab Emirates" },
-                  { value: "CA", label:"Canada"},
+                  { value: "CA", label: "Canada" },
+                  { value: "DE", label: "Germany" },
+                  { value: "FR", label: "France" },
+                  { value: "JP", label: "Japan" },
+                  { value: "CN", label: "China" },
+                  { value: "BR", label: "Brazil" },
+                  { value: "ZA", label: "South Africa" },
+                  { value: "RU", label: "Russia" },
+                  { value: "IT", label: "Italy" },
+                  { value: "ES", label: "Spain" },
+                  { value: "SG", label: "Singapore" },
+                  { value: "NZ", label: "New Zealand" },
+                  { value: "MX", label: "Mexico" }
                 ]}
               />
             </Form.Item>
