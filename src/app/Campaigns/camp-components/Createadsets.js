@@ -237,7 +237,19 @@ const Createadsets = () => {
                   { value: "AU", label: "Australia" },
                   { value: "IN", label: "India" },
                   { value: "AE", label: "United Arab Emirates" },
-                  { value: "CA", label:"Canada"},
+                  { value: "CA", label: "Canada" },
+                  { value: "DE", label: "Germany" },
+                  { value: "FR", label: "France" },
+                  { value: "JP", label: "Japan" },
+                  { value: "CN", label: "China" },
+                  { value: "BR", label: "Brazil" },
+                  { value: "ZA", label: "South Africa" },
+                  { value: "RU", label: "Russia" },
+                  { value: "IT", label: "Italy" },
+                  { value: "ES", label: "Spain" },
+                  { value: "SG", label: "Singapore" },
+                  { value: "NZ", label: "New Zealand" },
+                  { value: "MX", label: "Mexico" }
                 ]}
               />
             </Form.Item>
