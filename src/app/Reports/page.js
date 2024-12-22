@@ -11,7 +11,7 @@ import moment from 'moment-timezone';
 import dayjs from 'dayjs';
 import { useSearchParams } from 'next/navigation';
 // import { Select } from 'antd';
-import { Carousel, Input, Button, Pagination, Row, Col, Typography, Result, Modal, message, ConfigProvider, Switch, Divider, Flex, Spin, Tabs  } from 'antd';
+import { Carousel, Input, Button, Pagination, Row, Col, Typography, Result, Modal, message, ConfigProvider, Switch, Divider, Flex, Spin, Tabs } from 'antd';
 
 // import 'antd/dist/reset.css';
 import { CommentOutlined, CustomerServiceOutlined, MenuOutlined, InfoCircleOutlined, DownloadOutlined, SearchOutlined, ArrowLeftOutlined, ArrowRightOutlined, SmileOutlined, ReloadOutlined, CopyOutlined, StarOutlined, StarFilled, EditOutlined, CheckCircleFilled, CloseCircleFilled, MessageOutlined, SubnodeOutlined, PushpinFilled, PushpinOutlined } from '@ant-design/icons';
@@ -131,7 +131,7 @@ const MyTablePage = () => {
             </Flex>
         </div>;
     }
-    if(userdetails?.role === "Revenue_Partner"){
+    if (userdetails?.role === "Revenue_Partner") {
         redirect("/Dashboard");
     }
     // console.log(userdetails, "userDetails");
@@ -285,7 +285,7 @@ const MyTablePage = () => {
 
     const [isTrue, setTrue] = useState(false);
 
-    const [account, setAccount] = useState( accountNumberFromDashboard ? accountNumberFromDashboard : accountsForAccess[0].accountNumber);
+    const [account, setAccount] = useState(accountNumberFromDashboard ? accountNumberFromDashboard : accountsForAccess[0].accountNumber);
 
     const [time, setTime] = useState(timeFromDashboard ? timeFromDashboard : 'UTC');
 
@@ -869,43 +869,6 @@ const MyTablePage = () => {
     };
 
 
-    // (["campaignName", 
-    // "adsetname",
-    // "spend", 
-    // "revenue", 
-    // "date", 
-    // "fb-hour", 
-    // "mnet-hour",
-    // "profit", 
-    // "margin",
-    // "fbleads",
-    // "conversions",
-    // "cpc",
-    // "fbclicks",
-    // "impressions",
-    // "ctr",
-    // "rpc",
-    // "cpl",
-    // "ncpl",
-    // "fmargin",
-    // "roi",
-    // "adsetid",
-    // "compaignid", 
-    // "timezone"]);
-
-    // const CustomHeader = (props) => {
-    //     const handleMenuClick = () => {
-    //         // Handle menu click action here
-    //         console.log('Menu clicked for column:', props.column.getColId());
-    //     };
-
-    //     return (
-    //         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-    //             <div>{props.displayName}</div>
-    //             <MenuOutlined onClick={handleMenuClick} />
-    //         </div>
-    //     );
-    // };
 
     const onFilterChanged = () => {
         if (gridRef.current) {
@@ -1009,59 +972,7 @@ const MyTablePage = () => {
     };
 
 
-    // const handleAddColumn = () => {
-    //     if (newColumnName && formula) {
-    //         // Convert the formula to lowercase
-    //         const lowerCaseFormula = formula.toLowerCase();
 
-    //         // Add new column definition
-    //         const newColumnDef = {
-    //             headerName: newColumnName,
-    //             field: newColumnName.toLowerCase(),
-    //             valueGetter: (params) => {
-    //                 // Create a new function that uses the formula, where column names are used directly
-    //                 if (!params.data) return null;
-    //                 try {
-    //                     const func = new Function(...Object.keys(params.data), `return ${lowerCaseFormula}`);
-    //                     return func(...Object.values(params.data));
-    //                 } catch (error) {
-    //                     console.error('Error evaluating formula:', error);
-    //                     return null;
-    //                 }
-    //             }
-    //         };
-
-    //         setColumnDefs((prevDefs) => [...prevDefs, newColumnDef]);
-
-    //         // Update row data with new column values
-    //         setRowData((prevData) =>
-    //             prevData.map((row) => ({
-    //                 ...row,
-    //                 [newColumnName]: (() => {
-    //                     try {
-    //                         return new Function(...Object.keys(row), `return ${lowerCaseFormula}`)(...Object.values(row));
-    //                     } catch (error) {
-    //                         console.error('Error evaluating formula:', error);
-    //                         return null;
-    //                     }
-    //                 })()
-    //             }))
-    //         );
-
-    //         // Clear input fields
-    //         setNewColumnName('');
-    //         setFormula('');
-    //     }
-    // };
-
-    // function currencyFormatter(params) {
-    //     const value = params.value || 0; // Ensure value is defined and default to 0
-    //     return `$${value}`; // Format the value as currency
-    // }
-
-    // const onChangeSpendAndStatus = () => {
-    //     console.log("hi hello one");
-    // };
 
     const isYesterday = () => {
         const startDate1 = moment(startDate); // Convert to moment object
@@ -1900,8 +1811,10 @@ const MyTablePage = () => {
             },
             valueFormatter: (params) => `${params.value}%`,
         },
-        rpc: { headerName: 'Rpc', field: 'rpc', valueGetter: getRpc, sortable: true, filter: 'agNumberColumnFilter',
-            width: 240, },
+        rpc: {
+            headerName: 'Rpc', field: 'rpc', valueGetter: getRpc, sortable: true, filter: 'agNumberColumnFilter',
+            width: 240,
+        },
         cpl: { headerName: 'Cpl', field: 'cpl', valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter' },
         ncpl: { headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter' },
         fmargin: {
@@ -2183,8 +2096,10 @@ const MyTablePage = () => {
         },
         fbleads: { headerName: 'FbLeads', field: 'fbleads', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
         conversions: { headerName: 'Conversions', field: 'conversions', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
-        cpc: { headerName: 'cpc', field: 'cpc', aggFunc: cpcSpender, sortable: true, filter: 'agNumberColumnFilter',
-            width: 150, },
+        cpc: {
+            headerName: 'cpc', field: 'cpc', aggFunc: cpcSpender, sortable: true, filter: 'agNumberColumnFilter',
+            width: 150,
+        },
         fbclicks: { headerName: 'FbClicks', field: 'fbclicks', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
         impressions: { headerName: 'Impressions', field: 'impressions', width: 120, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter' },
         ctr: {
@@ -2197,8 +2112,10 @@ const MyTablePage = () => {
             },
             valueFormatter: (params) => `${params.value}%`,
         },
-        rpc: { headerName: 'Rpc', field: 'rpc', valueGetter: getRpc, sortable: true, filter: 'agNumberColumnFilter',
-            width: 150, },
+        rpc: {
+            headerName: 'Rpc', field: 'rpc', valueGetter: getRpc, sortable: true, filter: 'agNumberColumnFilter',
+            width: 150,
+        },
         cpl: { headerName: 'Cpl', field: 'cpl', valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter' },
         ncpl: { headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter' },
         fmargin: {
@@ -2230,19 +2147,19 @@ const MyTablePage = () => {
 
     const KeywordCellRenderer = ({ params }) => {
         const [tooltipText, setTooltipText] = useState("Copy to clipboard");
-    
+
         const keyword = params.value;
-        const adId = params.data?.adId; 
-    
+        const adId = params.data?.adId;
+
         const handleCopy = () => {
             navigator.clipboard.writeText(adId).then(() => {
                 setTooltipText("Copied!");
-                setTimeout(() => setTooltipText("Copy to clipboard"), 2000); 
+                setTimeout(() => setTooltipText("Copy to clipboard"), 2000);
             }).catch(() => {
                 alert('Failed to copy!');
             });
         };
-    
+
         const popoverContent = (
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span>{adId}</span>
@@ -2258,13 +2175,13 @@ const MyTablePage = () => {
                 </Tooltip>
             </div>
         );
-    
+
         return (
             <Popover
-                content={popoverContent}
-                trigger="hover" 
-                placement="topLeft" 
-                // title="Ad ID"
+                content={newRevenuePratner !== "FB_Tonic1" ? popoverContent : null}
+                trigger="hover"
+                placement="topLeft"
+            // title="Ad ID"
             >
                 <span style={{ cursor: 'pointer' }}>
                     {keyword}
@@ -2299,9 +2216,10 @@ const MyTablePage = () => {
             sortable: true,
             filter: 'agTextColumnFilter',
             resizable: true,
-            minWidth: 350, 
+            minWidth: 350,
             cellStyle: { textAlign: 'left' },
-            cellRenderer: (params) => newRevenuePratner !== "FB_Tonic1" ? <KeywordCellRenderer params={params} /> : "",
+            cellRenderer: (params) =>
+                <KeywordCellRenderer params={params} /> , 
         },
         searchKeyword: {
             headerName: 'S_Keywords',
@@ -2335,12 +2253,12 @@ const MyTablePage = () => {
         //     },
         //     // Include this column only in expanded rows
         // },
-        adId: { 
-            headerName: 'adId', 
-            field: 'adId', 
-            sortable: true, 
-            filter: "agTextColumnFilter", 
-            hide: false 
+        adId: {
+            headerName: 'adId',
+            field: 'adId',
+            sortable: true,
+            filter: "agTextColumnFilter",
+            hide: false
         },
         actions: {
             headerName: 'Actions',
@@ -2745,7 +2663,7 @@ const MyTablePage = () => {
     const getColumnDefs3 = (order) => {
         // console.log(order);
         const orderItems = order?.map(colKey => columnDefsObject3[colKey]);
-        const newOrderItems = [columnDefsObject3["keyword"], columnDefsObject3["searchKeyword"],  ...orderItems, columnDefsObject3["adId"]];
+        const newOrderItems = [columnDefsObject3["keyword"], columnDefsObject3["searchKeyword"], ...orderItems, columnDefsObject3["adId"]];
         return newOrderItems;
     };
 
@@ -2831,7 +2749,7 @@ const MyTablePage = () => {
     function groupAndCalculateProfit(data) {
         const groupedData = data.reduce((acc, item) => {
             const key = `${item.domain}-${item[`${newtime}Date`]}`;
-            
+
             if (!acc[key]) {
                 acc[key] = {
                     domain: item.domain,
@@ -2842,15 +2760,15 @@ const MyTablePage = () => {
                     fbLeads: 0,
                 };
             }
-    
+
             acc[key].estimated_revenue += item.estimated_revenue;
             acc[key].spend += parseFloat(item.spend);
             acc[key].conversions += item.conversions || 0;  // Default to 0 if undefined
             acc[key].fbLeads += parseInt(item.fbLeads) || 0;        // Default to 0 if undefined
-    
+
             return acc;
         }, {});
-    
+
         return Object.values(groupedData).map(item => ({
             ...item,
             profit: item.estimated_revenue - item.spend,
@@ -2863,7 +2781,7 @@ const MyTablePage = () => {
     function groupAndCalculateBMName(data) {
         const groupedData = data.reduce((acc, item) => {
             const key = `${item.BMName}-${item[`${newtime}Date`]}`;
-            
+
             if (!acc[key]) {
                 acc[key] = {
                     BMName: item.BMName,
@@ -2874,15 +2792,15 @@ const MyTablePage = () => {
                     fbLeads: 0,
                 };
             }
-    
+
             acc[key].estimated_revenue += item.estimated_revenue;
             acc[key].spend += parseFloat(item.spend);
             acc[key].conversions += item.conversions || 0;  // Default to 0 if undefined
             acc[key].fbLeads += parseInt(item.fbLeads) || 0;        // Default to 0 if undefined
-    
+
             return acc;
         }, {});
-    
+
         return Object.values(groupedData).map(item => ({
             ...item,
             profit: item.estimated_revenue - item.spend,
@@ -2891,7 +2809,7 @@ const MyTablePage = () => {
             cpl: item.fbLeads > 0 ? (item.spend / item.fbLeads) : 0,  // Cost per Lead
         }));
     }
-    
+
 
     const functionCall1 = async () => {
         if (!token) {
@@ -2914,8 +2832,8 @@ const MyTablePage = () => {
 
             setDomainColumnDefs([
                 {
-                    field:'domain',
-                    headerName:'Domain',
+                    field: 'domain',
+                    headerName: 'Domain',
                     minWidth: 400,
                     // resizable: true,
                     sortable: true,
@@ -2923,7 +2841,7 @@ const MyTablePage = () => {
                     rowGroup: true,
                     enableRowGroup: true,
                     flex: 8
-    
+
                 },
                 {
                     field: `${newtime}Date`,
@@ -2938,7 +2856,7 @@ const MyTablePage = () => {
                     sortable: true,
                     filter: true,
                     minWidth: 150,
-                    aggFunc:spender,
+                    aggFunc: spender,
                     valueFormatter: currencyFormatter
                 },
                 {
@@ -2948,24 +2866,24 @@ const MyTablePage = () => {
                     sortable: true,
                     filter: true,
                     minWidth: 150,
-                    aggFunc:spender,
+                    aggFunc: spender,
                     valueFormatter: currencyFormatter
                 },
-                { 
-                    field: 'profit', 
+                {
+                    field: 'profit',
                     resizable: true,
                     sortable: true,
                     minWidth: 150,
                     cellClassRules: {
                         'font-red': p => p.value < 0
                     },
-                    aggFunc:spender,
+                    aggFunc: spender,
                     filter: true,
                     valueFormatter: currencyFormatter
                 },
                 {
                     field: "margin",
-                    headerName:'Margin(%)',
+                    headerName: 'Margin(%)',
                     aggFunc: average,
                     cellClassRules: {
                         'font-red': p => p.value < 0
@@ -3011,13 +2929,13 @@ const MyTablePage = () => {
             // console.log(groupAndCalculateProfit1);
         }
 
-        if(fetchData.status === 200 && mainData.length > 0){
+        if (fetchData.status === 200 && mainData.length > 0) {
             const groupAndCalculateBMName1 = groupAndCalculateBMName(mainData);
             setBMNameData(groupAndCalculateBMName1);
             setBMNameColumnDefs([
                 {
-                    field:'BMName',
-                    headerName:'BMName',
+                    field: 'BMName',
+                    headerName: 'BMName',
                     minWidth: 400,
                     // resizable: true,
                     sortable: true,
@@ -3025,7 +2943,7 @@ const MyTablePage = () => {
                     rowGroup: true,
                     enableRowGroup: true,
                     flex: 9
-    
+
                 },
                 {
                     field: `${newtime}Date`,
@@ -3040,7 +2958,7 @@ const MyTablePage = () => {
                     sortable: true,
                     filter: true,
                     minWidth: 150,
-                    aggFunc:spender,
+                    aggFunc: spender,
                     valueFormatter: currencyFormatter
                 },
                 {
@@ -3050,24 +2968,24 @@ const MyTablePage = () => {
                     sortable: true,
                     filter: true,
                     minWidth: 150,
-                    aggFunc:spender,
+                    aggFunc: spender,
                     valueFormatter: currencyFormatter
                 },
-                { 
-                    field: 'profit', 
+                {
+                    field: 'profit',
                     resizable: true,
                     sortable: true,
                     minWidth: 150,
                     cellClassRules: {
                         'font-red': p => p.value < 0
                     },
-                    aggFunc:spender,
+                    aggFunc: spender,
                     filter: true,
                     valueFormatter: currencyFormatter
                 },
                 {
                     field: "margin",
-                    headerName:'Margin(%)',
+                    headerName: 'Margin(%)',
                     aggFunc: average,
                     cellClassRules: {
                         'font-red': p => p.value < 0
@@ -3233,89 +3151,7 @@ const MyTablePage = () => {
 
     }
 
-    // const functionCall1 = async () => {
-    //     const fetchData = await axios.get(`https://prodapis.adsgoat.in/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${account}&timezone=${time}&network=${newtworkCollections[revenuePratner]}`, {
-    //         headers: {
-    //             Authorization: token,
-    //         },
-    //     });
-    //     const mainData = fetchData.data;
-    //     console.log(mainData, "maindata of functinCall1");
-    //     const specifiedTimeZone = selectTimezone[time];
-    //     const filteredData = mainData && mainData.length > 0 ?
-    //         mainData.map((eachData) => {
-    //             let revenueData;
-    //             if (eachData.estimated_revenue === 0 || isNaN(eachData.estimated_revenue)) {
-    //                 revenueData = 0;
-    //             }
-    //             else if (eachData.estimated_revenue === undefined) {
-    //                 revenueData = 0;
-    //             }
-    //             else if (eachData.estimated_revenue === null) {
-    //                 revenueData = 0;
-    //             }
-    //             else {
-    //                 revenueData = eachData.estimated_revenue;
-    //             }
-    //             const profit = (revenueData - eachData.spend).toFixed(2);
-    //             let margin;
-    //             if (revenueData === 0) {
-    //                 margin = "0";
-    //             }
-    //             else {
-    //                 margin = `${Math.round((((revenueData - eachData.spend) / revenueData) * 100) * 100) / 100}%`;
-    //             }
-    //             const rpc = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((revenueData / eachData.conversions) * 100) / 100;
 
-    //             let cpl;
-    //             if (eachData.fbLeads == 0) {
-    //                 cpl = 0;
-    //             } else {
-    //                 cpl = Math.round((eachData.spend / eachData.fbLeads) * 100) / 100;
-    //             }
-    //             const ncpl = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((eachData.spend / eachData.conversions) * 100) / 100;
-    //             // console.log(revenueData, "revenueData");
-    //             return (
-    //                 {
-    //                     campaignname: eachData.campaign_name,
-    //                     adsetname: eachData.adsetName,
-    //                     date: eachData[specifiedTimeZone],
-    //                     'fb-hour': eachData.hour,
-    //                     'mnet-hour': eachData.updatedHour,
-    //                     spend: parseFloat(eachData.spend),
-    //                     revenue: revenueData ? revenueData : 0,
-    //                     profit: parseFloat(profit),
-    //                     margin: margin,
-    //                     fbleads: parseInt(eachData.fbLeads),
-    //                     conversions: eachData.conversions !== null && eachData.conversions !== 0 ? parseInt(eachData.conversions) : 0,
-    //                     cpc: parseFloat(eachData.cpc),
-    //                     fbclicks: parseInt(eachData.fbClicks),
-    //                     impressions: parseInt(eachData.impressions),
-    //                     rpc: parseFloat(rpc),
-    //                     cpl: parseFloat(cpl),
-    //                     ncpl: parseFloat(ncpl),
-    //                     adsetid: eachData.adset_id,
-    //                     campaignid: eachData.campaign_id,
-    //                     timezone: eachData[time],
-    //                 }
-    //             )
-    //         })
-    //         : null;
-    //     // setValue(mainData);
-    //     if (mainData.length > 1) {
-    //         timezone.current = mainData[0].accountTimezone;
-    //         accountStatus.current = mainData[0].accountStatus;
-    //         cronStatus.current = mainData[0].cronStatus;
-    //         maxHour.current = findMaxHour(mainData);
-    //         maxNetworkHour.current = getMaxHour(mainData);
-    //     }
-    //     setRowData(filteredData);
-    //     newRowData.current = filteredData;
-    //     setInitialRowData(filteredData);
-    //     setTrue(false);
-    //     setLoading(false);
-
-    // }
 
     const functionCall2 = async () => {
         try {
@@ -3563,7 +3399,7 @@ const MyTablePage = () => {
                     totalFbleads += eachData.fbLeads;
                     totalImpressions += eachData.impressions;
                 }) : null;
-          
+
             const filteredData = mainData && mainData.length > 0 ?
                 mainData.map((eachData) => {
                     const Revenue = eachData.estimated_revenue !== undefined ? (eachData.estimated_revenue) : 0;
@@ -3638,7 +3474,7 @@ const MyTablePage = () => {
     }
 
     const functionCall5 = async () => {
-        try { 
+        try {
             const fetchData = await axios.get(`https://prodapis.adsgoat.in/System1Keywords?startDate=${startDate}&endDate=${endDate}`, {
                 headers: {
                     Authorization: token,
@@ -3646,12 +3482,12 @@ const MyTablePage = () => {
             });
             const mainData = fetchData.data;
             console.log(mainData, "mainData of functionCall5");
-    
+
             let totalSpend = 0;
             let totalRevenue = 0;
             let totalClicks = 0;
             let totalSearches = 0;
-            
+
             // Process the data if it's available
             const filteredData = mainData && mainData.length > 0 ? mainData.map((eachData) => {
                 const Revenue = eachData.estimated_revenue || 0; // Make sure ESTIMATED_REVENUE exists
@@ -3661,7 +3497,7 @@ const MyTablePage = () => {
                 totalSpend += Revenue;
                 totalClicks += clicks;
                 totalSearches += searches;
-    
+
                 return {
                     date: eachData.DATE,
                     domain: eachData.DOMAIN,
@@ -3674,18 +3510,18 @@ const MyTablePage = () => {
                     revenue: Revenue,
                 };
             }) : [];
-    
+
             // Log filtered data to check
             console.log(filteredData, "filteredData");
-    
+
             // Update state with new data
             setSystem1KeywordData(filteredData);
-    
+
             // // Refresh grid after setting new data
             // if (gridRef4.current && gridRef4.current.api) {
             //     gridRef4.current.api.refreshCells();  // Refresh AgGrid after setting new data
             // }
-    
+
             setSFixedFooter([
                 {
                     revenue: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0).toFixed(2)),
@@ -3697,11 +3533,11 @@ const MyTablePage = () => {
             setLoading4(false); // Hide loading spinner
         } catch (error) {
             setSystem1KeywordData([]);
-            setLoading4(false); 
+            setLoading4(false);
             console.log(error);
             // setLoading4(false); // Hide loading spinner in case of error
         }
-    };  
+    };
 
     const functionCall6 = async () => {
         try { 
@@ -3845,14 +3681,14 @@ const MyTablePage = () => {
 
                 // Run this function on initial load and whenever pageSize changes
                 await functionCall3();
-                if(newRevenuePratner === "FB_DomainActive"){
+                if (newRevenuePratner === "FB_DomainActive") {
                     await functionCall4();
-                }else if(newRevenuePratner === "FB_System1"){
+                } else if (newRevenuePratner === "FB_System1") {
                     await functionCall5();
                 }else if(newRevenuePratner === "FB_Tonic1"){
                     await functionCall6();
                 }
-                
+
                 // console.log("functionCall3 executed successfully.");
             } catch (error) {
                 console.error("Error in function calls:", error);
@@ -3872,9 +3708,9 @@ const MyTablePage = () => {
                 await functionCall3();
                 // await functionCall4();   
                 // await functionCall5(); 
-                if(newRevenuePratner === "FB_DomainActive"){
+                if (newRevenuePratner === "FB_DomainActive") {
                     await functionCall4();
-                }else if(newRevenuePratner === "FB_System1"){
+                } else if (newRevenuePratner === "FB_System1") {
                     await functionCall5();
                 }else if(newRevenuePratner === "FB_Tonic1"){
                     await functionCall6();
@@ -3889,29 +3725,7 @@ const MyTablePage = () => {
         setGridKey((prevKey) => prevKey + 1);
     }, [fixedFooter, sFixedFooter]);
 
-    // useEffect(()=>{
-    //     if(isTrue){
-    //         const functionCall = async() => {
-    //             await functionCall3();
-    //         }
-    //         functionCall();
-    //     }
 
-    // }, [isTrue, pageSize]);
-
-    // useEffect(()=>{
-
-    //         const functionCall = async() =>{
-    //            await functionCall2();
-    //            await functionCall1();
-    //            await functionCall3();
-    //         }
-    //         functionCall();
-
-    // },[])
-
-
-    // console.log(fetchvalue);
 
     const selectRevenuePartner = ["Fb_Mnet", "Fb_Enki"];
     let selectElementAccounts = [];
@@ -3955,7 +3769,7 @@ const MyTablePage = () => {
         setLoading(true);
         setLoading1(true);
         setLoading2(true);
-        newRevenuePratner === "FB_DomainActive" && setLoading3(true);    
+        newRevenuePratner === "FB_DomainActive" && setLoading3(true);
         newRevenuePratner === "FB_System1" && setLoading4(true);
         newRevenuePratner === "FB_Tonic1" && setTonicKeywordLoading(true);
         setNewAccount(account);
@@ -3995,10 +3809,7 @@ const MyTablePage = () => {
         DST: 'DSTDate'
     };
 
-    // const defaultColDef = useMemo(()=>({
-    //     filter: true,
-    //     floatingFilter: true,
-    // }),[]);
+
 
     switch (revenuePratner) {
         case "FB_Mnet":
@@ -4128,6 +3939,383 @@ const MyTablePage = () => {
 
 
 
+    // const autoGroupColumnDefLive = {
+    //     headerName: 'CampaignName',
+    //     minWidth: 450,
+    //     pinned: 'left',
+    //     sortable: true, // Enable sorting
+
+    //     comparator: (campaignA, campaignB) => {
+    //         if (!campaignA) return 1;
+    //         if (!campaignB) return -1;
+
+    //         // Function to get the 'pinned' status of a campaign
+    //         const getPinStatusForCampaign = (campaignName) => {
+    //             const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+    //             return relatedComment ? relatedComment.pinned : false;
+    //         };
+
+    //         // Prioritize pinned campaigns first (pinned campaigns should come to the top)
+    //         const isPinnedA = getPinStatusForCampaign(campaignA);
+    //         const isPinnedB = getPinStatusForCampaign(campaignB);
+
+    //         if (isPinnedA !== isPinnedB) {
+    //             return isPinnedA ? -1 : 1;  // Pinned campaigns should come first
+    //         }
+
+    //         // If both campaigns have the same pinned status, fall back to other sorting logic
+
+    //         // For example: Prioritize by starred status
+    //         const getStarredForCampaign = (campaignName) => {
+    //             const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+    //             return relatedComment ? relatedComment.starred : false;
+    //         };
+
+    //         const isStarredA = getStarredForCampaign(campaignA);
+    //         const isStarredB = getStarredForCampaign(campaignB);
+
+    //         if (isStarredA !== isStarredB) {
+    //             return isStarredA ? -1 : 1;  // Starred campaigns should come first
+    //         }
+
+    //         // Finally, fallback to alphabetical sorting if no pinned or starred criteria
+    //         return campaignA.localeCompare(campaignB);
+    //     },
+
+
+    //     cellRendererParams: {
+    //         suppressCount: false,
+    //         innerRenderer: (params) => {
+    //             if (params.node.footer) {
+    //                 return 'Total';
+    //             }
+
+    //             const firstColumnValue = params.node.key;  // campaign name
+    //             const campaignName = params.node.key;
+
+    //             // Check if this is a grouped row and has children
+    //             let campaignid, adsetid;
+
+    //             if (params.node.group && params.node.childrenAfterGroup && params.node.childrenAfterGroup.length > 0) {
+    //                 // Get the first child row data to extract campaignid and adsetid
+    //                 const firstChild = params.node.childrenAfterGroup[0].data;
+    //                 campaignid = firstChild.campaignid;
+    //                 adsetid = firstChild.adsetid;
+    //             } else if (params.data) {
+    //                 // Fallback to individual row data if not grouped
+    //                 campaignid = params.data.campaignid;
+    //                 adsetid = params.data.adsetid;
+    //             } else {
+    //                 console.error('Missing campaignid or adsetid for campaign:', campaignName);
+    //                 return (
+    //                     <div style={{ color: 'red' }}>
+    //                         Error: campaignid or adsetid missing for {campaignName}
+    //                     </div>
+    //                 );
+    //             }
+
+    //             const getEditedUserAndTime = (campaignName, newaccount) => {
+    //                 const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
+    //                 // console.log(relatedStatus, "relatedStatus");
+    //                 const relatedStatusEditedTime = relatedStatus ? relatedStatus : null;
+    //                 // console.log(relatedStatusTrue);
+    //                 return relatedStatusEditedTime;
+    //             }
+
+    //             const getStatusForCampaign = (campaignName, newaccount) => {
+    //                 const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
+    //                 // console.log(relatedStatus, "relatedStatus");
+    //                 const relatedStatusTrue = relatedStatus !== undefined && relatedStatus.status === true ? true : relatedStatus !== undefined ? false : null;
+    //                 // console.log(relatedStatusTrue);
+    //                 return relatedStatusTrue;
+    //             }
+
+    //             const getCommentForCampaign = (campaignName) => {
+    //                 const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+    //                 return relatedComment ? relatedComment.comment : null;
+    //             };
+
+    //             const getStarredForCampaign = (campaignName) => {
+    //                 const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+    //                 return relatedComment ? relatedComment.starred : false;
+    //             };
+
+    //             const getPinStatusForCampaign = (campaignName) => {
+    //                 const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+    //                 return relatedComment ? relatedComment.pinned : false;
+    //             };
+
+    //             const editUserANdTime = getEditedUserAndTime(campaignName, newaccount);
+    //             const relatedStatus = getStatusForCampaign(campaignName, newaccount);
+    //             const relatedComment = getCommentForCampaign(campaignName);
+    //             const isStarred = getStarredForCampaign(campaignName);
+    //             const valueWithCount = `${firstColumnValue}`;
+
+    //             const [tooltipText, setTooltipText] = useState("Click to Copy");
+    //             const [isModalVisibles, setIsModalVisibles] = useState(false);
+    //             const [comment, setComment] = useState(relatedComment || '');
+    //             const [starred, setStarred] = useState(isStarred);
+    //             const [pinned, setPinned] = useState(getPinStatusForCampaign(campaignName));
+
+    //             const copyToClipboard = () => {
+    //                 navigator.clipboard.writeText(firstColumnValue)
+    //                     .then(() => {
+    //                         setTooltipText("Copied!");
+    //                         setTimeout(() => setTooltipText("Click to Copy"), 2000);
+    //                     })
+    //                     .catch(() => {
+    //                         console.error('Failed to copy to clipboard');
+    //                     });
+    //             };
+
+    //             const handleEditClick = () => {
+    //                 setIsModalVisibles(true);
+    //             };
+
+    //             const sendNewCommentToAPI = async (logData) => {
+    //                 try {
+    //                     const response = await axios.post('https://prodapis.adsgoat.in/Comments', {
+    //                         commentsdatas: logData,
+    //                     }, {
+    //                         headers: {
+    //                             Authorization: token,
+    //                         }
+    //                     });
+
+    //                     // console.log('Response from server:', response.data);
+    //                 } catch (error) {
+    //                     console.error('Error sending data to server:', error);
+    //                 }
+    //                 // console.log(logData);
+    //             };
+
+    //             const sendEditedCommentToAPI = async (logData) => {
+    //                 try {
+    //                     const response = await axios.post('https://prodapis.adsgoat.in/Comments/edit', {
+    //                         campaignname: logData.campaignname,
+    //                         comment: logData.comment,
+    //                         Account: logData.Account,
+    //                         adsetid: logData.adsetid,
+    //                         campaignid: logData.campaignid,
+    //                         status: true
+
+    //                     }, {
+    //                         headers: {
+    //                             Authorization: token,
+    //                         }
+    //                     });
+    //                     // console.log('Response from server (edited comment):', response.data);
+    //                     return response.data;
+    //                 } catch (error) {
+    //                     console.error('Error sending edited comment to server:', error);
+    //                     throw error;
+    //                 }
+    //                 // console.log(logData);
+    //             };
+
+    //             const sendStarStatusToAPI = async (campaignname, isStarred) => {
+    //                 // console.log(campaignid);
+    //                 // console.log(adsetid);
+    //                 try {
+    //                     const endpoint = isStarred ? 'https://prodapis.adsgoat.in/Star' : 'https://prodapis.adsgoat.in/Unstar';
+    //                     const response = await axios.post(endpoint, {
+    //                         campaignname: campaignname,
+    //                         Account: account,
+    //                         usercommit: userdetails?.email,
+    //                         campaignid: campaignid, // Pass campaignid from grouped data
+    //                         adsetid: adsetid // Pass adsetid from grouped data
+    //                     }, {
+    //                         headers: {
+    //                             Authorization: token,
+    //                         }
+    //                     });
+    //                     // console.log('Response from server (starred status):', response.data);
+    //                 } catch (error) {
+    //                     console.error('Error updating star status:', error);
+    //                 }
+    //             };
+
+    //             const handleStarClick = async () => {
+    //                 const updatedStarred = !starred;
+    //                 setStarred(updatedStarred);
+    //                 await sendStarStatusToAPI(firstColumnValue, updatedStarred);
+    //                 message.success(updatedStarred ? "Campaign starred!" : "Campaign unstarred!");
+
+    //                 const updatedComments = campaignComments.map(cmt =>
+    //                     cmt.campaignname === firstColumnValue ? { ...cmt, starred: updatedStarred } : cmt
+    //                 );
+    //                 setCampaignComments(updatedComments);
+    //                 changeRRefrst();
+    //             };
+
+    //             const handleOks = async () => {
+    //                 try {
+    //                     const logData = {
+    //                         Account: newaccount,
+    //                         usercommit: userdetails?.email,
+    //                         campaignname: firstColumnValue,
+    //                         comment: comment,
+    //                         campaignid: campaignid, // Pass campaignid
+    //                         adsetid: adsetid // Pass adsetid
+    //                     };
+
+    //                     if (relatedComment) {
+    //                         await sendEditedCommentToAPI(logData);
+    //                         message.success("Comment updated successfully!");
+    //                     } else {
+    //                         await sendNewCommentToAPI(logData);
+    //                         message.success("New comment added successfully!");
+    //                     }
+
+    //                     const updatedComments = relatedComment
+    //                         ? campaignComments.map(cmt => (cmt.campaignname === firstColumnValue ? { ...cmt, comment } : cmt))
+    //                         : [...campaignComments, logData];
+    //                     setCampaignComments(updatedComments);
+
+    //                     changeRRefrst();
+    //                     setIsModalVisibles(false);
+    //                 } catch (error) {
+    //                     console.error('Error while submitting comment:', error);
+    //                     message.error("Error while submitting the comment.");
+    //                 }
+    //             };
+
+    //             const handleCancels = () => {
+    //                 setIsModalVisibles(false);
+    //             };
+
+    //             const CustomTooltipContent = ({ editedTime, usercommit }) => (
+    //                 <div style={{ padding: '5px', borderRadius: '5px' }}>
+    //                     <p style={{ margin: 0, color: "#ffffff" }}>{usercommit}</p>
+    //                     <p style={{ margin: 0, color: "#ffffff" }}>{editedTime}</p>
+    //                 </div>
+    //             );
+
+    //             const handlePinClick = async (campaignName, campaignid, adsetid, currentPinStatus) => {
+    //                 const updatedPinStatus = !currentPinStatus;
+
+    //                 try {
+    //                     let response;
+    //                     if (updatedPinStatus) {
+    //                         response = await axios.post('https://prodapis.adsgoat.in/Pin', {
+    //                             campaignname: campaignName,
+    //                             Account: account,
+    //                             campaignid: campaignid,
+    //                             adsetid: adsetid,
+    //                             usercommit: userdetails?.email,
+    //                             comment: comment || ''
+    //                         }, { headers: { Authorization: token } });
+
+    //                         message.success("Campaign pinned!");
+    //                     } else {
+    //                         response = await axios.post('https://prodapis.adsgoat.in/Unpin', {
+    //                             campaignname: campaignName,
+    //                             Account: account,
+    //                             campaignid: campaignid,
+    //                             adsetid: adsetid
+    //                         }, { headers: { Authorization: token } });
+
+    //                         message.success("Campaign unpinned!");
+    //                     }
+
+    //                     const updatedComments = campaignComments.some(cmt => cmt.campaignname === campaignName)
+    //                         ? campaignComments.map(cmt =>
+    //                             cmt.campaignname === campaignName ? { ...cmt, pinned: updatedPinStatus } : cmt
+    //                         )
+    //                         : [...campaignComments, { campaignname: campaignName, pinned: updatedPinStatus }];
+
+    //                     // Update pinned campaigns to stay at the top
+    //                     const sortedComments = updatedComments.sort((a, b) => b.pinned - a.pinned);
+    //                     setCampaignComments(sortedComments);
+    //                     setPinned(updatedPinStatus);
+    //                 } catch (error) {
+    //                     console.error('Error toggling pin status:', error);
+    //                     message.error('Error while updating pin status.');
+    //                 }
+    //             };
+
+    //             const PinIcon = ({ campaignName, campaignid, adsetid, pinned }) => {
+    //                 return (
+    //                     <div onClick={() => handlePinClick(campaignName, campaignid, adsetid, pinned)}>
+    //                         {pinned ? (
+    //                             <PushpinFilled style={{ color: 'blue' }} />  // Blue for pinned
+    //                         ) : (
+    //                             <PushpinOutlined style={{ color: 'gray' }} />  // Gray for unpinned
+    //                         )}
+    //                     </div>
+    //                 );
+    //             };
+
+    //             return (
+    //                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+    //                     <PinIcon
+    //                         campaignName={campaignName}
+    //                         campaignid={campaignid}
+    //                         adsetid={adsetid}
+    //                         // pinned={getPinStatusForCampaign(campaignName)}
+    //                         pinned={pinned}
+    //                     />
+    //                     {relatedStatus === true &&
+    //                         <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit} />}>
+    //                             <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }} />
+    //                         </Tooltip>
+    //                     }
+    //                     {relatedStatus === false &&
+    //                         <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit} />}>
+    //                             <CloseCircleFilled style={{ color: 'red', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }} />
+    //                         </Tooltip>
+    //                     }
+    //                     {relatedComment && (
+    //                         starred ? (
+    //                             <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: "gold" }} />
+    //                         ) : (
+    //                             <StarOutlined className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px' }} />
+    //                         )
+    //                     )}
+    //                     {relatedComment ? (
+    //                         <Tooltip title={(
+    //                             <div style={{ display: 'flex', alignItems: 'center' }}>
+    //                                 <span>{relatedComment || 'No comment available'}</span>
+    //                                 <EditOutlined onClick={handleEditClick} style={{ marginLeft: '10px', color: 'blue', cursor: 'pointer' }} />
+    //                             </div>
+    //                         )}>
+    //                             <MessageOutlined className='Message' style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
+    //                             <Tooltip title={tooltipText}></Tooltip>
+    //                         </Tooltip>
+    //                     ) : (
+    //                         <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
+    //                     )}
+    //                     <Tooltip title={tooltipText}>
+    //                         <CopyOutlined
+    //                             onClick={copyToClipboard}
+    //                             style={{ cursor: 'pointer', marginLeft: '8px', color: "#1e1e1f", marginRight: '10px' }}
+    //                         />
+    //                     </Tooltip>
+    //                     <span
+    //                         onClick={() => {
+    //                             const url = `/LiveHistory/LiveCampaignHistory/${params.value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+    //                             window.open(url, '_blank');
+    //                         }}
+    //                     >
+    //                         {valueWithCount}
+    //                     </span>
+    //                     <Modal
+    //                         title={firstColumnValue}
+    //                         visible={isModalVisibles}
+    //                         onOk={handleOks}
+    //                         onCancel={handleCancels}
+    //                     >
+    //                         <Input.TextArea
+    //                             placeholder="Enter your comments here"
+    //                             value={comment}
+    //                             onChange={(e) => setComment(e.target.value)}
+    //                         />
+    //                     </Modal>
+    //                 </div>
+    //             );
+    //         }
+    //     }
+    // }; tech modified 
     const autoGroupColumnDefLive = {
         headerName: 'CampaignName',
         minWidth: 450,
@@ -4137,58 +4325,24 @@ const MyTablePage = () => {
         comparator: (campaignA, campaignB) => {
             if (!campaignA) return 1;
             if (!campaignB) return -1;
-    
+
             // Function to get the 'pinned' status of a campaign
             const getPinStatusForCampaign = (campaignName) => {
                 const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                 return relatedComment ? relatedComment.pinned : false;
             };
-    
+
             // Prioritize pinned campaigns first (pinned campaigns should come to the top)
             const isPinnedA = getPinStatusForCampaign(campaignA);
             const isPinnedB = getPinStatusForCampaign(campaignB);
-    
+
             if (isPinnedA !== isPinnedB) {
                 return isPinnedA ? -1 : 1;  // Pinned campaigns should come first
             }
-    
-            // If both campaigns have the same pinned status, fall back to other sorting logic
-    
-            // For example: Prioritize by starred status
-            const getStarredForCampaign = (campaignName) => {
-                const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
-                return relatedComment ? relatedComment.starred : false;
-            };
-    
-            const isStarredA = getStarredForCampaign(campaignA);
-            const isStarredB = getStarredForCampaign(campaignB);
-    
-            if (isStarredA !== isStarredB) {
-                return isStarredA ? -1 : 1;  // Starred campaigns should come first
-            }
-    
-            // Finally, fallback to alphabetical sorting if no pinned or starred criteria
+
+            // If both campaigns have the same pinned status, fallback to alphabetical sorting
             return campaignA.localeCompare(campaignB);
         },
-
-
-        // comparator: (campaignA, campaignB) => {
-        //     if (!campaignA) return 1;
-        //     if (!campaignB) return -1;
-
-        //     const getStarredForCampaign = (campaignName) => {
-        //         const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
-        //         return relatedComment ? relatedComment.starred : false;
-        //     };
-
-        //     const isStarredA = getStarredForCampaign(campaignA);
-        //     const isStarredB = getStarredForCampaign(campaignB);
-
-        //     if (isStarredA === isStarredB) {
-        //         return campaignA.localeCompare(campaignB);
-        //     }
-        //     return isStarredA ? -1 : 1;
-        // },
 
         cellRendererParams: {
             suppressCount: false,
@@ -4200,16 +4354,13 @@ const MyTablePage = () => {
                 const firstColumnValue = params.node.key;  // campaign name
                 const campaignName = params.node.key;
 
-                // Check if this is a grouped row and has children
                 let campaignid, adsetid;
 
                 if (params.node.group && params.node.childrenAfterGroup && params.node.childrenAfterGroup.length > 0) {
-                    // Get the first child row data to extract campaignid and adsetid
                     const firstChild = params.node.childrenAfterGroup[0].data;
                     campaignid = firstChild.campaignid;
                     adsetid = firstChild.adsetid;
                 } else if (params.data) {
-                    // Fallback to individual row data if not grouped
                     campaignid = params.data.campaignid;
                     adsetid = params.data.adsetid;
                 } else {
@@ -4223,28 +4374,17 @@ const MyTablePage = () => {
 
                 const getEditedUserAndTime = (campaignName, newaccount) => {
                     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
-                    // console.log(relatedStatus, "relatedStatus");
-                    const relatedStatusEditedTime = relatedStatus ? relatedStatus : null;
-                    // console.log(relatedStatusTrue);
-                    return relatedStatusEditedTime;
-                }
+                    return relatedStatus ? relatedStatus : null;
+                };
 
                 const getStatusForCampaign = (campaignName, newaccount) => {
                     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
-                    // console.log(relatedStatus, "relatedStatus");
-                    const relatedStatusTrue = relatedStatus !== undefined && relatedStatus.status === true ? true : relatedStatus !== undefined ? false : null;
-                    // console.log(relatedStatusTrue);
-                    return relatedStatusTrue;
-                }
+                    return relatedStatus !== undefined && relatedStatus.status === true ? true : relatedStatus !== undefined ? false : null;
+                };
 
                 const getCommentForCampaign = (campaignName) => {
                     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                     return relatedComment ? relatedComment.comment : null;
-                };
-
-                const getStarredForCampaign = (campaignName) => {
-                    const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
-                    return relatedComment ? relatedComment.starred : false;
                 };
 
                 const getPinStatusForCampaign = (campaignName) => {
@@ -4255,13 +4395,11 @@ const MyTablePage = () => {
                 const editUserANdTime = getEditedUserAndTime(campaignName, newaccount);
                 const relatedStatus = getStatusForCampaign(campaignName, newaccount);
                 const relatedComment = getCommentForCampaign(campaignName);
-                const isStarred = getStarredForCampaign(campaignName);
                 const valueWithCount = `${firstColumnValue}`;
 
                 const [tooltipText, setTooltipText] = useState("Click to Copy");
                 const [isModalVisibles, setIsModalVisibles] = useState(false);
                 const [comment, setComment] = useState(relatedComment || '');
-                const [starred, setStarred] = useState(isStarred);
                 const [pinned, setPinned] = useState(getPinStatusForCampaign(campaignName));
 
                 const copyToClipboard = () => {
@@ -4288,12 +4426,9 @@ const MyTablePage = () => {
                                 Authorization: token,
                             }
                         });
-
-                        // console.log('Response from server:', response.data);
                     } catch (error) {
                         console.error('Error sending data to server:', error);
                     }
-                    // console.log(logData);
                 };
 
                 const sendEditedCommentToAPI = async (logData) => {
@@ -4311,48 +4446,11 @@ const MyTablePage = () => {
                                 Authorization: token,
                             }
                         });
-                        // console.log('Response from server (edited comment):', response.data);
                         return response.data;
                     } catch (error) {
                         console.error('Error sending edited comment to server:', error);
                         throw error;
                     }
-                    // console.log(logData);
-                };
-
-                const sendStarStatusToAPI = async (campaignname, isStarred) => {
-                    // console.log(campaignid);
-                    // console.log(adsetid);
-                    try {
-                        const endpoint = isStarred ? 'https://prodapis.adsgoat.in/Star' : 'https://prodapis.adsgoat.in/Unstar';
-                        const response = await axios.post(endpoint, {
-                            campaignname: campaignname,
-                            Account: account,
-                            usercommit: userdetails?.email,
-                            campaignid: campaignid, // Pass campaignid from grouped data
-                            adsetid: adsetid // Pass adsetid from grouped data
-                        }, {
-                            headers: {
-                                Authorization: token,
-                            }
-                        });
-                        // console.log('Response from server (starred status):', response.data);
-                    } catch (error) {
-                        console.error('Error updating star status:', error);
-                    }
-                };
-
-                const handleStarClick = async () => {
-                    const updatedStarred = !starred;
-                    setStarred(updatedStarred);
-                    await sendStarStatusToAPI(firstColumnValue, updatedStarred);
-                    message.success(updatedStarred ? "Campaign starred!" : "Campaign unstarred!");
-
-                    const updatedComments = campaignComments.map(cmt =>
-                        cmt.campaignname === firstColumnValue ? { ...cmt, starred: updatedStarred } : cmt
-                    );
-                    setCampaignComments(updatedComments);
-                    changeRRefrst();
                 };
 
                 const handleOks = async () => {
@@ -4362,8 +4460,8 @@ const MyTablePage = () => {
                             usercommit: userdetails?.email,
                             campaignname: firstColumnValue,
                             comment: comment,
-                            campaignid: campaignid, // Pass campaignid
-                            adsetid: adsetid // Pass adsetid
+                            campaignid: campaignid,
+                            adsetid: adsetid
                         };
 
                         if (relatedComment) {
@@ -4400,7 +4498,7 @@ const MyTablePage = () => {
 
                 const handlePinClick = async (campaignName, campaignid, adsetid, currentPinStatus) => {
                     const updatedPinStatus = !currentPinStatus;
-    
+
                     try {
                         let response;
                         if (updatedPinStatus) {
@@ -4412,7 +4510,7 @@ const MyTablePage = () => {
                                 usercommit: userdetails?.email,
                                 comment: comment || ''
                             }, { headers: { Authorization: token } });
-    
+
                             message.success("Campaign pinned!");
                         } else {
                             response = await axios.post('https://prodapis.adsgoat.in/Unpin', {
@@ -4421,17 +4519,16 @@ const MyTablePage = () => {
                                 campaignid: campaignid,
                                 adsetid: adsetid
                             }, { headers: { Authorization: token } });
-    
+
                             message.success("Campaign unpinned!");
                         }
-    
+
                         const updatedComments = campaignComments.some(cmt => cmt.campaignname === campaignName)
                             ? campaignComments.map(cmt =>
-                                  cmt.campaignname === campaignName ? { ...cmt, pinned: updatedPinStatus } : cmt
-                              )
+                                cmt.campaignname === campaignName ? { ...cmt, pinned: updatedPinStatus } : cmt
+                            )
                             : [...campaignComments, { campaignname: campaignName, pinned: updatedPinStatus }];
-    
-                        // Update pinned campaigns to stay at the top
+
                         const sortedComments = updatedComments.sort((a, b) => b.pinned - a.pinned);
                         setCampaignComments(sortedComments);
                         setPinned(updatedPinStatus);
@@ -4440,26 +4537,29 @@ const MyTablePage = () => {
                         message.error('Error while updating pin status.');
                     }
                 };
-                
+
                 const PinIcon = ({ campaignName, campaignid, adsetid, pinned }) => {
                     return (
-                        <div onClick={() => handlePinClick(campaignName, campaignid, adsetid, pinned)}>
-                            {pinned ? (
-                                <PushpinFilled style={{ color: 'blue' }} />  // Blue for pinned
-                            ) : (
-                                <PushpinOutlined style={{ color: 'gray' }} />  // Gray for unpinned
-                            )}
-                        </div>
+                        <button
+                            onClick={() => handlePinClick(campaignName, campaignid, adsetid, pinned)}
+                            style={{
+                                border: "none",
+                                background: "none",
+                                cursor: "pointer",
+                                fontSize: "16px",
+                            }}
+                        >
+                            {pinned ? "📌" : "📍"}
+                        </button>
                     );
                 };
 
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                        <PinIcon 
-                            campaignName={campaignName} 
+                        <PinIcon
+                            campaignName={campaignName}
                             campaignid={campaignid}
                             adsetid={adsetid}
-                            // pinned={getPinStatusForCampaign(campaignName)}
                             pinned={pinned}
                         />
                         {relatedStatus === true &&
@@ -4473,13 +4573,6 @@ const MyTablePage = () => {
                             </Tooltip>
                         }
                         {relatedComment && (
-                            starred ? (
-                                <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: "gold" }} />
-                            ) : (
-                                <StarOutlined className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px' }} />
-                            )
-                        )}
-                        {relatedComment ? (
                             <Tooltip title={(
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
                                     <span>{relatedComment || 'No comment available'}</span>
@@ -4489,7 +4582,8 @@ const MyTablePage = () => {
                                 <MessageOutlined className='Message' style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
                                 <Tooltip title={tooltipText}></Tooltip>
                             </Tooltip>
-                        ) : (
+                        )}
+                        {!relatedComment && (
                             <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
                         )}
                         <Tooltip title={tooltipText}>
@@ -4524,10 +4618,6 @@ const MyTablePage = () => {
         }
     };
 
-
-
-
-
     const autoGroupColumnDef = {
         headerName: 'CampaignName',
         minWidth: 450,
@@ -4537,36 +4627,36 @@ const MyTablePage = () => {
         comparator: (campaignA, campaignB) => {
             if (!campaignA) return 1;
             if (!campaignB) return -1;
-    
+
             // Function to get the 'pinned' status of a campaign
             const getPinStatusForCampaign = (campaignName) => {
                 const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                 return relatedComment ? relatedComment.pinned : false;
             };
-    
+
             // Prioritize pinned campaigns first (pinned campaigns should come to the top)
             const isPinnedA = getPinStatusForCampaign(campaignA);
             const isPinnedB = getPinStatusForCampaign(campaignB);
-    
+
             if (isPinnedA !== isPinnedB) {
                 return isPinnedA ? -1 : 1;  // Pinned campaigns should come first
             }
-    
+
             // If both campaigns have the same pinned status, fall back to other sorting logic
-    
+
             // For example: Prioritize by starred status
             const getStarredForCampaign = (campaignName) => {
                 const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                 return relatedComment ? relatedComment.starred : false;
             };
-    
+
             const isStarredA = getStarredForCampaign(campaignA);
             const isStarredB = getStarredForCampaign(campaignB);
-    
+
             if (isStarredA !== isStarredB) {
                 return isStarredA ? -1 : 1;  // Starred campaigns should come first
             }
-    
+
             // Finally, fallback to alphabetical sorting if no pinned or starred criteria
             return campaignA.localeCompare(campaignB);
         },
@@ -4640,7 +4730,7 @@ const MyTablePage = () => {
                     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                     return relatedComment ? relatedComment.starred : false;
                 };
-                
+
                 const getPinStatusForCampaign = (campaignName) => {
                     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                     return relatedComment ? relatedComment.pinned : false;
@@ -4788,7 +4878,7 @@ const MyTablePage = () => {
 
                 const handlePinClick = async (campaignName, campaignid, adsetid, currentPinStatus) => {
                     const updatedPinStatus = !currentPinStatus;
-    
+
                     try {
                         let response;
                         if (updatedPinStatus) {
@@ -4800,7 +4890,7 @@ const MyTablePage = () => {
                                 usercommit: userdetails?.email,
                                 comment: comment || ''
                             }, { headers: { Authorization: token } });
-    
+
                             message.success("Campaign pinned!");
                         } else {
                             response = await axios.post('https://prodapis.adsgoat.in/Unpin', {
@@ -4809,16 +4899,16 @@ const MyTablePage = () => {
                                 campaignid: campaignid,
                                 adsetid: adsetid
                             }, { headers: { Authorization: token } });
-    
+
                             message.success("Campaign unpinned!");
                         }
-    
+
                         const updatedComments = campaignComments.some(cmt => cmt.campaignname === campaignName)
                             ? campaignComments.map(cmt =>
-                                  cmt.campaignname === campaignName ? { ...cmt, pinned: updatedPinStatus } : cmt
-                              )
+                                cmt.campaignname === campaignName ? { ...cmt, pinned: updatedPinStatus } : cmt
+                            )
                             : [...campaignComments, { campaignname: campaignName, pinned: updatedPinStatus }];
-    
+
                         // Update pinned campaigns to stay at the top
                         const sortedComments = updatedComments.sort((a, b) => b.pinned - a.pinned);
                         setCampaignComments(sortedComments);
@@ -4828,7 +4918,7 @@ const MyTablePage = () => {
                         message.error('Error while updating pin status.');
                     }
                 };
-                
+
                 const PinIcon = ({ campaignName, campaignid, adsetid, pinned }) => {
                     return (
                         <div onClick={() => handlePinClick(campaignName, campaignid, adsetid, pinned)}>
@@ -4843,8 +4933,8 @@ const MyTablePage = () => {
 
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                        <PinIcon 
-                            campaignName={campaignName} 
+                        <PinIcon
+                            campaignName={campaignName}
                             campaignid={campaignid}
                             adsetid={adsetid}
                             // pinned={getPinStatusForCampaign(campaignName)}
@@ -4912,10 +5002,6 @@ const MyTablePage = () => {
         }
     };
 
-
-
-
-
     const autoGroupColumnDef2 = {
         headerName: 'CampaignName',
         minWidth: 450,
@@ -4924,40 +5010,40 @@ const MyTablePage = () => {
         comparator: (campaignA, campaignB) => {
             if (!campaignA) return 1;
             if (!campaignB) return -1;
-    
+
             // Function to get the 'pinned' status of a campaign
             const getPinStatusForCampaign = (campaignName) => {
                 const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                 return relatedComment ? relatedComment.pinned : false;
             };
-    
+
             // Prioritize pinned campaigns first (pinned campaigns should come to the top)
             const isPinnedA = getPinStatusForCampaign(campaignA);
             const isPinnedB = getPinStatusForCampaign(campaignB);
-    
+
             if (isPinnedA !== isPinnedB) {
                 return isPinnedA ? -1 : 1;  // Pinned campaigns should come first
             }
-    
+
             // If both campaigns have the same pinned status, fall back to other sorting logic
-    
+
             // For example: Prioritize by starred status
             const getStarredForCampaign = (campaignName) => {
                 const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
                 return relatedComment ? relatedComment.starred : false;
             };
-    
+
             const isStarredA = getStarredForCampaign(campaignA);
             const isStarredB = getStarredForCampaign(campaignB);
-    
+
             if (isStarredA !== isStarredB) {
                 return isStarredA ? -1 : 1;  // Starred campaigns should come first
             }
-    
+
             // Finally, fallback to alphabetical sorting if no pinned or starred criteria
             return campaignA.localeCompare(campaignB);
         },
-        
+
         cellRendererParams: {
             suppressCount: false, // Allow count to be shown
             innerRenderer: (params) => {
@@ -5151,7 +5237,7 @@ const MyTablePage = () => {
 
                 const handlePinClick = async (campaignName, campaignid, adsetid, currentPinStatus) => {
                     const updatedPinStatus = !currentPinStatus;
-    
+
                     try {
                         let response;
                         if (updatedPinStatus) {
@@ -5163,7 +5249,7 @@ const MyTablePage = () => {
                                 usercommit: userdetails?.email,
                                 comment: comment || ''
                             }, { headers: { Authorization: token } });
-    
+
                             message.success("Campaign pinned!");
                         } else {
                             response = await axios.post('https://prodapis.adsgoat.in/Unpin', {
@@ -5172,16 +5258,16 @@ const MyTablePage = () => {
                                 campaignid: campaignid,
                                 adsetid: adsetid
                             }, { headers: { Authorization: token } });
-    
+
                             message.success("Campaign unpinned!");
                         }
-    
+
                         const updatedComments = campaignComments.some(cmt => cmt.campaignname === campaignName)
                             ? campaignComments.map(cmt =>
-                                  cmt.campaignname === campaignName ? { ...cmt, pinned: updatedPinStatus } : cmt
-                              )
+                                cmt.campaignname === campaignName ? { ...cmt, pinned: updatedPinStatus } : cmt
+                            )
                             : [...campaignComments, { campaignname: campaignName, pinned: updatedPinStatus }];
-    
+
                         // Update pinned campaigns to stay at the top
                         const sortedComments = updatedComments.sort((a, b) => b.pinned - a.pinned);
                         setCampaignComments(sortedComments);
@@ -5191,7 +5277,7 @@ const MyTablePage = () => {
                         message.error('Error while updating pin status.');
                     }
                 };
-                
+
                 const PinIcon = ({ campaignName, campaignid, adsetid, pinned }) => {
                     return (
                         <div onClick={() => handlePinClick(campaignName, campaignid, adsetid, pinned)}>
@@ -5206,8 +5292,8 @@ const MyTablePage = () => {
 
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                        <PinIcon 
-                            campaignName={campaignName} 
+                        <PinIcon
+                            campaignName={campaignName}
                             campaignid={campaignid}
                             adsetid={adsetid}
                             // pinned={getPinStatusForCampaign(campaignName)}
@@ -5560,174 +5646,9 @@ const MyTablePage = () => {
         resizable: true, // Enable resizing
         sortable: true, // Enable sorting
         cellRendererParams: {
-          suppressCount: true, // Suppress row count in the grouped column
+            suppressCount: true, // Suppress row count in the grouped column
         },
     };
-
-
-    // const autoGroupColumnDefLive = {
-    //     headerName: 'CampaignName',
-    //     minWidth: 450,
-    //     pinned: 'left',
-
-    //     cellRendererParams: {
-    //         suppressCount: false, // Allow count to be shown
-    //         innerRenderer: (params) => {
-    //             if (params.node.footer) {
-    //                 return 'Total'; // Custom footer label
-    //             }
-    //             // const count = params.node.allChildrenCount; // Get the count of children
-    //             const firstColumnValue = params.node.key;  // This should give you the campaign name
-    //             const valueWithCount = `${firstColumnValue}`;
-
-    //             const [tooltipText, setTooltipText] = useState("Click to Copy");
-
-    //             const copyToClipboard = () => {
-    //                 navigator.clipboard.writeText(firstColumnValue)
-    //                     .then(() => {
-    //                         setTooltipText("Copied!");
-    //                         setTimeout(() => setTooltipText("Click to Copy"), 2000);
-    //                     })
-    //                     .catch(() => {
-    //                         console.error('Failed to copy to clipboard');
-    //                     });
-    //             };
-
-    //             return (
-    //                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-    //                     <StarOutlined/>
-    //                     <EditOutlined style={{marginLeft:'10px'}}/>
-    //                     <Tooltip title={tooltipText}>
-    //                         <CopyOutlined
-    //                             onClick={copyToClipboard}
-    //                             style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight:'10px' }}
-    //                         />
-    //                     </Tooltip>
-    //                     <span
-    //                         onClick={() => {
-    //                             console.log(`Grouped Make clicked: ${params.value}`);
-    //                             const url = `/LiveHistory/LiveCampaignHistory/${params.value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
-    //                             window.open(url, '_blank');
-    //                         }}
-    //                     >
-    //                         {valueWithCount}
-    //                     </span>
-    //                 </div>
-    //             );
-    //         }
-    //     }
-    // };
-
-
-
-    // const autoGroupColumnDef = {
-    //     headerName: 'CampaignName',
-    //     minWidth: 450,
-    //     pinned: 'left',
-    //     cellRendererParams: {
-    //         suppressCount: false, // Allow count to be shown
-    //         innerRenderer: (params) => {
-    //             if (params.node.footer) {
-    //                 return 'Total'; // Custom footer label
-    //             }
-
-    //             // Get the group key or value (campaign name in this case)
-    //             const firstColumnValue = params.node.key;  // This should give you the campaign name
-    //             const valueWithCount = `${firstColumnValue}`;
-
-    //             const [tooltipText, setTooltipText] = useState("Click to Copy");
-
-    //             const copyToClipboard = () => {
-    //                 navigator.clipboard.writeText(firstColumnValue)
-    //                     .then(() => {
-    //                         setTooltipText("Copied!");
-    //                         setTimeout(() => setTooltipText("Click to Copy"), 2000);
-    //                     })
-    //                     .catch(() => {
-    //                         console.error('Failed to copy to clipboard');
-    //                     });
-    //             };
-
-    //             return (
-    //                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-    //                     <StarOutlined/>
-    //                     <EditOutlined style={{marginLeft:'10px'}} />
-    //                     <Tooltip title={tooltipText}>
-    //                         <CopyOutlined
-    //                             onClick={copyToClipboard}
-    //                             style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight:'10px' }}
-    //                         />
-    //                     </Tooltip>
-    //                     <span
-    //                         onClick={() => {
-    //                             console.log(`Grouped Make clicked: ${params.value}`);
-    //                             const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
-    //                             window.open(url, '_blank');
-    //                         }}
-    //                     >
-    //                         {valueWithCount}
-    //                     </span>
-
-    //                 </div>
-    //             );
-    //         }
-    //     }
-    // };
-
-
-    // const autoGroupColumnDef2 = {
-    //     headerName: 'CampaignName',
-    //     minWidth: 450,
-    //     pinned: 'left',
-    //     cellRendererParams: {
-    //         suppressCount: false, // Allow count to be shown
-    //         innerRenderer: (params) => {
-    //             if (params.node.footer) {
-    //                 return 'Total'; // Custom footer label
-    //             }
-    //             // const count = params.node.allChildrenCount; // Get the count of children
-    //             const firstColumnValue = params.node.key;  // This should give you the campaign name
-    //             const valueWithCount = `${firstColumnValue}`;
-
-    //             const [tooltipText, setTooltipText] = useState("Click to Copy");
-
-    //             const copyToClipboard = () => {
-    //                 navigator.clipboard.writeText(firstColumnValue)
-    //                     .then(() => {
-    //                         setTooltipText("Copied!");
-    //                         setTimeout(() => setTooltipText("Click to Copy"), 2000);
-    //                     })
-    //                     .catch(() => {
-    //                         console.error('Failed to copy to clipboard');
-    //                     });
-    //             };
-
-    //             return (
-    //                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-    //                     <StarOutlined/>
-    //                     <EditOutlined style={{marginLeft:'10px'}} />
-    //                     <Tooltip title={tooltipText}>
-    //                         <CopyOutlined
-    //                             onClick={copyToClipboard}
-    //                             style={{ cursor: 'pointer', marginLeft: '8px', color: '#1e1e1f', marginRight:'10px' }}
-    //                         />
-    //                     </Tooltip>
-    //                     <span
-    //                         onClick={() => {
-    //                             console.log(`Grouped Make clicked: ${params.value}`);
-    //                             const url = `/AllCampaigns/CampaignHistory/${params.value}-${account}-${time}-${newtworkCollections[revenuePratner]}`;
-    //                             window.open(url, '_blank');
-    //                         }}
-    //                     >
-    //                         {valueWithCount}
-    //                     </span>
-
-    //                 </div>
-
-    //             );
-    //         }
-    //     }
-    // };
 
     const GroupRowRenderer = (props) => {
         const { node } = props;
@@ -5825,62 +5746,6 @@ const MyTablePage = () => {
 
     const defaultDates = [dayjs(startDateFromDashboard ? startDateFromDashboard : yesterday), dayjs(endDateFromDashboard ? endDateFromDashboard : yesterday)];
 
-    // const onFilterChanged = (params) => {
-    //     const allData = params.api.rowModel.rowsToDisplay.map(node => node.data); // Get all row data from the grid
-
-    //     let filteredData = allData.filter(item => {
-    //         const campaignNameFilter = params.api.getFilterInstance('campaignName');
-    //         const adsetNameFilter = params.api.getFilterInstance('adsetName');
-    //         const dateFilter = params.api.getFilterInstance('date');
-    //         const fbHourFilter = params.api.getFilterInstance('fb-hour');
-    //         const mnetHourFilter = params.api.getFilterInstance('mnet-hour');
-    //         const spendFilter = params.api.getFilterInstance('spend');
-    //         const revenueFilter = params.api.getFilterInstance('revenue');
-    //         const profitFilter = params.api.getFilterInstance('profit');
-    //         const marginFilter = params.api.getFilterInstance('margin');
-    //         const fbleadsFilter = params.api.getFilterInstance('fbleads');
-    //         const conversionsFilter = params.api.getFilterInstance('conversions');
-    //         const cpcFilter = params.api.getFilterInstance('cpc');
-    //         const fbclicksFilter = params.api.getFilterInstance('fbclicks');
-    //         const impressionsFilter = params.api.getFilterInstance('impressions');
-    //         const ctrFilter = params.api.getFilterInstance('ctr');
-    //         const rpcFilter = params.api.getFilterInstance('rpc');
-    //         const cplFilter = params.api.getFilterInstance('cpl');
-    //         const ncplFilter = params.api.getFilterInstance('ncpl');
-    //         const fmarginFilter = params.api.getFilterInstance('fmargin');
-    //         const roiFilter = params.api.getFilterInstance('roi');
-    //         const adsetIdFilter = params.api.getFilterInstance('adsetId');
-    //         const campaignIdFilter = params.api.getFilterInstance('campaignId');
-    //         const timezoneFilter = params.api.getFilterInstance('timezone');
-
-    //         return (campaignNameFilter ? campaignNameFilter.doesFilterPass({ data: item }) : true)
-    //             && (adsetNameFilter ? adsetNameFilter.doesFilterPass({ data: item }) : true)
-    //             && (dateFilter ? dateFilter.doesFilterPass({ data: item }) : true)
-    //             && (fbHourFilter ? fbHourFilter.doesFilterPass({ data: item }) : true)
-    //             && (mnetHourFilter ? mnetHourFilter.doesFilterPass({ data: item }) : true)
-    //             && (spendFilter ? spendFilter.doesFilterPass({ data: item }) : true)
-    //             && (revenueFilter ? revenueFilter.doesFilterPass({ data: item }) : true)
-    //             && (profitFilter ? profitFilter.doesFilterPass({ data: item }) : true)
-    //             && (marginFilter ? marginFilter.doesFilterPass({ data: item }) : true)
-    //             && (fbleadsFilter ? fbleadsFilter.doesFilterPass({ data: item }) : true)
-    //             && (conversionsFilter ? conversionsFilter.doesFilterPass({ data: item }) : true)
-    //             && (cpcFilter ? cpcFilter.doesFilterPass({ data: item }) : true)
-    //             && (fbclicksFilter ? fbclicksFilter.doesFilterPass({ data: item }) : true)
-    //             && (impressionsFilter ? impressionsFilter.doesFilterPass({ data: item }) : true)
-    //             && (ctrFilter ? ctrFilter.doesFilterPass({ data: item }) : true)
-    //             && (rpcFilter ? rpcFilter.doesFilterPass({ data: item }) : true)
-    //             && (cplFilter ? cplFilter.doesFilterPass({ data: item }) : true)
-    //             && (ncplFilter ? ncplFilter.doesFilterPass({ data: item }) : true)
-    //             && (fmarginFilter ? fmarginFilter.doesFilterPass({ data: item }) : true)
-    //             && (roiFilter ? roiFilter.doesFilterPass({ data: item }) : true)
-    //             && (adsetIdFilter ? adsetIdFilter.doesFilterPass({ data: item }) : true)
-    //             && (campaignIdFilter ? campaignIdFilter.doesFilterPass({ data: item }) : true)
-    //             && (timezoneFilter ? timezoneFilter.doesFilterPass({ data: item }) : true);
-    //     });
-
-    //     console.log('Filtered Data: ', filteredData);
-    // };
-
     const onBtExport1 = () => {
         // console.log(gridRef.current.api,"in")
         gridRef.current.api.exportDataAsCsv({
@@ -5915,46 +5780,6 @@ const MyTablePage = () => {
             console.error("Grid reference is null");
         }
     };
-
-    // const SearchToggle = () => {
-    //     const [isSearching, setIsSearching] = useState(false);
-    //     const [inputValue, setInputValue] = useState('');
-
-    //     const handleSearchClick = () => {
-    //         setIsSearching(true);
-    //     };
-
-    //     const handleBlur = () => {
-    //         if (inputValue.trim() === '') {
-    //             setIsSearching(false);
-    //         }
-    //     };
-
-    //     const handleChange = (e) => {
-    //         setInputValue(e.target.value);
-    //     };
-
-    //     return (
-    //         <div>
-    //             {isSearching ? (
-    //                 <Input
-    //                     type="text"
-    //                     autoFocus
-    //                     value={inputValue}
-    //                     style={{width:'200px', height:'25px', borderRadius:'5px'}}
-    //                     onChange={handleChangeInput}
-    //                     onBlur={handleBlur}
-    //                 />
-    //             ) : (
-    //                 <Button
-    //                     icon={<SearchOutlined style={{fontSize:'15px'}} />}
-    //                     onClick={handleSearchClick}
-    //                     style={{width:'25px', height:'25px'}}
-    //                 />
-    //             )}
-    //         </div>
-    //     );
-    // };
 
     const itemRender = (_, type, originalElement) => {
         if (type === 'prev') {
@@ -6111,15 +5936,15 @@ const MyTablePage = () => {
         setLoading4(true);
         if (gridRef4.current) {
             const gridApi = gridRef4.current.api;
-    
+
             // Clear filters
             gridApi.setFilterModel(null);
-    
+
             // Temporarily clear the data and reset after a timeout
             setSystem1KeywordData([]); // Temporarily clear the data
             setTimeout(() => setSystem1KeywordData(newDailyData.current), 0); // Reset the data
             setTimeout(() => setLoading4(false), 1500); // Stop loading after timeout
-    
+
             // Force refresh the grid cells and redraw the rows
             gridApi.refreshCells({ force: true });
             gridApi.redrawRows();
@@ -6391,7 +6216,7 @@ const MyTablePage = () => {
 
     // console.log(fixedFooter, "fixed");
 
-   
+
     // console.log(dailyData, "Daily");
 
 
@@ -6407,48 +6232,48 @@ const MyTablePage = () => {
     ];
     const handleSlideChange = (from, to) => {
         // console.log(to, "to");
-        setActiveTab((parseInt(to)+1).toString());
+        setActiveTab((parseInt(to) + 1).toString());
         // console.log((parseInt(to)+1).toString());
     };
-    
+
     const handleCarouselChange = (index) => {
         setActiveTab(index);
         // console.log(index);
         // console.log(parseInt(index)-1);
-        carouselRef.current.goTo(parseInt(index)-1)
-        if(index == 5 && revenuePratner === "FB_DomainActive"){
+        carouselRef.current.goTo(parseInt(index) - 1)
+        if (index == 5 && revenuePratner === "FB_DomainActive") {
             // console.log("hello praveen");
             setIsKeywordsTabActive("keyword");
-        }else if(index === 5 && newRevenuePratner === "FB_System1"){
+        } else if (index === 5 && newRevenuePratner === "FB_System1") {
             setIsSystem1KeywordsTabActive('Domain')
         }
     };
-    
+
     const renderCarouselNav = () => (
-            <StickyBox offsetTop={64} offsetBottom={20} style={{ zIndex: 1, padding: '0px', margin: '0px', paddingLeft: '12px' }}>
-                <Tabs
-                    activeKey={activeTab}
-                    onChange={(key) => handleCarouselChange(key)}
-                    items={items.map((item) => ({
+        <StickyBox offsetTop={64} offsetBottom={20} style={{ zIndex: 1, padding: '0px', margin: '0px', paddingLeft: '12px' }}>
+            <Tabs
+                activeKey={activeTab}
+                onChange={(key) => handleCarouselChange(key)}
+                items={items.map((item) => ({
                     key: item.key,
                     label: item.label,
-                    }))}
-                    className="custom-tabs" // Apply custom CSS class
-                    style={{
+                }))}
+                className="custom-tabs" // Apply custom CSS class
+                style={{
                     backgroundColor: '#f0f2f5',
-                    padding: '0',       
-                    marginBottom: '0',  
-                    }}
-                    tabBarStyle={{
-                    fontSize: '12px',      
-                    padding: '0',          
-                    height: '30px',        
-                    lineHeight: '30px',    
-                    marginBottom: '-1px',  
-                    borderBottom: 'none',  
-                    }}
-                />
-            </StickyBox>
+                    padding: '0',
+                    marginBottom: '0',
+                }}
+                tabBarStyle={{
+                    fontSize: '12px',
+                    padding: '0',
+                    height: '30px',
+                    lineHeight: '30px',
+                    marginBottom: '-1px',
+                    borderBottom: 'none',
+                }}
+            />
+        </StickyBox>
     );
 
 
@@ -6543,9 +6368,9 @@ const MyTablePage = () => {
                                 value: item,
                                 label: item,
                             }))}
-                            // style={{
-                            //     width: '100%'
-                            // }}
+                        // style={{
+                        //     width: '100%'
+                        // }}
                         />
                     </Col>
 
@@ -6567,7 +6392,7 @@ const MyTablePage = () => {
                     </Col>
                 </Row>
             </Space>
-            <div style={{padding:'0px', margin:'0px'}}>
+            <div style={{ padding: '0px', margin: '0px' }}>
                 {renderCarouselNav()}
             </div>
             <div>
@@ -6738,20 +6563,6 @@ const MyTablePage = () => {
 
                                             return null;
                                         }}
-                                        // const onFirstDataRendered = {(params) => {
-                                        //     params.api.forEachNode(node => {
-                                        //         if (node.rowPinned === 'bottom') { // Assuming the total footer is pinned to the bottom
-                                        //             node.columnApi.getAllDisplayedColumns().forEach(col => {
-                                        //                 const cell = params.api.getDisplayedCellForColumn(node, col);
-                                        //                 if (cell) {
-                                        //                     cell.eGui.style.backgroundColor = 'lightblue';
-                                        //                     cell.eGui.style.color = 'white';
-                                        //                 }
-                                        //             });
-                                        //         }
-                                        //     });
-                                        // }}
-
 
                                         getMainMenuItems={getMainMenuItems}
                                     />
@@ -6901,7 +6712,7 @@ const MyTablePage = () => {
                                         />
                                     </div>
                                 </div>
-                            ) : campaignData.filter((each) =>  {
+                            ) : campaignData.filter((each) => {
                                 const normalizedCampaign = each.campaignname.trim().toLowerCase();
                                 const normalizedInput = inputValue.trim().toLowerCase();
                                 return (
@@ -7065,51 +6876,51 @@ const MyTablePage = () => {
                                     </Row> */}
 
 
-                                        <AgGridReact
-                                            rowData={BMNameData}
-                                            columnDefs={BMNameColumnDefs}
-                                            // defaultColDef={defaultColDef}
-                                            suppressAggFuncInHeader={true}
-                                            pinnedBottomRowData={BMNameFixedFooter}
-                                            getRowStyle={(params) => {
-                                                if (params.node.rowPinned) {
-                                                    return {
-                                                        fontWeight: 'bold',
-                                                        // backgroundColor: theme === "dark" ? '#000' : '#fff',
-                                                        // color: theme === "dark" ? '#fff' : '#000',
-                                                    };
+                                    <AgGridReact
+                                        rowData={BMNameData}
+                                        columnDefs={BMNameColumnDefs}
+                                        // defaultColDef={defaultColDef}
+                                        suppressAggFuncInHeader={true}
+                                        pinnedBottomRowData={BMNameFixedFooter}
+                                        getRowStyle={(params) => {
+                                            if (params.node.rowPinned) {
+                                                return {
+                                                    fontWeight: 'bold',
+                                                    // backgroundColor: theme === "dark" ? '#000' : '#fff',
+                                                    // color: theme === "dark" ? '#fff' : '#000',
+                                                };
+                                            }
+                                            return null;
+                                        }}
+                                        onFilterChanged={(params) => {
+                                            const api = params.api;
+                                            const filteredData = [];
+                                            api.forEachNodeAfterFilterAndSort((node) => {
+                                                if (!node.rowPinned) {
+                                                    filteredData.push(node.data);
                                                 }
-                                                return null;
-                                            }}
-                                            onFilterChanged={(params) => {
-                                                const api = params.api;
-                                                const filteredData = [];
-                                                api.forEachNodeAfterFilterAndSort((node) => {
-                                                    if (!node.rowPinned) {
-                                                        filteredData.push(node.data);
-                                                    }
-                                                });
+                                            });
 
-                                                const updatedFooter = [
-                                                    {
-                                                        [`${newtime}Date`]: 'Totals',
-                                                        spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
-                                                        estimated_revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.estimated_revenue || 0), 0).toFixed(2)),
-                                                        profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
-                                                        margin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.estimated_revenue), 0) * 100).toFixed(2)),
-                                                        rpc: parseFloat(
-                                                            (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc || 0), 0) / filteredData.length || 0).toFixed(2)
-                                                        ),
-                                                        // cpl: parseFloat(
-                                                        //     (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl || 0), 0) / filteredData.length || 0).toFixed(2)
-                                                        // ),
-                                                        // impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0).toFixed(2)),
-                                                    },
-                                                ];
+                                            const updatedFooter = [
+                                                {
+                                                    [`${newtime}Date`]: 'Totals',
+                                                    spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
+                                                    estimated_revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.estimated_revenue || 0), 0).toFixed(2)),
+                                                    profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
+                                                    margin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.estimated_revenue), 0) * 100).toFixed(2)),
+                                                    rpc: parseFloat(
+                                                        (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc || 0), 0) / filteredData.length || 0).toFixed(2)
+                                                    ),
+                                                    // cpl: parseFloat(
+                                                    //     (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl || 0), 0) / filteredData.length || 0).toFixed(2)
+                                                    // ),
+                                                    // impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0).toFixed(2)),
+                                                },
+                                            ];
 
-                                                setBMNameFixedFooter(updatedFooter);
-                                            }}
-                                        />
+                                            setBMNameFixedFooter(updatedFooter);
+                                        }}
+                                    />
 
                                 </div>
                             ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
@@ -7375,7 +7186,7 @@ const MyTablePage = () => {
                     {revenuePratner === "FB_System1" && (
                         <div>
                             <div style={contentStyle}>
-                            {isLoading4 === true ? (
+                                {isLoading4 === true ? (
                                     <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>
                                         <div className="ag-grid-Loader">
                                             <Audio
@@ -7390,91 +7201,91 @@ const MyTablePage = () => {
                                         </div>
                                     </div>
                                 ) : system1KeywordData.filter((each) => each.domain.includes(inputValue))?.length > 0 ? (
-                                <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
-                                <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap' }}>
-                                    <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
-                                    <Space align="center" className='daily-contaier'>
-                                        <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600' }}>Domain</Text>
-                                    </Space>
-                                    </Col>
-                                    <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                    <Text style={{ fontWeight: '600' }}>Acc: {newaccount}</Text>
-                                    </Col>
-                                    <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                    <Text style={{ fontWeight: '600' }}>AccName: {newAccountName}</Text>
-                                    </Col>
-                                    <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                    <Text style={{ fontWeight: '600' }}>Timezone: {timezone.current}</Text>
-                                    </Col>
-                                    <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                    <Text style={{ fontWeight: '600' }}>
-                                        Cron/Acc status: {cronStatus.current} /{' '}
-                                        <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
-                                        {accountStatus.current}
-                                        </span>
-                                    </Text>
-                                    </Col>
-                                    <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
-                                    <Tooltip title="Export to CSV">
-                                        <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef4)} />
-                                    </Tooltip>
-                                    </Col>
-                                </Row>
+                                    <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
+                                        <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap' }}>
+                                            <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
+                                                <Space align="center" className='daily-contaier'>
+                                                    <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600' }}>Domain</Text>
+                                                </Space>
+                                            </Col>
+                                            <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                                <Text style={{ fontWeight: '600' }}>Acc: {newaccount}</Text>
+                                            </Col>
+                                            <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                                <Text style={{ fontWeight: '600' }}>AccName: {newAccountName}</Text>
+                                            </Col>
+                                            <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                                <Text style={{ fontWeight: '600' }}>Timezone: {timezone.current}</Text>
+                                            </Col>
+                                            <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                                <Text style={{ fontWeight: '600' }}>
+                                                    Cron/Acc status: {cronStatus.current} /{' '}
+                                                    <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
+                                                        {accountStatus.current}
+                                                    </span>
+                                                </Text>
+                                            </Col>
+                                            <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
+                                                <Tooltip title="Export to CSV">
+                                                    <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef4)} />
+                                                </Tooltip>
+                                            </Col>
+                                        </Row>
 
-                                <AgGridReact
-                                    ref={gridRef4}
-                                    rowData={system1KeywordData}
-                                    columnDefs={columnDefsObject4}
-                                    onCellClicked={onCellClicked}
-                                    pagination={true}
-                                    paginationPageSize={100}
-                                    paginationPageSizeSelector={[20, 40, 60, 80, 100]}
-                                    groupDisplayType="multipleColumns"
-                                    suppressAggFuncInHeader={true}
-                                    groupSuppressBlankHeader={true}
-                                    defaultColDef={defaultColDef}
-                                    autoGroupColumnDef={autoGroupColumnDefDomain}
-                                    // onGridReady={(params) => onGridReady(params, 'grid5', gridRef4)}
-                                    // gridOptions={gridOptions4}
-                                    gridOptions={{
-                                        groupUseEntireRow: true,  // Ensures the entire row is used for grouping
-                                        // groupSuppressAutoColumn: true,  // Removes the auto group column that appears with the group header
-                                    }}
-                                    getMainMenuItems={getMainMenuItems}
-                                    pinnedBottomRowData={system1KeywordData.length > 0 ? pinnedBottomRowData4 : []}
-                                    getRowStyle={params => {
-                                    if (params.node.rowPinned) {
-                                        return {
-                                        fontWeight: 'bold',
-                                        backgroundColor: theme === "dark" ? '#000' : '#fff',
-                                        color: theme === "dark" ? '#fff' : '#000',
-                                        };
-                                    }
-                                    return null;
-                                    }}
-                                />
-                                </div>
-                            ) : (
-                                <div style={{ backgroundColor: theme === "dark" ? "#333" : "#fff" }}>
-                                {startDate !== endDate ? (
-                                    <Result
-                                    className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                                    icon={<SmileOutlined />}
-                                    title={`No DomainData from ${startDate} to ${endDate}`}
-                                    />
+                                        <AgGridReact
+                                            ref={gridRef4}
+                                            rowData={system1KeywordData}
+                                            columnDefs={columnDefsObject4}
+                                            onCellClicked={onCellClicked}
+                                            pagination={true}
+                                            paginationPageSize={100}
+                                            paginationPageSizeSelector={[20, 40, 60, 80, 100]}
+                                            groupDisplayType="multipleColumns"
+                                            suppressAggFuncInHeader={true}
+                                            groupSuppressBlankHeader={true}
+                                            defaultColDef={defaultColDef}
+                                            autoGroupColumnDef={autoGroupColumnDefDomain}
+                                            // onGridReady={(params) => onGridReady(params, 'grid5', gridRef4)}
+                                            // gridOptions={gridOptions4}
+                                            gridOptions={{
+                                                groupUseEntireRow: true,  // Ensures the entire row is used for grouping
+                                                // groupSuppressAutoColumn: true,  // Removes the auto group column that appears with the group header
+                                            }}
+                                            getMainMenuItems={getMainMenuItems}
+                                            pinnedBottomRowData={system1KeywordData.length > 0 ? pinnedBottomRowData4 : []}
+                                            getRowStyle={params => {
+                                                if (params.node.rowPinned) {
+                                                    return {
+                                                        fontWeight: 'bold',
+                                                        backgroundColor: theme === "dark" ? '#000' : '#fff',
+                                                        color: theme === "dark" ? '#fff' : '#000',
+                                                    };
+                                                }
+                                                return null;
+                                            }}
+                                        />
+                                    </div>
                                 ) : (
-                                    <Result
-                                    className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                                    icon={<SmileOutlined />}
-                                    title={`No DomainData for ${startDate}`}
-                                    />
+                                    <div style={{ backgroundColor: theme === "dark" ? "#333" : "#fff" }}>
+                                        {startDate !== endDate ? (
+                                            <Result
+                                                className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                                icon={<SmileOutlined />}
+                                                title={`No DomainData from ${startDate} to ${endDate}`}
+                                            />
+                                        ) : (
+                                            <Result
+                                                className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                                icon={<SmileOutlined />}
+                                                title={`No DomainData for ${startDate}`}
+                                            />
+                                        )}
+                                    </div>
                                 )}
-                                </div>
-                            )}
                             </div>
                         </div>
                     )}
-                    {revenuePratner === "FB_Mnet" && 
+                    {revenuePratner === "FB_Mnet" &&
                         <div style={{ height: "100%", marginBottom: '20px' }}>
                             <div style={contentStyle}>
                                 {isLoading === true ? (
@@ -7495,7 +7306,7 @@ const MyTablePage = () => {
 
                                     <div
                                         className={`ag-theme-alpine ${gridThemeClass}`}
-                                        style={{ width: '100%', height:'500px'}}
+                                        style={{ width: '100%', height: '500px' }}
                                     >
                                         <AgGridReact
                                             rowData={domainData}
