@@ -277,6 +277,12 @@ const MyTablePage = () => {
 
     const [isLoading4, setLoading4] = useState(true);
 
+    const [tonicKeywordLoading, setTonicKeywordLoading] = useState(true);
+
+    const [tonicKeywordData, setTonicKeywordData] = useState([]);
+
+    const [fixedTonic, setFixedTonic] = useState([]);
+
     const [isTrue, setTrue] = useState(false);
 
     const [account, setAccount] = useState(accountNumberFromDashboard ? accountNumberFromDashboard : accountsForAccess[0].accountNumber);
@@ -328,6 +334,8 @@ const MyTablePage = () => {
 
     const gridRef4 = useRef();
 
+    const gridRef5 = useRef();
+
     const [gridKey, setGridKey] = useState(0);
 
     const filterRef = useRef(null);
@@ -340,6 +348,10 @@ const MyTablePage = () => {
     const newDailyData = useRef();
 
     const newCampaignData = useRef();
+
+    const newTonicKeywordData = useRef();
+
+    const [tonicFixedFooter, setTonicFixedFooter] = useState([]);
 
     const [fixedFooter, setFixedFooter] = useState([]);
 
@@ -2166,7 +2178,7 @@ const MyTablePage = () => {
 
         return (
             <Popover
-                content={popoverContent}
+                content={newRevenuePratner !== "FB_Tonic1" ? popoverContent : null}
                 trigger="hover"
                 placement="topLeft"
             // title="Ad ID"
@@ -2206,7 +2218,8 @@ const MyTablePage = () => {
             resizable: true,
             minWidth: 350,
             cellStyle: { textAlign: 'left' },
-            cellRenderer: (params) => <KeywordCellRenderer params={params} />,
+            cellRenderer: (params) =>
+                <KeywordCellRenderer params={params} /> , 
         },
         searchKeyword: {
             headerName: 'S_Keywords',
@@ -2654,6 +2667,13 @@ const MyTablePage = () => {
         return newOrderItems;
     };
 
+    const getColumnDefs4 = (order) => {
+        // console.log(order);
+        const orderItems = order?.map(colKey => columnDefsObject3[colKey]);
+        const newOrderItems = [columnDefsObject3["keyword"],   ...orderItems];
+        return newOrderItems;
+    };
+
     const [columnDefs, setColumnDefs] = useState();
 
     const columnDefs1 = useRef();
@@ -2661,6 +2681,8 @@ const MyTablePage = () => {
     const columnDefs2 = useRef();
 
     const columnDefs3 = useRef();
+
+    const columnDefs4 = useRef();
 
     var token = localStorage.getItem("token")
 
@@ -2680,6 +2702,7 @@ const MyTablePage = () => {
         columnDefs1.current = (getColumnDefs1(updateDataArray));
         columnDefs2.current = (getColumnDefs2(updateDataArray));
         columnDefs3.current = (getColumnDefs3(updateDataArray));
+        columnDefs4.current = (getColumnDefs4(updateDataArray));
         // const data = await fetchData.json();
         // const mainData = await data;
         // console.log(mainData.rows, "rows");
@@ -2718,8 +2741,9 @@ const MyTablePage = () => {
         // setRowStructure(mainData.rows); 
         setColumnDefs(getColumnDefs(mainData.columnStructure));
         columnDefs1.current = getColumnDefs2(mainData.columnStructure);
-        columnDefs2.current = (getColumnDefs2(mainData.columnStructure))
-        columnDefs3.current = (getColumnDefs3(mainData.columnStructure))
+        columnDefs2.current = (getColumnDefs2(mainData.columnStructure));
+        columnDefs3.current = (getColumnDefs3(mainData.columnStructure));
+        columnDefs4.current = (getColumnDefs4(mainData.columnStructure));
     }
 
     function groupAndCalculateProfit(data) {
@@ -3515,6 +3539,132 @@ const MyTablePage = () => {
         }
     };
 
+    const functionCall6 = async () => {
+        try { 
+            
+            const fetchData = await axios.get(`https://prodapis.adsgoat.in/TonicKeywords?startDate=${startDate}&endDate=${endDate}&timezone=${newtime}&accountNumber=${newaccount}`, {
+                headers: {
+                    Authorization: token,
+                },
+            });
+            const mainData = fetchData.data;
+            console.log(mainData, "mainData of functionCall6");
+            const specifiedTimeZone = selectTimezone[time];
+
+            const filteredData = mainData && mainData.length > 0 ?
+                mainData.map((eachData) => {
+                    const Revenue = eachData.estimated_revenue !== undefined ? (eachData.estimated_revenue) : 0;
+                    const profit = Math.round((Revenue - eachData.spend) * 100) / 100;
+                    const margin = Revenue !== 0 ? `${Math.round((((Revenue - eachData.spend) / eachData.estimated_revenue) * 100) * 100) / 100}%` : '0%'
+                    let rpc = eachData.conversions !== 0 ? (Math.round((Revenue / eachData.conversions) * 100) / 100) : 0;
+                    const revenue = ((eachData.estimated_revenue - eachData.spend) / (eachData.fbLeads * rpc)) * 100;
+                    let fMargin = revenue !== 0 ? Math.round(((profit / revenue) * 100) * 100) / 100 : 0;
+                    const cpl = eachData.fbLeads !== 0 ? Math.round((eachData.spend / eachData.fbLeads) * 100) / 100 : 0;
+                    let ncpl = eachData.conversions !== 0 ? Math.round((eachData.spend / eachData.conversions) * 100) / 100 : 0;
+                    const roi = eachData.spend !== 0 ? `${Math.round((((Revenue - eachData.spend) / eachData.spend) * 100) * 100) / 100}%` : '0%';
+                    const ctr = eachData.impressions !== 0 ? `${Math.round(((eachData.fbClicks / eachData.impressions) * 100) * 100) / 100}%` : '0%';
+                    const mainRvenue = ((Math.round(Revenue * 100) / 100)).toString();
+                    const conversions = eachData.conversions !== undefined ? eachData.conversions : '0';
+                    rpc = !isNaN(rpc) ? rpc : 0;
+                    ncpl = !isNaN(ncpl) ? ncpl : 0;
+                    fMargin = !isNaN(fMargin) ? `${fMargin}%` : '0%';
+
+                    // console.log(eachData.campaign_name, "campaign_name");
+                    // console.log(eachData.landerKeyword, "Keyword");
+                    // console.log((eachData.tg7, "adid"));
+                    return (
+                        {
+                            campaignname: eachData.campaign_name,
+                            keyword: eachData.landerKeyword,
+                            adsetname: eachData.adsetName,
+                            date: eachData[specifiedTimeZone],
+                            'fb-hour': eachData.campaign_id,
+                            'mnet-hour': eachData.campaign_id,
+                            spend: parseFloat(eachData.spend),
+                            revenue: parseFloat(mainRvenue),
+                            profit: parseFloat(profit),
+                            margin: margin,
+                            fbleads: parseInt(eachData.fbLeads),
+                            conversions: parseInt(conversions),
+                            cpc: parseFloat(eachData.cpc),
+                            fbclicks: parseInt(eachData.fbClicks),
+                            impressions: parseInt(eachData.impressions),
+                            ctr: ctr,
+                            rpc: parseFloat(rpc),
+                            cpl: parseFloat(cpl),
+                            ncpl: parseFloat(cpl),
+                            roi: roi,
+                            fmargin: fMargin,
+                            campaignid: eachData.campaign_id,
+                            adsetid: eachData.adset_id,
+                            timezone: 'UTC',
+                            actions: '...',
+                            keyword: eachData.keyword
+                            // compaignid: eachData.campaign_id,
+                        }
+                    )
+                }) : null;
+            // console.log(filteredData[0],"one");
+            // console.log(filteredData, "filter");
+
+            console.log(filteredData);
+
+            const fullData = filteredData?.length > 0 ? [...filteredData] : [];
+            // console.log(fullData, "full");
+
+            // setDailyColumn(columnDefs);
+            console.log(fullData);
+            setTonicKeywordData(fullData);
+            setTonicKeywordLoading(false);
+            newTonicKeywordData.current = fullData;
+            setTonicFixedFooter([
+                {
+                    campaignName: 'Total',
+                    spend: fullData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0),
+                    revenue: fullData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0),
+                    profit: fullData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0),
+                    margin: `${(fullData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)}%`,
+                    rpc: fullData?.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / fullData?.length,
+                    cpl: fullData?.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / fullData?.length,
+                    ncpl: fullData?.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / fullData?.length,
+                    fbleads: fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0),
+                    conversions: fullData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0),
+                    fmargin: `${(fullData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)}%`,
+                    roi: `${(fullData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - fullData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100}%`,
+                    cpc: fullData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / fullData?.length,
+                    fbclicks: fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0),
+                    impressions: fullData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0),
+                    ctr: `${(fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)}%`
+                }
+            ]);
+            console.log([
+                {
+                    campaignName: 'Total',
+                    spend: fullData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0),
+                    revenue: fullData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0),
+                    profit: fullData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0),
+                    margin: `${(fullData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)}%`,
+                    rpc: fullData?.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / fullData?.length,
+                    cpl: fullData?.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / fullData?.length,
+                    ncpl: fullData?.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / fullData?.length,
+                    fbleads: fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0),
+                    conversions: fullData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0),
+                    fmargin: `${(fullData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)}%`,
+                    roi: `${(fullData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - fullData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100}%`,
+                    cpc: fullData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / fullData?.length,
+                    fbclicks: fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0),
+                    impressions: fullData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0),
+                    ctr: `${(fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)}%`
+                }
+            ]);
+            
+        } catch (error) {
+            setTonicKeywordData([]);
+            setTonicKeywordLoading(false); 
+            console.log(error);
+            // setLoading4(false); // Hide loading spinner in case of error
+        }
+    };
 
     useEffect(() => {
         const functionCall = async () => {
@@ -3535,6 +3685,8 @@ const MyTablePage = () => {
                     await functionCall4();
                 } else if (newRevenuePratner === "FB_System1") {
                     await functionCall5();
+                }else if(newRevenuePratner === "FB_Tonic1"){
+                    await functionCall6();
                 }
 
                 // console.log("functionCall3 executed successfully.");
@@ -3560,6 +3712,8 @@ const MyTablePage = () => {
                     await functionCall4();
                 } else if (newRevenuePratner === "FB_System1") {
                     await functionCall5();
+                }else if(newRevenuePratner === "FB_Tonic1"){
+                    await functionCall6();
                 }
             }
             functionCall();
@@ -3617,6 +3771,7 @@ const MyTablePage = () => {
         setLoading2(true);
         newRevenuePratner === "FB_DomainActive" && setLoading3(true);
         newRevenuePratner === "FB_System1" && setLoading4(true);
+        newRevenuePratner === "FB_Tonic1" && setTonicKeywordLoading(true);
         setNewAccount(account);
         setnewAccountName(accountName)
         setNewTime(time);
@@ -5560,6 +5715,15 @@ const MyTablePage = () => {
         }
     };
 
+    const gridOptions5 = {
+        onColumnMoved: (params) => debouncedHandleColumnMove(params, 'grid5'),
+        defaultColDef: {
+            suppressMenu: true,
+            headerClass: "custom-header" // Apply to all columns by default
+
+        }
+    };
+
     // const gridOptions4 = {
     //     onColumnMoved: (params) => debouncedHandleColumnMove(params, 'grid5'),
     //     defaultColDef: {
@@ -5789,12 +5953,34 @@ const MyTablePage = () => {
         }
     };
 
+    const refreshGrid5 = (gridRef5) => {
+        setTonicKeywordLoading(true);
+        if (gridRef5.current) {
+            const gridApi = gridRef5.current.api;
+    
+            // Clear filters
+            gridApi.setFilterModel(null);
+    
+            // Temporarily clear the data and reset after a timeout
+            setTonicKeywordData([]); // Temporarily clear the data
+            setTimeout(() => setTonicKeywordData(newTonicKeywordData.current), 0); // Reset the data
+            setTimeout(() => setTonicKeywordLoading(false), 1500); // Stop loading after timeout
+    
+            // Force refresh the grid cells and redraw the rows
+            gridApi.refreshCells({ force: true });
+            gridApi.redrawRows();
+        } else {
+            console.error('Grid reference is not available.');
+        }
+    };
+
     const onClickRefresh = () => {
         refreshGrid(gridRef);  // Refresh gridRef
         refreshGrid1(gridRef1); // Refresh gridRef1
         refreshGrid2(gridRef2); // Refresh gridRef2
         refreshGrid3(gridRef3); // Refresh gridRef3
         refreshGrid4(gridRef4);
+        refreshGrid5(gridRef5);
     };
 
 
@@ -6041,7 +6227,8 @@ const MyTablePage = () => {
         { key: '4', label: 'BMName', content: 'Content for BMName data' },
         ...(newRevenuePratner === "FB_Mnet" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : []),
         ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
-        ...(newRevenuePratner === "FB_System1" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : [])
+        ...(newRevenuePratner === "FB_System1" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : []),
+        ...(newRevenuePratner === "FB_Tonic1" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
     ];
     const handleSlideChange = (from, to) => {
         // console.log(to, "to");
@@ -6740,17 +6927,164 @@ const MyTablePage = () => {
                                 {startDate !== endDate ? <Result
                                     className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                     icon={<SmileOutlined />}
-                                    title={`No BMName for ${newaccount} from ${startDate} to ${endDate}`}
+                                    title={`No BMName Data for ${newaccount} from ${startDate} to ${endDate}`}
                                 // extra={<Button type="primary">Next</Button>}
                                 /> : <Result
                                     className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                     icon={<SmileOutlined />}
-                                    title={`No BMName for ${newaccount} to ${startDate}`}
+                                    title={`No BMName Data for ${newaccount} to ${startDate}`}
                                 // extra={<Button type="primary">Next</Button>}
                                 />}
                             </div>}
                         </div>
                     </div>
+
+                    {revenuePratner === "FB_Tonic1" &&
+                        <div>
+                            <div style={contentStyle}>
+                                {tonicKeywordLoading === true ? (
+                                    <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>
+                                        <div className="ag-grid-Loader">
+                                            <Audio
+                                                height="80"
+                                                width="80"
+                                                radius="9"
+                                                color="green"
+                                                ariaLabel="loading"
+                                                wrapperStyle
+                                                wrapperClass
+                                            />
+                                        </div>
+                                    </div>
+                                ) : tonicKeywordData?.length > 0 ? (
+                                    <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
+                                        <AgGridReact
+                                            ref={gridRef5}
+                                            rowData={tonicKeywordData}
+                                            columnDefs={columnDefs4.current}
+                                            onCellClicked={onCellClicked}
+                                            pagination={true}
+                                            paginationPageSize={100}
+                                            paginationPageSizeSelector={[20, 40, 60, 80, 100]}
+                                            groupDisplayType='multipleColumns'
+                                            suppressAggFuncInHeader={true}
+                                            groupSuppressBlankHeader={true}
+                                            defaultColDef={defaultColDef}
+                                            // groupIncludeFooter={true}
+                                            // groupIncludeTotalFooter={true}
+                                            autoGroupColumnDef={autoGroupColumnDef3}
+                                            onGridReady={(params) => onGridReady(params, 'grid5', gridRef5)}
+                                            gridOptions={gridOptions3}
+                                            getMainMenuItems={getMainMenuItems}
+                                            pinnedBottomRowData={tonicFixedFooter ? tonicFixedFooter : []}
+                                            getRowStyle={params => {
+                                                if (params.node.rowPinned) {
+                                                    return {
+                                                        fontWeight: 'bold',
+                                                        backgroundColor: theme === "dark" ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
+                                                        color: theme === "dark" ? '#fff' : '#000',           // Text color should contrast with the background
+                                                    };
+                                                }
+
+                                                return null;
+                                            }}
+                                            onFilterChanged={(params) => {
+                                                try {
+                                                    const api = params.api;
+                                                    const filteredData = [];
+                                            
+                                                    // Collect filtered data
+                                                    api.forEachNodeAfterFilterAndSort((node) => {
+                                                        if (!node.rowPinned) {
+                                                            filteredData.push(node.data);
+                                                        }
+                                                    });
+                                            
+                                                    const fieldValueFilter = (field, value) => {
+                                                        if (!filteredData || !Array.isArray(filteredData)) {
+                                                            console.error("Filtered data is invalid or not an array:", filteredData);
+                                                            return [];
+                                                        }
+                                                        return filteredData.filter((item) => item && item[field] && item[field] === value);
+                                                    };
+                                                    const updatedFooter = [
+                                                        {
+                                                            adsetName: 'Total',
+                                                            spend: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2),
+                                                            revenue: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2),
+                                                            profit: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2),
+                                                            margin: `${(
+                                                                (filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0) /
+                                                                    filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0)) *
+                                                                100 || 0
+                                                            ).toFixed(2)}%`,
+                                                            rpc: (
+                                                                filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.rpc || 0), 0) / filteredData?.length || 0
+                                                            ).toFixed(2),
+                                                            cpl: (
+                                                                filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.cpl || 0), 0) / filteredData?.length || 0
+                                                            ).toFixed(2),
+                                                            ncpl: (
+                                                                filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.ncpl || 0), 0) / filteredData?.length || 0
+                                                            ).toFixed(2),
+                                                            fbleads: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.fbleads || 0), 0),
+                                                            conversions: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.conversions || 0), 0),
+                                                            fmargin: `${(
+                                                                (filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0) /
+                                                                    filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0)) *
+                                                                100 || 0
+                                                            ).toFixed(2)}%`,
+                                                            roi: `${(
+                                                                ((filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0) -
+                                                                    filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0)) /
+                                                                    filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0)) *
+                                                                100 || 0
+                                                            ).toFixed(2)}%`,
+                                                            cpc: (
+                                                                filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.cpc || 0), 0) / filteredData?.length || 0
+                                                            ).toFixed(2),
+                                                            fbclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks || 0), 0),
+                                                            impressions: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0),
+                                                            ctr: `${(
+                                                                (filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks || 0), 0) /
+                                                                    filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0)) *
+                                                                100 || 0
+                                                            ).toFixed(2)}%`,
+                                                        },
+                                                    ];
+                                            
+                                                    // Set updated footer data
+                                                    setFixedTonic(updatedFooter);
+                                            
+                                                    // Example field-based filtering logic with error handling
+                                                    try {
+                                                        const specificFieldData = fieldValueFilter('status', 'Active'); // Replace 'status' and 'Active' with your field and value
+                                                        console.log('Filtered by status (Active):', specificFieldData);
+                                                    } catch (fieldFilterError) {
+                                                        console.error("Error in field-based filtering:", fieldFilterError);
+                                                    }
+                                                } catch (error) {
+                                                    console.error("Error in onFilterChanged handler:", error);
+                                                }
+                                            }}
+                                        />
+                                    </div>
+                                ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
+                                    {startDate !== endDate ? <Result
+                                        className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                        icon={<SmileOutlined />}
+                                        title={`No KeywordData for ${newaccount} from ${startDate} to ${endDate}`}
+                                    // extra={<Button type="primary">Next</Button>}
+                                    /> : <Result
+                                        className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                        icon={<SmileOutlined />}
+                                        title={`No KeywordData for ${newaccount} to ${startDate}`}
+                                    // extra={<Button type="primary">Next</Button>}
+                                    />}
+                                </div>}
+                            </div>
+                        </div>
+                    }
 
                     {revenuePratner === "FB_DomainActive" &&
                         <div>
@@ -6817,7 +7151,7 @@ const MyTablePage = () => {
                                             // groupIncludeTotalFooter={true}
                                             autoGroupColumnDef={autoGroupColumnDef3}
                                             onGridReady={(params) => onGridReady(params, 'grid4', gridRef3)}
-                                            gridOptions={gridOptions3}
+                                            gridOptions={gridOptions5}
                                             getMainMenuItems={getMainMenuItems}
                                             pinnedBottomRowData={keywordData.length > 0 ? pinnedBottomRowData3 : []}
                                             getRowStyle={params => {
