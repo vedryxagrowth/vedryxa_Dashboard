@@ -13,6 +13,7 @@ import dynamic from 'next/dynamic';
 import MnetUrlBuilder from './urlbuilder/mnet';
 import TonicUrlBuilder from './urlbuilder/tonic';
 import System1UrlBuilder from './urlbuilder/system1';
+import DActiveUrlBuilder from './urlbuilder/dactive';
 
 
 const FabricCanvas = dynamic(() => import('./Fabricanvas'), { ssr: false });
@@ -553,7 +554,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     const onReturnUrl = (text) => {
         setIsModalVisibleForURLBuilder(false);
         setWebsiteURL(text);
-        if (network === "FB_Mnet") {
+        if (network === "FB_Mnet" || network === "FB_DomainActive") {
             setCaption(text.split('//')[1].split("/")[0]);
 
         } else {
@@ -581,6 +582,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                 return <TonicUrlBuilder onReturnMessage={onReturnUrl} />
             case 'FB_System1':
                 return <System1UrlBuilder onReturnMessage={onReturnUrl} />
+            case 'FB_DomainActive':
+                return <DActiveUrlBuilder onReturnMessage={onReturnUrl} />
         }
     }
 
