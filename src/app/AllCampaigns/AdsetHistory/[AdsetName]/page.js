@@ -34,7 +34,8 @@ export default function AdsetNameAndAccount({params}){
     const [isLoading, setLoading] = useState(true);
     const [dailyData, setdailyData] = useState([]);
     const paramsData = ((params.AdsetName).split("-"));
-    const decodedString = decodeURIComponent(paramsData[0]);
+    let decodedString = decodeURIComponent(paramsData[0]);
+    decodedString = decodedString.replace(/\*/g, "/").replace(/\^/g, "-");
     const accountNumber = paramsData[1];
     const timeZone = paramsData[2];
     const network = paramsData[3];
