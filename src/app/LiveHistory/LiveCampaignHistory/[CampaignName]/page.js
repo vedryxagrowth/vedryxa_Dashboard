@@ -904,7 +904,8 @@ const MnetLiveCampaignHistory = ({ params }) => {
     // }
     const functionCall = async () => {
         const paramsData = ((params.CampaignName).split("-"));
-        const decodedString = decodeURIComponent(paramsData[0]);
+        let decodedString = decodeURIComponent(paramsData[0]);
+        decodedString = decodedString.replace(/\*/g, "/").replace(/\^/g, "-");
         const accountNumber = paramsData[1];
         const timeZone = paramsData[2];
         timeZoneToDisplay.current = timeZone;
