@@ -4511,7 +4511,7 @@ const MyTablePage = () => {
                     try {
                         let response;
                         if (updatedPinStatus) {
-                            response = await axios.post('http://localhost:8000/Pin', {
+                            response = await axios.post('https://prodapis.adsgoat.in/Pin', {
                                 campaignname: campaignName,
                                 Account: account,
                                 campaignid: campaignid,
@@ -4523,7 +4523,7 @@ const MyTablePage = () => {
 
                             message.success("Campaign pinned!");
                         } else {
-                            response = await axios.post('http://localhost:8000/Unpin', {
+                            response = await axios.post('https://prodapis.adsgoat.in/Unpin', {
                                 campaignname: campaignName,
                                 Account: account,
                                 campaignid: campaignid,
@@ -4908,7 +4908,7 @@ const MyTablePage = () => {
                     try {
                         let response;
                         if (updatedPinStatus) {
-                            response = await axios.post('http://localhost:8000/Pin', {
+                            response = await axios.post('https://prodapis.adsgoat.in/Pin', {
                                 campaignname: campaignName,
                                 Account: account,
                                 campaignid: campaignid,
@@ -4920,7 +4920,7 @@ const MyTablePage = () => {
 
                             message.success("Campaign pinned!");
                         } else {
-                            response = await axios.post('http://localhost:8000/Unpin', {
+                            response = await axios.post('https://prodapis.adsgoat.in/Unpin', {
                                 campaignname: campaignName,
                                 Account: account,
                                 campaignid: campaignid,
@@ -5324,7 +5324,7 @@ const MyTablePage = () => {
                     try {
                         let response;
                         if (updatedPinStatus) {
-                            response = await axios.post('http://localhost:8000/Pin', {
+                            response = await axios.post('https://prodapis.adsgoat.in/Pin', {
                                 campaignname: campaignName,
                                 Account: account,
                                 campaignid: campaignid,
@@ -5336,7 +5336,7 @@ const MyTablePage = () => {
 
                             message.success("Campaign pinned!");
                         } else {
-                            response = await axios.post('http://localhost:8000/Unpin', {
+                            response = await axios.post('https://prodapis.adsgoat.in/Unpin', {
                                 campaignname: campaignName,
                                 Account: account,
                                 campaignid: campaignid,
