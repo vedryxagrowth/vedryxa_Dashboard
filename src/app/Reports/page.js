@@ -2176,9 +2176,10 @@ const MyTablePage = () => {
             </div>
         );
 
+        
         return (
             <Popover
-                content={newRevenuePratner !== "FB_Tonic1" ? popoverContent : null}
+                content={popoverContent}
                 trigger="hover"
                 placement="topLeft"
             // title="Ad ID"
@@ -3867,7 +3868,7 @@ const MyTablePage = () => {
         if (event.colDef.field === 'adsetname') {
             const value = event.value;
             if (value !== undefined) {
-                const url = `/DailyAndCampaignHistory/AdsetHistory/${value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                const url = `/DailyAndCampaignHistory/AdsetHistory/${value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                 window.open(url, '_blank');
                 // console.log(`Price clicked: ${value}`);
             }
@@ -3879,7 +3880,7 @@ const MyTablePage = () => {
         if (event.colDef.field === 'adsetname') {
             const value = event.value;
             if (value !== undefined) {
-                const url = `/AllCampaigns/AdsetHistory/${value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                const url = `/AllCampaigns/AdsetHistory/${value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                 window.open(url, '_blank');
                 // console.log(`Adset clicked: ${value}`);
             }
@@ -3890,7 +3891,7 @@ const MyTablePage = () => {
         if (event.colDef.field === 'adsetname') {
             const value = event.value;
             if (value !== undefined) {
-                const url = `/LiveHistory/LiveAdsetHistory/${value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                const url = `/LiveHistory/LiveAdsetHistory/${value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                 window.open(url, '_blank');
                 // console.log(`Adset clicked: ${value}`);
             }
@@ -4351,6 +4352,7 @@ const MyTablePage = () => {
                 if (params.node.footer) {
                     return 'Total';
                 }
+                // console.log(params.value, "value");
 
                 const firstColumnValue = params.node.key;  // campaign name
                 const campaignName = params.node.key;
@@ -4626,7 +4628,7 @@ const MyTablePage = () => {
                         </Tooltip>
                         <span
                             onClick={() => {
-                                const url = `/LiveHistory/LiveCampaignHistory/${params.value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                                const url = `/LiveHistory/LiveCampaignHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                                 window.open(url, '_blank');
                             }}
                         >
@@ -5030,7 +5032,7 @@ const MyTablePage = () => {
                         </Tooltip>
                         <span
                             onClick={() => {
-                                const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                                const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                                 window.open(url, '_blank');
                             }}
                         >
@@ -5446,7 +5448,7 @@ const MyTablePage = () => {
                         </Tooltip>
                         <span
                             onClick={() => {
-                                const url = `/AllCampaigns/CampaignHistory/${params.value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                                const url = `/AllCampaigns/CampaignHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                                 window.open(url, '_blank');
                             }}
                         >
@@ -5725,7 +5727,7 @@ const MyTablePage = () => {
                         </Tooltip>
                         <span
                             onClick={() => {
-                                const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                                const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                                 window.open(url, '_blank');
                             }}
                         >
@@ -7069,7 +7071,16 @@ const MyTablePage = () => {
                                     <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
                                         <AgGridReact
                                             ref={gridRef5}
-                                            rowData={tonicKeywordData}
+                                            rowData={tonicKeywordData.filter((each) => {
+                                                const normalizedCampaign = each.campaignname.trim().toLowerCase();
+                                                const normalizedInput = inputValue.trim().toLowerCase();
+                                                return (
+                                                    normalizedCampaign.startsWith(normalizedInput) ||
+                                                    normalizedCampaign.includes(normalizedInput) ||
+                                                    normalizedCampaign.endsWith(normalizedInput)
+                                                );
+                                            }
+                                            )}
                                             columnDefs={columnDefs4.current}
                                             onCellClicked={onCellClicked}
                                             pagination={true}
