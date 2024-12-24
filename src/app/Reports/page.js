@@ -4316,6 +4316,7 @@ const MyTablePage = () => {
     //         }
     //     }
     // }; tech modified 
+    
     const autoGroupColumnDefLive = {
         headerName: 'CampaignName',
         minWidth: 450,
@@ -4377,6 +4378,11 @@ const MyTablePage = () => {
                     return relatedStatus ? relatedStatus : null;
                 };
 
+                const getPinEditedUserAndTime = (campaignName, newaccount) => {
+                    const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
+                    return relatedStatus ? relatedStatus : null;
+                };
+
                 const getStatusForCampaign = (campaignName, newaccount) => {
                     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
                     return relatedStatus !== undefined && relatedStatus.status === true ? true : relatedStatus !== undefined ? false : null;
@@ -4393,6 +4399,7 @@ const MyTablePage = () => {
                 };
 
                 const editUserANdTime = getEditedUserAndTime(campaignName, newaccount);
+                const editPinUserANdTime = getPinEditedUserAndTime(campaignName, newaccount);
                 const relatedStatus = getStatusForCampaign(campaignName, newaccount);
                 const relatedComment = getCommentForCampaign(campaignName);
                 const valueWithCount = `${firstColumnValue}`;
@@ -4502,32 +4509,55 @@ const MyTablePage = () => {
                     try {
                         let response;
                         if (updatedPinStatus) {
-                            response = await axios.post('https://prodapis.adsgoat.in/Pin', {
+                            response = await axios.post('http://localhost:8000/Pin', {
                                 campaignname: campaignName,
                                 Account: account,
                                 campaignid: campaignid,
                                 adsetid: adsetid,
-                                usercommit: userdetails?.email,
+                                userPin: userdetails?.email,
                                 comment: comment || ''
                             }, { headers: { Authorization: token } });
+                            changeRRefrst();
 
                             message.success("Campaign pinned!");
                         } else {
-                            response = await axios.post('https://prodapis.adsgoat.in/Unpin', {
+                            response = await axios.post('http://localhost:8000/Unpin', {
                                 campaignname: campaignName,
                                 Account: account,
                                 campaignid: campaignid,
                                 adsetid: adsetid
                             }, { headers: { Authorization: token } });
+                            changeRRefrst();
 
                             message.success("Campaign unpinned!");
                         }
 
-                        const updatedComments = campaignComments.some(cmt => cmt.campaignname === campaignName)
-                            ? campaignComments.map(cmt =>
-                                cmt.campaignname === campaignName ? { ...cmt, pinned: updatedPinStatus } : cmt
-                            )
-                            : [...campaignComments, { campaignname: campaignName, pinned: updatedPinStatus }];
+                        // Update campaignComments with the new pinned status and edited user/time
+                        const updatedComments = campaignComments.map(cmt =>
+                            cmt.campaignname === campaignName
+                                ? {
+                                    ...cmt,
+                                    pinned: updatedPinStatus,
+                                    editedPinTime: response.data.editedPinTime || new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+                                    userPin: userdetails?.email
+                                }
+                                : cmt
+                        );
+
+                        if (!campaignComments.some(cmt => cmt.campaignname === campaignName)) {
+                            updatedComments.push({
+                                campaignname: campaignName,
+                                pinned: updatedPinStatus,
+                                editedPinTime: response.data.editedPinTime || new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+                                userPin: userdetails?.email
+                            });
+                        }
+
+                        // const updatedComments = campaignComments.some(cmt => cmt.campaignname === campaignName)
+                        //     ? campaignComments.map(cmt =>
+                        //         cmt.campaignname === campaignName ? { ...cmt, pinned: updatedPinStatus } : cmt
+                        //     )
+                        //     : [...campaignComments, { campaignname: campaignName, pinned: updatedPinStatus }];
 
                         const sortedComments = updatedComments.sort((a, b) => b.pinned - a.pinned);
                         setCampaignComments(sortedComments);
@@ -4540,17 +4570,19 @@ const MyTablePage = () => {
 
                 const PinIcon = ({ campaignName, campaignid, adsetid, pinned }) => {
                     return (
-                        <button
-                            onClick={() => handlePinClick(campaignName, campaignid, adsetid, pinned)}
-                            style={{
-                                border: "none",
-                                background: "none",
-                                cursor: "pointer",
-                                fontSize: "16px",
-                            }}
-                        >
-                            {pinned ? "📌" : "📍"}
-                        </button>
+                        <Tooltip title={pinned ? <CustomTooltipContent editedTime={editPinUserANdTime?.editedPinTime} usercommit={editPinUserANdTime?.userPin} /> : null}>
+                            <button
+                                onClick={() => handlePinClick(campaignName, campaignid, adsetid, pinned)}
+                                style={{
+                                    border: "none",
+                                    background: "none",
+                                    cursor: "pointer",
+                                    fontSize: "16px",
+                                }}
+                            >
+                                {pinned ? "📌" : "📍"}
+                            </button>
+                        </Tooltip>
                     );
                 };
 
@@ -4642,22 +4674,7 @@ const MyTablePage = () => {
                 return isPinnedA ? -1 : 1;  // Pinned campaigns should come first
             }
 
-            // If both campaigns have the same pinned status, fall back to other sorting logic
-
-            // For example: Prioritize by starred status
-            const getStarredForCampaign = (campaignName) => {
-                const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
-                return relatedComment ? relatedComment.starred : false;
-            };
-
-            const isStarredA = getStarredForCampaign(campaignA);
-            const isStarredB = getStarredForCampaign(campaignB);
-
-            if (isStarredA !== isStarredB) {
-                return isStarredA ? -1 : 1;  // Starred campaigns should come first
-            }
-
-            // Finally, fallback to alphabetical sorting if no pinned or starred criteria
+            // If both campaigns have the same pinned status, fallback to alphabetical sorting
             return campaignA.localeCompare(campaignB);
         },
 
@@ -4713,6 +4730,12 @@ const MyTablePage = () => {
                     // console.log(relatedStatusTrue);
                     return relatedStatusEditedTime;
                 }
+
+                const getPinEditedUserAndTime = (campaignName, newaccount) => {
+                    const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
+                    return relatedStatus ? relatedStatus : null;
+                };
+
                 const getStatusForCampaign = (campaignName, newaccount) => {
                     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
                     // console.log(relatedStatus, "relatedStatus");
@@ -4726,10 +4749,10 @@ const MyTablePage = () => {
                     return relatedComment ? relatedComment.comment : null;
                 };
 
-                const getStarredForCampaign = (campaignName) => {
-                    const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
-                    return relatedComment ? relatedComment.starred : false;
-                };
+                // const getStarredForCampaign = (campaignName) => {
+                //     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+                //     return relatedComment ? relatedComment.starred : false;
+                // };
 
                 const getPinStatusForCampaign = (campaignName) => {
                     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
@@ -4737,15 +4760,16 @@ const MyTablePage = () => {
                 };
 
                 const editUserANdTime = getEditedUserAndTime(campaignName, newaccount);
+                const editPinUserANdTime = getPinEditedUserAndTime(campaignName, newaccount);
                 const relatedStatus = getStatusForCampaign(campaignName, newaccount);
                 const relatedComment = getCommentForCampaign(campaignName);
-                const isStarred = getStarredForCampaign(campaignName);
+                // const isStarred = getStarredForCampaign(campaignName);
                 const valueWithCount = `${firstColumnValue}`;
 
                 const [tooltipText, setTooltipText] = useState("Click to Copy");
                 const [isModalVisibles, setIsModalVisibles] = useState(false);
                 const [comment, setComment] = useState(relatedComment || '');
-                const [starred, setStarred] = useState(isStarred);
+                // const [starred, setStarred] = useState(isStarred);
                 const [pinned, setPinned] = useState(getPinStatusForCampaign(campaignName));
 
                 const copyToClipboard = () => {
@@ -4800,38 +4824,38 @@ const MyTablePage = () => {
                     }
                 };
 
-                const sendStarStatusToAPI = async (campaignname, isStarred) => {
-                    try {
-                        const endpoint = isStarred ? 'https://prodapis.adsgoat.in/Star' : 'https://prodapis.adsgoat.in/Unstar';
-                        const response = await axios.post(endpoint, {
-                            campaignname: campaignname,
-                            Account: account,
-                            usercommit: userdetails?.email,
-                            campaignid: campaignid,
-                            adsetid: adsetid
-                        }, {
-                            headers: {
-                                Authorization: token,
-                            }
-                        });
-                        // console.log('Response from server (starred status):', response.data);
-                    } catch (error) {
-                        console.error('Error updating star status:', error);
-                    }
-                };
+                // const sendStarStatusToAPI = async (campaignname, isStarred) => {
+                //     try {
+                //         const endpoint = isStarred ? 'https://prodapis.adsgoat.in/Star' : 'https://prodapis.adsgoat.in/Unstar';
+                //         const response = await axios.post(endpoint, {
+                //             campaignname: campaignname,
+                //             Account: account,
+                //             usercommit: userdetails?.email,
+                //             campaignid: campaignid,
+                //             adsetid: adsetid
+                //         }, {
+                //             headers: {
+                //                 Authorization: token,
+                //             }
+                //         });
+                //         // console.log('Response from server (starred status):', response.data);
+                //     } catch (error) {
+                //         console.error('Error updating star status:', error);
+                //     }
+                // };
 
-                const handleStarClick = async () => {
-                    const updatedStarred = !starred;
-                    setStarred(updatedStarred);
-                    await sendStarStatusToAPI(firstColumnValue, updatedStarred);
-                    message.success(updatedStarred ? "Campaign starred!" : "Campaign unstarred!");
+                // const handleStarClick = async () => {
+                //     const updatedStarred = !starred;
+                //     setStarred(updatedStarred);
+                //     await sendStarStatusToAPI(firstColumnValue, updatedStarred);
+                //     message.success(updatedStarred ? "Campaign starred!" : "Campaign unstarred!");
 
-                    const updatedComments = campaignComments.map(cmt =>
-                        cmt.campaignname === firstColumnValue ? { ...cmt, starred: updatedStarred } : cmt
-                    );
-                    setCampaignComments(updatedComments);
-                    changeRRefrst();
-                };
+                //     const updatedComments = campaignComments.map(cmt =>
+                //         cmt.campaignname === firstColumnValue ? { ...cmt, starred: updatedStarred } : cmt
+                //     );
+                //     setCampaignComments(updatedComments);
+                //     changeRRefrst();
+                // };
 
                 const handleOks = async () => {
                     try {
@@ -4882,34 +4906,56 @@ const MyTablePage = () => {
                     try {
                         let response;
                         if (updatedPinStatus) {
-                            response = await axios.post('https://prodapis.adsgoat.in/Pin', {
+                            response = await axios.post('http://localhost:8000/Pin', {
                                 campaignname: campaignName,
                                 Account: account,
                                 campaignid: campaignid,
                                 adsetid: adsetid,
-                                usercommit: userdetails?.email,
+                                userPin: userdetails?.email,
                                 comment: comment || ''
                             }, { headers: { Authorization: token } });
+                            changeRRefrst();
 
                             message.success("Campaign pinned!");
                         } else {
-                            response = await axios.post('https://prodapis.adsgoat.in/Unpin', {
+                            response = await axios.post('http://localhost:8000/Unpin', {
                                 campaignname: campaignName,
                                 Account: account,
                                 campaignid: campaignid,
                                 adsetid: adsetid
                             }, { headers: { Authorization: token } });
+                            changeRRefrst();
 
                             message.success("Campaign unpinned!");
                         }
 
-                        const updatedComments = campaignComments.some(cmt => cmt.campaignname === campaignName)
-                            ? campaignComments.map(cmt =>
-                                cmt.campaignname === campaignName ? { ...cmt, pinned: updatedPinStatus } : cmt
-                            )
-                            : [...campaignComments, { campaignname: campaignName, pinned: updatedPinStatus }];
+                        // Update campaignComments with the new pinned status and edited user/time
+                        const updatedComments = campaignComments.map(cmt =>
+                            cmt.campaignname === campaignName
+                                ? {
+                                    ...cmt,
+                                    pinned: updatedPinStatus,
+                                    editedPinTime: response.data.editedPinTime || new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+                                    userPin: userdetails?.email
+                                }
+                                : cmt
+                        );
 
-                        // Update pinned campaigns to stay at the top
+                        if (!campaignComments.some(cmt => cmt.campaignname === campaignName)) {
+                            updatedComments.push({
+                                campaignname: campaignName,
+                                pinned: updatedPinStatus,
+                                editedPinTime: response.data.editedPinTime || new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+                                userPin: userdetails?.email
+                            });
+                        }
+
+                        // const updatedComments = campaignComments.some(cmt => cmt.campaignname === campaignName)
+                        //     ? campaignComments.map(cmt =>
+                        //         cmt.campaignname === campaignName ? { ...cmt, pinned: updatedPinStatus } : cmt
+                        //     )
+                        //     : [...campaignComments, { campaignname: campaignName, pinned: updatedPinStatus }];
+
                         const sortedComments = updatedComments.sort((a, b) => b.pinned - a.pinned);
                         setCampaignComments(sortedComments);
                         setPinned(updatedPinStatus);
@@ -4921,13 +4967,19 @@ const MyTablePage = () => {
 
                 const PinIcon = ({ campaignName, campaignid, adsetid, pinned }) => {
                     return (
-                        <div onClick={() => handlePinClick(campaignName, campaignid, adsetid, pinned)}>
-                            {pinned ? (
-                                <PushpinFilled style={{ color: 'blue' }} />  // Blue for pinned
-                            ) : (
-                                <PushpinOutlined style={{ color: 'gray' }} />  // Gray for unpinned
-                            )}
-                        </div>
+                        <Tooltip title={pinned ? <CustomTooltipContent editedTime={editPinUserANdTime?.editedPinTime} usercommit={editPinUserANdTime?.userPin} /> : null}>
+                            <button
+                                onClick={() => handlePinClick(campaignName, campaignid, adsetid, pinned)}
+                                style={{
+                                    border: "none",
+                                    background: "none",
+                                    cursor: "pointer",
+                                    fontSize: "16px",
+                                }}
+                            >
+                                {pinned ? "📌" : "📍"}
+                            </button>
+                        </Tooltip>
                     );
                 };
 
@@ -4950,13 +5002,13 @@ const MyTablePage = () => {
                                 <CloseCircleFilled style={{ color: 'red', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }} />
                             </Tooltip>
                         }
-                        {relatedComment && (
+                        {/* {relatedComment && (
                             starred ? (
                                 <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: "gold" }} />
                             ) : (
                                 <StarOutlined className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px' }} />
                             )
-                        )}
+                        )} */}
                         {relatedComment ? (
                             <Tooltip title={(
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -5025,24 +5077,46 @@ const MyTablePage = () => {
                 return isPinnedA ? -1 : 1;  // Pinned campaigns should come first
             }
 
-            // If both campaigns have the same pinned status, fall back to other sorting logic
-
-            // For example: Prioritize by starred status
-            const getStarredForCampaign = (campaignName) => {
-                const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
-                return relatedComment ? relatedComment.starred : false;
-            };
-
-            const isStarredA = getStarredForCampaign(campaignA);
-            const isStarredB = getStarredForCampaign(campaignB);
-
-            if (isStarredA !== isStarredB) {
-                return isStarredA ? -1 : 1;  // Starred campaigns should come first
-            }
-
-            // Finally, fallback to alphabetical sorting if no pinned or starred criteria
+            // If both campaigns have the same pinned status, fallback to alphabetical sorting
             return campaignA.localeCompare(campaignB);
         },
+
+        // comparator: (campaignA, campaignB) => {
+        //     if (!campaignA) return 1;
+        //     if (!campaignB) return -1;
+
+        //     // Function to get the 'pinned' status of a campaign
+        //     const getPinStatusForCampaign = (campaignName) => {
+        //         const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+        //         return relatedComment ? relatedComment.pinned : false;
+        //     };
+
+        //     // Prioritize pinned campaigns first (pinned campaigns should come to the top)
+        //     const isPinnedA = getPinStatusForCampaign(campaignA);
+        //     const isPinnedB = getPinStatusForCampaign(campaignB);
+
+        //     if (isPinnedA !== isPinnedB) {
+        //         return isPinnedA ? -1 : 1;  // Pinned campaigns should come first
+        //     }
+
+        //     // If both campaigns have the same pinned status, fall back to other sorting logic
+
+        //     // For example: Prioritize by starred status
+        //     const getStarredForCampaign = (campaignName) => {
+        //         const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+        //         return relatedComment ? relatedComment.starred : false;
+        //     };
+
+        //     const isStarredA = getStarredForCampaign(campaignA);
+        //     const isStarredB = getStarredForCampaign(campaignB);
+
+        //     if (isStarredA !== isStarredB) {
+        //         return isStarredA ? -1 : 1;  // Starred campaigns should come first
+        //     }
+
+        //     // Finally, fallback to alphabetical sorting if no pinned or starred criteria
+        //     return campaignA.localeCompare(campaignB);
+        // },
 
         cellRendererParams: {
             suppressCount: false, // Allow count to be shown
@@ -5077,6 +5151,12 @@ const MyTablePage = () => {
                     // console.log(relatedStatusTrue);
                     return relatedStatusEditedTime;
                 }
+
+                const getPinEditedUserAndTime = (campaignName, newaccount) => {
+                    const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
+                    return relatedStatus ? relatedStatus : null;
+                };
+
                 const getStatusForCampaign = (campaignName, newaccount) => {
                     const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
                     // console.log(relatedStatus, "relatedStatus");
@@ -5090,10 +5170,10 @@ const MyTablePage = () => {
                     return relatedComment ? relatedComment.comment : null;
                 };
 
-                const getStarredForCampaign = (campaignName) => {
-                    const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
-                    return relatedComment ? relatedComment.starred : false;
-                };
+                // const getStarredForCampaign = (campaignName) => {
+                //     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+                //     return relatedComment ? relatedComment.starred : false;
+                // };
 
                 const getPinStatusForCampaign = (campaignName) => {
                     const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
@@ -5101,15 +5181,16 @@ const MyTablePage = () => {
                 };
 
                 const editUserANdTime = getEditedUserAndTime(campaignName, newaccount);
+                const editPinUserANdTime = getPinEditedUserAndTime(campaignName, newaccount);
                 const relatedStatus = getStatusForCampaign(campaignName, newaccount);
                 const relatedComment = getCommentForCampaign(campaignName);
-                const isStarred = getStarredForCampaign(campaignName);
+                // const isStarred = getStarredForCampaign(campaignName);
                 const valueWithCount = `${firstColumnValue}`;
 
                 const [tooltipText, setTooltipText] = useState("Click to Copy");
                 const [isModalVisible, setIsModalVisible] = useState(false);
                 const [comment, setComment] = useState(relatedComment || '');
-                const [starred, setStarred] = useState(isStarred);
+                // const [starred, setStarred] = useState(isStarred);
                 const [pinned, setPinned] = useState(getPinStatusForCampaign(campaignName));
 
                 const copyToClipboard = () => {
@@ -5164,38 +5245,38 @@ const MyTablePage = () => {
                     }
                 };
 
-                const sendStarStatusToAPI = async (campaignname, isStarred) => {
-                    try {
-                        const endpoint = isStarred ? 'https://prodapis.adsgoat.in/Star' : 'https://prodapis.adsgoat.in/Unstar';
-                        const response = await axios.post(endpoint, {
-                            campaignname: campaignname,
-                            Account: account,
-                            usercommit: userdetails?.email,
-                            campaignid: campaignid,
-                            adsetid: adsetid
-                        }, {
-                            headers: {
-                                Authorization: token,
-                            }
-                        });
-                        console.log('Response from server (starred status):', response.data);
-                    } catch (error) {
-                        console.error('Error updating star status:', error);
-                    }
-                };
+                // const sendStarStatusToAPI = async (campaignname, isStarred) => {
+                //     try {
+                //         const endpoint = isStarred ? 'https://prodapis.adsgoat.in/Star' : 'https://prodapis.adsgoat.in/Unstar';
+                //         const response = await axios.post(endpoint, {
+                //             campaignname: campaignname,
+                //             Account: account,
+                //             usercommit: userdetails?.email,
+                //             campaignid: campaignid,
+                //             adsetid: adsetid
+                //         }, {
+                //             headers: {
+                //                 Authorization: token,
+                //             }
+                //         });
+                //         console.log('Response from server (starred status):', response.data);
+                //     } catch (error) {
+                //         console.error('Error updating star status:', error);
+                //     }
+                // };
 
-                const handleStarClick = async () => {
-                    const updatedStarred = !starred;
-                    setStarred(updatedStarred);
-                    await sendStarStatusToAPI(firstColumnValue, updatedStarred);
-                    message.success(updatedStarred ? "Campaign starred!" : "Campaign unstarred!");
+                // const handleStarClick = async () => {
+                //     const updatedStarred = !starred;
+                //     setStarred(updatedStarred);
+                //     await sendStarStatusToAPI(firstColumnValue, updatedStarred);
+                //     message.success(updatedStarred ? "Campaign starred!" : "Campaign unstarred!");
 
-                    const updatedComments = campaignComments.map(cmt =>
-                        cmt.campaignname === firstColumnValue ? { ...cmt, starred: updatedStarred } : cmt
-                    );
-                    setCampaignComments(updatedComments);
-                    changeRRefrst();
-                };
+                //     const updatedComments = campaignComments.map(cmt =>
+                //         cmt.campaignname === firstColumnValue ? { ...cmt, starred: updatedStarred } : cmt
+                //     );
+                //     setCampaignComments(updatedComments);
+                //     changeRRefrst();
+                // };
 
                 const handleOk = async () => {
                     const logData = {
@@ -5241,34 +5322,56 @@ const MyTablePage = () => {
                     try {
                         let response;
                         if (updatedPinStatus) {
-                            response = await axios.post('https://prodapis.adsgoat.in/Pin', {
+                            response = await axios.post('http://localhost:8000/Pin', {
                                 campaignname: campaignName,
                                 Account: account,
                                 campaignid: campaignid,
                                 adsetid: adsetid,
-                                usercommit: userdetails?.email,
+                                userPin: userdetails?.email,
                                 comment: comment || ''
                             }, { headers: { Authorization: token } });
+                            changeRRefrst();
 
                             message.success("Campaign pinned!");
                         } else {
-                            response = await axios.post('https://prodapis.adsgoat.in/Unpin', {
+                            response = await axios.post('http://localhost:8000/Unpin', {
                                 campaignname: campaignName,
                                 Account: account,
                                 campaignid: campaignid,
                                 adsetid: adsetid
                             }, { headers: { Authorization: token } });
+                            changeRRefrst();
 
                             message.success("Campaign unpinned!");
                         }
 
-                        const updatedComments = campaignComments.some(cmt => cmt.campaignname === campaignName)
-                            ? campaignComments.map(cmt =>
-                                cmt.campaignname === campaignName ? { ...cmt, pinned: updatedPinStatus } : cmt
-                            )
-                            : [...campaignComments, { campaignname: campaignName, pinned: updatedPinStatus }];
+                        // Update campaignComments with the new pinned status and edited user/time
+                        const updatedComments = campaignComments.map(cmt =>
+                            cmt.campaignname === campaignName
+                                ? {
+                                    ...cmt,
+                                    pinned: updatedPinStatus,
+                                    editedPinTime: response.data.editedPinTime || new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+                                    userPin: userdetails?.email
+                                }
+                                : cmt
+                        );
 
-                        // Update pinned campaigns to stay at the top
+                        if (!campaignComments.some(cmt => cmt.campaignname === campaignName)) {
+                            updatedComments.push({
+                                campaignname: campaignName,
+                                pinned: updatedPinStatus,
+                                editedPinTime: response.data.editedPinTime || new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+                                userPin: userdetails?.email
+                            });
+                        }
+
+                        // const updatedComments = campaignComments.some(cmt => cmt.campaignname === campaignName)
+                        //     ? campaignComments.map(cmt =>
+                        //         cmt.campaignname === campaignName ? { ...cmt, pinned: updatedPinStatus } : cmt
+                        //     )
+                        //     : [...campaignComments, { campaignname: campaignName, pinned: updatedPinStatus }];
+
                         const sortedComments = updatedComments.sort((a, b) => b.pinned - a.pinned);
                         setCampaignComments(sortedComments);
                         setPinned(updatedPinStatus);
@@ -5280,13 +5383,19 @@ const MyTablePage = () => {
 
                 const PinIcon = ({ campaignName, campaignid, adsetid, pinned }) => {
                     return (
-                        <div onClick={() => handlePinClick(campaignName, campaignid, adsetid, pinned)}>
-                            {pinned ? (
-                                <PushpinFilled style={{ color: 'blue' }} />  // Blue for pinned
-                            ) : (
-                                <PushpinOutlined style={{ color: 'gray' }} />  // Gray for unpinned
-                            )}
-                        </div>
+                        <Tooltip title={pinned ? <CustomTooltipContent editedTime={editPinUserANdTime?.editedPinTime} usercommit={editPinUserANdTime?.userPin} /> : null}>
+                            <button
+                                onClick={() => handlePinClick(campaignName, campaignid, adsetid, pinned)}
+                                style={{
+                                    border: "none",
+                                    background: "none",
+                                    cursor: "pointer",
+                                    fontSize: "16px",
+                                }}
+                            >
+                                {pinned ? "📌" : "📍"}
+                            </button>
+                        </Tooltip>
                     );
                 };
 
@@ -5309,13 +5418,13 @@ const MyTablePage = () => {
                                 <CloseCircleFilled style={{ color: 'red', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }} />
                             </Tooltip>
                         }
-                        {relatedComment && (
+                        {/* {relatedComment && (
                             starred ? (
                                 <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: 'gold' }} />
                             ) : (
                                 <StarOutlined className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px' }} />
                             )
-                        )}
+                        )} */}
                         {relatedComment ? (
                             <Tooltip title={(
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
