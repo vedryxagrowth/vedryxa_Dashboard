@@ -33,6 +33,7 @@ import axios from 'axios';
 import MnetUrlBuilder from './urlbuilder/mnet';
 import TonicUrlBuilder from './urlbuilder/tonic';
 import System1UrlBuilder from './urlbuilder/system1';
+import DActiveUrlBuilder from './urlbuilder/dactive';
 
 const FabricCanvas = dynamic(() => import('./Fabricanvas'), { ssr: false });
 
@@ -536,7 +537,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
     const onReturnUrl = (text) => {
         setIsModalVisibleForURLBuilder(false);
         setWebsiteURL(text);
-        if(network === "FB_Mnet"){
+        if(network === "FB_Mnet" || network === "FB_DomainActive"){
             setCaption(text.split('//')[1].split("/")[0]);
 
         }else{
@@ -556,6 +557,8 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                 return <TonicUrlBuilder onReturnMessage={onReturnUrl} />
             case 'FB_System1':
                 return <System1UrlBuilder onReturnMessage={onReturnUrl} />
+            case 'FB_DomainActive':
+                return <DActiveUrlBuilder onReturnMessage={onReturnUrl} />
         }
       }
     
