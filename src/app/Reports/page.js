@@ -14,7 +14,7 @@ import { useSearchParams } from 'next/navigation';
 import { Carousel, Input, Button, Pagination, Row, Col, Typography, Result, Modal, message, ConfigProvider, Switch, Divider, Flex, Spin, Tabs } from 'antd';
 
 // import 'antd/dist/reset.css';
-import { CommentOutlined, CustomerServiceOutlined, MenuOutlined, InfoCircleOutlined, DownloadOutlined, SearchOutlined, ArrowLeftOutlined, ArrowRightOutlined, SmileOutlined, ReloadOutlined, CopyOutlined, StarOutlined, StarFilled, EditOutlined, CheckCircleFilled, CloseCircleFilled, MessageOutlined, SubnodeOutlined, PushpinFilled, PushpinOutlined } from '@ant-design/icons';
+import { CommentOutlined, CustomerServiceOutlined, MenuOutlined, InfoCircleOutlined, DownloadOutlined, SearchOutlined, ArrowLeftOutlined, ArrowRightOutlined, SmileOutlined, ReloadOutlined, CopyOutlined, StarOutlined, StarFilled, EditOutlined, CheckCircleFilled, CloseCircleFilled, MessageOutlined, SubnodeOutlined, PushpinFilled, PushpinOutlined, UserAddOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { FloatButton, Tooltip, Popover } from 'antd';
 import Draggable from 'react-draggable';
 import StickyBox from 'react-sticky-box';
@@ -3030,20 +3030,50 @@ const MyTablePage = () => {
                 }
             ]);
         }
+        // if (fetchData.status === 200 && mainData.length > 0) {
+        //     try {
+        //         const commentFetch = await axios.get(`https://prodapis.adsgoat.in/Comments/${account}`, {
+        //             headers: {
+        //                 Authorization: token,
+        //             },
+        //         });
+        //         campaignComments = commentFetch.data; // Set comments only if fetched successfully
+        //     } catch (error) {
+        //         console.error('Error fetching comments:', error); // Log any errors fetching comments
+        //     }
+        // }
+        // setCampaignComments(campaignComments);
+       
+
+
+        
+        // console.log(mainData, "maindata of functinCall1");
+        
         if (fetchData.status === 200 && mainData.length > 0) {
             try {
+                // Fetch comments
                 const commentFetch = await axios.get(`https://prodapis.adsgoat.in/Comments/${account}`, {
                     headers: {
                         Authorization: token,
                     },
                 });
-                campaignComments = commentFetch.data; // Set comments only if fetched successfully
+                const campaignComments = commentFetch.data; // Set comments only if fetched successfully
+                setCampaignComments(campaignComments);
+        
+                // Fetch campaign status after successfully fetching comments
+                const campaignStatusFetch = await axios.get(`https://prodapis.adsgoat.in/Campaignstatusfb/${account}`, {
+                    headers: {
+                        Authorization: token,
+                    },
+                });
+        
+                if (campaignStatusFetch.status === 200) {
+                    setCamapignlevelstatus(campaignStatusFetch.data); // Update state with fetched campaign status
+                }
             } catch (error) {
-                console.error('Error fetching comments:', error); // Log any errors fetching comments
+                console.error('Error during API calls:', error); // Log any errors
             }
         }
-        setCampaignComments(campaignComments);
-        // console.log(mainData, "maindata of functinCall1");
         const specifiedTimeZone = selectTimezone[time];
         const filteredData = mainData && mainData.length > 0 ?
             mainData.map((eachData) => {
@@ -3910,8 +3940,9 @@ const MyTablePage = () => {
     //     }
 
     // };
-
-    const [campaignComments, setCampaignComments] = useState([]);
+//setCampaignCommentssetCampaignCommentssetCampaignComments
+const [campaignComments, setCampaignComments] = useState([]);
+const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
     const fetchCampaignComments = async () => {
         try {
 
@@ -3925,7 +3956,9 @@ const MyTablePage = () => {
             console.error('Error fetching comments:', error);
         }
     };
-    useEffect(() => {
+
+
+    useEffect( () => {
         // Ensure it only runs if `refrst` changes after the first render
         if (hasFetched.current) {
             fetchCampaignComments();
@@ -4345,7 +4378,6 @@ const MyTablePage = () => {
             // If both campaigns have the same pinned status, fallback to alphabetical sorting
             return campaignA.localeCompare(campaignB);
         },
-
         cellRendererParams: {
             suppressCount: false,
             innerRenderer: (params) => {
@@ -4596,7 +4628,54 @@ const MyTablePage = () => {
                             adsetid={adsetid}
                             pinned={pinned}
                         />
-                        {relatedStatus === true &&
+                        <div style={{ marginLeft: '10px' }}>
+                            {(() => {
+                                // Find the matching campaign in the Camapignlevelstatus array
+                                const campaignStatus = Camapignlevelstatus.find(statusObj => statusObj.name === campaignName);
+
+                                if (campaignStatus) {
+                                    const { status, start, end } = campaignStatus;
+
+                                    // Tooltip content with start and end dates
+                                    const tooltipContent = (
+                                        <div>
+                                            <p style={{ margin: 0 }}>Start: {start || 'N/A'}</p>
+                                            <p style={{ margin: 0 }}>End: {end || 'N/A'}</p>
+                                        </div>
+                                    );
+
+                                    if (status === 'PAUSED') {
+                                        return (
+                                            <Tooltip title={tooltipContent}>
+                                                <PauseCircleOutlined style={{ color: 'orange', fontSize: '18px' }} />
+                                            </Tooltip>
+                                        );
+                                    } else if (status === 'ACTIVE') {
+                                        return (
+                                            <Tooltip title={tooltipContent}>
+                                                <CheckCircleOutlined style={{ color: 'green', fontSize: '18px' }} />
+                                            </Tooltip>
+                                        );
+                                    } else {
+                                        // Default for unknown status
+                                        return (
+                                            <Tooltip title={tooltipContent}>
+                                                <QuestionCircleOutlined style={{ color: 'gray', fontSize: '18px' }} />
+                                            </Tooltip>
+                                        );
+                                    }
+                                } else {
+                                    // Fallback if no matching campaign is found
+                                    return (
+                                        <Tooltip title="No campaign data available">
+                                            <QuestionCircleOutlined style={{ color: 'gray', fontSize: '18px' }} />
+                                        </Tooltip>
+                                    );
+                                }
+                            })()}
+                        </div>
+
+                        {/* {relatedStatus === true &&
                             <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit} />}>
                                 <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }} />
                             </Tooltip>
@@ -4605,7 +4684,7 @@ const MyTablePage = () => {
                             <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit} />}>
                                 <CloseCircleFilled style={{ color: 'red', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }} />
                             </Tooltip>
-                        }
+                        } */}
                         {relatedComment && (
                             <Tooltip title={(
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -4994,7 +5073,53 @@ const MyTablePage = () => {
                             // pinned={getPinStatusForCampaign(campaignName)}
                             pinned={pinned}
                         />
-                        {relatedStatus === true &&
+                        <div style={{ marginLeft: '10px' }}>
+                            {(() => {
+                                // Find the matching campaign in the Camapignlevelstatus array
+                                const campaignStatus = Camapignlevelstatus.find(statusObj => statusObj.name === campaignName);
+
+                                if (campaignStatus) {
+                                    const { status, start, end } = campaignStatus;
+
+                                    // Tooltip content with start and end dates
+                                    const tooltipContent = (
+                                        <div>
+                                            <p style={{ margin: 0 }}>Start: {start || 'N/A'}</p>
+                                            <p style={{ margin: 0 }}>End: {end || 'N/A'}</p>
+                                        </div>
+                                    );
+
+                                    if (status === 'PAUSED') {
+                                        return (
+                                            <Tooltip title={tooltipContent}>
+                                                <PauseCircleOutlined style={{ color: 'orange', fontSize: '18px' }} />
+                                            </Tooltip>
+                                        );
+                                    } else if (status === 'ACTIVE') {
+                                        return (
+                                            <Tooltip title={tooltipContent}>
+                                                <CheckCircleOutlined style={{ color: 'green', fontSize: '18px' }} />
+                                            </Tooltip>
+                                        );
+                                    } else {
+                                        // Default for unknown status
+                                        return (
+                                            <Tooltip title={tooltipContent}>
+                                                <QuestionCircleOutlined style={{ color: 'gray', fontSize: '18px' }} />
+                                            </Tooltip>
+                                        );
+                                    }
+                                } else {
+                                    // Fallback if no matching campaign is found
+                                    return (
+                                        <Tooltip title="No campaign data available">
+                                            <QuestionCircleOutlined style={{ color: 'gray', fontSize: '18px' }} />
+                                        </Tooltip>
+                                    );
+                                }
+                            })()}
+                        </div>
+                        {/* {relatedStatus === true &&
                             <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit} />}>
                                 <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }} />
                             </Tooltip>
@@ -5003,7 +5128,7 @@ const MyTablePage = () => {
                             <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit} />}>
                                 <CloseCircleFilled style={{ color: 'red', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }} />
                             </Tooltip>
-                        }
+                        } */}
                         {/* {relatedComment && (
                             starred ? (
                                 <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: "gold" }} />
@@ -5410,7 +5535,53 @@ const MyTablePage = () => {
                             // pinned={getPinStatusForCampaign(campaignName)}
                             pinned={pinned}
                         />
-                        {relatedStatus === true &&
+                        <div style={{ marginLeft: '10px' }}>
+                            {(() => {
+                                // Find the matching campaign in the Camapignlevelstatus array
+                                const campaignStatus = Camapignlevelstatus.find(statusObj => statusObj.name === campaignName);
+
+                                if (campaignStatus) {
+                                    const { status, start, end } = campaignStatus;
+
+                                    // Tooltip content with start and end dates
+                                    const tooltipContent = (
+                                        <div>
+                                            <p style={{ margin: 0 }}>Start: {start || 'N/A'}</p>
+                                            <p style={{ margin: 0 }}>End: {end || 'N/A'}</p>
+                                        </div>
+                                    );
+
+                                    if (status === 'PAUSED') {
+                                        return (
+                                            <Tooltip title={tooltipContent}>
+                                                <PauseCircleOutlined style={{ color: 'orange', fontSize: '18px' }} />
+                                            </Tooltip>
+                                        );
+                                    } else if (status === 'ACTIVE') {
+                                        return (
+                                            <Tooltip title={tooltipContent}>
+                                                <CheckCircleOutlined style={{ color: 'green', fontSize: '18px' }} />
+                                            </Tooltip>
+                                        );
+                                    } else {
+                                        // Default for unknown status
+                                        return (
+                                            <Tooltip title={tooltipContent}>
+                                                <QuestionCircleOutlined style={{ color: 'gray', fontSize: '18px' }} />
+                                            </Tooltip>
+                                        );
+                                    }
+                                } else {
+                                    // Fallback if no matching campaign is found
+                                    return (
+                                        <Tooltip title="No campaign data available">
+                                            <QuestionCircleOutlined style={{ color: 'gray', fontSize: '18px' }} />
+                                        </Tooltip>
+                                    );
+                                }
+                            })()}
+                        </div>
+                        {/* {relatedStatus === true &&
                             <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit} />}>
                                 <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }} />
                             </Tooltip>
@@ -5419,7 +5590,7 @@ const MyTablePage = () => {
                             <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit} />}>
                                 <CloseCircleFilled style={{ color: 'red', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }} />
                             </Tooltip>
-                        }
+                        } */}
                         {/* {relatedComment && (
                             starred ? (
                                 <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: 'gold' }} />
@@ -5689,7 +5860,53 @@ const MyTablePage = () => {
 
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                        {relatedStatus === true &&
+                        <div style={{ marginLeft: '10px' }}>
+                            {(() => {
+                                // Find the matching campaign in the Camapignlevelstatus array
+                                const campaignStatus = Camapignlevelstatus.find(statusObj => statusObj.name === campaignName);
+
+                                if (campaignStatus) {
+                                    const { status, start, end } = campaignStatus;
+
+                                    // Tooltip content with start and end dates
+                                    const tooltipContent = (
+                                        <div>
+                                            <p style={{ margin: 0 }}>Start: {start || 'N/A'}</p>
+                                            <p style={{ margin: 0 }}>End: {end || 'N/A'}</p>
+                                        </div>
+                                    );
+
+                                    if (status === 'PAUSED') {
+                                        return (
+                                            <Tooltip title={tooltipContent}>
+                                                <PauseCircleOutlined style={{ color: 'orange', fontSize: '18px' }} />
+                                            </Tooltip>
+                                        );
+                                    } else if (status === 'ACTIVE') {
+                                        return (
+                                            <Tooltip title={tooltipContent}>
+                                                <CheckCircleOutlined style={{ color: 'green', fontSize: '18px' }} />
+                                            </Tooltip>
+                                        );
+                                    } else {
+                                        // Default for unknown status
+                                        return (
+                                            <Tooltip title={tooltipContent}>
+                                                <QuestionCircleOutlined style={{ color: 'gray', fontSize: '18px' }} />
+                                            </Tooltip>
+                                        );
+                                    }
+                                } else {
+                                    // Fallback if no matching campaign is found
+                                    return (
+                                        <Tooltip title="No campaign data available">
+                                            <QuestionCircleOutlined style={{ color: 'gray', fontSize: '18px' }} />
+                                        </Tooltip>
+                                    );
+                                }
+                            })()}
+                        </div>
+                        {/* {relatedStatus === true &&
                             <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit} />}>
                                 <CheckCircleFilled style={{ color: 'green', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }} />
                             </Tooltip>
@@ -5698,7 +5915,7 @@ const MyTablePage = () => {
                             <Tooltip title={<CustomTooltipContent editedTime={editUserANdTime.editedTime} usercommit={editUserANdTime.usercommit} />}>
                                 <CloseCircleFilled style={{ color: 'red', fontSize: '15px', marginRight: relatedComment ? "10px" : '0px' }} />
                             </Tooltip>
-                        }
+                        } */}
                         {relatedComment && (
                             starred ? (
                                 <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: "gold" }} />
