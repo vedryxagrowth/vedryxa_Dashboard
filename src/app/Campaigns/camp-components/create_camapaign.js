@@ -13,6 +13,7 @@ import dynamic from 'next/dynamic';
 import MnetUrlBuilder from './urlbuilder/mnet';
 import TonicUrlBuilder from './urlbuilder/tonic';
 import System1UrlBuilder from './urlbuilder/system1';
+import DActiveUrlBuilder from './urlbuilder/dactive';
 
 
 const FabricCanvas = dynamic(() => import('./Fabricanvas'), { ssr: false });
@@ -26,7 +27,6 @@ const publisherOptions = [
     { label: 'Messenger', value: 'messenger' },
     { label: 'Audience Network', value: 'audience_network' }
 ];
-
 const positionOptions = {
     facebook: [
         { key: "feed", label: "Facebook Feed" },
@@ -35,12 +35,15 @@ const positionOptions = {
         { key: "instream_video", label: "Facebook In-Stream Videos" },
         { key: "facebook_reels", label: "Facebook Reels" },
         { key: "profile_feed", label: "Facebook Profile Feed" },
-        { key: "search", label: "Facebook search" },
-        { key: "story_fb", label: "Facebook Stories" }
+        { key: "search", label: "Facebook Search" },
+        { key: "story_fb", label: "Facebook Stories" },
+        { key: "right_column", label: "Facebook Right Column" },
+        { key: "instant_articles", label: "Facebook Instant Articles" },
+        { key: "business_explore", label: "Facebook Business Explore" } // Added Business Explore
     ],
     instagram: [
         { key: "stream", label: "Instagram Stream" },
-        { key: "story_in", label: "Instagram Story" },
+        { key: "story_in", label: "Instagram Stories" },
         { key: "explore", label: "Instagram Explore" },
         { key: "explore_home", label: "Instagram Explore Home" },
         { key: "reels", label: "Instagram Reels" },
@@ -50,14 +53,53 @@ const positionOptions = {
     ],
     messenger: [
         { key: "messenger_home", label: "Messenger Home" },
-        { key: "story_ms", label: "Messenger Story" },
-        { key: "sponsored_messages", label: "Messenger sponsored messages" }
+        { key: "story_ms", label: "Messenger Stories" },
+        { key: "sponsored_messages", label: "Messenger Sponsored Messages" },
+        { key: "messenger_inbox", label: "Messenger Inbox" }
     ],
     audience_network: [
         { key: "classic", label: "Audience Network Classic" },
-        { key: "rewarded_video", label: "Audience Network Rewarded Video" }
+        { key: "rewarded_video", label: "Audience Network Rewarded Video" },
+        { key: "in_stream", label: "Audience Network In-Stream Video" }
     ]
 };
+
+// const positionOptions = {
+//     facebook: [
+//         { key: "feed", label: "Facebook Feed" },
+//         { key: "marketplace", label: "Facebook Marketplace" },
+//         { key: "video_feeds", label: "Facebook Video Feeds" },
+//         { key: "instream_video", label: "Facebook In-Stream Videos" },
+//         { key: "facebook_reels", label: "Facebook Reels" },
+//         { key: "profile_feed", label: "Facebook Profile Feed" },
+//         { key: "search", label: "Facebook Search" },
+//         { key: "story_fb", label: "Facebook Stories" },
+//         { key: "right_column", label: "Facebook Right Column" }, // Added
+//         { key: "instant_articles", label: "Facebook Instant Articles" } // Added
+//     ],
+//     instagram: [
+//         { key: "stream", label: "Instagram Stream" },
+//         { key: "story_in", label: "Instagram Story" },
+//         { key: "explore", label: "Instagram Explore" },
+//         { key: "explore_home", label: "Instagram Explore Home" },
+//         { key: "reels", label: "Instagram Reels" },
+//         { key: "profile_feed_in", label: "Instagram Profile Feed" },
+//         { key: "ig_search", label: "Instagram Search" },
+//         { key: "profile_reels", label: "Instagram Profile Reels" }
+//     ],
+//     messenger: [
+//         { key: "messenger_home", label: "Messenger Home" },
+//         { key: "story_ms", label: "Messenger Story" },
+//         { key: "sponsored_messages", label: "Messenger Sponsored Messages" },
+//         { key: "messenger_inbox", label: "Messenger Inbox" } // Added
+//     ],
+//     audience_network: [
+//         { key: "classic", label: "Audience Network Classic" },
+//         { key: "rewarded_video", label: "Audience Network Rewarded Video" },
+//         { key: "in_stream", label: "Audience Network In-Stream Video" } // Added
+//     ]
+// };
+
 const localesdata = [
     {
         "name": "English (US)",
@@ -460,6 +502,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     const [campaignName, setCampaignName] = useState("");
     const [campaignLevelDailyBudget, setCampaignLevelDailyBudget] = useState(0);
     const [adsetLevelDailyBudget, setAdsetLevelDailyBudget] = useState(0);
+    const [activeKey, setActiveKey] = useState(['1']); // State to control active panels
+
 
     const handleModeChange = (value) => {
         setIsManual(value === "manual");
@@ -481,7 +525,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
             setAddName('');
             setAdsetLevelDailyBudget(0);
             setCampaignLevelDailyBudget(0);
-            
+
         }
     }, [visible]);
 
@@ -510,22 +554,22 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     const onReturnUrl = (text) => {
         setIsModalVisibleForURLBuilder(false);
         setWebsiteURL(text);
-        if(network === "FB_Mnet"){
+        if (network === "FB_Mnet" || network === "FB_DomainActive") {
             setCaption(text.split('//')[1].split("/")[0]);
 
-        }else{
+        } else {
             setCaption(text.split('/')[0]);
 
         }
         // console.log(text, "text");
     }
 
-    const onChangeCampaignLevelDailyBudget = (event) =>{
+    const onChangeCampaignLevelDailyBudget = (event) => {
         setCampaignLevelDailyBudget(parseInt(event.target.value));
         console.log(event.target.value);
     }
 
-    const onChangeAdsetLevelDailyBudget = (event) =>{
+    const onChangeAdsetLevelDailyBudget = (event) => {
         setAdsetLevelDailyBudget(parseInt(event.target.value));
     }
 
@@ -538,6 +582,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                 return <TonicUrlBuilder onReturnMessage={onReturnUrl} />
             case 'FB_System1':
                 return <System1UrlBuilder onReturnMessage={onReturnUrl} />
+            case 'FB_DomainActive':
+                return <DActiveUrlBuilder onReturnMessage={onReturnUrl} />
         }
     }
 
@@ -656,7 +702,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
 
     useEffect(() => {
         // Update the form field value for Website_URL whenever websiteURL changes
-        form.setFieldsValue({ pixel_id: imagehash?.pixelID, page_id:imagehash?.pageID, });
+        form.setFieldsValue({ pixel_id: imagehash?.pixelID, page_id: imagehash?.pageID, });
 
         // Check if all required fields are complete
         const checkFormCompletion = () => {
@@ -684,7 +730,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     //     console.log(values, "handlepositionChange")
     // }
 
-    const fetchAccountDetails = async() =>{
+    const fetchAccountDetails = async () => {
         try {
             const response = await axios.get(`https://www.testapi.adsgoat.in/api/hashimageidentity/${accountNumber}`,
                 {
@@ -694,18 +740,18 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                 }
             );
             console.log("account data", ...response?.data);
-            
-            
+
+
             setimagehash(...response?.data)
         } catch (error) {
             console.error("Error fetching campaign data:", error);
             // Handle error
         }
     }
- 
-    useEffect(()=>{
-        if(accountNumber && visible){
-        fetchAccountDetails();
+
+    useEffect(() => {
+        if (accountNumber && visible) {
+            fetchAccountDetails();
         }
     }, [accountNumber, visible]);
 
@@ -1154,12 +1200,12 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         DailyAdd_amount: adsetLevelDailyBudget,
         Description: "Find More",
         Caption: caption,
-        Name: campaignName, 
-        AdsetName: campaignName, 
+        Name: campaignName,
+        AdsetName: campaignName,
         AddName: campaignName,
         pixel_id: imagehash?.pixelID,
         page_id: imagehash?.pageID
-        
+
         // AddName: 
         // device_platforms: "mobile",
 
@@ -1187,6 +1233,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         setAdsetLevelDailyBudget(0);
         setCampaignLevelDailyBudget(0);
         onClose(); // Call onClose handler to close the drawer
+        setActiveKey(['1']);
     };
 
 
@@ -1196,11 +1243,12 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
             width="95%"
             open={visible}
             onClose={handleDrawerClose}
-        >   
-            
+        >
+
             <Spin spinning={loading}>
                 <Form layout="vertical" form={form} onFinish={onFinish} onValuesChange={handleFormChange} initialValues={initialValues}>
-                    <Collapse accordion defaultActiveKey={['1']} >
+                    <Collapse accordion activeKey={activeKey} // Bind active key state
+                        onChange={(key) => setActiveKey([key])}  >
                         <Panel header="CAMPAIGN LEVEL" key="1">
                             <div style={{ display: "flex" }}>
                                 <Form.Item
@@ -1303,8 +1351,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     name="Daily_amount"
                                     label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
                                     style={{ flex: 0.1, marginLeft: "2%" }}
-                                    // tooltip={adsetLevelDailyBudget !== "" ? "You have enabled daily budget in the Adset Level" : ""}
-                                    >
+                                // tooltip={adsetLevelDailyBudget !== "" ? "You have enabled daily budget in the Adset Level" : ""}
+                                >
                                     <Tooltip title={adsetLevelDailyBudget !== 0 ? "You have enabled daily budget in the Adset Level" : ""}>
                                         <Input
                                             type="number"
@@ -1458,7 +1506,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 >
                                     <Input />
                                 </Form.Item>
-                                 {/*pk*/}
+                                {/*pk*/}
                                 <Form.Item
                                     name="DailyAdd_amount" // Make sure this name matches the field you want to capture
                                     label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
@@ -1466,11 +1514,11 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 >
                                     <Tooltip title={campaignLevelDailyBudget !== 0 ? "You have enabled daily budget in the Campaign Level" : ""}>
                                         <Input
-                                        type="number"
-                                        placeholder="$"
-                                        value={adsetLevelDailyBudget}
-                                        onChange={onChangeAdsetLevelDailyBudget}
-                                        readOnly={campaignLevelDailyBudget !== 0} // This will keep the field readonly
+                                            type="number"
+                                            placeholder="$"
+                                            value={adsetLevelDailyBudget}
+                                            onChange={onChangeAdsetLevelDailyBudget}
+                                            readOnly={campaignLevelDailyBudget !== 0} // This will keep the field readonly
                                         />
                                     </Tooltip>
                                 </Form.Item>
@@ -1527,7 +1575,19 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             { value: "AU", label: "Australia" },
                                             { value: "IN", label: "India" },
                                             { value: "AE", label: "United Arab Emirates" },
-                                            { value: "CA", label:"Canada"},
+                                            { value: "CA", label: "Canada" },
+                                            { value: "DE", label: "Germany" },
+                                            { value: "FR", label: "France" },
+                                            { value: "JP", label: "Japan" },
+                                            { value: "CN", label: "China" },
+                                            { value: "BR", label: "Brazil" },
+                                            { value: "ZA", label: "South Africa" },
+                                            { value: "RU", label: "Russia" },
+                                            { value: "IT", label: "Italy" },
+                                            { value: "ES", label: "Spain" },
+                                            { value: "SG", label: "Singapore" },
+                                            { value: "NZ", label: "New Zealand" },
+                                            { value: "MX", label: "Mexico" }
                                         ]}
                                     />
                                 </Form.Item>

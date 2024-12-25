@@ -24,6 +24,7 @@ import EditUrlBuilder from './users-components/edit-urlbulder';
 import MnetUrlBuilder from '../Campaigns/camp-components/urlbuilder/mnet';
 import System1UrlBuilder from '../Campaigns/camp-components/urlbuilder/system1'
 import TonicUrlBuilder from '../Campaigns/camp-components/urlbuilder/tonic';
+import DActiveUrlBuilder from '../Campaigns/camp-components/urlbuilder/dactive';
 //
 
 import debounce from 'lodash.debounce';
@@ -1494,6 +1495,8 @@ const UsersTable = () => {
                 return <TonicUrlBuilder showSubmitButton={true}  />
             case 'System1':
                 return <System1UrlBuilder showSubmitButton={true}  /> //onReturnMessage={onReturnUrl}
+            case 'DActive':
+                return <DActiveUrlBuilder showSubmitButton={true}  />
         }
     }
 

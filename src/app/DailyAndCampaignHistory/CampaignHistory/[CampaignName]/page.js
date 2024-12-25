@@ -32,7 +32,8 @@ export default function CampaignAndAccount({ params }) {
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
     const [darkMode, setDarkMode] = useState(false);
     const paramsData = ((params.CampaignName).split("-"));
-    const decodedString = decodeURIComponent(paramsData[0]);
+    let decodedString = decodeURIComponent(paramsData[0]);
+    decodedString = decodedString.replace(/\*/g, "/").replace(/\^/g, "-");
     const accountNumber = paramsData[1];
     const timeZone = paramsData[2];
     const network = paramsData[3]

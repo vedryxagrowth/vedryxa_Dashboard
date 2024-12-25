@@ -23,6 +23,7 @@ const revenuePartnerNames = {
     "MEDIA_DOT_NET": "FB_Mnet",
     "Bodies": "FB_Bodies",
     "TONIC": "FB_Tonic",
+    "TONIC1":"FB_Tonic1",
     "DActive":"FB_DomainActive",
     "ENKI":"FB_Enki",
     "System1":"FB_System1",
