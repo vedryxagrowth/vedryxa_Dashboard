@@ -5041,7 +5041,7 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                         setCampaignComments(sortedComments);
                         setPinned(updatedPinStatus);
                     } catch (error) {
-                        console.error('Error toggling pin status:', error);
+                        console.error('Error toggling pin status', error);
                         message.error('Error while updating pin status.');
                     }
                 };
