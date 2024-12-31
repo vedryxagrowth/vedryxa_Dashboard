@@ -336,6 +336,10 @@ const MyTablePage = () => {
 
     const gridRef5 = useRef();
 
+    const gridRefForCampaignNamesLive = useRef();
+
+    const gridRefForCampaignNamesDaily = useRef();
+
     const [gridKey, setGridKey] = useState(0);
 
     const filterRef = useRef(null);
@@ -379,6 +383,23 @@ const MyTablePage = () => {
     const [BMNameColumnDefs, setBMNameColumnDefs] = useState([]);
 
     const [BMNameFixedFooter, setBMNameFixedFooter] = useState([]);
+
+    const newCampaignNamesDActiveLive = useRef();
+
+    const newCampaignNamesDActiveDaily = useRef();
+
+    const [campaignNamesDActiveLiveLoading, setCampaignNamesDActiveLiveLoading] = useState(false);
+
+    const [campaignNamesDActiveLive, setCampaignNamesDActiveLive] = useState([]);
+
+    const [campaignNamesDActiveFixedFooterLive, setCampaignNamesDActiveFixedFooterLive] = useState([]);
+
+    const [campaignNamesDActiveDailyLoading, setCampaignNamesDActiveDailyLoading] = useState(false);
+
+    const [campaignNamesDActiveDaily, setCampaignNamesDActiveDaily] = useState([]);
+
+    const [campaignNamesDActiveFixedFooterDaily, setCampaignNamesDActiveFixedFooterDaily] = useState([]);
+
     const showModal = () => {
         setIsModalOpen(true);
     };
@@ -3697,6 +3718,246 @@ const MyTablePage = () => {
         }
     };
 
+    const campaignNamesDataForDActiveLive = async()=>{
+        try{
+            const fetchData = await axios.get(`https://prodapis.adsgoat.in/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=Facebook_DActive_Names`, {
+                headers: {
+                    Authorization: token,
+                },
+            });
+            const mainData = fetchData.data;
+            const specifiedTimeZone = selectTimezone[time];
+            const filteredData = mainData && mainData.length > 0 ?
+            mainData.map((eachData) => {
+                let revenueData;
+                if (eachData.estimated_revenue === 0 || isNaN(eachData.estimated_revenue)) {
+                    revenueData = 0;
+                }
+                else if (eachData.estimated_revenue === undefined) {
+                    revenueData = 0;
+                }
+                else if (eachData.estimated_revenue === null) {
+                    revenueData = 0;
+                }
+                else {
+                    revenueData = eachData.estimated_revenue;
+                }
+                const profit = (revenueData - eachData.spend).toFixed(2);
+                let margin;
+                if (revenueData === 0) {
+                    margin = "0";
+                }
+                else {
+                    margin = `${Math.round((((revenueData - eachData.spend) / revenueData) * 100) * 100) / 100}%`;
+                }
+                const rpc = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((revenueData / eachData.conversions) * 100) / 100;
+
+                let cpl;
+                if (eachData.fbLeads == 0) {
+                    cpl = 0;
+                } else {
+                    cpl = Math.round((eachData.spend / eachData.fbLeads) * 100) / 100;
+                }
+                const ncpl = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((eachData.spend / eachData.conversions) * 100) / 100;
+                // console.log(revenueData, "revenueData");
+                const relatedComment = campaignComments.find(comment => comment.campaignname === eachData.campaign_name);
+                return (
+
+                    {
+                        campaignname: eachData.campaign_name,
+                        adsetname: eachData.adsetName,
+                        date: eachData[specifiedTimeZone],
+                        'fb-hour': eachData.hour,
+                        'mnet-hour': eachData.updatedHour,
+                        spend: parseFloat(eachData.spend),
+                        revenue: revenueData ? revenueData : 0,
+                        profit: parseFloat(profit),
+                        margin: margin,
+                        fbleads: parseInt(eachData.fbLeads),
+                        conversions: eachData.conversions !== null && eachData.conversions !== 0 ? parseInt(eachData.conversions) : 0,
+                        cpc: parseFloat(eachData.cpc),
+                        fbclicks: parseInt(eachData.fbClicks),
+                        impressions: parseInt(eachData.impressions),
+                        rpc: parseFloat(rpc),
+                        cpl: parseFloat(cpl),
+                        ncpl: parseFloat(ncpl),
+                        adsetid: eachData.adset_id,
+                        campaignid: eachData.campaign_id,
+                        timezone: eachData[time],
+                        comment: relatedComment ? relatedComment.comment : null,
+                        actions: '...'
+                    }
+                )
+            })
+            : null;
+            // console.log(filteredData);
+            setCampaignNamesDActiveLive(filteredData);
+            newCampaignNamesDActiveLive.current = filteredData;
+            setCampaignNamesDActiveLiveLoading(false);
+            setCampaignNamesDActiveFixedFooterLive([
+                {
+                    campaignname: 'Total',
+                    spend: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0).toFixed(2)),
+                    revenue: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0).toFixed(2)),
+                    profit: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0).toFixed(2)),
+                    margin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
+                    rpc: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / filteredData?.length).toFixed(2)),
+                    cpl: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / filteredData?.length).toFixed(2)),
+                    ncpl: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / filteredData?.length).toFixed(2)),
+                    fbleads: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0).toFixed(2)),
+                    conversions: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0).toFixed(2)),
+                    fmargin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+                    roi: parseFloat(((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+                    cpc: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / filteredData?.length).toFixed(2)),
+                    fbclicks: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
+                    impressions: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
+                    ctr: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
+                }
+            ]);
+        }catch(error){
+            console.log(error);
+        }
+    };
+
+    const campaignNamesDataForDActiveDaily = async () => {
+        try {
+            const fetchData = await axios.get(`https://prodapis.adsgoat.in/Daily/CampaignName?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`, {
+                headers: {
+                    Authorization: token,
+                },
+            });
+            const mainData = fetchData.data;
+            // console.log(mainData, "mainData of functionCall2");
+            let totalSpend = 0;
+            let totalRevenue = 0;
+            let totalProfit = 0;
+            let totalCpc = 0;
+            let totalFbleads = 0;
+            let totalFbclicks = 0;
+            let totalImpressions = 0;
+            let totalConversions = 0;
+            const specifiedTimeZone = selectTimezone[time];
+            // console.log(mainData[0], "one");
+            const totalRow = mainData && mainData.length > 0 ?
+                mainData.map((eachData) => {
+                    const Revenue = eachData.estimated_revenue !== undefined ? (eachData.estimated_revenue) : 0;
+                    const profit = (Revenue - eachData.spend);
+                    const conversions = eachData.conversions !== undefined ? eachData.conversions : 0;
+                    totalRevenue += Revenue;
+                    totalSpend += parseFloat(eachData.spend);
+                    totalProfit += profit;
+                    totalConversions += conversions;
+                    totalCpc += eachData.cpc;
+                    totalFbclicks += eachData.fbClicks;
+                    totalFbleads += eachData.fbLeads;
+                    totalImpressions += eachData.impressions;
+                }) : null;
+            // const totalValue = {
+            //     adsetname: "Total",
+            //     date: input,
+            //     adsetid: '',
+            //     compaignid: '',
+            //     spend: (Math.round(totalSpend*100)/100).toString(),
+            //     revenue: (Math.round(totalRevenue*100)/100).toString(),
+            //     profit: (Math.round(totalProfit*100)/100).toString(),
+            //     margin: `${(Math.round((((totalRevenue-totalSpend)/totalRevenue)*100)*100)/100)}%`,
+            //     rpc: (Math.round((totalRevenue/totalConversions)*100)/100).toString(),
+            //     cpl:(Math.round((totalSpend/totalFbleads)*100)/100).toString(),
+            //     ncpl:(Math.round((totalSpend/totalConversions)*100)/100).toString(),
+            //     roi: `${(Math.round((((totalRevenue-totalSpend)/totalSpend)*100)*100)/100)}%`,
+            //     cpc: (Math.round((totalCpc/mainData.length)*100)/100).toString(),
+            //     fbleads: totalFbleads.toString(),
+            //     fbclicks: totalFbclicks.toString(),
+            //     impressions: totalImpressions.toString(),
+            //     conversions: totalConversions.toString(),
+            //     fmargin: `${(Math.round((((totalProfit)/(totalFbleads*(totalRevenue/totalConversions)))*100)*100)/100)}%`,
+            //     ctr: `${(Math.round(((totalFbclicks/totalImpressions)*100)*100)/100)}%`,
+            // }
+            // console.log(totalValue);
+            const filteredData = mainData && mainData.length > 0 ?
+                mainData.map((eachData) => {
+                    const Revenue = eachData.estimated_revenue !== undefined ? (eachData.estimated_revenue) : 0;
+                    const profit = Math.round((Revenue - eachData.spend) * 100) / 100;
+                    const margin = Revenue !== 0 ? `${Math.round((((Revenue - eachData.spend) / eachData.estimated_revenue) * 100) * 100) / 100}%` : '0%'
+                    let rpc = eachData.conversions !== 0 ? (Math.round((Revenue / eachData.conversions) * 100) / 100) : 0;
+                    const revenue = ((eachData.estimated_revenue - eachData.spend) / (eachData.fbLeads * rpc)) * 100;
+                    let fMargin = revenue !== 0 ? Math.round(((profit / revenue) * 100) * 100) / 100 : 0;
+                    const cpl = eachData.fbLeads !== 0 ? Math.round((eachData.spend / eachData.fbLeads) * 100) / 100 : 0;
+                    let ncpl = eachData.conversions !== 0 ? Math.round((eachData.spend / eachData.conversions) * 100) / 100 : 0;
+                    const roi = eachData.spend !== 0 ? `${Math.round((((Revenue - eachData.spend) / eachData.spend) * 100) * 100) / 100}%` : '0%';
+                    const ctr = eachData.impressions !== 0 ? `${Math.round(((eachData.fbClicks / eachData.impressions) * 100) * 100) / 100}%` : '0%';
+                    const mainRvenue = ((Math.round(Revenue * 100) / 100)).toString();
+                    const conversions = eachData.conversions !== undefined ? eachData.conversions : '0';
+                    rpc = !isNaN(rpc) ? rpc : 0;
+                    ncpl = !isNaN(ncpl) ? ncpl : 0;
+                    fMargin = !isNaN(fMargin) ? `${fMargin}%` : '0%';
+
+                    // console.log(eachData.campaign_name, "campaign_name");
+                    return (
+                        {
+                            campaignname: eachData.campaign_name,
+                            adsetname: eachData.adsetName,
+                            date: eachData[specifiedTimeZone],
+                            'fb-hour': eachData.campaign_id,
+                            'mnet-hour': eachData.campaign_id,
+                            spend: parseFloat(eachData.spend),
+                            revenue: parseFloat(mainRvenue),
+                            profit: parseFloat(profit),
+                            margin: margin,
+                            fbleads: parseInt(eachData.fbLeads),
+                            conversions: parseInt(conversions),
+                            cpc: parseFloat(eachData.cpc),
+                            fbclicks: parseInt(eachData.fbClicks),
+                            impressions: parseInt(eachData.impressions),
+                            ctr: ctr,
+                            rpc: parseFloat(rpc),
+                            cpl: parseFloat(cpl),
+                            ncpl: parseFloat(cpl),
+                            roi: roi,
+                            fmargin: fMargin,
+                            campaignid: eachData.campaign_id,
+                            adsetid: eachData.adset_id,
+                            timezone: 'UTC',
+                            actions: '...'
+                            // compaignid: eachData.campaign_id,
+                        }
+                    )
+                }) : null;
+            // console.log(filteredData[0],"one");
+            // console.log(filteredData, "filter");
+
+            const fullData = filteredData?.length > 0 ? [...filteredData] : [];
+            // console.log(fullData, "full");
+
+            // setDailyColumn(columnDefs);
+            setCampaignNamesDActiveDaily(fullData);
+            newCampaignNamesDActiveDaily.current = fullData;
+            setCampaignNamesDActiveDailyLoading(false);
+            setCampaignNamesDActiveFixedFooterDaily([
+                {
+                    campaignname: 'Total',
+                    spend: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0).toFixed(2)),
+                    revenue: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0).toFixed(2)),
+                    profit: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0).toFixed(2)),
+                    margin: parseFloat((fullData?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
+                    rpc: parseFloat((fullData?.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / fullData?.length).toFixed(2)),
+                    cpl: parseFloat((fullData?.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / fullData?.length).toFixed(2)),
+                    ncpl: parseFloat((fullData?.reduce((acc, curr) => acc + parseFloat(curr?.ncpl), 0) / fullData?.length).toFixed(2)),
+                    fbleads: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0).toFixed(2)),
+                    conversions: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0).toFixed(2)),
+                    fmargin: parseFloat((fullData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+                    roi: parseFloat(((fullData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - fullData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+                    cpc: parseFloat((fullData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / fullData?.length).toFixed(2)),
+                    fbclicks: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
+                    impressions: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
+                    ctr: parseFloat((fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
+                }
+            ]);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     useEffect(() => {
         const functionCall = async () => {
             try {
@@ -3714,11 +3975,14 @@ const MyTablePage = () => {
                 await functionCall3();
                 if (newRevenuePratner === "FB_DomainActive") {
                     await functionCall4();
+                    await campaignNamesDataForDActiveLive();
+                    await campaignNamesDataForDActiveDaily();
                 } else if (newRevenuePratner === "FB_System1") {
                     await functionCall5();
                 }else if(newRevenuePratner === "FB_Tonic1"){
                     await functionCall6();
                 }
+                
 
                 // console.log("functionCall3 executed successfully.");
             } catch (error) {
@@ -3741,6 +4005,8 @@ const MyTablePage = () => {
                 // await functionCall5(); 
                 if (newRevenuePratner === "FB_DomainActive") {
                     await functionCall4();
+                    await campaignNamesDataForDActiveLive();
+                    await campaignNamesDataForDActiveDaily();
                 } else if (newRevenuePratner === "FB_System1") {
                     await functionCall5();
                 }else if(newRevenuePratner === "FB_Tonic1"){
@@ -3801,6 +4067,8 @@ const MyTablePage = () => {
         setLoading1(true);
         setLoading2(true);
         newRevenuePratner === "FB_DomainActive" && setLoading3(true);
+        newRevenuePratner === "FB_DomainActive" && setCampaignNamesDActiveLiveLoading(true);
+        newRevenuePratner === "FB_DomainActive" && setCampaignNamesDActiveDailyLoading(true);
         newRevenuePratner === "FB_System1" && setLoading4(true);
         newRevenuePratner === "FB_Tonic1" && setTonicKeywordLoading(true);
         setNewAccount(account);
@@ -6302,6 +6570,48 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
         }
     };
 
+    const refreshGrid6 = (gridRefForCampaignNamesLive) => {
+        setTonicKeywordLoading(true);
+        if (gridRefForCampaignNamesLive.current) {
+            const gridApi = gridRefForCampaignNamesLive.current.api;
+    
+            // Clear filters
+            gridApi.setFilterModel(null);
+    
+            // Temporarily clear the data and reset after a timeout
+            setCampaignNamesDActiveLive([]); // Temporarily clear the data
+            setTimeout(() => setCampaignNamesDActiveLive(newCampaignNamesDActiveLive.current), 0); // Reset the data
+            setTimeout(() => setCampaignNamesDActiveLiveLoading(false), 1500); // Stop loading after timeout
+    
+            // Force refresh the grid cells and redraw the rows
+            gridApi.refreshCells({ force: true });
+            gridApi.redrawRows();
+        } else {
+            console.error('Grid reference is not available.');
+        }
+    };
+
+    const refreshGrid7 = (gridRefForCampaignNamesDaily) => {
+        setTonicKeywordLoading(true);
+        if (gridRefForCampaignNamesDaily.current) {
+            const gridApi = gridRefForCampaignNamesDaily.current.api;
+    
+            // Clear filters
+            gridApi.setFilterModel(null);
+    
+            // Temporarily clear the data and reset after a timeout
+            setCampaignNamesDActiveDaily([]); // Temporarily clear the data
+            setTimeout(() => setCampaignNamesDActiveDaily(newCampaignNamesDActiveDaily.current), 0); // Reset the data
+            setTimeout(() => setCampaignNamesDActiveDailyLoading(false), 1500); // Stop loading after timeout
+    
+            // Force refresh the grid cells and redraw the rows
+            gridApi.refreshCells({ force: true });
+            gridApi.redrawRows();
+        } else {
+            console.error('Grid reference is not available.');
+        }
+    };
+
     const onClickRefresh = () => {
         refreshGrid(gridRef);  // Refresh gridRef
         refreshGrid1(gridRef1); // Refresh gridRef1
@@ -6309,6 +6619,8 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
         refreshGrid3(gridRef3); // Refresh gridRef3
         refreshGrid4(gridRef4);
         refreshGrid5(gridRef5);
+        refreshGrid6(gridRefForCampaignNamesLive);
+        refreshGrid7(gridRefForCampaignNamesDaily);
     };
 
 
@@ -6557,6 +6869,8 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
         ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
         ...(newRevenuePratner === "FB_System1" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : []),
         ...(newRevenuePratner === "FB_Tonic1" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
+        ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '6', label: 'Names-Live', content: 'Content for Names Live data' }] : []),
+        ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '7', label: 'Names-Daily', content: 'Content for Names Daily data' }] : []),
     ];
     const handleSlideChange = (from, to) => {
         // console.log(to, "to");
@@ -7702,6 +8016,339 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                         className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                         icon={<SmileOutlined />}
                                         title={`No DomainData for ${newaccount} to ${startDate}`}
+                                    // extra={<Button type="primary">Next</Button>}
+                                    />}
+                                </div>}
+                            </div>
+                        </div>
+                    }
+                    {revenuePratner === "FB_DomainActive" && 
+                        <div style={{ height: "100%", marginBottom: '20px' }}>
+                            <div style={contentStyle}>
+                                {campaignNamesDActiveLiveLoading === true ? (
+                                    <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>
+                                        <div className="ag-grid-Loader">
+                                            <Audio
+                                                height="80"
+                                                width="80"
+                                                radius="9"
+                                                color="green"
+                                                ariaLabel="loading"
+                                                wrapperStyle
+                                                wrapperClass
+                                            />
+                                        </div>
+                                    </div>
+                                ) : campaignNamesDActiveLive?.filter((each) => {
+                                    const normalizedCampaign = each.campaignname.trim().toLowerCase();
+                                    const normalizedInput = inputValue.trim().toLowerCase();
+                                    return (
+                                        normalizedCampaign.startsWith(normalizedInput) ||
+                                        normalizedCampaign.includes(normalizedInput) ||
+                                        normalizedCampaign.endsWith(normalizedInput)
+                                    );
+                                }
+                                )?.length > 0 ? (
+
+                                    <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
+                                        <AgGridReact
+                                            ref={gridRefForCampaignNamesLive}
+                                            rowData={campaignNamesDActiveLive ? campaignNamesDActiveLive?.filter((each) => {
+                                                const normalizedCampaign = each.campaignname.trim().toLowerCase();
+                                                const normalizedInput = inputValue.trim().toLowerCase();
+                                                return (
+                                                    normalizedCampaign.startsWith(normalizedInput) ||
+                                                    normalizedCampaign.includes(normalizedInput) ||
+                                                    normalizedCampaign.endsWith(normalizedInput)
+                                                );
+                                            }
+                                            ) : []}
+                                            rowSelection='multiple'
+                                            columnDefs={columnDefs}
+                                            defaultColDef={{ ...defaultColDef, suppressMenu: true }}
+                                            onCellClicked={onCellClickedLive}
+                                            pagination={true}
+                                            paginationPageSize={100}
+                                            paginationPageSizeSelector={[20, 40, 60, 80, 100]}
+                                            suppressAggFuncInHeader={true}
+                                            // groupIncludeTotalFooter={rowData.length > 0 ? true : false}
+                                            // groupIncludeFooter={rowData.length > 0 ? true : false}
+                                            autoGroupColumnDef={autoGroupColumnDefLive}
+                                            onGridReady={(params) => onGridReady(params, 'grid1', gridRefForCampaignNamesLive)}
+                                            gridOptions={gridOptions}
+                                            frameworkComponents={{ GroupCellRenderer }}
+                                            groupDisplayType='multipleColumns'
+                                            // rowGroupPanelShow='always'
+                                            // onFilterChanged={onFilterChanged} // Use the custom filter handler
+                                            pinnedBottomRowData={campaignNamesDActiveFixedFooterLive}
+                                            getRowStyle={params => {
+                                                if (params.node.rowPinned) {
+                                                    return {
+                                                        fontWeight: 'bold',
+                                                        backgroundColor: theme === "dark" ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
+                                                        color: theme === "dark" ? '#fff' : '#000',           // Text color should contrast with the background
+                                                    };
+                                                }
+
+                                                return null;
+                                            }}
+
+                                            getMainMenuItems={getMainMenuItems}
+                                            onFilterChanged={(params) => {
+                                                try {
+                                                    const api = params.api;
+                                                    const filteredData = [];
+                                            
+                                                    // Collect filtered data
+                                                    api.forEachNodeAfterFilterAndSort((node) => {
+                                                        if (!node.rowPinned) {
+                                                            filteredData.push(node.data);
+                                                        }
+                                                    });
+                                            
+                                                    const fieldValueFilter = (field, value) => {
+                                                        if (!filteredData || !Array.isArray(filteredData)) {
+                                                            console.error("Filtered data is invalid or not an array:", filteredData);
+                                                            return [];
+                                                        }
+                                                        return filteredData.filter((item) => item && item[field] && item[field] === value);
+                                                    };
+                                                    const updatedFooter = [
+                                                        {
+                                                            campaignname: 'Total',
+                                                            spend: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2),
+                                                            revenue: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2),
+                                                            profit: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2),
+                                                            margin: `${(
+                                                                (filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0) /
+                                                                    filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0)) *
+                                                                100 || 0
+                                                            ).toFixed(2)}%`,
+                                                            rpc: (
+                                                                filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.rpc || 0), 0) / filteredData?.length || 0
+                                                            ).toFixed(2),
+                                                            cpl: (
+                                                                filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.cpl || 0), 0) / filteredData?.length || 0
+                                                            ).toFixed(2),
+                                                            ncpl: (
+                                                                filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.ncpl || 0), 0) / filteredData?.length || 0
+                                                            ).toFixed(2),
+                                                            fbleads: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.fbleads || 0), 0),
+                                                            conversions: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.conversions || 0), 0),
+                                                            fmargin: `${(
+                                                                (filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0) /
+                                                                    filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0)) *
+                                                                100 || 0
+                                                            ).toFixed(2)}%`,
+                                                            roi: `${(
+                                                                ((filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0) -
+                                                                    filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0)) /
+                                                                    filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0)) *
+                                                                100 || 0
+                                                            ).toFixed(2)}%`,
+                                                            cpc: (
+                                                                filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.cpc || 0), 0) / filteredData?.length || 0
+                                                            ).toFixed(2),
+                                                            fbclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks || 0), 0),
+                                                            impressions: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0),
+                                                            ctr: `${(
+                                                                (filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks || 0), 0) /
+                                                                    filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0)) *
+                                                                100 || 0
+                                                            ).toFixed(2)}%`,
+                                                        },
+                                                    ];
+                                            
+                                                    // Set updated footer data
+                                                    setCampaignNamesDActiveFixedFooterLive(updatedFooter);
+                                            
+                                                    // Example field-based filtering logic with error handling
+                                                    try {
+                                                        const specificFieldData = fieldValueFilter('status', 'Active'); // Replace 'status' and 'Active' with your field and value
+                                                        console.log('Filtered by status (Active):', specificFieldData);
+                                                    } catch (fieldFilterError) {
+                                                        console.error("Error in field-based filtering:", fieldFilterError);
+                                                    }
+                                                } catch (error) {
+                                                    console.error("Error in onFilterChanged handler:", error);
+                                                }
+                                            }}
+                                        />
+
+                                    </div>
+                                ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
+                                    {startDate !== endDate ? <Result
+                                        className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                        icon={<SmileOutlined />}
+                                        title={`No Names Live Data for ${newaccount} from ${startDate} to ${endDate}`}
+                                    // extra={<Button type="primary">Next</Button>}
+                                    /> : <Result
+                                        className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                        icon={<SmileOutlined />}
+                                        title={`No Names Live Data for ${newaccount} to ${startDate}`}
+                                    // extra={<Button type="primary">Next</Button>}
+                                    />}
+                                </div>}
+                            </div>
+                        </div>
+                    }
+                    {revenuePratner === "FB_DomainActive" && 
+                        <div>
+                            <div style={contentStyle}>
+                                {campaignNamesDActiveDailyLoading === true ? (
+                                    <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>
+                                        <div className="ag-grid-Loader">
+                                            <Audio
+                                                height="80"
+                                                width="80"
+                                                radius="9"
+                                                color="green"
+                                                ariaLabel="loading"
+                                                wrapperStyle
+                                                wrapperClass
+                                            />
+                                        </div>
+                                    </div>
+                                ) : campaignNamesDActiveDaily?.filter((each) => {
+                                    const normalizedCampaign = each.campaignname.trim().toLowerCase();
+                                    const normalizedInput = inputValue.trim().toLowerCase();
+                                    return (
+                                        normalizedCampaign.startsWith(normalizedInput) ||
+                                        normalizedCampaign.includes(normalizedInput) ||
+                                        normalizedCampaign.endsWith(normalizedInput)
+                                    );
+                                }
+                                )?.length > 0 ? (
+                                    <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
+                                        
+                                        <AgGridReact
+                                            ref={gridRefForCampaignNamesDaily}
+                                            rowData={campaignNamesDActiveDaily?.filter((each) => {
+                                                const normalizedCampaign = each.campaignname.trim().toLowerCase();
+                                                const normalizedInput = inputValue.trim().toLowerCase();
+                                                return (
+                                                    normalizedCampaign.startsWith(normalizedInput) ||
+                                                    normalizedCampaign.includes(normalizedInput) ||
+                                                    normalizedCampaign.endsWith(normalizedInput)
+                                                );
+                                            }
+                                            )}
+                                            columnDefs={columnDefs1.current}
+                                            onCellClicked={onCellClicked}
+                                            pagination={true}
+                                            paginationPageSize={100}
+                                            paginationPageSizeSelector={[20, 40, 60, 80, 100]}
+                                            groupDisplayType='multipleColumns'
+                                            suppressAggFuncInHeader={true}
+                                            groupSuppressBlankHeader={true}
+                                            defaultColDef={defaultColDef}
+                                            // groupIncludeFooter={true}
+                                            // groupIncludeTotalFooter={true}
+                                            autoGroupColumnDef={autoGroupColumnDef}
+                                            onGridReady={(params) => onGridReady(params, 'grid2', gridRefForCampaignNamesDaily)}
+                                            gridOptions={gridOptions1}
+                                            getMainMenuItems={getMainMenuItems}
+                                            pinnedBottomRowData={campaignNamesDActiveFixedFooterDaily}
+                                            getRowStyle={params => {
+                                                if (params.node.rowPinned) {
+                                                    return {
+                                                        fontWeight: 'bold',
+                                                        backgroundColor: theme === "dark" ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
+                                                        color: theme === "dark" ? '#fff' : '#000',           // Text color should contrast with the background
+                                                    };
+                                                }
+
+                                                return null;
+                                            }}
+                                            onFilterChanged={(params) => {
+                                                try {
+                                                    const api = params.api;
+                                                    const filteredData = [];
+                                            
+                                                    // Collect filtered data
+                                                    api.forEachNodeAfterFilterAndSort((node) => {
+                                                        if (!node.rowPinned) {
+                                                            filteredData.push(node.data);
+                                                        }
+                                                    });
+                                            
+                                                    if (!filteredData.length) {
+                                                        setCampaignNamesDActiveFixedFooterDaily([]);
+                                                        return;
+                                                    }
+                                            
+                                                    // Single pass to calculate all totals
+                                                    const totals = filteredData.reduce(
+                                                        (acc, curr) => {
+                                                            const fields = ['spend', 'revenue', 'profit', 'fbclicks', 'impressions', 'fbleads', 'conversions', 'cpc', 'rpc', 'cpl', 'ncpl'];
+                                                            fields.forEach((field) => {
+                                                                acc[field] += parseFloat(curr?.[field] || 0);
+                                                            });
+                                                            return acc;
+                                                        },
+                                                        {
+                                                            spend: 0,
+                                                            revenue: 0,
+                                                            profit: 0,
+                                                            fbclicks: 0,
+                                                            impressions: 0,
+                                                            fbleads: 0,
+                                                            conversions: 0,
+                                                            cpc: 0,
+                                                            rpc: 0,
+                                                            cpl: 0,
+                                                            ncpl: 0,
+                                                        }
+                                                    );
+                                            
+                                                    // Calculate derived values
+                                                    const updatedFooter = [
+                                                        {
+                                                            campaignname: 'Total',
+                                                            spend: totals.spend.toFixed(2),
+                                                            revenue: totals.revenue.toFixed(2),
+                                                            profit: totals.profit.toFixed(2),
+                                                            margin: `${((totals.profit / totals.revenue) * 100 || 0).toFixed(2)}%`,
+                                                            rpc: (totals.rpc / filteredData.length || 0).toFixed(2),
+                                                            cpl: (totals.cpl / filteredData.length || 0).toFixed(2),
+                                                            ncpl: (totals.ncpl / filteredData.length || 0).toFixed(2),
+                                                            fbleads: totals.fbleads,
+                                                            conversions: totals.conversions,
+                                                            fmargin: `${((totals.profit / totals.spend) * 100 || 0).toFixed(2)}%`,
+                                                            roi: `${(((totals.revenue - totals.spend) / totals.spend) * 100 || 0).toFixed(2)}%`,
+                                                            cpc: (totals.cpc / filteredData.length || 0).toFixed(2),
+                                                            fbclicks: totals.fbclicks,
+                                                            impressions: totals.impressions,
+                                                            ctr: `${((totals.fbclicks / totals.impressions) * 100 || 0).toFixed(2)}%`,
+                                                        },
+                                                    ];
+                                            
+                                                    // Debounce state update to avoid frequent re-renders
+                                                    setTimeout(() => setCampaignNamesDActiveFixedFooterDaily(updatedFooter), 100);
+                                            
+                                                    // Example field-based filtering logic with error handling
+                                                    try {
+                                                        const specificFieldData = filteredData.filter((item) => item?.status === 'Active');
+                                                        console.log('Filtered by status (Active):', specificFieldData);
+                                                    } catch (fieldFilterError) {
+                                                        console.error('Error in field-based filtering:', fieldFilterError);
+                                                    }
+                                                } catch (error) {
+                                                    console.error('Error in onFilterChanged handler:', error);
+                                                }
+                                            }}
+                                        />
+                                    </div>
+                                ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
+                                    {startDate !== endDate ? <Result
+                                        className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                        icon={<SmileOutlined />}
+                                        title={`No DailyData for ${newaccount} from ${startDate} to ${endDate}`}
+                                    // extra={<Button type="primary">Next</Button>}
+                                    /> : <Result
+                                        className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                        icon={<SmileOutlined />}
+                                        title={`No DailyData for ${newaccount} to ${startDate}`}
                                     // extra={<Button type="primary">Next</Button>}
                                     />}
                                 </div>}
