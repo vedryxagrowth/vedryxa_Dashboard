@@ -8,6 +8,7 @@ import { useTokenContext } from '../../components/parent';
 const Createnewuser = ({ visible, onClose }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const { theme } = useTokenContext();
+    const { apiClient } = useTokenContext();
     const [formalldata, setFormData] = useState({
         userName: '',
         email: '',
@@ -110,12 +111,7 @@ const Createnewuser = ({ visible, onClose }) => {
                     };
                     // console.log(formattedData);
                     // console.log(formattedData, "formatted Data");
-                    const response = await axios.post('https://prodapis.adsgoat.in/api/createUser/', {formattedData},
-                        {
-                            headers: {
-                                'Authorization': token
-                            }
-                        });
+                    const response = await apiClient.post('https://prodapis.adsgoat.in/api/createUser/', {formattedData});
                     
                     if (response.status === 200) {
                         // console.log('User created successfully');

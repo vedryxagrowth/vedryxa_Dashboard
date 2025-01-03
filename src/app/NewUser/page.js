@@ -104,6 +104,7 @@ const UsersTable = () => {
     const [activeSlide, setActiveSlide] = useState(0);
     const [network, setNetwork] = useState("");
     const { theme } = useTokenContext();
+    const { apiClient } = useTokenContext();
 
     const handleDotClick = (index) => {
         if (carouselRef.current) {
@@ -290,7 +291,7 @@ const UsersTable = () => {
 
         try {
             // Check if values.email exists
-            const url = values.email ? `https://prodapis.adsgoat.in/api/deleteUser?email=${values.email}` : '';
+            const url = values.email ? `/api/deleteUser?email=${values.email}` : '';
 
             if (url) {
                 // Show modal confirmation
@@ -299,12 +300,7 @@ const UsersTable = () => {
                     content: 'Are you sure you want to remove access?',
                     onOk: async () => {
                         try {
-                            const response = await axios.delete(url,
-                            {
-                                headers: {
-                                    'Authorization': token
-                                }
-                            });
+                            const response = await apiClient.delete(url);
                             // const response = await fetch(url, {
                             //     method: 'DELETE',
                             //     headers: {
@@ -357,22 +353,14 @@ const UsersTable = () => {
         const newStatus = checked ? 'Active' : 'InActive';
         // console.log(newStatus, "newStatus");
         // console.log(token, "token");
-        const response = await axios.get(`https://prodapis.adsgoat.in/updateAccount/?accountNumber=${accountNumber}&status=${newStatus}`, {
-                headers: {
-                    Authorization: token
-                }
-        });
+        const response = await apiClient.get(`/updateAccount/?accountNumber=${accountNumber}&status=${newStatus}`);
         // console.log(response.data);
         setAccountsData(newData);
     };
 
     const fetchusersData = async () => {
         try {
-            const response = await axios.get('https://prodapis.adsgoat.in/get/usersdata/', {
-                headers: {
-                    Authorization: token
-                }
-            });
+            const response = await apiClient.get('/get/usersdata/');
             if (response.status === 200) {
                 setUsersData(response.data);
                 // console.log(response.data, "users")
@@ -388,11 +376,7 @@ const UsersTable = () => {
 
     const fetchAccountsData = async () => {
         try {
-            const response = await axios.get('https://prodapis.adsgoat.in/api/getAccountsData/', {
-                headers: {
-                    Authorization: token
-                }
-            });
+            const response = await apiClient.get('/api/getAccountsData/');
             // const response = await axios.get('https://www.testapi.adsgoat.in/api/getAccountsData', {
             //     headers: {
             //         Authorization: token
@@ -436,22 +420,14 @@ const UsersTable = () => {
         const newStatus = checked ? 'Active' : 'InActive';
         // console.log(newStatus, "newStatus");
         // console.log(token, "token");
-        const response = await axios.get(`https://prodapis.adsgoat.in/updateNetwork/?revenuePartner=${revenuePartner}&Status=${newStatus}`, {
-                headers: {
-                    Authorization: token
-                }
-        });
+        const response = await apiClient.get(`/updateNetwork/?revenuePartner=${revenuePartner}&Status=${newStatus}`);
         console.log(response.data);
         setNetworksData(newData);
     };
 
     const fetchNetworksData = async () => {
         try{
-            const response = await axios.get('https://prodapis.adsgoat.in/get/networksData/', {
-                headers: {
-                    Authorization: token
-                }
-            });
+            const response = await apiClient.get('/get/networksData/');
             console.log("Response:", response.data);
             if (response.status === 200) {
                 setNetworksData(response.data);
@@ -468,11 +444,7 @@ const UsersTable = () => {
 
     const fetchUrlBuilderData = async () => {
         try{
-            const response = await axios.get('https://prodapis.adsgoat.in/get/allurlbuilderdata/', {
-                headers: {
-                    Authorization: token
-                }
-            });
+            const response = await apiClient.get('/get/allurlbuilderdata/');
             console.log("Response:", response.data);
             if (response.status === 200) {
                 setUrlBuilderData(response.data);

@@ -8,6 +8,7 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
     
     const token = localStorage.getItem("token");
     const { theme } = useTokenContext();
+    const { apiClient } = useTokenContext();
     console.log(editeddata?.businessData);
     const [channelList, setChannelList] = useState([]);
     const [isChannelModalOpen, setIsChannelModalOpen] = useState(false);
@@ -267,12 +268,7 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
                     const result = createDynamicObject(editeddata?.Network, channelList, dataList, campaigns, objects);
                     console.log(result);
 
-                    const response = await axios.post(`https://prodapis.adsgoat.in/updateNetworkUrlBuilder/`, {updatedData: result},
-                        {
-                            headers: { 
-                                'Authorization': token
-                            }
-                        });
+                    const response = await apiClient.post(`https://prodapis.adsgoat.in/updateNetworkUrlBuilder/`, {updatedData: result});
                     // console.log(response.data);
                     if(response.status === 200){
                         onClose(result);

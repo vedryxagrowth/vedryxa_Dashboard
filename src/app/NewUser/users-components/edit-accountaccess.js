@@ -77,6 +77,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
   const [form] = Form.useForm();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { theme } = useTokenContext();
+  const { apiClient } = useTokenContext();
   const token = localStorage.getItem("token");
   console.log(editeddata, "edit");
 
@@ -103,14 +104,9 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
       console.log(newValues, "new");
 
       // Simulate API call with newValues
-      const response = await axios.post(
+      const response = await apiClient.post(
         "https://prodapis.adsgoat.in/updateAccount/",
-        { newAccount: newValues },
-        {
-          headers: {
-            Authorization: token,
-          },
-        }
+        { newAccount: newValues }
       );
 
       if (response.status === 200) {

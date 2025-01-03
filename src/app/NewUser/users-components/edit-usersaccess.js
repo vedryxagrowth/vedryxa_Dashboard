@@ -20,6 +20,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
     // console.log(userName, "userName");
     const [isModalVisible, setIsModalVisible] = useState(false);
     const { theme } = useTokenContext();
+    const { apiClient } = useTokenContext();
     
 
     const [formalldata, setFormData] = useState({
@@ -250,12 +251,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                     // console.log(additionalAccounts, "additionalAccounts data");
                     // console.log(singleObject, ":singleObject");
         
-                    const response = await axios.put(`https://prodapis.adsgoat.in/api/updateUserTableData/`, {formattedData},
-                        {
-                            headers: {
-                                'Authorization': token
-                            }
-                        });
+                    const response = await apiClient.put(`https://prodapis.adsgoat.in/api/updateUserTableData/`, {formattedData});
         
                     if (response.status === 200) {
                         message.success("User Edits updated successfully"); // Display success message

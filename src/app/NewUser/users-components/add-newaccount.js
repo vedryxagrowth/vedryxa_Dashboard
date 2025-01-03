@@ -63,6 +63,7 @@ const Newaddaccounts = ({ visible, onClose }) => {
     const [isVisibleBMId, setIsVisibleBMId] = useState(null);
     var token = localStorage.getItem("token");
     const { theme } = useTokenContext();
+    const { apiClient } = useTokenContext();
 
     const [options, setOptions] = useState([
         "Winkleads Search",
@@ -117,11 +118,7 @@ const Newaddaccounts = ({ visible, onClose }) => {
     }, [BMName, form]);
 
     const functionCallBMNames = async() =>{
-        const fetchData = await axios.get(`https://prodapis.adsgoat.in/getBMNames/`, {
-            headers: {
-                Authorization: token,
-            },
-        });
+        const fetchData = await apiClient.get(`https://prodapis.adsgoat.in/getBMNames/`);
         const mainData = fetchData.data;
         setOptions(mainData);
         setNewOptions(mainData);
@@ -144,12 +141,7 @@ const Newaddaccounts = ({ visible, onClose }) => {
             //     });
             const newValues = {...values, timeZone: timeZoneFullNames[values.timeZone], pageName: values.pageName ? values.pageName : '', pageID: values.pageID ? values.pageID : '' , pixelID: values.pixelID ? values.pixelID : '', AgencyName: values?.AgencyName ? values?.AgencyName: ""}
             console.log(newValues, "newValues");
-            const response = await axios.post('https://prodapis.adsgoat.in/createNewAccount/', {newAccount: newValues},
-                {
-                    headers: {
-                        'Authorization': token
-                    }
-            });
+            const response = await apiClient.post('https://prodapis.adsgoat.in/createNewAccount/', {newAccount: newValues});
             // console.log(response.data);
             if (response.status === 200) {
                 // console.log('Account created successfully');
