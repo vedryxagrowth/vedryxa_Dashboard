@@ -5,6 +5,7 @@ import axios from "axios";
 
 const { Option } = Select;
 import { CloseOutlined, EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons";
+import { useTokenContext } from "../../components/parent";
 
 const timezones = [
   "UTC",
@@ -77,6 +78,7 @@ const EditNetworkAccess = ({ editeddata, visible, onClose }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const token = localStorage.getItem("token");
+  const { apiClient } = useTokenContext();
   console.log(editeddata, "edit");
 
   useEffect(() => {
@@ -101,14 +103,9 @@ const EditNetworkAccess = ({ editeddata, visible, onClose }) => {
       console.log(newValues, "new");
 
       // Simulate API call with newValues
-      const response = await axios.post(
+      const response = await apiClient.post(
         "https://prodapis.adsgoat.in/updateNetwork/",
-        { updatedNetwork: newValues },
-        {
-          headers: {
-            Authorization: token,
-          },
-        }
+        { updatedNetwork: newValues }
       );
 
       if (response.status === 200) {

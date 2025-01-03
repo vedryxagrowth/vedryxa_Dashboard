@@ -121,6 +121,7 @@ const MyTablePage = () => {
     // console.log(endDateFromDashboard);
 
     const { theme } = useTokenContext();
+    const { apiClient } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
     if (!userdetails?.adAccounts) {
         return <div style={{ width: '100%', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -525,7 +526,41 @@ const MyTablePage = () => {
 
 
 
+    const saveScrollPosition = (gridApi) => {
+        if (gridApi) {
+            const scrollTop = gridApi.getVerticalScrollPosition()?.top || 0;
+            localStorage.setItem('gridScrollPosition', scrollTop);
+        }
+    };
 
+    // Restore scroll position from localStorage
+    const restoreScrollPosition = (gridApi) => {
+        const scrollTop = localStorage.getItem('gridScrollPosition');
+        if (gridApi && scrollTop) {
+            gridApi.setVerticalScrollPosition(parseInt(scrollTop, 10));
+        }
+    };
+
+    // Save grid state (filters and sorting) to localStorage
+    const saveGridState = (gridApi) => {
+        if (gridApi) {
+            const filterModel = gridApi.getFilterModel();
+            const sortModel = gridApi.getSortModel();
+            localStorage.setItem('gridFilterModel', JSON.stringify(filterModel));
+            localStorage.setItem('gridSortModel', JSON.stringify(sortModel));
+        }
+    };
+
+    // Restore grid state (filters and sorting) from localStorage
+    const restoreGridState = (gridApi) => {
+        const filterModel = JSON.parse(localStorage.getItem('gridFilterModel'));
+        const sortModel = JSON.parse(localStorage.getItem('gridSortModel'));
+
+        if (gridApi) {
+            if (filterModel) gridApi.setFilterModel(filterModel);
+            if (sortModel) gridApi.setSortModel(sortModel);
+        }
+    };
 
 
 
@@ -1075,11 +1110,7 @@ const MyTablePage = () => {
 
                     // Only show the modal if there is data (groupedData length is greater than 0)
                     if (groupedData.length > 0) {
-                        const getCampaignResponse = await axios.get(`https://prodapis.adsgoat.in/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`, {
-                            headers: {
-                                Authorization: token,
-                            },
-                        });
+                        const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
                         if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
                             setGroupedData(getCampaignResponse.data);
                             setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
@@ -1105,11 +1136,7 @@ const MyTablePage = () => {
                         status: campaignStatus
                     };
                     // console.log(object);
-                    const requestResponse = await axios.post('https://prodapis.adsgoat.in/Comments/accountNumber/campaign', { formattedData: object }, {
-                        headers: {
-                            Authorization: token,
-                        },
-                    });
+                    const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
                     const responseData = requestResponse.data;
                     // console.log(responseData, "response");
                     message.success("Budget and Status Updated");
@@ -1597,11 +1624,7 @@ const MyTablePage = () => {
 
                     // Only show the modal if there is data (groupedData length is greater than 0)
                     if (groupedData.length > 0) {
-                        const getCampaignResponse = await axios.get(`https://prodapis.adsgoat.in/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`, {
-                            headers: {
-                                Authorization: token,
-                            },
-                        });
+                        const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
                         if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
                             setGroupedData(getCampaignResponse.data);
                             setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
@@ -1628,11 +1651,7 @@ const MyTablePage = () => {
                         status: campaignStatus
                     };
                     console.log(object);
-                    const requestResponse = await axios.post('https://prodapis.adsgoat.in/Comments/accountNumber/campaign', { formattedData: object }, {
-                        headers: {
-                            Authorization: token,
-                        },
-                    });
+                    const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
                     const responseData = requestResponse.data;
                     // console.log(responseData, "response");
                     message.success("Budget and Status Updated");
@@ -1930,11 +1949,7 @@ const MyTablePage = () => {
 
                     // Only show the modal if there is data (groupedData length is greater than 0)
                     if (groupedData.length > 0) {
-                        const getCampaignResponse = await axios.get(`https://prodapis.adsgoat.in/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`, {
-                            headers: {
-                                Authorization: token,
-                            },
-                        });
+                        const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
                         if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
                             setGroupedData(getCampaignResponse.data);
                             setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
@@ -1960,11 +1975,7 @@ const MyTablePage = () => {
                         status: campaignStatus
                     };
                     // console.log(object);
-                    const requestResponse = await axios.post('https://prodapis.adsgoat.in/Comments/accountNumber/campaign', { formattedData: object }, {
-                        headers: {
-                            Authorization: token,
-                        },
-                    });
+                    const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
                     const responseData = requestResponse.data;
                     // console.log(responseData, "response");
                     message.success("Budget and Status Updated");
@@ -2316,11 +2327,7 @@ const MyTablePage = () => {
 
                     // Only show the modal if there is data (groupedData length is greater than 0)
                     if (groupedData.length > 0) {
-                        const getCampaignResponse = await axios.get(`https://prodapis.adsgoat.in/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`, {
-                            headers: {
-                                Authorization: token,
-                            },
-                        });
+                        const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
                         if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
                             setGroupedData(getCampaignResponse.data);
                             setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
@@ -2347,11 +2354,7 @@ const MyTablePage = () => {
                         status: campaignStatus
                     };
                     // console.log(object);
-                    const requestResponse = await axios.post('https://prodapis.adsgoat.in/Comments/accountNumber/campaign', { formattedData: object }, {
-                        headers: {
-                            Authorization: token,
-                        },
-                    });
+                    const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
                     const responseData = requestResponse.data;
                     // console.log(responseData, "response");
                     message.success("Budget and Status Updated");
@@ -2577,96 +2580,97 @@ const MyTablePage = () => {
         timezone: { headerName: 'TimeZone', field: 'timezone', sortable: true, hide: true, filter: "agTextColumnFilter", },
     };
 
-    const columnDefsObject4 = [
-        {
-            headerName: 'Domain',
-            field: 'domain',
-            sortable: true,
-            filter: 'agTextColumnFilter',
-            resizable: false,
-            width: 350, // Fixed width for Domain column
-            cellStyle: { textAlign: 'left' },
-            rowGroup: true, // Grouping by DOMAIN
-            hide: true, // Hide this column in the grid, but it will still be used for grouping
-        },
-        {
-            headerName: 'Keyword',
-            field: 'keyword',
-            sortable: true,
-            filter: 'agTextColumnFilter',
-            resizable: true,
-            minWidth: 350,
-            cellStyle: { textAlign: 'left' },
-        },
-        {
-            headerName: 'Date',
-            field: 'date',
-            width: 120,
-            sortable: true,
-            filter: 'agDateColumnFilter',
-            filterParams: {
-                comparator: (filterLocalDateAtMidnight, cellValue) => {
-                    const cellDate = new Date(cellValue); // Convert date string to Date object
-                    if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) return 0;
-                    if (cellDate < filterLocalDateAtMidnight) return -1;
-                    if (cellDate > filterLocalDateAtMidnight) return 1;
-                    return 0;
+    const columnDefsObject4 = useMemo(()=> 
+        [
+            {
+                headerName: 'Domain',
+                field: 'domain',
+                sortable: true,
+                filter: 'agTextColumnFilter',
+                resizable: false,
+                width: 350, // Fixed width for Domain column
+                cellStyle: { textAlign: 'left' },
+                rowGroup: true, // Grouping by DOMAIN
+                hide: true, // Hide this column in the grid, but it will still be used for grouping
+            },
+            {
+                headerName: 'Keyword',
+                field: 'keyword',
+                sortable: true,
+                filter: 'agTextColumnFilter',
+                resizable: true,
+                minWidth: 350,
+                cellStyle: { textAlign: 'left' },
+            },
+            {
+                headerName: 'Date',
+                field: 'date',
+                width: 120,
+                sortable: true,
+                filter: 'agDateColumnFilter',
+                filterParams: {
+                    comparator: (filterLocalDateAtMidnight, cellValue) => {
+                        const cellDate = new Date(cellValue); // Convert date string to Date object
+                        if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) return 0;
+                        if (cellDate < filterLocalDateAtMidnight) return -1;
+                        if (cellDate > filterLocalDateAtMidnight) return 1;
+                        return 0;
+                    },
                 },
             },
-        },
-        {
-            headerName: 'Revenue',
-            field: 'revenue',
-            sortable: true,
-            filter: 'agNumberColumnFilter',
-            resizable: true,
-            valueFormatter: (params) => params.value ? `$${params.value.toFixed(2)}` : '$0.00',
-            width: 200,
-            aggFunc: 'sum',
-        },
-        {
-            headerName: 'Vertical',
-            field: 'vertical',
-            sortable: true,
-            filter: 'agTextColumnFilter',
-            resizable: true,
-            minWidth: 250,
-        },
-        {
-            headerName: 'Country',
-            field: 'country',
-            sortable: true,
-            filter: 'agTextColumnFilter',
-            resizable: true,
-            minWidth: 150,
-        },
-        {
-            headerName: 'Device Type',
-            field: 'deviceType',
-            sortable: true,
-            filter: 'agTextColumnFilter',
-            resizable: true,
-            minWidth: 200,
-        },
-        {
-            headerName: 'Searches',
-            field: 'searches',
-            sortable: true,
-            filter: 'agNumberColumnFilter',
-            resizable: true,
-            width: 150,
-            aggFunc: 'sum',
-        },
-        {
-            headerName: 'Clicks',
-            field: 'clicks',
-            sortable: true,
-            filter: 'agNumberColumnFilter',
-            resizable: true,
-            width: 150,
-            aggFunc: 'sum',
-        },
-    ];
+            {
+                headerName: 'Revenue',
+                field: 'revenue',
+                sortable: true,
+                filter: 'agNumberColumnFilter',
+                resizable: true,
+                valueFormatter: (params) => params.value ? `$${params.value.toFixed(2)}` : '$0.00',
+                width: 200,
+                aggFunc: 'sum',
+            },
+            {
+                headerName: 'Vertical',
+                field: 'vertical',
+                sortable: true,
+                filter: 'agTextColumnFilter',
+                resizable: true,
+                minWidth: 250,
+            },
+            {
+                headerName: 'Country',
+                field: 'country',
+                sortable: true,
+                filter: 'agTextColumnFilter',
+                resizable: true,
+                minWidth: 150,
+            },
+            {
+                headerName: 'Device Type',
+                field: 'deviceType',
+                sortable: true,
+                filter: 'agTextColumnFilter',
+                resizable: true,
+                minWidth: 200,
+            },
+            {
+                headerName: 'Searches',
+                field: 'searches',
+                sortable: true,
+                filter: 'agNumberColumnFilter',
+                resizable: true,
+                width: 150,
+                aggFunc: 'sum',
+            },
+            {
+                headerName: 'Clicks',
+                field: 'clicks',
+                sortable: true,
+                filter: 'agNumberColumnFilter',
+                resizable: true,
+                width: 150,
+                aggFunc: 'sum',
+            },
+        ], []);
 
     const getColumnDefs = (order) => {
         return order?.map(colKey => columnDefsObject[colKey]);
@@ -2711,14 +2715,9 @@ const MyTablePage = () => {
 
     const updatingColumnsStructure = async (updateDataArray) => {
         // const fetchData = await fetch(`https://prodapis.adsgoat.in/api/singleUserData?id=${userdetails._id}&updateData=${updateData}`);
-        const response = await axios.put(`https://prodapis.adsgoat.in/api/updateUserData?email=${userdetails.email}`,
+        const response = await apiClient.put(`/api/updateUserData?email=${userdetails.email}`,
             {
                 updateDataArray
-            },
-            {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
             });
         setColumnDefs(getColumnDefs(updateDataArray));
         columnDefs1.current = (getColumnDefs1(updateDataArray));
@@ -2756,7 +2755,7 @@ const MyTablePage = () => {
 
 
     const functionCallForUserColumnStructure = async () => {
-        const fetchData = await axios.get(`https://prodapis.adsgoat.in/api/singleUserData?email=${userdetails.email}`);
+        const fetchData = await apiClient.get(`/api/singleUserData?email=${userdetails.email}`);
         // const data = await fetchData.json();
         const mainData = fetchData.data;
         // console.log(mainData.columnStructure, "columnStructure");
@@ -2839,11 +2838,7 @@ const MyTablePage = () => {
             return;  // Stop execution if token is missing
         }
         // console.log(newRevenuePratner);
-        const fetchData = await axios.get(`https://prodapis.adsgoat.in/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`, {
-            headers: {
-                Authorization: token,
-            },
-        });
+        const fetchData = await apiClient.get(`/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`);
         const mainData = fetchData.data;
         let campaignComments = [];
 
@@ -3073,20 +3068,12 @@ const MyTablePage = () => {
         if (fetchData.status === 200 && mainData.length > 0) {
             try {
                 // Fetch comments
-                const commentFetch = await axios.get(`https://prodapis.adsgoat.in/Comments/${account}`, {
-                    headers: {
-                        Authorization: token,
-                    },
-                });
+                const commentFetch = await apiClient.get(`/Comments/${account}`);
                 const campaignComments = commentFetch.data; // Set comments only if fetched successfully
                 setCampaignComments(campaignComments);
         
                 // Fetch campaign status after successfully fetching comments
-                const campaignStatusFetch = await axios.get(`https://prodapis.adsgoat.in/Campaignstatusfb/${account}`, {
-                    headers: {
-                        Authorization: token,
-                    },
-                });
+                const campaignStatusFetch = await apiClient.get(`/Campaignstatusfb/${account}`);
         
                 if (campaignStatusFetch.status === 200) {
                     setCamapignlevelstatus(campaignStatusFetch.data); // Update state with fetched campaign status
@@ -3207,11 +3194,7 @@ const MyTablePage = () => {
 
     const functionCall2 = async () => {
         try {
-            const fetchData = await axios.get(`https://prodapis.adsgoat.in/Daily?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`, {
-                headers: {
-                    Authorization: token,
-                },
-            });
+            const fetchData = await apiClient.get(`/Daily?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`);
             const mainData = fetchData.data;
             // console.log(mainData, "mainData of functionCall2");
             let totalSpend = 0;
@@ -3326,11 +3309,7 @@ const MyTablePage = () => {
     }
 
     const functionCall3 = async () => {
-        const fetchData = await axios.get(`https://prodapis.adsgoat.in/AllCampaigns?accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}&page=${pageSize}&limit=100`, {
-            headers: {
-                Authorization: token,
-            },
-        });
+        const fetchData = await apiClient.get(`/AllCampaigns?accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}&page=${pageSize}&limit=100`);
         // console.log(fetchData, "f1");
         const mainData = fetchData.data.items;
 
@@ -3420,11 +3399,7 @@ const MyTablePage = () => {
 
     const functionCall4 = async () => {
         try {
-            const fetchData = await axios.get(`https://prodapis.adsgoat.in/DAKeywords?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`, {
-                headers: {
-                    Authorization: token,
-                },
-            });
+            const fetchData = await apiClient.get(`/DAKeywords?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`);
             const mainData = fetchData.data;
             // console.log(mainData, "mainData of functionCall4");
             let totalSpend = 0;
@@ -3527,11 +3502,7 @@ const MyTablePage = () => {
 
     const functionCall5 = async () => {
         try {
-            const fetchData = await axios.get(`https://prodapis.adsgoat.in/System1Keywords?startDate=${startDate}&endDate=${endDate}`, {
-                headers: {
-                    Authorization: token,
-                },
-            });
+            const fetchData = await apiClient.get(`https://prodapis.adsgoat.in/System1Keywords?startDate=${startDate}&endDate=${endDate}`);
             const mainData = fetchData.data;
             console.log(mainData, "mainData of functionCall5");
 
@@ -3594,11 +3565,7 @@ const MyTablePage = () => {
     const functionCall6 = async () => {
         try { 
             
-            const fetchData = await axios.get(`https://prodapis.adsgoat.in/TonicKeywords?startDate=${startDate}&endDate=${endDate}&timezone=${newtime}&accountNumber=${newaccount}`, {
-                headers: {
-                    Authorization: token,
-                },
-            });
+            const fetchData = await apiClient.get(`/TonicKeywords?startDate=${startDate}&endDate=${endDate}&timezone=${newtime}&accountNumber=${newaccount}`);
             const mainData = fetchData.data;
             console.log(mainData, "mainData of functionCall6");
             const specifiedTimeZone = selectTimezone[time];
@@ -3720,11 +3687,7 @@ const MyTablePage = () => {
 
     const campaignNamesDataForDActiveLive = async()=>{
         try{
-            const fetchData = await axios.get(`https://prodapis.adsgoat.in/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=Facebook_DActive_Names`, {
-                headers: {
-                    Authorization: token,
-                },
-            });
+            const fetchData = await apiClient.get(`https://prodapis.adsgoat.in/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=Facebook_DActive_Names`);
             const mainData = fetchData.data;
             const specifiedTimeZone = selectTimezone[time];
             const filteredData = mainData && mainData.length > 0 ?
@@ -3821,11 +3784,7 @@ const MyTablePage = () => {
 
     const campaignNamesDataForDActiveDaily = async () => {
         try {
-            const fetchData = await axios.get(`https://prodapis.adsgoat.in/Daily/CampaignName?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`, {
-                headers: {
-                    Authorization: token,
-                },
-            });
+            const fetchData = await apiClient.get(`/Daily/CampaignName?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`);
             const mainData = fetchData.data;
             // console.log(mainData, "mainData of functionCall2");
             let totalSpend = 0;
@@ -4214,11 +4173,7 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
     const fetchCampaignComments = async () => {
         try {
 
-            const response = await axios.get(`https://prodapis.adsgoat.in/Comments/${account}`, {
-                headers: {
-                    Authorization: token, // Your token for authorization
-                },
-            });
+            const response = await apiClient.get(`/Comments/${account}`);
             setCampaignComments(response.data); // Update the state with the fetched comments
         } catch (error) {
             console.error('Error fetching comments:', error);
@@ -4728,12 +4683,8 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
 
                 const sendNewCommentToAPI = async (logData) => {
                     try {
-                        const response = await axios.post('https://prodapis.adsgoat.in/Comments', {
+                        const response = await apiClient.post('/Comments', {
                             commentsdatas: logData,
-                        }, {
-                            headers: {
-                                Authorization: token,
-                            }
                         });
                     } catch (error) {
                         console.error('Error sending data to server:', error);
@@ -4742,7 +4693,7 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
 
                 const sendEditedCommentToAPI = async (logData) => {
                     try {
-                        const response = await axios.post('https://prodapis.adsgoat.in/Comments/edit', {
+                        const response = await apiClient.post('/Comments/edit', {
                             campaignname: logData.campaignname,
                             comment: logData.comment,
                             Account: logData.Account,
@@ -4750,10 +4701,6 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                             campaignid: logData.campaignid,
                             status: true
 
-                        }, {
-                            headers: {
-                                Authorization: token,
-                            }
                         });
                         return response.data;
                     } catch (error) {
@@ -4811,24 +4758,24 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                     try {
                         let response;
                         if (updatedPinStatus) {
-                            response = await axios.post('https://prodapis.adsgoat.in/Pin', {
+                            response = await apiClient.post('/Pin', {
                                 campaignname: campaignName,
                                 Account: account,
                                 campaignid: campaignid,
                                 adsetid: adsetid,
                                 userPin: userdetails?.email,
                                 comment: comment || ''
-                            }, { headers: { Authorization: token } });
+                            });
                             changeRRefrst();
 
                             message.success("Campaign pinned!");
                         } else {
-                            response = await axios.post('https://prodapis.adsgoat.in/Unpin', {
+                            response = await apiClient.post('/Unpin', {
                                 campaignname: campaignName,
                                 Account: account,
                                 campaignid: campaignid,
                                 adsetid: adsetid
-                            }, { headers: { Authorization: token } });
+                            });
                             changeRRefrst();
 
                             message.success("Campaign unpinned!");
@@ -5138,12 +5085,8 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
 
                 const sendNewCommentToAPI = async (logData) => {
                     try {
-                        const response = await axios.post('https://prodapis.adsgoat.in/Comments', {
+                        const response = await apiClient.post('/Comments', {
                             commentsdatas: logData,
-                        }, {
-                            headers: {
-                                Authorization: token,
-                            }
                         });
                         // console.log('Response from server:', response.data);
                     } catch (error) {
@@ -5153,17 +5096,13 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
 
                 const sendEditedCommentToAPI = async (logData) => {
                     try {
-                        const response = await axios.post('https://prodapis.adsgoat.in/Comments/edit', {
+                        const response = await apiClient.post('/Comments/edit', {
                             campaignname: logData.campaignname,
                             comment: logData.comment,
                             Account: logData.Account,
                             adsetid: logData.adsetid,
                             campaignid: logData.campaignid,
                             status: true
-                        }, {
-                            headers: {
-                                Authorization: token,
-                            }
                         });
                         // console.log('Response from server (edited comment):', response.data);
                         return response.data;
@@ -5255,24 +5194,24 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                     try {
                         let response;
                         if (updatedPinStatus) {
-                            response = await axios.post('https://prodapis.adsgoat.in/Pin', {
+                            response = await apiClient.post('/Pin', {
                                 campaignname: campaignName,
                                 Account: account,
                                 campaignid: campaignid,
                                 adsetid: adsetid,
                                 userPin: userdetails?.email,
                                 comment: comment || ''
-                            }, { headers: { Authorization: token } });
+                            });
                             changeRRefrst();
 
                             message.success("Campaign pinned!");
                         } else {
-                            response = await axios.post('https://prodapis.adsgoat.in/Unpin', {
+                            response = await apiClient.post('/Unpin', {
                                 campaignname: campaignName,
                                 Account: account,
                                 campaignid: campaignid,
                                 adsetid: adsetid
-                            }, { headers: { Authorization: token } });
+                            });
                             changeRRefrst();
 
                             message.success("Campaign unpinned!");
@@ -5605,12 +5544,8 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
 
                 const sendNewCommentToAPI = async (logData) => {
                     try {
-                        const response = await axios.post('https://prodapis.adsgoat.in/Comments', {
+                        const response = await apiClient.post('/Comments', {
                             commentsdatas: logData,
-                        }, {
-                            headers: {
-                                Authorization: token,
-                            }
                         });
                         console.log('Response from server:', response.data);
                     } catch (error) {
@@ -5620,17 +5555,13 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
 
                 const sendEditedCommentToAPI = async (logData) => {
                     try {
-                        const response = await axios.post('https://prodapis.adsgoat.in/Comments/edit', {
+                        const response = await apiClient.post('/Comments/edit', {
                             campaignname: logData.campaignname,
                             comment: logData.comment,
                             Account: logData.Account,
                             adsetid: logData.adsetid,
                             campaignid: logData.campaignid,
                             status: true
-                        }, {
-                            headers: {
-                                Authorization: token,
-                            }
                         });
                         console.log('Response from server (edited comment):', response.data);
                         return response.data;
@@ -5717,24 +5648,24 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                     try {
                         let response;
                         if (updatedPinStatus) {
-                            response = await axios.post('https://prodapis.adsgoat.in/Pin', {
+                            response = await apiClient.post('/Pin', {
                                 campaignname: campaignName,
                                 Account: account,
                                 campaignid: campaignid,
                                 adsetid: adsetid,
                                 userPin: userdetails?.email,
                                 comment: comment || ''
-                            }, { headers: { Authorization: token } });
+                            });
                             changeRRefrst();
 
                             message.success("Campaign pinned!");
                         } else {
-                            response = await axios.post('https://prodapis.adsgoat.in/Unpin', {
+                            response = await apiClient.post('/Unpin', {
                                 campaignname: campaignName,
                                 Account: account,
                                 campaignid: campaignid,
                                 adsetid: adsetid
-                            }, { headers: { Authorization: token } });
+                            });
                             changeRRefrst();
 
                             message.success("Campaign unpinned!");
@@ -6015,12 +5946,8 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
 
                 const sendNewCommentToAPI = async (logData) => {
                     try {
-                        const response = await axios.post('https://prodapis.adsgoat.in/Comments', {
+                        const response = await apiClient.post('/Comments', {
                             commentsdatas: logData,
-                        }, {
-                            headers: {
-                                Authorization: token,
-                            }
                         });
                         console.log('Response from server:', response.data);
                     } catch (error) {
@@ -6030,17 +5957,13 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
 
                 const sendEditedCommentToAPI = async (logData) => {
                     try {
-                        const response = await axios.post('https://prodapis.adsgoat.in/Comments/edit', {
+                        const response = await apiClient.post('/Comments/edit', {
                             campaignname: logData.campaignname,
                             comment: logData.comment,
                             Account: logData.Account,
                             adsetid: logData.adsetid,
                             campaignid: logData.campaignid,
                             status: true
-                        }, {
-                            headers: {
-                                Authorization: token,
-                            }
                         });
                         console.log('Response from server (edited comment):', response.data);
                         return response.data;
@@ -6052,17 +5975,13 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
 
                 const sendStarStatusToAPI = async (campaignname, isStarred) => {
                     try {
-                        const endpoint = isStarred ? 'https://prodapis.adsgoat.in/Star' : 'https://prodapis.adsgoat.in/Unstar';
-                        const response = await axios.post(endpoint, {
+                        const endpoint = isStarred ? '/Star' : '/Unstar';
+                        const response = await apiClient.post(endpoint, {
                             campaignname: campaignname,
                             Account: account,
                             usercommit: userdetails?.email,
                             campaignid: campaignid,
                             adsetid: adsetid
-                        }, {
-                            headers: {
-                                Authorization: token,
-                            }
                         });
                         console.log('Response from server (starred status):', response.data);
                     } catch (error) {
@@ -6926,6 +6845,94 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
 
     const sanitizedInput = inputValue.replace(/_/g, '\\_');
 
+    const memorizedColumnDef = useMemo(() => columnDefs, [columnDefs]);
+    const memorizedRowData = useMemo(() => rowData ? rowData?.filter((each) => {
+        const normalizedCampaign = each.campaignname.trim().toLowerCase();
+        const normalizedInput = inputValue.trim().toLowerCase();
+        return (
+            normalizedCampaign.startsWith(normalizedInput) ||
+            normalizedCampaign.includes(normalizedInput) ||
+            normalizedCampaign.endsWith(normalizedInput)
+        );
+    }
+    ) : [], [rowData]);
+
+    const memorizedColumnDef1 = useMemo(()=> columnDefs1.current, [columnDefs1.current]);
+    const memorizedDailyData = useMemo(()=> dailyData?.filter((each) => {
+        const normalizedCampaign = each.campaignname.trim().toLowerCase();
+        const normalizedInput = inputValue.trim().toLowerCase();
+        return (
+            normalizedCampaign.startsWith(normalizedInput) ||
+            normalizedCampaign.includes(normalizedInput) ||
+            normalizedCampaign.endsWith(normalizedInput)
+        );
+    }
+    ), [dailyData]);
+
+    const memorizedColumnDef2 = useMemo(()=> columnDefs2.current, [columnDefs2.current]);
+    const memorizedCampaignsData = useMemo(()=>campaignData.filter((each) => {
+        const normalizedCampaign = each.campaignname.trim().toLowerCase();
+        const normalizedInput = inputValue.trim().toLowerCase();
+        return (
+            normalizedCampaign.startsWith(normalizedInput) ||
+            normalizedCampaign.includes(normalizedInput) ||
+            normalizedCampaign.endsWith(normalizedInput)
+        );
+    }
+    ), [campaignData]);
+
+    const memorizedBMNameColumnDefs = useMemo(()=>BMNameColumnDefs, [BMNameColumnDefs]);
+    const memorizedBMNameData = useMemo(()=> BMNameData, [BMNameData]);
+
+    const memorizedColumnDef3 = useMemo(()=> columnDefs3.current, [columnDefs3.current]);
+    const memorizedKeywordsData = useMemo(()=>keywordData.filter((each) => {
+        const normalizedCampaign = each.campaignname.trim().toLowerCase();
+        const normalizedInput = inputValue.trim().toLowerCase();
+        return (
+            normalizedCampaign.startsWith(normalizedInput) ||
+            normalizedCampaign.includes(normalizedInput) ||
+            normalizedCampaign.endsWith(normalizedInput)
+        );
+    }
+    ),[keywordData]);
+
+    const memorizedColumnDef4 = useMemo(()=> columnDefs4.current, [columnDefs4.current]);
+    const memorizedTonicKeywordsData = useMemo(()=>tonicKeywordData.filter((each) => {
+        const normalizedCampaign = each.campaignname.trim().toLowerCase();
+        const normalizedInput = inputValue.trim().toLowerCase();
+        return (
+            normalizedCampaign.startsWith(normalizedInput) ||
+            normalizedCampaign.includes(normalizedInput) ||
+            normalizedCampaign.endsWith(normalizedInput)
+        );
+    }
+    ),[tonicKeywordData]);
+
+    const memorizedSystem1KeywordData = useMemo(()=>system1KeywordData,[system1KeywordData]);
+
+    const memorizedDomainData = useMemo(()=>domainData, [domainData]);
+    const memorizeddomainColumnDefs = useMemo(()=>domainColumnDefs, [domainColumnDefs]);
+    const memorizedCampaignNamesDActiveLive = useMemo(()=>campaignNamesDActiveLive ? campaignNamesDActiveLive?.filter((each) => {
+        const normalizedCampaign = each.campaignname.trim().toLowerCase();
+        const normalizedInput = inputValue.trim().toLowerCase();
+        return (
+            normalizedCampaign.startsWith(normalizedInput) ||
+            normalizedCampaign.includes(normalizedInput) ||
+            normalizedCampaign.endsWith(normalizedInput)
+        );
+    }
+    ) : [],[campaignNamesDActiveLive]);
+    const memorizedCampaignNamesDActiveDaily = useMemo(()=>campaignNamesDActiveDaily?.filter((each) => {
+        const normalizedCampaign = each.campaignname.trim().toLowerCase();
+        const normalizedInput = inputValue.trim().toLowerCase();
+        return (
+            normalizedCampaign.startsWith(normalizedInput) ||
+            normalizedCampaign.includes(normalizedInput) ||
+            normalizedCampaign.endsWith(normalizedInput)
+        );
+    }
+    ),[campaignNamesDActiveDaily]);
+
     return (
         <div className='reports-container'>
             {/* className='select-container' */}
@@ -7166,18 +7173,9 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
 
                                     <AgGridReact
                                         ref={gridRef}
-                                        rowData={rowData ? rowData?.filter((each) => {
-                                            const normalizedCampaign = each.campaignname.trim().toLowerCase();
-                                            const normalizedInput = inputValue.trim().toLowerCase();
-                                            return (
-                                                normalizedCampaign.startsWith(normalizedInput) ||
-                                                normalizedCampaign.includes(normalizedInput) ||
-                                                normalizedCampaign.endsWith(normalizedInput)
-                                            );
-                                        }
-                                        ) : []}
+                                        rowData={memorizedRowData}
                                         rowSelection='multiple'
-                                        columnDefs={columnDefs}
+                                        columnDefs={memorizedColumnDef}
                                         defaultColDef={{ ...defaultColDef, suppressMenu: true }}
                                         onCellClicked={onCellClickedLive}
                                         pagination={true}
@@ -7284,17 +7282,8 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                     </Row>
                                     <AgGridReact
                                         ref={gridRef1}
-                                        rowData={dailyData?.filter((each) => {
-                                            const normalizedCampaign = each.campaignname.trim().toLowerCase();
-                                            const normalizedInput = inputValue.trim().toLowerCase();
-                                            return (
-                                                normalizedCampaign.startsWith(normalizedInput) ||
-                                                normalizedCampaign.includes(normalizedInput) ||
-                                                normalizedCampaign.endsWith(normalizedInput)
-                                            );
-                                        }
-                                        )}
-                                        columnDefs={columnDefs1.current}
+                                        rowData={memorizedDailyData}
+                                        columnDefs={memorizedColumnDef1}
                                         onCellClicked={onCellClicked}
                                         pagination={true}
                                         paginationPageSize={100}
@@ -7306,7 +7295,11 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                         // groupIncludeFooter={true}
                                         // groupIncludeTotalFooter={true}
                                         autoGroupColumnDef={autoGroupColumnDef}
-                                        onGridReady={(params) => onGridReady(params, 'grid2', gridRef1)}
+                                        onGridReady={(params) => {
+                                            gridRef1.current = params.api; // Store grid API
+                                            restoreGridState(gridRef1.current); // Restore state when grid is ready
+                                            onGridReady(params, 'grid2', gridRef1);
+                                        }}
                                         gridOptions={gridOptions1}
                                         getMainMenuItems={getMainMenuItems}
                                         pinnedBottomRowData={dailyData.length > 0 ? pinnedBottomRowData2 : []}
@@ -7398,17 +7391,8 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                     <div style={{ height: '90%' }}>
                                         <AgGridReact
                                             ref={gridRef2}
-                                            rowData={campaignData.filter((each) => {
-                                                const normalizedCampaign = each.campaignname.trim().toLowerCase();
-                                                const normalizedInput = inputValue.trim().toLowerCase();
-                                                return (
-                                                    normalizedCampaign.startsWith(normalizedInput) ||
-                                                    normalizedCampaign.includes(normalizedInput) ||
-                                                    normalizedCampaign.endsWith(normalizedInput)
-                                                );
-                                            }
-                                            )}
-                                            columnDefs={columnDefs2.current}
+                                            rowData={memorizedCampaignsData}
+                                            columnDefs={memorizedColumnDef2}
                                             onCellClicked={onCellClickedAllCampaigns}
                                             autoGroupColumnDef={autoGroupColumnDef2}
                                             defaultColDef={defaultColDef}
@@ -7519,8 +7503,8 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
 
 
                                     <AgGridReact
-                                        rowData={BMNameData}
-                                        columnDefs={BMNameColumnDefs}
+                                        rowData={memorizedBMNameData}
+                                        columnDefs={memorizedBMNameColumnDefs}
                                         // defaultColDef={defaultColDef}
                                         suppressAggFuncInHeader={true}
                                         pinnedBottomRowData={BMNameFixedFooter}
@@ -7602,17 +7586,8 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                     <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
                                         <AgGridReact
                                             ref={gridRef5}
-                                            rowData={tonicKeywordData.filter((each) => {
-                                                const normalizedCampaign = each.campaignname.trim().toLowerCase();
-                                                const normalizedInput = inputValue.trim().toLowerCase();
-                                                return (
-                                                    normalizedCampaign.startsWith(normalizedInput) ||
-                                                    normalizedCampaign.includes(normalizedInput) ||
-                                                    normalizedCampaign.endsWith(normalizedInput)
-                                                );
-                                            }
-                                            )}
-                                            columnDefs={columnDefs4.current}
+                                            rowData={memorizedTonicKeywordsData}
+                                            columnDefs={memorizedColumnDef4}
                                             onCellClicked={onCellClicked}
                                             pagination={true}
                                             paginationPageSize={100}
@@ -7754,7 +7729,7 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                             />
                                         </div>
                                     </div>
-                                ) : keywordData.filter((each) => each.campaignname.includes(inputValue))?.length > 0 ? (
+                                ) : keywordData?.length > 0 ? (
                                     <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
                                         <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap' }}>
                                             <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
@@ -7788,8 +7763,8 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                         </Row>
                                         <AgGridReact
                                             ref={gridRef3}
-                                            rowData={keywordData.filter((each) => each.campaignname.includes(inputValue))}
-                                            columnDefs={columnDefs3.current}
+                                            rowData={memorizedKeywordsData}
+                                            columnDefs={memorizedColumnDef3}
                                             onCellClicked={onCellClicked}
                                             pagination={true}
                                             paginationPageSize={100}
@@ -7851,7 +7826,7 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                             />
                                         </div>
                                     </div>
-                                ) : system1KeywordData.filter((each) => each.domain.includes(inputValue))?.length > 0 ? (
+                                ) : system1KeywordData?.length > 0 ? (
                                     <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
                                         <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap' }}>
                                             <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
@@ -7885,7 +7860,7 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
 
                                         <AgGridReact
                                             ref={gridRef4}
-                                            rowData={system1KeywordData}
+                                            rowData={memorizedSystem1KeywordData}
                                             columnDefs={columnDefsObject4}
                                             onCellClicked={onCellClicked}
                                             pagination={true}
@@ -7960,8 +7935,8 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                         style={{ width: '100%', height: '500px' }}
                                     >
                                         <AgGridReact
-                                            rowData={domainData}
-                                            columnDefs={domainColumnDefs}
+                                            rowData={memorizedDomainData}
+                                            columnDefs={memorizeddomainColumnDefs}
                                             // defaultColDef={defaultColDef}
                                             suppressAggFuncInHeader={true}
                                             pinnedBottomRowData={domainFixedFooter}
@@ -8053,18 +8028,9 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                     <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
                                         <AgGridReact
                                             ref={gridRefForCampaignNamesLive}
-                                            rowData={campaignNamesDActiveLive ? campaignNamesDActiveLive?.filter((each) => {
-                                                const normalizedCampaign = each.campaignname.trim().toLowerCase();
-                                                const normalizedInput = inputValue.trim().toLowerCase();
-                                                return (
-                                                    normalizedCampaign.startsWith(normalizedInput) ||
-                                                    normalizedCampaign.includes(normalizedInput) ||
-                                                    normalizedCampaign.endsWith(normalizedInput)
-                                                );
-                                            }
-                                            ) : []}
+                                            rowData={memorizedCampaignNamesDActiveLive}
                                             rowSelection='multiple'
-                                            columnDefs={columnDefs}
+                                            columnDefs={memorizedColumnDef}
                                             defaultColDef={{ ...defaultColDef, suppressMenu: true }}
                                             onCellClicked={onCellClickedLive}
                                             pagination={true}
@@ -8223,17 +8189,8 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                         
                                         <AgGridReact
                                             ref={gridRefForCampaignNamesDaily}
-                                            rowData={campaignNamesDActiveDaily?.filter((each) => {
-                                                const normalizedCampaign = each.campaignname.trim().toLowerCase();
-                                                const normalizedInput = inputValue.trim().toLowerCase();
-                                                return (
-                                                    normalizedCampaign.startsWith(normalizedInput) ||
-                                                    normalizedCampaign.includes(normalizedInput) ||
-                                                    normalizedCampaign.endsWith(normalizedInput)
-                                                );
-                                            }
-                                            )}
-                                            columnDefs={columnDefs1.current}
+                                            rowData={memorizedCampaignNamesDActiveDaily}
+                                            columnDefs={memorizedColumnDef1}
                                             onCellClicked={onCellClicked}
                                             pagination={true}
                                             paginationPageSize={100}

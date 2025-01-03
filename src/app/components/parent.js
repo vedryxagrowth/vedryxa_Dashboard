@@ -58,6 +58,7 @@
 // };
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import axios from 'axios';
 
 const TokenContext = createContext();
 
@@ -79,6 +80,8 @@ export const TokenProvider = ({ children }) => {
 
   const [theme, setTheme] = useState('light'); // Default to light theme
   const [darkMode, setDarkMode] = useState(false);
+
+  // console.log(session);
 
   useEffect(() => {
     // After the component mounts, we can access localStorage and set the theme
@@ -105,6 +108,14 @@ export const TokenProvider = ({ children }) => {
     setDarkMode(newTheme === 'dark');
     localStorage.setItem('theme', newTheme);
   };
+  const token = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : '';
+  const apiClient = axios.create({
+    baseURL: 'https://prodapis.adsgoat.in', // Relative URL
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': token, // Use session token if available
+    },
+  });
 
   if (!isMounted) {
     // While the component is mounting, render nothing to avoid mismatch between SSR and client
@@ -112,7 +123,7 @@ export const TokenProvider = ({ children }) => {
   }
 
   return (
-    <TokenContext.Provider value={{ userdetails, setuserdetails, darkMode, toggleTheme, theme }}>
+    <TokenContext.Provider value={{ userdetails, setuserdetails, darkMode, toggleTheme, theme, apiClient }}>
       {userdetails && !userdetails.role === "Revenue_Partner" && <ChatWidget />}
       {children}
     </TokenContext.Provider>

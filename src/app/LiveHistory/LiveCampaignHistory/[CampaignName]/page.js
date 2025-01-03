@@ -21,6 +21,8 @@ const MnetLiveCampaignHistory = ({ params }) => {
     // Define your rowData and columnDefs
     const { userdetails } = useTokenContext();
 
+    const { apiClient } = useTokenContext();
+
     // console.log(userdetails, "userDetails");
 
     const user = userdetails?.email;
@@ -914,11 +916,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
         console.log(network, "network");
         console.log(decodedString, "decode");
 
-        const fetchData = await axios.get(`https://prodapis.adsgoat.in/LiveCampaignHistory?campaignName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`, {
-            headers: {
-                Authorization: token,
-            },
-        });
+        const fetchData = await apiClient.get(`/LiveCampaignHistory?campaignName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`);
 
         const mainData = fetchData?.data;
         console.log(mainData[0]);

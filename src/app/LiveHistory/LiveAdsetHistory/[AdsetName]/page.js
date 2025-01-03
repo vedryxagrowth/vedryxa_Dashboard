@@ -19,6 +19,8 @@ const MnetLiveAdsetHistory = ({params}) => {
     // Define your rowData and columnDefs
     const {userdetails} = useTokenContext();
 
+    const { apiClient } = useTokenContext();
+
     console.log(userdetails, "userDetails");
 
     const user = userdetails?.email;
@@ -761,11 +763,7 @@ const MnetLiveAdsetHistory = ({params}) => {
         // const fetchData = await fetch(`http://localhost:8000/${network}?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}`);
         // const data = await fetchData.json();
         // const mainData = await data;
-        const fetchData = await axios.get(`https://prodapis.adsgoat.in/LiveAdsetHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`, {
-            headers: {
-                Authorization: token,
-            },
-        });
+        const fetchData = await apiClient.get(`/LiveAdsetHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`);
         // console.log(`https://prodapis.adsgoat.in/LiveAdsetHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`, "url");
         const url = `http://localhost:8000/MnetLiveCampaignHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}`
         

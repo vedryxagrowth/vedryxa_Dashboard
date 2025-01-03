@@ -19,6 +19,7 @@ import debounce from 'lodash.debounce';
 export default function AdsetNameAndAccount({params}){
     
     const {userdetails} = useTokenContext();
+    const { apiClient } = useTokenContext();
     const { theme } = useTokenContext();
 
     console.log(theme);
@@ -356,11 +357,7 @@ export default function AdsetNameAndAccount({params}){
     // }
 
     const getHistoryData = async() => {
-        const fetchData = await axios.get(`https://prodapis.adsgoat.in/DailyAdsetHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`, {
-            headers: {
-                Authorization: token,
-            },
-        });
+        const fetchData = await apiClient.get(`/DailyAdsetHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`);
         // console.log(`https://prodapis.adsgoat.in/LiveAdsetHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`, "url");
         const url = `http://localhost:8000/MnetLiveCampaignHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}`
         
