@@ -1,10 +1,10 @@
 {
   "pages": {
-    "/Reports/page": [
+    "/Dashboard/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/Reports/page.css",
-      "static/chunks/app/Reports/page.js"
+      "static/css/app/Dashboard/page.css",
+      "static/chunks/app/Dashboard/page.js"
     ],
     "/layout": [
       "static/chunks/webpack.js",

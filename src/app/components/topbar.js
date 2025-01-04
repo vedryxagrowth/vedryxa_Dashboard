@@ -897,7 +897,37 @@ const LayoutWrapper = ({ children, usersDataForLogin }) => {
   const [usersData, setUsersData] = useState([]);
   const { setuserdetails } = useTokenContext();
   const isCalledRef = useRef(false);  // To ensure getUsersData API is called only once
+  const [useractivites,setuseractivites]=useState({})
+  useEffect(() => {
+    if (Object.keys(useractivites).length === 0) return; // Do nothing if useractivites is empty
 
+    const postUserActivities = async () => {
+        try {
+            const response = await fetch("https://prodapis.adsgoat.in/UsersActivities/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: localStorage.getItem('token')
+                },
+                body: JSON.stringify({ userActivities: useractivites }),
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                message.success("User activity posted successfully!");
+                console.log("Response:", result);
+            } else {
+                const errorData = await response.json();
+                message.error(`Failed to post user activity: ${errorData.message}`);
+            }
+        } catch (error) {
+            console.error("Error posting user activity:", error);
+            message.error("Error posting user activity.");
+        }
+    };
+
+    postUserActivities();
+}, [useractivites]);
   // Generic retry mechanism for any API
   const debouncedRetry = debounce((fetchFunc, retries, resolve, reject) => {
     retryFetch(fetchFunc, retries - 1).then(resolve).catch(reject);
@@ -1061,6 +1091,9 @@ const LayoutWrapper = ({ children, usersDataForLogin }) => {
           const tokenResponse = await retryFetch(() => axios.post('/api/auth/jwt', { email }));
           const token = tokenResponse.data.token;
           localStorage.setItem("token", token);
+          const response = await retryFetch(() => axios.get(`/api/userDetails?name=${email}`));
+          console.log(response?.data,"hellooaxios.post")
+          setuseractivites(response.data)
         }
         else if(decodedToken && decodedToken.exp < Math.floor(Date.now() / 1000)){
           const email = session.user.email;
