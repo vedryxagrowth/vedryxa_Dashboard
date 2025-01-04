@@ -1090,32 +1090,42 @@ const MyTablePage = () => {
             cellRenderer: (params) => {
                 const [isModalVisible, setIsModalVisible] = useState(false);
                 const [groupedData, setGroupedData] = useState([]);
-                const [newGroupedData, setNewGroupedData] = useState([]);
-                const [changeBudget, setChangeBudget] = useState();
+                const [newgroupedData, setNewGroupedData] = useState([]);
+                const [changeBudget, onChangeBudget] = useState();
                 const [campaignStatus, setCampaignStatus] = useState(true);
-            
+
                 const onChangeSpendAndStatus = async () => {
-                    if (params?.node?.footer) return;
-            
+                    // Check if it's a group footer row (for groupIncludeFooter)
+                    if (params?.node?.footer) {
+                        // console.log("This is a groupIncludeFooter row. Modal will not open.");
+                        return; // Prevent modal from opening for group footer rows
+                    }
+
+                    // Ensure allLeafChildren exists and is an array before proceeding
                     const allLeafChildren = params.node?.allLeafChildren || [];
+
+                    // Fetch all the rows under the current group
                     const groupedData = allLeafChildren.map(node => node.data) || [];
                     setNewGroupedData(groupedData);
-            
+
+                    // Only show the modal if there is data (groupedData length is greater than 0)
                     if (groupedData.length > 0) {
                         const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
                         if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
                             setGroupedData(getCampaignResponse.data);
                             setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
-                            setChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100);
-                        } else {
+                            onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
+                        }
+                        else {
                             setGroupedData(groupedData);
                         }
-                        setIsModalVisible(true);
+                        // Set the grouped data for the modal
+                        setIsModalVisible(true); // Show the modal for non-footer rows
                     }
                 };
-            
+
                 const handleOk = async () => {
-                    setIsModalVisible(false);
+                    setIsModalVisible(false); // Close the modal
                     const object = {
                         campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname : groupedData[0]?.campaignname,
                         adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
@@ -1132,15 +1142,24 @@ const MyTablePage = () => {
                     message.success("Budget and Status Updated");
                     changeRRefrst();
                 };
-            
+
                 const handleCancel = () => {
                     setIsModalVisible(false);
+                    // console.log(changeBudget); // Close the modal
                 };
-            
-                const onChangeBudgetValue = (event) => {
-                    setChangeBudget(event.target.value);
+
+                const getTotalSpend = (data) => {
+                    if (!data || data.length === 0) return 0;
+                    const total = data.reduce((total, item) => {
+                        return total + (item?.spend || 0);
+                    }, 0);
+                    return Math.round(total * 100) / 100; // Round to 2 decimal places
                 };
-            
+
+                const onChangeBudgetValue = event => {
+                    onChangeBudget(event.target.value)
+                }
+
                 const onChangeCampaignStatus = async () => {
                     const apiEndpoint = campaignStatus
                         ? 'https://prodapis.adsgoat.in/campaignStatusPause/' // Pause campaign
@@ -1162,193 +1181,56 @@ const MyTablePage = () => {
                         message.error('Error updating campaign status.');
                     }
                 };
-                
-            
+
+                // console.log(groupedData);
+
                 return (
                     <div>
+                        {/* Click action for status cell */}
                         <div onClick={onChangeSpendAndStatus}>
-                            <span>{params.value || "..."}</span>
+                            <span>{params.value || "..."}</span> {/* Fallback to '...' if status is not available */}
                         </div>
+                        {/* Modal should only be shown for non-footer rows and when groupedData length is greater than 0 */}
                         {isModalVisible && (
                             <Modal
                                 title={groupedData?.length > 0 && groupedData?.length !== 1 ? groupedData[0]?.campaignname : groupedData?.campaignname}
                                 visible={isModalVisible}
                                 onOk={handleOk}
                                 onCancel={handleCancel}
-                                width={600}
-                                style={{ padding: '20px' }}
+                                width={600}  // Set a custom width for the modal
+                                style={{ padding: '20px' }}  // Adjust body padding
                             >
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                    {/* Campaign Name and Switch */}
+                                    {/* <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <Typography.Text strong>Campaign Name:</Typography.Text>
+                                        <Typography.Text strong style={{ paddingLeft: '5px' }}>
+                                            {`${groupedData[0]?.campaignname || "N/A"}`}
+                                        </Typography.Text>
+                                    </div> */}
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                         <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
                                         <Switch checked={campaignStatus} onChange={onChangeCampaignStatus} />
                                     </div>
+
+                                    {/* Input Field */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong style={{ marginBottom: '10px' }}>Budget:</Typography.Text>
-                                        <Input 
-                                            placeholder="Enter your value here" 
-                                            defaultValue={groupedData?.budget ? groupedData?.budget / 100 : 0} 
-                                            onChange={onChangeBudgetValue} 
-                                        />
+                                        <Input placeholder="Enter your value here" defaultValue={groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData)} onChange={onChangeBudgetValue} />
                                     </div>
+
+                                    {/* Campaign ID */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong>Campaign ID:</Typography.Text>
-                                        <p>{groupedData?.campaignid}</p>
+                                        <p>{groupedData?.length > 0 && groupedData?.length !== 1 ? groupedData[0]?.campaignid : groupedData.campaignid}</p>
                                     </div>
                                 </div>
                             </Modal>
                         )}
                     </div>
                 );
-            }
+            },
         },
-        // actions: {
-        //     headerName: 'Actions',
-        //     field: 'actions',
-        //     minWidth: 90,
-        //     // sortable: true,
-        //     // filter: true,
-        //     sortable: false,    // Ensure sorting is disabled
-        //     filter: false,      // Ensure filtering is disabled
-        //     enableSorting: false,  // Disable sorting at the column level
-        //     enableFilter: false,
-        //     suppressMenu: true,    // Suppress the column menu
-        //     menuTabs: [],
-        //     hide: !isYesterday(),
-        //     cellRenderer: (params) => {
-        //         const [isModalVisible, setIsModalVisible] = useState(false);
-        //         const [groupedData, setGroupedData] = useState([]);
-        //         const [newgroupedData, setNewGroupedData] = useState([]);
-        //         const [changeBudget, onChangeBudget] = useState();
-        //         const [campaignStatus, setCampaignStatus] = useState(true);
-
-        //         const onChangeSpendAndStatus = async () => {
-        //             // Check if it's a group footer row (for groupIncludeFooter)
-        //             if (params?.node?.footer) {
-        //                 // console.log("This is a groupIncludeFooter row. Modal will not open.");
-        //                 return; // Prevent modal from opening for group footer rows
-        //             }
-
-        //             // Ensure allLeafChildren exists and is an array before proceeding
-        //             const allLeafChildren = params.node?.allLeafChildren || [];
-
-        //             // Fetch all the rows under the current group
-        //             const groupedData = allLeafChildren.map(node => node.data) || [];
-        //             setNewGroupedData(groupedData);
-
-        //             // Only show the modal if there is data (groupedData length is greater than 0)
-        //             if (groupedData.length > 0) {
-        //                 const getCampaignResponse = await axios.get(`https://prodapis.adsgoat.in/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`, {
-        //                     headers: {
-        //                         Authorization: token,
-        //                     },
-        //                 });
-        //                 if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
-        //                     setGroupedData(getCampaignResponse.data);
-        //                     setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
-        //                     onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
-        //                 }
-        //                 else {
-        //                     setGroupedData(groupedData);
-        //                 }
-        //                 // Set the grouped data for the modal
-        //                 setIsModalVisible(true); // Show the modal for non-footer rows
-        //             }
-        //         };
-
-        //         const handleOk = async () => {
-        //             setIsModalVisible(false); // Close the modal
-        //             const object = {
-        //                 campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname : groupedData[0]?.campaignname,
-        //                 adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
-        //                 campaignid: !Array.isArray(groupedData) ? groupedData?.campaignid : groupedData[0]?.campaignid,
-        //                 usercommit: userdetails?.email,
-        //                 accountNumber: newaccount,
-        //                 budget: changeBudget * 100,
-        //                 status: campaignStatus
-        //             };
-        //             // console.log(object);
-        //             const requestResponse = await axios.post('https://prodapis.adsgoat.in/Comments/accountNumber/campaign', { formattedData: object }, {
-        //                 headers: {
-        //                     Authorization: token,
-        //                 },
-        //             });
-        //             const responseData = requestResponse.data;
-        //             // console.log(responseData, "response");
-        //             message.success("Budget and Status Updated");
-        //             changeRRefrst();
-        //         };
-
-        //         const handleCancel = () => {
-        //             setIsModalVisible(false);
-        //             // console.log(changeBudget); // Close the modal
-        //         };
-
-        //         const getTotalSpend = (data) => {
-        //             if (!data || data.length === 0) return 0;
-        //             const total = data.reduce((total, item) => {
-        //                 return total + (item?.spend || 0);
-        //             }, 0);
-        //             return Math.round(total * 100) / 100; // Round to 2 decimal places
-        //         };
-
-        //         const onChangeBudgetValue = event => {
-        //             onChangeBudget(event.target.value)
-        //         }
-
-        //         const onChangeCampaignStatus = () => {
-        //             setCampaignStatus((prev) => !prev);
-        //         }
-
-        //         // console.log(groupedData);
-
-        //         return (
-        //             <div>
-        //                 {/* Click action for status cell */}
-        //                 <div onClick={onChangeSpendAndStatus}>
-        //                     <span>{params.value || "..."}</span> {/* Fallback to '...' if status is not available */}
-        //                 </div>
-        //                 {/* Modal should only be shown for non-footer rows and when groupedData length is greater than 0 */}
-        //                 {isModalVisible && (
-        //                     <Modal
-        //                         title={groupedData?.length > 0 && groupedData?.length !== 1 ? groupedData[0]?.campaignname : groupedData?.campaignname}
-        //                         visible={isModalVisible}
-        //                         onOk={handleOk}
-        //                         onCancel={handleCancel}
-        //                         width={600}  // Set a custom width for the modal
-        //                         style={{ padding: '20px' }}  // Adjust body padding
-        //                     >
-        //                         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        //                             {/* Campaign Name and Switch */}
-        //                             {/* <div style={{ display: 'flex', alignItems: 'center' }}>
-        //                                 <Typography.Text strong>Campaign Name:</Typography.Text>
-        //                                 <Typography.Text strong style={{ paddingLeft: '5px' }}>
-        //                                     {`${groupedData[0]?.campaignname || "N/A"}`}
-        //                                 </Typography.Text>
-        //                             </div> */}
-        //                             <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-        //                                 <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-        //                                 <Switch checked={campaignStatus} onChange={onChangeCampaignStatus} />
-        //                             </div>
-
-        //                             {/* Input Field */}
-        //                             <div style={{ display: 'flex', flexDirection: 'column' }}>
-        //                                 <Typography.Text strong style={{ marginBottom: '10px' }}>Budget:</Typography.Text>
-        //                                 <Input placeholder="Enter your value here" defaultValue={groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData)} onChange={onChangeBudgetValue} />
-        //                             </div>
-
-        //                             {/* Campaign ID */}
-        //                             <div style={{ display: 'flex', flexDirection: 'column' }}>
-        //                                 <Typography.Text strong>Campaign ID:</Typography.Text>
-        //                                 <p>{groupedData?.length > 0 && groupedData?.length !== 1 ? groupedData[0]?.campaignid : groupedData.campaignid}</p>
-        //                             </div>
-        //                         </div>
-        //                     </Modal>
-        //                 )}
-        //             </div>
-        //         );
-        //     },
-        // },
         adsetname: {
             headerName: 'AdsetName',
             field: 'adsetname',
@@ -1726,144 +1608,6 @@ const MyTablePage = () => {
             },
             cellRenderer: campaignNameRenderer,
         },
-
-        // actions: {
-        //     headerName: 'Actions',
-        //     field: 'actions',
-        //     minWidth: 90,
-        //     sortable: false,    // Ensure sorting is disabled
-        //     filter: false,      // Ensure filtering is disabled
-        //     enableSorting: false,  // Disable sorting at the column level
-        //     enableFilter: false,
-        //     hide: false,
-        //     suppressMenu: true,
-        //     hide: !isYesterday(),
-        //     cellRenderer: (params) => {
-        //         const [isModalVisible, setIsModalVisible] = useState(false);
-        //         const [newGroupedData, setNewGroupedData] = useState([]);
-        //         const [groupedData, setGroupedData] = useState([]);
-        //         const [changeBudget, setChangeBudget] = useState();
-        //         const [campaignStatus, setCampaignStatus] = useState(true);
-            
-        //         const onChangeSpendAndStatus = async () => {
-        //             if (params?.node?.footer) return;
-            
-        //             const allLeafChildren = params.node?.allLeafChildren || [];
-        //             const groupedData = allLeafChildren.map(node => node.data) || [];
-        //             setNewGroupedData(groupedData);
-            
-        //             if (groupedData.length > 0) {
-        //                 const getCampaignResponse = await axios.get(
-        //                     `https://prodapis.adsgoat.in/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`,
-        //                     { headers: { Authorization: token } }
-        //                 );
-        //                 if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
-        //                     setGroupedData(getCampaignResponse.data);
-        //                     setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
-        //                     setChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100);
-        //                 } else {
-        //                     setGroupedData(groupedData);
-        //                 }
-        //                 setIsModalVisible(true);
-        //             }
-        //         };
-            
-        //         const handleOk = async () => {
-        //             setIsModalVisible(false);
-        //             const object = {
-        //                 campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname : groupedData[0]?.campaignname,
-        //                 adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
-        //                 campaignid: !Array.isArray(groupedData) ? groupedData?.campaignid : groupedData[0]?.campaignid,
-        //                 usercommit: userdetails?.email,
-        //                 accountNumber: newaccount,
-        //                 budget: changeBudget * 100,
-        //                 status: campaignStatus,
-        //             };
-        //             const requestResponse = await axios.post('https://prodapis.adsgoat.in/Comments/accountNumber/campaign', { formattedData: object }, {
-        //                 headers: { Authorization: token },
-        //             });
-        //             message.success("Budget and Status Updated");
-        //             changeRRefrst();
-        //         };
-            
-        //         const handleCancel = () => {
-        //             setIsModalVisible(false);
-        //         };
-            
-        //         const onChangeBudgetValue = (event) => {
-        //             setChangeBudget(event.target.value);
-        //         };
-            
-        //         const onChangeCampaignStatus = async () => {
-        //             const apiEndpoint = campaignStatus
-        //                 ? 'https://prodapis.adsgoat.in/campaignStatusPause/' // Pause campaign
-        //                 : 'https://prodapis.adsgoat.in/campaignStatusActive/'; // Activate campaign
-                
-        //             try {
-        //                 const response = await axios.post(apiEndpoint, 
-        //                     { campaignId: groupedData[0]?.campaignid }, 
-        //                     { headers: { Authorization: token } }
-        //                 );
-        //                 if (response.status === 200) {
-        //                     message.success(`Campaign ${groupedData[0]?.campaignid} status updated to ${campaignStatus ? 'Paused' : 'Active'}`);
-        //                     setCampaignStatus((prev) => !prev); // Toggle the status
-        //                 } else {
-        //                     message.error('Failed to update campaign status.');
-        //                 }
-        //             } catch (error) {
-        //                 console.error('Error updating campaign status:', error);
-        //                 message.error('Error updating campaign status.');
-        //             }
-        //         };
-            
-        //         return (
-        //             <div>
-        //                 <div onClick={onChangeSpendAndStatus}>
-        //                     <span>{params.value || "..."}</span>
-        //                 </div>
-        //                 {isModalVisible && (
-        //                     <Modal
-        //                         title={groupedData?.length > 0 ? groupedData[0]?.campaignname : groupedData?.campaignname}
-        //                         visible={isModalVisible}
-        //                         onOk={handleOk}
-        //                         onCancel={handleCancel}
-        //                         width={600}
-        //                         style={{ padding: '20px' }}
-        //                     >
-        //                         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        //                             <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-        //                                 <Typography.Text strong style={{ paddingRight: '20px' }}>
-        //                                     Campaign Status: Activate/Pause
-        //                                 </Typography.Text>
-        //                                 <Switch checked={campaignStatus} onChange={onChangeCampaignStatus} />
-        //                             </div>
-        //                             <div style={{ display: 'flex', flexDirection: 'column' }}>
-        //                                 <Typography.Text strong style={{ marginBottom: '10px' }}>Budget:</Typography.Text>
-        //                                 <Input
-        //                                     placeholder="Enter your value here"
-        //                                     defaultValue={
-        //                                         groupedData?.budget
-        //                                             ? groupedData?.budget / 100
-        //                                             : getTotalSpend(newGroupedData)
-        //                                     }
-        //                                     onChange={onChangeBudgetValue}
-        //                                 />
-        //                             </div>
-        //                             <div style={{ display: 'flex', flexDirection: 'column' }}>
-        //                                 <Typography.Text strong>Campaign ID:</Typography.Text>
-        //                                 <p>{groupedData?.campaignid}</p>
-        //                             </div>
-        //                         </div>
-        //                     </Modal>
-        //                 )}
-        //             </div>
-        //         );
-        //     },
-            
-        //     filterParams: { filterEnabled: false },
-
-        // },
-        
         actions: {
             headerName: 'Actions',
             field: 'actions',
@@ -1948,7 +1692,6 @@ const MyTablePage = () => {
                 const onChangeBudgetValue = event => {
                     onChangeBudget(event.target.value)
                 }
-
                 const onChangeCampaignStatus = async () => {
                     const apiEndpoint = campaignStatus
                         ? 'https://prodapis.adsgoat.in/campaignStatusPause/' // Pause campaign
@@ -2291,14 +2034,10 @@ const MyTablePage = () => {
                     onChangeBudget(event.target.value)
                 }
 
-                // const onChangeCampaignStatus = () => {
-                //     setCampaignStatus((prev) => !prev);
-                // }
-
                 const onChangeCampaignStatus = async () => {
                     const apiEndpoint = campaignStatus
-                        ? 'http://localhost:8000/campaignStatusPause/' // Pause campaign
-                        : 'http://localhost:8000/campaignStatusActive/'; // Activate campaign
+                        ? 'https://prodapis.adsgoat.in/campaignStatusPause/' // Pause campaign
+                        : 'https://prodapis.adsgoat.in/campaignStatusActive/'; // Activate campaign
                 
                     try {
                         const response = await axios.post(apiEndpoint, 
@@ -2316,7 +2055,6 @@ const MyTablePage = () => {
                         message.error('Error updating campaign status.');
                     }
                 };
-                
 
                 // console.log(groupedData);
 
@@ -2693,27 +2431,9 @@ const MyTablePage = () => {
                     onChangeBudget(event.target.value)
                 }
 
-                const onChangeCampaignStatus = async () => {
-                    const apiEndpoint = campaignStatus
-                        ? 'https://prodapis.adsgoat.in/campaignStatusPause/' // Pause campaign
-                        : 'https://prodapis.adsgoat.in/campaignStatusActive/'; // Activate campaign
-                
-                    try {
-                        const response = await axios.post(apiEndpoint, 
-                            { campaignId: groupedData[0]?.campaignid }, 
-                            { headers: { Authorization: token } }
-                        );
-                        if (response.status === 200) {
-                            message.success(`Campaign ${groupedData[0]?.campaignid} status updated to ${campaignStatus ? 'Paused' : 'Active'}`);
-                            setCampaignStatus((prev) => !prev); // Toggle the status
-                        } else {
-                            message.error('Failed to update campaign status.');
-                        }
-                    } catch (error) {
-                        console.error('Error updating campaign status:', error);
-                        message.error('Error updating campaign status.');
-                    }
-                };
+                const onChangeCampaignStatus = () => {
+                    setCampaignStatus((prev) => !prev);
+                }
 
 
                 // console.log(groupedData);
