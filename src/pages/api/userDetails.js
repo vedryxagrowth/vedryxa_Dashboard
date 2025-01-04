@@ -4,7 +4,7 @@ export default async function handler(req, res) {
   if (req.method === "GET") {
     const { name = "Unknown" } = req.query;
 
-    const userAgent = req.headers["user-agent"] || "Unknown";
+    const userAgent = req.headers["user-agent"] || "";
     console.log("User-Agent:", userAgent);
 
     const parser = new UAParser(userAgent);
@@ -18,7 +18,7 @@ export default async function handler(req, res) {
       const ipData = await ipRes.json();
       ip = ipData.ip || "Unknown";
     } catch (error) {
-      console.error("Error fetching IP address:", error);
+      console.error("Error fetching IP aaddress:", error);
     }
 
     let location = {
