@@ -44,6 +44,7 @@
     "react-loader-spinner": "^6.1.6",
     "react-responsive-carousel": "^3.2.23",
     "react-sticky-box": "^2.0.5",
+    "ua-parser-js": "^2.0.0",
     "uuid": "^9.0.1"
   }
 }

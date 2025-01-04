@@ -1160,9 +1160,27 @@ const MyTablePage = () => {
                     onChangeBudget(event.target.value)
                 }
 
-                const onChangeCampaignStatus = () => {
-                    setCampaignStatus((prev) => !prev);
-                }
+                const onChangeCampaignStatus = async () => {
+                    const apiEndpoint = campaignStatus
+                        ? 'https://prodapis.adsgoat.in/campaignStatusPause/' // Pause campaign
+                        : 'https://prodapis.adsgoat.in/campaignStatusActive/'; // Activate campaign
+                
+                    try {
+                        const response = await axios.post(apiEndpoint, 
+                            { campaignId: groupedData[0]?.campaignid }, 
+                            { headers: { Authorization: token } }
+                        );
+                        if (response.status === 200) {
+                            message.success(`Campaign ${groupedData[0]?.campaignid} status updated to ${campaignStatus ? 'Paused' : 'Active'}`);
+                            setCampaignStatus((prev) => !prev); // Toggle the status
+                        } else {
+                            message.error('Failed to update campaign status.');
+                        }
+                    } catch (error) {
+                        console.error('Error updating campaign status:', error);
+                        message.error('Error updating campaign status.');
+                    }
+                };
 
                 // console.log(groupedData);
 
@@ -1674,10 +1692,27 @@ const MyTablePage = () => {
                 const onChangeBudgetValue = event => {
                     onChangeBudget(event.target.value)
                 }
-
-                const onChangeCampaignStatus = () => {
-                    setCampaignStatus((prev) => !prev);
-                }
+                const onChangeCampaignStatus = async () => {
+                    const apiEndpoint = campaignStatus
+                        ? 'https://prodapis.adsgoat.in/campaignStatusPause/' // Pause campaign
+                        : 'https://prodapis.adsgoat.in/campaignStatusActive/'; // Activate campaign
+                
+                    try {
+                        const response = await axios.post(apiEndpoint, 
+                            { campaignId: groupedData[0]?.campaignid }, 
+                            { headers: { Authorization: token } }
+                        );
+                        if (response.status === 200) {
+                            message.success(`Campaign ${groupedData[0]?.campaignid} status updated to ${campaignStatus ? 'Paused' : 'Active'}`);
+                            setCampaignStatus((prev) => !prev); // Toggle the status
+                        } else {
+                            message.error('Failed to update campaign status.');
+                        }
+                    } catch (error) {
+                        console.error('Error updating campaign status:', error);
+                        message.error('Error updating campaign status.');
+                    }
+                };
 
 
                 // console.log(groupedData);
@@ -1999,9 +2034,27 @@ const MyTablePage = () => {
                     onChangeBudget(event.target.value)
                 }
 
-                const onChangeCampaignStatus = () => {
-                    setCampaignStatus((prev) => !prev);
-                }
+                const onChangeCampaignStatus = async () => {
+                    const apiEndpoint = campaignStatus
+                        ? 'https://prodapis.adsgoat.in/campaignStatusPause/' // Pause campaign
+                        : 'https://prodapis.adsgoat.in/campaignStatusActive/'; // Activate campaign
+                
+                    try {
+                        const response = await axios.post(apiEndpoint, 
+                            { campaignId: groupedData[0]?.campaignid }, 
+                            { headers: { Authorization: token } }
+                        );
+                        if (response.status === 200) {
+                            message.success(`Campaign ${groupedData[0]?.campaignid} status updated to ${campaignStatus ? 'Paused' : 'Active'}`);
+                            setCampaignStatus((prev) => !prev); // Toggle the status
+                        } else {
+                            message.error('Failed to update campaign status.');
+                        }
+                    } catch (error) {
+                        console.error('Error updating campaign status:', error);
+                        message.error('Error updating campaign status.');
+                    }
+                };
 
                 // console.log(groupedData);
 

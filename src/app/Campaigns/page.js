@@ -4,6 +4,8 @@ import { Table, Tag, Button, Col, Card, Drawer, Dropdown, Flex, Input, Row, Sele
 import { EditOutlined, EyeOutlined, SearchOutlined, CloseOutlined, SwapRightOutlined, PlusOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, ExclamationCircleFilled, ReloadOutlined, LinkOutlined } from "@ant-design/icons";
 import CreateCampaignDrawer from './camp-components/create_camapaign';
 import ViewDrawer from './camp-components/view-campaign';
+// import EditOnlyCampaignDrawer from './camp-components/EditCamp';
+import EditCampaignDrawer1 from './camp-components/EditCamp';
 import axios from 'axios';
 import EditCampaignDrawer from './camp-components/edit-campaign';
 import { useTokenContext } from '../components/parent';
@@ -44,7 +46,9 @@ const App = () => {
     const [dupdrawerVisible, setdupDrawerVisible] = useState(false);
     const [campaignData, setCampaignData] = useState([]);
     const [viewDrawerVisible, setViewDrawerVisible] = useState(false);
+    const [editOnlyDrawerVisible, setEditOnlyDrawerVisible] = useState(false);
     const [selectedRowData, setSelectedRowData] = useState(null);
+    const [selectedOnlyEditData, setSelectedOnlyEditData] = useState(null);
     const [viewEditDrawerVisible, setViewEditDrawerVisible] = useState(false);
     const [selectedEditRowData, setSelectedEditRowData] = useState(null);
     const [EditcamapaignDrawerVisible, setEditcamapaignDrawerVisible] = useState(false);
@@ -141,9 +145,15 @@ const App = () => {
     // var token = localStorage.getItem("token");
 
     const handleViewClick = (record) => {
-        console.log(record, "viewdata campaign")
+        console.log(record, "viewdata campaign");
         setSelectedRowData(record);
         setViewDrawerVisible(true);
+    };
+
+    const handleEditOnlyClick = (record) => {
+        console.log(record, "viewdata campaign")
+        setSelectedOnlyEditData(record);
+        setEditOnlyDrawerVisible(true);
     };
     // const handleEditClick = (record) => {
     //     console.log(record, "Editdata")
@@ -852,17 +862,28 @@ const App = () => {
             dataIndex: 'Action',
             align: "center",
             render: (_, record) => {
+                // console.log('Record in Action column:', record);
+                // console.log('fbstatus:', record.fbstatus);
+
                 if (record.Approval === 'Approved') {
                     return (
-                        <Button icon={<EyeOutlined />} onClick={() => handleViewClick(record)}>View</Button>
+                        <Button icon={<EyeOutlined />} onClick={() => handleViewClick(record)}></Button>
                     )
-                }
+                } 
+                // if (record.fbstatus === 'Live'){
+                //     return (
+                //         <Button icon={<EditOutlined />} onClick={() => handleEditOnlyClick(record)}></Button> 
+                //     )
+                // }
 
                 return (
                     <Space size="middle">
-                        <Button icon={<EyeOutlined />} onClick={() => handleViewClick(record)}>View</Button>
+                        <Button icon={<EyeOutlined />} onClick={() => handleViewClick(record)}></Button>
                         {record.Approval === 'PENDING_APPROVAL' && (
                             <Button type="primary" onClick={() => handleApproval(record)}>Approve</Button>
+                        )}
+                        {record.fbstatus !== 'Live' && (
+                            <Button icon={<EditOutlined />} onClick={() => handleEditOnlyClick(record)}></Button> 
                         )}
                         <Modal
                             title="Confirm Approval"
@@ -899,6 +920,12 @@ const App = () => {
                 visible={viewEditDrawerVisible}
                 changeRRefrst={changeRRefrst}
                 onClose={() => setViewEditDrawerVisible(false)}
+            />
+             <EditCampaignDrawer1
+                rowData={selectedOnlyEditData}
+                visible={editOnlyDrawerVisible}
+                changeRRefrst={changeRRefrst}
+                onClose={() => setEditOnlyDrawerVisible(false)}
             />
             {/* <Editcam
                 rowData={selectedEditCampaign}
@@ -941,11 +968,6 @@ const App = () => {
                                 </Option>
                             ))}
                         </Select>
-
-
-
-
-
                     </Col> */}
                     <Col span={4}>
                         <Select
