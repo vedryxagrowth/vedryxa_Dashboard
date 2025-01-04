@@ -4,7 +4,7 @@ export default async function handler(req, res) {
   if (req.method === "GET") {
     const { name = "Unknown" } = req.query;
 
-    const userAgent = req.headers["user-agent"] || "Unknown";
+    const userAgent = req.headers["user-agent"] || "";
     console.log("User-Agent:", userAgent);
 
     const parser = new UAParser(userAgent);
