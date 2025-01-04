@@ -1,10 +1,10 @@
 {
   "pages": {
-    "/Dashboard/page": [
+    "/Reports/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/Dashboard/page.css",
-      "static/chunks/app/Dashboard/page.js"
+      "static/css/app/Reports/page.css",
+      "static/chunks/app/Reports/page.js"
     ],
     "/layout": [
       "static/chunks/webpack.js",
@@ -12,53 +12,11 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/Reports/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/Reports/page.css",
-      "static/chunks/app/Reports/page.js"
-    ],
-    "/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page.css",
-      "static/chunks/app/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page.js"
-    ],
-    "/LiveHistory/LiveCampaignHistory/[CampaignName]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/LiveHistory/LiveCampaignHistory/[CampaignName]/page.css",
-      "static/chunks/app/LiveHistory/LiveCampaignHistory/[CampaignName]/page.js"
-    ],
-    "/AllCampaigns/CampaignHistory/[CampaignName]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/AllCampaigns/CampaignHistory/[CampaignName]/page.css",
-      "static/chunks/app/AllCampaigns/CampaignHistory/[CampaignName]/page.js"
-    ],
-    "/AllCampaigns/AdsetHistory/[AdsetName]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/AllCampaigns/AdsetHistory/[AdsetName]/page.css",
-      "static/chunks/app/AllCampaigns/AdsetHistory/[AdsetName]/page.js"
-    ],
-    "/Creatives/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/Creatives/page.css",
-      "static/chunks/app/Creatives/page.js"
-    ],
     "/Campaigns/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/css/app/Campaigns/page.css",
       "static/chunks/app/Campaigns/page.js"
-    ],
-    "/NewUser/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/NewUser/page.css",
-      "static/chunks/app/NewUser/page.js"
     ]
   }
 }
