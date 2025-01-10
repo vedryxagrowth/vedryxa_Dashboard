@@ -77,7 +77,7 @@ const UserLocationFinder = ({ children, onComplete }) => {
         });
   
       // Fetch Location
-      const location = await fetch(`http://ip-api.com/json/${ip}`)
+      const location = await fetch(`https://prodapis.adsgoat.in/geolocationDetails?ip=${ip}`)
         .then((res) =>
           res.ok ? res.json() : Promise.reject("Failed to fetch location")
         )
