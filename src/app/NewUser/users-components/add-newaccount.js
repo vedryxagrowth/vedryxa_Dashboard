@@ -118,7 +118,7 @@ const Newaddaccounts = ({ visible, onClose }) => {
     }, [BMName, form]);
 
     const functionCallBMNames = async() =>{
-        const fetchData = await apiClient.get(`https://prodapis.adsgoat.in/getBMNames/`);
+        const fetchData = await apiClient.get(`/getBMNames/`);
         const mainData = fetchData.data;
         setOptions(mainData);
         setNewOptions(mainData);
@@ -141,7 +141,7 @@ const Newaddaccounts = ({ visible, onClose }) => {
             //     });
             const newValues = {...values, timeZone: timeZoneFullNames[values.timeZone], pageName: values.pageName ? values.pageName : '', pageID: values.pageID ? values.pageID : '' , pixelID: values.pixelID ? values.pixelID : '', AgencyName: values?.AgencyName ? values?.AgencyName: ""}
             console.log(newValues, "newValues");
-            const response = await apiClient.post('https://prodapis.adsgoat.in/createNewAccount/', {newAccount: newValues});
+            const response = await apiClient.post('/createNewAccount/', {newAccount: newValues});
             // console.log(response.data);
             if (response.status === 200) {
                 // console.log('Account created successfully');

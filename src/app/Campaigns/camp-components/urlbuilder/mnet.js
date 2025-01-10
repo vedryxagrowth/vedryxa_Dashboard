@@ -8,6 +8,7 @@ import TextArea from 'antd/es/input/TextArea';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import { v4 as uuidv4 } from 'uuid';
+import { useTokenContext } from '../../../components/parent';
 const MnetUrlBuilder = ({ onReturnMessage, showSubmitButton }) => {
   // Initial data array
   const [domain, setDomain] = useState(null);
@@ -18,6 +19,7 @@ const MnetUrlBuilder = ({ onReturnMessage, showSubmitButton }) => {
   const [keywords, setKeyWords] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [NetworkData, setNetworkData] = useState([]);
+  const { apiClient } = useTokenContext();
 
 
   // const MnetDomains = [
@@ -178,7 +180,7 @@ const MnetUrlBuilder = ({ onReturnMessage, showSubmitButton }) => {
   // ];
 
   const getUrlBuilderData = async () => {
-    const response = await axios.get(`https://prodapis.adsgoat.in/get/urlbuilderdata?network=Mnet`);
+    const response = await apiClient.get(`/get/urlbuilderdata?network=Mnet`);
     if (response?.status === 200) {
       setNetworkData(response?.data)
     }

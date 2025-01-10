@@ -288,14 +288,14 @@ const MyTablePage = () => {
 
     const [account, setAccount] = useState(accountNumberFromDashboard ? accountNumberFromDashboard : accountsForAccess[0].accountNumber);
 
-    const [time, setTime] = useState(timeFromDashboard ? timeFromDashboard : 'UTC');
+    const [time, setTime] = useState(timeFromDashboard ? timeFromDashboard : (revenuePratner === "FB_DomainActive" || revenuePratner === "FB_Tonic1") ? "PDT" : "UTC");
 
     const [newaccount, setNewAccount] = useState(accountNumberFromDashboard ? accountNumberFromDashboard : accountsForAccess[0].accountNumber);
 
     const [accountName, setAccountName] = useState(accountsForAccess[0]?.accountName);
 
     const [newAccountName, setnewAccountName] = useState(accountsForAccess[0]?.accountName);
-    const [newtime, setNewTime] = useState(timeFromDashboard ? timeFromDashboard : 'UTC');
+    const [newtime, setNewTime] = useState(timeFromDashboard ? timeFromDashboard : (revenuePratner === "FB_DomainActive" || revenuePratner === "FB_Tonic1") ? "PDT" : "UTC");
 
     const [pageSize, setPageSize] = useState(1);
 
@@ -1162,13 +1162,12 @@ const MyTablePage = () => {
 
                 const onChangeCampaignStatus = async () => {
                     const apiEndpoint = campaignStatus
-                        ? 'https://prodapis.adsgoat.in/campaignStatusPause/' // Pause campaign
-                        : 'https://prodapis.adsgoat.in/campaignStatusActive/'; // Activate campaign
+                        ? '/campaignStatusPause/' // Pause campaign
+                        : '/campaignStatusActive/'; // Activate campaign
                 
                     try {
-                        const response = await axios.post(apiEndpoint, 
-                            { campaignId: groupedData[0]?.campaignid }, 
-                            { headers: { Authorization: token } }
+                        const response = await apiClient.post(apiEndpoint, 
+                            { campaignId: groupedData[0]?.campaignid }
                         );
                         if (response.status === 200) {
                             message.success(`Campaign ${groupedData[0]?.campaignid} status updated to ${campaignStatus ? 'Paused' : 'Active'}`);
@@ -2891,7 +2890,8 @@ const MyTablePage = () => {
             return;  // Stop execution if token is missing
         }
         // console.log(newRevenuePratner);
-        const fetchData = await apiClient.get(`/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`);
+        const collectionName = newRevenuePratner === "FB_DomainActive" ? "Facebook_DActive_Names" : newtworkCollections[newRevenuePratner];
+        const fetchData = await apiClient.get(`/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${collectionName}`);
         const mainData = fetchData.data;
         let campaignComments = [];
 
@@ -3247,7 +3247,8 @@ const MyTablePage = () => {
 
     const functionCall2 = async () => {
         try {
-            const fetchData = await apiClient.get(`/Daily?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`);
+            const api = newRevenuePratner === "FB_DomainActive" ? "Daily/CampaignName" : "Daily";
+            const fetchData = await apiClient.get(`/${api}?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`);
             const mainData = fetchData.data;
             // console.log(mainData, "mainData of functionCall2");
             let totalSpend = 0;
@@ -3987,8 +3988,8 @@ const MyTablePage = () => {
                 await functionCall3();
                 if (newRevenuePratner === "FB_DomainActive") {
                     await functionCall4();
-                    await campaignNamesDataForDActiveLive();
-                    await campaignNamesDataForDActiveDaily();
+                    // await campaignNamesDataForDActiveLive();
+                    // await campaignNamesDataForDActiveDaily();
                 } else if (newRevenuePratner === "FB_System1") {
                     await functionCall5();
                 }else if(newRevenuePratner === "FB_Tonic1"){
@@ -4017,8 +4018,8 @@ const MyTablePage = () => {
                 // await functionCall5(); 
                 if (newRevenuePratner === "FB_DomainActive") {
                     await functionCall4();
-                    await campaignNamesDataForDActiveLive();
-                    await campaignNamesDataForDActiveDaily();
+                    // await campaignNamesDataForDActiveLive();
+                    // await campaignNamesDataForDActiveDaily();
                 } else if (newRevenuePratner === "FB_System1") {
                     await functionCall5();
                 }else if(newRevenuePratner === "FB_Tonic1"){
@@ -5907,7 +5908,7 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
             if (!campaignB) return -1;
 
             const getStarredForCampaign = (campaignName) => {
-                const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+                const relatedComment = campaignComments.find(comment => comment?.campaignname === campaignName);
                 return relatedComment ? relatedComment.starred : false;
             };
 
@@ -5927,18 +5928,18 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                     return 'Total';
                 }
 
-                const firstColumnValue = params.node.key;  // campaign name
-                const campaignName = params.node.key;
+                const firstColumnValue = params?.node?.key;  // campaign name
+                const campaignName = params?.node?.key;
 
                 let campaignid, adsetid;
 
-                if (params.node.group && params.node.childrenAfterGroup && params.node.childrenAfterGroup.length > 0) {
-                    const firstChild = params.node.childrenAfterGroup[0].data;
-                    campaignid = firstChild.campaignid;
-                    adsetid = firstChild.adsetid;
-                } else if (params.data) {
-                    campaignid = params.data.campaignid;
-                    adsetid = params.data.adsetid;
+                if (params?.node?.group && params?.node?.childrenAfterGroup && params?.node?.childrenAfterGroup?.length > 0) {
+                    const firstChild = params?.node?.childrenAfterGroup[0]?.data;
+                    campaignid = firstChild?.campaignid;
+                    adsetid = firstChild?.adsetid;
+                } else if (params?.data) {
+                    campaignid = params?.data?.campaignid;
+                    adsetid = params?.data?.adsetid;
                 } else {
                     console.error('Missing campaignid or adsetid for campaign:', campaignName);
                     return (
@@ -5948,28 +5949,28 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                     );
                 }
                 const getEditedUserAndTime = (campaignName, newaccount) => {
-                    const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
+                    const relatedStatus = campaignComments?.find(comment => comment?.campaignname === campaignName && comment?.Account === newaccount);
                     // console.log(relatedStatus, "relatedStatus");
                     const relatedStatusEditedTime = relatedStatus ? relatedStatus : null;
                     // console.log(relatedStatusTrue);
                     return relatedStatusEditedTime;
                 }
                 const getStatusForCampaign = (campaignName, newaccount) => {
-                    const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
+                    const relatedStatus = campaignComments?.find(comment => comment?.campaignname === campaignName && comment?.Account === newaccount);
                     // console.log(relatedStatus, "relatedStatus");
-                    const relatedStatusTrue = relatedStatus !== undefined && relatedStatus.status === true ? true : relatedStatus !== undefined ? false : null;
+                    const relatedStatusTrue = relatedStatus !== undefined && relatedStatus?.status === true ? true : relatedStatus !== undefined ? false : null;
                     // console.log(relatedStatusTrue);
                     return relatedStatusTrue;
                 }
 
                 const getCommentForCampaign = (campaignName) => {
-                    const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
-                    return relatedComment ? relatedComment.comment : null;
+                    const relatedComment = campaignComments?.find(comment => comment?.campaignname === campaignName);
+                    return relatedComment ? relatedComment?.comment : null;
                 };
 
                 const getStarredForCampaign = (campaignName) => {
-                    const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
-                    return relatedComment ? relatedComment.starred : false;
+                    const relatedComment = campaignComments?.find(comment => comment?.campaignname === campaignName);
+                    return relatedComment ? relatedComment?.starred : false;
                 };
                 const editUserANdTime = getEditedUserAndTime(campaignName, newaccount);
                 const relatedStatus = getStatusForCampaign(campaignName, newaccount);
@@ -5983,7 +5984,7 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                 const [starred, setStarred] = useState(isStarred);
 
                 const copyToClipboard = () => {
-                    navigator.clipboard.writeText(firstColumnValue)
+                    navigator?.clipboard?.writeText(firstColumnValue)
                         .then(() => {
                             setTooltipText("Copied!");
                             setTimeout(() => setTooltipText("Click to Copy"), 2000);
@@ -6011,11 +6012,11 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                 const sendEditedCommentToAPI = async (logData) => {
                     try {
                         const response = await apiClient.post('/Comments/edit', {
-                            campaignname: logData.campaignname,
-                            comment: logData.comment,
-                            Account: logData.Account,
-                            adsetid: logData.adsetid,
-                            campaignid: logData.campaignid,
+                            campaignname: logData?.campaignname,
+                            comment: logData?.comment,
+                            Account: logData?.Account,
+                            adsetid: logData?.adsetid,
+                            campaignid: logData?.campaignid,
                             status: true
                         });
                         console.log('Response from server (edited comment):', response.data);
@@ -6048,7 +6049,7 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                     await sendStarStatusToAPI(firstColumnValue, updatedStarred);
                     message.success(updatedStarred ? "Campaign starred!" : "Campaign unstarred!");
 
-                    const updatedComments = campaignComments.map(cmt =>
+                    const updatedComments = campaignComments?.map(cmt =>
                         cmt.campaignname === firstColumnValue ? { ...cmt, starred: updatedStarred } : cmt
                     );
                     setCampaignComments(updatedComments);
@@ -6075,7 +6076,7 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                         }
 
                         const updatedComments = relatedComment
-                            ? campaignComments.map(cmt => (cmt.campaignname === firstColumnValue ? { ...cmt, comment } : cmt))
+                            ? campaignComments?.map(cmt => (cmt.campaignname === firstColumnValue ? { ...cmt, comment } : cmt))
                             : [...campaignComments, logData];
                         setCampaignComments(updatedComments);
 
@@ -6103,7 +6104,7 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                         <div style={{ marginLeft: '10px' }}>
                             {(() => {
                                 // Find the matching campaign in the Camapignlevelstatus array
-                                const campaignStatus = Camapignlevelstatus.find(statusObj => statusObj.name === campaignName);
+                                const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
 
                                 if (campaignStatus) {
                                     const { status, start, end } = campaignStatus;
@@ -6841,8 +6842,8 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
         ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
         ...(newRevenuePratner === "FB_System1" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : []),
         ...(newRevenuePratner === "FB_Tonic1" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
-        ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '6', label: 'Names-Live', content: 'Content for Names Live data' }] : []),
-        ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '7', label: 'Names-Daily', content: 'Content for Names Daily data' }] : []),
+        // ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '6', label: 'Names-Live', content: 'Content for Names Live data' }] : []),
+        // ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '7', label: 'Names-Daily', content: 'Content for Names Daily data' }] : []),
     ];
     const handleSlideChange = (from, to) => {
         // console.log(to, "to");
@@ -7669,7 +7670,7 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                             }}
                                             onFilterChanged={(params) => {
                                                 try {
-                                                    const api = params.api;
+                                                    const api = params?.api;
                                                     const filteredData = [];
                                             
                                                     // Collect filtered data
