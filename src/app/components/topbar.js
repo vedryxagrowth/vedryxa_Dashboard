@@ -16,6 +16,7 @@ import { getSession } from 'next-auth/react';
 import debounce from 'lodash.debounce';
 import soundFile from "../../../public/notification_sounds.mp3";
 import jwt from 'jsonwebtoken';
+import { UAParser } from "ua-parser-js";
 
 import { message } from 'antd';
 
@@ -64,6 +65,90 @@ const items = (setuserdetails, router) => [
   },
 ];
 
+async function getUserDetails(name) {
+  // Get user agent details
+  const userAgent = navigator.userAgent || "";
+  const parser = new UAParser(userAgent);
+  const device = parser.getDevice();
+  let deviceType = device?.type || "desktop";
+
+  // Fetch public IP
+  let ip = "Unknown";
+  try {
+    const ipRes = await fetch("https://api64.ipify.org?format=json");
+    if (!ipRes.ok) throw new Error("Failed to fetch IP address");
+    const ipData = await ipRes.json();
+    ip = ipData.ip || "Unknown";
+  } catch (error) {
+    console.error("Error fetching IP address:", error);
+  }
+
+  // Fetch location based on IP
+  let location = {
+    status: "Unknown",
+    country: "Unknown",
+    countryCode: "Unknown",
+    region: "Unknown",
+    regionName: "Unknown",
+    city: "Unknown",
+    zip: "Unknown",
+    lat: "Unknown",
+    lon: "Unknown",
+    timezone: "Unknown",
+    isp: "Unknown",
+    org: "Unknown",
+    as: "Unknown",
+    query: ip,
+  };
+
+  try {
+    const geoRes = await fetch(`http://ip-api.com/json/${ip}`);
+    if (!geoRes.ok) throw new Error("Failed to fetch location data");
+    const geoData = await geoRes.json();
+    if (geoData.status === "success") {
+      location = { ...geoData };
+    }
+  } catch (error) {
+    console.error("Error fetching location:", error);
+  }
+
+  // Get current timestamp in IST
+  const now = new Date();
+  const istFormatter = new Intl.DateTimeFormat("en-IN", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+
+  const istTimestamp = istFormatter.format(now);
+
+  console.log({
+    timestamp: istTimestamp,
+    ip,
+    location,
+    device: {
+      type: deviceType,
+    },
+    userAgent,
+    name
+  });
+
+  return {
+    timestamp: istTimestamp,
+    ip,
+    location,
+    device: {
+      type: deviceType,
+    },
+    userAgent,
+    name
+  };
+}
+
 const Topbar = () => {
   const { darkMode, toggleTheme } = useTokenContext();
   const router = useRouter();
@@ -79,6 +164,8 @@ const Topbar = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const wrapperRef = useRef(null);
+  
+  const { apiClient } = useTokenContext();
 
   const notificationIconRef = useRef(null); // Ref for the notification icon
   const [modalPosition, setModalPosition] = useState({ top: 0, right: 0 }); // Modal position
@@ -99,15 +186,10 @@ const Topbar = () => {
 
     try {
       console.log('Marking notification as viewed:', notification._id);
-      const response = await axios.post('https://prodapis.adsgoat.in/Notifications/view', {
+      const response = await apiClient.post('/Notifications/view', {
         email: userdetails?.email,
         notificationId: notification._id,
-      },
-        {
-          headers: {
-            Authorization: tokenForAuth,
-          }
-        });
+      });
 
       if (response.status === 200) {
         console.log('Notification marked as viewed and removed:', notification._id);
@@ -154,14 +236,7 @@ const Topbar = () => {
         // console.log(tokenForAuth);
         let response;
         if(isNotificationsFetched.current === false){
-          response = await axios.get(
-            `https://prodapis.adsgoat.in/Notifications/get?email=${userdetails?.email}`,
-            {
-              headers: {
-                Authorization: tokenForAuth,
-              }
-            }
-          );
+          response = await apiClient.get(`/Notifications/get?email=${userdetails?.email}`);
         }
         if (response.status === 200) {
           setNotifications(response.data.notifications);
@@ -217,16 +292,10 @@ const Topbar = () => {
     }
 
     try {
-      const response = await axios.post('https://prodapis.adsgoat.in/Notifications/add', {
+      const response = await apiClient.post('/Notifications/add', {
         title,
         description,
-      },
-        {
-          headers: {
-            Authorization: tokenForAuth,
-          }
-        }
-      );
+      });
 
       if (response.status === 200) {
         message.success('Notification added to all users');
@@ -896,6 +965,8 @@ const LayoutWrapper = ({ children, usersDataForLogin }) => {
   const [initialized, setInitialized] = useState(false);
   const [usersData, setUsersData] = useState([]);
   const { setuserdetails } = useTokenContext();
+  const { apiClient } = useTokenContext();
+  
   const isCalledRef = useRef(false);  // To ensure getUsersData API is called only once
   const [useractivites,setuseractivites]=useState({})
   useEffect(() => {
@@ -972,11 +1043,11 @@ const LayoutWrapper = ({ children, usersDataForLogin }) => {
               for (let item of MediaBuyerkeysOfAdAccounts) {
                 if (MediaBuyeradAccounts[item][0] === "All") {
                   // Retry logic for Accounts API
-                  const networkResponse = await retryFetch(() => axios.get(`https://prodapis.adsgoat.in/network/Accounts?network=${item}`));
+                  const networkResponse = await retryFetch(() => apiClient.get(`/network/Accounts?network=${item}`));
                   MediaBuyernewObject[item] = networkResponse.data;
                 } else {
                   const response = await retryFetch(() =>
-                    axios.post('https://prodapis.adsgoat.in/getAccountNameandStatusofNetwork/', { updatedNetwork: MediaBuyeradAccounts[item] })
+                    apiClient.post('/getAccountNameandStatusofNetwork/', { updatedNetwork: MediaBuyeradAccounts[item] })
                   );
                   MediaBuyernewObject[item] = response.data;
                 }
@@ -1016,11 +1087,11 @@ const LayoutWrapper = ({ children, usersDataForLogin }) => {
                 if (SpecialUseradAccounts[item][0] === "All") {
                   // Retry logic for Accounts API
                   console.log(item);
-                  const networkResponse = await retryFetch(() => axios.get(`https://prodapis.adsgoat.in/network/Accounts?network=${item}`));
+                  const networkResponse = await retryFetch(() => apiClient.get(`/network/Accounts?network=${item}`));
                   SpecialUsernewObject[item] = networkResponse.data;
                 } else {
                   const response = await retryFetch(() =>
-                    axios.post('https://prodapis.adsgoat.in/getAccountNameandStatusofNetwork/', { updatedNetwork: SpecialUseradAccounts[item] })
+                    apiClient.post('/getAccountNameandStatusofNetwork/', { updatedNetwork: SpecialUseradAccounts[item] })
                   );
                   SpecialUsernewObject[item] = response.data;
                 }
@@ -1038,11 +1109,11 @@ const LayoutWrapper = ({ children, usersDataForLogin }) => {
               for (let item of ManagerkeysOfAdAccounts) {
                 if (ManageradAccounts[item][0] === "All") {
                   // Retry logic for Accounts API
-                  const networkResponse = await retryFetch(() => axios.get(`https://prodapis.adsgoat.in/network/Accounts?network=${item}`));
+                  const networkResponse = await retryFetch(() => apiClient.get(`/network/Accounts?network=${item}`));
                   ManagernewObject[item] = networkResponse.data;
                 } else {
                   const response = await retryFetch(() =>
-                    axios.post('https://prodapis.adsgoat.in/getAccountNameandStatusofNetwork/', { updatedNetwork: ManageradAccounts[item] })
+                    apiClient.post('/getAccountNameandStatusofNetwork/', { updatedNetwork: ManageradAccounts[item] })
                   );
                   ManagernewObject[item] = response.data;
                 }
@@ -1053,7 +1124,7 @@ const LayoutWrapper = ({ children, usersDataForLogin }) => {
             // Case Admin
             case 'Admin':
               // Retry logic for All Accounts API
-              const AllAccountsData = await retryFetch(() => axios.get(`https://prodapis.adsgoat.in/All/Accounts/`));
+              const AllAccountsData = await retryFetch(() => apiClient.get(`/All/Accounts/`));
               const responseData = AllAccountsData.data;
               // console.log(responseData, "responseData");
               setuserdetails({ ...usersDataForLogin[0], adAccounts: responseData });
@@ -1078,32 +1149,30 @@ const LayoutWrapper = ({ children, usersDataForLogin }) => {
           
         //   console.log("Token has expired.");
         // }
+        
+        
+
         // if (!localStorage.getItem("token")) {
         //   const email = session.user.email;
         //   const tokenResponse = await retryFetch(() => axios.post('/api/auth/jwt', { email }));
         //   const token = tokenResponse.data.token;
         //   localStorage.setItem("token", token);
+        //   const response = await getUserDetails(email);
+        //   console.log(response,"hellooaxios.post")
+        //   setuseractivites(response)
         // }
-        
-
-        if (!localStorage.getItem("token")) {
-          const email = session.user.email;
-          const tokenResponse = await retryFetch(() => axios.post('/api/auth/jwt', { email }));
-          const token = tokenResponse.data.token;
-          localStorage.setItem("token", token);
-          const response = await retryFetch(() => axios.get(`/api/userDetails?name=${email}`));
-          console.log(response?.data,"hellooaxios.post")
-          setuseractivites(response.data)
-        }
-        else if(decodedToken && decodedToken.exp < Math.floor(Date.now() / 1000)){
-          const email = session.user.email;
-          const tokenResponse = await retryFetch(() => axios.post('/api/auth/jwt', { email }));
-          const token = tokenResponse.data.token;
-          localStorage.setItem("token", token);
-        }
-        else {
-          console.log("Token is already stored:", localStorage.getItem("token"));
-        }
+        // else if(decodedToken && decodedToken.exp < Math.floor(Date.now() / 1000)){
+        //   const email = session.user.email;
+        //   // const tokenResponse = await retryFetch(() => axios.post('/api/auth/jwt', { email }));
+        //   // const token = tokenResponse.data.token;
+        //   // localStorage.setItem("token", token);
+        //   localStorage.clear();
+        //   localStorage.setItem('redirectUrl', router.asPath);
+        //   signOut();
+        // }
+        // else {
+        //   console.log("Token is already stored:", localStorage.getItem("token"));
+        // }
       } catch (error) {
         console.error('Error during API call:', error);
       } finally {

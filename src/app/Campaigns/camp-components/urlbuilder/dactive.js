@@ -8,6 +8,7 @@ import TextArea from 'antd/es/input/TextArea';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import { v4 as uuidv4 } from 'uuid';
+import { useTokenContext } from '../../../components/parent';
 const DActiveUrlBuilder = ({ onReturnMessage, showSubmitButton }) => {
   // Initial data array
   const [source, setSource] = useState("None");
@@ -18,9 +19,10 @@ const DActiveUrlBuilder = ({ onReturnMessage, showSubmitButton }) => {
   const [errorMessage, setErrorMessage] = useState('');
   const [NetworkData, setNetworkData]= useState([]);
   const [generatedUrl, setGeneratedUrl] = useState(""); // To store the generated URL
+  const { apiClient } = useTokenContext();
 
   const getUrlBuilderData = async()=>{
-    const response = await axios.get(`https://prodapis.adsgoat.in/get/urlbuilderdata?network=DActive`);
+    const response = await apiClient.get(`/get/urlbuilderdata?network=DActive`);
     if(response?.status === 200){
       setNetworkData(response?.data)
     }

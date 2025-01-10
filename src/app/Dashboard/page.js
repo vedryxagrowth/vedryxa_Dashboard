@@ -687,17 +687,17 @@ const RevenuePartnerDashboard = () => {
                                         const updatedFooter = [
                                             {
                                                 [`${timeZoneForColumnDefs.current}Date`]: 'Totals',
-                                                spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
-                                                revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
-                                                profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
+                                                spend: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
+                                                revenue: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
+                                                profit: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
                                                 margin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
                                                 rpc: parseFloat(
-                                                    (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc || 0), 0) / filteredData.length || 0).toFixed(2)
+                                                    (filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.rpc || 0), 0) / filteredData?.length || 0).toFixed(2)
                                                 ),
                                                 cpl: parseFloat(
-                                                    (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl || 0), 0) / filteredData.length || 0).toFixed(2)
+                                                    (filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.cpl || 0), 0) / filteredData?.length || 0).toFixed(2)
                                                 ),
-                                                impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0).toFixed(2)),
+                                                impressions: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0).toFixed(2)),
                                             },
                                         ];
 
@@ -749,17 +749,17 @@ const RevenuePartnerDashboard = () => {
                                             const updatedFooter = [
                                                 {
                                                     [`${timeZoneForColumnDefs.current}Date`]: 'Totals',
-                                                    spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
-                                                    revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
-                                                    profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
+                                                    spend: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
+                                                    revenue: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
+                                                    profit: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
                                                     margin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
                                                     rpc: parseFloat(
-                                                        (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc || 0), 0) / filteredData.length || 0).toFixed(2)
+                                                        (filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.rpc || 0), 0) / filteredData.length || 0).toFixed(2)
                                                     ),
                                                     cpl: parseFloat(
-                                                        (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl || 0), 0) / filteredData.length || 0).toFixed(2)
+                                                        (filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.cpl || 0), 0) / filteredData.length || 0).toFixed(2)
                                                     ),
-                                                    impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0).toFixed(2)),
+                                                    impressions: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0).toFixed(2)),
                                                 },
                                             ];
 
@@ -957,7 +957,7 @@ const Dashboard = () => {
     };
     
     function getTotalEstimatedRevenue(fullData) {
-        const total = fullData.reduce((sum, item) => {
+        const total = fullData?.reduce((sum, item) => {
             // Check if 'estimated_revenue' exists in the object and is a number
             if (item.estimated_revenue && typeof item.estimated_revenue === 'number') {
                 return sum + item.estimated_revenue;
@@ -982,7 +982,7 @@ const Dashboard = () => {
     // }getTotalEstimatedProfit
 
     function getTotalEstimatedSpend(fullData) {
-        const total = fullData.reduce((sum, item) => {
+        const total = fullData?.reduce((sum, item) => {
             // Check if 'estimated_revenue' exists in the object and is a number
             if (item.spend) {
                 return sum + parseFloat(item.spend);
@@ -999,7 +999,7 @@ const Dashboard = () => {
     }
 
     function getTotalLeads(fullData) {
-        const total = fullData.reduce((sum, item) => {
+        const total = fullData?.reduce((sum, item) => {
             // Check if 'estimated_revenue' exists in the object and is a number
             if (item.fbLeads) {
                 return sum + parseInt(item.fbLeads);
@@ -1012,7 +1012,7 @@ const Dashboard = () => {
     }
 
     function getTotalConversions(fullData) {
-        const total = fullData.reduce((sum, item) => {
+        const total = fullData?.reduce((sum, item) => {
             // Check if 'estimated_revenue' exists in the object and is a number
             if (item.conversions) {
                 return sum + parseInt(item.conversions);
@@ -1026,21 +1026,21 @@ const Dashboard = () => {
 
     function getAverageEstimatedCpc(fullData) {
         // Filter items that have a valid 'cpc' value
-        const validCpcItems = fullData.filter(item => item.cpc);
+        const validCpcItems = fullData?.filter(item => item.cpc);
 
         // Calculate the total sum of 'cpc'
-        const total = validCpcItems.reduce((sum, item) => {
+        const total = validCpcItems?.reduce((sum, item) => {
             return sum + parseFloat(item.cpc);
         }, 0);
 
         // Calculate the average, and round to 2 decimal places
-        const average = validCpcItems.length > 0 ? (total / validCpcItems.length) : 0;
+        const average = validCpcItems?.length > 0 ? (total / validCpcItems?.length) : 0;
 
         return Math.round(average * 100) / 100;
     }
 
     function getTotalFbClicks(fullData) {
-        const total = fullData.reduce((sum, item) => {
+        const total = fullData?.reduce((sum, item) => {
             // Check if 'estimated_revenue' exists in the object and is a number
             if (item.fbClicks) {
                 return sum + parseInt(item.fbClicks);
@@ -1053,7 +1053,7 @@ const Dashboard = () => {
     }
 
     function getTotalImpressions(fullData) {
-        const total = fullData.reduce((sum, item) => {
+        const total = fullData?.reduce((sum, item) => {
             // Check if 'estimated_revenue' exists in the object and is a number
             if (item.impressions) {
                 return sum + parseInt(item.impressions);
@@ -1095,7 +1095,7 @@ const Dashboard = () => {
                 if (key === "Newsbreak_DA"){
                     newKey = "Newsbreak_DomainActive"
                 }else if (key === "FB_DomainActive"){
-                    newKey = "Facebook_DActive"
+                    newKey = "Facebook_DActive_Names"
                 }
                 else{ newKey = "Facebook_" + splitKey[1];}
         
@@ -1137,7 +1137,7 @@ const Dashboard = () => {
         }catch(error){
             message.error('API failed to fetch the data please click the reload button', 8);
         }
-        const responseData = response.data;
+        const responseData = response?.data;
         console.log(responseData, "response");
         // console.log(moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A'), "deadend");
         const functionForDetailsUpdate = async () => {
@@ -1156,8 +1156,8 @@ const Dashboard = () => {
         }
         functionForDetailsUpdate();
         function groupByCampaignAndDate(data) {
-            return data.reduce((acc, obj) => {
-                const campaignKey = obj.campaign_name;
+            return data?.reduce((acc, obj) => {
+                const campaignKey = obj?.campaign_name;
                 const dateKey = obj[`${time}Date`]; // directly access the specifiedDate field from the object
         
                 // Create a combined key for grouping by both campaign_name and specifiedDate
@@ -1170,24 +1170,24 @@ const Dashboard = () => {
                     // If not found, create a new entry for this campaign_name and specifiedDate
                     acc.push({
                         key, // Unique key for grouping
-                        campaign_name: obj.campaign_name,
+                        campaign_name: obj?.campaign_name,
                         Date: dateKey,
                         spend: obj.spend ? parseFloat(obj.spend) : 0,
-                        estimated_revenue: obj.estimated_revenue ? parseFloat(obj.estimated_revenue) : 0,
-                        fbLeads: obj.fbLeads ? parseInt(obj.fbLeads) : 0,
-                        conversions: obj.conversions ? parseInt(obj.conversions) : 0,
-                        revenuePartner: obj.revenuePartner,
-                        mediaBuyerName: obj.MediaBuyerName,
-                        holder: obj.Holder,
-                        accountNumber: obj.accountNumber
+                        estimated_revenue: obj?.estimated_revenue ? parseFloat(obj?.estimated_revenue) : 0,
+                        fbLeads: obj.fbLeads ? parseInt(obj?.fbLeads) : 0,
+                        conversions: obj.conversions ? parseInt(obj?.conversions) : 0,
+                        revenuePartner: obj?.revenuePartner,
+                        mediaBuyerName: obj?.MediaBuyerName,
+                        holder: obj?.Holder,
+                        accountNumber: obj?.accountNumber
                         // Add any other fields you want to keep after grouping
                     });
                 } else {
                     // If found, sum the respective fields
-                    entry.spend += obj.spend !== null && obj.spend !== undefined ? parseFloat(obj.spend) : 0;
-                    entry.estimated_revenue += obj.estimated_revenue !== null && obj.estimated_revenue !== undefined ? parseFloat(obj.estimated_revenue) : 0;
-                    entry.fbLeads += obj.fbLeads !== null && obj.fbLeads !== undefined ? parseInt(obj.fbLeads) : 0;
-                    entry.conversions += obj.conversions !== null && obj.conversions !== undefined ? parseInt(obj.conversions) : 0;
+                    entry.spend += obj?.spend !== null && obj?.spend !== undefined ? parseFloat(obj?.spend) : 0;
+                    entry.estimated_revenue += obj?.estimated_revenue !== null && obj?.estimated_revenue !== undefined ? parseFloat(obj?.estimated_revenue) : 0;
+                    entry.fbLeads += obj?.fbLeads !== null && obj?.fbLeads !== undefined ? parseInt(obj?.fbLeads) : 0;
+                    entry.conversions += obj?.conversions !== null && obj?.conversions !== undefined ? parseInt(obj?.conversions) : 0;
                 }
         
                 return acc;
@@ -1203,7 +1203,7 @@ const Dashboard = () => {
 
         function getTopFiveSpendCampaignsByDate(data) {
             // Step 1: Group objects by specifiedDate using a Map
-            const groupedByDate = data.reduce((acc, curr) => {
+            const groupedByDate = data?.reduce((acc, curr) => {
                 const date = curr.Date; // Use specifiedDate directly from the object
         
                 if (!acc.has(date)) {
@@ -1233,7 +1233,7 @@ const Dashboard = () => {
 
         function getTopFiveRevenueCampaignsByDate(data) {
             // Step 1: Group objects by specifiedDate using a Map
-            const groupedByDate = data.reduce((acc, curr) => {
+            const groupedByDate = data?.reduce((acc, curr) => {
                 const date = curr.Date; // Use specifiedDate directly from the object
         
                 if (!acc.has(date)) {
@@ -1263,7 +1263,7 @@ const Dashboard = () => {
 
         function getTopFiveProfitCampaignsByDate(data) {
             // Step 1: Group objects by specifiedDate using a Map
-            const groupedByDate = data.reduce((acc, curr) => {
+            const groupedByDate = data?.reduce((acc, curr) => {
                 const date = curr.Date; // Use specifiedDate directly from the object
         
                 if (!acc.has(date)) {
@@ -1293,7 +1293,7 @@ const Dashboard = () => {
 
         function getAllProfitableCampaignsByDate(data) {
             // Step 1: Group objects by specifiedDate using a Map
-            const groupedByDate = data.reduce((acc, curr) => {
+            const groupedByDate = data?.reduce((acc, curr) => {
                 const date = curr.Date; // Use specifiedDate directly from the object
         
                 if (!acc.has(date)) {
@@ -1322,7 +1322,7 @@ const Dashboard = () => {
 
         function getAllUnprofitableCampaignsByDate(data) {
             // Step 1: Group objects by specifiedDate using a Map
-            const groupedByDate = data.reduce((acc, curr) => {
+            const groupedByDate = data?.reduce((acc, curr) => {
                 const date = curr.Date; // Use specifiedDate directly from the object
         
                 if (!acc.has(date)) {
@@ -1412,7 +1412,7 @@ const Dashboard = () => {
         
 
         function groupByAccountNumberAndDate(data, specifiedDateKey) {
-            return data.reduce((acc, obj) => {
+            return data?.reduce((acc, obj) => {
                 const accountKey = obj.accountNumber;
                 const dateKey = obj[`${specifiedDateKey}Date`]; // dynamically access the specified date field
         
@@ -1459,7 +1459,7 @@ const Dashboard = () => {
         setRowData(groupedData);
 
         function groupByDate(data, specifiedDateKey) {
-            return data.reduce((acc, obj) => {
+            return data?.reduce((acc, obj) => {
                 const dateKey = obj[`${specifiedDateKey}Date`]; // dynamically access the specified date field
         
                 // Find if the date key already exists in the accumulator array
@@ -1520,7 +1520,7 @@ const Dashboard = () => {
 
         function groupDataByDomainAndAccount(data, dateField) {
             console.log(dateField);
-            const DomainGroupedData = data.reduce((acc, obj) => {
+            const DomainGroupedData = data?.reduce((acc, obj) => {
               const { domain, accountNumber, spend, estimated_revenue, revenuePartner, MediaBuyerName, Holder } = obj;
               const specifiedDate = obj[dateField]; // Dynamically get the date based on the field
           
@@ -3090,11 +3090,11 @@ const Dashboard = () => {
                                 >
                                     <Line
                                         data={{
-                                            labels: chartData.dates, // X-axis labels (dates)
+                                            labels: chartData?.dates, // X-axis labels (dates)
                                             datasets: [
                                             {
                                                 label: 'Spend',
-                                                data: chartData.spend,
+                                                data: chartData?.spend,
                                                 borderColor: 'rgba(44, 144, 192, 1)',
                                                 backgroundColor: 'rgba(44, 144, 192, 0.2)',
                                                 fill: true,
@@ -3107,7 +3107,7 @@ const Dashboard = () => {
                                             },
                                             {
                                                 label: 'Revenue',
-                                                data: chartData.revenue,
+                                                data: chartData?.revenue,
                                                 borderColor: 'rgba(99, 200, 99, 1)',
                                                 backgroundColor: 'rgba(99, 200, 99, 0.2)',
                                                 fill: true,
@@ -3133,7 +3133,7 @@ const Dashboard = () => {
                                             },
                                             {
                                                 label: 'CPL',
-                                                data: chartData.cpl,
+                                                data: chartData?.cpl,
                                                 borderColor: 'rgba(255, 159, 64, 1)',
                                                 backgroundColor: 'rgba(255, 159, 64, 0.2)',
                                                 fill: true,
@@ -3146,7 +3146,7 @@ const Dashboard = () => {
                                             },
                                             {
                                                 label: 'Profit',
-                                                data: chartData.profit,
+                                                data: chartData?.profit,
                                                 borderColor: 'rgba(255, 206, 86, 1)',
                                                 backgroundColor: 'rgba(255, 206, 86, 0.2)',
                                                 fill: true,
@@ -3158,7 +3158,7 @@ const Dashboard = () => {
                                             },
                                             {
                                                 label: 'Margin',
-                                                data: chartData.margin,
+                                                data: chartData?.margin,
                                                 borderColor: 'rgba(153, 102, 255, 1)',
                                                 backgroundColor: 'rgba(153, 102, 255, 0.2)',
                                                 fill: true,
@@ -3179,7 +3179,7 @@ const Dashboard = () => {
                                                 ticks: {
                                                 padding: 30,
                                                 color: (context) => {
-                                                    const label = chartData.dates[context.index];
+                                                    const label = chartData?.dates[context.index];
                                                     return getColorForValue(label);
                                                 },
                                                 },
@@ -3217,7 +3217,7 @@ const Dashboard = () => {
                                                     const datasetLabel = dataset.label || '';
 
                                                     // Return label with value and date
-                                                    return `${datasetLabel}: ${value} (Date: ${chartData.newDates[index]})`;
+                                                    return `${datasetLabel}: ${value} (Date: ${chartData?.newDates[index]})`;
                                                 },
                                                 },
                                                 displayColors: true, // Enable color box for each dataset

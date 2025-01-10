@@ -6,14 +6,95 @@ import Appbar from "./components/appbar";
 import Topbar from "./components/topbar";
 import TopBar1 from "./components/topbar1";
 import { SessionProvider, useSession } from 'next-auth/react';
+import { signOut } from "next-auth/react";
 import Parent, { TokenProvider, useTokenContext } from "./components/parent";
 import { useEffect, useState, useMemo } from "react";
-// import { useTokenContext } from "./components/parent";
-// const { setuserdetails } = useTokenContext();
+import jwt from 'jsonwebtoken';
+import { useRouter } from "next/navigation";
+import { UAParser } from "ua-parser-js";
 
-import {Spin} from 'antd';
+import { Spin, message } from 'antd';
 
 const inter = Inter({ subsets: ["latin"] });
+
+async function getUserDetails(name) {
+  const userAgent = navigator.userAgent || "";
+  const parser = new UAParser(userAgent);
+  const deviceType = parser.getDevice()?.type || "desktop";
+
+  // Fetch IP Address
+  const ip = await fetch("https://api64.ipify.org?format=json")
+    .then((res) => res.ok ? res.json() : Promise.reject("Failed to fetch IP"))
+    .then((data) => data.ip)
+    .catch((err) => {
+      console.error(err);
+      return "Unknown";
+    });
+
+  // Fetch Location
+  const location = await fetch(`http://ip-api.com/json/${ip}`)
+    .then((res) => res.ok ? res.json() : Promise.reject("Failed to fetch location"))
+    .catch((err) => {
+      console.error(err);
+      return {
+        status: "Unknown",
+        country: "Unknown",
+        region: "Unknown",
+        city: "Unknown",
+        timezone: "Unknown",
+        isp: "Unknown",
+      };
+    });
+
+  // Format IST Timestamp
+  const timestamp = new Intl.DateTimeFormat("en-IN", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).format(new Date());
+
+  const userActivities = { timestamp, ip, location, device: { type: deviceType }, userAgent, name };
+
+  // Post User Activities
+  await fetch("https://prodapis.adsgoat.in/UsersActivities/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: localStorage.getItem("token"),
+    },
+    body: JSON.stringify({ userActivities }),
+  })
+    .then((res) => res.ok ? res.json() : res.json().then((err) => Promise.reject(err)))
+    .then((result) => {
+      message.success("User activity posted successfully!");
+      console.log("Response:", result);
+    })
+    .catch((err) => {
+      console.error("Error posting user activity:", err);
+      message.error(err.message || "Error posting user activity.");
+    });
+
+  return userActivities;
+}
+
+const retryFetch = async (fetchFunc, retries = 3) => {
+  try {
+      return await fetchFunc();  // Try the API call
+  } catch (error) {
+      if (retries === 1) throw error;  // Throw error if no retries left
+
+      console.log(`Retrying... Attempts left: ${retries - 1}`);
+      
+      // Use debounce for a delay before retrying
+      return new Promise((resolve, reject) => {
+          debouncedRetry(fetchFunc, retries, resolve, reject);
+      });
+  }
+};
 
 const BodyWrapper = ({ children }) => {
   const { darkMode, userdetails } = useTokenContext();
@@ -30,15 +111,165 @@ const BodyWrapper = ({ children }) => {
   return <>{children}</>;
 };
 
+const UserActivities = ({ children, onComplete }) => {
+  const { data: session, status } = useSession(); 
+  const router = useRouter();
+  const [useractivites, setuseractivites] = useState({});
+  const {sessionClose, setSessionClose} = useState("open");
+  
+  useEffect(() => {
+    if(sessionClose === "close"){
+        const handleSignOutAcrossTabs = () => {
+            console.log("Sign-out triggered across all tabs.");
+            localStorage.clear();
+            localStorage.removeItem("token");
+            signOut(); // Sign out the user using your existing auth logic
+             // Trigger the onComplete callback
+          };
+      
+          const handleStorageEvent = (event) => {
+            if (event.key === "signout" && event.newValue === "true") {
+              // Another tab triggered the sign-out
+              handleSignOutAcrossTabs();
+              onComplete();
+            }
+          };
+      
+          window.addEventListener("storage", handleStorageEvent);
+      
+          return () => {
+            window.removeEventListener("storage", handleStorageEvent);
+          };
+    }
+  }, [sessionClose]);
+  
+  useEffect(() => {
+    if (status === "authenticated") {
+      const token = localStorage.getItem("token");
+      console.log(token);
+      let decodedToken;
+  
+      if (token) {
+        console.log("Hi");
+        try {
+          // Decode the token
+          decodedToken = jwt.decode(token);
+          console.log("This");
+  
+          if (!decodedToken || !decodedToken.exp) {
+            console.log("is");
+            console.error("Decoded token is invalid or missing 'exp' field:", decodedToken);
+            throw new Error("Invalid token structure.");
+          }
+  
+          // Compare the token expiration with the current time
+          const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+          console.log("Decoded token expiration:", decodedToken.exp);
+          console.log("Current time:", currentTime);
+  
+          if (decodedToken.exp < currentTime) {
+            console.log("praveen");
+            console.log("Token is expired. Clearing localStorage and signing out.");
+  
+            // Broadcast sign-out to all tabs
+            localStorage.setItem("signout", "true");
+  
+            // Clear local changes and log out
+            localStorage.clear();
+            localStorage.removeItem("token");
+            localStorage.setItem("redirectUrl", router.pathname);
+            signOut();
+            setSessionClose("close");
+            return;
+            
+          } 
+          else if (decodedToken.exp > currentTime) {
+            // Token exists and is valid
+            console.log("testing");
+            console.log("Token is already stored and valid:", token);
+            onComplete();
+          }
+        } catch (err) {
+          console.error("Error decoding token or handling expiration check:", err);
+          console.log("authentication");
+          // Handle invalid token gracefully
+          localStorage.clear();
+          signOut();
+          onComplete();
+          return;
+        }
+      } else {
+        console.log("for");
+        console.log("No token found in localStorage.");
+        onComplete();
+        // signOut();
+      }
+    }
+    if(status === "unauthenticated"){
+      console.log("users");
+      localStorage.clear();
+      onComplete();
+      // signOut();
+      console.log("un auth");
+    }
+  }, [status]);
+  
+
+  // useEffect(() => {
+  //   if (Object.keys(useractivites).length === 0) return;
+
+  //   const postUserActivities = async () => {
+  //     try {
+  //       const response = await fetch("https://prodapis.adsgoat.in/UsersActivities/", {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: localStorage.getItem('token')
+  //         },
+  //         body: JSON.stringify({ userActivities: useractivites }),
+  //       });
+
+  //       if (response.ok) {
+  //         const result = await response.json();
+  //         message.success("User activity posted successfully!");
+  //         console.log("Response:", result);
+  //       } else {
+  //         const errorData = await response.json();
+  //         message.error(`Failed to post user activity: ${errorData.message}`);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error posting user activity:", error);
+  //       message.error("Error posting user activity.");
+  //     }
+  //   };
+
+  //   postUserActivities();
+  // }, [useractivites]);
+
+  // useEffect(() => {
+  //   if (status === "authenticated") {
+  //     const fetchUserDetails = async () => {
+  //       const decodedToken = jwt.decode(localStorage.getItem("token"));
+  //       if (!localStorage.getItem("token")) {
+          
+  //       }
+  //     };
+
+  //     fetchUserDetails();
+  //   }
+  // }, [status]);
+
+
+  return <>{children}</>;
+};
+
 const ContentWrapper = ({ children }) => {
   const [darkMode, setDarkMode] = useState(false);
   const { data: session, status } = useSession(); // useSession to check login status
   const [usersDataForLogin, setusersDataForLogin] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isComponentMounted, setIsComponentMounted] = useState(false); // To prevent initial rendering issues
-
-  // console.log(session?.user?.email);
-
+  
   // useEffect to fetch user data
   const fetchDataUntilSuccess = async (email, delay = 1500) => {
     while (true) {
@@ -66,6 +297,7 @@ const ContentWrapper = ({ children }) => {
       if (session?.user?.email) {
         try {
           setLoading(true);
+          
           const userData = await fetchDataUntilSuccess(session?.user?.email);
           if (isMounted) {
             setusersDataForLogin(userData);
@@ -79,7 +311,6 @@ const ContentWrapper = ({ children }) => {
         if (isMounted) setLoading(false); // Stop loading if no session
       }
     };
-  
     fetchUserData();
   
     return () => {
@@ -97,8 +328,6 @@ const ContentWrapper = ({ children }) => {
     setDarkMode(!darkMode);
   };
 
-  // console.log(usersDataForLogin, "usersLogin");
-
   // Unified conditional logic to show either Topbar or Appbar
   const shouldRenderTopbarOrAppbar = useMemo(() => {
     if (!isComponentMounted || status === "loading" || loading) {
@@ -114,7 +343,7 @@ const ContentWrapper = ({ children }) => {
     }
 
     if (status === "authenticated" && usersDataForLogin?.length !== 0) {
-      // console.log(usersDataForLogin);
+      console.log("app to console");
       return (
         <Appbar darkMode={darkMode} toggleTheme={toggleTheme} usersDataForLogin={usersDataForLogin}>
           {children}
@@ -136,19 +365,41 @@ const ContentWrapper = ({ children }) => {
   return <>{shouldRenderTopbarOrAppbar}</>;
 };
 
+const AuthenticationProvider = ({ children }) => {
+  const [isUserActivitiesComplete, setIsUserActivitiesComplete] = useState(false);
+
+  const handleUserActivitiesComplete = () => {
+    setIsUserActivitiesComplete(true);
+  };
+
+  return (
+    <>
+      {!isUserActivitiesComplete ? (
+        <UserActivities onComplete={handleUserActivitiesComplete} />
+      ) : (
+        <TokenProvider>
+          <BodyWrapper>
+            <ContentWrapper>{children}</ContentWrapper>
+          </BodyWrapper>
+        </TokenProvider>
+      )}
+    </>
+  );
+};
+
 export default function RootLayout({ children }) {
+  
   return (
     <html lang="en">
       <head></head>
       <body className={`${inter.className} full-width`}>
-        <SessionProvider refetchOnWindowFocus={false} refetchInterval={0} broadcast={false} >
-          <TokenProvider>
-            <BodyWrapper>
-              <ContentWrapper>
+        <SessionProvider refetchOnWindowFocus={false} refetchInterval={0} broadcast={false}>
+          
+              <AuthenticationProvider>
                 {children}
-              </ContentWrapper>
-            </BodyWrapper>
-          </TokenProvider>
+              </AuthenticationProvider>
+            
+          
         </SessionProvider>
       </body>
     </html>

@@ -3,11 +3,13 @@ import React from 'react';
 import { Button, Input, Row, Col } from 'antd';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useTokenContext } from '../../../components/parent';
 const TonicUrlBuilder = ({onReturnMessage, showSubmitButton}) => {
     const [siteName, setSiteName] = useState('');
     const [keywords, setKeyWords] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [NetworkData, setNetworkData]= useState([]);
+    const { apiClient } = useTokenContext();
     // const businessData = [
     //     {
     //       "id":5,
@@ -19,7 +21,7 @@ const TonicUrlBuilder = ({onReturnMessage, showSubmitButton}) => {
     // ]
 
     const getUrlBuilderData = async()=>{
-        const response = await axios.get(`https://prodapis.adsgoat.in/get/urlbuilderdata?network=Tonic`);
+        const response = await apiClient.get(`/get/urlbuilderdata?network=Tonic`);
         if(response?.status === 200){
           setNetworkData(response?.data)
         }

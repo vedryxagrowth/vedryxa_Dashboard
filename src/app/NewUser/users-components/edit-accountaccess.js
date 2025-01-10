@@ -105,7 +105,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
 
       // Simulate API call with newValues
       const response = await apiClient.post(
-        "https://prodapis.adsgoat.in/updateAccount/",
+        "/updateAccount/",
         { newAccount: newValues }
       );
 

@@ -111,7 +111,7 @@ const Createnewuser = ({ visible, onClose }) => {
                     };
                     // console.log(formattedData);
                     // console.log(formattedData, "formatted Data");
-                    const response = await apiClient.post('https://prodapis.adsgoat.in/api/createUser/', {formattedData});
+                    const response = await apiClient.post('/api/createUser/', {formattedData});
                     
                     if (response.status === 200) {
                         // console.log('User created successfully');

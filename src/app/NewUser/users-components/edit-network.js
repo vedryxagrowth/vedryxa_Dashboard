@@ -104,7 +104,7 @@ const EditNetworkAccess = ({ editeddata, visible, onClose }) => {
 
       // Simulate API call with newValues
       const response = await apiClient.post(
-        "https://prodapis.adsgoat.in/updateNetwork/",
+        "/updateNetwork/",
         { updatedNetwork: newValues }
       );
 
