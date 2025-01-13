@@ -8,12 +8,14 @@ import TextArea from 'antd/es/input/TextArea';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import { v4 as uuidv4 } from 'uuid';
+import { useTokenContext } from '../../../components/parent';
 const System1UrlBuilder = ({onReturnMessage, showSubmitButton}) => {
     const [siteName, setSiteName] = useState('');
     const [pixelId, setPixelId] = useState('');
     const [keywords, setKeyWords] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [NetworkData, setNetworkData]= useState([]);
+    const { apiClient } = useTokenContext();
     
 
     const MnetDomains = [
@@ -188,7 +190,7 @@ const System1UrlBuilder = ({onReturnMessage, showSubmitButton}) => {
     // }
 
     const getUrlBuilderData = async()=>{
-      const response = await axios.get(`https://prodapis.adsgoat.in/get/urlbuilderdata?network=System1`);
+      const response = await apiClient.get(`/get/urlbuilderdata?network=System1`);
       if(response?.status === 200){
         setNetworkData(response?.data)
       }

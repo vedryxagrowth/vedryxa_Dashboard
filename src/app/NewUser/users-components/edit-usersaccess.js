@@ -251,7 +251,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                     // console.log(additionalAccounts, "additionalAccounts data");
                     // console.log(singleObject, ":singleObject");
         
-                    const response = await apiClient.put(`https://prodapis.adsgoat.in/api/updateUserTableData/`, {formattedData});
+                    const response = await apiClient.put(`/api/updateUserTableData/`, {formattedData});
         
                     if (response.status === 200) {
                         message.success("User Edits updated successfully"); // Display success message
