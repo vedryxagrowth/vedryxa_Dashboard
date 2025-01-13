@@ -10,7 +10,8 @@ import {
     DoubleRightOutlined,
     DoubleLeftOutlined,
     DatabaseOutlined,
-    UserOutlined
+    UserOutlined,
+    LaptopOutlined
 } from '@ant-design/icons';
 import { Layout, Menu, Button, theme, message } from 'antd';
 import React, { useState, useEffect } from "react";
@@ -259,9 +260,7 @@ const Appbar = ({ children, usersDataForLogin }) => {
         usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Campaigns', '/Campaigns', <DesktopOutlined />),
         // getItem('Users', '/Users', <ContainerOutlined />),
         usersDataForLogin[0]?.role === 'Admin' && getItem('NewUser', '/NewUser', <UserOutlined />),
-        // getItem('Setting', '/setting', <SettingOutlined />),
-        // getItem('Password', '/password', <LockOutlined />),
-        // getItem('Sign Out', '/signout', <LogoutOutlined />),
+        usersDataForLogin[0]?.role === 'Admin' && getItem('Activities', '/Activities', <LaptopOutlined />),
     ].filter(Boolean);
 
     //     useEffect(async()=>{
