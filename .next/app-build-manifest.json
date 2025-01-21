@@ -1,16 +1,25 @@
 {
   "pages": {
+<<<<<<< HEAD
     "/Activities/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/css/app/Activities/page.css",
       "static/chunks/app/Activities/page.js"
+=======
+    "/NewUser/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/NewUser/page.css",
+      "static/chunks/app/NewUser/page.js"
+>>>>>>> DevUi
     ],
     "/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
+<<<<<<< HEAD
     ],
     "/Dashboard/page": [
       "static/chunks/webpack.js",
@@ -53,6 +62,8 @@
       "static/chunks/main-app.js",
       "static/css/app/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page.css",
       "static/chunks/app/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page.js"
+=======
+>>>>>>> DevUi
     ]
   }
 }

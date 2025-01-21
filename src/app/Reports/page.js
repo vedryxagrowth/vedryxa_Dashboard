@@ -1319,7 +1319,7 @@ const MyTablePage = () => {
             aggFunc: liveSpender,
             sortable: true,
             filter: "agTextColumnFilter",
-            valueFormatter: currencyFormatter
+            valueFormatter: currencyFormatter,
             // filterParams: {
             //     textCustomComparator: customTextFilterFunction,
             // },

@@ -125,7 +125,11 @@
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
+<<<<<<< HEAD
 /******/ 		__webpack_require__.h = () => ("ea8fd25a14731dba")
+=======
+/******/ 		__webpack_require__.h = () => ("98144c2b8fba2d0c")
+>>>>>>> DevUi
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/harmony module decorator */
@@ -185,11 +189,14 @@
 /******/ 		__webpack_require__.p = "/_next/";
 /******/ 	})();
 /******/ 	
+<<<<<<< HEAD
 /******/ 	/* webpack/runtime/nonce */
 /******/ 	(() => {
 /******/ 		__webpack_require__.nc = undefined;
 /******/ 	})();
 /******/ 	
+=======
+>>>>>>> DevUi
 /******/ 	/* webpack/runtime/require chunk loading */
 /******/ 	(() => {
 /******/ 		// no baseURI

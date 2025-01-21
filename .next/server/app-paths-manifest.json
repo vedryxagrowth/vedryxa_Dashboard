@@ -1,8 +1,12 @@
 {
+<<<<<<< HEAD
   "/Users/page": "app/Users/page.js",
   "/Creatives/page": "app/Creatives/page.js",
   "/Reports/page": "app/Reports/page.js",
   "/LiveHistory/LiveCampaignHistory/[CampaignName]/page": "app/LiveHistory/LiveCampaignHistory/[CampaignName]/page.js",
   "/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page": "app/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page.js",
   "/Dashboard/page": "app/Dashboard/page.js"
+=======
+  "/NewUser/page": "app/NewUser/page.js"
+>>>>>>> DevUi
 }
