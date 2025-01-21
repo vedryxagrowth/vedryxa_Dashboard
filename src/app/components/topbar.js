@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { SessionProvider, useSession, signIn, signOut } from 'next-auth/react';
 import Image from "next/image";
-import { Layout, Avatar, Dropdown, Button, Switch, Spin, Form, Input, Divider, Modal, Badge, Card, notification } from "antd";
+import { Layout, Avatar, Dropdown, Button, Switch, Spin, Form, Input, Divider, Modal, Badge, Card, Upload, notification } from "antd";
 import React from "react";
 import { useRouter } from "next/navigation";
 import axios from 'axios';
@@ -10,7 +10,7 @@ const { Header } = Layout;
 import { useTokenContext } from './parent';
 import moment from 'moment-timezone';
 import ContactForm from './mail';
-import { BellFilled, EyeOutlined, GoogleOutlined, LockOutlined, PlusOutlined, UserOutlined } from '@ant-design/icons';
+import { BellFilled, EyeOutlined, GoogleOutlined, LockOutlined, PlusOutlined, UserOutlined, UploadOutlined  } from '@ant-design/icons';
 import { Bell, Edit3Icon, Moon, Sun } from 'lucide-react';
 import { getSession } from 'next-auth/react';
 import debounce from 'lodash.debounce';
@@ -172,6 +172,7 @@ const Topbar = () => {
   const [selectedNotification, setSelectedNotification] = useState(null); // For the notification to be displayed in modal
   const [isViewNotificationModalVisible, setIsViewNotificationModalVisible] = useState(false); // View notification moda
 
+  const [loading, setLoading] = useState(false);
   // console.log(userdetails);
 
   const tokenForAuth = localStorage.getItem('token');
@@ -418,13 +419,13 @@ const Topbar = () => {
   const maleImoji = 'https://res.cloudinary.com/dyogjqsil/image/upload/v1727960655/3d-rendering-cartoon-character-with-eyeglasses-jacket_lu1cqi.jpg';
   const femaleImoji = 'https://res.cloudinary.com/dyogjqsil/image/upload/v1727960642/portrait-3d-female-doctor_cei7bm.jpg';
 
-  const getAvatarSrc = () => {
-    if (userdetails?.gender === 'Male') {
-      return maleImoji;
-    } else if (userdetails?.gender === 'Female') {
-      return femaleImoji;
-    }
-  };
+  // const getAvatarSrc = () => {
+  //   if (userdetails?.gender === 'Male') {
+  //     return maleImoji;
+  //   } else if (userdetails?.gender === 'Female') {
+  //     return femaleImoji;
+  //   }
+  // };
 
   // Dropdown for authenticated users (Profile + Sign Out)
   const dropdownItemsAuthenticated = [
@@ -465,6 +466,177 @@ const Topbar = () => {
 
   // Only show profile and signout if the user is authenticated and has access
   const isUserAuthorized = status === 'authenticated' && userdetails;
+
+  const [avatarUrl, setAvatarUrl] = useState('');
+  const [previewImage, setPreviewImage] = useState(null);  // State for image preview
+  const [imageFile, setImageFile] = useState(null);  // Temporary state for storing the file before upload
+
+
+   // Fetch the user's avatar URL on page load or when userdetails change
+   const fetchUserAvatarWithRetry = async (retries = 3, delay = 2000) => {
+    try {
+      console.log('Fetching user avatar with retry...');
+      const email = userdetails?.email;
+  
+      if (!email) {
+        console.warn('Email is missing. Cannot fetch user avatar.');
+        return;
+      }
+  
+      const response = await axios.get(`https://prodapis.adsgoat.in/GetUserImage`, {
+        params: { email },
+        headers: {
+          Authorization: localStorage.getItem('token'),
+        },
+      });
+  
+      if (response.data.success) {
+        const fetchedAvatarUrl = response.data.imageUrl;
+        console.log('Fetched avatar URL:', fetchedAvatarUrl);
+        setAvatarUrl(fetchedAvatarUrl || getDefaultAvatar());
+      } else {
+        console.error('Error fetching avatar:', response.data.message);
+        setAvatarUrl(getDefaultAvatar());
+      }
+    } catch (error) {
+      if (retries > 0) {
+        console.log(`Retrying... (${retries} retries left)`);
+        setTimeout(() => fetchUserAvatarWithRetry(retries - 1, delay), delay);
+      } else {
+        console.error('Failed to fetch avatar after retries:', error);
+        setAvatarUrl(getDefaultAvatar());
+      }
+    }
+  };
+  
+  useEffect(() => {
+    fetchUserAvatarWithRetry();
+  }, [userdetails]);
+  
+  
+
+
+  // Get the default avatar source based on gender
+  const getDefaultAvatar = () => {
+    console.log('Determining default avatar...');
+    if (userdetails?.gender === 'Male') {
+      return maleImoji;
+    } else if (userdetails?.gender === 'Female') {
+      return femaleImoji;
+    } else {
+      return ''; // Fallback if gender is not available
+    }
+  };
+
+  // Store image URL in the database
+  const storeImageUrlInDb = async (imageUrl) => {
+    try {
+      const email = userdetails?.email;
+      if (!email) {
+        throw new Error('Email is required to store image URL.');
+      }
+
+      const response = await axios.post(
+        'https://prodapis.adsgoat.in/UserImage',
+        { email, imageUrl },
+        {
+          headers: {
+            Authorization: localStorage.getItem('token'),
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      return response; // Return the response containing the updated user data
+    } catch (error) {
+      console.error('Error storing image URL in the database:', error);
+      alert('Error storing image URL. Please try again later.');
+    }
+  };
+
+  // Handle the preview of the selected image
+  const handlePreviewImage = (file) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreviewImage(reader.result); // Set the preview image as the file content
+      console.log("Image preview updated.");
+    };
+    if (file) {
+      reader.readAsDataURL(file); // Read the file as a DataURL
+      setImageFile(file); // Store the file temporarily
+      console.log("Image file temporarily stored:", file);
+    }
+  };
+
+  // Handle confirm to upload the selected image
+  const handleConfirmUpload = () => {
+    if (imageFile) {
+      const formData = new FormData();
+      formData.append('file', imageFile);
+      console.log("FormData prepared for upload:", formData);
+  
+      // Call your API here to upload the image
+      fetch('https://www.testapi.adsgoat.in/upload', {
+        method: 'POST',
+        headers: {
+          Authorization: localStorage.getItem('token'),
+        },
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then(async (data) => {
+  
+          if (data.imageUrl) {
+            console.log("Image successfully uploaded. Image URL:", data.imageUrl);
+  
+            // Store the image URL in the database
+            const response = await storeImageUrlInDb(data.imageUrl);
+  
+            // Update the avatar and clear the preview
+            if (response?.data?.success) {
+              setAvatarUrl(data.imageUrl); // Update the avatar with the stored URL
+              setPreviewImage(null); // Clear the preview after successful upload and store
+            } else {
+              console.error("Failed to store the image URL in the database.");
+            }
+          } else {
+            console.error("Image URL not returned from upload API.");
+            alert("Image upload failed. Please try again.");
+          }
+        })
+        .catch((error) => {
+          console.error("Error during file upload:", error);
+          alert("Something went wrong while uploading the image. Please try again.");
+        });
+    } else {
+      console.log("No image file to upload.");
+    }
+  };
+  
+
+  // Upload properties for the file uploader
+  const uploadProps = {
+    name: 'file',
+    action: 'https://www.testapi.adsgoat.in/upload',
+    headers: {
+      Authorization: localStorage.getItem('token'),
+    },
+    showUploadList: false,
+    // onChange: handleFileChange,
+    beforeUpload: (file) => {
+      const isImage = file.type.startsWith('image/');
+      if (!isImage) {
+        alert('You can only upload image files!');
+        return false; // Cancel upload if not an image
+      }
+      handlePreviewImage(file); // Preview image on file selection
+      return false; // Prevent the automatic upload
+    },
+    onError: (error) => {
+      console.error('Error during file upload:', error);
+      alert('Something went wrong while uploading the image. Please try again.');
+    },
+  };
 
   return (
     <div
@@ -551,7 +723,7 @@ const Topbar = () => {
             >
               <Avatar
                 size="large"
-                src={getAvatarSrc()}
+                src={avatarUrl || getDefaultAvatar()}
                 style={{
                   background: darkMode ? '#333' : '#ebebeb',
                   fontSize: '1.8em',
@@ -661,36 +833,58 @@ const Topbar = () => {
         />
       </Modal>
 
-      <Modal
-        visible={isModalVisible}
-        width={`50%`}
-        onCancel={onHandleCancel}
-        footer={null}
-        style={{ textAlign: "center", borderRadius: '8px', padding: '0px' }}
-      >
-        <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", width: '100%' }}>
-          <div style={{ display: "flex", justifyContent: "space-between", flexDirection: "row", height: "12%", marginBottom: '10px' }}>
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <Avatar
-                size={110}
-                src={getAvatarSrc()}
-                style={{ border: "2px solid #ccc" }}
-              />
-            </div>
-            <div style={{ display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "flex-start", padding: "0px" }}>
-              <p style={{ margin: "1px" }}><span style={{ fontWeight: "bold" }}>ID:</span> {userdetails ? userdetails._id : ""}</p>
-              <p style={{ margin: "1px" }}><span style={{ fontWeight: "bold" }}>EMAIL_ID:</span> {userdetails ? userdetails.email : "No email"}</p>
-              <p style={{ margin: "1px" }}><span style={{ fontWeight: "bold" }}>Name:</span> {userdetails ? userdetails.userName : "Guest"}</p>
-            </div>
+
+    <Modal
+      visible={isModalVisible}
+      width="50%"
+      onCancel={onHandleCancel}
+      footer={null}
+      style={{ textAlign: 'center', borderRadius: '8px', padding: '0px' }}
+    >
+      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', width: '100%' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', flexDirection: 'row', height: '12%', marginBottom: '10px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            {/* Display the image preview if exists */}
+            <img
+              src={previewImage || avatarUrl || getDefaultAvatar()} // Show the preview image or fallback to avatarUrl or default
+              alt="Avatar"
+              style={{ width: 110, height: 110, borderRadius: '50%', border: '2px solid #ccc' }}
+            />
+            
+            <Upload {...uploadProps}>
+              <Button style={{ marginTop: '10px' }} icon={<UploadOutlined />} loading={loading}>
+                {loading ? 'Uploading...' : 'Upload Image'}
+              </Button>
+            </Upload>
           </div>
-          <hr style={{ border: "1px solid black", width: "100%" }} />
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-            <div style={{ maxHeight: '200px', width: "100%", overflowY: 'auto', padding: '10px', border: '1px solid #ccc', marginBottom: '20px' }}>
-              {renderAdAccounts()}
-            </div>
+
+          <div style={{ display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'flex-start', padding: '0px' }}>
+            <p style={{ margin: '1px' }}><span style={{ fontWeight: 'bold' }}>ID:</span> {userdetails ? userdetails._id : ''}</p>
+            <p style={{ margin: '1px' }}><span style={{ fontWeight: 'bold' }}>EMAIL_ID:</span> {userdetails ? userdetails.email : 'No email'}</p>
+            <p style={{ margin: '1px' }}><span style={{ fontWeight: 'bold' }}>Name:</span> {userdetails ? userdetails.userName : 'Guest'}</p>
           </div>
         </div>
-      </Modal>
+
+        {/* Display the Confirm button to trigger upload */}
+        {previewImage && (
+          <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'flex-end' }}>
+            <Button onClick={handleConfirmUpload} type="primary">
+              Confirm & Upload Image
+            </Button>
+          </div>
+        )}
+
+        <hr style={{ border: '1px solid black', width: '100%' }} />
+
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+          <div style={{ maxHeight: '200px', width: '100%', overflowY: 'auto', padding: '10px', border: '1px solid #ccc', marginBottom: '20px' }}>
+            {/* Render Ad Accounts or any other content */}
+            {renderAdAccounts && renderAdAccounts()}
+          </div>
+        </div>
+      </div>
+    </Modal>
+
     </div>
   );
 };
