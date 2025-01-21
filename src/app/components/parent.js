@@ -69,6 +69,7 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import 'ag-grid-enterprise';
 import ChatWidget from './supportchat';
+import ChatWithAI from './chartwithAI'
 
 export const TokenProvider = ({ children }) => {
   const { data: session } = useSession();
@@ -124,7 +125,8 @@ export const TokenProvider = ({ children }) => {
 
   return (
     <TokenContext.Provider value={{ userdetails, setuserdetails, darkMode, toggleTheme, theme, apiClient }}>
-      {userdetails && !userdetails.role === "Revenue_Partner" && <ChatWidget />}
+      {userdetails && userdetails.role !== "Revenue_Partner" && <ChatWithAI />}
+      {/* {userdetails && userdetails.role !== "Revenue_Partner" && <ChatWidget />} */}
       {children}
     </TokenContext.Provider>
   );

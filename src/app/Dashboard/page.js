@@ -24,7 +24,7 @@ const revenuePartnerNames = {
     "Bodies": "FB_Bodies",
     "TONIC": "FB_Tonic",
     "TONIC1":"FB_Tonic1",
-    "DActive":"FB_DomainActive",
+    "Domain Active":"FB_DomainActive",
     "ENKI":"FB_Enki",
     "System1":"FB_System1",
     "Domain_Active":"Newsbreak_DA",
@@ -195,6 +195,7 @@ const RevenuePartnerDashboard = () => {
     const [domainColumnDefs, setDomainColumnDefs] = useState([]);
 
     const [isDomain, setIsDomain] = useState("");
+
 
     const onChangeTime = (value) => {
         setTimeZone(value);
@@ -859,10 +860,14 @@ const Dashboard = () => {
     const [activeTab1, setActiveTab1] = useState("1");
 
     const [activeTab2, setActiveTab2] = useState("1");
+
+    const [activeTab3, setActiveTab3] = useState("1");
     // const toggleTheme = () => {
     //     setDarkMode(!darkMode);
     // };
     const [time, setTime] = useState('UTC');
+    
+    const [agencyNameReport, setAgencyNameReport] = useState([]);
 
     const onChangeTime = (value) => {
         setSkeletonLoading(true);
@@ -873,6 +878,8 @@ const Dashboard = () => {
     const carouselRef1 = useRef();
 
     const carouselRef2 = useRef();
+
+    const carouselRef3 = useRef();
 
     const revenue1 = useRef(0);
     const spend1 = useRef(0);
@@ -1218,7 +1225,7 @@ const Dashboard = () => {
             const topFiveCampaigns = [];
         
             // Step 3: Iterate through each date group and get the top 5 campaigns by spend
-            groupedByDate.forEach(campaigns => {
+            groupedByDate?.forEach(campaigns => {
                 // Sort the campaigns by spend in descending order and take the top 5
                 const topFive = campaigns
                     .sort((a, b) => b.spend - a.spend) // Sort by spend descending
@@ -1248,7 +1255,7 @@ const Dashboard = () => {
             const topFiveCampaigns = [];
         
             // Step 3: Iterate through each date group and get the top 5 campaigns by spend
-            groupedByDate.forEach(campaigns => {
+            groupedByDate?.forEach(campaigns => {
                 // Sort the campaigns by spend in descending order and take the top 5
                 const topFive = campaigns
                     .sort((a, b) => b.estimated_revenue - a.estimated_revenue) // Sort by spend descending
@@ -1278,7 +1285,7 @@ const Dashboard = () => {
             const topFiveCampaigns = [];
         
             // Step 3: Iterate through each date group and get the top 5 campaigns by spend
-            groupedByDate.forEach(campaigns => {
+            groupedByDate?.forEach(campaigns => {
                 // Sort the campaigns by spend in descending order and take the top 5
                 const topFive = campaigns
                     .sort((a, b) => b.profit - a.profit) // Sort by spend descending
@@ -1308,7 +1315,7 @@ const Dashboard = () => {
             const profitableCampaigns = [];
         
             // Step 3: Iterate through each date group, filter campaigns with profit > 0, and sort them by profit
-            groupedByDate.forEach(campaigns => {
+            groupedByDate?.forEach(campaigns => {
                 const filteredAndSortedCampaigns = campaigns
                     .filter(campaign => campaign.profit > 0) // Keep only campaigns with profit > 0
                     .sort((a, b) => b.profit - a.profit); // Sort by profit in descending order
@@ -1337,7 +1344,7 @@ const Dashboard = () => {
             const unprofitableCampaigns = [];
         
             // Step 3: Iterate through each date group, filter campaigns with profit < 0, and sort them by profit
-            groupedByDate.forEach(campaigns => {
+            groupedByDate?.forEach(campaigns => {
                 const filteredAndSortedCampaigns = campaigns
                     .filter(campaign => campaign.profit < 0) // Keep only campaigns with profit < 0
                     .sort((a, b) => b.profit - a.profit); // Sort by profit in descending order (optional)
@@ -1556,12 +1563,48 @@ const Dashboard = () => {
             return domainResult;
         }
           
+        function groupDataByBMNameAndAgencyName(data, dateField) {
+            console.log(dateField);
+            const DomainGroupedData = data?.reduce((acc, obj) => {
+              const {  spend, estimated_revenue, BMName, AgencyName } = obj;
+              const specifiedDate = obj[dateField]; // Dynamically get the date based on the field
           
+              // Create a unique key for grouping by domain, specifiedDate, and accountNumber
+              const key = `${specifiedDate}-${BMName}-${AgencyName}`;
+          
+              if (!acc[key]) {
+                acc[key] = {
+                  specifiedDate,
+                  BMName,
+                  AgencyName,
+                  spend: 0,
+                  estimated_revenue: 0,
+                };
+              }
+          
+              // Sum the fields (spend, estimated_revenue) based on the new grouping
+              acc[key].spend += spend;
+              acc[key].estimated_revenue += estimated_revenue;
+          
+              return acc;
+            }, {});
+          
+            // Convert the grouped data object back to an array and add the profit field
+            const domainResult = Object.values(DomainGroupedData).map(item => {
+              item.profit = item.estimated_revenue - item.spend; // Calculate profit
+              return item;
+            });
+          
+            return domainResult;
+        }
           
           
         const domainResult = groupDataByDomainAndAccount(responseData, `${time}Date`);
 
+        const agencyLevelReport = groupDataByBMNameAndAgencyName(responseData, `${time}Date`);
+
         setDomainWiseData(domainResult);
+        setAgencyNameReport(agencyLevelReport);
           
         console.log(domainResult, "domain Result");
 
@@ -2076,6 +2119,11 @@ const Dashboard = () => {
         { key: '2', label: 'Accounts', content: 'Content for Top 5 Revenue Campaigns' },
     ];
 
+    const items3 = [
+        { key: '1', label: 'Domain', content: 'Content for Top 5 Spend Campaigns' },
+        { key: '2', label: 'Agency', content: 'Content for Top 5 Revenue Campaigns' },
+    ];
+
     const handleSlideChange = (from, to) => {
         // console.log(to, "to");
         setActiveTab((parseInt(to)+1).toString());
@@ -2101,6 +2149,12 @@ const Dashboard = () => {
         // console.log((parseInt(to)+1).toString());
     };
 
+    const handleSlideChange3 = (from, to) => {
+        // console.log(to, "to");
+        setActiveTab3((parseInt(to)+1).toString());
+        // console.log((parseInt(to)+1).toString());
+    };
+
     const handleCarouselChange1 = (index) => {
         setActiveTab1(index);
         // console.log(index);
@@ -2114,6 +2168,14 @@ const Dashboard = () => {
         // console.log(index);
         // console.log(parseInt(index)-1);
         carouselRef2.current.goTo(parseInt(index)-1)
+        
+    };
+
+    const handleCarouselChange3 = (index) => {
+        setActiveTab3(index);
+        // console.log(index);
+        // console.log(parseInt(index)-1);
+        carouselRef3.current.goTo(parseInt(index)-1)
         
     };
 
@@ -2198,6 +2260,32 @@ const Dashboard = () => {
         </StickyBox>
     ));
 
+    const RenderCarouselNav3 = React.memo(() => (
+        <StickyBox offsetTop={64} offsetBottom={20} style={{ zIndex: 1, padding: '0px', margin: '0px' }}>
+            <Tabs
+                activeKey={activeTab3}
+                onChange={handleCarouselChange3}
+                items={items3.map((item) => ({
+                    key: item.key,
+                    label: item.label,
+                }))}
+                className="custom-tabs"
+                style={{
+                    backgroundColor: '#f0f2f5',
+                    padding: '0',
+                    marginBottom: '0',
+                }}
+                tabBarStyle={{
+                    fontSize: '12px',
+                    padding: '0',
+                    height: '30px',
+                    lineHeight: '30px',
+                    marginBottom: '-1px',
+                    borderBottom: 'none',
+                }}
+            />
+        </StickyBox>
+    ));
 
     const [columnDefs1] = useState([
         {
@@ -2348,6 +2436,49 @@ const Dashboard = () => {
             minWidth: 125// Group by MediaBuyerName
         },
     ]);
+    const [columnDefs4] = useState([
+        {   
+            field: 'BMName', minWidth: 200, suppressAutoSize: true,  
+            resizable: true,
+            sortable: true,
+            hide: true, // Hide column as it's grouped
+            rowGroup: true,
+            enableRowGroup: true,
+        },
+        {
+            field: "AgencyName", minWidth:180,
+            resizable: true,
+            sortable: true,
+            // hide: true, // Hide column as it's grouped
+            // rowGroup: true,
+            // enableRowGroup: true,
+
+        }, // Group by Network
+        {field:'specifiedDate', headerName:"Date",
+        minWidth: 125},
+        {
+            field: "spend",
+            aggFunc: spender,
+            valueFormatter: currencyFormatter,
+            minWidth: 125
+        }, // Summing Spend column
+        {
+            headerName: 'Revenue',
+            field: "estimated_revenue",
+            aggFunc: spender,
+            valueFormatter: currencyFormatter,
+            minWidth: 125
+        }, // Summing Revenue column
+        {
+            field: "profit",
+            aggFunc: spender,
+            cellClassRules: {
+                'font-red': p => p.value < 0
+            },
+            valueFormatter: currencyFormatter,
+            minWidth: 125
+        }
+    ]);
 
     const autoGroupColumnDef = {
         headerName: 'Campaign Name', // Display name for the grouped column
@@ -2361,6 +2492,15 @@ const Dashboard = () => {
 
     const autoGroupColumnDefDomain = {
         headerName: 'Domain', // Display name for the grouped column
+        minWidth: 250, // Set width for grouped rows
+        resizable: true, // Enable resizing
+        sortable: true, // Enable sorting
+        cellRendererParams: {
+          suppressCount: true, // Suppress row count in the grouped column
+        },
+      };
+      const autoGroupColumnDefAgency = {
+        headerName: 'BMName', // Display name for the grouped column
         minWidth: 250, // Set width for grouped rows
         resizable: true, // Enable resizing
         sortable: true, // Enable sorting
@@ -3498,28 +3638,55 @@ const Dashboard = () => {
                             </div>
                         </Carousel>
                         
-                        
-                        <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                            <Col>
-                                <h2>Domain Level</h2>
-                            </Col>
-                            <Col>
-                                <div
-                                    className={`ag-theme-alpine ${gridThemeClass}`}
-                                    style={{ width: '100%', height: '400px' }}
-                                >             <AgGridReact
-                                        rowData={domainWiseData}
-                                        columnDefs={columnDefs3}
-                                        defaultColDef={defaultColDef}
-                                        // rowGroupPanelShow="always"
-                                        suppressAggFuncInHeader={true}
-                                        // groupIncludeFooter={true}
-                                        groupIncludeTotalFooter={true}
-                                        autoGroupColumnDef={autoGroupColumnDefDomain}
-                                    />
-                                </div>
-                            </Col>
-                        </Row>
+                        <div style={{padding:'0px', marginTop:'15px'}}>
+                            <RenderCarouselNav3/>
+                        </div>
+                        <Carousel ref={carouselRef3} beforeChange={handleSlideChange3} dots={false}>
+                            <div>
+                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                    <Col>
+                                        <div
+                                            className={`ag-theme-alpine ${gridThemeClass}`}
+                                            style={{ width: '100%', height: '400px' }}
+                                        >             <AgGridReact
+                                                rowData={domainWiseData}
+                                                columnDefs={columnDefs3}
+                                                defaultColDef={defaultColDef}
+                                                // rowGroupPanelShow="always"
+                                                suppressAggFuncInHeader={true}
+                                                // groupIncludeFooter={true}
+                                                groupIncludeTotalFooter={true}
+                                                autoGroupColumnDef={autoGroupColumnDefDomain}
+                                            />
+                                        </div>
+                                    </Col>
+                                </Row>
+                            </div>
+                            <div>
+                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                    <Col>
+                                        <div
+                                            className={`ag-theme-alpine ${gridThemeClass}`}
+                                            style={{ width: '100%', height: '400px' }}
+                                        >           <AgGridReact
+                                                        rowData={agencyNameReport}
+                                                        columnDefs={columnDefs4}
+                                                        defaultColDef={defaultColDef}
+                                                        gridOptions={{
+                                                            groupDefaultExpanded: -1, // Expands all groups by default
+                                                        }}
+                                                        // rowGroupPanelShow="always"
+                                                        suppressAggFuncInHeader={true}
+                                                        rowGroupPanelShow="always"
+                                                        // groupIncludeFooter={true}
+                                                        groupIncludeTotalFooter={true}
+                                                        autoGroupColumnDef={autoGroupColumnDefAgency}
+                                                    />
+                                        </div>
+                                    </Col>
+                                </Row>
+                            </div>
+                        </Carousel>
                         <Row></Row>
     
     

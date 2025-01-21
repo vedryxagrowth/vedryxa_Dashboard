@@ -96,7 +96,7 @@ const newtworkCollections = {
     "FB_System1": 'Facebook_System1',
     "FB_Rsoc": 'Facebook_Rsoc',
     "FB_Tonic": 'Facebook_Tonic',
-    "FB_DomainActive": "Facebook_DActive",
+    "FB_DomainActive": "Facebook_DActive_Names",
     "FB_Bodies": "Facebook_Bodies",
     "FB_Bodies1": "Facebook_Bodies1",
     "Newsbreak_DA": "Newsbreak_DomainActive",
@@ -2883,6 +2883,39 @@ const MyTablePage = () => {
         }));
     }
 
+    function groupAndCalculateBMNameAndAgency(data) {
+        const groupedData = data.reduce((acc, item) => {
+            const key = `${item.BMName}-${item.AgencyName}-${item[`${newtime}Date`]}`;
+
+            if (!acc[key]) {
+                acc[key] = {
+                    BMName: item.BMName,
+                    AgencyName: item.AgencyName,
+                    [`${newtime}Date`]: item[`${newtime}Date`],
+                    estimated_revenue: 0,
+                    spend: 0,
+                    conversions: 0,
+                    fbLeads: 0,
+                };
+            }
+
+            acc[key].estimated_revenue += item.estimated_revenue;
+            acc[key].spend += parseFloat(item.spend);
+            acc[key].conversions += item.conversions || 0;  // Default to 0 if undefined
+            acc[key].fbLeads += parseInt(item.fbLeads) || 0;        // Default to 0 if undefined
+
+            return acc;
+        }, {});
+
+        return Object.values(groupedData).map(item => ({
+            ...item,
+            profit: item.estimated_revenue - item.spend,
+            margin: item.estimated_revenue > 0 ? ((item.estimated_revenue - item.spend) / item.estimated_revenue) * 100 : 0,
+            rpc: item.conversions > 0 ? (item.estimated_revenue / item.conversions) : 0, // Revenue per Conversion
+            cpl: item.fbLeads > 0 ? (item.spend / item.fbLeads) : 0,  // Cost per Lead
+        }));
+    }
+
 
     const functionCall1 = async () => {
         if (!token) {
@@ -3000,26 +3033,38 @@ const MyTablePage = () => {
         }
 
         if (fetchData.status === 200 && mainData.length > 0) {
-            const groupAndCalculateBMName1 = groupAndCalculateBMName(mainData);
+            const groupAndCalculateBMName1 = groupAndCalculateBMNameAndAgency(mainData);
             setBMNameData(groupAndCalculateBMName1);
             setBMNameColumnDefs([
                 {
                     field: 'BMName',
                     headerName: 'BMName',
-                    minWidth: 400,
+                    minWidth: 150,
                     // resizable: true,
                     sortable: true,
-                    hide: true, // Hide column as it's grouped
+                    // hide: true, // Hide column as it's grouped
                     rowGroup: true,
                     enableRowGroup: true,
                     flex: 9
 
                 },
                 {
+                    field: 'AgencyName',
+                    headerName: 'AgencyName',
+                    minWidth: 150,
+                    // resizable: true,
+                    sortable: true,
+                    // hide: true, // Hide column as it's grouped
+                    // rowGroup: true,
+                    // enableRowGroup: true,
+                    flex: 8
+
+                },
+                {
                     field: `${newtime}Date`,
                     headerName: 'Date',
                     flex: 6,
-                    minWidth: 200,
+                    minWidth: 120,
                     filter: true,
                 },
                 {
@@ -6837,7 +6882,7 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
         { key: '1', label: 'Live', content: 'Content for Live data' },
         { key: '2', label: 'Daily', content: 'Content for Daily data' },
         { key: '3', label: 'Campaigns', content: 'Content for Campaign data' },
-        { key: '4', label: 'BMName', content: 'Content for BMName data' },
+        { key: '4', label: 'Agency', content: 'Content for BMName data' },
         ...(newRevenuePratner === "FB_Mnet" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : []),
         ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
         ...(newRevenuePratner === "FB_System1" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : []),
@@ -6909,7 +6954,7 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
             normalizedCampaign.endsWith(normalizedInput)
         );
     }
-    ) : [], [rowData]);
+    ) : [], [rowData, inputValue]);
 
     const memorizedColumnDef1 = useMemo(()=> columnDefs1.current, [columnDefs1.current]);
     const memorizedDailyData = useMemo(()=> dailyData?.filter((each) => {
@@ -6921,7 +6966,7 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
             normalizedCampaign.endsWith(normalizedInput)
         );
     }
-    ), [dailyData]);
+    ), [dailyData, inputValue]);
 
     const memorizedColumnDef2 = useMemo(()=> columnDefs2.current, [columnDefs2.current]);
     const memorizedCampaignsData = useMemo(()=>campaignData.filter((each) => {
@@ -6933,7 +6978,7 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
             normalizedCampaign.endsWith(normalizedInput)
         );
     }
-    ), [campaignData]);
+    ), [campaignData, inputValue]);
 
     const memorizedBMNameColumnDefs = useMemo(()=>BMNameColumnDefs, [BMNameColumnDefs]);
     const memorizedBMNameData = useMemo(()=> BMNameData, [BMNameData]);
@@ -6948,7 +6993,7 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
             normalizedCampaign.endsWith(normalizedInput)
         );
     }
-    ),[keywordData]);
+    ),[keywordData, inputValue]);
 
     const memorizedColumnDef4 = useMemo(()=> columnDefs4.current, [columnDefs4.current]);
     const memorizedTonicKeywordsData = useMemo(()=>tonicKeywordData.filter((each) => {
@@ -6960,7 +7005,7 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
             normalizedCampaign.endsWith(normalizedInput)
         );
     }
-    ),[tonicKeywordData]);
+    ),[tonicKeywordData, inputValue]);
 
     const memorizedSystem1KeywordData = useMemo(()=>system1KeywordData,[system1KeywordData]);
 
@@ -6975,7 +7020,7 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
             normalizedCampaign.endsWith(normalizedInput)
         );
     }
-    ) : [],[campaignNamesDActiveLive]);
+    ) : [],[campaignNamesDActiveLive, inputValue]);
     const memorizedCampaignNamesDActiveDaily = useMemo(()=>campaignNamesDActiveDaily?.filter((each) => {
         const normalizedCampaign = each.campaignname.trim().toLowerCase();
         const normalizedInput = inputValue.trim().toLowerCase();
@@ -6985,7 +7030,7 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
             normalizedCampaign.endsWith(normalizedInput)
         );
     }
-    ),[campaignNamesDActiveDaily]);
+    ),[campaignNamesDActiveDaily, inputValue]);
 
     return (
         <div className='reports-container'>
@@ -7560,6 +7605,9 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                         rowData={memorizedBMNameData}
                                         columnDefs={memorizedBMNameColumnDefs}
                                         // defaultColDef={defaultColDef}
+                                        gridOptions={{
+                                            groupDefaultExpanded: -1, // Expands all groups by default
+                                        }}
                                         suppressAggFuncInHeader={true}
                                         pinnedBottomRowData={BMNameFixedFooter}
                                         getRowStyle={(params) => {
