@@ -1179,7 +1179,7 @@ const LayoutWrapper = ({ children, usersDataForLogin }) => {
 
             if (response.ok) {
                 const result = await response.json();
-                message.success("User activity posted successfully!");
+                // message.success("User activity posted successfully!");
                 console.log("Response:", result);
             } else {
                 const errorData = await response.json();

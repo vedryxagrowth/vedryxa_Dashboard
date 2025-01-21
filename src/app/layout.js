@@ -150,26 +150,26 @@ const UserActivities = ({ children, onComplete }) => {
       let decodedToken;
   
       if (token) {
-        console.log("Hi");
+        // console.log("Hi");
         try {
           // Decode the token
           decodedToken = jwt.decode(token);
-          console.log("This");
+          // console.log("This");
   
           if (!decodedToken || !decodedToken.exp) {
-            console.log("is");
+            // console.log("is");
             console.error("Decoded token is invalid or missing 'exp' field:", decodedToken);
             throw new Error("Invalid token structure.");
           }
   
           // Compare the token expiration with the current time
           const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
-          console.log("Decoded token expiration:", decodedToken.exp);
-          console.log("Current time:", currentTime);
+          // console.log("Decoded token expiration:", decodedToken.exp);
+          // console.log("Current time:", currentTime);
   
           if (decodedToken.exp < currentTime) {
-            console.log("praveen");
-            console.log("Token is expired. Clearing localStorage and signing out.");
+            // console.log("praveen");
+            // console.log("Token is expired. Clearing localStorage and signing out.");
   
             // Broadcast sign-out to all tabs
             localStorage.setItem("signout", "true");
@@ -185,13 +185,13 @@ const UserActivities = ({ children, onComplete }) => {
           } 
           else if (decodedToken.exp > currentTime) {
             // Token exists and is valid
-            console.log("testing");
+            // console.log("testing");
             console.log("Token is already stored and valid:", token);
             onComplete();
           }
         } catch (err) {
-          console.error("Error decoding token or handling expiration check:", err);
-          console.log("authentication");
+          // console.error("Error decoding token or handling expiration check:", err);
+          // console.log("authentication");
           // Handle invalid token gracefully
           localStorage.clear();
           signOut();
@@ -199,7 +199,7 @@ const UserActivities = ({ children, onComplete }) => {
           return;
         }
       } else {
-        console.log("for");
+        // console.log("for");
         console.log("No token found in localStorage.");
         onComplete();
         // signOut();
@@ -214,52 +214,6 @@ const UserActivities = ({ children, onComplete }) => {
     }
   }, [status]);
   
-
-  // useEffect(() => {
-  //   if (Object.keys(useractivites).length === 0) return;
-
-  //   const postUserActivities = async () => {
-  //     try {
-  //       const response = await fetch("https://prodapis.adsgoat.in/UsersActivities/", {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: localStorage.getItem('token')
-  //         },
-  //         body: JSON.stringify({ userActivities: useractivites }),
-  //       });
-
-  //       if (response.ok) {
-  //         const result = await response.json();
-  //         message.success("User activity posted successfully!");
-  //         console.log("Response:", result);
-  //       } else {
-  //         const errorData = await response.json();
-  //         message.error(`Failed to post user activity: ${errorData.message}`);
-  //       }
-  //     } catch (error) {
-  //       console.error("Error posting user activity:", error);
-  //       message.error("Error posting user activity.");
-  //     }
-  //   };
-
-  //   postUserActivities();
-  // }, [useractivites]);
-
-  // useEffect(() => {
-  //   if (status === "authenticated") {
-  //     const fetchUserDetails = async () => {
-  //       const decodedToken = jwt.decode(localStorage.getItem("token"));
-  //       if (!localStorage.getItem("token")) {
-          
-  //       }
-  //     };
-
-  //     fetchUserDetails();
-  //   }
-  // }, [status]);
-
-
   return <>{children}</>;
 };
 
