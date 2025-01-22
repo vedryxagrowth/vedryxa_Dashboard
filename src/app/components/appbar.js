@@ -127,7 +127,7 @@ const UserLocationFinder = ({ children, onComplete }) => {
           res.ok ? res.json() : res.json().then((err) => Promise.reject(err))
         )
         .then((result) => {
-          message.success("User activity posted successfully!");
+          // message.success("User activity posted successfully!");
           console.log("Response:", result);
         })
         .catch((err) => {
