@@ -472,24 +472,32 @@ const Topbar = () => {
   const [imageFile, setImageFile] = useState(null);  // Temporary state for storing the file before upload
 
 
-   // Fetch the user's avatar URL on page load or when userdetails change
-   const fetchUserAvatarWithRetry = async (retries = 3, delay = 2000) => {
+  // Fetch the user's avatar URL on page load or when userdetails change
+  let shouldRetry = true; // Global or module-level flag to control retries
+
+  const fetchUserAvatarWithRetry = async (retries = 3, delay = 2500) => {
     try {
-      console.log('Fetching user avatar with retry...');
-      const email = userdetails?.email;
-  
-      if (!email) {
-        console.warn('Email is missing. Cannot fetch user avatar.');
+      if (!shouldRetry) {
+        console.log('Retries have been stopped due to a 404 error.');
         return;
       }
-  
+
+      console.log('Fetching user avatar with retry...');
+      const email = userdetails?.email;
+
+      if (!email) {
+        console.warn('Email is missing. Cannot fetch user avatar.');
+        setAvatarUrl(getDefaultAvatar());
+        return;
+      }
+
       const response = await axios.get(`https://prodapis.adsgoat.in/GetUserImage`, {
         params: { email },
         headers: {
           Authorization: localStorage.getItem('token'),
         },
       });
-  
+
       if (response.data.success) {
         const fetchedAvatarUrl = response.data.imageUrl;
         console.log('Fetched avatar URL:', fetchedAvatarUrl);
@@ -499,6 +507,14 @@ const Topbar = () => {
         setAvatarUrl(getDefaultAvatar());
       }
     } catch (error) {
+      if (error.response && error.response.status === 404) {
+        // Stop retries if the response status is 404
+        console.error('Error 404: Resource not found. Stopping retries.');
+        shouldRetry = false; // Set flag to false to stop further retries
+        setAvatarUrl(getDefaultAvatar());
+        return;
+      }
+
       if (retries > 0) {
         console.log(`Retrying... (${retries} retries left)`);
         setTimeout(() => fetchUserAvatarWithRetry(retries - 1, delay), delay);
@@ -508,8 +524,9 @@ const Topbar = () => {
       }
     }
   };
-  
+
   useEffect(() => {
+    shouldRetry = true; // Reset flag when `userdetails` changes
     fetchUserAvatarWithRetry();
   }, [userdetails]);
   

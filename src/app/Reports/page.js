@@ -225,6 +225,7 @@ const MyTablePage = () => {
 
     const [isSearching, setIsSearching] = useState(false);
     const [inputValue, setInputValue] = useState('');
+    const [newInputValue, setNewInputValue] = useState(inputValue);
     const [isSecondRowVisible, setIsSecondRowVisible] = useState(false);
     const [refrst, setRefrst] = useState(false);
     const [activeTab, setActiveTab] = useState("1");
@@ -242,8 +243,8 @@ const MyTablePage = () => {
         }
     };
 
-    const handleChangeInput = (e) => {
-        setInputValue(e.target.value);
+    const handleChangeInput = () => {
+        setInputValue(newInputValue);
         // console.log(e.target.value);
         // const filteredLiveData = rowData.filter((each)=> each.campaignName.includes(e.target.value));
 
@@ -253,6 +254,10 @@ const MyTablePage = () => {
         // setdailyData(filteredDailyData);
         // setCampaignData(filteredAllCampaignsData);
     };
+
+    const handleChangeNewInputValue = (e) => {
+        setNewInputValue(e.target.value.trim());
+    }
 
     // const [rowStructure, setRowStructure] = useState(); 
 
@@ -3408,7 +3413,7 @@ const MyTablePage = () => {
     }
 
     const functionCall3 = async () => {
-        const fetchData = await apiClient.get(`/AllCampaigns?accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}&page=${pageSize}&limit=100`);
+        const fetchData = await apiClient.get(`/AllCampaigns?accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}&campaignName=${inputValue}&page=${pageSize}&limit=100`);
         // console.log(fetchData, "f1");
         const mainData = fetchData.data.items;
 
@@ -4031,14 +4036,16 @@ const MyTablePage = () => {
 
                 // Run this function on initial load and whenever pageSize changes
                 await functionCall3();
-                if (newRevenuePratner === "FB_DomainActive") {
-                    await functionCall4();
-                    // await campaignNamesDataForDActiveLive();
-                    // await campaignNamesDataForDActiveDaily();
-                } else if (newRevenuePratner === "FB_System1") {
-                    await functionCall5();
-                }else if(newRevenuePratner === "FB_Tonic1"){
-                    await functionCall6();
+                if (isInitialLoad.current) {
+                    if (newRevenuePratner === "FB_DomainActive") {
+                        await functionCall4();
+                        // await campaignNamesDataForDActiveLive();
+                        // await campaignNamesDataForDActiveDaily();
+                    } else if (newRevenuePratner === "FB_System1") {
+                        await functionCall5();
+                    }else if(newRevenuePratner === "FB_Tonic1"){
+                        await functionCall6();
+                    }
                 }
                 
 
@@ -4050,7 +4057,7 @@ const MyTablePage = () => {
         };
 
         functionCall();
-    }, [pageSize]);
+    }, [pageSize, inputValue]);
 
     useEffect(() => {
         if (isTrue) {
@@ -4117,7 +4124,7 @@ const MyTablePage = () => {
         // console.log(endDate, "end");
         setNewEndDate(endDate);
         setNewStartDate(startDate);
-        setPageSize(1);
+        // setPageSize(pageSize);
         setTrue(true);
         setRowData([]);
         setTime(time);
@@ -4133,6 +4140,15 @@ const MyTablePage = () => {
         setnewAccountName(accountName)
         setNewTime(time);
         setNewRevenuePartner(revenuePratner);
+        if(newRevenuePratner !== revenuePratner){
+            setPageSize(1);
+        }
+        else if (newaccount !== account){
+            setPageSize(1);
+        }else{
+            setPageSize(pageSize);
+        }
+        isInitialLoad.current = false;
         // setMainComponent(true);
     }
 
@@ -6362,6 +6378,14 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
 
     const onBtExport1 = () => {
         // console.log(gridRef.current.api,"in")
+        const Details = {
+            network : newRevenuePratner,
+            account: newaccount,
+            dateRange: `From ${newStartDate} to ${newendDate}`,
+            type: "Live",
+            email: userdetails?.email,
+            time: moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm A")
+        }
         gridRef.current.api.exportDataAsCsv({
             processCellCallback: (params) => {
                 const node = params.node;
@@ -6374,9 +6398,22 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                 return params.node.group;
             },
         });
+        const updateDetails = async()=>{
+            await apiClient.post('/UserExportActivities/', { Details });
+        }
+        updateDetails();
+
     };
 
-    const onBtExport = (gridRef) => {
+    const onBtExport = (gridRef, text) => {
+        const Details = {
+            network : newRevenuePratner,
+            account: newaccount,
+            dateRange: `From ${newStartDate} to ${newendDate}`,
+            type: text,
+            email: userdetails?.email,
+            time: moment().tz("Asia/Kolkata").format("YYYY-MM-DD hh:mm A")
+        }
         if (gridRef.current) {
             gridRef.current.api.exportDataAsCsv({
                 processCellCallback: (params) => {
@@ -6393,6 +6430,10 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
         } else {
             console.error("Grid reference is null");
         }
+        const updateDetails = async()=>{
+            await apiClient.post('/UserExportActivities/', { Details });
+        }
+        updateDetails();
     };
 
     const itemRender = (_, type, originalElement) => {
@@ -7186,14 +7227,15 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                     <Input
                                         placeholder="Search here"
                                         // autoFocus
-                                        value={inputValue}
-                                        onChange={handleChangeInput}
+                                        value={newInputValue}
+                                        onChange={handleChangeNewInputValue}
                                         onBlur={handleBlur}
+                                        onPressEnter={handleChangeInput}
                                         style={{ width: '100%', borderRadius: '5px' }}
                                     />
                                 </Col>
                                 <Col>
-                                    <Button style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<SearchOutlined />} />
+                                    <Button style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<SearchOutlined />} onClick={handleChangeInput} />
                                 </Col>
                             </Row>
                         </Col>
@@ -7281,6 +7323,7 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                         paginationPageSize={100}
                                         paginationPageSizeSelector={[20, 40, 60, 80, 100]}
                                         suppressAggFuncInHeader={true}
+                                        
                                         // groupIncludeTotalFooter={rowData.length > 0 ? true : false}
                                         // groupIncludeFooter={rowData.length > 0 ? true : false}
                                         autoGroupColumnDef={autoGroupColumnDefLive}
@@ -7375,7 +7418,7 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                         </Col>
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                             <Tooltip title="Export to CSV">
-                                                <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef1)} />
+                                                <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef1, "Daily")} />
                                             </Tooltip>
                                         </Col>
                                     </Row>
@@ -7482,7 +7525,7 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                         </Col>
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                             <Tooltip title="Export to CSV">
-                                                <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef2)} />
+                                                <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef2, "AllCampaigns")} />
                                             </Tooltip>
                                         </Col>
                                     </Row>
@@ -7859,7 +7902,7 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                             </Col>
                                             <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                                 <Tooltip title="Export to CSV">
-                                                    <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef3)} />
+                                                    <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef3, "Keywords")} />
                                                 </Tooltip>
                                             </Col>
                                         </Row>
@@ -7955,7 +7998,7 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                             </Col>
                                             <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                                 <Tooltip title="Export to CSV">
-                                                    <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef4)} />
+                                                    <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef4, "Domain")} />
                                                 </Tooltip>
                                             </Col>
                                         </Row>
