@@ -2,7 +2,7 @@
 import axios from "axios";
 import { useState, useEffect, useRef } from 'react';
 import { Button, Card, Input, Typography, List, Avatar, Upload, Modal, message as antdMessage, Flex, Spin, Select, Tooltip } from 'antd';
-import { MessageOutlined, SendOutlined, CloseOutlined, RobotOutlined, PaperClipOutlined, LoadingOutlined, PictureFilled, CopyOutlined, OpenAIFilled } from '@ant-design/icons';
+import { MessageOutlined, SendOutlined, CloseOutlined, RobotOutlined, PaperClipOutlined, LoadingOutlined, PictureFilled, CopyFilled, OpenAIFilled } from '@ant-design/icons';
 import { useTokenContext } from './parent';
 import Draggable from "react-draggable";
 const { Option } = Select;
@@ -387,6 +387,7 @@ export default function ChatWithAI() {
                         bordered={false}
                         style={{
                             width: 350,
+                            maxHeight:425,
                             position: 'fixed',
                             bottom: 70,
                             right: 20,
@@ -396,190 +397,193 @@ export default function ChatWithAI() {
                             paddingBottom: 0,
                         }}
                     >
-                        <div
-                            id="chat-messages"
-                            style={{
-                                maxHeight: '400px',
-                                overflowY: 'auto',
-                                paddingBottom: '5px',
-                            }}
-                        >
-                            <List
-                                dataSource={messages}
-                                renderItem={(item) => (
-                                    <List.Item style={{ justifyContent: item.sender === 'user' ? 'flex-end' : 'flex-start' }}>
-                                        <List.Item.Meta
-                                            avatar={
-                                                item.sender === 'assistant' ? (
-                                                    <Avatar icon={<RobotOutlined />} style={{ backgroundColor: '#f56a00' }} />
-                                                ) : (
-                                                    <Avatar style={{ backgroundColor: '#0078d7', color: '#fff' }}>
-                                                        {userdetails.userName ? userdetails.userName.charAt(0).toUpperCase() : 'U'}
-                                                    </Avatar>
-                                                )
-                                            }
-                                            description={
-                                                <div style={{ background: item.sender === 'assistant' ? '#f1f1f1' : '#f1f1f1', color: '#000', padding: '5px 5px', borderRadius: '12px', maxWidth: '80%', wordBreak: 'break-word', fontSize: '14px' }}>
-                                                    {/* {item.image && (
-                                                        <div style={{ marginTop: '10px' }}>
-                                                            <img src={URL.createObjectURL(item.image)} alt="uploaded" style={{ maxWidth: '100%', maxHeight: '200px', objectFit: 'contain' }} />
-                                                        </div>
-                                                    )} */}
-                                                    {item.text}
-                                                    <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'right' }}>{item.time}</div>
-                                                </div>
-                                            }
-                                        />
-                                    </List.Item>
-                                )}
-                            />
-                            {Array.isArray(chats) && Array.isArray(responses) && chats.length > 0 && chats.map((chatItem, index) => {
-                            // Combine chat and response
-                                const responseItem = responses[index];
-
-                                return (
-                                    <div key={index}>
-                                    {/* Render chat item */}
-                                    <List
-                                        dataSource={[chatItem]} // Pass an array with the current chat item
-                                        renderItem={(item) => (
-                                            <List.Item
-                                                style={{
-                                                    display: 'flex', // Make sure the item uses flex layout
-                                                    justifyContent: item.sender === 'user' ? 'flex-end' : 'flex-start',
-                                                    alignItems: 'flex-start', // Align items vertically
-                                                }}
-                                            >
-                                                <List.Item.Meta
-                                                    description={
-                                                        <div style={{display:'flex', justifyContent:'flex-end'}}>
-                                                            <div
-                                                                style={{
-                                                                    background: '#f1f1f1', // Unified background color
-                                                                    color: '#000',
-                                                                    padding: '8px',
-                                                                    borderRadius: '12px',
-                                                                    maxWidth: '80%',
-                                                                    wordBreak: 'break-word',
-                                                                    fontSize: '14px',
-                                                                }}
-                                                            >
-                                                                {item.image && (
-                                                                    <div style={{ marginTop: '10px' }}>
-                                                                        <img
-                                                                            src={URL.createObjectURL(item.image)}
-                                                                            alt="uploaded"
-                                                                            style={{ maxWidth: '100%', maxHeight: '200px', objectFit: 'contain' }}
-                                                                        />
-                                                                    </div>
-                                                                )}
-                                                                {item.text}
-                                                                <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'right' }}>
-                                                                    {item.time}
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    }
-                                                    avatar={null} // Remove avatar here because we'll display it after the description
-                                                />
-                                                
-                                                {/* Display avatar after the description */}
-                                                <Avatar
-                                                    icon={item.sender === 'assistant' ? <RobotOutlined /> : null}
-                                                    style={{
-                                                        backgroundColor: item.sender === 'assistant' ? '#f56a00' : '#0078d7',
-                                                        color: item.sender === 'assistant' ? '#fff' : '#fff',
-                                                        marginRight:'10px',
-                                                        marginLeft: '5px', // Ensure there's some space between the text and the avatar
-                                                        alignSelf: 'center', // Vertically align the avatar with the text
-                                                    }}
-                                                >
-                                                    {item.sender !== 'assistant' && (userdetails.userName ? userdetails.userName.charAt(0).toUpperCase() : 'U')}
-                                                </Avatar>
-                                            </List.Item>
-                                        )}
-                                    />
-                                    {/* Render response item */}
-                                    {responseItem && responseItem.text !== "loading" ? (
-                                        <List
-                                        dataSource={[responseItem]} // Pass responseItem as an array
-                                        renderItem={(item) => (
-                                            <List.Item
-                                            style={{
-                                                display: 'flex',
-                                                justifyContent: 'space-between', // Move avatar to the right
-                                                alignItems: 'center', // Align items vertically
-                                            }}
-                                            >
+                        <div style={{display:'flex', flexDirection:"column", height:"100%"}}>
+                            <div
+                                id="chat-messages"
+                                style={{
+                                    // maxHeight: '300px',
+                                    height:'280px',
+                                    overflowY: 'auto',
+                                    paddingBottom: '5px'
+                                }}
+                            >
+                                <List
+                                    dataSource={messages}
+                                    renderItem={(item) => (
+                                        <List.Item style={{ justifyContent: item.sender === 'user' ? 'flex-end' : 'flex-start' }}>
                                             <List.Item.Meta
                                                 avatar={
-                                                    <Avatar icon={<RobotOutlined />} style={{ backgroundColor: '#f56a00' }} />
+                                                    item.sender === 'assistant' ? (
+                                                        <Avatar icon={<RobotOutlined />} style={{ backgroundColor: '#f56a00' }} />
+                                                    ) : (
+                                                        <Avatar style={{ backgroundColor: '#0078d7', color: '#fff' }}>
+                                                            {userdetails.userName ? userdetails.userName.charAt(0).toUpperCase() : 'U'}
+                                                        </Avatar>
+                                                    )
                                                 }
                                                 description={
-                                                <div>
-                                                    {item.image && (
-                                                    <div style={{ marginTop: '10px' }}>
-                                                        <img
-                                                        src={item.image}
-                                                        alt="uploaded"
-                                                        style={{ maxWidth: '100%', maxHeight: '200px', objectFit: 'contain' }}
-                                                        />
+                                                    <div style={{ background: item.sender === 'assistant' ? '#f1f1f1' : '#f1f1f1', color: '#000', padding: '5px 5px', borderRadius: '12px', maxWidth: '80%', wordBreak: 'break-word', fontSize: '14px' }}>
+                                                        {/* {item.image && (
+                                                            <div style={{ marginTop: '10px' }}>
+                                                                <img src={URL.createObjectURL(item.image)} alt="uploaded" style={{ maxWidth: '100%', maxHeight: '200px', objectFit: 'contain' }} />
+                                                            </div>
+                                                        )} */}
+                                                        {item.text}
+                                                        <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'right' }}>{item.time}</div>
                                                     </div>
-                                                    )}
-                                                    <div
+                                                }
+                                            />
+                                        </List.Item>
+                                    )}
+                                />
+                                {Array.isArray(chats) && Array.isArray(responses) && chats.length > 0 && chats.map((chatItem, index) => {
+                                // Combine chat and response
+                                    const responseItem = responses[index];
+
+                                    return (
+                                        <div key={index}>
+                                        {/* Render chat item */}
+                                        <List
+                                            dataSource={[chatItem]} // Pass an array with the current chat item
+                                            renderItem={(item) => (
+                                                <List.Item
+                                                    style={{
+                                                        display: 'flex', // Make sure the item uses flex layout
+                                                        justifyContent: item.sender === 'user' ? 'flex-end' : 'flex-start',
+                                                        alignItems: 'flex-start', // Align items vertically
+                                                    }}
+                                                >
+                                                    <List.Item.Meta
+                                                        description={
+                                                            <div style={{display:'flex', justifyContent:'flex-end'}}>
+                                                                <div
+                                                                    style={{
+                                                                        background: '#f1f1f1', // Unified background color
+                                                                        color: '#000',
+                                                                        padding: '8px',
+                                                                        borderRadius: '12px',
+                                                                        maxWidth: '80%',
+                                                                        wordBreak: 'break-word',
+                                                                        fontSize: '14px',
+                                                                    }}
+                                                                >
+                                                                    {item.image && (
+                                                                        <div style={{ marginTop: '10px' }}>
+                                                                            <img
+                                                                                src={URL.createObjectURL(item.image)}
+                                                                                alt="uploaded"
+                                                                                style={{ maxWidth: '100%', maxHeight: '200px', objectFit: 'contain' }}
+                                                                            />
+                                                                        </div>
+                                                                    )}
+                                                                    {item.text}
+                                                                    <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'right' }}>
+                                                                        {item.time}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                        avatar={null} // Remove avatar here because we'll display it after the description
+                                                    />
+                                                    
+                                                    {/* Display avatar after the description */}
+                                                    <Avatar
+                                                        icon={item.sender === 'assistant' ? <RobotOutlined /> : null}
                                                         style={{
-                                                        background: '#f1f1f1', // Unified background color
-                                                        color: '#000',
-                                                        padding: '8px',
-                                                        borderRadius: '12px',
-                                                        maxWidth: '80%',
-                                                        wordBreak: 'break-word',
-                                                        fontSize: '14px',
+                                                            backgroundColor: item.sender === 'assistant' ? '#f56a00' : '#0078d7',
+                                                            color: item.sender === 'assistant' ? '#fff' : '#fff',
+                                                            marginRight:'10px',
+                                                            marginLeft: '5px', // Ensure there's some space between the text and the avatar
+                                                            alignSelf: 'center', // Vertically align the avatar with the text
                                                         }}
                                                     >
-                                                        
-                                                        {item.text}
-                                                        <Tooltip title={copyText}>
-                                                            <CopyOutlined
-                                                                onClick={() => handleCopy(item.text)}
-                                                                style={{
-                                                                position: 'absolute',
-                                                                top: '14px',
-                                                                right: '8px',
-                                                                fontSize: '16px',
-                                                                color: '#aaa',
-                                                                cursor: 'pointer',
-                                                                }}
+                                                        {item.sender !== 'assistant' && (userdetails.userName ? userdetails.userName.charAt(0).toUpperCase() : 'U')}
+                                                    </Avatar>
+                                                </List.Item>
+                                            )}
+                                        />
+                                        {/* Render response item */}
+                                        {responseItem && responseItem.text !== "loading" ? (
+                                            <List
+                                            dataSource={[responseItem]} // Pass responseItem as an array
+                                            renderItem={(item) => (
+                                                <List.Item
+                                                style={{
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between', // Move avatar to the right
+                                                    alignItems: 'center', // Align items vertically
+                                                }}
+                                                >
+                                                <List.Item.Meta
+                                                    avatar={
+                                                        <Avatar icon={<RobotOutlined />} style={{ backgroundColor: '#f56a00' }} />
+                                                    }
+                                                    description={
+                                                    <div>
+                                                        {item.image && (
+                                                        <div style={{ marginTop: '10px' }}>
+                                                            <img
+                                                            src={item.image}
+                                                            alt="uploaded"
+                                                            style={{ maxWidth: '100%', maxHeight: '200px', objectFit: 'contain' }}
                                                             />
-                                                        </Tooltip>
-                                                        <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'right' }}>
-                                                        {item.time}
+                                                        </div>
+                                                        )}
+                                                        <div
+                                                            style={{
+                                                            background: '#f1f1f1', // Unified background color
+                                                            color: '#000',
+                                                            padding: '8px',
+                                                            borderRadius: '12px',
+                                                            maxWidth: '80%',
+                                                            wordBreak: 'break-word',
+                                                            fontSize: '14px',
+                                                            }}
+                                                        >
+                                                            
+                                                            {item.text}
+                                                            <Tooltip title={copyText}>
+                                                                <CopyFilled
+                                                                    onClick={() => handleCopy(item.text)}
+                                                                    style={{
+                                                                    position: 'absolute',
+                                                                    top: '14px',
+                                                                    right: '8px',
+                                                                    fontSize: '16px',
+                                                                    color: '#aaa',
+                                                                    cursor: 'pointer',
+                                                                    }}
+                                                                />
+                                                            </Tooltip>
+                                                            <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'right' }}>
+                                                            {item.time}
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                                
-                                                }
-                                                
+                                                    
+                                                    }
+                                                    
+                                                />
+                                                </List.Item>
+                                            )}
                                             />
-                                            </List.Item>
-                                        )}
-                                        />
-                                    ) : <div style={{display:'flex', justifyContent:"center"}}>
-                                            <Flex align="center" gap="middle">
-                                                <Spin indicator={<LoadingOutlined spin />} />
-                                            </Flex>
-                                        </div>}
-                                    </div>
-                                );
-                            })}
+                                        ) : <div style={{display:'flex', justifyContent:"center"}}>
+                                                <Flex align="center" gap="middle">
+                                                    <Spin indicator={<LoadingOutlined spin />} />
+                                                </Flex>
+                                            </div>}
+                                        </div>
+                                    );
+                                })}
 
 
-                        </div>
+                            </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', bottom: 0, backgroundColor: '#fff', borderTop: '1px solid #ddd', padding: '5px 1px' }}>
-                            <Button icon={<PictureFilled />} onClick={handleAddImage} style={{ borderRadius: '50%', backgroundColor: '#25D366', borderColor: '#ddd', padding: '8px', marginRight: '10px' }} />
-                            <Input placeholder="Type a message" value={message} onChange={(e) => setMessage(e.target.value)} onPressEnter={handleSendMessage} style={{ borderRadius: '20px', padding: '10px 16px', border: '1px solid #ddd', width: 'calc(100% - 50px)', fontSize: '14px' }} />
-                            <Button type="primary" icon={<SendOutlined />} onClick={handleSendMessage} style={{ borderRadius: '50%', backgroundColor: '#25D366', borderColor: '#25D366', padding: '10px' }} />
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',  bottom: 0, backgroundColor: '#fff', borderTop: '1px solid #ddd', padding: '5px 1px' }}>
+                                <Button icon={<PictureFilled />} onClick={handleAddImage} style={{ borderRadius: '50%', backgroundColor: '#25D366', borderColor: '#ddd', padding: '8px', marginRight: '10px' }} />
+                                <Input placeholder="Type a message" value={message} onChange={(e) => setMessage(e.target.value)} onPressEnter={handleSendMessage} style={{ borderRadius: '20px', padding: '10px 16px', border: '1px solid #ddd', width: 'calc(100% - 50px)', fontSize: '14px' }} />
+                                <Button type="primary" icon={<SendOutlined />} onClick={handleSendMessage} style={{ borderRadius: '50%', backgroundColor: '#25D366', borderColor: '#25D366', padding: '10px' }} />
+                            </div>
                         </div>
 
                         {(imageFile || videoFile) && (

@@ -132,7 +132,7 @@ const UserLocationFinder = ({ children, onComplete }) => {
         })
         .catch((err) => {
           console.error("Error posting user activity:", err);
-          message.error(err.message || "Error posting user activity.");
+          // message.error(err.message || "Error posting user activity.");
         });
   
       return userActivities;
