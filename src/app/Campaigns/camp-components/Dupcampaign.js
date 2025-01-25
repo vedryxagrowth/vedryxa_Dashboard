@@ -9,6 +9,7 @@ import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import dynamic from 'next/dynamic';
 import { v4 as uuidv4 } from 'uuid';
+import dayjs from 'dayjs';
 const FabricCanvas = dynamic(() => import('./Fabricanvas'), { ssr: false });
 import MnetUrlBuilder from './urlbuilder/mnet';
 import TonicUrlBuilder from './urlbuilder/tonic';
@@ -553,12 +554,12 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
     }
 
     const onChangeCampaignLevelDailyBudget = (event) => {
-        setCampaignLevelDailyBudget(parseInt(event.target.value));
+        setCampaignLevelDailyBudget(parseFloat(event.target.value));
         console.log(event.target.value);
     }
 
     const onChangeAdsetLevelDailyBudget = (event) => {
-        setAdsetLevelDailyBudget(parseInt(event.target.value));
+        setAdsetLevelDailyBudget(parseFloat(event.target.value));
     }
 
 
@@ -1210,14 +1211,14 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                     Objectives: values.Objectives,
                     Special_categories: values.Special_categories,
                     Bid_strategy: values.Bid_strategy,
-                    Daily_amount: campaignLevelDailyBudget * 100,
+                    Daily_amount: parseFloat(campaignLevelDailyBudget) * 100,
                     Status: values.Status,
                     access_token: imagehash.token,
                     createdDate: moment().tz('Asia/Kolkata').format('YYYY-MM-DD')
                 },
                 adsetlevel: {
                     AdsetName: values.AdsetName,
-                    Daily_amount: adsetLevelDailyBudget !== 0 ? adsetLevelDailyBudget * 100 : "",
+                    Daily_amount: adsetLevelDailyBudget !== 0 ? parseFloat(adsetLevelDailyBudget) * 100 : "",
                     optimization_goal: values.optimization_goal,
                     billing_event: values.billing_event,
                     start_time: moment(values.DatePicker.$d).utc().format("YYYY-MM-DDTHH:mm:ssZ"),
@@ -1286,7 +1287,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
             form.setFieldsValue({ Website_URL: websiteURL, Caption: caption });
         }
     }, [websiteURL, form]);
-    const currentDate = moment();
+    const currentDate = dayjs();
     const initialValues = {
         Account_Number: DuplicatedampaignData?.Account_Number,
         // createdby:DuplicatedampaignData?.camapaignlevel?.createdby,
@@ -1475,6 +1476,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 value={campaignLevelDailyBudget}
                                                 onChange={onChangeCampaignLevelDailyBudget}
                                                 readOnly={adsetLevelDailyBudget !== 0 ? true : false}
+                                                step="0.01"
                                             />
                                         </Tooltip>
                                     </Form.Item> {/*pk*/}
@@ -1642,6 +1644,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 value={adsetLevelDailyBudget}
                                                 onChange={onChangeAdsetLevelDailyBudget}
                                                 readOnly={campaignLevelDailyBudget !== 0} // This will keep the field readonly
+                                                step="0.01"
                                             />
                                         </Tooltip>
                                     </Form.Item>
@@ -2025,7 +2028,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                     </Form.Item> */}
                                 </div>
                             </Panel>
-                            <Panel header="ADD LEVEL" key="3">
+                            <Panel header="AD LEVEL" key="3">
                                 <div style={{ display: "flex", justifyContent: "space-between" }}>
                                     <div style={{ flex: "70%", marginRight: "5%" }}>
                                         <div style={{ display: 'flex', gap: '16px' }}>
