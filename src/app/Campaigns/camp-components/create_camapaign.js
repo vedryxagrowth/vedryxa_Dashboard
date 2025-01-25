@@ -9,7 +9,7 @@ import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import { v4 as uuidv4 } from 'uuid';
 import dynamic from 'next/dynamic';
-
+import dayjs from 'dayjs';
 import MnetUrlBuilder from './urlbuilder/mnet';
 import TonicUrlBuilder from './urlbuilder/tonic';
 import System1UrlBuilder from './urlbuilder/system1';
@@ -565,12 +565,12 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     }
 
     const onChangeCampaignLevelDailyBudget = (event) => {
-        setCampaignLevelDailyBudget(parseInt(event.target.value));
+        setCampaignLevelDailyBudget(parseFloat(event.target.value));
         console.log(event.target.value);
     }
 
     const onChangeAdsetLevelDailyBudget = (event) => {
-        setAdsetLevelDailyBudget(parseInt(event.target.value));
+        setAdsetLevelDailyBudget(parseFloat(event.target.value));
     }
 
 
@@ -1109,14 +1109,14 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                     Objectives: values.Objectives,
                     Special_categories: values.Special_categories,
                     Bid_strategy: values.Bid_strategy,
-                    Daily_amount: parseInt(values.Daily_amount) * 100,
+                    Daily_amount: parseFloat(values.Daily_amount) * 100,
                     Status: values.Status,
                     access_token: imagehash.token,
                     createdDate: moment().tz('Asia/Kolkata').format('YYYY-MM-DD')
                 },
                 adsetlevel: {
                     AdsetName: values.AdsetName,
-                    Daily_amount: values.DailyAdd_amount ? parseInt(values.DailyAdd_amount) * 100 : "",
+                    Daily_amount: values.DailyAdd_amount ? parseFloat(values.DailyAdd_amount) * 100 : "",
                     optimization_goal: values.optimization_goal,
                     billing_event: values.billing_event,
                     start_time: moment(values.DatePicker.$d).utc().format("YYYY-MM-DDTHH:mm:ssZ"),
@@ -1175,7 +1175,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         setSelectedFiles(info.fileList.map(file => file.originFileObj));
     };
 
-    const currentDate = moment();
+    const currentDate = dayjs();
     console.log(moment(), "currentDate")
     let initialValues = {
         Status: "PAUSED",
@@ -1360,6 +1360,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             value={campaignLevelDailyBudget}
                                             onChange={onChangeCampaignLevelDailyBudget}
                                             readOnly={adsetLevelDailyBudget !== 0 ? true : false}
+                                            step="0.01"
                                         />
                                     </Tooltip>
                                 </Form.Item> {/*pk*/}
@@ -1519,6 +1520,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             value={adsetLevelDailyBudget}
                                             onChange={onChangeAdsetLevelDailyBudget}
                                             readOnly={campaignLevelDailyBudget !== 0} // This will keep the field readonly
+                                            step="0.01"
                                         />
                                     </Tooltip>
                                 </Form.Item>
