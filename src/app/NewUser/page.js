@@ -78,7 +78,10 @@ const UsersTable = () => {
     const [filteredData, setFilteredData] = useState([]);
     const [accFilteredData, setaccFilteredData] = useState([]);
     const [paginationSize, setPaginationSize] = useState();
-    const [loading, setLoading] = useState(true);
+    const [loading1, setLoading1] = useState(true);
+    const [loading2, setLoading2] = useState(true);
+    const [loading3, setLoading3] = useState(true);
+    const [loading4, setLoading4] = useState(true);
     const [drawerVisible, setDrawerVisible] = useState(false);
     const [accountDrawerVisible, setaccountDrawerVisible] = useState(false);
     const [usersaccessDrawerVisible, setusersaccessDrawerVisible] = useState(false);
@@ -374,7 +377,7 @@ const UsersTable = () => {
         } catch (error) {
             console.error('Error:', error);
         } finally {
-            setLoading(false);
+            setLoading1(false);
         }
     };
 
@@ -395,7 +398,7 @@ const UsersTable = () => {
         } catch (error) {
             console.error('Error:', error);
         } finally {
-            setLoading(false);
+            setLoading2(false);
         }
     };
 
@@ -442,7 +445,7 @@ const UsersTable = () => {
         } catch (error) {
             console.error('Error:', error);
         } finally {
-            setLoading(false);
+            setLoading3(false);
         }
     }
 
@@ -459,7 +462,7 @@ const UsersTable = () => {
         } catch (error) {
             console.error('Error:', error);
         } finally {
-            setLoading(false);
+            setLoading4(false);
         }
     }
 
@@ -1365,7 +1368,7 @@ const UsersTable = () => {
 
     const refreshUsers = async () => {
         try {
-            setLoading(true);
+            setLoading1(true);
             const response = await fetchusersData();  
             setUsersData(response.data);  
         } catch (error) {
@@ -1373,13 +1376,13 @@ const UsersTable = () => {
             
         } finally {
           
-            setLoading(false);
+            setLoading1(false);
         }
     };
 
     const refreshAccounts = async () => {
         try { 
-            setLoading(true);
+            setLoading2(true);
             const response = await fetchAccountsData(); 
             setAccountsData(response.data);  
         } catch (error) {
@@ -1387,31 +1390,31 @@ const UsersTable = () => {
             
         } finally {
           
-            setLoading(false);
+            setLoading2(false);
         }
     };
     
     const refreshNetworks = async () => {
         try {
-            setLoading(true);
+            setLoading3(true);
             const response = await fetchNetworksData();  
             setNetworksData(response.data); 
         } catch (error) {
             console.error("Error fetching network data:", error);
         } finally {
-            setLoading(false);
+            setLoading3(false);
         }
     };
 
     const refreshUrlBuilder = async () => {
         try {
-            setLoading(true);
+            setLoading4(true);
             const response = await fetchUrlBuilderData();  
             setUrlBuilderData(response.data); 
         } catch (error) {
             console.error("Error fetching network data:", error);
         } finally {
-            setLoading(false);
+            setLoading4(false);
         }
     };
 
@@ -1584,7 +1587,7 @@ const UsersTable = () => {
                             </Col>
                         </Row>
                     </Card>
-                    {loading ? (
+                    {loading1 ? (
                         <Spin />
                     ) : usersData.length > 0 ? (
                         <Table
@@ -1681,7 +1684,7 @@ const UsersTable = () => {
                             </Col>
                         </Row>
                     </Card>
-                    {(loading) ? (
+                    {(loading2) ? (
                         <Spin />
                     ) : AccountsData.length > 0 ? (
                         <Table
@@ -1778,7 +1781,7 @@ const UsersTable = () => {
                             </Col>
                         </Row>
                     </Card>
-                    {(loading) ? (
+                    {(loading3) ? (
                         <Spin />
                     ) : networksData.length > 0 ? ( 
                         <Table
@@ -1877,7 +1880,7 @@ const UsersTable = () => {
                             </Col>
                         </Row>
                     </Card>
-                    {(loading) ? (
+                    {(loading4) ? (
                         <Spin />
                     ) : urlBuilderData.length > 0 ? (
                         <Table
