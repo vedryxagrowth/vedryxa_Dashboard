@@ -390,6 +390,10 @@ const MyTablePage = () => {
 
     const [BMNameFixedFooter, setBMNameFixedFooter] = useState([]);
 
+    const [dailyFixedFooter, setDailyFixedFooter] = useState([]);
+
+    const [liveFixedFooter, setLiveFixedFooter] = useState([]);
+
     const newCampaignNamesDActiveLive = useRef();
 
     const newCampaignNamesDActiveDaily = useRef();
@@ -3285,6 +3289,26 @@ const MyTablePage = () => {
         //     maxHour.current = findMaxHour(mainData);
         //     maxNetworkHour.current = getMaxHour(mainData);
         // }
+        setLiveFixedFooter([
+            {
+                campaignName: 'Total',
+                spend: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0).toFixed(2)),
+                revenue: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0).toFixed(2)),
+                profit: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0).toFixed(2)),
+                margin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
+                rpc: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / filteredData?.length).toFixed(2)),
+                cpl: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / filteredData?.length).toFixed(2)),
+                ncpl: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / filteredData?.length).toFixed(2)),
+                fbleads: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0).toFixed(2)),
+                conversions: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0).toFixed(2)),
+                fmargin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+                roi: parseFloat(((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+                cpc: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / filteredData?.length).toFixed(2)),
+                fbclicks: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
+                impressions: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
+                ctr: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
+            }
+        ]);
         setRowData(filteredData);
         newRowData.current = filteredData;
         setInitialRowData(filteredData);
@@ -3401,6 +3425,29 @@ const MyTablePage = () => {
 
             const fullData = filteredData?.length > 0 ? [...filteredData] : [];
             // console.log(fullData, "full");
+
+            setDailyFixedFooter(
+                [
+                    {
+                        campaignName: 'Total',
+                        spend: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0).toFixed(2)),
+                        revenue: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0).toFixed(2)),
+                        profit: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0).toFixed(2)),
+                        margin: parseFloat((fullData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
+                        rpc: parseFloat((fullData?.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / fullData?.length).toFixed(2)),
+                        cpl: parseFloat((fullData?.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / fullData?.length).toFixed(2)),
+                        ncpl: parseFloat((fullData?.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / fullData?.length).toFixed(2)),
+                        fbleads: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0).toFixed(2)),
+                        conversions: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0).toFixed(2)),
+                        fmargin: parseFloat((fullData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+                        roi: parseFloat(((fullData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - fullData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+                        cpc: parseFloat((fullData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / fullData?.length).toFixed(2)),
+                        fbclicks: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
+                        impressions: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
+                        ctr: parseFloat((fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
+                    }
+                ]
+            );
 
             // setDailyColumn(columnDefs);
             setdailyData(fullData);
@@ -6818,47 +6865,47 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
 
 
 
-    const pinnedBottomRowData1 = [
-        {
-            campaignName: 'Total',
-            spend: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0).toFixed(2)),
-            revenue: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0).toFixed(2)),
-            profit: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0).toFixed(2)),
-            margin: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
-            rpc: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / rowData?.length).toFixed(2)),
-            cpl: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / rowData?.length).toFixed(2)),
-            ncpl: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / rowData?.length).toFixed(2)),
-            fbleads: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0).toFixed(2)),
-            conversions: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0).toFixed(2)),
-            fmargin: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
-            roi: parseFloat(((rowData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - rowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
-            cpc: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / rowData?.length).toFixed(2)),
-            fbclicks: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
-            impressions: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
-            ctr: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
-        }
-    ];
+    // const pinnedBottomRowData1 = [
+    //     {
+    //         campaignName: 'Total',
+    //         spend: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0).toFixed(2)),
+    //         revenue: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0).toFixed(2)),
+    //         profit: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0).toFixed(2)),
+    //         margin: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
+    //         rpc: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / rowData?.length).toFixed(2)),
+    //         cpl: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / rowData?.length).toFixed(2)),
+    //         ncpl: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / rowData?.length).toFixed(2)),
+    //         fbleads: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0).toFixed(2)),
+    //         conversions: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0).toFixed(2)),
+    //         fmargin: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+    //         roi: parseFloat(((rowData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - rowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+    //         cpc: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / rowData?.length).toFixed(2)),
+    //         fbclicks: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
+    //         impressions: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
+    //         ctr: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
+    //     }
+    // ];
 
-    const pinnedBottomRowData2 = [
-        {
-            campaignName: 'Total',
-            spend: parseFloat(dailyData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0).toFixed(2)),
-            revenue: parseFloat(dailyData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0).toFixed(2)),
-            profit: parseFloat(dailyData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0).toFixed(2)),
-            margin: parseFloat((dailyData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / dailyData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
-            rpc: parseFloat((dailyData.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / dailyData.length).toFixed(2)),
-            cpl: parseFloat((dailyData.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / dailyData.length).toFixed(2)),
-            ncpl: parseFloat((dailyData.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / dailyData.length).toFixed(2)),
-            fbleads: parseFloat(dailyData.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0).toFixed(2)),
-            conversions: parseFloat(dailyData.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0).toFixed(2)),
-            fmargin: parseFloat((dailyData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / dailyData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
-            roi: parseFloat(((dailyData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - dailyData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / dailyData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
-            cpc: parseFloat((dailyData.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / dailyData.length).toFixed(2)),
-            fbclicks: parseFloat(dailyData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
-            impressions: parseFloat(dailyData.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
-            ctr: parseFloat((dailyData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / dailyData.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
-        }
-    ];
+    // const pinnedBottomRowData2 = [
+    //     {
+    //         campaignName: 'Total',
+    //         spend: parseFloat(dailyData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0).toFixed(2)),
+    //         revenue: parseFloat(dailyData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0).toFixed(2)),
+    //         profit: parseFloat(dailyData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0).toFixed(2)),
+    //         margin: parseFloat((dailyData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / dailyData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
+    //         rpc: parseFloat((dailyData.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / dailyData.length).toFixed(2)),
+    //         cpl: parseFloat((dailyData.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / dailyData.length).toFixed(2)),
+    //         ncpl: parseFloat((dailyData.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / dailyData.length).toFixed(2)),
+    //         fbleads: parseFloat(dailyData.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0).toFixed(2)),
+    //         conversions: parseFloat(dailyData.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0).toFixed(2)),
+    //         fmargin: parseFloat((dailyData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / dailyData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+    //         roi: parseFloat(((dailyData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - dailyData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / dailyData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+    //         cpc: parseFloat((dailyData.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / dailyData.length).toFixed(2)),
+    //         fbclicks: parseFloat(dailyData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
+    //         impressions: parseFloat(dailyData.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
+    //         ctr: parseFloat((dailyData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / dailyData.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
+    //     }
+    // ];
 
 
     const pinnedBottomRowData3 = [
@@ -7168,7 +7215,7 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                             Submit
                         </Button>
                     </Col>
-                    <Col xs={24} sm={24} md={15} lg={5}>
+                    {/* <Col xs={24} sm={24} md={15} lg={5}>
                         <Tooltip title="Refresh and Search">
                             <Button
                                 type="primary"
@@ -7178,14 +7225,56 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                 onClick={handleSearchClick} // Toggle search bar visibility on button click
                             />
                         </Tooltip>
-                    </Col>
+                    </Col> */}
                 </Row>
             </Space>
             <div style={{ padding: '0px', margin: '0px' }}>
-                {renderCarouselNav()}
+                <Row gutter={8} style={{ marginTop: '16px' }}> 
+                    {renderCarouselNav()}
+                    <div style={{display: 'flex', marginLeft: '10px'}}>
+                        {/* <Row gutter={8} style={{ marginTop: '16px' }}>  */}
+                            <Col>
+                                <Input
+                                placeholder="Search here"
+                                value={newInputValue}
+                                onChange={handleChangeNewInputValue}
+                                onBlur={handleBlur}
+                                onPressEnter={handleChangeInput}
+                                style={{ width: '100%', borderRadius: '5px' }}
+                                />
+                            </Col>
+                            <Col>
+                                <Button
+                                style={{
+                                    backgroundColor: '#C7F39A',
+                                    border: 'solid 0px',
+                                    color: 'black',
+                                }}
+                                icon={<SearchOutlined />}
+                                onClick={handleChangeInput}
+                                />
+                            </Col>
+                            <Col>
+                                <Tooltip title="Click to Refresh Tables">
+                                    <Button
+                                    type="primary"
+                                    style={{
+                                        backgroundColor: '#C7F39A',
+                                        border: 'solid 0px',
+                                        color: 'black',
+                                    }}
+                                    icon={<ReloadOutlined />}
+                                    onClick={onClickRefresh}
+                                    />
+                                </Tooltip>
+                            </Col>
+                        {/* </Row> */}
+                    </div>
+                </Row>
             </div>
+
             <div>
-                <div className={`secondRow ${isSecondRowVisible ? '' : 'hidden'}`}>
+                {/* <div className={`secondRow ${isSecondRowVisible ? '' : 'hidden'}`}>
                     <Row style={{ padding: '10px', paddingRight: '30px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                             <Text style={{ fontWeight: '600', display: 'flex', justifyContent: 'flex-end' }}>
@@ -7198,7 +7287,7 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                             </Text>
                         </Col>
                         <Col style={{ marginRight: '15px' }}>
-                            {/* {isSearching ? (
+                            {isSearching ? (
                             <Row gutter={8}>
                                 <Col>
                                     <Input
@@ -7221,7 +7310,7 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                 onClick={handleSearchClick}
 
                             />
-                        )} */}
+                        )}
                             <Row gutter={8}>
                                 <Col>
                                     <Input
@@ -7245,7 +7334,7 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                             </Tooltip>
                         </Col>
                     </Row>
-                </div>
+                </div> */}
 
                 <Carousel ref={carouselRef} beforeChange={handleSlideChange} dots={false}>
                     <div style={{ height: "100%", marginBottom: '20px' }}>
@@ -7304,13 +7393,24 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                                 </span>
                                             </Text>
                                         </Col>
+                                        <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
+                                            <Tooltip
+                                            title={
+                                                <>
+                                                <div>FbAcc Status: {`${fbCron.current}`}</div>
+                                                <div>RevAcc Status: {`${revenueCron.current}`}</div>
+                                                </>
+                                            }
+                                            >
+                                                <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px' }} />
+                                            </Tooltip>
+                                        </Col>
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                             <Tooltip title="Export to CSV">
                                                 <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={onBtExport1} />
                                             </Tooltip>
                                         </Col>
                                     </Row>
-
 
                                     <AgGridReact
                                         ref={gridRef}
@@ -7332,8 +7432,8 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                         frameworkComponents={{ GroupCellRenderer }}
                                         groupDisplayType='multipleColumns'
                                         // rowGroupPanelShow='always'
-                                        onFilterChanged={onFilterChanged} // Use the custom filter handler
-                                        pinnedBottomRowData={rowData.length > 0 ? pinnedBottomRowData1 : []}
+                                        // onFilterChanged={onFilterChanged} // Use the custom filter handler
+                                        pinnedBottomRowData={liveFixedFooter}
                                         getRowStyle={params => {
                                             if (params.node.rowPinned) {
                                                 return {
@@ -7347,6 +7447,39 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                         }}
 
                                         getMainMenuItems={getMainMenuItems}
+                                        onFilterChanged={(params) => {
+                                            const api = params.api;
+                                            const filteredData = [];
+                                            api.forEachNodeAfterFilterAndSort((node) => {
+                                                if (!node.rowPinned) {
+                                                    filteredData.push(node.data);
+                                                }
+                                            });
+
+                                            const updatedFooter = [
+                                                {
+                                                    // [`${newtime}Date`]: 'Totals',
+                                                    campaignName: 'Total',
+                                                    spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
+                                                    revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
+                                                    profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
+                                                    margin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
+                                                    rpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / filteredData.length).toFixed(2)),
+                                                    cpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / filteredData.length).toFixed(2)),
+                                                    ncpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.ncpl), 0) / filteredData.length).toFixed(2)),
+                                                    fbleads: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbleads), 0).toFixed(2)),
+                                                    conversions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
+                                                    fmargin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+                                                    roi: parseFloat(((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) - filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0)) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+                                                    cpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpc), 0) / filteredData.length).toFixed(2)),
+                                                    fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
+                                                    impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
+                                                    ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2))
+                                                },
+                                            ];
+
+                                            setLiveFixedFooter(updatedFooter);
+                                        }}
                                     />
 
                                 </div>
@@ -7416,6 +7549,18 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                                 </span>
                                             </Text>
                                         </Col>
+                                        <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
+                                            <Tooltip
+                                            title={
+                                                <>
+                                                <div>FbAcc Status: {`${fbCron.current}`}</div>
+                                                <div>RevAcc Status: {`${revenueCron.current}`}</div>
+                                                </>
+                                            }
+                                            >
+                                                <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px' }} />
+                                            </Tooltip>
+                                        </Col>
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                             <Tooltip title="Export to CSV">
                                                 <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef1, "Daily")} />
@@ -7444,7 +7589,7 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                         }}
                                         gridOptions={gridOptions1}
                                         getMainMenuItems={getMainMenuItems}
-                                        pinnedBottomRowData={dailyData.length > 0 ? pinnedBottomRowData2 : []}
+                                        pinnedBottomRowData={dailyFixedFooter}
                                         getRowStyle={params => {
                                             if (params.node.rowPinned) {
                                                 return {
@@ -7455,6 +7600,39 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                             }
 
                                             return null;
+                                        }}
+                                        onFilterChanged={(params) => {
+                                            const api = params.api;
+                                            const filteredData = [];
+                                            api.forEachNodeAfterFilterAndSort((node) => {
+                                                if (!node.rowPinned) {
+                                                    filteredData.push(node.data);
+                                                }
+                                            });
+
+                                            const updatedFooter = [
+                                                {
+                                                    // [`${newtime}Date`]: 'Totals',
+                                                    campaignName: 'Total',
+                                                    spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
+                                                    revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
+                                                    profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
+                                                    margin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
+                                                    rpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / filteredData.length).toFixed(2)),
+                                                    cpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / filteredData.length).toFixed(2)),
+                                                    ncpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.ncpl), 0) / filteredData.length).toFixed(2)),
+                                                    fbleads: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbleads), 0).toFixed(2)),
+                                                    conversions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
+                                                    fmargin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+                                                    roi: parseFloat(((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) - filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0)) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+                                                    cpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpc), 0) / filteredData.length).toFixed(2)),
+                                                    fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
+                                                    impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
+                                                    ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2))
+                                                },
+                                            ];
+
+                                            setDailyFixedFooter(updatedFooter);
                                         }}
                                     />
                                 </div>
@@ -7523,6 +7701,18 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                                 </span>
                                             </Text>
                                         </Col>
+                                        <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
+                                            <Tooltip
+                                            title={
+                                                <>
+                                                <div>FbAcc Status: {`${fbCron.current}`}</div>
+                                                <div>RevAcc Status: {`${revenueCron.current}`}</div>
+                                                </>
+                                            }
+                                            >
+                                                <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px' }} />
+                                            </Tooltip>
+                                        </Col>
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                             <Tooltip title="Export to CSV">
                                                 <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef2, "AllCampaigns")} />
@@ -7558,6 +7748,39 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                                     };
                                                 }
                                                 return null;
+                                            }}
+                                            onFilterChanged={(params) => {
+                                                const api = params.api;
+                                                const filteredData = [];
+                                                api.forEachNodeAfterFilterAndSort((node) => {
+                                                    if (!node.rowPinned) {
+                                                        filteredData.push(node.data);
+                                                    }
+                                                });
+    
+                                                const updatedFooter = [
+                                                    {
+                                                        // [`${newtime}Date`]: 'Totals',
+                                                        campaignName: 'Total',
+                                                        spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
+                                                        revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
+                                                        profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
+                                                        margin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
+                                                        rpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / filteredData.length).toFixed(2)),
+                                                        cpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / filteredData.length).toFixed(2)),
+                                                        ncpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.ncpl), 0) / filteredData.length).toFixed(2)),
+                                                        fbleads: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbleads), 0).toFixed(2)),
+                                                        conversions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
+                                                        fmargin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+                                                        roi: parseFloat(((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) - filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0)) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+                                                        cpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpc), 0) / filteredData.length).toFixed(2)),
+                                                        fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
+                                                        impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
+                                                        ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2))
+                                                    },
+                                                ];
+    
+                                                setFixedFooter(updatedFooter);
                                             }}
                                         />
                                     </div>

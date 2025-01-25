@@ -869,6 +869,8 @@ const Dashboard = () => {
     
     const [agencyNameReport, setAgencyNameReport] = useState([]);
 
+    const [byAccountNumber, setByAccountNumber] = useState([]);
+
     const onChangeTime = (value) => {
         setSkeletonLoading(true);
         setTime(value);
@@ -1463,6 +1465,47 @@ const Dashboard = () => {
 
         console.log(responseData[0], "hi");
         const groupedData = groupByAccountNumberAndDate(responseData, time);
+
+        function groupByAccountNumber(data) {
+            return data?.reduce((acc, obj) => {
+                const dateKey = obj.accountNumber; // dynamically access the specified date field
+        
+                // Find if the date key already exists in the accumulator array
+                let entry = acc.find(item => item.accountNumber === dateKey);
+        
+                if (!entry) {
+                    // If not found, create a new entry for this date
+                    acc.push({
+                        // date: dateKey,
+                        accountNumber: obj.accountNumber,
+                        spend: obj.spend ? parseFloat(obj.spend) : 0,
+                        estimated_revenue: obj.estimated_revenue ? parseFloat(obj.estimated_revenue) : 0,
+                        fbLeads: obj.fbLeads ? parseInt(obj.fbLeads) : 0,
+                        conversions: obj.conversions ? parseInt(obj.conversions) : 0,
+                        revenuePartner: obj.revenuePartner,
+                        mediaBuyerName: obj.MediaBuyerName,
+                        holder: obj.Holder,
+                    });
+                } else {
+                    // If found, sum the respective fields
+                    entry.spend += obj.spend !== null && obj.spend !== undefined ? parseFloat(obj.spend) : 0;
+                    entry.estimated_revenue += obj.estimated_revenue !== null && obj.estimated_revenue !== undefined ? parseFloat(obj.estimated_revenue) : 0;
+                    entry.fbLeads += obj.fbLeads !== null && obj.fbLeads !== undefined ? parseInt(obj.fbLeads) : 0;
+                    entry.conversions += obj.conversions !== null && obj.conversions !== undefined ? parseInt(obj.conversions) : 0;
+                }
+        
+                return acc;
+            }, []).map(dateEntry => {
+                // Calculate profit after grouping
+                dateEntry.profit = dateEntry.estimated_revenue - dateEntry.spend;
+                return dateEntry;
+            });
+        }
+
+        const groupByAccountNumberData = groupByAccountNumber(groupedData);
+
+        setByAccountNumber(groupByAccountNumberData);
+
         setRowData(groupedData);
 
         function groupByDate(data, specifiedDateKey) {
@@ -1517,7 +1560,7 @@ const Dashboard = () => {
         const revenueByDate = sortedDataByDate.map(d => Math.round(parseFloat(d.estimated_revenue) * 100) / 100);
         const profitByDate = sortedDataByDate.map(d => Math.round((d.estimated_revenue - d.spend) * 100) / 100);
         const rpcByDate = sortedDataByDate.map(d => !isNaN((d.estimated_revenue / d.conversions)) && (d.estimated_revenue / d.conversions) !== undefined ? Math.round((d.estimated_revenue / d.conversions) * 100) / 100 : 0);
-        const cplByDate = sortedDataByDate.map(d => !isNaN(((d.spend / d.fbLeads) * 100)) && ((d.spend / d.fbLeads) * 100) !== undefined ? Math.round(((d.spend / d.fbLeads) * 100) * 100) / 100 : 0);
+        const cplByDate = sortedDataByDate.map(d => !isNaN(((d.spend / d.fbLeads) * 100)) && ((d.spend / d.fbLeads) * 100) !== undefined ? Math.round((((d.spend / d.fbLeads) * 100) / 100) * 100) / 100 : 0);
 
         const marginByDate = sortedDataByDate.map(d => d.estimated_revenue !== 0 ?Math.round((((d.estimated_revenue - d.spend) / d.estimated_revenue) * 100) * 100) / 100 : 0);
 
@@ -1625,7 +1668,7 @@ const Dashboard = () => {
         const revenue = sortedData.map(d => Math.round(parseFloat(d.estimated_revenue) * 100) / 100);
         const profit = sortedData.map(d => Math.round((d.estimated_revenue - d.spend) * 100) / 100);
         const rpc = sortedData.map(d => !isNaN((d.estimated_revenue / d.conversions)) && (d.estimated_revenue / d.conversions) !== undefined ? Math.round((d.estimated_revenue / d.conversions) * 100) / 100 : 0);
-        const cpl = sortedData.map(d => !isNaN(((d.spend / d.fbLeads) * 100)) && ((d.spend / d.fbLeads) * 100) !== undefined ? Math.round(((d.spend / d.fbLeads) * 100) * 100) / 100 : 0);
+        const cpl = sortedData.map(d => !isNaN(((d.spend / d.fbLeads) * 100)) && ((d.spend / d.fbLeads) * 100) !== undefined ? Math.round((((d.spend / d.fbLeads) * 100) / 100) * 100) / 100 : 0);
 
         const margin = sortedData.map(d => d.estimated_revenue !== 0 ?Math.round((((d.estimated_revenue - d.spend) / d.estimated_revenue) * 100) * 100) / 100 : 0);
 
@@ -2293,13 +2336,13 @@ const Dashboard = () => {
             field: "accountNumber",
             resizable: true,
             sortable: true,
-            hide: true, // Hide column as it's grouped
-            rowGroup: true,
-            enableRowGroup: true,
+            // hide: true, // Hide column as it's grouped
+            // rowGroup: true,
+            // enableRowGroup: true,
             
 
         }, // Group by Network
-        {field:'specifiedDate', headerName:'Date'},
+        // {field:'specifiedDate', headerName:'Date'},
         {
             field: "spend",
             aggFunc: spender,
@@ -3469,7 +3512,7 @@ const Dashboard = () => {
                                             style={{ width: '100%', height: '400px' }}
                                         >
                                             <AgGridReact
-                                                rowData={rowData?.slice().sort((a, b) => b.spend - a.spend).slice(0, 5)}
+                                                rowData={byAccountNumber?.slice().sort((a, b) => b.spend - a.spend).slice(0, 5)}
                                                 columnDefs={columnDefs1}
                                                 defaultColDef={defaultColDef}
                                                 rowGroupPanelShow="always"
@@ -3491,7 +3534,7 @@ const Dashboard = () => {
                                             style={{ width: '100%', height: '400px' }}
                                         >
                                             <AgGridReact
-                                                rowData={rowData?.slice().sort((a, b) => b.estimated_revenue - a.estimated_revenue).slice(0, 5)}
+                                                rowData={byAccountNumber?.slice().sort((a, b) => b.estimated_revenue - a.estimated_revenue).slice(0, 5)}
                                                 columnDefs={columnDefs1}
                                                 defaultColDef={defaultColDef}
                                                 rowGroupPanelShow="always"
@@ -3513,7 +3556,7 @@ const Dashboard = () => {
                                             style={{ width: '100%', height: '400px' }}
                                         >
                                             <AgGridReact
-                                                rowData={rowData?.slice().sort((a, b) => b.profit - a.profit).slice(0, 5)}
+                                                rowData={byAccountNumber?.slice().sort((a, b) => b.profit - a.profit).slice(0, 5)}
                                                 columnDefs={columnDefs1}
                                                 defaultColDef={defaultColDef}
                                                 rowGroupPanelShow="always"
