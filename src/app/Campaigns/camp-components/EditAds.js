@@ -354,7 +354,6 @@ const Editads = ({ viewCampaignData, changeRRefrst, editdata, onClose }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [formData, setFormData] = useState(null);
 
-  console.log(editdata);
   let s3UrlPath = '';
   let hashid = '';
 
@@ -469,9 +468,7 @@ const Editads = ({ viewCampaignData, changeRRefrst, editdata, onClose }) => {
     const formData = new FormData();
     formData.append('file', file); // Capture the file
     setfilesof(file); // Track the file for further processing
-    console.log(file, "I am praveen file");
     setimageshow(formData); // Set the form data to be used in the customRequest function
-    console.log(formData, "I am Praveen");
     return false; // Prevent automatic upload
   };
 
@@ -516,11 +513,8 @@ const Editads = ({ viewCampaignData, changeRRefrst, editdata, onClose }) => {
           }
         );
         const imagehash = response.data[0];
-        console.log(imagehash);
 
         const mediaData = await customRequest(imageshow, imagehash, onSuccess, onError);
-
-        console.log(mediaData, "Media");
 
         let newAddData;
         if (mediaData.type === 'image') {
@@ -643,43 +637,11 @@ const Editads = ({ viewCampaignData, changeRRefrst, editdata, onClose }) => {
               <Input />
             </Form.Item>
 
-            <Form.Item
-              name="MediaContent"
-              label="Upload Media"
-              rules={[
-                { required: true, message: 'Please upload a file!' },
-              ]}
-              valuePropName="fileList" // Bind Upload's fileList to the Form field
-              getValueFromEvent={(e) => (Array.isArray(e) ? e : e?.fileList)} // Correctly handle fileList changes
-              initialValue={
-                initialMedia
-                  ? [
-                      {
-                        uid: '-1', // Unique ID for the file
-                        name: initialMedia.split('/').pop(), // Extract filename from URL
-                        status: 'done', // Mark as already uploaded
-                        url: initialMedia, // Default image URL
-                      },
-                    ]
-                  : []
-              } // Ensure Form knows the default value
-            >
-              <Upload
-                beforeUpload={handleBeforeUpload}
-                onChange={handleChange}
-                maxCount={1} // Limit to 1 file
-                accept="image/*,video/*"
-                listType="picture-card" // Thumbnail style
-              >
-                {/* {!initialMedia && ( */}
-                  <div>
-                    <UploadOutlined />
-                    <div style={{ marginTop: 8 }}>Select File</div>
-                  </div>
-                {/* )} */}
+            <Form.Item name="MediaContent" label="Upload Media" rules={[{ required: true, message: 'Please upload a file!' }]}>
+              <Upload beforeUpload={handleBeforeUpload} onChange={handleChange} maxCount={1} accept="image/*, video/*">
+                <Button icon={<UploadOutlined />}>Select File</Button>
               </Upload>
             </Form.Item>
-
 
             <Form.Item name="AddName" label="Add Name" rules={[{ required: true, message: 'Please enter an ad name!' }]}>
               <Input onChange={(e) => setAddName(e.target.value)} />
