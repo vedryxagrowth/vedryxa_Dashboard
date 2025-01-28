@@ -4,7 +4,7 @@ import { Button, Input, Row, Col } from 'antd';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useTokenContext } from '../../../components/parent';
-const TonicUrlBuilder = ({onReturnMessage, showSubmitButton}) => {
+const TonicUrlBuilder = ({defaultValues, onReturnMessage, showSubmitButton}) => {
     const [siteName, setSiteName] = useState('');
     const [keywords, setKeyWords] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
@@ -21,9 +21,15 @@ const TonicUrlBuilder = ({onReturnMessage, showSubmitButton}) => {
     // ]
 
     const getUrlBuilderData = async()=>{
-        const response = await apiClient.get(`/get/urlbuilderdata?network=Tonic`);
+        const response = await apiClient.get(`/get/urlbuilderdata?network=Tonic1`);
         if(response?.status === 200){
           setNetworkData(response?.data)
+          if(defaultValues){
+            const defaultSiteName = defaultValues?.split("/")[0];
+            const defaultKeyword = defaultValues?.split("/")[1]?.split("&")[3]?.split("=")[1];
+            setSiteName(defaultSiteName);
+            setKeyWords(defaultKeyword);
+          }
         }
       };
     
@@ -37,7 +43,7 @@ const TonicUrlBuilder = ({onReturnMessage, showSubmitButton}) => {
     }
 
     const onChangeKeyword = (event) =>{
-        setKeyWords(event.target.value)
+        setKeyWords(event.target.value);
     }
 
     const onClickClear = () =>{
@@ -52,8 +58,8 @@ const TonicUrlBuilder = ({onReturnMessage, showSubmitButton}) => {
             let url = NetworkData?.businessData[0]?.url;
 
             url = url
-                .replace("sitename_replace", siteName)
-                .replace("keywords_replace", keywords);
+                .replace("sitename_replace", siteName.trim())
+                .replace("keywords_replace", keywords.trim());
             onReturnMessage(url);
         }
         else{
@@ -67,8 +73,8 @@ const TonicUrlBuilder = ({onReturnMessage, showSubmitButton}) => {
             let url = NetworkData?.businessData[0]?.url;
 
             url = url
-                .replace("sitename_replace", siteName)
-                .replace("keywords_replace", keywords);
+                .replace("sitename_replace", siteName.trim())
+                .replace("keywords_replace", keywords.trim());
             setErrorMessage(url);
         }
         else{

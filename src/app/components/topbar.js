@@ -527,7 +527,10 @@ const Topbar = () => {
 
   useEffect(() => {
     shouldRetry = true; // Reset flag when `userdetails` changes
-    fetchUserAvatarWithRetry();
+    // fetchUserAvatarWithRetry();
+    if(userdetails?.profileImage){
+      setAvatarUrl(userdetails?.profileImage);
+    }
   }, [userdetails]);
   
   

@@ -9,7 +9,7 @@ import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import { v4 as uuidv4 } from 'uuid';
 import { useTokenContext } from '../../../components/parent';
-const System1UrlBuilder = ({onReturnMessage, showSubmitButton}) => {
+const System1UrlBuilder = ({defaultValues, onReturnMessage, showSubmitButton}) => {
     const [siteName, setSiteName] = useState('');
     const [pixelId, setPixelId] = useState('');
     const [keywords, setKeyWords] = useState('');
@@ -193,6 +193,14 @@ const System1UrlBuilder = ({onReturnMessage, showSubmitButton}) => {
       const response = await apiClient.get(`/get/urlbuilderdata?network=System1`);
       if(response?.status === 200){
         setNetworkData(response?.data)
+        if(defaultValues){
+          const defaultSiteName = defaultValues?.split("/")[0];
+          const defaultPixelID = defaultValues?.split("/")[1]?.split("&")[2]?.split("=")[1];
+          const defaultKeyword = defaultValues?.split("/")[1]?.split("&")[5]?.split("=")[1];
+          setSiteName(defaultSiteName);
+          setPixelId(defaultPixelID);
+          setKeyWords(defaultKeyword);
+        }
       }
     };
   
@@ -225,9 +233,9 @@ const System1UrlBuilder = ({onReturnMessage, showSubmitButton}) => {
             let url = NetworkData?.businessData[0]?.url;
 
             url = url
-                .replace("sitename_replace", siteName)
-                .replace("pixelid_replace", pixelId)
-                .replace("keywords_replace", keywords);
+                .replace("sitename_replace", siteName.trim())
+                .replace("pixelid_replace", pixelId.trim())
+                .replace("keywords_replace", keywords.trim());
             onReturnMessage(url);
         }
         else{
@@ -241,9 +249,9 @@ const System1UrlBuilder = ({onReturnMessage, showSubmitButton}) => {
             let url = NetworkData?.businessData[0]?.url;
 
             url = url
-                .replace("sitename_replace", siteName)
-                .replace("pixelid_replace", pixelId)
-                .replace("keywords_replace", keywords);
+                .replace("sitename_replace", siteName.trim())
+                .replace("pixelid_replace", pixelId.trim())
+                .replace("keywords_replace", keywords.trim());
             setErrorMessage(url);
         }
         else{

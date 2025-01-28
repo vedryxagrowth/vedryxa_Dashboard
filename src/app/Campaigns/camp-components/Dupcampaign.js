@@ -485,6 +485,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
     const { data: session } = useSession();
     const [DuplicatedampaignData, setDuplicatedampaignData] = useState(null);
     console.log(DuplicatedampaignData, "DuplicatedampaignData in clone")
+    const [defaultURlBuilder, setDefaultURLBuilder] = useState("");
     var token = localStorage.getItem("token")
     const [showBidAmount, setShowBidAmount] = useState(false);
     const [selectedPublishers, setSelectedPublishers] = useState([]);
@@ -566,13 +567,13 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
     const getUrlBuilder = (network) => {
         switch (network) {
             case 'FB_Mnet':
-                return <MnetUrlBuilder onReturnMessage={onReturnUrl} />
-            case 'FB_Tonic':
-                return <TonicUrlBuilder onReturnMessage={onReturnUrl} />
+                return <MnetUrlBuilder defaultValues={defaultURlBuilder} onReturnMessage={onReturnUrl} /> //hi
+            case 'FB_Tonic1':
+                return <TonicUrlBuilder defaultValues={defaultURlBuilder} onReturnMessage={onReturnUrl} />
             case 'FB_System1':
-                return <System1UrlBuilder onReturnMessage={onReturnUrl} />
+                return <System1UrlBuilder defaultValues={defaultURlBuilder} onReturnMessage={onReturnUrl} />
             case 'FB_DomainActive':
-                return <DActiveUrlBuilder onReturnMessage={onReturnUrl} />
+                return <DActiveUrlBuilder defaultValues={defaultURlBuilder} onReturnMessage={onReturnUrl} />
         }
     }
 
@@ -599,6 +600,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
             setSelectedPositions(DuplicatedampaignData?.adsetlevel?.position || ["feed"]);
             setAdsetLevelDailyBudget(DuplicatedampaignData?.adsetlevel?.Daily_amount ? (DuplicatedampaignData?.adsetlevel?.Daily_amount) / 100 : 0);
             setCampaignLevelDailyBudget((DuplicatedampaignData?.camapaignlevel?.Daily_amount) / 100);
+            setDefaultURLBuilder(DuplicatedampaignData?.addlevel[0]?.Website_URL);
             form.setFieldsValue({
                 positions: DuplicatedampaignData?.adsetlevel?.position || ["feed"],
                 Account_Number: DuplicatedampaignData?.Account_Number,
@@ -1503,7 +1505,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                 </div>
                             </Panel>
                             <Panel header="ADSET LEVEL" key="2">
-                                <div style={{ display: "flex" }}>
+                                <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
                                     <Form.Item
                                         name="AdsetName"
                                         initialValue={campaignName}
@@ -1514,7 +1516,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 message: "Please select an option!",
                                             },
                                         ]}
-                                        style={{ flex: 0.25 }}>
+                                        style={{ flex: '1 1 200px' }}>
                                         <Input
                                             style={{ width: "100%" }}
                                         />
@@ -1528,7 +1530,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 message: "Please select an option!",
                                             },
                                         ]}
-                                        style={{ flex: 0.1, marginLeft: "2%" }}>
+                                        style={{ flex: '1 1 150px', marginLeft: "2%" }}>
                                         <Select
 
                                             variant="filled"
@@ -1549,7 +1551,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 message: "Please select an option!",
                                             },
                                         ]}
-                                        style={{ flex: 0.1, marginLeft: "2%" }}>
+                                        style={{ flex: '1 1 150px' }}>
                                         <Select
 
                                             variant="filled"
@@ -1568,7 +1570,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 message: 'Please input!',
                                             },
                                         ]}
-                                        style={{ flex: 0.1, marginLeft: "2%" }}
+                                        style={{ flex: '1 1 150px' }}
                                         initialValue={currentDate}
 
                                     >
@@ -1583,7 +1585,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 message: "Please select an option!",
                                             },
                                         ]}
-                                        style={{ flex: 0.1, marginLeft: "2%" }}>
+                                        style={{ flex: '1 1 150px' }}>
                                         <Select
 
                                             variant="filled"
@@ -1604,7 +1606,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 message: "Please select an option!",
                                             },
                                         ]}
-                                        style={{ flex: 0.1, marginLeft: "2%" }}>
+                                        style={{ flex: '1 1 150px' }}>
                                         <Select
 
                                             variant="filled"
@@ -1626,7 +1628,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 message: "Please select an option!",
                                             },
                                         ]}
-                                        style={{ flex: 0.15, marginLeft: "2%" }}>
+                                        style={{ flex: '1 1 200px' }}>
                                         <Input
                                             style={{ width: "100%" }}
                                         />
@@ -1665,7 +1667,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                                 : Promise.reject(new Error("Please enter a valid float value!")),
                                                     },
                                                 ]}
-                                                style={{ flex: 0.1, marginLeft: "2%" }}
+                                                style={{ flex: '1 1 150px' }}
                                             >
                                                 <Input
                                                     type="number"
@@ -1749,7 +1751,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
 
                                 </div>
                                 <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "green" }}>Targeting</span>
-                                <div style={{ display: "flex" }}>
+                                <div style={{ display: "flex", flexWrap: "wrap", gap: "16px"  }}>
                                     <Form.Item
                                         name="countries"
                                         label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
@@ -1759,7 +1761,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 message: "Please select an option!",
                                             },
                                         ]}
-                                        style={{ flex: 0.12 }}>
+                                        style={{ flex: '1 1 150px' }}>
                                         <Select
                                             variant="filled"
 
@@ -1794,7 +1796,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 message: "Please select an option!",
                                             },
                                         ]}
-                                        style={{ marginLeft: "2%" }}>
+                                        style={{ flex: '1 1 150px' }}>
                                         <Select
                                             variant="filled"
                                             options={[
@@ -1814,6 +1816,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 message: "Please select an option!",
                                             },
                                         ]}
+                                        style={{ flex: '1 1 150px' }}
                                     >
                                         <Select
                                             variant="filled"
@@ -1834,7 +1837,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 message: "Please select an option!",
                                             },
                                         ]}
-                                        style={{ flex: 0.1, marginLeft: "2%" }}>
+                                        style={{ flex: '1 1 150px' }}
+                                        >
                                         <Select
                                             variant="filled"
                                             options={[
@@ -1853,7 +1857,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 message: "Please select an option!",
                                             },
                                         ]}
-                                        style={{ flex: 0.18, marginLeft: "2%" }}>
+                                        style={{ flex: '1 1 150px' }}>
                                         <Select
                                             showSearch
                                             mode="multiple" // or "tags" if you want to allow selecting multiple options
@@ -1887,7 +1891,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 label={<span style={{ color: "#B4B4B4" }}>Platforms</span>}
                                                 rules={[{ required: true, message: "Please select an option!" }]}
                                                 // style={{ marginRight: "10px" }}
-                                                style={{ flex: 0.18, marginLeft: "2%" }}
+                                                style={{ flex: '1 1 300px' }}
                                             >
 
                                                 <Select
@@ -1909,7 +1913,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 name="positions"
                                                 label={<span style={{ color: "#B4B4B4" }}>Positions</span>}
                                                 rules={[{ required: true, message: "Please select an option!" }]}
-                                                style={{ flex: 0.18, marginLeft: "2%" }}
+                                                style={{ flex: '1 1 400px' }}
                                             // style={{ marginRight: "10px" }}
                                             >
                                                 <Select
@@ -1940,7 +1944,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                         message: "Please select an option!",
                                                     },
                                                 ]}
-                                                style={{ flex: 0.18, marginLeft: "2%" }}>
+                                                style={{ flex: '1 1 200px' }}>
                                                 <Select
                                                     mode="multiple"
                                                     variant="filled"
