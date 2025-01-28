@@ -245,6 +245,7 @@ const MyTablePage = () => {
 
     const handleChangeInput = () => {
         setInputValue(newInputValue);
+        gridRef.current.api.onFilterChanged(); // Trigger AG-Grid to reapply filters
         // console.log(e.target.value);
         // const filteredLiveData = rowData.filter((each)=> each.campaignName.includes(e.target.value));
 
@@ -4853,6 +4854,47 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                     }
                 };
 
+                const handleDelete = async () => {
+                    try {
+                        // Prepare the payload for the API call
+                        const payload = {
+                            campaignname: firstColumnValue,
+                            Account: newaccount,
+                            adsetid: adsetid,
+                            campaignid: campaignid,
+                        };
+                
+                        // Call the backend API to delete the comment
+                        const response = await apiClient.post('/Comments/delete', payload,
+                            {
+                                headers: { Authorization: token } 
+                            }
+                        );
+                
+                        if (response.status === 200) {
+                            // Remove the comment from the local state
+                            const updatedComments = campaignComments.filter(
+                                (comment) => comment.campaignname !== firstColumnValue
+                            );
+                
+                            // Update the state with the updated comments
+                            setCampaignComments(updatedComments);
+                
+                            // Refresh the table or any other UI component
+                            // changeRRefrst();
+                
+                            message.success('Comment deleted successfully!');
+                            setIsModalVisibles(false); // Close the popup
+                        } else {
+                            message.error('Failed to delete the comment. Please try again.');
+                        }
+                    } catch (error) {
+                        console.error('Error deleting the comment:', error);
+                        message.error('Failed to delete the comment. Please try again.');
+                    }
+                };
+                
+
                 const sendEditedCommentToAPI = async (logData) => {
                     try {
                         const response = await apiClient.post('/Comments/edit', {
@@ -5093,8 +5135,24 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                         <Modal
                             title={firstColumnValue}
                             visible={isModalVisibles}
-                            onOk={handleOks}
-                            onCancel={handleCancels}
+                            onOk={handleOks} // Default Ok button functionality
+                            onCancel={handleCancels} // Default Cancel button functionality
+                            footer={[
+                                <Button
+                                    key="delete"
+                                    type="danger"
+                                    onClick={handleDelete}
+                                    style={{ marginRight: 'auto', border: "1px solid black" }} // Push Delete button to the far left
+                                >
+                                    Delete
+                                </Button>,
+                                <Button key="cancel" onClick={handleCancels}>
+                                    Cancel
+                                </Button>,
+                                <Button key="ok" type="primary" onClick={handleOks}>
+                                    Ok
+                                </Button>,
+                            ]}
                         >
                             <Input.TextArea
                                 placeholder="Enter your comments here"
@@ -5102,6 +5160,36 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                 onChange={(e) => setComment(e.target.value)}
                             />
                         </Modal>
+
+                        {/* <Modal
+                            title={firstColumnValue}
+                            visible={isModalVisibles}
+                            onOk={handleOks}
+                            onCancel={handleCancels}
+                            footer={[
+                                <Button
+                                    key="delete"
+                                    type="danger"
+                                    onClick={handleDelete}
+                                >
+                                    Delete
+                                </Button>,
+                            ]}
+                        >
+                            <Input.TextArea
+                                placeholder="Enter your comments here"
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                            />
+                            <div style={{display: 'flex',justifyContent: 'flex-end', flexDirection: 'column'}}>
+                                <Button
+                                    type="danger"
+                                    onClick={handleDelete}
+                                >
+                                    Delete
+                                </Button>
+                            </div>
+                        </Modal> */}
                     </div>
                 );
             }
@@ -5271,6 +5359,46 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                     } catch (error) {
                         console.error('Error sending edited comment to server:', error);
                         throw error;
+                    }
+                };
+
+                const handleDelete = async () => {
+                    try {
+                        // Prepare the payload for the API call
+                        const payload = {
+                            campaignname: firstColumnValue,
+                            Account: newaccount,
+                            adsetid: adsetid,
+                            campaignid: campaignid,
+                        };
+                
+                        // Call the backend API to delete the comment
+                        const response = await apiClient.post('/Comments/delete', payload,
+                            {
+                                headers: { Authorization: token } 
+                            }
+                        );
+                
+                        if (response.status === 200) {
+                            // Remove the comment from the local state
+                            const updatedComments = campaignComments.filter(
+                                (comment) => comment.campaignname !== firstColumnValue
+                            );
+                
+                            // Update the state with the updated comments
+                            setCampaignComments(updatedComments);
+                
+                            // Refresh the table or any other UI component
+                            // changeRRefrst();
+                
+                            message.success('Comment deleted successfully!');
+                            setIsModalVisibles(false); // Close the popup
+                        } else {
+                            message.error('Failed to delete the comment. Please try again.');
+                        }
+                    } catch (error) {
+                        console.error('Error deleting the comment:', error);
+                        message.error('Failed to delete the comment. Please try again.');
                     }
                 };
 
@@ -5535,6 +5663,34 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                         <Modal
                             title={firstColumnValue}
                             visible={isModalVisibles}
+                            onOk={handleOks} // Default Ok button functionality
+                            onCancel={handleCancels} // Default Cancel button functionality
+                            footer={[
+                                <Button
+                                    key="delete"
+                                    type="danger"
+                                    onClick={handleDelete}
+                                    style={{ marginRight: 'auto', border: "1px solid black" }} // Push Delete button to the far left
+                                >
+                                    Delete
+                                </Button>,
+                                <Button key="cancel" onClick={handleCancels}>
+                                    Cancel
+                                </Button>,
+                                <Button key="ok" type="primary" onClick={handleOks}>
+                                    Ok
+                                </Button>,
+                            ]}
+                        >
+                            <Input.TextArea
+                                placeholder="Enter your comments here"
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                            />
+                        </Modal>
+                        {/* <Modal
+                            title={firstColumnValue}
+                            visible={isModalVisibles}
                             onOk={handleOks}
                             onCancel={handleCancels}
                         >
@@ -5543,7 +5699,7 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                 value={comment}
                                 onChange={(e) => setComment(e.target.value)}
                             />
-                        </Modal>
+                        </Modal> */}
                     </div>
                 );
             }
@@ -5730,6 +5886,46 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                     } catch (error) {
                         console.error('Error sending edited comment to server:', error);
                         throw error;
+                    }
+                };
+
+                const handleDelete = async () => {
+                    try {
+                        // Prepare the payload for the API call
+                        const payload = {
+                            campaignname: firstColumnValue,
+                            Account: newaccount,
+                            adsetid: adsetid,
+                            campaignid: campaignid,
+                        };
+                
+                        // Call the backend API to delete the comment
+                        const response = await apiClient.post('/Comments/delete', payload,
+                            {
+                                headers: { Authorization: token } 
+                            }
+                        );
+                
+                        if (response.status === 200) {
+                            // Remove the comment from the local state
+                            const updatedComments = campaignComments.filter(
+                                (comment) => comment.campaignname !== firstColumnValue
+                            );
+                
+                            // Update the state with the updated comments
+                            setCampaignComments(updatedComments);
+                
+                            // Refresh the table or any other UI component
+                            // changeRRefrst();
+                
+                            message.success('Comment deleted successfully!');
+                            setIsModalVisibles(false); // Close the popup
+                        } else {
+                            message.error('Failed to delete the comment. Please try again.');
+                        }
+                    } catch (error) {
+                        console.error('Error deleting the comment:', error);
+                        message.error('Failed to delete the comment. Please try again.');
                     }
                 };
 
@@ -5989,6 +6185,34 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                         <Modal
                             title={firstColumnValue}
                             visible={isModalVisible}
+                            onOk={handleOk} // Default Ok button functionality
+                            onCancel={handleCancel} // Default Cancel button functionality
+                            footer={[
+                                <Button
+                                    key="delete"
+                                    type="danger"
+                                    onClick={handleDelete}
+                                    style={{ marginRight: 'auto', border: "1px solid black" }} // Push Delete button to the far left
+                                >
+                                    Delete
+                                </Button>,
+                                <Button key="cancel" onClick={handleCancel}>
+                                    Cancel
+                                </Button>,
+                                <Button key="ok" type="primary" onClick={handleOk}>
+                                    Ok
+                                </Button>,
+                            ]}
+                        >
+                            <Input.TextArea
+                                placeholder="Enter your comments here"
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                            />
+                        </Modal>
+                        {/* <Modal
+                            title={firstColumnValue}
+                            visible={isModalVisible}
                             onOk={handleOk}
                             onCancel={handleCancel}
                         >
@@ -5997,7 +6221,7 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                 value={comment}
                                 onChange={(e) => setComment(e.target.value)}
                             />
-                        </Modal>
+                        </Modal> */}
                     </div>
                 );
             }
@@ -7120,6 +7344,31 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
     }
     ),[campaignNamesDActiveDaily, inputValue]);
 
+    useEffect(()=>{
+        setDailyFixedFooter(
+            [
+                {
+                    campaignName: 'Total',
+                    spend: parseFloat(memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0).toFixed(2)),
+                    revenue: parseFloat(memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0).toFixed(2)),
+                    profit: parseFloat(memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0).toFixed(2)),
+                    margin: parseFloat((memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
+                    rpc: parseFloat((memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / memorizedDailyData?.length).toFixed(2)),
+                    cpl: parseFloat((memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / memorizedDailyData?.length).toFixed(2)),
+                    ncpl: parseFloat((memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / memorizedDailyData?.length).toFixed(2)),
+                    fbleads: parseFloat(memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0).toFixed(2)),
+                    conversions: parseFloat(memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0).toFixed(2)),
+                    fmargin: parseFloat((memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+                    roi: parseFloat(((memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+                    cpc: parseFloat((memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / memorizedDailyData?.length).toFixed(2)),
+                    fbclicks: parseFloat(memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
+                    impressions: parseFloat(memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
+                    ctr: parseFloat((memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
+                }
+            ]
+        );
+    },[memorizedDailyData]);
+
     return (
         <div className='reports-container'>
             {/* className='select-container' */}
@@ -7229,9 +7478,9 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                 </Row>
             </Space>
             <div style={{ padding: '0px', margin: '0px' }}>
-                <Row gutter={8} style={{ marginTop: '16px' }}> 
+                <Row gutter={8} style={{ marginTop: '16px', display: 'flex', justifyContent: 'space-between' }}> 
                     {renderCarouselNav()}
-                    <div style={{display: 'flex', marginLeft: '10px'}}>
+                    <div style={{display: 'flex', marginRight: '15px'}}>
                         {/* <Row gutter={8} style={{ marginTop: '16px' }}>  */}
                             <Col>
                                 <Input
@@ -7450,9 +7699,25 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                         onFilterChanged={(params) => {
                                             const api = params.api;
                                             const filteredData = [];
+                                            // api.forEachNodeAfterFilterAndSort((node) => {
+                                            //     if (!node.rowPinned) {
+                                            //         filteredData.push(node.data);
+                                            //     }
+                                            // });
+                                            const normalizedInput = inputValue.trim().toLowerCase();
+
                                             api.forEachNodeAfterFilterAndSort((node) => {
-                                                if (!node.rowPinned) {
-                                                    filteredData.push(node.data);
+                                                if (node.data && node.data.campaignname) {
+                                                    const normalizedCampaign = node.data.campaignname.trim().toLowerCase();
+                                        
+                                                    // Apply search and filter conditions
+                                                    if (
+                                                        normalizedCampaign.startsWith(normalizedInput) ||
+                                                        normalizedCampaign.includes(normalizedInput) ||
+                                                        normalizedCampaign.endsWith(normalizedInput)
+                                                    ) {
+                                                        filteredData.push(node.data);
+                                                    }
                                                 }
                                             });
 
@@ -7604,9 +7869,26 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                         onFilterChanged={(params) => {
                                             const api = params.api;
                                             const filteredData = [];
+                                            // api.forEachNodeAfterFilterAndSort((node) => {
+                                            //     if (!node.rowPinned) {
+                                            //         filteredData.push(node.data);
+                                            //     }
+                                            // });
+                                            const normalizedInput = inputValue.trim().toLowerCase();
+
                                             api.forEachNodeAfterFilterAndSort((node) => {
-                                                if (!node.rowPinned) {
-                                                    filteredData.push(node.data);
+                                                // Check if node.data exists and has a valid campaignname
+                                                if (node.data && node.data.campaignname) {
+                                                    const normalizedCampaign = node.data.campaignname.trim().toLowerCase();
+                                        
+                                                    // Apply both search and AG-Grid filters
+                                                    if (
+                                                        normalizedCampaign.startsWith(normalizedInput) ||
+                                                        normalizedCampaign.includes(normalizedInput) ||
+                                                        normalizedCampaign.endsWith(normalizedInput)
+                                                    ) {
+                                                        filteredData.push(node.data);
+                                                    }
                                                 }
                                             });
 
@@ -7752,9 +8034,26 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                             onFilterChanged={(params) => {
                                                 const api = params.api;
                                                 const filteredData = [];
+                                                // api.forEachNodeAfterFilterAndSort((node) => {
+                                                //     if (!node.rowPinned) {
+                                                //         filteredData.push(node.data);
+                                                //     }
+                                                // });
+                                                const normalizedInput = inputValue.trim().toLowerCase();
+
                                                 api.forEachNodeAfterFilterAndSort((node) => {
-                                                    if (!node.rowPinned) {
-                                                        filteredData.push(node.data);
+                                                    // Check if node.data exists and has a valid campaignname
+                                                    if (node.data && node.data.campaignname) {
+                                                        const normalizedCampaign = node.data.campaignname.trim().toLowerCase();
+                                            
+                                                        // Apply both search and AG-Grid filters
+                                                        if (
+                                                            normalizedCampaign.startsWith(normalizedInput) ||
+                                                            normalizedCampaign.includes(normalizedInput) ||
+                                                            normalizedCampaign.endsWith(normalizedInput)
+                                                        ) {
+                                                            filteredData.push(node.data);
+                                                        }
                                                     }
                                                 });
     
