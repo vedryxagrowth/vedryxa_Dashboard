@@ -9,7 +9,7 @@ import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import { v4 as uuidv4 } from 'uuid';
 import { useTokenContext } from '../../../components/parent';
-const MnetUrlBuilder = ({ onReturnMessage, showSubmitButton }) => {
+const MnetUrlBuilder = ({ defaultValues, onReturnMessage, showSubmitButton }) => {
   // Initial data array
   const [domain, setDomain] = useState(null);
   const [source, setSource] = useState("FB");
@@ -183,6 +183,27 @@ const MnetUrlBuilder = ({ onReturnMessage, showSubmitButton }) => {
     const response = await apiClient.get(`/get/urlbuilderdata?network=Mnet`);
     if (response?.status === 200) {
       setNetworkData(response?.data)
+      if(defaultValues){
+        console.log(defaultValues);
+        // console.log(defaultValues.split("//")[1].split("/")[0]);
+        const DomainUrls = response?.data?.Domains
+        .filter(item => item.url.includes(defaultValues.split("//")[1].split("/")[0]))
+        .map(item => item.url);
+        // console.log(DomainUrls);
+        setDomain(DomainUrls[0]);
+
+        const text = defaultValues.split("//")[1].split("/")[3];
+        const result = text.replace(/\+/g, " ");
+        console.log(result);
+        setKeyWords(result);
+        console.log(defaultValues.split("//")[1].split("/")[4].split("&")[0].split("?")[1]);
+        setChannel(defaultValues.split("//")[1].split("/")[4].split("&")[0].split("?")[1]);
+        setMembetId(defaultValues?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[0]);
+        setSource(defaultValues?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[1]);
+        setGeo(defaultValues?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[2]);
+        // console.log(defaultValues.split("//")[1].split("/")[0]);
+        // const domainData = response 
+      }
     }
   };
 
