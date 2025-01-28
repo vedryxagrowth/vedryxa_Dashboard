@@ -27,6 +27,8 @@ import {
 import TextArea from "antd/es/input/TextArea";
 import axios from "axios";
 import moment from "moment-timezone";
+import dayjs from "dayjs";
+import { use } from "react";
 import { useEffect, useRef, useState } from "react";
 
 const { Option } = Select;
@@ -36,6 +38,13 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
     const [form] = Form.useForm();
     const [formData, setFormData] = useState(null);
     const token = localStorage.getItem("token");
+    console.log(viewadsetlevel);
+    const defaultDate = viewadsetlevel?.start_time
+    ? moment(viewadsetlevel?.start_time) // Parse ISO date using Day.js
+    : null;
+
+  const [date, setDate] = useState(defaultDate);
+    console.log(date);
 
     const initialValue = {
         AdsetName: viewadsetlevel?.AdsetName,
@@ -44,6 +53,7 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
         billing_event: viewadsetlevel?.billing_event,
         action_source: viewadsetlevel?.action_source,
         custom_event_type: viewadsetlevel?.custom_event_type,
+        // DatePicker: viewadsetlevel?.start_time.split("T")[0],
         pixel_id: viewadsetlevel?.pixel_id,
         bid_amount: viewadsetlevel?.bid_amount / 100,
         countries: viewadsetlevel?.countries,
@@ -62,28 +72,19 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
             <h3>{viewadsetlevel?.AdsetName}</h3>
             <Card style={{ width: "100%" }} className="editcard">
                 <Form form={form} layout="vertical" initialValues={initialValue}>
-                    <div style={{ display: "flex" }}>
-                        <Form.Item
-                            name="DailyAdd_amount"
-                            label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
-                            style={{ flex: 0.15, marginLeft: "2%" }}>
-                            <Input disabled style={{ width: "100%" }}
-                                type="number"
-                                placeholder="$"
-
-                            />
-                        </Form.Item>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
+                        
                         <Form.Item
                             name="AdsetName"
                             label={<span style={{ color: "#B4B4B4" }}>Adset name</span>}
-                            style={{ flex: 0.25 }}
+                            style={{ flex: "1 1 20%" }}
                         >
                             <Input disabled style={{ width: "100%" }} />
                         </Form.Item>
                         <Form.Item
                             name="optimization_goal"
                             label={<span style={{ color: "#B4B4B4" }}>Optimization goal</span>}
-                            style={{ flex: 0.1, marginLeft: "2%" }}
+                            style={{ flex: "1 1 15%" }}
                         >
                             <Select
                                 disabled
@@ -98,7 +99,7 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                         <Form.Item
                             name="billing_event"
                             label={<span style={{ color: "#B4B4B4" }}>Billing event</span>}
-                            style={{ flex: 0.1, marginLeft: "2%" }}
+                            style={{ flex: "1 1 15%" }}
                         >
                             <Select
                                 disabled
@@ -111,14 +112,15 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                         <Form.Item
                             name="DatePicker"
                             label={<span style={{ color: "#B4B4B4" }}>Start Time</span>}
-                            style={{ flex: 0.1, marginLeft: "2%" }}
+                            style={{ flex: "1 1 15%" }}
+                            initialValue={date}
                         >
                             <DatePicker disabled />
                         </Form.Item>
                         <Form.Item
                             name="action_source"
                             label={<span style={{ color: "#B4B4B4" }}>Action source</span>}
-                            style={{ flex: 0.1, marginLeft: "2%" }}
+                            style={{ flex: "1 1 15%" }}
                         >
                             <Select
                                 disabled
@@ -133,7 +135,7 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                         <Form.Item
                             name="custom_event_type"
                             label={<span style={{ color: "#B4B4B4" }}>Event type</span>}
-                            style={{ flex: 0.1, marginLeft: "2%" }}
+                            style={{ flex: "1 1 15%" }}
                         >
                             <Select
                                 disabled
@@ -148,24 +150,34 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                         <Form.Item
                             name="pixel_id"
                             label={<span style={{ color: "#B4B4B4" }}>Pixel id</span>}
-                            style={{ flex: 0.15, marginLeft: "2%" }}
+                            style={{ flex: "1 1 20%" }}
                         >
                             <Input disabled style={{ width: "100%" }} />
                         </Form.Item>
                         <Form.Item
+                            name="DailyAdd_amount"
+                            label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
+                            style={{ flex: "1 1 15%" }}>
+                            <Input disabled style={{ width: "100%" }}
+                                type="number"
+                                placeholder="$"
+
+                            />
+                        </Form.Item>
+                        <Form.Item
                             name="bid_amount"
                             label={<span style={{ color: "#B4B4B4" }}>Bid amount</span>}
-                            style={{ flex: 0.1, marginLeft: "2%" }}
+                            style={{ flex: "1 1 15%" }}
                         >
                             <Input type="number" placeholder="$" disabled />
                         </Form.Item>
                     </div>
                     <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "green" }}>Targeting</span>
-                    <div style={{ display: "flex" }}>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
                         <Form.Item
                             name="countries"
                             label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
-                            style={{ flex: 0.12 }}
+                            style={{ flex: "1 1 20%" }}
                         >
                             <Select
                                 disabled
@@ -194,7 +206,7 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                         <Form.Item
                             name="Min_Age"
                             label={<span style={{ color: "#B4B4B4" }}>Min Age</span>}
-                            style={{ marginLeft: "2%" }}
+                            style={{ flex: "1 1 10%" }}
                         >
                             <Select
                                 disabled
@@ -208,7 +220,7 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                         </Form.Item>
                         <Form.Item
                             name="Max_Age"
-                            label={<span style={{ color: "#B4B4B4" }}>Max Age</span>}
+                            label={<span style={{ color: "#B4B4B4", flex: "1 1 10%" }}>Max Age</span>}
                         >
                             <Select
                                 disabled
@@ -223,7 +235,7 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                         <Form.Item
                             name="Gender"
                             label={<span style={{ color: "#B4B4B4" }}>Gender</span>}
-                            style={{ flex: 0.1, marginLeft: "2%" }}
+                            style={{ flex: "1 1 15%" }}
                         >
                             <Select
                                 disabled
@@ -255,7 +267,7 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                                 <Form.Item
                                     name="publisher_platforms"
                                     label={<span style={{ color: "#B4B4B4" }}>Platforms</span>}
-                                    style={{ flex: 0.1, marginLeft: "2%" }}
+                                    style={{ flex: "1 1 20%" }}
                                 >
                                     <Select
                                         disabled
@@ -268,7 +280,7 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                                 <Form.Item
                                     name="Facebook_positions"
                                     label={<span style={{ color: "#B4B4B4" }}>Positions</span>}
-                                    style={{ flex: 0.25, marginLeft: "2%" }}
+                                    style={{ flex: "1 1 30%" }}
                                 >
                                     <Select
                                         disabled
@@ -292,7 +304,7 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                                 <Form.Item
                                     name="device_platforms"
                                     label={<span style={{ color: "#B4B4B4" }}>Device</span>}
-                                    style={{ flex: 0.18, marginLeft: "2%" }}
+                                    style={{ flex: "1 1 20%" }}
                                 >
                                     <Select
                                         disabled

@@ -578,7 +578,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         switch (network) {
             case 'FB_Mnet':
                 return <MnetUrlBuilder onReturnMessage={onReturnUrl} />
-            case 'FB_Tonic':
+            case 'FB_Tonic1':
                 return <TonicUrlBuilder onReturnMessage={onReturnUrl} />
             case 'FB_System1':
                 return <System1UrlBuilder onReturnMessage={onReturnUrl} />
