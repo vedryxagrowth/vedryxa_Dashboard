@@ -30,6 +30,20 @@ const revenuePartnerNames = {
     "Domain_Active":"Newsbreak_DA",
 };
 
+const newtworkCollections = {
+    "FB_Mnet": "Facebook_Mnet",
+    "FB_MnetBing": "Facebook_MnetBing",
+    "FB_Enki": "Facebook_Enki",
+    "FB_System1": 'Facebook_System1',
+    "FB_Rsoc": 'Facebook_Rsoc',
+    "FB_Tonic": 'Facebook_Tonic',
+    "FB_DomainActive": "Facebook_DActive_Names",
+    "FB_Bodies": "Facebook_Bodies",
+    "FB_Bodies1": "Facebook_Bodies1",
+    "Newsbreak_DA": "Newsbreak_DomainActive",
+    "FB_Tonic1": "Facebook_Tonic1"
+}
+
 import { DatePicker, Space, ConfigProvider, Flex, Spin, Skeleton } from 'antd';
 import { generate } from '@ant-design/colors'; // For dynamic color generation
 import { ReloadOutlined } from "@ant-design/icons";
@@ -1444,8 +1458,8 @@ const Dashboard = () => {
                         revenuePartner: obj.revenuePartner,
                         mediaBuyerName: obj.MediaBuyerName,
                         holder: obj.Holder,
-                        rpc: parseFloat(((obj.estimated_revenue/obj.conversions)*100)/100).toFixed(2),
-                        cpl: parseFloat(((obj.spend/obj.fbLeads)*100)/100).toFixed(2) || 0
+                        // rpc: parseFloat(((obj.estimated_revenue/obj.conversions)*100)/100).toFixed(2),
+                        // cpl: parseFloat(((obj.spend/obj.fbLeads)*100)/100).toFixed(2) || 0
                     });
                 } else {
                     // If found, sum the respective fields
@@ -1458,7 +1472,9 @@ const Dashboard = () => {
                 return acc;
             }, []).map(account => {
                 // Calculate profit after grouping
-                account.profit = account.estimated_revenue - account.spend;
+                account.profit = account.estimated_revenue - account.spend,
+                account.rpc = parseFloat(((account.estimated_revenue/account.conversions)*100)/100).toFixed(2),
+                account.cpl = parseFloat(((account.spend/account.fbLeads)*100)/100).toFixed(2) || 0
                 return account;
             });
         }
@@ -2080,6 +2096,99 @@ const Dashboard = () => {
         }
     };
     
+    const autoGroupColumnDefCampaigns = {
+        headerName: 'Campaign Name',
+        minWidth: 200,
+        sortable: true,
+        cellRendererParams: {
+            suppressCount: false,
+            innerRenderer: (params) => {
+                if (params.node.footer) {
+                    return 'Total';
+                }
+    
+                const firstColumnValue = params.node.key; // campaign name
+                const campaignName = params.node.key;
+                const groupedData = params.node.allLeafChildren
+                    ? params.node.allLeafChildren.map(childNode => childNode.data)
+                    : [];
+    
+                // Ensure groupedData has at least one element
+                if (groupedData.length === 0) {
+                    return '';
+                }
+    
+                // Safeguard against undefined or missing properties
+                const firstGroupedItem = groupedData[0] || {};
+                const revenuePartnerNameToPassToReports = firstGroupedItem.revenuePartner
+                    ? revenuePartnerNames[firstGroupedItem.revenuePartner]
+                    : 'Unknown Partner';
+                const collectionName = newtworkCollections[revenuePartnerNameToPassToReports];
+    
+                const accountNumberToPassToReports = firstGroupedItem.accountNumber || 'Unknown Account';
+                const campaignNameToPass = firstGroupedItem.campaign_name || 'Unknown Account';
+    
+                const valueWithCount = `${firstColumnValue}`;
+                return (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                        <span
+                            onClick={() => {
+                                // const data = {
+                                //     network: revenuePartnerNameToPassToReports,
+                                //     accountNumber: accountNumberToPassToReports,
+                                //     time: time,
+                                //     startDate: startDate,
+                                //     endDate: endDate,
+                                // };
+    
+                                // // Convert data to query string
+                                // const queryString = new URLSearchParams(data).toString();
+                                const url = `/DailyAndCampaignHistory/CampaignHistory/${campaignNameToPass}-${accountNumberToPassToReports}-${time}-${collectionName}`;
+                                console.log(url);
+    
+                                // Open the URL in a new tab
+                                window.open(url, '_blank');
+                            }}
+                        >
+                            {valueWithCount}
+                        </span>
+                    </div>
+                );
+            }
+        },
+        cellRendererFramework: (params) => {
+            if (params.node.group) {
+                // Keep the original logic for grouped rows
+                return params.valueFormatted || params.value || params.node.key;
+            }
+    
+            // For ungrouped rows, handle navigation directly
+            const accountNumber = params.data?.accountNumber || 'Unknown Account';
+            const revenuePartner = params.data?.revenuePartner || 'Unknown Partner';
+    
+            const data = {
+                network: revenuePartner,
+                accountNumber,
+                time,
+                startDate,
+                endDate,
+            };
+    
+            const queryString = new URLSearchParams(data).toString();
+            const url = `/Reports?${queryString}`;
+    
+            return (
+                <span
+                    style={{ cursor: 'pointer', color: '#1890ff' }}
+                    onClick={() => {
+                        window.open(url, '_blank');
+                    }}
+                >
+                    {accountNumber}
+                </span>
+            );
+        }
+    };
 
     const [columnDefs] = useState([
         {
@@ -2139,7 +2248,20 @@ const Dashboard = () => {
             headerName: 'CPL',
             aggFunc: avgRpcCpl,
             valueFormatter: rpcCplFormatter,
-        }
+        }, 
+        {
+            field: 'conversions',
+            headerName: 'Conversions',
+            aggFunc: spender,
+            // valueFormatter: rpcCplFormatter,
+        }, 
+        {
+            field: 'fbLeads',
+            headerName: 'FbLeads',
+            aggFunc: spender,
+            // valueFormatter: rpcCplFormatter,
+        }, 
+
     ]);
 
     const items = [
@@ -2336,9 +2458,9 @@ const Dashboard = () => {
             field: "accountNumber",
             resizable: true,
             sortable: true,
-            // hide: true, // Hide column as it's grouped
-            // rowGroup: true,
-            // enableRowGroup: true,
+            hide: true, // Hide column as it's grouped
+            rowGroup: true,
+            enableRowGroup: true,
             
 
         }, // Group by Network
@@ -3593,7 +3715,7 @@ const Dashboard = () => {
                                                 suppressAggFuncInHeader={true}
                                                 groupIncludeFooter={true}
                                                 groupIncludeTotalFooter={true}
-                                                autoGroupColumnDef={autoGroupColumnDef}
+                                                autoGroupColumnDef={autoGroupColumnDefCampaigns}
                                             />
                                         </div>
                                     </Col>
@@ -3613,7 +3735,7 @@ const Dashboard = () => {
                                                 suppressAggFuncInHeader={true}
                                                 groupIncludeFooter={true}
                                                 groupIncludeTotalFooter={true}
-                                                autoGroupColumnDef={autoGroupColumnDef}
+                                                autoGroupColumnDef={autoGroupColumnDefCampaigns}
                                             />
                                         </div>
                                     </Col>
@@ -3625,7 +3747,7 @@ const Dashboard = () => {
                                         <div
                                             className={`ag-theme-alpine ${gridThemeClass}`}
                                             style={{ width: '100%', height: '400px' }}
-                                        >             <AgGridReact
+                                        >   <AgGridReact
                                                 rowData={top5ProfitCampaigns}
                                                 columnDefs={columnDefs2}
                                                 defaultColDef={defaultColDef}
@@ -3633,7 +3755,7 @@ const Dashboard = () => {
                                                 suppressAggFuncInHeader={true}
                                                 groupIncludeFooter={true}
                                                 groupIncludeTotalFooter={true}
-                                                autoGroupColumnDef={autoGroupColumnDef}
+                                                autoGroupColumnDef={autoGroupColumnDefCampaigns}
                                             />
                                         </div>
                                     </Col>
@@ -3653,7 +3775,7 @@ const Dashboard = () => {
                                                 suppressAggFuncInHeader={true}
                                                 groupIncludeFooter={true}
                                                 groupIncludeTotalFooter={true}
-                                                autoGroupColumnDef={autoGroupColumnDef}
+                                                autoGroupColumnDef={autoGroupColumnDefCampaigns}
                                             />
                                         </div>
                                     </Col>
@@ -3673,7 +3795,7 @@ const Dashboard = () => {
                                                 suppressAggFuncInHeader={true}
                                                 groupIncludeFooter={true}
                                                 groupIncludeTotalFooter={true}
-                                                autoGroupColumnDef={autoGroupColumnDef}
+                                                autoGroupColumnDef={autoGroupColumnDefCampaigns}
                                             />
                                         </div>
                                     </Col>
