@@ -505,6 +505,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
     const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] = useState(false);
     const [campaignLevelDailyBudget, setCampaignLevelDailyBudget] = useState(0);
     const [adsetLevelDailyBudget, setAdsetLevelDailyBudget] = useState(0);
+    const [defaultImages, setDefaultImages] = useState([]);
 
     useEffect(() => {
         if (visible) {
@@ -535,6 +536,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
             ...prev,
             [fileId]: editedImageObject.imageBase64 || editedImageObject.imageUrl
         }));
+        console.log(fileId);
+        console.log(editedImageObject);
         closeCanvasModal();
     };
 
@@ -601,6 +604,24 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
             setAdsetLevelDailyBudget(DuplicatedampaignData?.adsetlevel?.Daily_amount ? (DuplicatedampaignData?.adsetlevel?.Daily_amount) / 100 : 0);
             setCampaignLevelDailyBudget((DuplicatedampaignData?.camapaignlevel?.Daily_amount) / 100);
             setDefaultURLBuilder(DuplicatedampaignData?.addlevel[0]?.Website_URL);
+            setSelectedFiles(DuplicatedampaignData?.addlevel?.map((file, index)=>{
+                return({
+                    uid: `-${index+1}`,
+                    name: file?.filename,
+                    status: 'done',
+                    type: `${file?.filename?.endsWith(".jpg") || file?.filename?.endsWith(".png") ? file?.filename?.endsWith(".jpg") ? "image/jpg" : "image/png" : "video/"}`,
+                    url: file?.filename,
+                })
+            }));
+            // form.setFieldsValue({
+            //     MediaContent: fileList, // Ensure the selected files are added to the form value
+            //   });
+            
+            // setCaption(DuplicatedampaignData?.addlevel[0]?.Caption);
+            // setPrimaryText(DuplicatedampaignData?.addlevel[0]?.message);
+            // setDescription(DuplicatedampaignData?.addlevel[0]?.Description);
+            // setHeadline(DuplicatedampaignData?.addlevel[0]?.headline);
+            console.log(DuplicatedampaignData?.adsetlevel?.placements);
             form.setFieldsValue({
                 positions: DuplicatedampaignData?.adsetlevel?.position || ["feed"],
                 Account_Number: DuplicatedampaignData?.Account_Number,
@@ -624,8 +645,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                 Min_Age: DuplicatedampaignData?.adsetlevel?.Min_Age,
                 Max_Age: DuplicatedampaignData?.adsetlevel?.Max_Age,
                 Gender: DuplicatedampaignData?.adsetlevel?.Gender,
-                publisher_platforms: DuplicatedampaignData?.adsetlevel?.publisher_platforms,
-                device_platforms: DuplicatedampaignData?.adsetlevel?.device_platforms,
+                publisher_platforms: DuplicatedampaignData?.adsetlevel?.publisher_platforms ? DuplicatedampaignData?.adsetlevel?.publisher_platforms : "",
+                device_platforms: DuplicatedampaignData?.adsetlevel?.device_platforms ? DuplicatedampaignData?.adsetlevel?.device_platforms : "",
                 Language: DuplicatedampaignData?.adsetlevel?.locales,
                 placements: DuplicatedampaignData?.adsetlevel?.placements,
                 // Facebook_positions: DuplicatedampaignData?.adsetlevel?.Facebook_positions,
@@ -640,7 +661,15 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                 Website_URL: DuplicatedampaignData?.addlevel[0]?.Website_URL,
                 Caption: DuplicatedampaignData?.addlevel[0]?.Caption,
                 pixel_id: DuplicatedampaignData?.addlevel[0]?.pixel_id,
-                page_id: DuplicatedampaignData?.addlevel[0]?.page_id
+                page_id: DuplicatedampaignData?.addlevel[0]?.page_id,
+                MediaContent: (DuplicatedampaignData?.addlevel?.map((file, index)=>{
+                    return({
+                        uid: `-${index+1}`,
+                        name: `default_image${index+1}.jpg`,
+                        status: 'done',
+                        url: file?.filename,
+                    })
+                }))
             });
         }
     }, [DuplicatedampaignData, form]);
@@ -652,9 +681,24 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
         // Check if all required fields are complete
         const checkFormCompletion = () => {
             const allValues = form.getFieldsValue(true);
-            const isComplete = Object.keys(allValues).every(
-                key => allValues[key] !== undefined && allValues[key] !== ''
+        
+            // If manualStatus is false, we ignore 'publisher_platforms' and 'device_platforms'
+            const fieldsToSkip = isManual === false ? ['publisher_platforms', 'device_platforms'] : [];
+        
+            // Find the keys of the form items that are empty, except the ones to skip
+            const emptyFields = Object.keys(allValues).filter(
+                key => !fieldsToSkip.includes(key) && (allValues[key] === undefined || allValues[key] === '')
             );
+        
+            // Log the empty fields
+            if (emptyFields.length > 0) {
+                console.log('Empty fields:', emptyFields);
+            } else {
+                console.log('All fields are complete');
+            }
+            
+            // Check if all form fields are filled, considering the skipped fields
+            const isComplete = emptyFields.length === 0;
             setIsFormComplete(isComplete);
         };
 
@@ -776,6 +820,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
     const handleNameChange = async (e) => {
         const newName = e.target.value;
         setCampaignName(newName);
+        
+
         // console.log("Account Number:", accountNumber);
 
         // try {
@@ -852,98 +898,211 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
 
         const uploadPromises = selectedFiles.map(async (file) => {
             try {
-                const formData = new FormData();
-                const fileId = file.name;
-                const editedImage = editedImages[fileId];
+                // const formData = new FormData();
+                // const fileId = file.name;
+                // const editedImage = editedImages[fileId];
 
-                // Use edited image if available, otherwise original file
-                const uploadFile = editedImage ? await fetch(editedImage).then(res => res.blob()) : file;
+                // // Use edited image if available, otherwise original file
+                // const uploadFile = editedImage ? await fetch(editedImage).then(res => res.blob()) : file;
 
-                // Log the MIME type of the file
-                const fileType = uploadFile.type;
-                console.log("File type:", fileType);
+                // // Log the MIME type of the file
+                // console.log(file);
+                // console.log(formData);
+                const fileType = file.type;
+                // console.log("File type:", fileType);
+                // console.log(uploadFile, "upLoad");
+                // // formData.append("file", uploadFile, `blob/${file.name}`);
+                // console.log(formData);
+                // console.log(file.name);
 
-                if (!fileType.startsWith("image/") && !fileType.startsWith("video/")) {
+                if (!fileType.startsWith("image/") && !fileType.startsWith("video/") ) {
                     onError("Unsupported file type");
                     return;
                 }
 
-                formData.append("file", uploadFile, `blob/${file.name}`);
+                // formData.append("file", uploadFile, `blob/${file.name}`);
+                
 
-
-                let response, fbResponse;
-
-                if (file.type.startsWith('image/')) {
-                    response = await axios.post('https://www.testapi.adsgoat.in/upload', formData, {
-                        headers: { 'Authorization': localStorage.getItem("token"), "Content-Type": "multipart/form-data" },
-                    });
-                    if (!response.data.imageUrl) {
-                        onError("Error: Image URL not returned from custom API");
-                        throw new Error("Image upload to custom API failed, imageUrl missing");
-                    }
-
-                    console.log("Custom API response imageUrl:", response);
-
-                    formData.append('file', file);
-                    formData.append('access_token', token);
-
-                    fbResponse = await axios.post(`https://graph.facebook.com/v20.0/act_${account}/adimages`, formData, {
-                        headers: { 'Content-Type': 'multipart/form-data' }
-                    });
-
-                    if (response.status === 200 && fbResponse.status === 200) {
-                        onSuccess("ok", response);
-                        return {
-                            filename: response.data.imageUrl,
-                            imag_hash: fbResponse.data?.images?.[file.name]?.hash,
-                        };
-                    } else {
-                        onError("error", response);
-                        throw new Error("Image upload failed");
-                    }
-                } else if (file.type.startsWith('video/')) {
-                    response = await axios.post('https://www.testapi.adsgoat.in/upload', formData, {
-                        headers: { 'Authorization': localStorage.getItem("token"), "Content-Type": "multipart/form-data" },
-                    });
-
-                    if (response.status !== 200) {
-                        onError("error", response);
-                        throw new Error("Video upload to custom API failed");
-                    }
-
-                    formData.append('access_token', token);
-
-                    fbResponse = await axios.post(`https://graph.facebook.com/v20.0/act_${account}/advideos`, formData, {
-                        headers: { 'Content-Type': 'multipart/form-data' }
-                    });
-
-                    if (fbResponse.status === 200) {
-                        const videoid = fbResponse?.data?.id;
-                        await new Promise(resolve => setTimeout(resolve, 10000));
-
-                        const thumbnailResponse = await axios.get(`https://graph.facebook.com/v20.0/${videoid}`, {
-                            params: {
-                                access_token: token,
-                                fields: 'thumbnails',
-                                is_preferred: true
-                            }
+                if(file?.url){
+                    if(file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith('.mp4')){
+                        console.log("hi DFPK");
+                        const formData = new FormData();
+                        const response = await fetch(`https://prodapis.adsgoat.in/s3?s3Url=${file.url}`, {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                Authorization: localStorage.getItem("token"),
+                            },
                         });
+                        const uploadFile = await response.blob(); // Convert the fetched file to a Blob
 
-                        const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
-                        const uri = preferredThumbnail ? preferredThumbnail.uri : "";
+                        // Check if the response is a valid Blob
+                        if (!(uploadFile instanceof Blob)) {
+                            console.error("The fetched file is not a Blob:", uploadFile);
+                            return; // Exit if the response is not a Blob
+                        }
 
-                        onSuccess("ok", fbResponse);
+                        // Append the Blob to FormData
+                        formData.append("file", uploadFile, file.name);
+                        console.log(formData);
+                        let fbResponse;
+                        if(file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg')){
+                            formData.append('file', uploadFile, file.name);  // Append the file Blob and its name
+                            formData.append('access_token', token); 
+                            const fileName = file.name.split('/').pop();
 
-                        return {
-                            filename: response.data.imageUrl,
-                            videoid: videoid,
-                            thambnailurl: uri,
-                        };
-                    } else {
-                        onError("error", fbResponse);
-                        throw new Error("Video upload to Facebook failed");
+                            fbResponse = await axios.post(`https://graph.facebook.com/v20.0/act_${account}/adimages`, formData, {
+                                headers: { 'Content-Type': 'multipart/form-data' }
+                            });
+
+                            if ( fbResponse.status === 200) {
+                                onSuccess("ok", response);
+                                return {
+                                    filename: file?.url,
+                                    imag_hash: fbResponse.data?.images?.[fileName]?.hash,
+                                };
+                            } 
+                            else {
+                                onError("error", response);
+                                throw new Error("Image upload failed");
+                            }
+                        }
+                        else if(file?.url?.endsWith('.mp4')){  // Append the file Blob and its name
+                            formData.append('access_token', token); 
+                            fbResponse = await axios.post(`https://graph.facebook.com/v20.0/act_${account}/advideos`, formData, {
+                                headers: { 'Content-Type': 'multipart/form-data' }
+                            });
+
+                            if (fbResponse.status === 200) {
+                                const videoid = fbResponse?.data?.id;
+                                await new Promise(resolve => setTimeout(resolve, 10000));
+
+                                const thumbnailResponse = await axios.get(`https://graph.facebook.com/v20.0/${videoid}`, {
+                                    params: {
+                                        access_token: token,
+                                        fields: 'thumbnails',
+                                        is_preferred: true
+                                    }
+                                });
+
+                                const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
+                                const uri = preferredThumbnail ? preferredThumbnail.uri : "";
+                                console.log(videoid);
+                                console.log(uri);
+
+                                onSuccess("ok", fbResponse);
+
+                                return {
+                                    filename: response.data.imageUrl,
+                                    videoid: videoid,
+                                    thambnailurl: uri,
+                                };
+                            } else {
+                                onError("error", fbResponse);
+                                throw new Error("Video upload to Facebook failed");
+                            }
+                        
+                        }
                     }
                 }
+                else{
+
+                    if(file.type.startsWith('image/') || file.type.startsWith('video/')){
+                        const formData = new FormData();
+                        const fileId = file.name;
+                        const editedImage = editedImages[fileId];
+                        const uploadFile = editedImage ? await fetch(editedImage).then(res => res.blob()) : null;
+
+                        console.log(file.originFileObj.name);
+                        
+                        if(uploadFile){
+                            formData.append("file", uploadFile, `blob/${file.name}`);
+                        }else{
+                            formData.append("file", file.originFileObj, `blob/${file.originFileObj.name}`);
+                        }
+                        
+                        console.log(formData);
+                        let response, fbResponse;
+                        
+                        if (file.type.startsWith('image/')) {
+                            response = await axios.post('https://www.testapi.adsgoat.in/upload', formData, {
+                                headers: { 'Authorization': localStorage.getItem("token"), "Content-Type": "multipart/form-data" },
+                            });
+                            if (!response.data.imageUrl) {
+                                onError("Error: Image URL not returned from custom API");
+                                throw new Error("Image upload to custom API failed, imageUrl missing");
+                            }
+
+                            console.log("Custom API response imageUrl:", response);
+
+                            // formData.append('file', file);
+                            formData.append('access_token', token);
+
+                            fbResponse = await axios.post(`https://graph.facebook.com/v20.0/act_${account}/adimages`, formData, {
+                                headers: { 'Content-Type': 'multipart/form-data' }
+                            });
+
+                            if (response.status === 200 && fbResponse.status === 200) {
+                                
+                                onSuccess("ok", response);
+                                
+                                return {
+                                    filename: response.data.imageUrl,
+                                    imag_hash: fbResponse.data?.images?.[fileName]?.hash,
+                                };
+                            } else {
+                                onError("error", response);
+                                throw new Error("Image upload failed");
+                            }
+                        } else if (file.type.startsWith('video/')) {
+                            response = await axios.post('https://www.testapi.adsgoat.in/upload', formData, {
+                                headers: { 'Authorization': localStorage.getItem("token"), "Content-Type": "multipart/form-data" },
+                            });
+
+                            if (response.status !== 200) {
+                                onError("error", response);
+                                throw new Error("Video upload to custom API failed");
+                            }
+
+                            formData.append('access_token', token);
+
+                            fbResponse = await axios.post(`https://graph.facebook.com/v20.0/act_${account}/advideos`, formData, {
+                                headers: { 'Content-Type': 'multipart/form-data' }
+                            });
+
+                            if (fbResponse.status === 200) {
+                                const videoid = fbResponse?.data?.id;
+                                await new Promise(resolve => setTimeout(resolve, 10000));
+
+                                const thumbnailResponse = await axios.get(`https://graph.facebook.com/v20.0/${videoid}`, {
+                                    params: {
+                                        access_token: token,
+                                        fields: 'thumbnails',
+                                        is_preferred: true
+                                    }
+                                });
+
+                                const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
+                                const uri = preferredThumbnail ? preferredThumbnail.uri : "";
+                                
+
+                                onSuccess("ok", fbResponse);
+
+                                return {
+                                    filename: response.data.imageUrl,
+                                    videoid: videoid,
+                                    thambnailurl: uri,
+                                };
+                            } else {
+                                onError("error", fbResponse);
+                                throw new Error("Video upload to Facebook failed");
+                            }
+                        }
+                    }
+                }
+
+
+                
             } catch (error) {
                 console.error("Error uploading file:", error);
                 onError("error", error);
@@ -1069,6 +1228,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
         const formData = new FormData();
         formData.append("file", file);
         setimageshow(formData);
+        // console.log(formData);
+        // console.log(file);
 
         return false; // Prevent auto-upload
     };
@@ -1168,6 +1329,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                         ...values
                     };
                 }
+                console.log();
 
                 setFormValues(formData);
                 setIsModalVisible(true);
@@ -1200,7 +1362,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
     // };
 
     const postData = async (values) => {
-        setLoading(true); // Start the spinner
+        setLoading(true); // Start the spinner post
         try {
             const dataToSubmit = {
                 campaign_name: values.Name,
@@ -1280,9 +1442,38 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
 
     };
 
-    const handleChange = (info) => {
-        setSelectedFiles(info.fileList.map(file => file.originFileObj));
-    };
+    const handleChange = (info) => { 
+        console.log(info);
+        setSelectedFiles(info.fileList.map(file => ({
+          ...file,
+          uid: file.uid || `-${Date.now()}`,  // Ensure there's a valid uid
+        })));
+        const checkFormCompletion = () => {
+            const allValues = form.getFieldsValue(true);
+        
+            // If manualStatus is false, we ignore 'publisher_platforms' and 'device_platforms'
+            const fieldsToSkip = isManual === false ? ['publisher_platforms', 'device_platforms'] : [];
+        
+            // Find the keys of the form items that are empty, except the ones to skip
+            const emptyFields = Object.keys(allValues).filter(
+                key => !fieldsToSkip.includes(key) && (allValues[key] === undefined || allValues[key] === '')
+            );
+        
+            // Log the empty fields
+            if (emptyFields.length > 0) {
+                console.log('Empty fields:', emptyFields);
+            } else {
+                console.log('All fields are complete');
+            }
+            
+            // Check if all form fields are filled, considering the skipped fields
+            const isComplete = emptyFields.length === 0;
+            setIsFormComplete(isComplete);
+        };
+
+        // Trigger form completion check
+        checkFormCompletion();
+      };
     useEffect(() => {
         // Update the Website_URL form field whenever websiteURL changes
         if (websiteURL) {
@@ -1353,6 +1544,11 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
         setAdsetLevelDailyBudget(0);
         onClose(); // Call onClose handler to close the drawer
     };
+
+    console.log(selectedFiles);
+
+    {selectedFiles && selectedFiles.length > 0 ? (
+        selectedFiles.map((file, index) => (console.log(file?.filename, index)))): null}
 
     return (
         <Drawer
@@ -2041,8 +2237,13 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 label={<span style={{ color: "#B4B4B4" }}>Upload</span>}
                                                 rules={[
                                                     {
-                                                        required: true,
-                                                        message: "Please select Upload!",
+                                                        validator: (_, value) => {
+                                                            // Check if no files are selected after removal
+                                                            if (selectedFiles.length === 0) {
+                                                                return Promise.reject(new Error('Please select Upload!'));
+                                                            }
+                                                            return Promise.resolve();
+                                                        },
                                                     },
                                                 ]}
                                                 style={{ flex: 1 }}
@@ -2053,6 +2254,12 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                     multiple // Add this line to enable multiple file selection
                                                     maxCount={10} // Adjust the max count as needed
                                                     accept="image/*, video/*"
+                                                    fileList={selectedFiles}
+                                                    onRemove={(file) => {
+                                                        setSelectedFiles((prevFiles) =>
+                                                            prevFiles.filter((item) => item.uid !== file.uid)
+                                                        );
+                                                    }}
                                                 >
                                                     <Button icon={<UploadOutlined />}>Select Files</Button>
                                                 </Upload>
@@ -2264,6 +2471,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             selectedFiles.map((file, index) => (
                                                 <Badge
                                                     count={
+                                                        (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith('.mp4')) ? 
+                                                        null:
                                                         <EditOutlined
                                                             style={{ fontSize: '25px', color: '#fff' }}
                                                             onClick={() => handleEditClick(file)} // Edit icon click handler
@@ -2285,24 +2494,49 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                         <div className="ad-preview" style={{ width: "350px" }}>
                                                             <div className="ad-heading">
                                                                 <div className="img">
-                                                                    {file.type.startsWith('image/') ? (
+                                                                    {/* {file?.filename?.endsWith('.png') && console.log(file)} */}
+                                                                    {file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') ? (
                                                                         <img
-                                                                            src={URL.createObjectURL(file)}
+                                                                            src={file?.url}
                                                                             alt="page id"
                                                                             width="40"
                                                                             height="40"
                                                                             style={{ objectFit: 'cover' }}
                                                                         />
-                                                                    ) : (
+                                                                    ) : file?.url?.endsWith('.mp4') ? (
                                                                         <video
-                                                                            src={URL.createObjectURL(file)}
+                                                                            src={file?.url}
                                                                             alt="page id"
                                                                             width="40"
                                                                             height="30"
                                                                             style={{ objectFit: 'cover' }}
                                                                             muted // Muted to prevent sound on preview
                                                                         />
-                                                                    )}
+                                                                    ) : 
+                                                                    file?.type?.startsWith('image/') ? (
+                                                                        <img
+                                                                            src={editedImages[file?.name] ? editedImages[file?.name]:  file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url}
+                                                                            alt="page id"
+                                                                            width="40"
+                                                                            height="40"
+                                                                            style={{ objectFit: 'cover' }}
+                                                                        />
+                                                                    ) 
+                                                                    : 
+                                                                    (
+                                                                        <video
+                                                                            src={file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url}
+                                                                            alt="page id"
+                                                                            width="40"
+                                                                            height="30"
+                                                                            style={{ objectFit: 'cover' }}
+                                                                            muted // Muted to prevent sound on preview
+                                                                        />
+                                                                    )
+                                                                    // null
+                                                                    }
+
+                                                                    
                                                                 </div>
 
                                                                 <div className="title">
@@ -2332,21 +2566,40 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                                 {primaryText}
                                                             </div>
                                                             <div className="ad-image" style={{ width: '350px', height: '200px' }}>
-                                                                {file.type.startsWith('image/') ? (
-                                                                    <img
-                                                                        src={editedImages[file.name] || URL.createObjectURL(file)} // Use edited image if available
-                                                                        alt="ad content"
-                                                                        style={{ width: '350px', height: '200px', objectFit: 'cover' }}
-                                                                    />
-                                                                ) : (
-                                                                    <video
+                                                                    {file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') ? (
+                                                                        <img
+                                                                            src={file?.url}
+                                                                            alt="ad content"
+                                                                            style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                        />
+                                                                    ) : file?.url?.endsWith('.mp4') ? (
+                                                                        <video
                                                                         controls
                                                                         style={{ width: '350px', height: '200px', objectFit: 'cover' }}
-                                                                    >
-                                                                        <source src={URL.createObjectURL(file)} type={file.type} />
-                                                                        Your browser does not support the video tag.
-                                                                    </video>
-                                                                )}
+                                                                        >
+                                                                            <source src={file?.url} />
+                                                                            Your browser does not support the video tag.
+                                                                        </video>
+                                                                    ) 
+                                                                    :
+                                                                    file?.type?.startsWith('image/') ? (
+                                                                        <img
+                                                                            src={editedImages[file?.name] ? editedImages[file?.name]:  file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url} // Use edited image if available
+                                                                            alt="ad content"
+                                                                            style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                        />
+                                                                    ) : 
+                                                                    (
+                                                                        <video
+                                                                            controls
+                                                                            style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                        >
+                                                                            <source src={file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url} />
+                                                                            Your browser does not support the video tag.
+                                                                        </video>
+                                                                    )
+                                                                    // null
+                                                                    }
                                                             </div>
 
                                                             <div className="ad-cta">
@@ -2455,7 +2708,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                         {isImgEditorShown && currentFile && (
                             <FabricCanvas
                                 fileId={currentFile.name} // Pass a unique identifier
-                                initialImage={URL.createObjectURL(currentFile)}
+                                initialImage={currentFile?.originFileObj ? URL.createObjectURL(currentFile.originFileObj) : currentFile?.url}
                                 closeCanvasModal={closeCanvasModal}
                                 onSaveEditedImage={handleSaveEditedImage}
                             />
