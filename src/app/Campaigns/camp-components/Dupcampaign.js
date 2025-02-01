@@ -1376,7 +1376,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                     Special_categories: values.Special_categories,
                     Bid_strategy: values.Bid_strategy,
                     Daily_amount: parseFloat(campaignLevelDailyBudget) * 100,
-                    Status: values.Status,
+                    Status: "PAUSED",
                     access_token: imagehash.token,
                     createdDate: moment().tz('Asia/Kolkata').format('YYYY-MM-DD')
                 },
