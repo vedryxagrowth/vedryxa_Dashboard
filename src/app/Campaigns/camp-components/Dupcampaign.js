@@ -484,7 +484,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
     const [pageid, setpageid] = useState(null)
     const { data: session } = useSession();
     const [DuplicatedampaignData, setDuplicatedampaignData] = useState(null);
-    console.log(DuplicatedampaignData, "DuplicatedampaignData in clone")
+    // console.log(DuplicatedampaignData, "DuplicatedampaignData in clone")
     const [defaultURlBuilder, setDefaultURLBuilder] = useState("");
     var token = localStorage.getItem("token")
     const [showBidAmount, setShowBidAmount] = useState(false);
@@ -558,12 +558,44 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
     }
 
     const onChangeCampaignLevelDailyBudget = (event) => {
-        setCampaignLevelDailyBudget(parseFloat(event.target.value));
-        console.log(event.target.value);
-    }
+        const value = event.target.value;
+    
+        // Allow empty input and prevent NaN issues
+        if (value === "" || value === ".") {
+            setCampaignLevelDailyBudget(value); // Allow typing "."
+            return;
+        }
+    
+        // Convert to float and update state
+        const floatValue = parseFloat(value);
+        if (!isNaN(floatValue)) {
+            setCampaignLevelDailyBudget(floatValue);
+        }
+        
+        form.setFieldsValue({ Daily_amount: floatValue }); // Update form state
+    
+        // console.log("Updated Value:", floatValue);
+    };
 
     const onChangeAdsetLevelDailyBudget = (event) => {
-        setAdsetLevelDailyBudget(parseFloat(event.target.value));
+        const value = event.target.value;
+    
+        // Allow empty input and prevent NaN issues
+        if (value === "" || value === ".") {
+            setAdsetLevelDailyBudget(value); // Allow typing "."
+            return;
+        }
+    
+        // Convert to float and update state
+        const floatValue = parseFloat(value);
+        if (!isNaN(floatValue)) {
+            setAdsetLevelDailyBudget(floatValue);
+        }
+        
+        form.setFieldsValue({ DailyAdd_amount: floatValue }); // Update form state
+    
+        // console.log("Updated Value:", floatValue);
+        // setAdsetLevelDailyBudget(parseFloat(event.target.value));
     }
 
 
@@ -665,7 +697,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                 MediaContent: (DuplicatedampaignData?.addlevel?.map((file, index)=>{
                     return({
                         uid: `-${index+1}`,
-                        name: `default_image${index+1}.jpg`,
+                        name: file?.filename,
                         status: 'done',
                         url: file?.filename,
                     })
@@ -896,222 +928,224 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
         const token = imagehash.token;
         const account = imagehash.accountNumber;
 
-        const uploadPromises = selectedFiles.map(async (file) => {
-            try {
-                // const formData = new FormData();
-                // const fileId = file.name;
-                // const editedImage = editedImages[fileId];
-
-                // // Use edited image if available, otherwise original file
-                // const uploadFile = editedImage ? await fetch(editedImage).then(res => res.blob()) : file;
-
-                // // Log the MIME type of the file
-                // console.log(file);
-                // console.log(formData);
-                const fileType = file.type;
-                // console.log("File type:", fileType);
-                // console.log(uploadFile, "upLoad");
-                // // formData.append("file", uploadFile, `blob/${file.name}`);
-                // console.log(formData);
-                // console.log(file.name);
-
-                if (!fileType.startsWith("image/") && !fileType.startsWith("video/") ) {
-                    onError("Unsupported file type");
-                    return;
-                }
-
-                // formData.append("file", uploadFile, `blob/${file.name}`);
-                
-
-                if(file?.url){
-                    if(file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith('.mp4')){
-                        console.log("hi DFPK");
-                        const formData = new FormData();
-                        const response = await fetch(`https://prodapis.adsgoat.in/s3?s3Url=${file.url}`, {
-                            method: 'GET',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                Authorization: localStorage.getItem("token"),
-                            },
-                        });
-                        const uploadFile = await response.blob(); // Convert the fetched file to a Blob
-
-                        // Check if the response is a valid Blob
-                        if (!(uploadFile instanceof Blob)) {
-                            console.error("The fetched file is not a Blob:", uploadFile);
-                            return; // Exit if the response is not a Blob
-                        }
-
-                        // Append the Blob to FormData
-                        formData.append("file", uploadFile, file.name);
-                        console.log(formData);
-                        let fbResponse;
-                        if(file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg')){
-                            formData.append('file', uploadFile, file.name);  // Append the file Blob and its name
-                            formData.append('access_token', token); 
-                            const fileName = file.name.split('/').pop();
-
-                            fbResponse = await axios.post(`https://graph.facebook.com/v20.0/act_${account}/adimages`, formData, {
-                                headers: { 'Content-Type': 'multipart/form-data' }
+        const uploadFilesSequentially = async (selectedFiles) => {
+            const mediaHashArray = [];
+        
+            for (const file of selectedFiles) {
+                try {
+                    const fileType = file.type;
+                    if (!fileType.startsWith("image/") && !fileType.startsWith("video/")) {
+                        onError("Unsupported file type");
+                        continue;
+                    }
+        
+                    if (file?.url) {
+                        if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith('.mp4')) {
+                            console.log("hi DFPK");
+                            const formData = new FormData();
+                            const response = await fetch(`https://prodapis.adsgoat.in/s3?s3Url=${file.url}`, {
+                                method: 'GET',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    Authorization: localStorage.getItem("token"),
+                                },
                             });
-
-                            if ( fbResponse.status === 200) {
-                                onSuccess("ok", response);
-                                return {
-                                    filename: file?.url,
-                                    imag_hash: fbResponse.data?.images?.[fileName]?.hash,
-                                };
-                            } 
-                            else {
-                                onError("error", response);
-                                throw new Error("Image upload failed");
+        
+                            const uploadFile = await response.blob();
+                            if (!(uploadFile instanceof Blob)) {
+                                console.error("The fetched file is not a Blob:", uploadFile);
+                                continue;
+                            }
+        
+                            formData.append("file", uploadFile, file.name);
+                            console.log(formData);
+        
+                            let fbResponse;
+                            if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg')) {
+                                formData.append('file', uploadFile, file.name);
+                                formData.append('access_token', token);
+                                const fileName = file.name.split('/').pop();
+        
+                                fbResponse = await axios.post(
+                                    `https://graph.facebook.com/v20.0/act_${account}/adimages`,
+                                    formData,
+                                    { headers: { 'Content-Type': 'multipart/form-data' } }
+                                );
+        
+                                if (fbResponse.status === 200) {
+                                    onSuccess("ok", response);
+                                    mediaHashArray.push({
+                                        filename: file?.url,
+                                        imag_hash: fbResponse.data?.images?.[fileName]?.hash,
+                                    });
+                                } else {
+                                    onError("error", response);
+                                    console.error("Image upload failed");
+                                }
+                            } else if (file?.url?.endsWith('.mp4')) {
+                                formData.append('access_token', token);
+                                fbResponse = await axios.post(
+                                    `https://graph.facebook.com/v20.0/act_${account}/advideos`,
+                                    formData,
+                                    { headers: { 'Content-Type': 'multipart/form-data' } }
+                                );
+        
+                                if (fbResponse.status === 200) {
+                                    const videoid = fbResponse?.data?.id;
+                                    await new Promise(resolve => setTimeout(resolve, 10000));
+        
+                                    const thumbnailResponse = await axios.get(
+                                        `https://graph.facebook.com/v20.0/${videoid}`,
+                                        {
+                                            params: {
+                                                access_token: token,
+                                                fields: 'thumbnails',
+                                                is_preferred: true
+                                            }
+                                        }
+                                    );
+        
+                                    const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
+                                    const uri = preferredThumbnail ? preferredThumbnail.uri : "";
+                                    console.log(videoid);
+                                    console.log(uri);
+        
+                                    onSuccess("ok", fbResponse);
+                                    mediaHashArray.push({
+                                        filename: file?.url,
+                                        videoid: videoid,
+                                        thambnailurl: uri,
+                                    });
+                                } else {
+                                    onError("error", fbResponse);
+                                    console.error("Video upload to Facebook failed");
+                                }
                             }
                         }
-                        else if(file?.url?.endsWith('.mp4')){  // Append the file Blob and its name
-                            formData.append('access_token', token); 
-                            fbResponse = await axios.post(`https://graph.facebook.com/v20.0/act_${account}/advideos`, formData, {
-                                headers: { 'Content-Type': 'multipart/form-data' }
-                            });
-
-                            if (fbResponse.status === 200) {
-                                const videoid = fbResponse?.data?.id;
-                                await new Promise(resolve => setTimeout(resolve, 10000));
-
-                                const thumbnailResponse = await axios.get(`https://graph.facebook.com/v20.0/${videoid}`, {
-                                    params: {
-                                        access_token: token,
-                                        fields: 'thumbnails',
-                                        is_preferred: true
-                                    }
-                                });
-
-                                const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
-                                const uri = preferredThumbnail ? preferredThumbnail.uri : "";
-                                console.log(videoid);
-                                console.log(uri);
-
-                                onSuccess("ok", fbResponse);
-
-                                return {
-                                    filename: response.data.imageUrl,
-                                    videoid: videoid,
-                                    thambnailurl: uri,
-                                };
+                    } else {
+                        if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
+                            const formData = new FormData();
+                            const fileId = file.name;
+                            const editedImage = editedImages[fileId];
+                            const uploadFile = editedImage ? await fetch(editedImage).then(res => res.blob()) : null;
+        
+                            console.log(file.originFileObj.name);
+        
+                            if (uploadFile) {
+                                formData.append("file", uploadFile, `blob/${file.name}`);
                             } else {
-                                onError("error", fbResponse);
-                                throw new Error("Video upload to Facebook failed");
+                                formData.append("file", file.originFileObj, `blob/${file.originFileObj.name}`);
                             }
-                        
+        
+                            console.log(formData);
+                            let response, fbResponse;
+        
+                            if (file.type.startsWith('image/')) {
+                                response = await axios.post(
+                                    'https://www.testapi.adsgoat.in/upload',
+                                    formData,
+                                    {
+                                        headers: {
+                                            'Authorization': localStorage.getItem("token"),
+                                            "Content-Type": "multipart/form-data"
+                                        },
+                                    }
+                                );
+        
+                                if (!response.data.imageUrl) {
+                                    onError("Error: Image URL not returned from custom API");
+                                    console.error("Image upload to custom API failed, imageUrl missing");
+                                    continue;
+                                }
+        
+                                console.log("Custom API response imageUrl:", response);
+                                formData.append('access_token', token);
+        
+                                fbResponse = await axios.post(
+                                    `https://graph.facebook.com/v20.0/act_${account}/adimages`,
+                                    formData,
+                                    { headers: { 'Content-Type': 'multipart/form-data' } }
+                                );
+        
+                                if (response.status === 200 && fbResponse.status === 200) {
+                                    onSuccess("ok", response);
+                                    mediaHashArray.push({
+                                        filename: response.data.imageUrl,
+                                        imag_hash: fbResponse.data?.images?.[fileId]?.hash,
+                                    });
+                                } else {
+                                    onError("error", response);
+                                    console.error("Image upload failed");
+                                }
+                            } else if (file.type.startsWith('video/')) {
+                                response = await axios.post(
+                                    'https://www.testapi.adsgoat.in/upload',
+                                    formData,
+                                    {
+                                        headers: {
+                                            'Authorization': localStorage.getItem("token"),
+                                            "Content-Type": "multipart/form-data"
+                                        },
+                                    }
+                                );
+        
+                                if (response.status !== 200) {
+                                    onError("error", response);
+                                    console.error("Video upload to custom API failed");
+                                    continue;
+                                }
+        
+                                formData.append('access_token', token);
+        
+                                fbResponse = await axios.post(
+                                    `https://graph.facebook.com/v20.0/act_${account}/advideos`,
+                                    formData,
+                                    { headers: { 'Content-Type': 'multipart/form-data' } }
+                                );
+        
+                                if (fbResponse.status === 200) {
+                                    const videoid = fbResponse?.data?.id;
+                                    await new Promise(resolve => setTimeout(resolve, 10000));
+        
+                                    const thumbnailResponse = await axios.get(
+                                        `https://graph.facebook.com/v20.0/${videoid}`,
+                                        {
+                                            params: {
+                                                access_token: token,
+                                                fields: 'thumbnails',
+                                                is_preferred: true
+                                            }
+                                        }
+                                    );
+        
+                                    const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
+                                    const uri = preferredThumbnail ? preferredThumbnail.uri : "";
+        
+                                    onSuccess("ok", fbResponse);
+                                    mediaHashArray.push({
+                                        filename: response.data.imageUrl,
+                                        videoid: videoid,
+                                        thambnailurl: uri,
+                                    });
+                                } else {
+                                    onError("error", fbResponse);
+                                    console.error("Video upload to Facebook failed");
+                                }
+                            }
                         }
                     }
+                } catch (error) {
+                    console.error("Error uploading file:", error);
+                    onError("error", error);
                 }
-                else{
-
-                    if(file.type.startsWith('image/') || file.type.startsWith('video/')){
-                        const formData = new FormData();
-                        const fileId = file.name;
-                        const editedImage = editedImages[fileId];
-                        const uploadFile = editedImage ? await fetch(editedImage).then(res => res.blob()) : null;
-
-                        console.log(file.originFileObj.name);
-                        
-                        if(uploadFile){
-                            formData.append("file", uploadFile, `blob/${file.name}`);
-                        }else{
-                            formData.append("file", file.originFileObj, `blob/${file.originFileObj.name}`);
-                        }
-                        
-                        console.log(formData);
-                        let response, fbResponse;
-                        
-                        if (file.type.startsWith('image/')) {
-                            response = await axios.post('https://www.testapi.adsgoat.in/upload', formData, {
-                                headers: { 'Authorization': localStorage.getItem("token"), "Content-Type": "multipart/form-data" },
-                            });
-                            if (!response.data.imageUrl) {
-                                onError("Error: Image URL not returned from custom API");
-                                throw new Error("Image upload to custom API failed, imageUrl missing");
-                            }
-
-                            console.log("Custom API response imageUrl:", response);
-
-                            // formData.append('file', file);
-                            formData.append('access_token', token);
-
-                            fbResponse = await axios.post(`https://graph.facebook.com/v20.0/act_${account}/adimages`, formData, {
-                                headers: { 'Content-Type': 'multipart/form-data' }
-                            });
-
-                            if (response.status === 200 && fbResponse.status === 200) {
-                                
-                                onSuccess("ok", response);
-                                
-                                return {
-                                    filename: response.data.imageUrl,
-                                    imag_hash: fbResponse.data?.images?.[fileName]?.hash,
-                                };
-                            } else {
-                                onError("error", response);
-                                throw new Error("Image upload failed");
-                            }
-                        } else if (file.type.startsWith('video/')) {
-                            response = await axios.post('https://www.testapi.adsgoat.in/upload', formData, {
-                                headers: { 'Authorization': localStorage.getItem("token"), "Content-Type": "multipart/form-data" },
-                            });
-
-                            if (response.status !== 200) {
-                                onError("error", response);
-                                throw new Error("Video upload to custom API failed");
-                            }
-
-                            formData.append('access_token', token);
-
-                            fbResponse = await axios.post(`https://graph.facebook.com/v20.0/act_${account}/advideos`, formData, {
-                                headers: { 'Content-Type': 'multipart/form-data' }
-                            });
-
-                            if (fbResponse.status === 200) {
-                                const videoid = fbResponse?.data?.id;
-                                await new Promise(resolve => setTimeout(resolve, 10000));
-
-                                const thumbnailResponse = await axios.get(`https://graph.facebook.com/v20.0/${videoid}`, {
-                                    params: {
-                                        access_token: token,
-                                        fields: 'thumbnails',
-                                        is_preferred: true
-                                    }
-                                });
-
-                                const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
-                                const uri = preferredThumbnail ? preferredThumbnail.uri : "";
-                                
-
-                                onSuccess("ok", fbResponse);
-
-                                return {
-                                    filename: response.data.imageUrl,
-                                    videoid: videoid,
-                                    thambnailurl: uri,
-                                };
-                            } else {
-                                onError("error", fbResponse);
-                                throw new Error("Video upload to Facebook failed");
-                            }
-                        }
-                    }
-                }
-
-
-                
-            } catch (error) {
-                console.error("Error uploading file:", error);
-                onError("error", error);
-                throw error;
             }
-        });
+        
+            console.log("All media files uploaded successfully:", mediaHashArray);
+            return mediaHashArray;
+        };
 
         try {
-            const mediaHashArray = await Promise.all(uploadPromises);
+            const mediaHashArray = uploadFilesSequentially(selectedFiles);
             console.log("All media files uploaded successfully. Media Hash Array:", mediaHashArray);
             return mediaHashArray;
         } catch (error) {
@@ -1249,6 +1283,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
 
             try {
                 const mediaHashArray = await customRequest(onSuccess, onError);
+                console.log(mediaHashArray, "mediaHashArray");
 
                 if (mediaHashArray.length > 0) {
                     // Create addlevel objects based on uploaded media
@@ -1284,6 +1319,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                             };
                         }
                     });
+                    console.log(addLevelData, "addLevelData");
 
                     // Proceed with posting data, including the addLevelData
                     await postData({ ...formValues, addlevel: addLevelData });
@@ -1307,37 +1343,72 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
     const handleCancel = () => {
         setIsModalVisible(false);
     };
-
-    const onFinish = () => {
-        form
-            .validateFields()
-            .then((values) => {
-                let formData = { ...values };
-
-                if (isManual) {
-                    // Only process selectedPlatforms if isManual is true
-                    const selectedPlatforms = selectedPublishers.reduce((acc, publisher) => {
-                        acc[publisher + '_positions'] = values.positions.filter(position =>
-                            positionOptions[publisher]?.map(option => option.key).includes(position)
-                        );
-                        return acc;
-                    }, {});
-
-                    formData = {
-                        publisher_platforms: values.publisher_platforms,
-                        ...selectedPlatforms,
-                        ...values
-                    };
-                }
-                console.log();
-
-                setFormValues(formData);
-                setIsModalVisible(true);
-            })
-            .catch((errorInfo) => {
-                console.log('Validation failed:', errorInfo);
-            });
+    const onFinish = async () => {
+        try {
+            // Validate fields first
+            await form.validateFields();
+    
+            // Get all form fields, even empty ones (null or undefined)
+            const allValues = form.getFieldsValue(true); 
+            let formData = { ...allValues }; // Use allValues instead of only validated values
+    
+            if (isManual) {
+                // Only process selectedPlatforms if isManual is true
+                const selectedPlatforms = selectedPublishers.reduce((acc, publisher) => {
+                    acc[publisher + '_positions'] = allValues.positions?.filter(position =>
+                        positionOptions[publisher]?.map(option => option.key).includes(position)
+                    );
+                    return acc;
+                }, {});
+    
+                formData = {
+                    publisher_platforms: allValues.publisher_platforms,
+                    ...selectedPlatforms,
+                    ...allValues
+                };
+            }
+    
+            // console.log("All Form Values:", allValues); // Logs all fields
+            console.log("Final Form Data:", formData); // Logs processed data
+    
+            setFormValues(formData);
+            setIsModalVisible(true);
+        } catch (errorInfo) {
+            console.log('Validation failed:', errorInfo);
+        }
     };
+
+    // const onFinish = () => {
+    //     form
+    //         .validateFields()
+    //         .then((values) => {
+    //             let formData = { ...values };
+
+    //             if (isManual) {
+    //                 // Only process selectedPlatforms if isManual is true
+    //                 const selectedPlatforms = selectedPublishers.reduce((acc, publisher) => {
+    //                     acc[publisher + '_positions'] = values.positions.filter(position =>
+    //                         positionOptions[publisher]?.map(option => option.key).includes(position)
+    //                     );
+    //                     return acc;
+    //                 }, {});
+
+    //                 formData = {
+    //                     publisher_platforms: values.publisher_platforms,
+    //                     ...selectedPlatforms,
+    //                     ...values
+    //                 };
+    //             }
+    //             console.log(values);
+    //             console.log(formData);
+
+    //             setFormValues(formData);
+    //             setIsModalVisible(true);
+    //         })
+    //         .catch((errorInfo) => {
+    //             console.log('Validation failed:', errorInfo);
+    //         });
+    // };
 
     // const onFinish = () => {
     //     form
@@ -1416,6 +1487,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                 },
                 addlevel: values.addlevel, // Use the addlevel array created in handleOk
             };
+
+            
             console.log(dataToSubmit);
             const response = await fetch('https://www.testapi.adsgoat.in/api/submitFormData', {
                 method: 'POST',
@@ -1491,6 +1564,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
         Daily_amount: campaignLevelDailyBudget,
         Status: DuplicatedampaignData?.camapaignlevel?.Status,
         // AdsetName: DuplicatedampaignData?.adsetlevel?.AdsetName,
+        DatePicker: currentDate,
         DailyAdd_amount: adsetLevelDailyBudget,
         optimization_goal: DuplicatedampaignData?.adsetlevel?.optimization_goal,
         billing_event: DuplicatedampaignData?.adsetlevel?.billing_event,
@@ -1545,10 +1619,12 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
         onClose(); // Call onClose handler to close the drawer
     };
 
-    console.log(selectedFiles);
+    // console.log(selectedFiles);
+    // console.log(DuplicatedampaignData);
+    // console.log(initialValues)
 
     {selectedFiles && selectedFiles.length > 0 ? (
-        selectedFiles.map((file, index) => (console.log(file?.filename, index)))): null}
+        selectedFiles.map((file, index) => (console.log(file?.name, index)))): null}
 
     return (
         <Drawer
