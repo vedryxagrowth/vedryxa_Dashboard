@@ -941,7 +941,6 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
         
                     if (file?.url) {
                         if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith('.mp4')) {
-                            console.log("hi DFPK");
                             const formData = new FormData();
                             const response = await fetch(`https://prodapis.adsgoat.in/s3?s3Url=${file.url}`, {
                                 method: 'GET',
@@ -958,7 +957,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                             }
         
                             formData.append("file", uploadFile, file.name);
-                            console.log(formData);
+                            // console.log(formData);
         
                             let fbResponse;
                             if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg')) {
@@ -1007,8 +1006,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
         
                                     const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
                                     const uri = preferredThumbnail ? preferredThumbnail.uri : "";
-                                    console.log(videoid);
-                                    console.log(uri);
+                                    // console.log(videoid);
+                                    // console.log(uri);
         
                                     onSuccess("ok", fbResponse);
                                     mediaHashArray.push({
@@ -1037,7 +1036,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                 formData.append("file", file.originFileObj, `blob/${file.originFileObj.name}`);
                             }
         
-                            console.log(formData);
+                            // console.log(formData);
                             let response, fbResponse;
         
                             if (file.type.startsWith('image/')) {
@@ -1058,7 +1057,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                     continue;
                                 }
         
-                                console.log("Custom API response imageUrl:", response);
+                                // console.log("Custom API response imageUrl:", response);
                                 formData.append('access_token', token);
         
                                 fbResponse = await axios.post(
@@ -1140,7 +1139,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                 }
             }
         
-            console.log("All media files uploaded successfully:", mediaHashArray);
+            // console.log("All media files uploaded successfully:", mediaHashArray);
             return mediaHashArray;
         };
 
@@ -1283,7 +1282,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
 
             try {
                 const mediaHashArray = await customRequest(onSuccess, onError);
-                console.log(mediaHashArray, "mediaHashArray");
+                // console.log(mediaHashArray, "mediaHashArray");
 
                 if (mediaHashArray.length > 0) {
                     // Create addlevel objects based on uploaded media
@@ -1319,7 +1318,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                             };
                         }
                     });
-                    console.log(addLevelData, "addLevelData");
+                    // console.log(addLevelData, "addLevelData");
 
                     // Proceed with posting data, including the addLevelData
                     await postData({ ...formValues, addlevel: addLevelData });
