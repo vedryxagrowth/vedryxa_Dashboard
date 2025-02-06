@@ -854,6 +854,7 @@ const Dashboard = () => {
     //   })();
 
     const transformedData = transformData(userdetails?.adAccounts);
+    console.log(transformedData, "transformedData");
     // console.log(userdetails?.adAccounts, "1");
 
 
@@ -931,6 +932,7 @@ const Dashboard = () => {
     const [submitted, setSubmitted] = useState(false);
     const [domainWiseData, setDomainWiseData] = useState([]);
     const { apiClient } = useTokenContext();
+    // const [collectionName, setCollectionName] = useState([]);
 
     // const functionalCall = (data) => {
     //     setData(data);
@@ -1034,17 +1036,32 @@ const Dashboard = () => {
         return total;
     }
 
-    function getTotalConversions(fullData) {
-        const total = fullData?.reduce((sum, item) => {
-            // Check if 'estimated_revenue' exists in the object and is a number
-            if (item.conversions) {
-                return sum + parseInt(item.conversions);
-            }
-            return sum;
-        }, 0); // Start the sum at 0
+    function getTotalConversions(fullData, collectionName) {
+        if(collectionName?.length === 1 && collectionName[0] === "Facebook_Mnet" && time === "UTC"){
+            const total = fullData?.reduce((sum, item) => {
+                // Check if 'estimated_revenue' exists in the object and is a number
+                if (item.ad_clicks) {
+                    return sum + parseInt(item.ad_clicks);
+                }
+                return sum;
+            }, 0); // Start the sum at 0
 
-        // Round the final total to 2 decimal places
-        return total;
+            // Round the final total to 2 decimal places
+            return total;
+
+        }
+        else{
+            const total = fullData?.reduce((sum, item) => {
+                // Check if 'estimated_revenue' exists in the object and is a number
+                if (item.conversions) {
+                    return sum + parseInt(item.conversions);
+                }
+                return sum;
+            }, 0); // Start the sum at 0
+
+            // Round the final total to 2 decimal places
+            return total;
+        }
     }
 
     function getAverageEstimatedCpc(fullData) {
@@ -1092,8 +1109,8 @@ const Dashboard = () => {
         return Math.round((getTotalEstimatedSpend(fullData) / getTotalConversions(fullData)) * 100) / 100;
     }
 
-    function getTotalRpc(fullData) {
-        return Math.round((getTotalEstimatedRevenue(fullData) / getTotalConversions(fullData)) * 100) / 100;
+    function getTotalRpc(fullData, collectionName) {
+        return Math.round((getTotalEstimatedRevenue(fullData) / getTotalConversions(fullData, collectionName)) * 100) / 100;
     }
 
     function getTotalCpl(fullData) {
@@ -1151,6 +1168,8 @@ const Dashboard = () => {
         // };
 
         const transformedObject = transformObjectKeys(data);
+        console.log(transformedObject);
+        const collectionName = (Object.keys(transformedObject));
         // console.log(moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A'), "end");
         // console.log(transformedObject);
         let response;
@@ -1168,16 +1187,17 @@ const Dashboard = () => {
             spend1.current = getTotalEstimatedSpend(responseData);
             profit1.current = getTotalEstimatedProfit(responseData);
             leads1.current = getTotalLeads(responseData);
-            conversions1.current = getTotalConversions(responseData);
+            conversions1.current = getTotalConversions(responseData, collectionName);
             cpc1.current = getAverageEstimatedCpc(responseData);
             ncpl1.current = getTotalNcpl(responseData);
             cpl1.current = getTotalCpl(responseData);
-            rpc1.current = getTotalRpc(responseData);
+            rpc1.current = getTotalRpc(responseData, collectionName);
             ctr1.current = getTotalCtr(responseData);
 
             setData(responseData);
         }
         functionForDetailsUpdate();
+        console.log(collectionName.length === 1 && collectionName[0] === "Facebook_Mnet" && time === "UTC")
         function groupByCampaignAndDate(data) {
             return data?.reduce((acc, obj) => {
                 const campaignKey = obj?.campaign_name;
@@ -1198,7 +1218,13 @@ const Dashboard = () => {
                         spend: obj.spend ? parseFloat(obj.spend) : 0,
                         estimated_revenue: obj?.estimated_revenue ? parseFloat(obj?.estimated_revenue) : 0,
                         fbLeads: obj.fbLeads ? parseInt(obj?.fbLeads) : 0,
-                        conversions: obj.conversions ? parseInt(obj?.conversions) : 0,
+                        conversions: collectionName.length === 1 && collectionName[0] === "Facebook_Mnet" && time === "UTC"
+                        ? obj.ad_clicks
+                            ? parseInt(obj?.ad_clicks)
+                            : 0
+                        : obj.conversions
+                            ? parseInt(obj?.conversions)
+                            : 0,
                         revenuePartner: obj?.revenuePartner,
                         mediaBuyerName: obj?.MediaBuyerName,
                         holder: obj?.Holder,
@@ -1210,7 +1236,13 @@ const Dashboard = () => {
                     entry.spend += obj?.spend !== null && obj?.spend !== undefined ? parseFloat(obj?.spend) : 0;
                     entry.estimated_revenue += obj?.estimated_revenue !== null && obj?.estimated_revenue !== undefined ? parseFloat(obj?.estimated_revenue) : 0;
                     entry.fbLeads += obj?.fbLeads !== null && obj?.fbLeads !== undefined ? parseInt(obj?.fbLeads) : 0;
-                    entry.conversions += obj?.conversions !== null && obj?.conversions !== undefined ? parseInt(obj?.conversions) : 0;
+                    entry.conversions += collectionName.length === 1 && collectionName[0] === "Facebook_Mnet" && time === "UTC"
+                    ? obj?.ad_clicks !== null && obj?.ad_clicks !== undefined
+                        ? parseInt(obj?.ad_clicks)
+                        : 0
+                    : obj?.conversions !== null && obj?.conversions !== undefined
+                        ? parseInt(obj?.conversions)
+                        : 0;
                 }
         
                 return acc;
@@ -1454,7 +1486,13 @@ const Dashboard = () => {
                         spend: obj.spend ? parseFloat(obj.spend) : 0,
                         estimated_revenue: obj.estimated_revenue ? parseFloat(obj.estimated_revenue) : 0,
                         fbLeads: obj.fbLeads ? parseInt(obj.fbLeads) : 0,
-                        conversions: obj.conversions ? parseInt(obj.conversions) : 0,
+                        conversions: collectionName.length === 1 && collectionName[0] === "Facebook_Mnet" && time === "UTC"
+                        ? obj.ad_clicks
+                            ? parseInt(obj?.ad_clicks)
+                            : 0
+                        : obj.conversions
+                            ? parseInt(obj?.conversions)
+                            : 0,
                         revenuePartner: obj.revenuePartner,
                         mediaBuyerName: obj.MediaBuyerName,
                         holder: obj.Holder,
@@ -1466,7 +1504,13 @@ const Dashboard = () => {
                     entry.spend += obj.spend !== null && obj.spend !== undefined ? parseFloat(obj.spend) : 0;
                     entry.estimated_revenue += obj.estimated_revenue !== null && obj.estimated_revenue !== undefined ? parseFloat(obj.estimated_revenue) : 0;
                     entry.fbLeads += obj.fbLeads !== null && obj.fbLeads !== undefined ? parseInt(obj.fbLeads) : 0;
-                    entry.conversions += obj.conversions !== null && obj.conversions !== undefined ? parseInt(obj.conversions) : 0;
+                    entry.conversions += collectionName.length === 1 && collectionName[0] === "Facebook_Mnet" && time === "UTC"
+                    ? obj?.ad_clicks !== null && obj?.ad_clicks !== undefined
+                        ? parseInt(obj?.ad_clicks)
+                        : 0
+                    : obj?.conversions !== null && obj?.conversions !== undefined
+                        ? parseInt(obj?.conversions)
+                        : 0;
                 }
         
                 return acc;
@@ -1928,20 +1972,57 @@ const Dashboard = () => {
 
 
     const avgRpcCpl = (params) => {
-        // Filter out NaN and Infinity values
-        const validValues = params.values.filter(value => !isNaN(value) && isFinite(value));
-        
-        // If there are no valid values, return 0
-        if (validValues.length === 0) {
-            return 0;
+        // For non-grouped rows (individual row data)
+        if (params.data !== undefined) {
+            console.log(params.data);
+            const { conversions, estimated_revenue } = params.data;
+            if (estimated_revenue !== 0) {
+                const RPC = estimated_revenue / conversions;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return Number(RPC.toFixed(2));
+            }
         }
     
-        // Calculate average
-        const sum = validValues.reduce((acc, value) => acc + value, 0);
-        const average = sum / validValues.length;
+        // For grouped rows (aggregation)
+        if (params.node?.aggData !== undefined) {
+            console.log(params.node?.aggData);
+            const { conversions, estimated_revenue } = params.node.aggData;
+            if (estimated_revenue !== 0) {
+                const RPC = estimated_revenue / conversions;
+                return Number(RPC.toFixed(2));
+            }
+        }
     
-        // Return the average rounded to two decimal places
-        return parseFloat(average);
+        return 0;
+    };
+
+    const avgCpl = (params) => {
+        // For non-grouped rows (individual row data)
+        if (params.data !== undefined) {
+            // console.log(params.data);
+            const { spend, fbLeads } = params.data;
+            if (spend !== 0) {
+                const RPC = spend / fbLeads;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return Number(RPC.toFixed(2));
+            }
+        }
+    
+        // For grouped rows (aggregation)
+        if (params.node?.aggData !== undefined) {
+            // console.log(params.node?.aggData);
+            const { spend, fbLeads } = params.node.aggData;
+            if (spend !== 0) {
+                const RPC = spend / fbLeads;
+                return Number(RPC.toFixed(2));
+            }
+        }
+    
+        return 0;
     };
 
     const autoGroupColumnDefProfit = {
@@ -2240,14 +2321,14 @@ const Dashboard = () => {
         {
             field: 'rpc',
             headerName: 'RPC',
-            aggFunc: avgRpcCpl,
-            valueFormatter: rpcCplFormatter,
+            valueGetter: avgRpcCpl,
+            // valueFormatter: rpcCplFormatter,
         },
         {
             field: 'cpl',
             headerName: 'CPL',
-            aggFunc: avgRpcCpl,
-            valueFormatter: rpcCplFormatter,
+            valueGetter: avgCpl,
+            // valueFormatter: rpcCplFormatter,
         }, 
         {
             field: 'conversions',
