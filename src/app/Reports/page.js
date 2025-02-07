@@ -2835,7 +2835,7 @@ const MyTablePage = () => {
     function groupAndCalculateProfit(data) {
         const groupedData = data.reduce((acc, item) => {
             const key = `${item.domain}-${item[`${newtime}Date`]}`;
-
+    
             if (!acc[key]) {
                 acc[key] = {
                     domain: item.domain,
@@ -2844,25 +2844,33 @@ const MyTablePage = () => {
                     spend: 0,
                     conversions: 0,
                     fbLeads: 0,
+                    adClicks: 0, // Store total ad_clicks
                 };
             }
-
-            acc[key].estimated_revenue += item.estimated_revenue;
-            acc[key].spend += parseFloat(item.spend);
-            acc[key].conversions += item.conversions || 0;  // Default to 0 if undefined
-            acc[key].fbLeads += parseInt(item.fbLeads) || 0;        // Default to 0 if undefined
-
+    
+            acc[key].estimated_revenue += item.estimated_revenue || 0;
+            acc[key].spend += parseFloat(item.spend) || 0;
+            acc[key].conversions += item.conversions || 0;
+            acc[key].fbLeads += parseInt(item.fbLeads) || 0;
+            acc[key].adClicks += item.ad_clicks || 0; // Sum ad_clicks separately
+    
             return acc;
         }, {});
-
-        return Object.values(groupedData).map(item => ({
-            ...item,
-            profit: item.estimated_revenue - item.spend,
-            margin: item.estimated_revenue > 0 ? ((item.estimated_revenue - item.spend) / item.estimated_revenue) * 100 : 0,
-            rpc: item.conversions > 0 ? (item.estimated_revenue / item.conversions) : 0, // Revenue per Conversion
-            cpl: item.fbLeads > 0 ? (item.spend / item.fbLeads) : 0,  // Cost per Lead
-        }));
+    
+        return Object.values(groupedData).map(item => {
+            const finalConversions = item.adClicks > 0 ? item.adClicks : item.conversions; // ✅ Ensure correct conversions
+    
+            return {
+                ...item,
+                conversions: finalConversions, // ✅ Set correct conversions before using in rpc
+                profit: item.estimated_revenue - item.spend,
+                margin: item.estimated_revenue > 0 ? ((item.estimated_revenue - item.spend) / item.estimated_revenue) * 100 : 0,
+                rpc: finalConversions > 0 ? (item.estimated_revenue / finalConversions) : 0, // ✅ Now uses correct conversions
+                cpl: item.fbLeads > 0 ? (item.spend / item.fbLeads) : 0,  // Cost per Lead
+            };
+        });
     }
+    
 
     function groupAndCalculateBMName(data) {
         const groupedData = data.reduce((acc, item) => {
@@ -2899,7 +2907,7 @@ const MyTablePage = () => {
     function groupAndCalculateBMNameAndAgency(data) {
         const groupedData = data.reduce((acc, item) => {
             const key = `${item.BMName}-${item.AgencyName}-${item[`${newtime}Date`]}`;
-
+    
             if (!acc[key]) {
                 acc[key] = {
                     BMName: item.BMName,
@@ -2909,25 +2917,33 @@ const MyTablePage = () => {
                     spend: 0,
                     conversions: 0,
                     fbLeads: 0,
+                    adClicks: 0, // Store total ad_clicks
                 };
             }
-
-            acc[key].estimated_revenue += item.estimated_revenue;
-            acc[key].spend += parseFloat(item.spend);
-            acc[key].conversions += item.conversions || 0;  // Default to 0 if undefined
-            acc[key].fbLeads += parseInt(item.fbLeads) || 0;        // Default to 0 if undefined
-
+    
+            acc[key].estimated_revenue += item.estimated_revenue || 0;
+            acc[key].spend += parseFloat(item.spend) || 0;
+            acc[key].conversions += item.conversions || 0;
+            acc[key].fbLeads += parseInt(item.fbLeads) || 0;
+            acc[key].adClicks += item.ad_clicks || 0; // Sum ad_clicks separately
+    
             return acc;
         }, {});
-
-        return Object.values(groupedData).map(item => ({
-            ...item,
-            profit: item.estimated_revenue - item.spend,
-            margin: item.estimated_revenue > 0 ? ((item.estimated_revenue - item.spend) / item.estimated_revenue) * 100 : 0,
-            rpc: item.conversions > 0 ? (item.estimated_revenue / item.conversions) : 0, // Revenue per Conversion
-            cpl: item.fbLeads > 0 ? (item.spend / item.fbLeads) : 0,  // Cost per Lead
-        }));
+    
+        return Object.values(groupedData).map(item => {
+            const finalConversions = item.adClicks > 0 ? item.adClicks : item.conversions; // ✅ Ensure correct conversions
+    
+            return {
+                ...item,
+                conversions: finalConversions, // ✅ Set correct conversions before using in rpc
+                profit: item.estimated_revenue - item.spend,
+                margin: item.estimated_revenue > 0 ? ((item.estimated_revenue - item.spend) / item.estimated_revenue) * 100 : 0,
+                rpc: finalConversions > 0 ? (item.estimated_revenue / finalConversions) : 0, // ✅ Now uses correct conversions
+                cpl: item.fbLeads > 0 ? (item.spend / item.fbLeads) : 0,  // Cost per Lead
+            };
+        });
     }
+    
 
 
     const functionCall1 = async () => {
@@ -2938,11 +2954,12 @@ const MyTablePage = () => {
         // console.log(newRevenuePratner);
         const collectionName = newRevenuePratner === "FB_DomainActive" ? "Facebook_DActive_Names" : newtworkCollections[newRevenuePratner];
         const fetchData = await apiClient.get(`/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${collectionName}`);
-        const mainData = fetchData.data;
+        const mainData1 = fetchData.data;
+        const mainData =  mainData1.filter(obj => !("ad_clicks" in obj));
         let campaignComments = [];
 
         if (fetchData.status === 200 && mainData.length > 0 && newRevenuePratner === "FB_Mnet") {
-            const groupAndCalculateProfit1 = groupAndCalculateProfit(mainData);
+            const groupAndCalculateProfit1 = groupAndCalculateProfit(mainData1);
 
             setDomainData(groupAndCalculateProfit1);
 
@@ -3035,18 +3052,21 @@ const MyTablePage = () => {
                     estimated_revenue: parseFloat(groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.estimated_revenue), 0).toFixed(2)),
                     profit: parseFloat(groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0).toFixed(2)),
                     margin: parseFloat((groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr.estimated_revenue), 0) * 100).toFixed(2)),
-                    rpc: parseFloat((groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / groupAndCalculateProfit1?.length).toFixed(2)),
-                    cpl: parseFloat((groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / groupAndCalculateProfit1?.length).toFixed(2)),
+                    rpc: parseFloat((groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0)).toFixed(2)),
+                    cpl: parseFloat((groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0)).toFixed(2)),
                     conversions: parseFloat(groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
                     // clicks: parseFloat(groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.clicks), 0).toFixed(2)),
                     // impressions: parseFloat(groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
                 }
             ]);
-            // console.log(groupAndCalculateProfit1);
+        }
+        else{
+            setDomainData([]);
+            setDomainFixedFooter([]);
         }
 
         if (fetchData.status === 200 && mainData.length > 0) {
-            const groupAndCalculateBMName1 = groupAndCalculateBMNameAndAgency(mainData);
+            const groupAndCalculateBMName1 = groupAndCalculateBMNameAndAgency(mainData1);
             setBMNameData(groupAndCalculateBMName1);
             setBMNameColumnDefs([
                 {
@@ -3156,6 +3176,10 @@ const MyTablePage = () => {
                     // impressions: parseFloat(groupAndCalculateBMName1?.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
                 }
             ]);
+        }
+        else{
+            setBMNameData([]);
+            setBMNameFixedFooter([]);
         }
         // if (fetchData.status === 200 && mainData.length > 0) {
         //     try {
@@ -7761,12 +7785,12 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                 {startDate !== endDate ? <Result
                                     className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                     icon={<SmileOutlined />}
-                                    title={`No LiveData for ${newaccount} from ${startDate} to ${endDate}`}
+                                    title={`No LiveData for ${newaccount} from ${newStartDate} to ${newendDate}`}
                                 // extra={<Button type="primary">Next</Button>}
                                 /> : <Result
                                     className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                     icon={<SmileOutlined />}
-                                    title={`No LiveData for ${newaccount} to ${startDate}`}
+                                    title={`No LiveData for ${newaccount} to ${newStartDate}`}
                                 // extra={<Button type="primary">Next</Button>}
                                 />}
                             </div>}
@@ -7931,12 +7955,12 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                 {startDate !== endDate ? <Result
                                     className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                     icon={<SmileOutlined />}
-                                    title={`No DailyData for ${newaccount} from ${startDate} to ${endDate}`}
+                                    title={`No DailyData for ${newaccount} from ${newStartDate} to ${newendDate}`}
                                 // extra={<Button type="primary">Next</Button>}
                                 /> : <Result
                                     className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                     icon={<SmileOutlined />}
-                                    title={`No DailyData for ${newaccount} to ${startDate}`}
+                                    title={`No DailyData for ${newaccount} to ${newStartDate}`}
                                 // extra={<Button type="primary">Next</Button>}
                                 />}
                             </div>}
@@ -8099,11 +8123,11 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                         {startDate !== endDate ? <Result
                                             className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                             icon={<SmileOutlined />}
-                                            title={`No CampaignData for ${newaccount} from ${startDate} to ${endDate}`}
+                                            title={`No CampaignData for ${newaccount} from ${newStartDate} to ${newendDate}`}
                                         /> : <Result
                                             className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                             icon={<SmileOutlined />}
-                                            title={`No CampaignData for ${newaccount} to ${startDate}`}
+                                            title={`No CampaignData for ${newaccount} to ${newStartDate}`}
                                         />}
                                     </div>
                                 </div>
@@ -8229,12 +8253,12 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                 {startDate !== endDate ? <Result
                                     className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                     icon={<SmileOutlined />}
-                                    title={`No BMName Data for ${newaccount} from ${startDate} to ${endDate}`}
+                                    title={`No Agency and BMName Data for ${newaccount} from ${newStartDate} to ${newendDate}`}
                                 // extra={<Button type="primary">Next</Button>}
                                 /> : <Result
                                     className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                     icon={<SmileOutlined />}
-                                    title={`No BMName Data for ${newaccount} to ${startDate}`}
+                                    title={`No Agency and BMName Data for ${newaccount} to ${newStartDate}`}
                                 // extra={<Button type="primary">Next</Button>}
                                 />}
                             </div>}
@@ -8375,12 +8399,12 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                     {startDate !== endDate ? <Result
                                         className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                         icon={<SmileOutlined />}
-                                        title={`No KeywordData for ${newaccount} from ${startDate} to ${endDate}`}
+                                        title={`No KeywordData for ${newaccount} from ${newStartDate} to ${newendDate}`}
                                     // extra={<Button type="primary">Next</Button>}
                                     /> : <Result
                                         className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                         icon={<SmileOutlined />}
-                                        title={`No KeywordData for ${newaccount} to ${startDate}`}
+                                        title={`No KeywordData for ${newaccount} to ${newStartDate}`}
                                     // extra={<Button type="primary">Next</Button>}
                                     />}
                                 </div>}
@@ -8473,12 +8497,12 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                     {startDate !== endDate ? <Result
                                         className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                         icon={<SmileOutlined />}
-                                        title={`No KeywordData for ${newaccount} from ${startDate} to ${endDate}`}
+                                        title={`No KeywordData for ${newaccount} from ${newStartDate} to ${newendDate}`}
                                     // extra={<Button type="primary">Next</Button>}
                                     /> : <Result
                                         className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                         icon={<SmileOutlined />}
-                                        title={`No KeywordData for ${newaccount} to ${startDate}`}
+                                        title={`No KeywordData for ${newaccount} to ${newStartDate}`}
                                     // extra={<Button type="primary">Next</Button>}
                                     />}
                                 </div>}
@@ -8573,13 +8597,13 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                             <Result
                                                 className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                                 icon={<SmileOutlined />}
-                                                title={`No DomainData from ${startDate} to ${endDate}`}
+                                                title={`No DomainData from ${newStartDate} to ${newendDate}`}
                                             />
                                         ) : (
                                             <Result
                                                 className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                                 icon={<SmileOutlined />}
-                                                title={`No DomainData for ${startDate}`}
+                                                title={`No DomainData for ${newStartDate}`}
                                             />
                                         )}
                                     </div>
@@ -8643,11 +8667,11 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                                         profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
                                                         margin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.estimated_revenue), 0) * 100).toFixed(2)),
                                                         rpc: parseFloat(
-                                                            (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc || 0), 0) / filteredData.length || 0).toFixed(2)
+                                                            (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc || 0), 0) || 0).toFixed(2)
                                                         ),
-                                                        // cpl: parseFloat(
-                                                        //     (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl || 0), 0) / filteredData.length || 0).toFixed(2)
-                                                        // ),
+                                                        cpl: parseFloat(
+                                                            (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl || 0), 0) || 0).toFixed(2)
+                                                        ),
                                                         // impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0).toFixed(2)),
                                                     },
                                                 ];
@@ -8661,12 +8685,12 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                     {startDate !== endDate ? <Result
                                         className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                         icon={<SmileOutlined />}
-                                        title={`No DomainData for ${newaccount} from ${startDate} to ${endDate}`}
+                                        title={`No DomainData for ${newaccount} from ${newStartDate} to ${newendDate}`}
                                     // extra={<Button type="primary">Next</Button>}
                                     /> : <Result
                                         className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                         icon={<SmileOutlined />}
-                                        title={`No DomainData for ${newaccount} to ${startDate}`}
+                                        title={`No DomainData for ${newaccount} to ${newStartDate}`}
                                     // extra={<Button type="primary">Next</Button>}
                                     />}
                                 </div>}
@@ -8822,12 +8846,12 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                     {startDate !== endDate ? <Result
                                         className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                         icon={<SmileOutlined />}
-                                        title={`No Names Live Data for ${newaccount} from ${startDate} to ${endDate}`}
+                                        title={`No Names Live Data for ${newaccount} from ${newStartDate} to ${newendDate}`}
                                     // extra={<Button type="primary">Next</Button>}
                                     /> : <Result
                                         className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                         icon={<SmileOutlined />}
-                                        title={`No Names Live Data for ${newaccount} to ${startDate}`}
+                                        title={`No Names Live Data for ${newaccount} to ${newStartDate}`}
                                     // extra={<Button type="primary">Next</Button>}
                                     />}
                                 </div>}
@@ -8976,12 +9000,12 @@ const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
                                     {startDate !== endDate ? <Result
                                         className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                         icon={<SmileOutlined />}
-                                        title={`No DailyData for ${newaccount} from ${startDate} to ${endDate}`}
+                                        title={`No DailyData for ${newaccount} from ${newStartDate} to ${newendDate}`}
                                     // extra={<Button type="primary">Next</Button>}
                                     /> : <Result
                                         className={theme === 'dark' ? 'dark-result' : 'light-result'}
                                         icon={<SmileOutlined />}
-                                        title={`No DailyData for ${newaccount} to ${startDate}`}
+                                        title={`No DailyData for ${newaccount} to ${newStartDate}`}
                                     // extra={<Button type="primary">Next</Button>}
                                     />}
                                 </div>}

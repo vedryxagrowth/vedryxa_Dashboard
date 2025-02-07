@@ -938,6 +938,19 @@ const Dashboard = () => {
     //     setData(data);
     // }
 
+    const [searchValue, setSearchValue] = useState('');
+
+    const handleSearchChange = (value) => {
+        setSearchValue(value.toLowerCase());  // Store lowercase search term
+    };
+
+    // const handleSelectAllChange = (checked, category) => {
+    //     if (checked) {
+    //         setSearchValue(""); // Reset search value when network is selected
+    //     }
+    //     // Your existing logic for handling "Select All"
+    // };
+
     const handleChangeDates = (dates) => {
         setSelectedDates(dates || []); // Save selected dates in state
         setIsPickerOpen(true); // Ensure the RangePicker stays open after date selection
@@ -1105,8 +1118,8 @@ const Dashboard = () => {
         return total;
     }
 
-    function getTotalNcpl(fullData) {
-        return Math.round((getTotalEstimatedSpend(fullData) / getTotalConversions(fullData)) * 100) / 100;
+    function getTotalNcpl(fullData, collectionName) {
+        return Math.round((getTotalEstimatedSpend(fullData) / getTotalConversions(fullData, collectionName)) * 100) / 100;
     }
 
     function getTotalRpc(fullData, collectionName) {
@@ -1189,7 +1202,7 @@ const Dashboard = () => {
             leads1.current = getTotalLeads(responseData);
             conversions1.current = getTotalConversions(responseData, collectionName);
             cpc1.current = getAverageEstimatedCpc(responseData);
-            ncpl1.current = getTotalNcpl(responseData);
+            ncpl1.current = getTotalNcpl(responseData, collectionName);
             cpl1.current = getTotalCpl(responseData);
             rpc1.current = getTotalRpc(responseData, collectionName);
             ctr1.current = getTotalCtr(responseData);
@@ -1712,13 +1725,15 @@ const Dashboard = () => {
         console.log(domainResult, "domain Result");
 
         const sortedData = groupedData.sort((a, b) => {
-            if (a.accountNumber < b.accountNumber) {
-              return -1;
-            }
-            if (a.accountNumber > b.accountNumber) {
-              return 1;
-            }
-            return 0;  // If accountNumber is the same, maintain original order
+            // Compare accountNumber first
+            if (a.accountNumber < b.accountNumber) return -1;
+            if (a.accountNumber > b.accountNumber) return 1;
+        
+            // If accountNumber is the same, compare specifiedDate
+            if (a.specifiedDate < b.specifiedDate) return -1;
+            if (a.specifiedDate > b.specifiedDate) return 1;
+        
+            return 0; // Maintain original order if both values are the same
         });
         console.log(sortedData);
 
@@ -1859,6 +1874,9 @@ const Dashboard = () => {
     };
 
     const handleSelectAllChange = (isChecked, category) => {
+        if (isChecked) {
+            setSearchValue(""); // Reset search value when network is selected
+        }
         setSkeletonLoading(true);
         const newSelectedValues = isChecked ? transformedData[category] : [];
         setSelectedItems((prevSelected) => ({
@@ -1871,11 +1889,14 @@ const Dashboard = () => {
     // Render checkboxes for categories dynamically based on the first Select values
     const renderInnerSelects = (theme) => {
         return firstSelectValues.map((category) => {
-            // Ensure transformedData[category] is available before proceeding
-            console.log(transformedData[category]);
             const allSelected =
                 transformedData[category]?.length === selectedItems[category]?.length;
-    
+
+            // Filter transformedData based on search query
+            const filteredData = transformedData[category]?.filter(item =>
+                item.accountNumber?.toString().toLowerCase().includes(searchValue)
+            ) || [];
+
             return (
                 <div key={category}>
                     <div
@@ -1896,35 +1917,32 @@ const Dashboard = () => {
                             />
                         </Divider>
                     </div>
-    
-                    <Checkbox.Group
-                        options={
-                            transformedData[category]?.map((item) => {
-                                const accountNumber = item?.accountNumber ? item.accountNumber.toString() : 'Unknown';
-                                return {
-                                    label: (
-                                        <div style={{
-                                            display: 'flex',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center',
-                                            padding: '5px 10px',
-                                            borderBottom: '1px solid #ddd',  // Optional: to separate each item visually
-                                        }}>
-                                            <div style={{display:'flex', flexDirection:'column'}}>
-                                                <span style={{ fontWeight: '600' }}>{accountNumber}</span>
-                                                <span>{item.accountName || ''}</span>
-                                            </div>
-                                        </div>
-                                    ),
-                                    value: accountNumber,  // Ensure the value is the accountNumber as a string
-                                };
-                            }) || []  // Fallback to an empty array if transformedData[category] is undefined
-                        }
-                        value={selectedItems[category]?.map(item => item.accountNumber?.toString()) || []}
-                        onChange={(checkedValues) => handleGroupChange(checkedValues, category)}  // Handle the change in selection
-                        className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}  // Apply class based on theme
-                    />
 
+                    <Checkbox.Group
+                        options={filteredData.map((item) => {
+                            const accountNumber = item?.accountNumber ? item.accountNumber.toString() : 'Unknown';
+                            return {
+                                label: (
+                                    <div style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        padding: '5px 10px',
+                                        borderBottom: '1px solid #ddd',
+                                    }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                            <span style={{ fontWeight: '600' }}>{accountNumber}</span>
+                                            <span>{item.accountName || ''}</span>
+                                        </div>
+                                    </div>
+                                ),
+                                value: accountNumber,
+                            };
+                        })}
+                        value={selectedItems[category]?.map(item => item.accountNumber?.toString()) || []}
+                        onChange={(checkedValues) => handleGroupChange(checkedValues, category)}
+                        className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}
+                    />
                 </div>
             );
         });
@@ -2893,22 +2911,22 @@ const Dashboard = () => {
                             </Col>
     
                             <Col span={6}>
-                                <Select
-                                    mode="multiple"
-                                    style={{ 
-                                        width: '100%',
-                                    }}
-                                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                    placeholder="Select items"
-                                    dropdownClassName={theme === 'dark' && 'custom-dropdown'}
-                                    value={[]} // This should be updated to reflect selectedItems based on the selected categories
-                                    dropdownRender={() => (
-                                        <div style={{ maxHeight: '300px', overflowY: 'auto', padding: '8px' }}>
-                                            {renderInnerSelects(theme)}
-                                        </div>
-                                    )}
-                                />
-                            </Col>
+            <Select
+                mode="multiple"
+                showSearch
+                onSearch={handleSearchChange}  // Update searchValue dynamically
+                style={{ width: '100%' }}
+                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                placeholder="Select items"
+                dropdownClassName={theme === 'dark' && 'custom-dropdown'}
+                value={[]} // This should be updated to reflect selectedItems based on the selected categories
+                dropdownRender={() => (
+                    <div style={{ maxHeight: '300px', overflowY: 'auto', padding: '8px' }}>
+                        {renderInnerSelects(theme)}
+                    </div>
+                )}
+            />
+        </Col>
     
                             <Col span={3}>
                                 <Select

@@ -104,7 +104,7 @@ const Topbar = ({onComplete}) => {
   const isNotificationsFetched = useRef(false);
 
   // Fetch notifications function
-  const fetchNotificationsWithRetry = async (retries = 3, delay = 5000) => {
+  const fetchNotificationsWithRetry = async (retries = 3, delay = 1500) => {
     const makeRequest = async (retryAttempt) => {
       try {
         // console.log(tokenForAuth);
