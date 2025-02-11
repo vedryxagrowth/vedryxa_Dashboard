@@ -340,6 +340,10 @@ const Appbar = ({ children, usersDataForLogin }) => {
                 
               
                 <LayoutWrapper usersDataForLogin={usersDataForLogin} onComplete={handleMoveForward}/>
+                {!moveForward &&
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                    <Spin size="large" />
+                </div>}
                 
                 {moveForward &&
                   <div style={{ border: "", margin: "0px 10px", borderRadius: "", height: "86vh", overflow: "auto", backgroundColor: darkMode ? '#333' : '#f0f0f0', scrollbarWidth: "thin " }}>

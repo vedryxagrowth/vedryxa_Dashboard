@@ -943,3 +943,7 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
   background-color: #f9f9f9;
   font-weight: bold;
 }
+
+.hide-menu .ag-header-cell-menu-button {
+  display: none !important;
+}

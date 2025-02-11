@@ -433,9 +433,9 @@ export default function AdsetNameAndAccount({params}){
       setDomainFixedFooter([
           {
               adsetName: 'Total',
-              spend: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0),
-              revenue: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0),
-              profit: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0),
+              spend: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend || 0), 0).toFixed(2),
+              revenue: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue || 0), 0).toFixed(2),
+              profit: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit || 0), 0).toFixed(2),
               margin: `${(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)}%`,
               rpc: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / filteredData?.length,
               cpl: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / filteredData?.length,
@@ -458,7 +458,7 @@ export default function AdsetNameAndAccount({params}){
       
     const debouncedFunctionCall = debounce(async () => {
         await getHistoryData();
-    }, 1500);
+    }, 100);
 
     useEffect(()=>{
         if(userdetails?.adAccounts){
@@ -572,98 +572,185 @@ export default function AdsetNameAndAccount({params}){
     //     };
 
     const columnDefs = [
-          // {headerName:'CampaignName', field:'campaignName',
-          //     // rowGroup: true,
-          //     // filter: true,
-          //     // hide: true,
-          //     // resizable: true,
-          //     // enableRowGroup: true,
-          //     // groupDisplayType: 'group',
-          //     width: 450,
-          // },
-          { headerName: 'AdsetName', field: 'adsetName',
-          // resizeble: true,
-          // sortable: true,
-          width: 425,
-          // hide: true,
-          // // resizable:false,
-          // rowGroup: true,
-          // filter: true,
-          // pinned: 'left',
-          // enableRowGroup: true,
-          // autoHeight: true, 
-          },
-          { headerName: 'Date', field: 'date', minWidth: 120, sort: 'asc',
-          comparator: (valueA, valueB) => {
-              if (valueA == null && valueB == null) return 0;
-              if (valueA == null) return -1;
-              if (valueB == null) return 1;
-  
-              const dateA = new Date(valueA);
-              const dateB = new Date(valueB);
-  
-              // Compare valid dates
-              if (!isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) {
-                  return dateA - dateB;
-              }
-  
-              // Fallback for invalid dates (compare as strings)
-              return valueA.toString().localeCompare(valueB.toString());
-          },
-          cellStyle: {
-              fontWeight: 'bold', // Makes the cell text bold
-          },
-          valueFormatter: (params) => {
-            // If the row is grouped or pinned, return the original value (or empty for pinned rows)
-            if (params.node.group) {
-                return "";
-            }
-            if (params.node.rowPinned) {
-                return ''; // Return an empty value for pinnedBottomRowData
-            }
-            // Format the value for leaf nodes
-            return `${params.value} (${moment(params.value).format('ddd')})`;
-          },
-           },
-          { headerName: 'Spend', field: 'spend', width: 120,
-              aggFunc: agFunc, 
-              valueFormatter: params => params.value ? Math.round(params.value*100)/100 : '',
-          },
-          { headerName: 'Revenue', field: 'revenue', width: 120,
-              aggFunc: agFunc,
-              valueFormatter: params => params.value ? Math.round(params.value*100)/100 : '', 
-          },
-          { headerName: 'Profit', field: 'profit', width: 120, cellClassRules:{
-              'font-red': p => p.value < 0
-              },
-              aggFunc: agFunc,
-              valueFormatter: params => params.value ? Math.round(params.value*100)/100 : '',
-          },
-          { headerName: 'Margin', field: 'margin', valueGetter: getMargin,
-              
-          },
-          { headerName: 'Rpc', field: 'rpc', valueGetter: getRpc},
-          { headerName: 'Cpl', field: 'cpl', valueGetter: getCpl},
-          { headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl },
-          { headerName: 'Leads', field: 'fbleads', width: 120, aggFunc: agFunc,   },
-          { headerName: 'Conversions', field: 'conversions', width: 120, aggFunc: agFunc,   },
-          { headerName: 'Fmargin', field: 'fmargin', valueGetter: getFmargin},
-          { headerName: 'ROI', field: 'roi', valueGetter: getROI},
-          { headerName: 'cpc', field: 'cpc',
-              aggFunc: (params) => {
-                  const sum = params.values.reduce((sum, value) => sum + parseFloat(value), 0);
-                  return sum / params.values.length;
-              },
-              valueFormatter: params => params.value !== undefined ? Math.round(params.value*100)/100 : '',
+      // {headerName:'CampaignName', field:'campaignName',
+      //     // rowGroup: true,
+      //     // filter: true,
+      //     // hide: true,
+      //     // resizable: true,
+      //     // enableRowGroup: true,
+      //     // groupDisplayType: 'group',
+      //     width: 450,
+      // },
+      { headerName: 'Adset-Name', field: 'adsetName',
+      // resizeble: true,
+      // sortable: true,
+      width: 300,
+      cellStyle: { whiteSpace: "normal", lineHeight: "1.5" }, // Enables text wrapping
+      autoHeight: true,
+      suppressMenu: true,
+      menuTabs: [],
+      headerClass: 'hide-menu',
+      // hide: true,
+      // // resizable:false,
+      // rowGroup: true,
+      // filter: true,
+      // pinned: 'left',
+      // enableRowGroup: true,
+      // autoHeight: true, 
+      },
+      { headerName: 'Date', field: 'date', width: 160, sort: 'asc',
+      comparator: (valueA, valueB) => {
+          if (valueA == null && valueB == null) return 0;
+          if (valueA == null) return -1;
+          if (valueB == null) return 1;
 
+          const dateA = new Date(valueA);
+          const dateB = new Date(valueB);
+
+          // Compare valid dates
+          if (!isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) {
+              return dateA - dateB;
+          }
+
+          // Fallback for invalid dates (compare as strings)
+          return valueA.toString().localeCompare(valueB.toString());
+      },
+      cellStyle: {
+          fontWeight: 'bold', // Makes the cell text bold
+      },
+      valueFormatter: (params) => {
+          // If the row is grouped or pinned, return the original value (or empty for pinned rows)
+          if (params.node.group) {
+              return "";
+          }
+          if (params.node.rowPinned) {
+              return ''; // Return an empty value for pinnedBottomRowData
+          }
+          // Format the value for leaf nodes
+          return `${params.value} (${moment(params.value).format('ddd')})`;
+      },
+      suppressMenu: true,
+      menuTabs: [],
+      headerClass: 'hide-menu',
+       },
+      { headerName: 'Spend', field: 'spend', width: 90,
+          aggFunc: agFunc, 
+          valueFormatter: params => params.value ? Math.round(params.value*100)/100 : '',
+          suppressMenu: true,
+          menuTabs: [],
+          headerClass: 'hide-menu',
+          valueFormatter: (params) => `$${params.value}`,
+      },
+      { headerName: 'Revenue', field: 'revenue', width: 105,
+          aggFunc: agFunc,
+          valueFormatter: params => params.value ? Math.round(params.value*100)/100 : '', 
+          suppressMenu: true,
+          menuTabs: [],
+          headerClass: 'hide-menu',
+          valueFormatter: (params) => `$${params.value}`,
+      },
+      { headerName: 'Profit', field: 'profit', width: 95, 
+          cellClassRules:{
+          'font-red': p => p.value < 0
           },
-          { headerName: 'FbClicks', field: 'fbclicks', width: 120, aggFunc: agFunc,  },
-          { headerName: 'Impressions', field: 'impressions', width: 120, aggFunc: agFunc,   },
-          { headerName: 'Ctr', field: 'ctr', valueGetter: getCtr},
+          aggFunc: agFunc,
+          valueFormatter: params => params.value ? Math.round(params.value*100)/100 : '',
+          suppressMenu: true,
+          menuTabs: [],
+          headerClass: 'hide-menu',
+          valueFormatter: (params) => `$${params.value}`,
+          headerToolTip: 'Profit = Revenue - Spend',
+      },
+      { headerName: 'Margin', field: 'margin', valueGetter: getMargin,
+          suppressMenu: true,
+          menuTabs: [],
+          headerClass: 'hide-menu',
+          width: 105,
+          // valueFormatter: (params) => `${params.value}%`,
+          headerToolTip: 'Margin = ((Revenue - Spend) / Revenue) * 100',
           
-          // { headerName: 'AdsetId', field: 'adsetId' },
-          // {headerName: "CampaignId", field:'campaignId'}
-    ];
+      },
+      { headerName: 'RPC', field: 'rpc', valueGetter: getRpc,
+          suppressMenu: true,
+          menuTabs: [],
+          headerClass: 'hide-menu',
+          headerToolTip: 'RPC = Revenue / Conversions',
+          width: 90,},
+      { headerName: 'CPL', field: 'cpl', valueGetter: getCpl,
+          suppressMenu: true,
+          menuTabs: [],
+          headerClass: 'hide-menu',
+          headerToolTip: 'CPL = Spend / FBLeads',
+          width: 90,},
+      { headerName: 'NCPL', field: 'ncpl', valueGetter: getNcpl,
+          suppressMenu: true,
+          menuTabs: [],
+          headerClass: 'hide-menu',
+          headerToolTip: 'NCPL = Spend / Conversions',
+          width: 100},
+      { headerName: 'Leads', field: 'fbleads', width: 100, aggFunc: agFunc,
+          suppressMenu: true,
+          menuTabs: [],
+          headerClass: 'hide-menu', 
+        },
+      // { headerName: "Filteration", field:'filterarion', width: 120,  valueGetter: getFilteration},
+      // { headerName: "Filteration", field:'filterarion', width: 115, 
+      //     valueFormatter: params => params.value ? `${params.value}%` : '0%',
+      //     suppressMenu: true,
+      //     menuTabs: [],
+      //     headerClass: 'hide-menu',
+      // },
+      { headerName: 'Conv', field: 'conversions', width: 90, aggFunc: agFunc, 
+          suppressMenu: true,
+          menuTabs: [],
+          headerToolTip: 'Conversions',
+          headerClass: 'hide-menu',  },
+      { headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin,
+          suppressMenu: true,
+          menuTabs: [],
+          headerClass: 'hide-menu',
+          valueFormatter: (params) => `$${params.value}`,
+          headerToolTip: 'FMargin = (Profit / Revenue) * 100',
+          width: 110},
+      { headerName: 'ROI', field: 'roi', valueGetter: getROI,
+          suppressMenu: true,
+          menuTabs: [],
+          headerClass: 'hide-menu',
+          valueFormatter: (params) => `$${params.value}`,
+          headerToolTip: 'ROI = ((Revenue - Spend) / Spend) * 100',
+          width: 90},
+      { headerName: 'CPC', field: 'cpc',
+          aggFunc: (params) => {
+              const sum = params.values.reduce((sum, value) => sum + parseFloat(value), 0);
+              return sum / params.values.length;
+          },
+          valueFormatter: params => params.value !== undefined ? Math.round(params.value*100)/100 : '',
+          suppressMenu: true,
+          menuTabs: [],
+          headerClass: 'hide-menu',
+          width: 90,
+          headerToolTip: 'CPC = Spend / FBClicks',
+
+      },
+      { headerName: 'FBClicks', field: 'fbclicks', width: 110, aggFunc: agFunc, 
+          suppressMenu: true,
+          menuTabs: [],
+          headerClass: 'hide-menu', },
+      { headerName: 'IMP', field: 'impressions', width: 80, aggFunc: agFunc,
+          suppressMenu: true,
+          menuTabs: [],
+          headerToolTip: 'Impressions',
+          headerClass: 'hide-menu',   },
+      { headerName: 'CTR', field: 'ctr', valueGetter: getCtr,
+          suppressMenu: true,
+          menuTabs: [],
+          headerClass: 'hide-menu',
+          headerToolTip: 'CTR = (FBClicks / Impressions) * 100',
+      width: 90},
+      
+      // { headerName: 'AdsetId', field: 'adsetId' },
+      // {headerName: "CampaignId", field:'campaignId'}
+  ];
 
     console.log(columnDefs);
 
