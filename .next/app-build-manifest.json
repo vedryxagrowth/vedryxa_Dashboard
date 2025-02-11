@@ -1,34 +1,3 @@
 {
-  "pages": {
-    "/Reports/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/Reports/page.css",
-      "static/chunks/app/Reports/page.js"
-    ],
-    "/layout": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/layout.css",
-      "static/chunks/app/layout.js"
-    ],
-    "/Dashboard/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/Dashboard/page.css",
-      "static/chunks/app/Dashboard/page.js"
-    ],
-    "/AllCampaigns/CampaignHistory/[CampaignName]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/AllCampaigns/CampaignHistory/[CampaignName]/page.css",
-      "static/chunks/app/AllCampaigns/CampaignHistory/[CampaignName]/page.js"
-    ],
-    "/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page.css",
-      "static/chunks/app/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page.js"
-    ]
-  }
+  "pages": {}
 }
