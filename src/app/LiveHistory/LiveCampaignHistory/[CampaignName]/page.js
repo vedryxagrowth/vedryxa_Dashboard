@@ -497,8 +497,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
 
     const columnDefs = [
         {
-            headerName: 'Date_N', field: 'date', minWidth: 250,
-            minWidth: 450,
+            headerName: 'Date_N', field: 'date', minWidth: 120,
             resizable: true,
             sortable: true,
             // width: 500,
@@ -507,6 +506,9 @@ const MnetLiveCampaignHistory = ({ params }) => {
             enableRowGroup: true,
             pinned: 'left',
             sort: 'desc',
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
             
             // valueFormatter: (params) => `${params.value} (${moment(params.value).format('ddd')}) `,
         },
@@ -524,10 +526,10 @@ const MnetLiveCampaignHistory = ({ params }) => {
         //     // autoHeight: true, 
         // },
         {
-            headerName: 'AdsetName', field: 'adsetName',
+            headerName: 'Adset-Name', field: 'adsetName',
             // resizeble: true,
             // // sortable: true,
-            minWidth: 350,
+            minWidth: 280,
             // hide: true,
             // // // resizable:false,
             // // rowGroup: true,
@@ -535,17 +537,30 @@ const MnetLiveCampaignHistory = ({ params }) => {
             // pinned: 'left',
             // enableRowGroup: true,
             // autoHeight: true, 
+            cellStyle: { whiteSpace: "normal", lineHeight: "1.5" }, // Enables text wrapping
+            autoHeight: true,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
         // { headerName: 'FB-Hour', field: 'fb-hour', width: 120 },
         // { headerName: 'MNet-Hour', field: 'mnet-hour', width: 120 },
         {
             headerName: 'Hour_N', field: "updatedHour",
             comparator: defaultComparator,
+            minWidth: 100,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
         
         {
             headerName: 'Hour_F', field: "hour",
             comparator: defaultComparator,
+            minWidth: 100,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
         {
             headerName: 'Date_F', field: 'date', 
@@ -563,11 +578,14 @@ const MnetLiveCampaignHistory = ({ params }) => {
                 // Format the value for leaf nodes
                 return `${params.value} (${moment(params.value).format('ddd')})`;
             },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
         {
             headerName: 'Spend',
             field: 'spend',
-            width: 120,
+            minWidth: 90,
             aggFunc: spender, // Ensure spender aggregates numeric values
             comparator: (valueA, valueB) => {
                 if (valueA == null && valueB == null) return 0; // Both are null
@@ -580,11 +598,14 @@ const MnetLiveCampaignHistory = ({ params }) => {
                 const value = parseFloat(params.value);
                 return !isNaN(value) ? `$${value.toFixed(2)}` : ''; // Format only if it's a valid number
             }, // Format as currency with 2 decimals
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
         {
             headerName: 'Revenue',
             field: 'revenue',
-            width: 120,
+            minWidth: 90,
             aggFunc: spender, // Ensure spender aggregates numeric values
             filter: true, 
             valueParser: (params) => {
@@ -601,11 +622,14 @@ const MnetLiveCampaignHistory = ({ params }) => {
                 const value = parseFloat(params.value);
                 return !isNaN(value) ? `$${value.toFixed(2)}` : ''; // Format only if it's a valid number
             }, // Format as currency with 2 decimals
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
         {
             headerName: 'Profit',
             field: 'profit',
-            width: 120,
+            minWidth: 90,
             aggFunc: spender, // Ensure `spender` returns numeric values
             cellClassRules: {
                 'font-red': (params) => params.value < 0, // Highlight negative values
@@ -620,10 +644,15 @@ const MnetLiveCampaignHistory = ({ params }) => {
             },
             valueFormatter: (params) =>
                 params.value != null ? Math.round(params.value * 100) / 100 : '', // Format to 2 decimal places
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            headetTooltip: 'Profit = Revenue - Spend',
         },
         {
             headerName: 'Margin',
             field: 'margin',
+            minWidth: 90,
             valueGetter: getMargin, // Custom logic to calculate margin
             comparator: (valueA, valueB) => {
                 const numA = parseFloat(valueA);
@@ -637,9 +666,14 @@ const MnetLiveCampaignHistory = ({ params }) => {
                 const value = parseFloat(params.value);
                 return !isNaN(value) ? `${value.toFixed(2)}%` : '';
             },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            headerToolTip: 'Margin = (Revenue - Spend) / Revenue * 100',
         },
         {
-            headerName: 'Rpc',
+            headerName: 'RPC',
+            minWidth: 80,
             field: 'rpc',
             valueGetter: getRpc, // Custom logic to calculate RPC
             comparator: (valueA, valueB) => {
@@ -654,9 +688,14 @@ const MnetLiveCampaignHistory = ({ params }) => {
                 const value = parseFloat(params.value);
                 return !isNaN(value) ? `$${value.toFixed(2)}` : ''; // Format as currency
             },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            headerToolTip: 'RPC = Revenue / Conversions',
         },
         {
-            headerName: 'Cpl',
+            headerName: 'CPL',
+            minWidth: 80,
             field: 'cpl',
             valueGetter: getCpl, // Custom logic to calculate CPL
             comparator: (valueA, valueB) => {
@@ -671,45 +710,90 @@ const MnetLiveCampaignHistory = ({ params }) => {
                 const value = parseFloat(params.value);
                 return !isNaN(value) ? `$${value.toFixed(2)}` : ''; // Format as currency
             },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            headerToolTip: 'CPL = Spend / Conversions',
         },
         {
-            headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl,
+            headerName: 'NCPL', field: 'ncpl', valueGetter: getNcpl,
             comparator: defaultComparator,
+            minWidth: 80,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            headerToolTip: 'NCPL = Spend / Conversions',
         },
         {
-            headerName: 'FbLeads', field: 'fbleads', width: 120, aggFunc: spender,
+            headerName: 'FBLeads', field: 'fbleads', minWidth: 90, aggFunc: spender,
             comparator: defaultComparator,
+            minWidth: 105,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
         {
-            headerName: 'Conversions', field: 'conversions', width: 120, aggFunc: newSpender,
+            headerName: 'Conv', field: 'conversions', minWidth: 85, aggFunc: newSpender,
             comparator: defaultComparator,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            headerToolTip: 'Conversions',
         },
         {
-            headerName: 'Fmargin', field: 'fmargin', valueGetter: getFmargin,
+            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin,
             comparator: defaultComparator,
             valueFormatter: (params) => `${params.value}%`,
+            minWidth: 95,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            headerToolTip: 'FMargin = (Profit / Spend) * 100',
         },
         {
             headerName: 'ROI', field: 'roi', valueGetter: getROI,
             comparator: defaultComparator,
             valueFormatter: (params) => `${params.value}%`,
+            minWidth: 90,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            headerToolTip: 'ROI = (Revenue - Spend) / Spend * 100',
         },
         {
-            headerName: 'cpc', field: 'cpc', aggFunc: cpcSpender,
+            headerName: 'CPC', field: 'cpc', aggFunc: cpcSpender,
             comparator: defaultComparator,
+            // valueFormatter: (params) => `${params.value.toFixed(2)}%`,
+            minWidth: 85,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            headerToolTip: 'CPC = Spend / Clicks',
         },
         {
-            headerName: 'FbClicks', field: 'fbclicks', width: 120, aggFunc: spender,
+            headerName: 'FBClicks', field: 'fbclicks', minWidth: 90, aggFunc: spender,
             comparator: defaultComparator,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
         {
-            headerName: 'Impressions', field: 'impressions', width: 120, aggFunc: spender,
+            headerName: 'IMP', field: 'impressions', minWidth: 90, aggFunc: spender,
             comparator: defaultComparator,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            headerToolTip: 'Impressions',
         },
         {
-            headerName: 'Ctr', field: 'ctr', valueGetter: getCtr,
+            headerName: 'CTR', field: 'ctr', valueGetter: getCtr,
             comparator: defaultComparator,
             valueFormatter: (params) => `${params.value}%`,
+            minWidth: 80,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            headerToolTip: 'CTR = (Clicks / Impressions) * 100',
         },
         // {
         //     headerName: 'AdsetId', field: 'adsetId',
@@ -918,7 +1002,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
 
         const fetchData = await apiClient.get(`/LiveCampaignHistory?campaignName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`);
 
-        const mainData = fetchData?.data;
+        const mainData = fetchData?.data?.filter(obj => !("ad_clicks" in obj));
         console.log(mainData[0]);
 
         const filteredData = mainData && mainData.length > 0 ?
@@ -1011,7 +1095,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
             ?.filter(item => item.date === today) // Filter to only today's data
             ?.map(item => ({
                 date: item.date,
-                hour: item.timezone.split(" ")[1].split(":")[0],
+                hour: item?.timezone?.split(" ")[1]?.split(":")[0],
                 margin: parseFloat(item.margin), // Ensure margin is a number
             }))
             ?.sort((a, b) => b.margin - a.margin) // Sort by margin in descending order
@@ -1021,7 +1105,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
             ?.filter(item => item.date === today) // Filter to only today's data
             ?.map(item => ({
                 date: item.date,
-                hour: item.timezone.split(" ")[1].split(":")[0],
+                hour: item?.timezone?.split(" ")[1]?.split(":")[0],
                 rpc: (item.rpc ? item.rpc : 0), // Ensure margin is a number
             }))
             ?.sort((a, b) => b.rpc - a.rpc) // Sort by margin in descending order
@@ -1032,8 +1116,8 @@ const MnetLiveCampaignHistory = ({ params }) => {
 
         const filteredArray = filteredData
             ?.map(item => ({
-                date: moment(item.timezone, "YYYY-MM-DD HH:mm:ss").format("YYYY-MM-DD"),
-                hour: moment(item.timezone, "YYYY-MM-DD HH:mm:ss").format("HH"),
+                date: moment(item?.timezone, "YYYY-MM-DD HH:mm:ss")?.format("YYYY-MM-DD"),
+                hour: moment(item?.timezone, "YYYY-MM-DD HH:mm:ss")?.format("HH"),
                 rpc: isNaN(item.rpc) ? 0 : item.rpc  // Ensure rpc is a number, otherwise default to 0
             }))
             ?.filter(item => {
@@ -1124,7 +1208,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
 
     const debouncedFunctionCall = debounce(async () => {
         await functionCall();
-    }, 1500);
+    }, 100);
 
     useEffect(() => {
         if (userdetails?.adAccounts) {

@@ -433,8 +433,7 @@ const MnetLiveAdsetHistory = ({params}) => {
     
     const columnDefs = [
         {
-            headerName: 'Date_N', field: 'date', minWidth: 250,
-            minWidth: 450,
+            headerName: 'Date_N', field: 'date', minWidth: 125,
             resizable: true,
             sortable: true,
             // width: 500,
@@ -443,6 +442,9 @@ const MnetLiveAdsetHistory = ({params}) => {
             enableRowGroup: true,
             pinned: 'left',
             sort: 'desc',
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
             
             // valueFormatter: (params) => `${params.value} (${moment(params.value).format('ddd')}) `,
         },
@@ -460,10 +462,10 @@ const MnetLiveAdsetHistory = ({params}) => {
         //     // autoHeight: true, 
         // },
         {
-            headerName: 'AdsetName', field: 'adsetName',
+            headerName: 'Adset-Name', field: 'adsetName',
             // resizeble: true,
             // // sortable: true,
-            minWidth: 350,
+            width: 280,
             // hide: true,
             // // // resizable:false,
             // // rowGroup: true,
@@ -471,21 +473,34 @@ const MnetLiveAdsetHistory = ({params}) => {
             // pinned: 'left',
             // enableRowGroup: true,
             // autoHeight: true, 
+            cellStyle: { whiteSpace: "normal", lineHeight: "1.5" }, // Enables text wrapping
+            autoHeight: true,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
         // { headerName: 'FB-Hour', field: 'fb-hour', width: 120 },
         // { headerName: 'MNet-Hour', field: 'mnet-hour', width: 120 },
         {
             headerName: 'Hour_N', field: "updatedHour",
             comparator: defaultComparator,
+            width: 100,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
         
         {
             headerName: 'Hour_F', field: "hour",
             comparator: defaultComparator,
+            width: 100,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
         {
             headerName: 'Date_F', field: 'date', 
-            minWidth: 150,
+            width: 150,
             resizable: true,
             sortable: true,
             valueFormatter: (params) => {
@@ -499,11 +514,14 @@ const MnetLiveAdsetHistory = ({params}) => {
                 // Format the value for leaf nodes
                 return `${params.value} (${moment(params.value).format('ddd')})`;
             },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
         {
             headerName: 'Spend',
             field: 'spend',
-            width: 120,
+            width: 90,
             aggFunc: spender, // Ensure spender aggregates numeric values
             comparator: (valueA, valueB) => {
                 if (valueA == null && valueB == null) return 0; // Both are null
@@ -516,11 +534,14 @@ const MnetLiveAdsetHistory = ({params}) => {
                 const value = parseFloat(params.value);
                 return !isNaN(value) ? `$${value.toFixed(2)}` : ''; // Format only if it's a valid number
             }, // Format as currency with 2 decimals
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
         {
             headerName: 'Revenue',
             field: 'revenue',
-            width: 120,
+            width: 90,
             aggFunc: spender, // Ensure spender aggregates numeric values
             filter: true, 
             valueParser: (params) => {
@@ -537,11 +558,14 @@ const MnetLiveAdsetHistory = ({params}) => {
                 const value = parseFloat(params.value);
                 return !isNaN(value) ? `$${value.toFixed(2)}` : ''; // Format only if it's a valid number
             }, // Format as currency with 2 decimals
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
         {
             headerName: 'Profit',
             field: 'profit',
-            width: 120,
+            width: 90,
             aggFunc: spender, // Ensure `spender` returns numeric values
             cellClassRules: {
                 'font-red': (params) => params.value < 0, // Highlight negative values
@@ -556,10 +580,15 @@ const MnetLiveAdsetHistory = ({params}) => {
             },
             valueFormatter: (params) =>
                 params.value != null ? Math.round(params.value * 100) / 100 : '', // Format to 2 decimal places
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            headetTooltip: 'Profit = Revenue - Spend',
         },
         {
             headerName: 'Margin',
             field: 'margin',
+            width: 90,
             valueGetter: getMargin, // Custom logic to calculate margin
             comparator: (valueA, valueB) => {
                 const numA = parseFloat(valueA);
@@ -573,9 +602,14 @@ const MnetLiveAdsetHistory = ({params}) => {
                 const value = parseFloat(params.value);
                 return !isNaN(value) ? `${value.toFixed(2)}%` : '';
             },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            headerToolTip: 'Margin = (Revenue - Spend) / Revenue * 100',
         },
         {
-            headerName: 'Rpc',
+            headerName: 'RPC',
+            width: 80,
             field: 'rpc',
             valueGetter: getRpc, // Custom logic to calculate RPC
             comparator: (valueA, valueB) => {
@@ -590,9 +624,14 @@ const MnetLiveAdsetHistory = ({params}) => {
                 const value = parseFloat(params.value);
                 return !isNaN(value) ? `$${value.toFixed(2)}` : ''; // Format as currency
             },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            headerToolTip: 'RPC = Revenue / Conversions',
         },
         {
-            headerName: 'Cpl',
+            headerName: 'CPL',
+            width: 80,
             field: 'cpl',
             valueGetter: getCpl, // Custom logic to calculate CPL
             comparator: (valueA, valueB) => {
@@ -607,45 +646,90 @@ const MnetLiveAdsetHistory = ({params}) => {
                 const value = parseFloat(params.value);
                 return !isNaN(value) ? `$${value.toFixed(2)}` : ''; // Format as currency
             },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            headerToolTip: 'CPL = Spend / Conversions',
         },
         {
-            headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl,
+            headerName: 'NCPL', field: 'ncpl', valueGetter: getNcpl,
             comparator: defaultComparator,
+            width: 80,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            headerToolTip: 'NCPL = Spend / Conversions',
         },
         {
-            headerName: 'FbLeads', field: 'fbleads', width: 120, aggFunc: spender,
+            headerName: 'FBLeads', field: 'fbleads', minWidth: 90, aggFunc: spender,
             comparator: defaultComparator,
+            width: 105,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
         {
-            headerName: 'Conversions', field: 'conversions', width: 120, aggFunc: newSpender,
+            headerName: 'Conv', field: 'conversions', width: 85, aggFunc: newSpender,
             comparator: defaultComparator,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            headerToolTip: 'Conversions',
         },
         {
-            headerName: 'Fmargin', field: 'fmargin', valueGetter: getFmargin,
+            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin,
             comparator: defaultComparator,
             valueFormatter: (params) => `${params.value}%`,
+            width: 95,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            headerToolTip: 'FMargin = (Profit / Spend) * 100',
         },
         {
             headerName: 'ROI', field: 'roi', valueGetter: getROI,
             comparator: defaultComparator,
             valueFormatter: (params) => `${params.value}%`,
+            width: 90,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            headerToolTip: 'ROI = (Revenue - Spend) / Spend * 100',
         },
         {
-            headerName: 'cpc', field: 'cpc', aggFunc: cpcSpender,
+            headerName: 'CPC', field: 'cpc', aggFunc: cpcSpender,
             comparator: defaultComparator,
+            // valueFormatter: (params) => `${params.value.toFixed(2)}%`,
+            width: 85,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            headerToolTip: 'CPC = Spend / Clicks',
         },
         {
-            headerName: 'FbClicks', field: 'fbclicks', width: 120, aggFunc: spender,
+            headerName: 'FBClicks', field: 'fbclicks', width: 90, aggFunc: spender,
             comparator: defaultComparator,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
         {
-            headerName: 'Impressions', field: 'impressions', width: 120, aggFunc: spender,
+            headerName: 'IMP', field: 'impressions', width: 90, aggFunc: spender,
             comparator: defaultComparator,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            headerToolTip: 'Impressions',
         },
         {
-            headerName: 'Ctr', field: 'ctr', valueGetter: getCtr,
+            headerName: 'CTR', field: 'ctr', valueGetter: getCtr,
             comparator: defaultComparator,
-            // valueFormatter: (params) => `${params.value}%`,
+            valueFormatter: (params) => `${params.value}%`,
+            width: 80,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            headerToolTip: 'CTR = (Clicks / Impressions) * 100',
         },
         // {
         //     headerName: 'AdsetId', field: 'adsetId',
@@ -767,7 +851,7 @@ const MnetLiveAdsetHistory = ({params}) => {
         // console.log(`https://prodapis.adsgoat.in/LiveAdsetHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`, "url");
         const url = `http://localhost:8000/MnetLiveCampaignHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}`
         
-        const mainData = fetchData.data;
+        const mainData = fetchData?.data?.filter(obj => !("ad_clicks" in obj));
         console.log(mainData[0]);
         const filteredData = mainData && mainData.length > 0 ? 
         mainData.map((eachData)=> {
@@ -977,7 +1061,7 @@ const MnetLiveAdsetHistory = ({params}) => {
       
     const debouncedFunctionCall = debounce(async () => {
         await functionCall();
-    }, 1500);
+    }, 100);
       
       useEffect(() => {
         if (userdetails?.adAccounts) {

@@ -541,6 +541,7 @@ const Topbar = ({onComplete}) => {
         display: 'flex',
         justifyContent: "space-between",
         alignItems: 'center',
+        height: '50px',
       }}
     >
       {/* Show logo only if the user is NOT authenticated */}
@@ -573,7 +574,7 @@ const Topbar = ({onComplete}) => {
           <>
             <div className="relative inline-block" ref={wrapperRef}>
               <div className="cursor-pointer" onClick={openNotificationsList}>
-                <Bell size={24} />
+                <Bell size={20} />
                 {notifications.length > 0 && (
                   <Badge
                     style={{ color: 'red' }}
@@ -593,16 +594,16 @@ const Topbar = ({onComplete}) => {
               className={`theme-toggle-btn ${darkMode ? 'dark-mode' : 'light-mode'}`}
             >
               {darkMode ? (
-                <Sun className="icon sun-icon" />
+                <Sun className="icon sun-icon" style={{ width: "20px", height: "20px" }}/>
               ) : (
-                <Moon className="icon moon-icon" />
+                <Moon className="icon moon-icon" style={{ width: "20px", height: "20px" }} />
               )}
             </button>
             <h2
               style={{
                 color: darkMode ? '#fff' : '#000',
                 margin: 0,
-                fontSize: '1.2rem',
+                fontSize: '17px',
                 transition: 'color 0.3s ease',
               }}
             >
@@ -616,7 +617,7 @@ const Topbar = ({onComplete}) => {
               arrow={{ pointAtCenter: true }}
             >
               <Avatar
-                size="large"
+                size={36}
                 src={avatarUrl || getDefaultAvatar()}
                 style={{
                   background: darkMode ? '#333' : '#ebebeb',
