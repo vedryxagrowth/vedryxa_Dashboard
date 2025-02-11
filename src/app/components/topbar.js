@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { SessionProvider, useSession, signIn, signOut } from 'next-auth/react';
 import Image from "next/image";
-import { Layout, Avatar, Dropdown, Button, Switch, Spin, Form, Input, Divider, Modal, Badge, Card, notification } from "antd";
+import { Layout, Avatar, Dropdown, Button, Switch, Spin, Form, Input, Divider, Modal, Badge, Card, Upload, notification } from "antd";
 import React from "react";
 import { useRouter } from "next/navigation";
 import axios from 'axios';
@@ -10,7 +10,7 @@ const { Header } = Layout;
 import { useTokenContext } from './parent';
 import moment from 'moment-timezone';
 import ContactForm from './mail';
-import { BellFilled, EyeOutlined, GoogleOutlined, LockOutlined, PlusOutlined, UserOutlined } from '@ant-design/icons';
+import { BellFilled, EyeOutlined, GoogleOutlined, LockOutlined, PlusOutlined, UserOutlined, UploadOutlined  } from '@ant-design/icons';
 import { Bell, Edit3Icon, Moon, Sun } from 'lucide-react';
 import { getSession } from 'next-auth/react';
 import debounce from 'lodash.debounce';
@@ -22,134 +22,7 @@ import { message } from 'antd';
 
 import { useGlobalLoading } from "../layout";
 
-const items = (setuserdetails, router) => [
-  {
-    key: "1",
-    label: (
-      <Button
-        style={{
-          border: "none",
-          outline: "none",
-          background: "none",
-          cursor: "pointer",
-          textDecoration: "underline",
-          padding: "0",
-          fontSize: "inherit",
-        }}
-        onClick={() => signIn()}>
-        Sign in
-      </Button>
-    ),
-  },
-  {
-    key: "2",
-    label: (
-      <Button
-        style={{
-          border: "none",
-          outline: "none",
-          background: "none",
-          cursor: "pointer",
-          textDecoration: "underline",
-          padding: "0",
-          fontSize: "inherit",
-        }}
-        onClick={() => {
-          localStorage.clear();
-          localStorage.setItem("redirectUrl", router.asPath);
-          router.push("/api/auth/signout");
-        }}>
-        Sign Out
-      </Button>
-    ),
-  },
-];
-
-async function getUserDetails(name) {
-  // Get user agent details
-  const userAgent = navigator.userAgent || "";
-  const parser = new UAParser(userAgent);
-  const device = parser.getDevice();
-  let deviceType = device?.type || "desktop";
-
-  // Fetch public IP
-  let ip = "Unknown";
-  try {
-    const ipRes = await fetch("https://api64.ipify.org?format=json");
-    if (!ipRes.ok) throw new Error("Failed to fetch IP address");
-    const ipData = await ipRes.json();
-    ip = ipData.ip || "Unknown";
-  } catch (error) {
-    console.error("Error fetching IP address:", error);
-  }
-
-  // Fetch location based on IP
-  let location = {
-    status: "Unknown",
-    country: "Unknown",
-    countryCode: "Unknown",
-    region: "Unknown",
-    regionName: "Unknown",
-    city: "Unknown",
-    zip: "Unknown",
-    lat: "Unknown",
-    lon: "Unknown",
-    timezone: "Unknown",
-    isp: "Unknown",
-    org: "Unknown",
-    as: "Unknown",
-    query: ip,
-  };
-
-  try {
-    const geoRes = await fetch(`http://ip-api.com/json/${ip}`);
-    if (!geoRes.ok) throw new Error("Failed to fetch location data");
-    const geoData = await geoRes.json();
-    if (geoData.status === "success") {
-      location = { ...geoData };
-    }
-  } catch (error) {
-    console.error("Error fetching location:", error);
-  }
-
-  // Get current timestamp in IST
-  const now = new Date();
-  const istFormatter = new Intl.DateTimeFormat("en-IN", {
-    timeZone: "Asia/Kolkata",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
-
-  const istTimestamp = istFormatter.format(now);
-
-  console.log({
-    timestamp: istTimestamp,
-    ip,
-    location,
-    device: {
-      type: deviceType,
-    },
-    userAgent,
-    name
-  });
-
-  return {
-    timestamp: istTimestamp,
-    ip,
-    location,
-    device: {
-      type: deviceType,
-    },
-    userAgent,
-    name
-  };
-}
-
-const Topbar = () => {
+const Topbar = ({onComplete}) => {
   const { darkMode, toggleTheme } = useTokenContext();
   const router = useRouter();
   const { data: session, status } = useSession(); // Session status from next-auth
@@ -172,6 +45,7 @@ const Topbar = () => {
   const [selectedNotification, setSelectedNotification] = useState(null); // For the notification to be displayed in modal
   const [isViewNotificationModalVisible, setIsViewNotificationModalVisible] = useState(false); // View notification moda
 
+  const [loading, setLoading] = useState(false);
   // console.log(userdetails);
 
   const tokenForAuth = localStorage.getItem('token');
@@ -230,7 +104,7 @@ const Topbar = () => {
   const isNotificationsFetched = useRef(false);
 
   // Fetch notifications function
-  const fetchNotificationsWithRetry = async (retries = 3, delay = 5000) => {
+  const fetchNotificationsWithRetry = async (retries = 3, delay = 1500) => {
     const makeRequest = async (retryAttempt) => {
       try {
         // console.log(tokenForAuth);
@@ -240,6 +114,7 @@ const Topbar = () => {
         }
         if (response.status === 200) {
           setNotifications(response.data.notifications);
+          onComplete();
           isNotificationsFetched.current = true;
         }
       } catch (error) {
@@ -418,13 +293,13 @@ const Topbar = () => {
   const maleImoji = 'https://res.cloudinary.com/dyogjqsil/image/upload/v1727960655/3d-rendering-cartoon-character-with-eyeglasses-jacket_lu1cqi.jpg';
   const femaleImoji = 'https://res.cloudinary.com/dyogjqsil/image/upload/v1727960642/portrait-3d-female-doctor_cei7bm.jpg';
 
-  const getAvatarSrc = () => {
-    if (userdetails?.gender === 'Male') {
-      return maleImoji;
-    } else if (userdetails?.gender === 'Female') {
-      return femaleImoji;
-    }
-  };
+  // const getAvatarSrc = () => {
+  //   if (userdetails?.gender === 'Male') {
+  //     return maleImoji;
+  //   } else if (userdetails?.gender === 'Female') {
+  //     return femaleImoji;
+  //   }
+  // };
 
   // Dropdown for authenticated users (Profile + Sign Out)
   const dropdownItemsAuthenticated = [
@@ -466,6 +341,197 @@ const Topbar = () => {
   // Only show profile and signout if the user is authenticated and has access
   const isUserAuthorized = status === 'authenticated' && userdetails;
 
+  const [avatarUrl, setAvatarUrl] = useState('');
+  const [previewImage, setPreviewImage] = useState(null);  // State for image preview
+  const [imageFile, setImageFile] = useState(null);  // Temporary state for storing the file before upload
+
+
+  // Fetch the user's avatar URL on page load or when userdetails change
+  // let shouldRetry = true; // Global or module-level flag to control retries
+
+  // const fetchUserAvatarWithRetry = async (retries = 3, delay = 2500) => {
+  //   try {
+  //     if (!shouldRetry) {
+  //       console.log('Retries have been stopped due to a 404 error.');
+  //       return;
+  //     }
+
+  //     console.log('Fetching user avatar with retry...');
+  //     const email = userdetails?.email;
+
+  //     if (!email) {
+  //       console.warn('Email is missing. Cannot fetch user avatar.');
+  //       setAvatarUrl(getDefaultAvatar());
+  //       return;
+  //     }
+
+  //     const response = await axios.get(`https://prodapis.adsgoat.in/GetUserImage`, {
+  //       params: { email },
+  //       headers: {
+  //         Authorization: localStorage.getItem('token'),
+  //       },
+  //     });
+
+  //     if (response.data.success) {
+  //       const fetchedAvatarUrl = response.data.imageUrl;
+  //       console.log('Fetched avatar URL:', fetchedAvatarUrl);
+  //       setAvatarUrl(fetchedAvatarUrl || getDefaultAvatar());
+  //     } else {
+  //       console.error('Error fetching avatar:', response.data.message);
+  //       setAvatarUrl(getDefaultAvatar());
+  //     }
+  //   } catch (error) {
+  //     if (error.response && error.response.status === 404) {
+  //       // Stop retries if the response status is 404
+  //       console.error('Error 404: Resource not found. Stopping retries.');
+  //       shouldRetry = false; // Set flag to false to stop further retries
+  //       setAvatarUrl(getDefaultAvatar());
+  //       return;
+  //     }
+
+  //     if (retries > 0) {
+  //       console.log(`Retrying... (${retries} retries left)`);
+  //       setTimeout(() => fetchUserAvatarWithRetry(retries - 1, delay), delay);
+  //     } else {
+  //       console.error('Failed to fetch avatar after retries:', error);
+  //       setAvatarUrl(getDefaultAvatar());
+  //     }
+  //   }
+  // };
+
+  useEffect(() => {
+    // shouldRetry = true; // Reset flag when `userdetails` changes
+    // fetchUserAvatarWithRetry();
+    if(userdetails?.profileImage){
+      setAvatarUrl(userdetails?.profileImage);
+    }
+  }, [userdetails]);
+  
+  
+
+
+  // Get the default avatar source based on gender
+  const getDefaultAvatar = () => {
+    console.log('Determining default avatar...');
+    if (userdetails?.gender === 'Male') {
+      return maleImoji;
+    } else if (userdetails?.gender === 'Female') {
+      return femaleImoji;
+    } else {
+      return ''; // Fallback if gender is not available
+    }
+  };
+
+  // Store image URL in the database
+  const storeImageUrlInDb = async (imageUrl) => {
+    try {
+      const email = userdetails?.email;
+      if (!email) {
+        throw new Error('Email is required to store image URL.');
+      }
+
+      const response = await axios.post(
+        'https://prodapis.adsgoat.in/UserImage',
+        { email, imageUrl },
+        {
+          headers: {
+            Authorization: localStorage.getItem('token'),
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      return response; // Return the response containing the updated user data
+    } catch (error) {
+      console.error('Error storing image URL in the database:', error);
+      alert('Error storing image URL. Please try again later.');
+    }
+  };
+
+  // Handle the preview of the selected image
+  const handlePreviewImage = (file) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreviewImage(reader.result); // Set the preview image as the file content
+      console.log("Image preview updated.");
+    };
+    if (file) {
+      reader.readAsDataURL(file); // Read the file as a DataURL
+      setImageFile(file); // Store the file temporarily
+      console.log("Image file temporarily stored:", file);
+    }
+  };
+
+  // Handle confirm to upload the selected image
+  const handleConfirmUpload = () => {
+    if (imageFile) {
+      const formData = new FormData();
+      formData.append('file', imageFile);
+      console.log("FormData prepared for upload:", formData);
+  
+      // Call your API here to upload the image
+      fetch('https://www.testapi.adsgoat.in/upload', {
+        method: 'POST',
+        headers: {
+          Authorization: localStorage.getItem('token'),
+        },
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then(async (data) => {
+  
+          if (data.imageUrl) {
+            console.log("Image successfully uploaded. Image URL:", data.imageUrl);
+  
+            // Store the image URL in the database
+            const response = await storeImageUrlInDb(data.imageUrl);
+  
+            // Update the avatar and clear the preview
+            if (response?.data?.success) {
+              setAvatarUrl(data.imageUrl); // Update the avatar with the stored URL
+              setPreviewImage(null); // Clear the preview after successful upload and store
+            } else {
+              console.error("Failed to store the image URL in the database.");
+            }
+          } else {
+            console.error("Image URL not returned from upload API.");
+            alert("Image upload failed. Please try again.");
+          }
+        })
+        .catch((error) => {
+          console.error("Error during file upload:", error);
+          alert("Something went wrong while uploading the image. Please try again.");
+        });
+    } else {
+      console.log("No image file to upload.");
+    }
+  };
+  
+
+  // Upload properties for the file uploader
+  const uploadProps = {
+    name: 'file',
+    action: 'https://www.testapi.adsgoat.in/upload',
+    headers: {
+      Authorization: localStorage.getItem('token'),
+    },
+    showUploadList: false,
+    // onChange: handleFileChange,
+    beforeUpload: (file) => {
+      const isImage = file.type.startsWith('image/');
+      if (!isImage) {
+        alert('You can only upload image files!');
+        return false; // Cancel upload if not an image
+      }
+      handlePreviewImage(file); // Preview image on file selection
+      return false; // Prevent the automatic upload
+    },
+    onError: (error) => {
+      console.error('Error during file upload:', error);
+      alert('Something went wrong while uploading the image. Please try again.');
+    },
+  };
+
   return (
     <div
       style={{
@@ -475,6 +541,7 @@ const Topbar = () => {
         display: 'flex',
         justifyContent: "space-between",
         alignItems: 'center',
+        height: '50px',
       }}
     >
       {/* Show logo only if the user is NOT authenticated */}
@@ -507,7 +574,7 @@ const Topbar = () => {
           <>
             <div className="relative inline-block" ref={wrapperRef}>
               <div className="cursor-pointer" onClick={openNotificationsList}>
-                <Bell size={24} />
+                <Bell size={20} />
                 {notifications.length > 0 && (
                   <Badge
                     style={{ color: 'red' }}
@@ -527,16 +594,16 @@ const Topbar = () => {
               className={`theme-toggle-btn ${darkMode ? 'dark-mode' : 'light-mode'}`}
             >
               {darkMode ? (
-                <Sun className="icon sun-icon" />
+                <Sun className="icon sun-icon" style={{ width: "20px", height: "20px" }}/>
               ) : (
-                <Moon className="icon moon-icon" />
+                <Moon className="icon moon-icon" style={{ width: "20px", height: "20px" }} />
               )}
             </button>
             <h2
               style={{
                 color: darkMode ? '#fff' : '#000',
                 margin: 0,
-                fontSize: '1.2rem',
+                fontSize: '17px',
                 transition: 'color 0.3s ease',
               }}
             >
@@ -550,8 +617,8 @@ const Topbar = () => {
               arrow={{ pointAtCenter: true }}
             >
               <Avatar
-                size="large"
-                src={getAvatarSrc()}
+                size={36}
+                src={avatarUrl || getDefaultAvatar()}
                 style={{
                   background: darkMode ? '#333' : '#ebebeb',
                   fontSize: '1.8em',
@@ -661,303 +728,63 @@ const Topbar = () => {
         />
       </Modal>
 
-      <Modal
-        visible={isModalVisible}
-        width={`50%`}
-        onCancel={onHandleCancel}
-        footer={null}
-        style={{ textAlign: "center", borderRadius: '8px', padding: '0px' }}
-      >
-        <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", width: '100%' }}>
-          <div style={{ display: "flex", justifyContent: "space-between", flexDirection: "row", height: "12%", marginBottom: '10px' }}>
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <Avatar
-                size={110}
-                src={getAvatarSrc()}
-                style={{ border: "2px solid #ccc" }}
-              />
-            </div>
-            <div style={{ display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "flex-start", padding: "0px" }}>
-              <p style={{ margin: "1px" }}><span style={{ fontWeight: "bold" }}>ID:</span> {userdetails ? userdetails._id : ""}</p>
-              <p style={{ margin: "1px" }}><span style={{ fontWeight: "bold" }}>EMAIL_ID:</span> {userdetails ? userdetails.email : "No email"}</p>
-              <p style={{ margin: "1px" }}><span style={{ fontWeight: "bold" }}>Name:</span> {userdetails ? userdetails.userName : "Guest"}</p>
-            </div>
+
+    <Modal
+      visible={isModalVisible}
+      width="50%"
+      onCancel={onHandleCancel}
+      footer={null}
+      style={{ textAlign: 'center', borderRadius: '8px', padding: '0px' }}
+    >
+      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', width: '100%' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', flexDirection: 'row', height: '12%', marginBottom: '10px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            {/* Display the image preview if exists */}
+            <img
+              src={previewImage || avatarUrl || getDefaultAvatar()} // Show the preview image or fallback to avatarUrl or default
+              alt="Avatar"
+              style={{ width: 110, height: 110, borderRadius: '50%', border: '2px solid #ccc' }}
+            />
+            
+            <Upload {...uploadProps}>
+              <Button style={{ marginTop: '10px' }} icon={<UploadOutlined />} loading={loading}>
+                {loading ? 'Uploading...' : 'Upload Image'}
+              </Button>
+            </Upload>
           </div>
-          <hr style={{ border: "1px solid black", width: "100%" }} />
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-            <div style={{ maxHeight: '200px', width: "100%", overflowY: 'auto', padding: '10px', border: '1px solid #ccc', marginBottom: '20px' }}>
-              {renderAdAccounts()}
-            </div>
+
+          <div style={{ display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'flex-start', padding: '0px' }}>
+            <p style={{ margin: '1px' }}><span style={{ fontWeight: 'bold' }}>ID:</span> {userdetails ? userdetails._id : ''}</p>
+            <p style={{ margin: '1px' }}><span style={{ fontWeight: 'bold' }}>EMAIL_ID:</span> {userdetails ? userdetails.email : 'No email'}</p>
+            <p style={{ margin: '1px' }}><span style={{ fontWeight: 'bold' }}>Name:</span> {userdetails ? userdetails.userName : 'Guest'}</p>
           </div>
         </div>
-      </Modal>
+
+        {/* Display the Confirm button to trigger upload */}
+        {previewImage && (
+          <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'flex-end' }}>
+            <Button onClick={handleConfirmUpload} type="primary">
+              Confirm & Upload Image
+            </Button>
+          </div>
+        )}
+
+        <hr style={{ border: '1px solid black', width: '100%' }} />
+
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+          <div style={{ maxHeight: '200px', width: '100%', overflowY: 'auto', padding: '10px', border: '1px solid #ccc', marginBottom: '20px' }}>
+            {/* Render Ad Accounts or any other content */}
+            {renderAdAccounts && renderAdAccounts()}
+          </div>
+        </div>
+      </div>
+    </Modal>
+
     </div>
   );
 };
 
-
-
-
-// const Topbar = ({ }) => {
-//   const { darkMode, toggleTheme, usersData } = useTokenContext();
-//   const router = useRouter();
-//   const { data: session, status } = useSession();
-//   //   const [darkMode, setDarkMode] = React.useState(false);
-
-//   //   const toggleTheme = () => {
-//   //     setDarkMode(!darkMode);
-
-//   const { userdetails } = useTokenContext();
-
-//   const [userProfile, setUserProfile] = useState(userdetails);
-
-//   useEffect(() => {
-//     if (userdetails) {
-//       setUserProfile(userdetails);
-//     }
-//   }, [userdetails]);
-
-//   const handleProfileUpdate = (updatedProfileData) => {
-//     setUserProfile(prev => ({
-//       ...prev,
-//       ...updatedProfileData,
-//     }));
-//   };
-//   //   };
-
-//   const [isModalVisible, setIsModalVisible] = useState(false);
-
-//   const openProfileModal = () => {
-//     setIsModalVisible(true);
-//   };
-
-//   const onHandleCancel = () => {
-//     setIsModalVisible(false);
-//   }
-
-//   const renderAdAccounts = () => {
-//     if (!userdetails?.adAccounts) return null;
-
-//     return Object.keys(userdetails.adAccounts).map((key) => (
-//       <div key={key} style={{ textAlign: 'left', marginBottom: '20px' }}>
-//         <h4>{key}:</h4>
-//         <ul>
-//           {userdetails.adAccounts[key].map((accountId, index) => (
-//             <li key={index}>{typeof accountId === 'object' ? accountId.accountNumber : accountId}</li>
-//           ))}
-//         </ul>
-//       </div>
-//     ));
-//   };
-
-//   const dropdownItems = status === 'authenticated' ? [
-//     {
-//       key: '1',
-//       label: (
-//         <a onClick={openProfileModal} style={{ padding: '5px' }}>
-//           Profile
-//         </a>
-//       ),
-//     },
-//     {
-//       key: '2',
-//       label: (
-//         <a
-//           onClick={() => {
-//             localStorage.clear();
-//             localStorage.setItem('redirectUrl', router.asPath);
-//             router.push('/api/auth/signout');
-//           }}
-//         >
-//           Sign Out
-//         </a>
-//       ),
-//     },
-//   ] : [
-//     {
-//       key: '1',
-//       label: (
-//         <span onClick={() => signIn()} style={{ cursor: 'pointer' }}>
-//           Sign in
-//         </span>
-//       ),
-//     }
-
-//   ];
-
-//   const maleImoji = 'https://res.cloudinary.com/dyogjqsil/image/upload/v1727960655/3d-rendering-cartoon-character-with-eyeglasses-jacket_lu1cqi.jpg';
-
-//   const femaleImoji = 'https://res.cloudinary.com/dyogjqsil/image/upload/v1727960642/portrait-3d-female-doctor_cei7bm.jpg';
-
-//   const getAvatarSrc = () => {
-//     if (userdetails?.gender === 'Male') {
-//       return maleImoji;
-//     } else if (userdetails?.gender === 'Female') {
-//       return femaleImoji;
-//     }
-//     // return defaultImoji
-//   }
-
-//   // const dropdownItems = [
-//   //   {
-//   //     key: '1',
-//   //     label: (
-//   //       <a href="/api/auth/signin">Sign in</a>
-//   //     ),
-//   //   },
-//   //   {
-//   //     key: '2',
-//   //     label: (
-//   //       <a
-//   //         onClick={() => {
-//   //           localStorage.clear();
-//   //           localStorage.setItem('redirectUrl', router.asPath);
-//   //           router.push('/api/auth/signout');
-//   //         }}
-//   //       >
-//   //         Sign Out
-//   //       </a>
-//   //     ),
-//   //   },
-//   // ];
-
-//   return (
-//     <div
-//       style={{
-//         backgroundColor: darkMode ? '#333' : '#fff',
-//         // width:'100%',
-//         paddingRight: '20px',
-//         margin: '10px',
-//         display: 'flex',
-//         justifyContent: "space-between",
-//         alignItems: 'center'
-//         // transition: 'background-color 0.3s ease',
-//       }}
-//     >
-//       <div>
-//           <Image
-//             src={darkMode ? "/4.png" : "/RR1.png"}
-//             width={150}  // Larger logo when expanded
-//             height={60}
-//             priority={true}
-//             alt="Expanded Logo"
-//             style={{ margin: "0px 20px", objectFit: "cover" }}
-//           // src={darkMode ? "/4.png" : "/RR1.png"}
-//           // width={150}
-//           // height={60}
-//           // priority={true}
-//           // alt="Logo"
-//           // // style={{ maxWidth: "8rem", maxHeight: "4rem", marginBottom: '10px', margin:"0px 20px"}} // Optional margin for spacing
-//           // style={{ margin: "0px 20px" }} // Optional margin for spacing
-//           />
-//       </div>
-
-
-//        <div
-//         style={{
-//           display: 'flex',
-//           flexDirection: 'row',
-//           alignItems: 'center',
-//           gap: '1em',
-//           height: '60px',
-//           justifyContent: 'flex-end',
-//         }}
-//       >
-//         <h2
-//           style={{
-//             color: darkMode ? '#fff' : '#000',
-//             margin: 0,
-//             fontSize: '1.2rem',
-//             transition: 'color 0.3s ease',
-//           }}
-//         >
-//           Hi, {session?.user?.name || ''}
-//         </h2>
-//         <Dropdown
-//           menu={{
-//             items: dropdownItems,
-//           }}
-//           placement="bottomLeft"
-//           arrow={{ pointAtCenter: true }}
-//         >
-//           <Avatar
-//             size="large"
-//             src={getAvatarSrc()}
-//             style={{
-//               background: darkMode ? '#333' : '#ebebeb',
-//               fontSize: '1.8em',
-//               transition: 'background 0.3s ease',
-//             }}
-//           />
-//         </Dropdown>
-
-//         {/* <Button
-//         onClick={toggleTheme}
-//         style={{
-//           backgroundColor: darkMode ? '#333' : '#f0f0f0',
-//           color: darkMode ? '#fff' : '#000',
-//           transition: 'background-color 0.3s ease, color 0.3s ease',
-//         }}
-//       >
-//         {darkMode ? '🌙 Dark Mode' : '☀️ Light Mode'}
-//       </Button> */}
-//         <button
-//           onClick={toggleTheme}
-//           className={`theme-toggle-btn ${darkMode ? 'dark-mode' : 'light-mode'}`}
-//         >
-//           {darkMode ? (
-//             <Sun className="icon sun-icon" />
-//           ) : (
-//             <Moon className="icon moon-icon" />
-//           )}
-//         </button>
-
-//       </div>  
-
-//       <Modal
-//         visible={isModalVisible}
-//         width={`50%`}
-//         onCancel={onHandleCancel}
-//         footer={[
-//           // <Button key="close" onClick={onHandleCancel}>Close</Button>
-//         ]}
-//         style={{ textAlign: "center", borderRadius: '8px', padding: '0px' }}
-//       >
-//         <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", width: '100%' }}>
-//           <div style={{ display: "flex", justifyContent: "space-between", flexDirection: "row", height: "12%", marginBottom: '10px' }}>
-//             <div style={{ display: "flex", flexDirection: "column" }}>
-//               <Avatar
-//                 size={110}
-//                 src={getAvatarSrc()}
-//                 style={{ border: "2px solid #ccc" }}
-//               />
-//               {/* <Button 
-//                                 type="primary" 
-//                                 style={{ height: "25px", width: "70px", marginLeft: "10px", marginTop: "10px" }}
-//                                 onClick={() => handleProfileUpdate({ image: '/new-image.png' })}
-//                             >
-//                                 Upload
-//                             </Button> */}
-//             </div>
-//             <div style={{ display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "flex-start", padding: "0px" }}>
-//               <p style={{ margin: "1px" }}><span style={{ fontWeight: "bold" }}>ID:</span> {userdetails ? userdetails._id : ""}</p>
-//               <p style={{ margin: "1px" }}><span style={{ fontWeight: "bold" }}>EMAIL_ID:</span> {userdetails ? userdetails.email : "No email"}</p>
-//               <p style={{ margin: "1px" }}><span style={{ fontWeight: "bold" }}>Name:</span> {userdetails ? userdetails.userName : "Guest"}</p>
-//             </div>
-//           </div>
-//           <hr style={{ border: "1px solid black", width: "100%" }} />
-//           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-//             <div style={{ maxHeight: '200px', width: "100%", overflowY: 'auto', padding: '10px', border: '1px solid #ccc', marginBottom: '20px' }}>
-//               {renderAdAccounts()}
-//             </div>
-//           </div>
-//         </div>
-//       </Modal>
-//     </div>
-//   );
-// };
-
-const LayoutWrapper = ({ children, usersDataForLogin }) => {
+const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
   const router = useRouter();
   const [darkMode, setDarkMode] = useState(false);
   const { data: session, status: sessionStatus } = useSession();
@@ -966,40 +793,10 @@ const LayoutWrapper = ({ children, usersDataForLogin }) => {
   const [usersData, setUsersData] = useState([]);
   const { setuserdetails } = useTokenContext();
   const { apiClient } = useTokenContext();
+  const [topbarStatus, setTopbarStatus] = useState(false);
   
   const isCalledRef = useRef(false);  // To ensure getUsersData API is called only once
-  const [useractivites,setuseractivites]=useState({})
-  useEffect(() => {
-    if (Object.keys(useractivites).length === 0) return; // Do nothing if useractivites is empty
 
-    const postUserActivities = async () => {
-        try {
-            const response = await fetch("https://prodapis.adsgoat.in/UsersActivities/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: localStorage.getItem('token')
-                },
-                body: JSON.stringify({ userActivities: useractivites }),
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-                message.success("User activity posted successfully!");
-                console.log("Response:", result);
-            } else {
-                const errorData = await response.json();
-                message.error(`Failed to post user activity: ${errorData.message}`);
-            }
-        } catch (error) {
-            console.error("Error posting user activity:", error);
-            message.error("Error posting user activity.");
-        }
-    };
-
-    postUserActivities();
-}, [useractivites]);
-  // Generic retry mechanism for any API
   const debouncedRetry = debounce((fetchFunc, retries, resolve, reject) => {
     retryFetch(fetchFunc, retries - 1).then(resolve).catch(reject);
   }, 2000);
@@ -1138,41 +935,6 @@ const LayoutWrapper = ({ children, usersDataForLogin }) => {
           setuserdetails(usersDataForLogin[0]);
         }
         
-        // const localstorageItem = localStorage.getItem("token");
-        // console.log(localstorageItem)
-        const decodedToken = jwt.decode(localStorage.getItem("token"));
-        // console.log(decodedToken);
-        // console.log(decodedToken.exp);
-        // console.log(Math.floor(Date.now() / 1000));
-        // if (decodedToken && decodedToken.exp < Math.floor(Date.now() / 1000)) {
-          
-          
-        //   console.log("Token has expired.");
-        // }
-        
-        
-
-        // if (!localStorage.getItem("token")) {
-        //   const email = session.user.email;
-        //   const tokenResponse = await retryFetch(() => axios.post('/api/auth/jwt', { email }));
-        //   const token = tokenResponse.data.token;
-        //   localStorage.setItem("token", token);
-        //   const response = await getUserDetails(email);
-        //   console.log(response,"hellooaxios.post")
-        //   setuseractivites(response)
-        // }
-        // else if(decodedToken && decodedToken.exp < Math.floor(Date.now() / 1000)){
-        //   const email = session.user.email;
-        //   // const tokenResponse = await retryFetch(() => axios.post('/api/auth/jwt', { email }));
-        //   // const token = tokenResponse.data.token;
-        //   // localStorage.setItem("token", token);
-        //   localStorage.clear();
-        //   localStorage.setItem('redirectUrl', router.asPath);
-        //   signOut();
-        // }
-        // else {
-        //   console.log("Token is already stored:", localStorage.getItem("token"));
-        // }
       } catch (error) {
         console.error('Error during API call:', error);
       } finally {
@@ -1189,12 +951,12 @@ const LayoutWrapper = ({ children, usersDataForLogin }) => {
     }
   }, [sessionStatus, session]);
 
-  // useEffect(() => {
-  //   // Reload page if session has just become authenticated to avoid session delay issues
-  //   if (sessionStatus === 'authenticated' && !usersData) {
-  //     router.reload();  // Force reload to ensure session is fully loaded
-  //   }
-  // }, [sessionStatus, usersData, router]);
+  useEffect(()=>{
+    if(initialized && topbarStatus){
+      onComplete();
+    }
+  },[initialized, topbarStatus]);
+
 
   const toggleTheme = () => {
     setDarkMode(!darkMode);
@@ -1208,79 +970,15 @@ const LayoutWrapper = ({ children, usersDataForLogin }) => {
     signIn('google'); // Use Next-auth for Google sign-in
   };
 
+  const handleTopbarCalling = () =>{
+    setTopbarStatus(true)
+  }
+
   return (
     <>
-      <Topbar session={session} darkMode={darkMode} toggleTheme={toggleTheme} usersData={!loading && usersData} />
-      {/* {usersData.length === 0 && redirect("/")} */}
-      {/* {session && usersData && usersData.length > 0 &&
-                session.user && session.user.email ? (
-                usersData.some(user => user.email.toLowerCase() === session.user.email.toLowerCase()) ? (
-                    loading ? (
-                        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
-                            <Spin size="large" />
-                        </div>
-                    ) 
-                    : (
-                        // React.Children.map(children, child => {
-                        //     return React.cloneElement(child, { darkMode: darkMode });
-                        // })
-                        React.Children.map(children, child => {
-                          return React.cloneElement(child, { darkMode });
-                      })
-                      // <p>Hello</p>
-                    )
-                ) : (
-                    <div style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'hidden' }}>
-                        <img
-                            style={{
-                                width: '100%',
-                                height: 'auto',
-                                maxHeight: '90vh',
-                            }}
-                            src="/hope.png"
-                            alt="img"
-                        />
-                        <div style={{ position: 'absolute', top: 40, right: 4, zIndex: 2, border: "2px dotted green", padding: "1%" }}>
-                            <h3>You are not Authorized {session.user.email}`</h3>
-                            <ContactForm />
-                        </div>
-                    </div>
-
-                )
-            ) : 
-            ( sessionStatus !== "authenticated" ? (
-                <img
-                    style={{
-                        width: '100%',
-                        height: 'auto',
-                        maxHeight: '90vh',
-                    }}
-                    src="/hope.png"
-                    alt="img"
-                    as="image"
-                />
-              ):
-                <p style={{height:'0px', margin:'0px', padding:'0px'}}></p>
-            )
-          } */}
+      <Topbar session={session} darkMode={darkMode} toggleTheme={toggleTheme} usersData={!loading && usersData} onComplete={handleTopbarCalling}/>
+      
       {sessionStatus == "authenticated" && usersData?.length === 0 && !loading ?
-        // (
-        //   <div style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'hidden' }}>
-        //     <img
-        //       style={{
-        //         width: '100%',
-        //         height: 'auto',
-        //         maxHeight: '90vh',
-        //       }}
-        //       src="/hope.png"
-        //       alt="img"
-        //     />
-        //     <div style={{ position: 'absolute', top: 10, right: 4, zIndex: 2, border: "2px dotted green", padding: "1%" }}>
-        //       <h3>You are not Authorized {session.user.email}`</h3>
-        //       <ContactForm />
-        //     </div>
-        //   </div>
-        // ) 
         null
         :
         (sessionStatus !== "authenticated" ? (

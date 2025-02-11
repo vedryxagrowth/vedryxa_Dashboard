@@ -19,6 +19,8 @@ import Edituseraccesses from './users-components/edit-usersaccess';
 import EditAccountAccess from './users-components/edit-accountaccess';
 import EditNetworkAccess from './users-components/edit-network';
 import EditUrlBuilder from './users-components/edit-urlbulder';
+import RequestComponent from '../CronDashboard/crons';
+
 
 //UrlBuilder Components
 import MnetUrlBuilder from '../Campaigns/camp-components/urlbuilder/mnet';
@@ -75,8 +77,11 @@ const UsersTable = () => {
     const [searchInput, setSearchInput] = useState("");
     const [filteredData, setFilteredData] = useState([]);
     const [accFilteredData, setaccFilteredData] = useState([]);
-    const [paginationSize, setPaginationSize] = useState(10);
-    const [loading, setLoading] = useState(true);
+    const [paginationSize, setPaginationSize] = useState();
+    const [loading1, setLoading1] = useState(true);
+    const [loading2, setLoading2] = useState(true);
+    const [loading3, setLoading3] = useState(true);
+    const [loading4, setLoading4] = useState(true);
     const [drawerVisible, setDrawerVisible] = useState(false);
     const [accountDrawerVisible, setaccountDrawerVisible] = useState(false);
     const [usersaccessDrawerVisible, setusersaccessDrawerVisible] = useState(false);
@@ -149,7 +154,8 @@ const UsersTable = () => {
         { key: '1', label: 'Users', content: 'Content for Live data' },
         { key: '2', label: 'Accounts', content: 'Content for Daily data' },
         { key: '3', label: 'Networks', content: 'Content for Campaign data' },
-        { key: '4', label: 'UrlBuilder', content: 'Content for Campaign data' }
+        { key: '4', label: 'UrlBuilder', content: 'Content for Campaign data' },
+        {key: '5', label: 'CronDashboard', content: 'Content for Crons'}
     ];
 
     const handleTabChange = (key) => {
@@ -311,9 +317,10 @@ const UsersTable = () => {
                             if (response.status === 200) {
                                 // console.log('User deleted successfully');
                                 message.success(`${values.userName} User access removed successfully`);
-                                setTimeout(() => {
-                                    window.location.reload();
-                                }, 1500);
+                                refreshUsers();
+                                // setTimeout(() => {
+                                //     window.location.reload();
+                                // }, 1500);
                                 // Handle success, such as updating UI or showing a success message
                             } else {
                                 console.error('Failed to delete user');
@@ -370,7 +377,7 @@ const UsersTable = () => {
         } catch (error) {
             console.error('Error:', error);
         } finally {
-            setLoading(false);
+            setLoading1(false);
         }
     };
 
@@ -391,7 +398,7 @@ const UsersTable = () => {
         } catch (error) {
             console.error('Error:', error);
         } finally {
-            setLoading(false);
+            setLoading2(false);
         }
     };
 
@@ -438,7 +445,7 @@ const UsersTable = () => {
         } catch (error) {
             console.error('Error:', error);
         } finally {
-            setLoading(false);
+            setLoading3(false);
         }
     }
 
@@ -455,7 +462,7 @@ const UsersTable = () => {
         } catch (error) {
             console.error('Error:', error);
         } finally {
-            setLoading(false);
+            setLoading4(false);
         }
     }
 
@@ -1268,11 +1275,11 @@ const UsersTable = () => {
     useEffect(() => {
         const handleResize = () => {
             if (window.innerWidth < 768) {
-                setPaginationSize(5);
+                setPaginationSize();
             } else if (window.innerWidth < 2560) {
-                setPaginationSize(15);
+                setPaginationSize();
             } else {
-                setPaginationSize(25);
+                setPaginationSize();
             }
         };
 
@@ -1361,7 +1368,7 @@ const UsersTable = () => {
 
     const refreshUsers = async () => {
         try {
-            setLoading(true);
+            setLoading1(true);
             const response = await fetchusersData();  
             setUsersData(response.data);  
         } catch (error) {
@@ -1369,13 +1376,13 @@ const UsersTable = () => {
             
         } finally {
           
-            setLoading(false);
+            setLoading1(false);
         }
     };
 
     const refreshAccounts = async () => {
         try { 
-            setLoading(true);
+            setLoading2(true);
             const response = await fetchAccountsData(); 
             setAccountsData(response.data);  
         } catch (error) {
@@ -1383,31 +1390,31 @@ const UsersTable = () => {
             
         } finally {
           
-            setLoading(false);
+            setLoading2(false);
         }
     };
     
     const refreshNetworks = async () => {
         try {
-            setLoading(true);
+            setLoading3(true);
             const response = await fetchNetworksData();  
             setNetworksData(response.data); 
         } catch (error) {
             console.error("Error fetching network data:", error);
         } finally {
-            setLoading(false);
+            setLoading3(false);
         }
     };
 
     const refreshUrlBuilder = async () => {
         try {
-            setLoading(true);
+            setLoading4(true);
             const response = await fetchUrlBuilderData();  
             setUrlBuilderData(response.data); 
         } catch (error) {
             console.error("Error fetching network data:", error);
         } finally {
-            setLoading(false);
+            setLoading4(false);
         }
     };
 
@@ -1580,7 +1587,7 @@ const UsersTable = () => {
                             </Col>
                         </Row>
                     </Card>
-                    {loading ? (
+                    {loading1 ? (
                         <Spin />
                     ) : usersData.length > 0 ? (
                         <Table
@@ -1677,7 +1684,7 @@ const UsersTable = () => {
                             </Col>
                         </Row>
                     </Card>
-                    {(loading) ? (
+                    {(loading2) ? (
                         <Spin />
                     ) : AccountsData.length > 0 ? (
                         <Table
@@ -1774,7 +1781,7 @@ const UsersTable = () => {
                             </Col>
                         </Row>
                     </Card>
-                    {(loading) ? (
+                    {(loading3) ? (
                         <Spin />
                     ) : networksData.length > 0 ? ( 
                         <Table
@@ -1873,7 +1880,7 @@ const UsersTable = () => {
                             </Col>
                         </Row>
                     </Card>
-                    {(loading) ? (
+                    {(loading4) ? (
                         <Spin />
                     ) : urlBuilderData.length > 0 ? (
                         <Table
@@ -1914,6 +1921,58 @@ const UsersTable = () => {
                         >
                             {getUrlBuilder(network)}
                     </Modal>
+                </div>
+                {/* Add the RequestComponent for each network */}
+                <div>
+                    <Card title="Ad Account Details" size="small">
+                        <div
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'flex-start',
+                                padding: '10px',
+                            }}
+                        >
+                            <div
+                                style={{
+                                    maxHeight: '500px',
+                                    width: '100%',
+                                    overflowY: 'auto',
+                                    padding: '10px',
+                                    border: '1px solid #ccc',
+                                    marginBottom: '20px',
+                                }}
+                            >
+                                {userdetails?.adAccounts ? (
+                                    Object.keys(userdetails.adAccounts).map((network) => (
+                                        <RequestComponent
+                                            key={network}
+                                            network={network}
+                                            adAccounts={userdetails.adAccounts[network]}
+                                        />
+                                    ))
+                                ) : (
+                                    <div>Loading account details...</div> // Fallback while loading
+                                )}
+                            </div>
+                        </div>
+                    </Card>
+                </div>
+                {/* Render RequestComponent for each network */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                    <div style={{ maxHeight: '500px', width: '100%', overflowY: 'auto', padding: '10px', border: '1px solid #ccc', marginBottom: '20px' }}>
+                        {userdetails?.adAccounts ? (
+                            Object.keys(userdetails.adAccounts).map((network) => (
+                                <RequestComponent
+                                    key={network}
+                                    network={network}
+                                    adAccounts={userdetails.adAccounts[network]}
+                                />
+                            ))
+                        ) : (
+                            <div>Loading account details...</div> // Fallback while loading
+                        )}
+                    </div>
                 </div>
             </Carousel>
         </>

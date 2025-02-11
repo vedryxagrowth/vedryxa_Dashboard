@@ -24,11 +24,25 @@ const revenuePartnerNames = {
     "Bodies": "FB_Bodies",
     "TONIC": "FB_Tonic",
     "TONIC1":"FB_Tonic1",
-    "DActive":"FB_DomainActive",
+    "Domain Active":"FB_DomainActive",
     "ENKI":"FB_Enki",
     "System1":"FB_System1",
     "Domain_Active":"Newsbreak_DA",
 };
+
+const newtworkCollections = {
+    "FB_Mnet": "Facebook_Mnet",
+    "FB_MnetBing": "Facebook_MnetBing",
+    "FB_Enki": "Facebook_Enki",
+    "FB_System1": 'Facebook_System1',
+    "FB_Rsoc": 'Facebook_Rsoc',
+    "FB_Tonic": 'Facebook_Tonic',
+    "FB_DomainActive": "Facebook_DActive_Names",
+    "FB_Bodies": "Facebook_Bodies",
+    "FB_Bodies1": "Facebook_Bodies1",
+    "Newsbreak_DA": "Newsbreak_DomainActive",
+    "FB_Tonic1": "Facebook_Tonic1"
+}
 
 import { DatePicker, Space, ConfigProvider, Flex, Spin, Skeleton } from 'antd';
 import { generate } from '@ant-design/colors'; // For dynamic color generation
@@ -195,6 +209,7 @@ const RevenuePartnerDashboard = () => {
     const [domainColumnDefs, setDomainColumnDefs] = useState([]);
 
     const [isDomain, setIsDomain] = useState("");
+
 
     const onChangeTime = (value) => {
         setTimeZone(value);
@@ -839,6 +854,7 @@ const Dashboard = () => {
     //   })();
 
     const transformedData = transformData(userdetails?.adAccounts);
+    console.log(transformedData, "transformedData");
     // console.log(userdetails?.adAccounts, "1");
 
 
@@ -859,10 +875,16 @@ const Dashboard = () => {
     const [activeTab1, setActiveTab1] = useState("1");
 
     const [activeTab2, setActiveTab2] = useState("1");
+
+    const [activeTab3, setActiveTab3] = useState("1");
     // const toggleTheme = () => {
     //     setDarkMode(!darkMode);
     // };
     const [time, setTime] = useState('UTC');
+    
+    const [agencyNameReport, setAgencyNameReport] = useState([]);
+
+    const [byAccountNumber, setByAccountNumber] = useState([]);
 
     const onChangeTime = (value) => {
         setSkeletonLoading(true);
@@ -873,6 +895,8 @@ const Dashboard = () => {
     const carouselRef1 = useRef();
 
     const carouselRef2 = useRef();
+
+    const carouselRef3 = useRef();
 
     const revenue1 = useRef(0);
     const spend1 = useRef(0);
@@ -908,10 +932,24 @@ const Dashboard = () => {
     const [submitted, setSubmitted] = useState(false);
     const [domainWiseData, setDomainWiseData] = useState([]);
     const { apiClient } = useTokenContext();
+    // const [collectionName, setCollectionName] = useState([]);
 
     // const functionalCall = (data) => {
     //     setData(data);
     // }
+
+    const [searchValue, setSearchValue] = useState('');
+
+    const handleSearchChange = (value) => {
+        setSearchValue(value.toLowerCase());  // Store lowercase search term
+    };
+
+    // const handleSelectAllChange = (checked, category) => {
+    //     if (checked) {
+    //         setSearchValue(""); // Reset search value when network is selected
+    //     }
+    //     // Your existing logic for handling "Select All"
+    // };
 
     const handleChangeDates = (dates) => {
         setSelectedDates(dates || []); // Save selected dates in state
@@ -1011,17 +1049,32 @@ const Dashboard = () => {
         return total;
     }
 
-    function getTotalConversions(fullData) {
-        const total = fullData?.reduce((sum, item) => {
-            // Check if 'estimated_revenue' exists in the object and is a number
-            if (item.conversions) {
-                return sum + parseInt(item.conversions);
-            }
-            return sum;
-        }, 0); // Start the sum at 0
+    function getTotalConversions(fullData, collectionName) {
+        if(collectionName?.length === 1 && collectionName[0] === "Facebook_Mnet" && time === "UTC"){
+            const total = fullData?.reduce((sum, item) => {
+                // Check if 'estimated_revenue' exists in the object and is a number
+                if (item.ad_clicks) {
+                    return sum + parseInt(item.ad_clicks);
+                }
+                return sum;
+            }, 0); // Start the sum at 0
 
-        // Round the final total to 2 decimal places
-        return total;
+            // Round the final total to 2 decimal places
+            return total;
+
+        }
+        else{
+            const total = fullData?.reduce((sum, item) => {
+                // Check if 'estimated_revenue' exists in the object and is a number
+                if (item.conversions) {
+                    return sum + parseInt(item.conversions);
+                }
+                return sum;
+            }, 0); // Start the sum at 0
+
+            // Round the final total to 2 decimal places
+            return total;
+        }
     }
 
     function getAverageEstimatedCpc(fullData) {
@@ -1065,12 +1118,12 @@ const Dashboard = () => {
         return total;
     }
 
-    function getTotalNcpl(fullData) {
-        return Math.round((getTotalEstimatedSpend(fullData) / getTotalConversions(fullData)) * 100) / 100;
+    function getTotalNcpl(fullData, collectionName) {
+        return Math.round((getTotalEstimatedSpend(fullData) / getTotalConversions(fullData, collectionName)) * 100) / 100;
     }
 
-    function getTotalRpc(fullData) {
-        return Math.round((getTotalEstimatedRevenue(fullData) / getTotalConversions(fullData)) * 100) / 100;
+    function getTotalRpc(fullData, collectionName) {
+        return Math.round((getTotalEstimatedRevenue(fullData) / getTotalConversions(fullData, collectionName)) * 100) / 100;
     }
 
     function getTotalCpl(fullData) {
@@ -1128,6 +1181,8 @@ const Dashboard = () => {
         // };
 
         const transformedObject = transformObjectKeys(data);
+        console.log(transformedObject);
+        const collectionName = (Object.keys(transformedObject));
         // console.log(moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A'), "end");
         // console.log(transformedObject);
         let response;
@@ -1145,16 +1200,17 @@ const Dashboard = () => {
             spend1.current = getTotalEstimatedSpend(responseData);
             profit1.current = getTotalEstimatedProfit(responseData);
             leads1.current = getTotalLeads(responseData);
-            conversions1.current = getTotalConversions(responseData);
+            conversions1.current = getTotalConversions(responseData, collectionName);
             cpc1.current = getAverageEstimatedCpc(responseData);
-            ncpl1.current = getTotalNcpl(responseData);
+            ncpl1.current = getTotalNcpl(responseData, collectionName);
             cpl1.current = getTotalCpl(responseData);
-            rpc1.current = getTotalRpc(responseData);
+            rpc1.current = getTotalRpc(responseData, collectionName);
             ctr1.current = getTotalCtr(responseData);
 
             setData(responseData);
         }
         functionForDetailsUpdate();
+        console.log(collectionName.length === 1 && collectionName[0] === "Facebook_Mnet" && time === "UTC")
         function groupByCampaignAndDate(data) {
             return data?.reduce((acc, obj) => {
                 const campaignKey = obj?.campaign_name;
@@ -1175,7 +1231,13 @@ const Dashboard = () => {
                         spend: obj.spend ? parseFloat(obj.spend) : 0,
                         estimated_revenue: obj?.estimated_revenue ? parseFloat(obj?.estimated_revenue) : 0,
                         fbLeads: obj.fbLeads ? parseInt(obj?.fbLeads) : 0,
-                        conversions: obj.conversions ? parseInt(obj?.conversions) : 0,
+                        conversions: collectionName.length === 1 && collectionName[0] === "Facebook_Mnet" && time === "UTC"
+                        ? obj.ad_clicks
+                            ? parseInt(obj?.ad_clicks)
+                            : 0
+                        : obj.conversions
+                            ? parseInt(obj?.conversions)
+                            : 0,
                         revenuePartner: obj?.revenuePartner,
                         mediaBuyerName: obj?.MediaBuyerName,
                         holder: obj?.Holder,
@@ -1187,7 +1249,13 @@ const Dashboard = () => {
                     entry.spend += obj?.spend !== null && obj?.spend !== undefined ? parseFloat(obj?.spend) : 0;
                     entry.estimated_revenue += obj?.estimated_revenue !== null && obj?.estimated_revenue !== undefined ? parseFloat(obj?.estimated_revenue) : 0;
                     entry.fbLeads += obj?.fbLeads !== null && obj?.fbLeads !== undefined ? parseInt(obj?.fbLeads) : 0;
-                    entry.conversions += obj?.conversions !== null && obj?.conversions !== undefined ? parseInt(obj?.conversions) : 0;
+                    entry.conversions += collectionName.length === 1 && collectionName[0] === "Facebook_Mnet" && time === "UTC"
+                    ? obj?.ad_clicks !== null && obj?.ad_clicks !== undefined
+                        ? parseInt(obj?.ad_clicks)
+                        : 0
+                    : obj?.conversions !== null && obj?.conversions !== undefined
+                        ? parseInt(obj?.conversions)
+                        : 0;
                 }
         
                 return acc;
@@ -1218,7 +1286,7 @@ const Dashboard = () => {
             const topFiveCampaigns = [];
         
             // Step 3: Iterate through each date group and get the top 5 campaigns by spend
-            groupedByDate.forEach(campaigns => {
+            groupedByDate?.forEach(campaigns => {
                 // Sort the campaigns by spend in descending order and take the top 5
                 const topFive = campaigns
                     .sort((a, b) => b.spend - a.spend) // Sort by spend descending
@@ -1248,7 +1316,7 @@ const Dashboard = () => {
             const topFiveCampaigns = [];
         
             // Step 3: Iterate through each date group and get the top 5 campaigns by spend
-            groupedByDate.forEach(campaigns => {
+            groupedByDate?.forEach(campaigns => {
                 // Sort the campaigns by spend in descending order and take the top 5
                 const topFive = campaigns
                     .sort((a, b) => b.estimated_revenue - a.estimated_revenue) // Sort by spend descending
@@ -1278,7 +1346,7 @@ const Dashboard = () => {
             const topFiveCampaigns = [];
         
             // Step 3: Iterate through each date group and get the top 5 campaigns by spend
-            groupedByDate.forEach(campaigns => {
+            groupedByDate?.forEach(campaigns => {
                 // Sort the campaigns by spend in descending order and take the top 5
                 const topFive = campaigns
                     .sort((a, b) => b.profit - a.profit) // Sort by spend descending
@@ -1308,7 +1376,7 @@ const Dashboard = () => {
             const profitableCampaigns = [];
         
             // Step 3: Iterate through each date group, filter campaigns with profit > 0, and sort them by profit
-            groupedByDate.forEach(campaigns => {
+            groupedByDate?.forEach(campaigns => {
                 const filteredAndSortedCampaigns = campaigns
                     .filter(campaign => campaign.profit > 0) // Keep only campaigns with profit > 0
                     .sort((a, b) => b.profit - a.profit); // Sort by profit in descending order
@@ -1337,7 +1405,7 @@ const Dashboard = () => {
             const unprofitableCampaigns = [];
         
             // Step 3: Iterate through each date group, filter campaigns with profit < 0, and sort them by profit
-            groupedByDate.forEach(campaigns => {
+            groupedByDate?.forEach(campaigns => {
                 const filteredAndSortedCampaigns = campaigns
                     .filter(campaign => campaign.profit < 0) // Keep only campaigns with profit < 0
                     .sort((a, b) => b.profit - a.profit); // Sort by profit in descending order (optional)
@@ -1431,12 +1499,65 @@ const Dashboard = () => {
                         spend: obj.spend ? parseFloat(obj.spend) : 0,
                         estimated_revenue: obj.estimated_revenue ? parseFloat(obj.estimated_revenue) : 0,
                         fbLeads: obj.fbLeads ? parseInt(obj.fbLeads) : 0,
+                        conversions: collectionName.length === 1 && collectionName[0] === "Facebook_Mnet" && time === "UTC"
+                        ? obj.ad_clicks
+                            ? parseInt(obj?.ad_clicks)
+                            : 0
+                        : obj.conversions
+                            ? parseInt(obj?.conversions)
+                            : 0,
+                        revenuePartner: obj.revenuePartner,
+                        mediaBuyerName: obj.MediaBuyerName,
+                        holder: obj.Holder,
+                        // rpc: parseFloat(((obj.estimated_revenue/obj.conversions)*100)/100).toFixed(2),
+                        // cpl: parseFloat(((obj.spend/obj.fbLeads)*100)/100).toFixed(2) || 0
+                    });
+                } else {
+                    // If found, sum the respective fields
+                    entry.spend += obj.spend !== null && obj.spend !== undefined ? parseFloat(obj.spend) : 0;
+                    entry.estimated_revenue += obj.estimated_revenue !== null && obj.estimated_revenue !== undefined ? parseFloat(obj.estimated_revenue) : 0;
+                    entry.fbLeads += obj.fbLeads !== null && obj.fbLeads !== undefined ? parseInt(obj.fbLeads) : 0;
+                    entry.conversions += collectionName.length === 1 && collectionName[0] === "Facebook_Mnet" && time === "UTC"
+                    ? obj?.ad_clicks !== null && obj?.ad_clicks !== undefined
+                        ? parseInt(obj?.ad_clicks)
+                        : 0
+                    : obj?.conversions !== null && obj?.conversions !== undefined
+                        ? parseInt(obj?.conversions)
+                        : 0;
+                }
+        
+                return acc;
+            }, []).map(account => {
+                // Calculate profit after grouping
+                account.profit = account.estimated_revenue - account.spend,
+                account.rpc = parseFloat(((account.estimated_revenue/account.conversions)*100)/100).toFixed(2),
+                account.cpl = parseFloat(((account.spend/account.fbLeads)*100)/100).toFixed(2) || 0
+                return account;
+            });
+        }
+
+        console.log(responseData[0], "hi");
+        const groupedData = groupByAccountNumberAndDate(responseData, time);
+
+        function groupByAccountNumber(data) {
+            return data?.reduce((acc, obj) => {
+                const dateKey = obj.accountNumber; // dynamically access the specified date field
+        
+                // Find if the date key already exists in the accumulator array
+                let entry = acc.find(item => item.accountNumber === dateKey);
+        
+                if (!entry) {
+                    // If not found, create a new entry for this date
+                    acc.push({
+                        // date: dateKey,
+                        accountNumber: obj.accountNumber,
+                        spend: obj.spend ? parseFloat(obj.spend) : 0,
+                        estimated_revenue: obj.estimated_revenue ? parseFloat(obj.estimated_revenue) : 0,
+                        fbLeads: obj.fbLeads ? parseInt(obj.fbLeads) : 0,
                         conversions: obj.conversions ? parseInt(obj.conversions) : 0,
                         revenuePartner: obj.revenuePartner,
                         mediaBuyerName: obj.MediaBuyerName,
                         holder: obj.Holder,
-                        rpc: parseFloat(((obj.estimated_revenue/obj.conversions)*100)/100).toFixed(2),
-                        cpl: parseFloat(((obj.spend/obj.fbLeads)*100)/100).toFixed(2) || 0
                     });
                 } else {
                     // If found, sum the respective fields
@@ -1447,15 +1568,17 @@ const Dashboard = () => {
                 }
         
                 return acc;
-            }, []).map(account => {
+            }, []).map(dateEntry => {
                 // Calculate profit after grouping
-                account.profit = account.estimated_revenue - account.spend;
-                return account;
+                dateEntry.profit = dateEntry.estimated_revenue - dateEntry.spend;
+                return dateEntry;
             });
         }
 
-        console.log(responseData[0], "hi");
-        const groupedData = groupByAccountNumberAndDate(responseData, time);
+        const groupByAccountNumberData = groupByAccountNumber(groupedData);
+
+        setByAccountNumber(groupByAccountNumberData);
+
         setRowData(groupedData);
 
         function groupByDate(data, specifiedDateKey) {
@@ -1510,7 +1633,7 @@ const Dashboard = () => {
         const revenueByDate = sortedDataByDate.map(d => Math.round(parseFloat(d.estimated_revenue) * 100) / 100);
         const profitByDate = sortedDataByDate.map(d => Math.round((d.estimated_revenue - d.spend) * 100) / 100);
         const rpcByDate = sortedDataByDate.map(d => !isNaN((d.estimated_revenue / d.conversions)) && (d.estimated_revenue / d.conversions) !== undefined ? Math.round((d.estimated_revenue / d.conversions) * 100) / 100 : 0);
-        const cplByDate = sortedDataByDate.map(d => !isNaN(((d.spend / d.fbLeads) * 100)) && ((d.spend / d.fbLeads) * 100) !== undefined ? Math.round(((d.spend / d.fbLeads) * 100) * 100) / 100 : 0);
+        const cplByDate = sortedDataByDate.map(d => !isNaN(((d.spend / d.fbLeads) * 100)) && ((d.spend / d.fbLeads) * 100) !== undefined ? Math.round((((d.spend / d.fbLeads) * 100) / 100) * 100) / 100 : 0);
 
         const marginByDate = sortedDataByDate.map(d => d.estimated_revenue !== 0 ?Math.round((((d.estimated_revenue - d.spend) / d.estimated_revenue) * 100) * 100) / 100 : 0);
 
@@ -1556,23 +1679,61 @@ const Dashboard = () => {
             return domainResult;
         }
           
+        function groupDataByBMNameAndAgencyName(data, dateField) {
+            console.log(dateField);
+            const DomainGroupedData = data?.reduce((acc, obj) => {
+              const {  spend, estimated_revenue, BMName, AgencyName } = obj;
+              const specifiedDate = obj[dateField]; // Dynamically get the date based on the field
           
+              // Create a unique key for grouping by domain, specifiedDate, and accountNumber
+              const key = `${specifiedDate}-${BMName}-${AgencyName}`;
+          
+              if (!acc[key]) {
+                acc[key] = {
+                  specifiedDate,
+                  BMName,
+                  AgencyName,
+                  spend: 0,
+                  estimated_revenue: 0,
+                };
+              }
+          
+              // Sum the fields (spend, estimated_revenue) based on the new grouping
+              acc[key].spend += spend;
+              acc[key].estimated_revenue += estimated_revenue;
+          
+              return acc;
+            }, {});
+          
+            // Convert the grouped data object back to an array and add the profit field
+            const domainResult = Object.values(DomainGroupedData).map(item => {
+              item.profit = item.estimated_revenue - item.spend; // Calculate profit
+              return item;
+            });
+          
+            return domainResult;
+        }
           
           
         const domainResult = groupDataByDomainAndAccount(responseData, `${time}Date`);
 
+        const agencyLevelReport = groupDataByBMNameAndAgencyName(responseData, `${time}Date`);
+
         setDomainWiseData(domainResult);
+        setAgencyNameReport(agencyLevelReport);
           
         console.log(domainResult, "domain Result");
 
         const sortedData = groupedData.sort((a, b) => {
-            if (a.accountNumber < b.accountNumber) {
-              return -1;
-            }
-            if (a.accountNumber > b.accountNumber) {
-              return 1;
-            }
-            return 0;  // If accountNumber is the same, maintain original order
+            // Compare accountNumber first
+            if (a.accountNumber < b.accountNumber) return -1;
+            if (a.accountNumber > b.accountNumber) return 1;
+        
+            // If accountNumber is the same, compare specifiedDate
+            if (a.specifiedDate < b.specifiedDate) return -1;
+            if (a.specifiedDate > b.specifiedDate) return 1;
+        
+            return 0; // Maintain original order if both values are the same
         });
         console.log(sortedData);
 
@@ -1582,7 +1743,7 @@ const Dashboard = () => {
         const revenue = sortedData.map(d => Math.round(parseFloat(d.estimated_revenue) * 100) / 100);
         const profit = sortedData.map(d => Math.round((d.estimated_revenue - d.spend) * 100) / 100);
         const rpc = sortedData.map(d => !isNaN((d.estimated_revenue / d.conversions)) && (d.estimated_revenue / d.conversions) !== undefined ? Math.round((d.estimated_revenue / d.conversions) * 100) / 100 : 0);
-        const cpl = sortedData.map(d => !isNaN(((d.spend / d.fbLeads) * 100)) && ((d.spend / d.fbLeads) * 100) !== undefined ? Math.round(((d.spend / d.fbLeads) * 100) * 100) / 100 : 0);
+        const cpl = sortedData.map(d => !isNaN(((d.spend / d.fbLeads) * 100)) && ((d.spend / d.fbLeads) * 100) !== undefined ? Math.round((((d.spend / d.fbLeads) * 100) / 100) * 100) / 100 : 0);
 
         const margin = sortedData.map(d => d.estimated_revenue !== 0 ?Math.round((((d.estimated_revenue - d.spend) / d.estimated_revenue) * 100) * 100) / 100 : 0);
 
@@ -1713,6 +1874,9 @@ const Dashboard = () => {
     };
 
     const handleSelectAllChange = (isChecked, category) => {
+        if (isChecked) {
+            setSearchValue(""); // Reset search value when network is selected
+        }
         setSkeletonLoading(true);
         const newSelectedValues = isChecked ? transformedData[category] : [];
         setSelectedItems((prevSelected) => ({
@@ -1725,11 +1889,14 @@ const Dashboard = () => {
     // Render checkboxes for categories dynamically based on the first Select values
     const renderInnerSelects = (theme) => {
         return firstSelectValues.map((category) => {
-            // Ensure transformedData[category] is available before proceeding
-            console.log(transformedData[category]);
             const allSelected =
                 transformedData[category]?.length === selectedItems[category]?.length;
-    
+
+            // Filter transformedData based on search query
+            const filteredData = transformedData[category]?.filter(item =>
+                item.accountNumber?.toString().toLowerCase().includes(searchValue)
+            ) || [];
+
             return (
                 <div key={category}>
                     <div
@@ -1750,35 +1917,32 @@ const Dashboard = () => {
                             />
                         </Divider>
                     </div>
-    
-                    <Checkbox.Group
-                        options={
-                            transformedData[category]?.map((item) => {
-                                const accountNumber = item?.accountNumber ? item.accountNumber.toString() : 'Unknown';
-                                return {
-                                    label: (
-                                        <div style={{
-                                            display: 'flex',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center',
-                                            padding: '5px 10px',
-                                            borderBottom: '1px solid #ddd',  // Optional: to separate each item visually
-                                        }}>
-                                            <div style={{display:'flex', flexDirection:'column'}}>
-                                                <span style={{ fontWeight: '600' }}>{accountNumber}</span>
-                                                <span>{item.accountName || ''}</span>
-                                            </div>
-                                        </div>
-                                    ),
-                                    value: accountNumber,  // Ensure the value is the accountNumber as a string
-                                };
-                            }) || []  // Fallback to an empty array if transformedData[category] is undefined
-                        }
-                        value={selectedItems[category]?.map(item => item.accountNumber?.toString()) || []}
-                        onChange={(checkedValues) => handleGroupChange(checkedValues, category)}  // Handle the change in selection
-                        className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}  // Apply class based on theme
-                    />
 
+                    <Checkbox.Group
+                        options={filteredData.map((item) => {
+                            const accountNumber = item?.accountNumber ? item.accountNumber.toString() : 'Unknown';
+                            return {
+                                label: (
+                                    <div style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        padding: '5px 10px',
+                                        borderBottom: '1px solid #ddd',
+                                    }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                            <span style={{ fontWeight: '600' }}>{accountNumber}</span>
+                                            <span>{item.accountName || ''}</span>
+                                        </div>
+                                    </div>
+                                ),
+                                value: accountNumber,
+                            };
+                        })}
+                        value={selectedItems[category]?.map(item => item.accountNumber?.toString()) || []}
+                        onChange={(checkedValues) => handleGroupChange(checkedValues, category)}
+                        className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}
+                    />
                 </div>
             );
         });
@@ -1826,20 +1990,57 @@ const Dashboard = () => {
 
 
     const avgRpcCpl = (params) => {
-        // Filter out NaN and Infinity values
-        const validValues = params.values.filter(value => !isNaN(value) && isFinite(value));
-        
-        // If there are no valid values, return 0
-        if (validValues.length === 0) {
-            return 0;
+        // For non-grouped rows (individual row data)
+        if (params.data !== undefined) {
+            console.log(params.data);
+            const { conversions, estimated_revenue } = params.data;
+            if (estimated_revenue !== 0) {
+                const RPC = estimated_revenue / conversions;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return Number(RPC.toFixed(2));
+            }
         }
     
-        // Calculate average
-        const sum = validValues.reduce((acc, value) => acc + value, 0);
-        const average = sum / validValues.length;
+        // For grouped rows (aggregation)
+        if (params.node?.aggData !== undefined) {
+            console.log(params.node?.aggData);
+            const { conversions, estimated_revenue } = params.node.aggData;
+            if (estimated_revenue !== 0) {
+                const RPC = estimated_revenue / conversions;
+                return Number(RPC.toFixed(2));
+            }
+        }
     
-        // Return the average rounded to two decimal places
-        return parseFloat(average);
+        return 0;
+    };
+
+    const avgCpl = (params) => {
+        // For non-grouped rows (individual row data)
+        if (params.data !== undefined) {
+            // console.log(params.data);
+            const { spend, fbLeads } = params.data;
+            if (spend !== 0) {
+                const RPC = spend / fbLeads;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return Number(RPC.toFixed(2));
+            }
+        }
+    
+        // For grouped rows (aggregation)
+        if (params.node?.aggData !== undefined) {
+            // console.log(params.node?.aggData);
+            const { spend, fbLeads } = params.node.aggData;
+            if (spend !== 0) {
+                const RPC = spend / fbLeads;
+                return Number(RPC.toFixed(2));
+            }
+        }
+    
+        return 0;
     };
 
     const autoGroupColumnDefProfit = {
@@ -1994,6 +2195,99 @@ const Dashboard = () => {
         }
     };
     
+    const autoGroupColumnDefCampaigns = {
+        headerName: 'Campaign Name',
+        minWidth: 200,
+        sortable: true,
+        cellRendererParams: {
+            suppressCount: false,
+            innerRenderer: (params) => {
+                if (params.node.footer) {
+                    return 'Total';
+                }
+    
+                const firstColumnValue = params.node.key; // campaign name
+                const campaignName = params.node.key;
+                const groupedData = params.node.allLeafChildren
+                    ? params.node.allLeafChildren.map(childNode => childNode.data)
+                    : [];
+    
+                // Ensure groupedData has at least one element
+                if (groupedData.length === 0) {
+                    return '';
+                }
+    
+                // Safeguard against undefined or missing properties
+                const firstGroupedItem = groupedData[0] || {};
+                const revenuePartnerNameToPassToReports = firstGroupedItem.revenuePartner
+                    ? revenuePartnerNames[firstGroupedItem.revenuePartner]
+                    : 'Unknown Partner';
+                const collectionName = newtworkCollections[revenuePartnerNameToPassToReports];
+    
+                const accountNumberToPassToReports = firstGroupedItem.accountNumber || 'Unknown Account';
+                const campaignNameToPass = firstGroupedItem.campaign_name || 'Unknown Account';
+    
+                const valueWithCount = `${firstColumnValue}`;
+                return (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                        <span
+                            onClick={() => {
+                                // const data = {
+                                //     network: revenuePartnerNameToPassToReports,
+                                //     accountNumber: accountNumberToPassToReports,
+                                //     time: time,
+                                //     startDate: startDate,
+                                //     endDate: endDate,
+                                // };
+    
+                                // // Convert data to query string
+                                // const queryString = new URLSearchParams(data).toString();
+                                const url = `/DailyAndCampaignHistory/CampaignHistory/${campaignNameToPass}-${accountNumberToPassToReports}-${time}-${collectionName}`;
+                                console.log(url);
+    
+                                // Open the URL in a new tab
+                                window.open(url, '_blank');
+                            }}
+                        >
+                            {valueWithCount}
+                        </span>
+                    </div>
+                );
+            }
+        },
+        cellRendererFramework: (params) => {
+            if (params.node.group) {
+                // Keep the original logic for grouped rows
+                return params.valueFormatted || params.value || params.node.key;
+            }
+    
+            // For ungrouped rows, handle navigation directly
+            const accountNumber = params.data?.accountNumber || 'Unknown Account';
+            const revenuePartner = params.data?.revenuePartner || 'Unknown Partner';
+    
+            const data = {
+                network: revenuePartner,
+                accountNumber,
+                time,
+                startDate,
+                endDate,
+            };
+    
+            const queryString = new URLSearchParams(data).toString();
+            const url = `/Reports?${queryString}`;
+    
+            return (
+                <span
+                    style={{ cursor: 'pointer', color: '#1890ff' }}
+                    onClick={() => {
+                        window.open(url, '_blank');
+                    }}
+                >
+                    {accountNumber}
+                </span>
+            );
+        }
+    };
 
     const [columnDefs] = useState([
         {
@@ -2045,15 +2339,28 @@ const Dashboard = () => {
         {
             field: 'rpc',
             headerName: 'RPC',
-            aggFunc: avgRpcCpl,
-            valueFormatter: rpcCplFormatter,
+            valueGetter: avgRpcCpl,
+            // valueFormatter: rpcCplFormatter,
         },
         {
             field: 'cpl',
             headerName: 'CPL',
-            aggFunc: avgRpcCpl,
-            valueFormatter: rpcCplFormatter,
-        }
+            valueGetter: avgCpl,
+            // valueFormatter: rpcCplFormatter,
+        }, 
+        {
+            field: 'conversions',
+            headerName: 'Conversions',
+            aggFunc: spender,
+            // valueFormatter: rpcCplFormatter,
+        }, 
+        {
+            field: 'fbLeads',
+            headerName: 'FbLeads',
+            aggFunc: spender,
+            // valueFormatter: rpcCplFormatter,
+        }, 
+
     ]);
 
     const items = [
@@ -2074,6 +2381,11 @@ const Dashboard = () => {
     const items2 = [
         { key: '1', label: 'Date', content: 'Content for Top 5 Spend Campaigns' },
         { key: '2', label: 'Accounts', content: 'Content for Top 5 Revenue Campaigns' },
+    ];
+
+    const items3 = [
+        { key: '1', label: 'Domain', content: 'Content for Top 5 Spend Campaigns' },
+        { key: '2', label: 'Agency', content: 'Content for Top 5 Revenue Campaigns' },
     ];
 
     const handleSlideChange = (from, to) => {
@@ -2101,6 +2413,12 @@ const Dashboard = () => {
         // console.log((parseInt(to)+1).toString());
     };
 
+    const handleSlideChange3 = (from, to) => {
+        // console.log(to, "to");
+        setActiveTab3((parseInt(to)+1).toString());
+        // console.log((parseInt(to)+1).toString());
+    };
+
     const handleCarouselChange1 = (index) => {
         setActiveTab1(index);
         // console.log(index);
@@ -2114,6 +2432,14 @@ const Dashboard = () => {
         // console.log(index);
         // console.log(parseInt(index)-1);
         carouselRef2.current.goTo(parseInt(index)-1)
+        
+    };
+
+    const handleCarouselChange3 = (index) => {
+        setActiveTab3(index);
+        // console.log(index);
+        // console.log(parseInt(index)-1);
+        carouselRef3.current.goTo(parseInt(index)-1)
         
     };
 
@@ -2198,6 +2524,32 @@ const Dashboard = () => {
         </StickyBox>
     ));
 
+    const RenderCarouselNav3 = React.memo(() => (
+        <StickyBox offsetTop={64} offsetBottom={20} style={{ zIndex: 1, padding: '0px', margin: '0px' }}>
+            <Tabs
+                activeKey={activeTab3}
+                onChange={handleCarouselChange3}
+                items={items3.map((item) => ({
+                    key: item.key,
+                    label: item.label,
+                }))}
+                className="custom-tabs"
+                style={{
+                    backgroundColor: '#f0f2f5',
+                    padding: '0',
+                    marginBottom: '0',
+                }}
+                tabBarStyle={{
+                    fontSize: '12px',
+                    padding: '0',
+                    height: '30px',
+                    lineHeight: '30px',
+                    marginBottom: '-1px',
+                    borderBottom: 'none',
+                }}
+            />
+        </StickyBox>
+    ));
 
     const [columnDefs1] = useState([
         {
@@ -2211,7 +2563,7 @@ const Dashboard = () => {
             
 
         }, // Group by Network
-        {field:'specifiedDate', headerName:'Date'},
+        // {field:'specifiedDate', headerName:'Date'},
         {
             field: "spend",
             aggFunc: spender,
@@ -2348,6 +2700,49 @@ const Dashboard = () => {
             minWidth: 125// Group by MediaBuyerName
         },
     ]);
+    const [columnDefs4] = useState([
+        {   
+            field: 'BMName', minWidth: 200, suppressAutoSize: true,  
+            resizable: true,
+            sortable: true,
+            hide: true, // Hide column as it's grouped
+            rowGroup: true,
+            enableRowGroup: true,
+        },
+        {
+            field: "AgencyName", minWidth:180,
+            resizable: true,
+            sortable: true,
+            // hide: true, // Hide column as it's grouped
+            // rowGroup: true,
+            // enableRowGroup: true,
+
+        }, // Group by Network
+        {field:'specifiedDate', headerName:"Date",
+        minWidth: 125},
+        {
+            field: "spend",
+            aggFunc: spender,
+            valueFormatter: currencyFormatter,
+            minWidth: 125
+        }, // Summing Spend column
+        {
+            headerName: 'Revenue',
+            field: "estimated_revenue",
+            aggFunc: spender,
+            valueFormatter: currencyFormatter,
+            minWidth: 125
+        }, // Summing Revenue column
+        {
+            field: "profit",
+            aggFunc: spender,
+            cellClassRules: {
+                'font-red': p => p.value < 0
+            },
+            valueFormatter: currencyFormatter,
+            minWidth: 125
+        }
+    ]);
 
     const autoGroupColumnDef = {
         headerName: 'Campaign Name', // Display name for the grouped column
@@ -2361,6 +2756,15 @@ const Dashboard = () => {
 
     const autoGroupColumnDefDomain = {
         headerName: 'Domain', // Display name for the grouped column
+        minWidth: 250, // Set width for grouped rows
+        resizable: true, // Enable resizing
+        sortable: true, // Enable sorting
+        cellRendererParams: {
+          suppressCount: true, // Suppress row count in the grouped column
+        },
+      };
+      const autoGroupColumnDefAgency = {
+        headerName: 'BMName', // Display name for the grouped column
         minWidth: 250, // Set width for grouped rows
         resizable: true, // Enable resizing
         sortable: true, // Enable sorting
@@ -2507,22 +2911,22 @@ const Dashboard = () => {
                             </Col>
     
                             <Col span={6}>
-                                <Select
-                                    mode="multiple"
-                                    style={{ 
-                                        width: '100%',
-                                    }}
-                                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                    placeholder="Select items"
-                                    dropdownClassName={theme === 'dark' && 'custom-dropdown'}
-                                    value={[]} // This should be updated to reflect selectedItems based on the selected categories
-                                    dropdownRender={() => (
-                                        <div style={{ maxHeight: '300px', overflowY: 'auto', padding: '8px' }}>
-                                            {renderInnerSelects(theme)}
-                                        </div>
-                                    )}
-                                />
-                            </Col>
+            <Select
+                mode="multiple"
+                showSearch
+                onSearch={handleSearchChange}  // Update searchValue dynamically
+                style={{ width: '100%' }}
+                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                placeholder="Select items"
+                dropdownClassName={theme === 'dark' && 'custom-dropdown'}
+                value={[]} // This should be updated to reflect selectedItems based on the selected categories
+                dropdownRender={() => (
+                    <div style={{ maxHeight: '300px', overflowY: 'auto', padding: '8px' }}>
+                        {renderInnerSelects(theme)}
+                    </div>
+                )}
+            />
+        </Col>
     
                             <Col span={3}>
                                 <Select
@@ -3329,7 +3733,7 @@ const Dashboard = () => {
                                             style={{ width: '100%', height: '400px' }}
                                         >
                                             <AgGridReact
-                                                rowData={rowData?.slice().sort((a, b) => b.spend - a.spend).slice(0, 5)}
+                                                rowData={byAccountNumber?.slice().sort((a, b) => b.spend - a.spend).slice(0, 5)}
                                                 columnDefs={columnDefs1}
                                                 defaultColDef={defaultColDef}
                                                 rowGroupPanelShow="always"
@@ -3351,7 +3755,7 @@ const Dashboard = () => {
                                             style={{ width: '100%', height: '400px' }}
                                         >
                                             <AgGridReact
-                                                rowData={rowData?.slice().sort((a, b) => b.estimated_revenue - a.estimated_revenue).slice(0, 5)}
+                                                rowData={byAccountNumber?.slice().sort((a, b) => b.estimated_revenue - a.estimated_revenue).slice(0, 5)}
                                                 columnDefs={columnDefs1}
                                                 defaultColDef={defaultColDef}
                                                 rowGroupPanelShow="always"
@@ -3373,7 +3777,7 @@ const Dashboard = () => {
                                             style={{ width: '100%', height: '400px' }}
                                         >
                                             <AgGridReact
-                                                rowData={rowData?.slice().sort((a, b) => b.profit - a.profit).slice(0, 5)}
+                                                rowData={byAccountNumber?.slice().sort((a, b) => b.profit - a.profit).slice(0, 5)}
                                                 columnDefs={columnDefs1}
                                                 defaultColDef={defaultColDef}
                                                 rowGroupPanelShow="always"
@@ -3410,7 +3814,7 @@ const Dashboard = () => {
                                                 suppressAggFuncInHeader={true}
                                                 groupIncludeFooter={true}
                                                 groupIncludeTotalFooter={true}
-                                                autoGroupColumnDef={autoGroupColumnDef}
+                                                autoGroupColumnDef={autoGroupColumnDefCampaigns}
                                             />
                                         </div>
                                     </Col>
@@ -3430,7 +3834,7 @@ const Dashboard = () => {
                                                 suppressAggFuncInHeader={true}
                                                 groupIncludeFooter={true}
                                                 groupIncludeTotalFooter={true}
-                                                autoGroupColumnDef={autoGroupColumnDef}
+                                                autoGroupColumnDef={autoGroupColumnDefCampaigns}
                                             />
                                         </div>
                                     </Col>
@@ -3442,7 +3846,7 @@ const Dashboard = () => {
                                         <div
                                             className={`ag-theme-alpine ${gridThemeClass}`}
                                             style={{ width: '100%', height: '400px' }}
-                                        >             <AgGridReact
+                                        >   <AgGridReact
                                                 rowData={top5ProfitCampaigns}
                                                 columnDefs={columnDefs2}
                                                 defaultColDef={defaultColDef}
@@ -3450,7 +3854,7 @@ const Dashboard = () => {
                                                 suppressAggFuncInHeader={true}
                                                 groupIncludeFooter={true}
                                                 groupIncludeTotalFooter={true}
-                                                autoGroupColumnDef={autoGroupColumnDef}
+                                                autoGroupColumnDef={autoGroupColumnDefCampaigns}
                                             />
                                         </div>
                                     </Col>
@@ -3470,7 +3874,7 @@ const Dashboard = () => {
                                                 suppressAggFuncInHeader={true}
                                                 groupIncludeFooter={true}
                                                 groupIncludeTotalFooter={true}
-                                                autoGroupColumnDef={autoGroupColumnDef}
+                                                autoGroupColumnDef={autoGroupColumnDefCampaigns}
                                             />
                                         </div>
                                     </Col>
@@ -3490,7 +3894,7 @@ const Dashboard = () => {
                                                 suppressAggFuncInHeader={true}
                                                 groupIncludeFooter={true}
                                                 groupIncludeTotalFooter={true}
-                                                autoGroupColumnDef={autoGroupColumnDef}
+                                                autoGroupColumnDef={autoGroupColumnDefCampaigns}
                                             />
                                         </div>
                                     </Col>
@@ -3498,28 +3902,55 @@ const Dashboard = () => {
                             </div>
                         </Carousel>
                         
-                        
-                        <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                            <Col>
-                                <h2>Domain Level</h2>
-                            </Col>
-                            <Col>
-                                <div
-                                    className={`ag-theme-alpine ${gridThemeClass}`}
-                                    style={{ width: '100%', height: '400px' }}
-                                >             <AgGridReact
-                                        rowData={domainWiseData}
-                                        columnDefs={columnDefs3}
-                                        defaultColDef={defaultColDef}
-                                        // rowGroupPanelShow="always"
-                                        suppressAggFuncInHeader={true}
-                                        // groupIncludeFooter={true}
-                                        groupIncludeTotalFooter={true}
-                                        autoGroupColumnDef={autoGroupColumnDefDomain}
-                                    />
-                                </div>
-                            </Col>
-                        </Row>
+                        <div style={{padding:'0px', marginTop:'15px'}}>
+                            <RenderCarouselNav3/>
+                        </div>
+                        <Carousel ref={carouselRef3} beforeChange={handleSlideChange3} dots={false}>
+                            <div>
+                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                    <Col>
+                                        <div
+                                            className={`ag-theme-alpine ${gridThemeClass}`}
+                                            style={{ width: '100%', height: '400px' }}
+                                        >             <AgGridReact
+                                                rowData={domainWiseData}
+                                                columnDefs={columnDefs3}
+                                                defaultColDef={defaultColDef}
+                                                // rowGroupPanelShow="always"
+                                                suppressAggFuncInHeader={true}
+                                                // groupIncludeFooter={true}
+                                                groupIncludeTotalFooter={true}
+                                                autoGroupColumnDef={autoGroupColumnDefDomain}
+                                            />
+                                        </div>
+                                    </Col>
+                                </Row>
+                            </div>
+                            <div>
+                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                    <Col>
+                                        <div
+                                            className={`ag-theme-alpine ${gridThemeClass}`}
+                                            style={{ width: '100%', height: '400px' }}
+                                        >           <AgGridReact
+                                                        rowData={agencyNameReport}
+                                                        columnDefs={columnDefs4}
+                                                        defaultColDef={defaultColDef}
+                                                        gridOptions={{
+                                                            groupDefaultExpanded: -1, // Expands all groups by default
+                                                        }}
+                                                        // rowGroupPanelShow="always"
+                                                        suppressAggFuncInHeader={true}
+                                                        rowGroupPanelShow="always"
+                                                        // groupIncludeFooter={true}
+                                                        groupIncludeTotalFooter={true}
+                                                        autoGroupColumnDef={autoGroupColumnDefAgency}
+                                                    />
+                                        </div>
+                                    </Col>
+                                </Row>
+                            </div>
+                        </Carousel>
                         <Row></Row>
     
     

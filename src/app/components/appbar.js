@@ -13,7 +13,7 @@ import {
     UserOutlined,
     LaptopOutlined
 } from '@ant-design/icons';
-import { Layout, Menu, Button, theme, message } from 'antd';
+import { Layout, Menu, Button, theme, message, Spin } from 'antd';
 import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { SessionProvider, useSession, signOut } from 'next-auth/react';
@@ -31,33 +31,6 @@ function getItem(label, key, icon) {
         label,
     };
 }
-{/* <UserOutlined /> */ }
-// const menuItems = [
-//     getItem('Dashboard', '/Dashboard', <HomeOutlined />),
-//     getItem('Reports', '/Reports', <DatabaseOutlined />),
-//     getItem('Creatives', '/Creatives', <PieChartOutlined />),
-//     getItem('Campaigns', '/Campaigns', <DesktopOutlined />),
-//     // getItem('Users', '/Users', <ContainerOutlined />),
-//     getItem('NewUser', '/NewUser', <UserOutlined />),
-//     getItem('Setting', '/setting', <SettingOutlined />),
-//     getItem('Password', '/password', <LockOutlined />),
-//     getItem('Sign Out', '/signout', <LogoutOutlined />),
-// ].filter(Boolean);
-
-// const retryFetch = async (fetchFunc, retries = 3) => {
-//     try {
-//         return await fetchFunc();  // Try the API call
-//     } catch (error) {
-//         if (retries === 1) throw error;  // Throw error if no retries left
-  
-//         console.log(`Retrying... Attempts left: ${retries - 1}`);
-        
-//         // Use debounce for a delay before retrying
-//         return new Promise((resolve, reject) => {
-//             debouncedRetry(fetchFunc, retries, resolve, reject);
-//         });
-//     }
-// };
 
 const UserLocationFinder = ({ children, onComplete }) => {
     const router = useRouter();
@@ -127,12 +100,12 @@ const UserLocationFinder = ({ children, onComplete }) => {
           res.ok ? res.json() : res.json().then((err) => Promise.reject(err))
         )
         .then((result) => {
-          message.success("User activity posted successfully!");
+          // message.success("User activity posted successfully!");
           console.log("Response:", result);
         })
         .catch((err) => {
           console.error("Error posting user activity:", err);
-          message.error(err.message || "Error posting user activity.");
+          // message.error(err.message || "Error posting user activity.");
         });
   
       return userActivities;
@@ -146,42 +119,6 @@ const UserLocationFinder = ({ children, onComplete }) => {
           let decodedToken;
     
           if (token) {
-            // try {
-            //   // Decode the token
-            //   decodedToken = jwt.decode(token);
-    
-            //   if (!decodedToken || !decodedToken.exp) {
-            //     console.error("Decoded token is invalid or missing 'exp' field:", decodedToken);
-            //     throw new Error("Invalid token structure.");
-            //   }
-    
-            //   // Compare the token expiration with the current time
-            //   const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
-            //   console.log("Decoded token expiration:", decodedToken.exp);
-            //   console.log("Current time:", currentTime);
-    
-            //   if (decodedToken.exp < currentTime) {
-            //     console.log("Token is expired. Clearing localStorage and signing out.");
-    
-            //     // Broadcast sign-out to all tabs
-            //     localStorage.setItem("signout", "true");
-    
-            //     // Clear local changes and log out
-            //     localStorage.clear();
-            //     localStorage.removeItem("token");
-            //     localStorage.setItem("redirectUrl", router.pathname);
-            //     signOut();
-            //     return;
-            //   }
-            //   else{onComplete()}
-            // } catch (err) {
-            //   console.error("Error decoding token or handling expiration check:", err);
-            //   // Handle invalid token gracefully
-            //   localStorage.clear();
-            //   signOut();
-            //   onComplete();
-            //   return;
-            // }
             onComplete();
           } else {
             console.log("No token found in localStorage. Proceeding to generate.");
@@ -235,10 +172,15 @@ const Appbar = ({ children, usersDataForLogin }) => {
     // console.log(session?.user?.email)
     const { userdetails } = useTokenContext();
     const [isUserActivitiesComplete, setIsUserActivitiesComplete] = useState(false);
+    const [moveForward, setMoveForward] = useState(false);
 
     const handleUserActivitiesComplete = () => {
         setIsUserActivitiesComplete(true);
     };
+
+    const handleMoveForward = () =>{
+      setMoveForward(true);
+    }
     // console.log(userdetails);
 
     useEffect(() => {
@@ -262,11 +204,6 @@ const Appbar = ({ children, usersDataForLogin }) => {
         usersDataForLogin[0]?.role === 'Admin' && getItem('NewUser', '/NewUser', <UserOutlined />),
         usersDataForLogin[0]?.role === 'Admin' && getItem('Activities', '/Activities', <LaptopOutlined />),
     ].filter(Boolean);
-
-    //     useEffect(async()=>{
-    //     const userResponse = await axios.get(`https://prodapis.adsgoat.in/api/getusersData?email=${session?.user?.email}`);
-    //     setusersDataForLogin(userResponse.data);
-    //   },[session?.user?.email]);
 
     const toggleCollapsed = () => {
         setCollapsed(!collapsed);
@@ -400,15 +337,26 @@ const Appbar = ({ children, usersDataForLogin }) => {
             </Sider>
 
             <Layout style={{ marginLeft: collapsed ? 0 : 0, transition: 'margin-left 0.2s', backgroundColor: darkMode ? '#262426d6' : '#f5f5f5' }}>
-                <LayoutWrapper usersDataForLogin={usersDataForLogin} />
+                
+              
+                <LayoutWrapper usersDataForLogin={usersDataForLogin} onComplete={handleMoveForward}/>
+                {!moveForward &&
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                    <Spin size="large" />
+                </div>}
+                
+                {moveForward &&
+                  <div style={{ border: "", margin: "0px 10px", borderRadius: "", height: "86vh", overflow: "auto", backgroundColor: darkMode ? '#333' : '#f0f0f0', scrollbarWidth: "thin " }}>
 
-                <div style={{ border: "", margin: "0px 10px", borderRadius: "", height: "86vh", overflow: "auto", backgroundColor: darkMode ? '#333' : '#f0f0f0', scrollbarWidth: "thin " }}>
 
+                      {React.Children.map(children, child => {
+                          return React.cloneElement(child, { darkMode });
+                      })}
+                  </div>
+                }
+                
+              
 
-                    {React.Children.map(children, child => {
-                        return React.cloneElement(child, { darkMode });
-                    })}
-                </div>
 
             </Layout>
         </Layout>

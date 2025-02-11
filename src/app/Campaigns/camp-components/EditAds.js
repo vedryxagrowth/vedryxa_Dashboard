@@ -353,6 +353,18 @@ const Editads = ({ viewCampaignData, changeRRefrst, editdata, onClose }) => {
   const [imageshow, setimageshow] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [formData, setFormData] = useState(null);
+  const [fileList, setFileList] = useState(
+    initialMedia
+      ? [
+          {
+            uid: "-1", // Unique ID for the default file
+            name: initialMedia.split("/").pop(), // Extract filename from URL
+            status: "done", // Mark as already uploaded
+            url: initialMedia, // Default image/video URL
+          },
+        ]
+      : []
+  );
 
   let s3UrlPath = '';
   let hashid = '';
@@ -504,35 +516,41 @@ const Editads = ({ viewCampaignData, changeRRefrst, editdata, onClose }) => {
       };
 
       try {
-        const response = await axios.get(
-          `https://www.testapi.adsgoat.in/api/hashimageidentity/${viewCampaignData?.Account_Number}`,
-          {
-            headers: {
-              Authorization: localStorage.getItem('token'),
-            },
+        // const response = await axios.get(
+        //   `https://www.testapi.adsgoat.in/api/hashimageidentity/${viewCampaignData?.Account_Number}`,
+        //   {
+        //     headers: {
+        //       Authorization: localStorage.getItem('token'),
+        //     },
+        //   }
+        // );
+        // const imagehash = response.data[0];
+
+        // const mediaData = await customRequest(imageshow, imagehash, onSuccess, onError);
+
+        let newAddData = {id: uuidv4(), ...formData, filename: editdata?.filename, imag_hash: editdata?.imag_hash};
+        if(editdata?.videoid){
+          newAddData = {...newAddData,
+            videoid: editdata?.videoid,
+            thambnailurl: editdata?.thambnailurl,
           }
-        );
-        const imagehash = response.data[0];
-
-        const mediaData = await customRequest(imageshow, imagehash, onSuccess, onError);
-
-        let newAddData;
-        if (mediaData.type === 'image') {
-          newAddData = {
-            ...formData,
-            id: uuidv4(),
-            filename: mediaData.filename,
-            imag_hash: mediaData.imag_hash,
-          };
-        } else if (mediaData.type === 'video') {
-          newAddData = {
-            ...formData,
-            id: uuidv4(),
-            filename: mediaData.filename,
-            videoid: mediaData.videoid,
-            thambnailurl: mediaData.thambnailurl,
-          };
         }
+        // if (mediaData.type === 'image') {
+        //   newAddData = {
+        //     ...formData,
+        //     id: uuidv4(),
+        //     filename: mediaData.filename,
+        //     imag_hash: mediaData.imag_hash,
+        //   };
+        // } else if (mediaData.type === 'video') {
+        //   newAddData = {
+        //     ...formData,
+        //     id: uuidv4(),
+        //     filename: mediaData.filename,
+        //     videoid: mediaData.videoid,
+        //     thambnailurl: mediaData.thambnailurl,
+        //   };
+        // }
 
         await postData(newAddData);
         // changeRRefrst && changeRRefrst();
@@ -559,7 +577,7 @@ const Editads = ({ viewCampaignData, changeRRefrst, editdata, onClose }) => {
       const data1 = {
         id: values.id,
         AddName: values.AddName,
-        filename: s3UrlPath,
+        filename: values.filename,
         page_id: values.page_id,
         message: values.message,
         headline: values.headline,
@@ -621,7 +639,19 @@ const Editads = ({ viewCampaignData, changeRRefrst, editdata, onClose }) => {
         form={form}
         layout="vertical"
         onFinish={handleSubmit}
-        initialValues={editdata}
+        initialValues={{
+          ...editdata, // Include other form values
+          MediaContent: editdata?.filename
+            ? [
+                {
+                  uid: "-1", // Unique identifier for the default file
+                  name: editdata.filename.split("/").pop(), // Extract filename from URL
+                  status: "done", // Mark the file as uploaded
+                  url: editdata.filename, // URL of the default file
+                },
+              ]
+            : [], // Initialize with an empty array if no default file
+        }}
         onValuesChange={(changedValues) => {
           if (changedValues.AddName !== undefined) setAddName(changedValues.AddName);
           if (changedValues.message !== undefined) setPrimaryText(changedValues.message);
@@ -637,11 +667,47 @@ const Editads = ({ viewCampaignData, changeRRefrst, editdata, onClose }) => {
               <Input />
             </Form.Item>
 
-            <Form.Item name="MediaContent" label="Upload Media" rules={[{ required: true, message: 'Please upload a file!' }]}>
-              <Upload beforeUpload={handleBeforeUpload} onChange={handleChange} maxCount={1} accept="image/*, video/*">
-                <Button icon={<UploadOutlined />}>Select File</Button>
+            <Form.Item
+              name="MediaContent"
+              label="Upload Media"
+              rules={[{ required: true, message: "Please upload a file!" }]}
+              valuePropName="fileList"
+              getValueFromEvent={(e) => e?.fileList || []}
+            >
+              <Upload
+                beforeUpload={(file) => false}
+                onChange={(info) => {
+                  const { fileList } = info;
+                  form.setFieldsValue({ MediaContent: fileList });
+                }}
+                maxCount={1}
+                accept="image/*,video/*"
+                listType="picture-card"
+                defaultFileList={
+                  editdata?.filename
+                    ? [
+                        {
+                          uid: "-1",
+                          name: editdata.filename.split("/").pop(),
+                          status: "done",
+                          url: editdata.filename,
+                        },
+                      ]
+                    : []
+                }
+                showUploadList={{
+                  showRemoveIcon: false, // Disable the remove (delete) icon
+                }}
+              >
+                {(!editdata || !editdata.filename) && (
+                  <div>
+                    <UploadOutlined />
+                    <div style={{ marginTop: 8 }}>Select File</div>
+                  </div>
+                )}
               </Upload>
             </Form.Item>
+
 
             <Form.Item name="AddName" label="Add Name" rules={[{ required: true, message: 'Please enter an ad name!' }]}>
               <Input onChange={(e) => setAddName(e.target.value)} />

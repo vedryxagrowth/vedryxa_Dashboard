@@ -1031,7 +1031,7 @@ const App = () => {
                         </Select>
                     </Col>
 
-                    <Col span={4}>
+                    <Col span={5}>
                         <ConfigProvider>
                             <RangePicker
                                 presets={rangePresets}
@@ -1044,7 +1044,7 @@ const App = () => {
                         </ConfigProvider>
                     </Col>
 
-                    <Col span={4}>
+                    <Col span={3}>
 
                         <Input
                             placeholder="Search..."
