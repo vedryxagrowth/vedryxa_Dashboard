@@ -7,35 +7,30 @@ import { Add } from '@mui/icons-material';
 import { useTokenContext } from '../../components/parent';
 
 const Edituseraccesses = ({ editeddata, visible, onClose }) => {
-    // console.log(editeddata, "heyy edit-useraccess page")
-    // console.log(editeddata, "editeddata");
     const userAccess = editeddata?.adAccounts;
-    // console.log(userAccess, "adAccounts");
     userAccess !== null && userAccess !== undefined ? Object.keys(userAccess).map(key => ({ network: key, inputs: userAccess[key] })) : [];
-    // console.log(userAccessresult, "userAccessResult");
     let userName;
     if (editeddata !== null){
         userName = editeddata.userName;
     }
-    // console.log(userName, "userName");
+
     const [isModalVisible, setIsModalVisible] = useState(false);
     const { theme } = useTokenContext();
     const { apiClient } = useTokenContext();
     
-
     const [formalldata, setFormData] = useState({
         userName: '',
         email: '',
         role: '',
         adAccounts: [],
     });
-    // const userAccessData =  [{network: "Mnet", inputs: ['123456789', '987654321']}, {network: "Enki", inputs: ['123456789', '987654321']}];
-
+    
     const [additionalAccounts, setAdditionalAccounts] = useState([]);
     const [formAccounts, setFormAccounts] = useState([]);
     const [selectedNetworks, setSelectedNetworks] = useState([]);
     const [editeddatas, setEditeddatas] = useState(null);
     var token = localStorage.getItem("token")
+
     useEffect(()=>{
         if(userAccess !== null && userAccess !== undefined){
             setAdditionalAccounts(Object.keys(userAccess).map(key => ({ network: key, inputs: userAccess[key] })))
@@ -44,33 +39,6 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
             setAdditionalAccounts([])
         }
     }, [userAccess]);
-    // const submitForm = async (values) => {
-    //     try {
-    //         const allAccounts = [
-    //             ...(editeddata && editeddata.adAccounts ? editeddata.adAccounts : []),
-    //             ...additionalAccounts
-    //         ];
-
-    //         const formattedData = {
-    //             ...values,
-    //             adAccounts: allAccounts,
-    //         };
-
-    //         const response = await axios.put(`https://www.testapi.adsgoat.in/api/users/${editeddata && editeddata.email}`, formattedData);
-
-    //         if (response.status === 200) {
-    //             console.log('User created successfully');
-    //             message.success("User created successfully"); // Display success message
-    //             setIsModalVisible(false); // Close modal after success
-    //             onClose(); // Close drawer
-    //         } else {
-    //             console.error('Failed to create user');
-    //             // Handle error, show error message
-    //         }
-    //     } catch (error) {
-    //         console.error('Error creating user:', error);
-    //     }
-    // };
 
     let AddAccounts ;
 
@@ -79,10 +47,8 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
     }, [additionalAccounts, formAccounts]);
 
     const handleAddAccount = () => {
-        // console.log(AddAccounts, "AddAccounts");
         if(AddAccounts.length > 1){
             const newAccount = { network: '', inputs: [''] };
-            // setFormAccounts(prevFormAccounts => [...prevFormAccounts, newAccount]);
             setAdditionalAccounts(prevAdditionalAccounts => [...prevAdditionalAccounts, newAccount]);
         }
     };
@@ -98,16 +64,12 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                     updateSelectedNetworks([...formAccounts, ...updatedAccounts]);
                 } catch (error) {
                     console.error('Error:', error);
-                    // Handle error, such as showing an error message
                 }
             },
             onCancel: () => {
                 console.log('Cancel');
             },
         });
-        // const updatedAccounts = additionalAccounts.filter((_, accountIndex) => accountIndex !== index);
-        // setAdditionalAccounts(updatedAccounts);
-        // updateSelectedNetworks([...formAccounts, ...updatedAccounts]);
     };
 
     const handleRemoveAccount1 = (index) => {
@@ -121,16 +83,12 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                     updateSelectedNetworks([...updatedFormAccounts, ...additionalAccounts]);
                 } catch (error) {
                     console.error('Error:', error);
-                    // Handle error, such as showing an error message
                 }
             },
             onCancel: () => {
                 console.log('Cancel');
             },
         });
-        // const updatedFormAccounts = formAccounts.filter((_, accountIndex) => accountIndex !== index);
-        // setFormAccounts(updatedFormAccounts);
-        // updateSelectedNetworks([...updatedFormAccounts, ...additionalAccounts]);
     };
 
     const handleNetworkChange = (index, value) => {
@@ -170,7 +128,6 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                     setAdditionalAccounts(updatedAccounts);
                 } catch (error) {
                     console.error('Error:', error);
-                    // Handle error, such as showing an error message
                 }
             },
             onCancel: () => {
@@ -204,42 +161,24 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
 
     const getAvailableNetworks = (currentNetwork = '') => {
         const allSelectedNetworks = selectedNetworks.filter(network => network !== currentNetwork);
-        
         const data = ["FB_Mnet", "FB_MnetBing", "FB_Enki", "FB_Tonic", "FB_System1", "FB_Bodies", "FB_Bodies1", "FB_Rsoc", "FB_DomainActive"].filter(network => !allSelectedNetworks.includes(network));
-        // setNetworks(data);
         AddAccounts = data;
         return data;
     };
-
 
     const handleCancel = () => {
         setIsModalVisible(false);
     };
 
-    // const handleAddAccount = () => {
-    //     setAdditionalAccounts([...additionalAccounts, '']);
-    // };
-
-    // const handleRemoveAccount = (index) => {
-    //     const newAccounts = [...additionalAccounts];
-    //     newAccounts.splice(index, 1);
-    //     setAdditionalAccounts(newAccounts);
-    // };
     const submitForm = async (values) => {
         Modal.confirm({
             title: 'Confirmation',
             content: 'Are you sure you want to submit?',
             onOk: async() => {
                 try {
-                    // const allAccounts = [
-                    //     ...(editeddata && editeddata.adAccounts ? editeddata.adAccounts : []),
-                    //     ...additionalAccounts
-                    // ];
                     const singleObject = additionalAccounts.reduce((acc, obj) => {
                         const key = obj[Object.keys(obj)[0]];
                         const value = Object.keys(obj)[1];
-                        // console.log() // Get the key from the current object
-                        // console.log(obj, "obj")
                         acc[key] = obj[value]; // Assign the value to the accumulated object using the key
                         return acc;
                     }, {});
@@ -247,30 +186,19 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                     const formattedData = {
                         ...values, adAccounts: singleObject
                     };
-                    // console.log(formattedData);
-                    // console.log(additionalAccounts, "additionalAccounts data");
-                    // console.log(singleObject, ":singleObject");
         
                     const response = await apiClient.put(`/api/updateUserTableData/`, {formattedData});
         
                     if (response.status === 200) {
                         message.success("User Edits updated successfully"); // Display success message
-
                         // Pass the updated user data back to the parent to update the table
                         const updatedUserData = { ...editeddata, ...formattedData };
-                        
                         // Call onClose and pass the updated data to the parent
                         onClose(updatedUserData);
-                        
-                        // setTimeout(() => {
-                        //     window.location.reload();
-                        // }, 1500);
-
                         setIsModalVisible(false); 
                     }
                      else {
                         console.error('Failed to update user');
-                        // Handle error, show error message
                     }
                 } catch (error) {
                     console.error('Error updating user:', error);
@@ -283,22 +211,6 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
         
     };
 
-
-    // const handleRemoveAccount = (index, type) => {
-    //     if (type === 'existing') {
-    //         // Logic to remove existing account from editeddata
-    //         const newEditedData = { ...editeddata };
-    //         newEditedData.adAccounts.splice(index, 1);
-    //         setEditeddatas(newEditedData);
-    //     } else {
-    //         // Logic to remove additional account
-    //         const newAccounts = [...additionalAccounts];
-    //         newAccounts.splice(index, 1);
-    //         setAdditionalAccounts(newAccounts);
-    //     }
-    // };
-
-
     const handleOk = () => {
         setIsModalVisible(false);
         document.querySelector('form').dispatchEvent(new Event('submit', { cancelable: true }));
@@ -308,11 +220,8 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
         email: editeddata.email,
         role: editeddata.role,
         adAccounts: editeddata.adAccounts
-        // Add other fields with their initial values here
     } : null;
 
-    
-    // console.log(initialValues, "initialValues")
     return (
         <Drawer
             title={`Edit the user ${userName}`}
@@ -376,47 +285,14 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                         <Select.Option value="Manager">Manager</Select.Option>
                     </Select>
                 </Form.Item>
-                {/* <Form.Item label="Ad Accounts" name="adAccounts">
-                    <div>
-                        {(editeddata && editeddata.adAccounts ? editeddata.adAccounts : []).map((account, index) => (
-                            <div key={index}>
-                                <Input
-                                    value={account}
-                                    readOnly // Ensure the input is read-only to display existing accounts
-                                    placeholder="Existing ad account"
-                                />
-                                <Button type="default" onClick={() => handleRemoveAccount(index)}>
-                                    Remove
-                                </Button>
-                            </div>
-                        ))}
-                        {additionalAccounts.map((account, index) => (
-                            <div key={index}>
-                                <Input
-                                    value={account}
-                                    onChange={(e) => {
-                                        const newAccounts = [...additionalAccounts];
-                                        newAccounts[index] = e.target.value;
-                                        setAdditionalAccounts(newAccounts);
-                                    }}
-                                    placeholder="Enter ad account"
-                                />
-                                <Button type="default" onClick={() => handleRemoveAccount(index)}>
-                                    Remove
-                                </Button>
-                            </div>
-                        ))}
-                        <Button type="dashed" onClick={handleAddAccount} icon={<PlusOutlined />}>
-                            Add Account
-                        </Button>
-                    </div>
-                </Form.Item> */}
+                
                 {additionalAccounts?.map((account, accountIndex) => (
                     <div key={accountIndex}>
-                        <div style={{ display: 'flex', marginBottom: '8px', width: '100%' }}>
+                        <div className='add-accounts'>
                             <Select
                                 placeholder="Select a network"
-                                style={{ width: '145px', height: '30px', marginRight:'8px',
+                                className='add-accounts-select-network'
+                                style={{
                                     backgroundColor: theme === 'dark' && '#333', // Background color
                                     color: theme === 'dark' && '#fff',
                                 }}
@@ -442,14 +318,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                                 {account.inputs.map((input, inputIndex) => (
                                     <div
                                     key={inputIndex}
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        marginBottom: '8px',
-                                        width: '100%',
-                                        height: '30px',
-                                        justifyContent: 'center',
-                                    }}
+                                    className='add-account-container-input'
                                     >
                                     <Input
                                         value={input}
@@ -489,10 +358,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                                     </div>
                                 ))}
                             </div>
-
-
-                        </div>
-                        
+                        </div> 
                     </div>
                 ))}
 
@@ -500,7 +366,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                     <div>
                         {formAccounts.map((account, accountIndex) => (
                             <div key={accountIndex}>
-                                <div style={{ display: 'flex', marginBottom: '8px', width: '100%' }}>
+                                <div className='add-accounts'>
                                     <Select
                                         placeholder="Select a network"
                                         style={{ width: '120px', marginRight: '8px',
@@ -517,9 +383,9 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                                             </Select.Option>
                                         ))}
                                     </Select>
-                                    <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                                    <div className='add-account-container'>
                                         {account.inputs.map((input, inputIndex) => (
-                                            <div key={inputIndex} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', width: '100%' }}>
+                                            <div key={inputIndex} className='add-account-input-container'>
                                                 <Input
                                                     value={input}
                                                     onChange={(e) => handleInputChange1(accountIndex, inputIndex, e.target.value)}
@@ -585,11 +451,3 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
 };
 
 export default Edituseraccesses;
-
-
-
-
-
-
-
-

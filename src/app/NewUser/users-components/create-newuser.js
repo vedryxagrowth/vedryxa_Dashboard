@@ -5,7 +5,7 @@ import { CloseOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { useTokenContext } from '../../components/parent';
 
-const Createnewuser = ({ visible, onClose }) => {
+const Createnewuser = ({ visible, onClose, refreshUsers }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const { theme } = useTokenContext();
     const { apiClient } = useTokenContext();
@@ -17,14 +17,8 @@ const Createnewuser = ({ visible, onClose }) => {
     });
     const [additionalAccounts, setAdditionalAccounts] = useState([]);
     const [selectedNetworks, setSelectedNetworks] = useState([]);
-    // const [inputsArray, setInputArray] = useState([]);
-    // console.log(additionalAccounts, "addition");
-    // const [data, setData] = useState({});
-    // const [inputValue, setInputValue] = useState();
-    // const netData = {...data};
-    // console.log(netData);
-    // const [network, setNetwork] = useState();
-    // const [accounts, setAccounts] = useState();
+    const [form] = Form.useForm();
+
     var token = localStorage.getItem("token");
 
     const availableNetworks = ["FB_Mnet", "FB_MnetBing", "FB_Enki", "FB_Tonic", "FB_System1", "FB_Bodies", "FB_Bodies1", "FB_Rsoc", "FB_DomainActive"].filter(network => !selectedNetworks.includes(network));
@@ -38,7 +32,6 @@ const Createnewuser = ({ visible, onClose }) => {
         const updatedAccounts = additionalAccounts.filter((_, accountIndex) => accountIndex !== index);
         setAdditionalAccounts(updatedAccounts);
         setSelectedNetworks(updatedAccounts.map(account => account.network));
-        // console.log(index, "remove");
     };
 
     const handleNetworkChange = (index, value) => {
@@ -55,15 +48,11 @@ const Createnewuser = ({ visible, onClose }) => {
     };
 
     const handleRemoveInput = (accountIndex, inputIndex) => {
-        // console.log(inputIndex, "inputIndex");
-        // console.log(accountIndex, "accountIndex");
         const updatedAccounts = [...additionalAccounts];
         
         updatedAccounts[accountIndex].inputs = updatedAccounts[accountIndex].inputs.filter((_, i) => i !== inputIndex);
         const indexes = updatedAccounts[accountIndex].inputs.length;
-        // console.log(indexes, "length of inputs");
         if(indexes === 0){
-            // console.log(accountIndex, "index index");
             handleRemoveAccount(accountIndex);
         }
         setAdditionalAccounts(updatedAccounts);
@@ -74,8 +63,6 @@ const Createnewuser = ({ visible, onClose }) => {
         updatedAccounts[accountIndex].inputs.push('');
         setAdditionalAccounts(updatedAccounts);
     };
-
-    
 
     const handleCancel = () => {
         setIsModalVisible(false);
@@ -93,7 +80,6 @@ const Createnewuser = ({ visible, onClose }) => {
             onOk: async() => {
                 try {
                     let data = {};
-                    // if(values)
                     if(values.role !== "Revenue_Partner"){
                         additionalAccounts.map((each)=>{
                             data[each.network] = each.inputs;
@@ -109,17 +95,18 @@ const Createnewuser = ({ visible, onClose }) => {
                         ...values,
                         adAccounts: additionalAccounts.length > 0 ? data : [],
                     };
-                    // console.log(formattedData);
-                    // console.log(formattedData, "formatted Data");
+                   
                     const response = await apiClient.post('/api/createUser/', {formattedData});
                     
                     if (response.status === 200) {
-                        // console.log('User created successfully');
                         message.success("User created successfully"); // Display success message
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1500);
+                        refreshUsers();
                         setIsModalVisible(false); // Close modal after success
+
+                        form.resetFields();
+                        setAdditionalAccounts([]); // Clear dynamic accounts
+                        setSelectedNetworks([]);
+                        
                         onClose("email"); // Close drawer
                     } else {
                         console.error('Failed to create user');
@@ -146,6 +133,7 @@ const Createnewuser = ({ visible, onClose }) => {
             closeIcon={<CloseOutlined />}
         >
             <Form
+                form={form}
                 layout="vertical"
                 onFinish={submitForm}
             >
@@ -205,10 +193,11 @@ const Createnewuser = ({ visible, onClose }) => {
                         <div>
                         {additionalAccounts.map((account, accountIndex) => (
                                 <div key={accountIndex}>
-                                    <div style={{ display: 'flex', marginBottom: '8px', width: '100%' }}>
+                                    <div className='add-accounts'>
                                         <Select
                                             placeholder="Select a network"
-                                            style={{ maxWidth: '120px', height: '30px', marginRight:'8px',
+                                            className='add-accounts-select-network'
+                                            style={{
                                                 backgroundColor: theme === 'dark' && '#333', // Background color
                                                 color: theme === 'dark' && '#fff',
                                             }}
@@ -222,16 +211,9 @@ const Createnewuser = ({ visible, onClose }) => {
                                                 </Select.Option>
                                             ))}
                                         </Select>
-                                        <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                                        <div className='add-account-container'>
                                             {account.inputs.map((input, inputIndex) => (
-                                                <div key={inputIndex} style={{ 
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    marginBottom: '8px',
-                                                    width: '100%',
-                                                    height: '30px',
-                                                    justifyContent: 'center',
-                                                 }}>
+                                                <div key={inputIndex} className='add-account-container-input'>
                                                     <Input
                                                         value={input}
                                                         onChange={(e) => handleInputChange(accountIndex, inputIndex, e.target.value)}
@@ -258,13 +240,11 @@ const Createnewuser = ({ visible, onClose }) => {
                                                             style={{ cursor: 'pointer', marginLeft: '8px' }}
                                                             onClick={() => handleAddInput(accountIndex)}
                                                         />
-                                                    )}
-                                                    
+                                                    )}   
                                                 </div>
                                             ))}
                                         </div>
-                                    </div>
-                                    
+                                    </div>  
                                 </div>
                             ))}
                         </div>
