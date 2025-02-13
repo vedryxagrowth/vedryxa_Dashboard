@@ -74,6 +74,7 @@ const Newaddaccounts = ({ visible, onClose }) => {
         "Winkleads Search",
         "MODO LEO BM X1",
     ]);
+    
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [newValue, setNewValue] = useState("");
     const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
@@ -101,20 +102,13 @@ const Newaddaccounts = ({ visible, onClose }) => {
     useEffect(() => {
         // Update the form field value for Website_URL whenever websiteURL changes
         form.setFieldsValue({ BMName: BMName });
-
         // Check if all required fields are complete
         setIsVisibleBMId("visible");
-        
-
     }, [newValue, form]);
+
     useEffect(() => {
         // Update the form field value for Website_URL whenever websiteURL changes
         form.setFieldsValue({ BMName: BMName });
-        // setIsVisibleBMId(null);
-
-        // Check if all required fields are complete
-        
-
     }, [BMName, form]);
 
     const functionCallBMNames = async() =>{
@@ -132,19 +126,10 @@ const Newaddaccounts = ({ visible, onClose }) => {
 
     const onFinish = async (values) => {
         try {
-            // console.log(values, "values");
-            // const response = await axios.post('https://www.testapi.adsgoat.in/api/newaddaccount', values,
-            //     {
-            //         headers: {
-            //             'Authorization': token
-            //         }
-            //     });
             const newValues = {...values, timeZone: timeZoneFullNames[values.timeZone], pageName: values.pageName ? values.pageName : '', pageID: values.pageID ? values.pageID : '' , pixelID: values.pixelID ? values.pixelID : '', AgencyName: values?.AgencyName ? values?.AgencyName: ""}
             console.log(newValues, "newValues");
             const response = await apiClient.post('/createNewAccount/', {newAccount: newValues});
-            // console.log(response.data);
             if (response.status === 200) {
-                // console.log('Account created successfully');
                 message.success('Account created successfully');
                 form.resetFields();
                 setBMName("Winkleads Search");
@@ -172,28 +157,22 @@ const Newaddaccounts = ({ visible, onClose }) => {
 
     const onChangeAccountNumber = (event) => {
         setAccountNumber(event.target.value);
-        // console.log(event.target.value);
     }
     const onChangeAccountName = (event) => {
         setAccountName(event.target.value);
-        // console.log(event.target.value);
     }
     const onChangePagelId = (event) => {
         setPageId(event.target.value);
-        // console.log(event.target.value);
     }
     const onChangePageName = (event) => {
         setPageName(event.target.value);
-        // console.log(event.target.value);
     }
 
     const onChangeAgencyName = (event) => {
         setAgencyName(event.target.value);
-        // console.log(event.target.value);
     }
     const onChangePixelId = (event) => {
         setPixelId(event.target.value);
-        // console.log(event.target.value);
     }
 
     const onChangeSpendPartner = (value)=>{
@@ -249,7 +228,7 @@ const Newaddaccounts = ({ visible, onClose }) => {
                         <Input value={AgencyName} onChange={onChangeAgencyName}  style={{color: theme === "dark" ? 'white' : "black"}}/>
                     </Form.Item>
                     <Form.Item label="BM Name" name="BMName">
-                        <div ref={containerRef} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <div ref={containerRef} className='form-item-bmname'>
                             <Select
                                 placeholder="Select or add a value"
                                 value={BMName}
@@ -360,18 +339,6 @@ const Newaddaccounts = ({ visible, onClose }) => {
                     <Form.Item label="Holder" name="Holder" rules={[{ required: true, message: 'Please input the Holder Name ID!' }]}>
                         <Input style={{color: theme === "dark" ? 'white' : "black"}}/>
                     </Form.Item>
-                    {/* <Form.Item label="Revenue Account ID" name="revenueAccountId" rules={[{ required: true, message: 'Please input the revenue account ID!' }]}>
-                        <Input />
-                    </Form.Item> */}
-                    {/* <Form.Item label="Media Buyer Name" name="mediaBuyerName" rules={[{ required: true, message: 'Please input the media buyer name!' }]}>
-                        <Input />
-                    </Form.Item> */}
-                    {/* <Form.Item label="Agency ID" name="agencyId" rules={[{ required: true, message: 'Please input the agency ID!' }]}>
-                        <Input />
-                    </Form.Item> */}
-                    {/* <Form.Item label="Agency Name" name="agencyName" rules={[{ required: true, message: 'Please input the agency name!' }]}>
-                        <Input />
-                    </Form.Item>                     */}
                     <Form.Item>
                         <Button type="primary" onClick={showModal}>Submit</Button>
                     </Form.Item>
