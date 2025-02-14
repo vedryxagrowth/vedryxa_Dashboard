@@ -109,11 +109,15 @@ const ImageUploadPage = () => {
                 // Show all files initially, add upload date as metadata
                 setImages(response.data.images.map(file => ({
                     uid: file.key,
+                    name: `https://sudheer-fbimages.s3.amazonaws.com/${file.key}`,
+                    status: 'done',
                     url: `https://sudheer-fbimages.s3.amazonaws.com/${file.key}`,
                     uploadDate: moment(file.uploadDate).format("YYYY-MM-DD"), // Assuming `uploadDate` is sent with the file
                 })));
                 setFilteredImages(response.data.images.map(file => ({
                     uid: file.key,
+                    name: `https://sudheer-fbimages.s3.amazonaws.com/${file.key}`,
+                    status: 'done',
                     url: `https://sudheer-fbimages.s3.amazonaws.com/${file.key}`,
                     uploadDate: moment(file.uploadDate).format("YYYY-MM-DD"),
                 })));
@@ -147,11 +151,11 @@ const ImageUploadPage = () => {
         }
     
         try {
-            console.log("Fetching URL:", urlInput); 
+            // console.log("Fetching URL:", urlInput); 
             const response = await fetch(urlInput);
-            console.log("Fetch Response Status:", response.status, response.statusText);
+            // console.log("Fetch Response Status:", response.status, response.statusText);
             if (!response.ok) {
-                console.error("Failed to fetch image from URL:", response.statusText);
+                message.error("Failed to fetch image from URL:", response.statusText);
                 return;
             }
             const blob = await response.blob();
@@ -185,6 +189,9 @@ const ImageUploadPage = () => {
             // 🔹 Directly update state instead of re-fetching
             const newImage = { 
                 uid: Date.now(), 
+                // name: `https://sudheer-fbimages.s3.amazonaws.com/${file.key}`,
+                name: newImageUrl,
+                status: 'done',
                 url: newImageUrl, 
                 uploadDate: moment().format("YYYY-MM-DD") 
             };
@@ -252,9 +259,9 @@ const ImageUploadPage = () => {
         }
 
          // Check file size (Limit: 5MB)
-        const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+        const MAX_FILE_SIZE = 1024 * 1024; // 5MB
         if (fileToUpload.size > MAX_FILE_SIZE) {
-            message.error("File size exceeds 5MB limit! Please upload a smaller file.");
+            message.error("❌ File size exceeds 5MB limit! Please upload a smaller file.");
             return;
         }
          // Generate a unique filename to prevent overwriting
@@ -284,7 +291,10 @@ const ImageUploadPage = () => {
             }
             // 🔹 Add image with selected date
             const newImage = { 
-                uid: Date.now(), 
+                uid: Date.now(),
+                // name: `https://sudheer-fbimages.s3.amazonaws.com/${file.key}`,
+                name: newImageUrl, 
+                status: 'done', 
                 url: newImageUrl, 
                 uploadDate 
             };
@@ -406,6 +416,7 @@ const ImageUploadPage = () => {
 
     const onCloseDrawer = () => {
         setDrawerVisible(false);
+        setSelectedImages([]);
     };
 
     const handleDeleteFile = (fileToDelete) => {
@@ -457,7 +468,7 @@ const ImageUploadPage = () => {
                 onClose={onCloseDrawer} 
                 // changeRRefrst={changeRRefrst} 
                 network={selectedKey} 
-                selectedFiles={selectedImages} 
+                imageFiles={selectedImages} 
                 onDeleteFile={handleDeleteFile} 
                 selectedAccountNumber={selectedAccountNumber}
             />

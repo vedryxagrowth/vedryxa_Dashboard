@@ -49,7 +49,9 @@ const Topbar = ({onComplete}) => {
   // console.log(userdetails);
 
   const tokenForAuth = localStorage.getItem('token');
-
+  if(userdetails?.role === "Revenue_Partner"){
+    onComplete();
+  }
 
   // Handle viewing and removing the notification after modal closes
   const handleViewNotification = async (notification) => {

@@ -244,7 +244,7 @@ const MyTablePage = () => {
     };
 
     const handleChangeInput = () => {
-        setInputValue(newInputValue);
+        setInputValue(newInputValue.trim());
         gridRef.current.api.onFilterChanged(); // Trigger AG-Grid to reapply filters
         // console.log(e.target.value);
         // const filteredLiveData = rowData.filter((each)=> each.campaignName.includes(e.target.value));
@@ -257,7 +257,7 @@ const MyTablePage = () => {
     };
 
     const handleChangeNewInputValue = (e) => {
-        setNewInputValue(e.target.value.trim());
+        setNewInputValue(e.target.value);
     }
 
     // const [rowStructure, setRowStructure] = useState(); 
