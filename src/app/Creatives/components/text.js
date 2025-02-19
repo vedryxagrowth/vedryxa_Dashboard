@@ -2000,21 +2000,15 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             ]}
                                             style={{ flex: 1 }}
                                         >
-                                            {/* <Upload
-                                                beforeUpload={handleBeforeUpload}
-                                                onChange={handleChange}
-                                                multiple
-                                                maxCount={10} // Limit to 10 files, for example
-                                                accept="image/*, video/*"
-                                            >
-                                                <Button icon={<UploadOutlined />}>Select Files</Button>
-                                            </Upload> */}
                                             <ul style={{ listStyleType: 'none', padding: 0 }}>
                                                 {selectedFiles.map((file, index) => (
                                                     <li key={file.uid} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
                                                         <span>{index + 1}.</span>
                                                         <DeleteOutlined 
-                                                            onClick={() => onDeleteFile(file)}
+                                                            onClick={() => {
+                                                                onDeleteFile(file); // Call the delete function from the parent
+                                                                setSelectedFiles((prevFiles) => prevFiles.filter((f) => f.uid !== file.uid)); // Update UI state
+                                                            }}
                                                             style={{ color: 'red', cursor: 'pointer' }} 
                                                         />
                                                     </li>
