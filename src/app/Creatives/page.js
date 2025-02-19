@@ -2,7 +2,7 @@
 import { redirect } from 'next/navigation';
 import { useTokenContext } from "../components/parent";
 import React, { useState, useEffect } from 'react';
-import { Upload, Modal, Input, Button, Row, Col, Select, message, notification } from 'antd';
+import { Upload, Modal, Input, Button, Row, Col, Select, message, notification, Badge } from 'antd';
 import { EditOutlined, UploadOutlined, PlusOutlined, SearchOutlined, CheckCircleFilled, CloseCircleFilled, ReloadOutlined, EyeOutlined, DeleteOutlined} from '@ant-design/icons';
 import Image from 'next/image';
 import dynamic from "next/dynamic";
@@ -11,8 +11,8 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import moment from "moment"; // Import moment for date manipulation
 import { v4 as uuidv4 } from 'uuid';
-
 import dayjs from 'dayjs';
+
 const { RangePicker} = DatePicker;
 const { Option } = Select;
 
@@ -47,6 +47,8 @@ const ImageUploadPage = () => {
     const [cdrawerVisible, setDrawerVisible] = useState(false);
     const [selectedAccountNumber, setSelectedAccountNumber] = useState("");
     const [selectedImages, setSelectedImages] = useState([]);
+    const [fileInputName, setFileInputName] = useState("");
+    const [searchQuery, setSearchQuery] = useState(""); // State to store search input
 
     const { userdetails } = useTokenContext();
     const router = useRouter();
@@ -56,10 +58,6 @@ const ImageUploadPage = () => {
             fetchUserImages();
         }
     }, [userdetails?.userName]);
-
-    useEffect(() => {
-        setFilteredImages(images);
-    }, [images]);
 
     useEffect(() => {
         if (userdetails?.adAccounts && Object.keys(userdetails.adAccounts).length > 0) {
@@ -92,9 +90,7 @@ const ImageUploadPage = () => {
             console.error("User name is missing");
             return;
         }
-    
         setLoading(true);
-
         try {
             const response = await axios.get("https://prodapis.adsgoat.in/getUserFiles", {
                 headers: { 
@@ -103,24 +99,17 @@ const ImageUploadPage = () => {
                  },
             });
 
-            console.log("Fetched Images:", response.data); // 🔍 Check what API is returning
-    
             if (response.data.images && Array.isArray(response.data.images)) {
-                // Show all files initially, add upload date as metadata
-                setImages(response.data.images.map(file => ({
+                // Process and store images
+                const imagesWithFileNames = response.data.images.map(file => ({
                     uid: file.key,
-                    name: `https://sudheer-fbimages.s3.amazonaws.com/${file.key}`,
+                    name: file.filename || `${file.key}`, // 🔹 Use filename from API or default text
                     status: 'done',
                     url: `https://sudheer-fbimages.s3.amazonaws.com/${file.key}`,
                     uploadDate: moment(file.uploadDate).format("YYYY-MM-DD"), // Assuming `uploadDate` is sent with the file
-                })));
-                setFilteredImages(response.data.images.map(file => ({
-                    uid: file.key,
-                    name: `https://sudheer-fbimages.s3.amazonaws.com/${file.key}`,
-                    status: 'done',
-                    url: `https://sudheer-fbimages.s3.amazonaws.com/${file.key}`,
-                    uploadDate: moment(file.uploadDate).format("YYYY-MM-DD"),
-                })));
+                }));
+                setImages(imagesWithFileNames);
+                setFilteredImages(imagesWithFileNames);
             }
         } catch (error) {
             console.error("Error fetching images:", error.response ? error.response.data : error.message);
@@ -145,63 +134,14 @@ const ImageUploadPage = () => {
     };
 
     const handleUrlUpload = async () => {
-        if (!urlInput || !userdetails?.userName) {
-            console.error("User name is missing or no URL provided");
+        if (!urlInput.trim()) {
+            message.error("Please enter a valid image URL.");
             return;
         }
-    
-        try {
-            // console.log("Fetching URL:", urlInput); 
-            const response = await fetch(urlInput);
-            // console.log("Fetch Response Status:", response.status, response.statusText);
-            if (!response.ok) {
-                message.error("Failed to fetch image from URL:", response.statusText);
-                return;
-            }
-            const blob = await response.blob();
-          
-            // Convert it to a File object
-            const fileName = `image_${Date.now()}.jpg`;
-            const file = new File([blob], fileName, { type: blob.type });
-            console.log("File created:", file);
-            // Prepare FormData
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("filename", fileName);
-            formData.append("uploadDate", moment().format("YYYY-MM-DD"));
-
-            console.log("FormData:", formData.get("file"), formData.get("filename"));
-            // Send to the existing upload API
-            const uploadResponse = await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
-                headers: {
-                    Authorization: localStorage.getItem('token'),
-                    "Content-Type": "multipart/form-data",
-                    "username": userdetails?.userName,
-                },
-            });
-            console.log("Upload Response:", uploadResponse.data);
-    
-            const newImageUrl = uploadResponse.data.imageUrl;
-            if (!newImageUrl) {
-                console.error("No image URL returned from server!");
-                return;
-            }
-            // 🔹 Directly update state instead of re-fetching
-            const newImage = { 
-                uid: Date.now(), 
-                // name: `https://sudheer-fbimages.s3.amazonaws.com/${file.key}`,
-                name: newImageUrl,
-                status: 'done',
-                url: newImageUrl, 
-                uploadDate: moment().format("YYYY-MM-DD") 
-            };
-    
-            setImages((prevImages) => [newImage, ...prevImages]);
-            setFilteredImages((prevImages) => [newImage, ...prevImages]);
-            setUrlInput(''); // Clear input after upload
-        } catch (error) {
-            console.error("Error uploading image from URL:", error.response ? error.response.data : error.message);
-        }
+        // Show preview instead of uploading immediately
+        setPreviewFile({ url: urlInput, name: `image_${Date.now()}.jpg` }); // Store URL as preview file
+        setFileInputName(""); // Reset filename input
+        setIsModalVisible(true); // Open existing modal
     };
 
     const handleCancel = () =>{
@@ -252,24 +192,44 @@ const ImageUploadPage = () => {
     
     const handleConfirmUpload = async () => {
         let fileToUpload = editedFile || pendingFile;
-    
-        if (!fileToUpload || !userdetails?.userName) {
-            message.error("User name is missing or no file selected!");
+
+        if (!previewFile || !userdetails?.userName || !fileInputName.trim()) {
+            message.error("User name is missing, no file selected, or file name is empty!");
             return;
         }
 
+        // If the file is from a URL, convert it into a File object before uploading
+        if (previewFile.url) {
+            try {
+                const response = await fetch(previewFile.url);
+                if (!response.ok) {
+                    message.error("Failed to fetch image from URL.");
+                    return;
+                }
+
+                const blob = await response.blob();
+                fileToUpload = new File([blob], `${fileInputName.trim()}.jpg`, { type: blob.type });
+
+            } catch (error) {
+                console.error("Error fetching file from URL:", error);
+                return;
+            }
+        }
+        //Ensure `fileToUpload` exists before checking `size`
+        if (!fileToUpload) {
+            message.error("No file available for upload!");
+            return;
+        }
          // Check file size (Limit: 5MB)
         const MAX_FILE_SIZE = 1024 * 1024; // 5MB
         if (fileToUpload.size > MAX_FILE_SIZE) {
             message.error("❌ File size exceeds 5MB limit! Please upload a smaller file.");
             return;
         }
-         // Generate a unique filename to prevent overwriting
-        const uniqueFilename = `${Date.now()}-${fileToUpload.name}`;
 
+        const uniqueFilename = `${Date.now()}-${fileInputName.trim()}${fileToUpload.name.substring(fileToUpload.name.lastIndexOf("."))}`;
         // Use selected date from RangePicker or default to today
         const uploadDate = startDate || moment().format("YYYY-MM-DD");
-    
         const formData = new FormData();
         formData.append("file", fileToUpload);
         formData.append("uploadDate", uploadDate);
@@ -292,8 +252,7 @@ const ImageUploadPage = () => {
             // 🔹 Add image with selected date
             const newImage = { 
                 uid: Date.now(),
-                // name: `https://sudheer-fbimages.s3.amazonaws.com/${file.key}`,
-                name: newImageUrl, 
+                name: fileInputName.trim(), // Save the chosen filename
                 status: 'done', 
                 url: newImageUrl, 
                 uploadDate 
@@ -316,6 +275,8 @@ const ImageUploadPage = () => {
         setPendingFile(null);
         setEditedFile(null);
         setSelectedImage(null);
+        setFileInputName("");
+        setUrlInput("");
     };
     
     const handleKeyChange = (key) => {
@@ -326,7 +287,7 @@ const ImageUploadPage = () => {
     
     const handleValueChange = (value) => {
         setSelectedValue(value);
-        setSelectedAccountNumber(value); // ✅ Updates selected account
+        setSelectedAccountNumber(value); // Updates selected account
     };
     
     const rangePresets = [
@@ -460,6 +421,22 @@ const ImageUploadPage = () => {
         }
     };
 
+    // Function to handle search input changes
+    const handleSearch = (e) => {
+        const query = e.target.value.toLowerCase(); // Convert to lowercase for case-insensitive search
+        setSearchQuery(query);
+
+        // Filter images based on filename
+        if (query.trim() === "") {
+            setFilteredImages(images); // Reset if empty search
+        } else {
+            const filtered = images.filter(image =>
+                image.name.toLowerCase().includes(query)
+            );
+            setFilteredImages(filtered);
+        }
+    };
+
     return (
         <div style={{ padding: '20px' }}>
             <CreateCampaign 
@@ -573,16 +550,35 @@ const ImageUploadPage = () => {
                 </Col>
                 <Col span={3}>
                     <Input
-                        placeholder="Search..."
-                        suffix={<SearchOutlined />}                      
+                        placeholder="Search by filename..."
+                        suffix={<SearchOutlined />}
+                        value={searchQuery}
+                        onChange={handleSearch} // Call function on user input
                     />                       
                 </Col>
                 <Col>
-                    <Button type="primary" onClick={showDrawer} icon={<PlusOutlined />}>
+                    <Button type="primary" onClick={showDrawer} icon={<PlusOutlined />} style={{ display: 'flex', justifyContent: 'center', maxWidth: '160px' }}>
                         Create Campaign
+                        {selectedImages.length > 0 && (
+                            <Badge
+                                style={{ 
+                                    color: 'red', 
+                                    position: 'absolute', // 🔹 Keeps it from affecting button width
+                                    top: '-5px', 
+                                    right: '-5px', 
+                                    fontSize: '12px', 
+                                    padding: '2px 6px', 
+                                    borderRadius: '50%' // 🔹 Makes it circular }}
+                                }}
+                                className="Badge"
+                                variant="destructive"
+                            >
+                                {selectedImages.length}
+                            </Badge>
+                        )}
                     </Button>                   
                 </Col>                
-                <Button type="primary" icon={<ReloadOutlined />} />                  
+                <Button type="primary" onClick={fetchUserImages} icon={<ReloadOutlined />} />                  
             </Row>
             {/* URL Input for Image */}
             <div style={{ display: 'flex', marginBottom: '20px', marginTop: '10px' }}>
@@ -612,6 +608,8 @@ const ImageUploadPage = () => {
                 marginTop: '20px',}}
             >
                 {filteredImages.map((image) => {
+                    console.log("image:", image);
+                    const extractedName = image.name.split('/').pop().split('-').pop().split('.').shift();
                     const isSelected = selectedImages.some((img) => img.uid === image.uid);
                     return (
                         <div 
@@ -622,18 +620,42 @@ const ImageUploadPage = () => {
                                 height: '150px', 
                                 cursor: 'pointer',
                                 borderRadius: '8px',
-                                border: isSelected ? '3px solid blue' : 'none',
+                                // border: isSelected ? '3px solid blue' : 'none',
                                 overflow: 'hidden'
                             }}
                             onMouseEnter={() => setHoveredImage(image.uid)}
                             onMouseLeave={() => setHoveredImage(null)}
                             onClick={() => handleImageSelect(image)}
                         >
+                            {/* Checkmark Badge for Selected Images */}
+                            {isSelected && (
+                                <div style={{
+                                    position: 'absolute',
+                                    top: '8px',
+                                    right: '8px',
+                                    width: '24px',
+                                    height: '24px',
+                                    backgroundColor: 'blue',
+                                    color: 'white',
+                                    borderRadius: '50%',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    fontSize: '16px',
+                                    fontWeight: 'bold',
+                                    zIndex: 10
+                                }}>
+                                    ✓
+                                </div>
+                            )}
                             <img
                                 src={image.url}
                                 alt="Uploaded Image"
                                 style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }}
                             />
+                            <p>
+                                 {extractedName}
+                            </p>
                             {/* View & Delete Icons (Show Only on Hover) */}
                             {hoveredImage === image.uid && (
                                 <div 
@@ -730,11 +752,19 @@ const ImageUploadPage = () => {
                 ]}                 
             >
                 {previewFile && (
-                    <img
-                        src={previewFile.url}
-                        alt="Uploaded Preview"
-                        style={{ width: "100%", height: "auto", borderRadius: "8px" }}
-                    />
+                    <>
+                        <img
+                            src={previewFile.url}
+                            alt="Uploaded Preview"
+                            style={{ width: "100%", height: "auto", borderRadius: "8px" }}
+                        />
+                        <Input 
+                            placeholder="Enter file name" 
+                            value={fileInputName}
+                            onChange={(e) => setFileInputName(e.target.value)}
+                            style={{ marginTop: 10 }}
+                        />
+                    </>
                 )}   
             </Modal>
             {/* Image Editor */}
