@@ -11,8 +11,8 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import moment from "moment"; // Import moment for date manipulation
 import { v4 as uuidv4 } from 'uuid';
-import dayjs from 'dayjs';
 
+import dayjs from 'dayjs';
 const { RangePicker} = DatePicker;
 const { Option } = Select;
 
@@ -100,14 +100,14 @@ const ImageUploadPage = () => {
             });
 
             if (response.data.images && Array.isArray(response.data.images)) {
-                // Process and store images
                 const imagesWithFileNames = response.data.images.map(file => ({
                     uid: file.key,
-                    name: file.filename || `${file.key}`, // 🔹 Use filename from API or default text
+                    name: file.filename || `Unnamed File ${file.key}`, // 🔹 Use filename from API or default text
                     status: 'done',
                     url: `https://sudheer-fbimages.s3.amazonaws.com/${file.key}`,
                     uploadDate: moment(file.uploadDate).format("YYYY-MM-DD"), // Assuming `uploadDate` is sent with the file
                 }));
+    
                 setImages(imagesWithFileNames);
                 setFilteredImages(imagesWithFileNames);
             }
@@ -152,7 +152,6 @@ const ImageUploadPage = () => {
     const handleFileChange = ({ fileList }) => {
         if (fileList.length === 0) return;
         console.log(fileList);
-        // Clear previous preview file
         setPreviewFile(null);
         setPendingFile(null);
         setEditedFile(null); 
@@ -209,7 +208,6 @@ const ImageUploadPage = () => {
 
                 const blob = await response.blob();
                 fileToUpload = new File([blob], `${fileInputName.trim()}.jpg`, { type: blob.type });
-
             } catch (error) {
                 console.error("Error fetching file from URL:", error);
                 return;
@@ -228,8 +226,8 @@ const ImageUploadPage = () => {
         }
 
         const uniqueFilename = `${Date.now()}-${fileInputName.trim()}${fileToUpload.name.substring(fileToUpload.name.lastIndexOf("."))}`;
-        // Use selected date from RangePicker or default to today
         const uploadDate = startDate || moment().format("YYYY-MM-DD");
+    
         const formData = new FormData();
         formData.append("file", fileToUpload);
         formData.append("uploadDate", uploadDate);
@@ -287,7 +285,7 @@ const ImageUploadPage = () => {
     
     const handleValueChange = (value) => {
         setSelectedValue(value);
-        setSelectedAccountNumber(value); // Updates selected account
+        setSelectedAccountNumber(value); // ✅ Updates selected account
     };
     
     const rangePresets = [
@@ -347,7 +345,6 @@ const ImageUploadPage = () => {
     
         setStartDate(formattedStart);
         setEndDate(formattedEnd);
-    
         // 🔹 Filter images based on selected date range
         setFilteredImages(images.filter(img => 
             img.uploadDate >= formattedStart && img.uploadDate <= formattedEnd
@@ -381,9 +378,12 @@ const ImageUploadPage = () => {
     };
 
     const handleDeleteFile = (fileToDelete) => {
-        setSelectedImages((prevFiles) => prevFiles.filter(file => file.uid !== fileToDelete.uid));
+        setSelectedImages((prevFiles) => {
+            const updatedFiles = prevFiles.filter(file => file.uid !== fileToDelete.uid);
+            return updatedFiles;
+        });
     };
-
+    
     const handleViewImage = (image) => {
         setViewedImage(image);
         setIsViewModalVisible(true);
@@ -425,7 +425,6 @@ const ImageUploadPage = () => {
     const handleSearch = (e) => {
         const query = e.target.value.toLowerCase(); // Convert to lowercase for case-insensitive search
         setSearchQuery(query);
-
         // Filter images based on filename
         if (query.trim() === "") {
             setFilteredImages(images); // Reset if empty search
@@ -608,8 +607,6 @@ const ImageUploadPage = () => {
                 marginTop: '20px',}}
             >
                 {filteredImages.map((image) => {
-                    console.log("image:", image);
-                    const extractedName = image.name.split('/').pop().split('-').pop().split('.').shift();
                     const isSelected = selectedImages.some((img) => img.uid === image.uid);
                     return (
                         <div 
@@ -620,7 +617,6 @@ const ImageUploadPage = () => {
                                 height: '150px', 
                                 cursor: 'pointer',
                                 borderRadius: '8px',
-                                // border: isSelected ? '3px solid blue' : 'none',
                                 overflow: 'hidden'
                             }}
                             onMouseEnter={() => setHoveredImage(image.uid)}
@@ -654,7 +650,7 @@ const ImageUploadPage = () => {
                                 style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }}
                             />
                             <p>
-                                 {extractedName}
+                                 {image?.name}
                             </p>
                             {/* View & Delete Icons (Show Only on Hover) */}
                             {hoveredImage === image.uid && (
