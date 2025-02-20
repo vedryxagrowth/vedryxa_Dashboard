@@ -5,7 +5,6 @@ import axios from 'axios';
 import { useTokenContext } from '../../components/parent';
 
 const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
-    
     const token = localStorage.getItem("token");
     const { theme } = useTokenContext();
     const { apiClient } = useTokenContext();
@@ -18,188 +17,188 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
     const [dataList, setDataList] = useState([]);
 
     const [isModalVisible, setIsModalVisible] = useState(false);
-  const [deleteIndex, setDeleteIndex] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState(null);
-  const [campaigns, setCampaigns] = useState([]);
+    const [deleteIndex, setDeleteIndex] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedIndex, setSelectedIndex] = useState(null);
+    const [campaigns, setCampaigns] = useState([]);
 
-  // State for modal visibility and delete index
-  const [modalVisible, setModalVisible] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(null);
+    // State for modal visibility and delete index
+    const [modalVisible, setModalVisible] = useState(false);
+    const [activeIndex, setActiveIndex] = useState(null);
 
-  const generateNextChannelId = () => {
-    const maxId = channelList.reduce((max, channel) => Math.max(max, channel.id), 0);
-    return maxId + 1;
-  };
-
-  // Update input values for a specific channel
-  const updateChannelField = (index, key, value) => {
-    setChannelList((prevChannels) =>
-      prevChannels.map((channel, i) => (i === index ? { ...channel, [key]: value } : channel))
-    );
-  };
-
-  // Add a new channel
-  const addNewChannel = () => {
-    const newChannel = {
-      id: generateNextChannelId(),
-      name: "",
-      source: "",
-      value: "",
+    const generateNextChannelId = () => {
+        const maxId = channelList.reduce((max, channel) => Math.max(max, channel.id), 0);
+        return maxId + 1;
     };
-    setChannelList([...channelList, newChannel]);
-  };
 
-  // Open the delete confirmation modal
-  const openChannelDeleteModal = (index) => {
-    setSelectedChannelIndex(index);
-    setIsChannelModalOpen(true);
-  };
-
-  // Confirm deletion of a channel
-  const confirmChannelDeletion = () => {
-    setChannelList((prevChannels) => prevChannels.filter((_, i) => i !== selectedChannelIndex));
-    setIsChannelModalOpen(false);
-    setSelectedChannelIndex(null);
-  };
-
-  // Cancel deletion of a channel
-  const cancelChannelDeletion = () => {
-    setIsChannelModalOpen(false);
-    setSelectedChannelIndex(null);
-  };
-
-  const getNextCampaignId = () => {
-    const highestId = campaigns.reduce((maxId, campaign) => Math.max(maxId, campaign.id), 0);
-    return highestId + 1;
-  };
-
-  // Function to handle input updates
-  const updateField = (index, field, value) => {
-    setCampaigns((prevCampaigns) =>
-      prevCampaigns.map((campaign, i) =>
-        i === index ? { ...campaign, [field]: value } : campaign
-      )
-    );
-  };
-
-  // Function to add a new campaign row
-  const addNewCampaign = () => {
-    const newCampaign = {
-      id: getNextCampaignId(),
-      name: "",
-      code: "",
-      campaignId: "",
-      AdsetId: "",
+    // Update input values for a specific channel
+    const updateChannelField = (index, key, value) => {
+        setChannelList((prevChannels) =>
+        prevChannels.map((channel, i) => (i === index ? { ...channel, [key]: value } : channel))
+        );
     };
-    setCampaigns([...campaigns, newCampaign]);
-  };
 
-  // Function to show the delete confirmation modal
-  const showDeleteModal = (index) => {
-    setActiveIndex(index);
-    setModalVisible(true);
-  };
-
-  // Function to confirm deletion
-  const deleteCampaign = () => {
-    setCampaigns((prevCampaigns) => prevCampaigns.filter((_, i) => i !== activeIndex));
-    setModalVisible(false);
-    setActiveIndex(null);
-  };
-
-  // Function to cancel deletion
-  const cancelDelete1 = () => {
-    setModalVisible(false);
-    setActiveIndex(null);
-  };
-
-  // Get the next available ID
-  const getNextId = () => {
-    const highestId = objects.reduce((maxId, obj) => Math.max(maxId, obj.id), 0);
-    return highestId + 1;
-  };
-
-  // Handle input changes for existing objects
-  const handleInputChange = (index, key, value) => {
-    setObjects((prevObjects) =>
-      prevObjects.map((obj, i) => (i === index ? { ...obj, [key]: value } : obj))
-    );
-  };
-
-  // Handle adding a new object
-  const handleAddObject = () => {
-    const newObject = {
-      id: getNextId(), // Automatically assign the next ID
-      name: "",
-      code: "",
-      account: "",
-      url: "",
+    // Add a new channel
+    const addNewChannel = () => {
+        const newChannel = {
+        id: generateNextChannelId(),
+        name: "",
+        source: "",
+        value: "",
+        };
+        setChannelList([...channelList, newChannel]);
     };
-    setObjects([...objects, newObject]);
-  };
 
-  // Handle showing delete modal
-  const handleDeleteClick = (index) => {
-    setDeleteIndex(index); // Set the index of the object to delete
-    setIsModalVisible(true); // Show the modal
-  };
-
-  // Handle confirming delete
-  const handleConfirmDelete = () => {
-    setObjects((prevObjects) => prevObjects.filter((_, i) => i !== deleteIndex)); // Remove object
-    setIsModalVisible(false); // Close modal
-    setDeleteIndex(null); // Reset index
-  };
-
-  // Handle cancel delete
-  const handleCancelDelete = () => {
-    setIsModalVisible(false); // Close modal
-    setDeleteIndex(null); // Reset index
-  };
-
-  const generateNextId = () => {
-    const highestId = dataList.reduce((maxId, item) => Math.max(maxId, item.id), 0);
-    return highestId + 1;
-  };
-
-  // Function to handle input changes
-  const updateInputValue = (index, key, value) => {
-    setDataList((prevData) =>
-      prevData.map((item, i) => (i === index ? { ...item, [key]: value } : item))
-    );
-  };
-
-  // Function to add a new row
-  const addNewRow = () => {
-    const newRow = {
-      id: generateNextId(),
-      name: "",
-      code: "",
-      account: "",
-      url: "",
+    // Open the delete confirmation modal
+    const openChannelDeleteModal = (index) => {
+        setSelectedChannelIndex(index);
+        setIsChannelModalOpen(true);
     };
-    setDataList([...dataList, newRow]);
-  };
 
-  // Function to open the delete modal
-  const openDeleteModal = (index) => {
-    setSelectedIndex(index);
-    setIsModalOpen(true);
-  };
+    // Confirm deletion of a channel
+    const confirmChannelDeletion = () => {
+        setChannelList((prevChannels) => prevChannels.filter((_, i) => i !== selectedChannelIndex));
+        setIsChannelModalOpen(false);
+        setSelectedChannelIndex(null);
+    };
 
-  // Function to confirm delete
-  const confirmDelete = () => {
-    setDataList((prevData) => prevData.filter((_, i) => i !== selectedIndex));
-    setIsModalOpen(false);
-    setSelectedIndex(null);
-  };
+    // Cancel deletion of a channel
+    const cancelChannelDeletion = () => {
+        setIsChannelModalOpen(false);
+        setSelectedChannelIndex(null);
+    };
 
-  // Function to cancel delete
-  const cancelDelete = () => {
-    setIsModalOpen(false);
-    setSelectedIndex(null);
-  };
+    const getNextCampaignId = () => {
+        const highestId = campaigns.reduce((maxId, campaign) => Math.max(maxId, campaign.id), 0);
+        return highestId + 1;
+    };
+
+    // Function to handle input updates
+    const updateField = (index, field, value) => {
+        setCampaigns((prevCampaigns) =>
+        prevCampaigns.map((campaign, i) =>
+            i === index ? { ...campaign, [field]: value } : campaign
+        )
+        );
+    };
+
+    // Function to add a new campaign row
+    const addNewCampaign = () => {
+        const newCampaign = {
+        id: getNextCampaignId(),
+        name: "",
+        code: "",
+        campaignId: "",
+        AdsetId: "",
+        };
+        setCampaigns([...campaigns, newCampaign]);
+    };
+
+    // Function to show the delete confirmation modal
+    const showDeleteModal = (index) => {
+        setActiveIndex(index);
+        setModalVisible(true);
+    };
+
+    // Function to confirm deletion
+    const deleteCampaign = () => {
+        setCampaigns((prevCampaigns) => prevCampaigns.filter((_, i) => i !== activeIndex));
+        setModalVisible(false);
+        setActiveIndex(null);
+    };
+
+    // Function to cancel deletion
+    const cancelDelete1 = () => {
+        setModalVisible(false);
+        setActiveIndex(null);
+    };
+
+    // Get the next available ID
+    const getNextId = () => {
+        const highestId = objects.reduce((maxId, obj) => Math.max(maxId, obj.id), 0);
+        return highestId + 1;
+    };
+
+    // Handle input changes for existing objects
+    const handleInputChange = (index, key, value) => {
+        setObjects((prevObjects) =>
+        prevObjects.map((obj, i) => (i === index ? { ...obj, [key]: value } : obj))
+        );
+    };
+
+    // Handle adding a new object
+    const handleAddObject = () => {
+        const newObject = {
+        id: getNextId(), // Automatically assign the next ID
+        name: "",
+        code: "",
+        account: "",
+        url: "",
+        };
+        setObjects([...objects, newObject]);
+    };
+
+    // Handle showing delete modal
+    const handleDeleteClick = (index) => {
+        setDeleteIndex(index); // Set the index of the object to delete
+        setIsModalVisible(true); // Show the modal
+    };
+
+    // Handle confirming delete
+    const handleConfirmDelete = () => {
+        setObjects((prevObjects) => prevObjects.filter((_, i) => i !== deleteIndex)); // Remove object
+        setIsModalVisible(false); // Close modal
+        setDeleteIndex(null); // Reset index
+    };
+
+    // Handle cancel delete
+    const handleCancelDelete = () => {
+        setIsModalVisible(false); // Close modal
+        setDeleteIndex(null); // Reset index
+    };
+
+    const generateNextId = () => {
+        const highestId = dataList.reduce((maxId, item) => Math.max(maxId, item.id), 0);
+        return highestId + 1;
+    };
+
+    // Function to handle input changes
+    const updateInputValue = (index, key, value) => {
+        setDataList((prevData) =>
+        prevData.map((item, i) => (i === index ? { ...item, [key]: value } : item))
+        );
+    };
+
+    // Function to add a new row
+    const addNewRow = () => {
+        const newRow = {
+        id: generateNextId(),
+        name: "",
+        code: "",
+        account: "",
+        url: "",
+        };
+        setDataList([...dataList, newRow]);
+    };
+
+    // Function to open the delete modal
+    const openDeleteModal = (index) => {
+        setSelectedIndex(index);
+        setIsModalOpen(true);
+    };
+
+    // Function to confirm delete
+    const confirmDelete = () => {
+        setDataList((prevData) => prevData.filter((_, i) => i !== selectedIndex));
+        setIsModalOpen(false);
+        setSelectedIndex(null);
+    };
+
+    // Function to cancel delete
+    const cancelDelete = () => {
+        setIsModalOpen(false);
+        setSelectedIndex(null);
+    };
     
     useEffect(() => {
         if (visible) {
@@ -273,8 +272,6 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
                     if(response.status === 200){
                         onClose(result);
                     }
-                    
-                    
                 } catch (error) {
                     console.error('Error updating user:', error);
                 }
@@ -282,19 +279,11 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
             onCancel: () => {
                 console.log('Cancel');
             },
-        });
-        
+        }); 
     };
 
-
-    
     const initialValues = editeddata ? {
         Network: editeddata.Network,
-        // Domains: editeddata.Domains,
-        // Source: editeddata.Source,
-        // channels: editeddata.channels,
-
-        // Add other fields with their initial values here
     } : null;
 
     return(
@@ -335,14 +324,7 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
                         },
                     ]}
                 >
-                    <div
-                        style={{
-                        display: "flex",
-                        fontWeight: "bold",
-                        borderBottom: "2px solid #ddd",
-                        padding: "10px 0",
-                        }}
-                    >
+                    <div className='editeddata-source-fields'>
                         <div style={{ flex: 1, textAlign: "center" }}>ID</div>
                         <div style={{ flex: 2, textAlign: "center" }}>Name</div>
                         <div style={{ flex: 2, textAlign: "center" }}>Code</div>
@@ -355,70 +337,65 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
                     {campaigns.map((campaign, index) => (
                         <div
                         key={index}
-                        style={{
-                            display: "flex",
-                            padding: "10px 0",
-                            borderBottom: "1px solid #eee",
-                            alignItems: "center",
-                        }}
+                        className='campaigns-container'
                         >
-                        <div style={{ flex: 1, textAlign: "center" }}>
-                            <input
-                            type="text"
-                            value={campaign.id}
-                            readOnly
-                            style={{ width: "90%", textAlign: "center", backgroundColor: "#f5f5f5", cursor: "not-allowed" }}
-                            />
-                        </div>
-                        <div style={{ flex: 2, textAlign: "center" }}>
-                            <input
-                            type="text"
-                            value={campaign.name}
-                            onChange={(e) => updateField(index, "name", e.target.value)}
-                            style={{ width: "90%", textAlign: "center" }}
-                            />
-                        </div>
-                        <div style={{ flex: 2, textAlign: "center" }}>
-                            <input
-                            type="text"
-                            value={campaign.code}
-                            onChange={(e) => updateField(index, "code", e.target.value)}
-                            style={{ width: "90%", textAlign: "center" }}
-                            />
-                        </div>
-                        <div style={{ flex: 2, textAlign: "center" }}>
-                            <input
-                            type="text"
-                            value={campaign.campaignId}
-                            onChange={(e) => updateField(index, "campaignId", e.target.value)}
-                            style={{ width: "90%", textAlign: "center" }}
-                            />
-                        </div>
-                        <div style={{ flex: 2, textAlign: "center" }}>
-                            <input
-                            type="text"
-                            value={campaign.AdsetId}
-                            onChange={(e) => updateField(index, "AdsetId", e.target.value)}
-                            style={{ width: "90%", textAlign: "center" }}
-                            />
-                        </div>
-                        <div style={{ flex: 2, textAlign: "center", display: "flex", justifyContent: "space-evenly" }}>
-                            {/* Delete button for all rows */}
-                            <Button
-                            type="danger"
-                            icon={<DeleteOutlined />}
-                            onClick={() => showDeleteModal(index)}
-                            />
-                            {/* Add button only for the last row */}
-                            {index === campaigns.length - 1 && (
-                            <Button
-                                type="primary"
-                                icon={<PlusOutlined />}
-                                onClick={addNewCampaign}
-                                style={{ marginRight: "5px" }}
-                            />
-                            )}
-                        </div>
+                            <div style={{ flex: 1, textAlign: "center" }}>
+                                <input
+                                type="text"
+                                value={campaign.id}
+                                readOnly
+                                className='campaigns-container-input'
+                                />
+                            </div>
+                            <div style={{ flex: 2, textAlign: "center" }}>
+                                <input
+                                type="text"
+                                value={campaign.name}
+                                onChange={(e) => updateField(index, "name", e.target.value)}
+                                style={{ width: "90%", textAlign: "center" }}
+                                />
+                            </div>
+                            <div style={{ flex: 2, textAlign: "center" }}>
+                                <input
+                                type="text"
+                                value={campaign.code}
+                                onChange={(e) => updateField(index, "code", e.target.value)}
+                                style={{ width: "90%", textAlign: "center" }}
+                                />
+                            </div>
+                            <div style={{ flex: 2, textAlign: "center" }}>
+                                <input
+                                type="text"
+                                value={campaign.campaignId}
+                                onChange={(e) => updateField(index, "campaignId", e.target.value)}
+                                style={{ width: "90%", textAlign: "center" }}
+                                />
+                            </div>
+                            <div style={{ flex: 2, textAlign: "center" }}>
+                                <input
+                                type="text"
+                                value={campaign.AdsetId}
+                                onChange={(e) => updateField(index, "AdsetId", e.target.value)}
+                                style={{ width: "90%", textAlign: "center" }}
+                                />
+                            </div>
+                            <div className='delete-button-container'>
+                                {/* Delete button for all rows */}
+                                <Button
+                                type="danger"
+                                icon={<DeleteOutlined />}
+                                onClick={() => showDeleteModal(index)}
+                                />
+                                {/* Add button only for the last row */}
+                                {index === campaigns.length - 1 && (
+                                    <Button
+                                        type="primary"
+                                        icon={<PlusOutlined />}
+                                        onClick={addNewCampaign}
+                                        style={{ marginRight: "5px" }}
+                                    />
+                                )}
+                            </div>
                         </div>
                     ))}
 
@@ -446,14 +423,7 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
                         },
                     ]}
                 >
-                    <div
-                        style={{
-                        display: "flex",
-                        fontWeight: "bold",
-                        borderBottom: "2px solid #ddd",
-                        padding: "10px 0",
-                        }}
-                    >
+                    <div className='editeddata-source-fields'>
                         <div style={{ flex: 1, textAlign: "center" }}>ID</div>
                         <div style={{ flex: 2, textAlign: "center" }}>Name</div>
                         <div style={{ flex: 2, textAlign: "center" }}>Source</div>
@@ -465,62 +435,57 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
                     {channelList.map((channel, index) => (
                         <div
                         key={index}
-                        style={{
-                            display: "flex",
-                            padding: "10px 0",
-                            borderBottom: "1px solid #eee",
-                            alignItems: "center",
-                        }}
+                        className='campaigns-container'
                         >
-                        <div style={{ flex: 1, textAlign: "center" }}>
-                            <input
-                            type="text"
-                            value={channel.id}
-                            readOnly
-                            style={{ width: "90%", textAlign: "center", backgroundColor: "#f5f5f5", cursor: "not-allowed" }}
-                            />
-                        </div>
-                        <div style={{ flex: 2, textAlign: "center" }}>
-                            <input
-                            type="text"
-                            value={channel.name}
-                            onChange={(e) => updateChannelField(index, "name", e.target.value)}
-                            style={{ width: "90%", textAlign: "center" }}
-                            />
-                        </div>
-                        <div style={{ flex: 2, textAlign: "center" }}>
-                            <input
-                            type="text"
-                            value={channel.source}
-                            onChange={(e) => updateChannelField(index, "source", e.target.value)}
-                            style={{ width: "90%", textAlign: "center" }}
-                            />
-                        </div>
-                        <div style={{ flex: 2, textAlign: "center" }}>
-                            <input
-                            type="text"
-                            value={channel.value}
-                            onChange={(e) => updateChannelField(index, "value", e.target.value)}
-                            style={{ width: "90%", textAlign: "center" }}
-                            />
-                        </div>
-                        <div style={{ flex: 2, textAlign: "center", display: "flex", justifyContent: "space-evenly" }}>
-                            {/* Delete button for all rows */}
-                            <Button
-                            type="danger"
-                            icon={<DeleteOutlined />}
-                            onClick={() => openChannelDeleteModal(index)}
-                            />
-                            {/* Add button only for the last row */}
-                            {index === channelList.length - 1 && (
-                            <Button
-                                type="primary"
-                                icon={<PlusOutlined />}
-                                onClick={addNewChannel}
-                                style={{ marginRight: "5px" }}
-                            />
-                            )}
-                        </div>
+                            <div style={{ flex: 1, textAlign: "center" }}>
+                                <input
+                                type="text"
+                                value={channel.id}
+                                readOnly
+                                className='campaigns-container-input'
+                                />
+                            </div>
+                            <div style={{ flex: 2, textAlign: "center" }}>
+                                <input
+                                type="text"
+                                value={channel.name}
+                                onChange={(e) => updateChannelField(index, "name", e.target.value)}
+                                style={{ width: "90%", textAlign: "center" }}
+                                />
+                            </div>
+                            <div style={{ flex: 2, textAlign: "center" }}>
+                                <input
+                                type="text"
+                                value={channel.source}
+                                onChange={(e) => updateChannelField(index, "source", e.target.value)}
+                                style={{ width: "90%", textAlign: "center" }}
+                                />
+                            </div>
+                            <div style={{ flex: 2, textAlign: "center" }}>
+                                <input
+                                type="text"
+                                value={channel.value}
+                                onChange={(e) => updateChannelField(index, "value", e.target.value)}
+                                style={{ width: "90%", textAlign: "center" }}
+                                />
+                            </div>
+                            <div className='delete-button-container'>
+                                {/* Delete button for all rows */}
+                                <Button
+                                type="danger"
+                                icon={<DeleteOutlined />}
+                                onClick={() => openChannelDeleteModal(index)}
+                                />
+                                {/* Add button only for the last row */}
+                                {index === channelList.length - 1 && (
+                                <Button
+                                    type="primary"
+                                    icon={<PlusOutlined />}
+                                    onClick={addNewChannel}
+                                    style={{ marginRight: "5px" }}
+                                />
+                                )}
+                            </div>
                         </div>
                     ))}
 
@@ -548,14 +513,7 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
                         },
                     ]}
                 >
-                    <div
-                        style={{
-                        display: "flex",
-                        fontWeight: "bold",
-                        borderBottom: "2px solid #ddd",
-                        padding: "10px 0",
-                        }}
-                    >
+                    <div className='editeddata-source-fields'>
                         <div style={{ flex: 1, textAlign: "center" }}>ID</div>
                         <div style={{ flex: 2, textAlign: "center" }}>Name</div>
                         <div style={{ flex: 1, textAlign: "center" }}>Code</div>
@@ -568,72 +526,67 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
                     {dataList.map((item, index) => (
                         <div
                         key={index}
-                        style={{
-                            display: "flex",
-                            padding: "10px 0",
-                            borderBottom: "1px solid #eee",
-                            alignItems: "center",
-                        }}
+                        className='campaigns-container'
                         >
-                        <div style={{ flex: 1, textAlign: "center" }}>
-                            <input
-                            type="text"
-                            value={item.id}
-                            readOnly
-                            style={{ width: "90%", textAlign: "center", backgroundColor: "#f5f5f5", cursor: "not-allowed" }}
-                            />
-                        </div>
-                        <div style={{ flex: 2, textAlign: "center" }}>
-                            <input
-                            type="text"
-                            value={item.name}
-                            onChange={(e) => updateInputValue(index, "name", e.target.value)}
-                            style={{ width: "90%", textAlign: "center" }}
-                            />
-                        </div>
-                        <div style={{ flex: 1, textAlign: "center" }}>
-                            <input
-                            type="text"
-                            value={item.code}
-                            onChange={(e) => updateInputValue(index, "code", e.target.value)}
-                            style={{ width: "90%", textAlign: "center" }}
-                            />
-                        </div>
-                        <div style={{ flex: 1, textAlign: "center" }}>
-                            <input
-                            type="text"
-                            value={item.account}
-                            onChange={(e) => updateInputValue(index, "account", e.target.value)}
-                            style={{ width: "90%", textAlign: "center" }}
-                            />
-                        </div>
-                        <div style={{ flex: 3, textAlign: "center" }}>
-                            <input
-                            type="text"
-                            value={item.url}
-                            onChange={(e) => updateInputValue(index, "url", e.target.value)}
-                            style={{ width: "90%" }}
-                            />
-                        </div>
-                        <div style={{ flex: 1, textAlign: "center", display: "flex" }}>
-                            {/* Delete button for all rows */}
-                            <Button
-                            type="danger"
-                            style={{marginRight:'5px'}}
-                            icon={<DeleteOutlined  style={{fontSize:'15px'}}/>}
-                            onClick={() => openDeleteModal(index)}
-                            />
-                            {/* Add button only for the last row */}
-                            {index === dataList.length - 1 && (
-                            <Button
-                                type="primary"
-                                
-                                icon={<PlusOutlined style={{fontSize:'15px'}}/>}
-                                onClick={addNewRow}
-                                style={{ marginRight: "5px" }}
-                            />
-                            )}
-                        </div>
+                            <div style={{ flex: 1, textAlign: "center" }}>
+                                <input
+                                type="text"
+                                value={item.id}
+                                readOnly
+                                campaigns-container-input
+                                />
+                            </div>
+                            <div style={{ flex: 2, textAlign: "center" }}>
+                                <input
+                                type="text"
+                                value={item.name}
+                                onChange={(e) => updateInputValue(index, "name", e.target.value)}
+                                style={{ width: "90%", textAlign: "center" }}
+                                />
+                            </div>
+                            <div style={{ flex: 1, textAlign: "center" }}>
+                                <input
+                                type="text"
+                                value={item.code}
+                                onChange={(e) => updateInputValue(index, "code", e.target.value)}
+                                style={{ width: "90%", textAlign: "center" }}
+                                />
+                            </div>
+                            <div style={{ flex: 1, textAlign: "center" }}>
+                                <input
+                                type="text"
+                                value={item.account}
+                                onChange={(e) => updateInputValue(index, "account", e.target.value)}
+                                style={{ width: "90%", textAlign: "center" }}
+                                />
+                            </div>
+                            <div style={{ flex: 3, textAlign: "center" }}>
+                                <input
+                                type="text"
+                                value={item.url}
+                                onChange={(e) => updateInputValue(index, "url", e.target.value)}
+                                style={{ width: "90%" }}
+                                />
+                            </div>
+                            <div className='delete-button-container'>
+                                {/* Delete button for all rows */}
+                                <Button
+                                type="danger"
+                                style={{marginRight:'5px'}}
+                                icon={<DeleteOutlined  style={{fontSize:'15px'}}/>}
+                                onClick={() => openDeleteModal(index)}
+                                />
+                                {/* Add button only for the last row */}
+                                {index === dataList.length - 1 && (
+                                <Button
+                                    type="primary"
+                                    
+                                    icon={<PlusOutlined style={{fontSize:'15px'}}/>}
+                                    onClick={addNewRow}
+                                    style={{ marginRight: "5px" }}
+                                />
+                                )}
+                            </div>
                         </div>
                     ))}
 
@@ -661,14 +614,7 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
                         },
                     ]}
                 >
-                    <div
-                        style={{
-                        display: "flex",
-                        fontWeight: "bold",
-                        borderBottom: "2px solid #ddd",
-                        padding: "10px 0",
-                        }}
-                    >
+                    <div className='editeddata-source-fields'>
                         <div style={{ flex: 1, textAlign: "center" }}>ID</div>
                         <div style={{ flex: 2, textAlign: "center" }}>Name</div>
                         <div style={{ flex: 2, textAlign: "center" }}>Code</div>
@@ -681,72 +627,67 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
                     {objects.map((obj, index) => (
                         <div
                         key={index}
-                        style={{
-                            display: "flex",
-                            padding: "10px 0",
-                            borderBottom: "1px solid #eee",
-                            alignItems: "center",
-                        }}
+                        className='campaigns-container'
                         >
-                        <div style={{ flex: 1, textAlign: "center" }}>
-                            <input
-                            type="text"
-                            value={obj.id}
-                            readOnly
-                            style={{ width: "90%", textAlign: "center", backgroundColor: "#f5f5f5", cursor: "not-allowed" }}
-                            />
-                        </div>
-                        <div style={{ flex: 2, textAlign: "center" }}>
-                            <input
-                            type="text"
-                            value={obj.name}
-                            onChange={(e) => handleInputChange(index, "name", e.target.value)}
-                            style={{ width: "90%", textAlign: "center" }}
-                            />
-                        </div>
-                        <div style={{ flex: 2, textAlign: "center" }}>
-                            <input
-                            type="text"
-                            value={obj.code}
-                            onChange={(e) => handleInputChange(index, "code", e.target.value)}
-                            style={{ width: "90%", textAlign: "center" }}
-                            />
-                        </div>
-                        <div style={{ flex: 2, textAlign: "center" }}>
-                            <input
-                            type="text"
-                            value={obj.account}
-                            onChange={(e) => handleInputChange(index, "account", e.target.value)}
-                            style={{ width: "90%", textAlign: "center" }}
-                            />
-                        </div>
-                        <div style={{ flex: 3, textAlign: "center" }}>
-                            <input
-                            type="text"
-                            value={obj.url}
-                            onChange={(e) => handleInputChange(index, "url", e.target.value)}
-                            style={{ width: "90%" }}
-                            />
-                        </div>
-                        <div style={{ flex: 2, textAlign: "center", display: "flex", justifyContent: "space-evenly" }}>
-                            {/* Add button only for the last object */}
-                            {/* Delete button for all objects, including the last */}
-                            <Button
-                            type="danger"
-                            icon={<DeleteOutlined />}
-                            onClick={() => handleDeleteClick(index)}
-                            >
-                            </Button>
-                            {index === objects.length - 1 && (
-                            <Button
-                                type="primary"
-                                icon={<PlusOutlined />}
-                                onClick={handleAddObject}
-                                style={{ marginRight: "5px" }}
-                            >
-                            </Button>
-                            )}
-                        </div>
+                            <div style={{ flex: 1, textAlign: "center" }}>
+                                <input
+                                type="text"
+                                value={obj.id}
+                                readOnly
+                                className='campaigns-container-input'
+                                />
+                            </div>
+                            <div style={{ flex: 2, textAlign: "center" }}>
+                                <input
+                                type="text"
+                                value={obj.name}
+                                onChange={(e) => handleInputChange(index, "name", e.target.value)}
+                                style={{ width: "90%", textAlign: "center" }}
+                                />
+                            </div>
+                            <div style={{ flex: 2, textAlign: "center" }}>
+                                <input
+                                type="text"
+                                value={obj.code}
+                                onChange={(e) => handleInputChange(index, "code", e.target.value)}
+                                style={{ width: "90%", textAlign: "center" }}
+                                />
+                            </div>
+                            <div style={{ flex: 2, textAlign: "center" }}>
+                                <input
+                                type="text"
+                                value={obj.account}
+                                onChange={(e) => handleInputChange(index, "account", e.target.value)}
+                                style={{ width: "90%", textAlign: "center" }}
+                                />
+                            </div>
+                            <div style={{ flex: 3, textAlign: "center" }}>
+                                <input
+                                type="text"
+                                value={obj.url}
+                                onChange={(e) => handleInputChange(index, "url", e.target.value)}
+                                style={{ width: "90%" }}
+                                />
+                            </div>
+                            <div className='delete-button-container'>
+                                {/* Add button only for the last object */}
+                                {/* Delete button for all objects, including the last */}
+                                <Button
+                                type="danger"
+                                icon={<DeleteOutlined />}
+                                onClick={() => handleDeleteClick(index)}
+                                >
+                                </Button>
+                                {index === objects.length - 1 && (
+                                <Button
+                                    type="primary"
+                                    icon={<PlusOutlined />}
+                                    onClick={handleAddObject}
+                                    style={{ marginRight: "5px" }}
+                                >
+                                </Button>
+                                )}
+                            </div>
                         </div>
                     ))}
 

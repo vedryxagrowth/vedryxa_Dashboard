@@ -460,7 +460,12 @@ const App = () => {
                         console.log('Facebook API response:', fbResponse.data);
 
                         if (fbResponse.status === 200) {
-                            message.success("Status updated successfully");
+                            if(fbResponse.data?.success===true){
+                                var mains="Launched"
+                            }else{
+                                var mains="PAUSE"
+                            }
+                            message.success(`Campaign ${checked ? 'Launched' : 'Paused'} Successfully`);
 
                             // Update the state to reflect the change in UI
                             setCampaignData(prevCampaigns =>
@@ -480,7 +485,7 @@ const App = () => {
                     }
                 } else {
                     // If no campaignId is available, only update the backend
-                    message.success("Status updated successfully on backend");
+                    message.success("Campaign Launched Successfully");
 
                     // Update the state to reflect the change in UI
                     setCampaignData(prevCampaigns =>
@@ -658,10 +663,10 @@ const App = () => {
         //     ),
         // },
         {
-            title: 'status',
+            title: 'Status',
             dataIndex: 'fbstatus',
             key: 'fbstatus',
-            width: '5%',  // Adjust width
+            width: '10%',  // Adjust width
             align: 'center',
             render: (text, record) => (
                 <>
@@ -720,7 +725,7 @@ const App = () => {
             ),
         },
         {
-            title: "Account Number & Creatives Status",
+            title: "Account Number",
             dataIndex: "Account_Number",
             key: "Account_Number",
             width: '15%',  // Adjust width
@@ -772,7 +777,7 @@ const App = () => {
             align: 'center',
         },
         {
-            title: "Daily Amount",
+            title: "Budget",
             dataIndex: "Daily_amount",
             key: "Daily_amount",
             width: '10%',  // Adjust width
@@ -810,10 +815,10 @@ const App = () => {
             )
         },
         {
-            title: "Approval status",
+            title: "Approve",
             dataIndex: "Approval",
             key: "Approval",
-            width: '10%',
+            width: '7%',
             align: 'center',
             render: (text, record) => {
                 console.log(record, "recordeddata")
@@ -829,7 +834,7 @@ const App = () => {
 
                 return (
                     <div>
-                        <span style={{ color }}>{`${text} By`}</span>
+                        <span style={{ color }}>{`${text}`}</span>
                         {text === "Approved" && (
                             <>
                                 <br />
@@ -858,7 +863,7 @@ const App = () => {
         //     },
         // },
         {
-            title: 'Action',
+            title: '',
             dataIndex: 'Action',
             align: "center",
             render: (_, record) => {

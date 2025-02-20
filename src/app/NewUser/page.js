@@ -1,44 +1,35 @@
 "use client"
 import React, { useEffect, useState, useRef } from 'react';
-import axios from 'axios';
-import { Table, Button, Col, Card, Input, Row, Select, Result, Spin, Space, Modal, message, Menu, Switch, Search, Tooltip, Tabs, Flex } from 'antd';
-import { ReloadOutlined, HighlightOutlined, LeftOutlined, RightOutlined, SearchOutlined, SwapRightOutlined, DownOutlined, EditOutlined, EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
+import { Table, Button, Col, Card, Input, Row, Select, Result, Spin, Space, Modal, message, Menu, Switch, Tooltip, Tabs, Flex } from 'antd';
+import { ReloadOutlined, SearchOutlined, DownOutlined, EditOutlined, EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
 import { Carousel } from 'react-responsive-carousel';
-import { MailOutlined, SettingOutlined } from '@ant-design/icons';
-import StickyBox from 'react-sticky-box';
 import { redirect } from 'next/navigation';
-
-// import { , Select } from 'antd';
 import { useTokenContext } from '../components/parent';
 
 const { SubMenu } = Menu;
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
-import Createnewuser from './users-components/create-newuser';
-import Newaddaccounts from './users-components/add-newaccount';
-import Edituseraccesses from './users-components/edit-usersaccess';
-import EditAccountAccess from './users-components/edit-accountaccess';
-import EditNetworkAccess from './users-components/edit-network';
-import EditUrlBuilder from './users-components/edit-urlbulder';
-import RequestComponent from '../CronDashboard/crons';
-
 
 //UrlBuilder Components
 import MnetUrlBuilder from '../Campaigns/camp-components/urlbuilder/mnet';
 import System1UrlBuilder from '../Campaigns/camp-components/urlbuilder/system1'
 import TonicUrlBuilder from '../Campaigns/camp-components/urlbuilder/tonic';
 import DActiveUrlBuilder from '../Campaigns/camp-components/urlbuilder/dactive';
-//
 
 import debounce from 'lodash.debounce';
 
-const contentStyle = {
-    margin: 0,
-    // height: '800px',
-    color: '#66fc03',
-    lineHeight: '160px',
-    textAlign: 'center',
-    background: '#fbfcfa',
-};
+import dynamic from 'next/dynamic';
+
+const DynamicCreatenewuser = dynamic(() => import('./users-components/create-newuser'), {
+    ssr: false,
+    loading: () => <p>I am fetching</p>
+});
+const DynamicNewaddaccounts = dynamic(() => import('./users-components/add-newaccount'));
+const DynamicEdituseraccesses = dynamic(() => import('./users-components/edit-usersaccess'));
+const DynamicEditAccountAccess = dynamic(() => import('./users-components/edit-accountaccess'));
+const DynamicEditNetworkAccess = dynamic(() => import('./users-components/edit-network'));
+const DynamicEditUrlBuilder = dynamic(() => import('./users-components/edit-urlbulder'));
+const DynamicRequestComponent = dynamic(() => import('../CronDashboard/crons'));
+
 const roles = ['All', 'Media_Buyer', 'Admin', 'Manager', 'Special_User', "Revenue_Partner"];
 const accountStatus = ['All', 'Active', 'InActive'];
 const availableNetworks = ['All', "MEDIA_DOT_NET", "MEDIA_DOT_NET_BING", "ENKI", "TONIC", "System1", "Bodies", "Bodies1", "Rsoc", "Domain Active"];
@@ -46,12 +37,9 @@ const networkStatus = ['All', 'Active', 'InActive'];
 
 const UsersTable = () => {
     const { userdetails } = useTokenContext();
-
     if (!userdetails?.adAccounts) {
         return <div style={{ width: '100%', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <Flex align="center" gap="middle">
-                {/* <Spin size="small" />
-                <Spin /> */}
                 <Spin size="large" />
             </Flex>
         </div>;
@@ -59,9 +47,6 @@ const UsersTable = () => {
 
     if(userdetails?.role !== "Admin"){
         redirect("/Dashboard");
-        // return(
-        //     <RevenuePartnerDashboard />
-        // )
     };
     const [isSearchingNetwork, setIsSearchingNetwork] = useState(false); //prudhvi
     const [netSearchInput, setNetSearchInput] = useState(""); //prudhvi
@@ -104,40 +89,15 @@ const UsersTable = () => {
         setIsModalVisibleForURLBuilder(false);
     };
 
-    const carouselRef = useRef();
-    const [currentSlide, setCurrentSlide] = useState(0);
     const [activeSlide, setActiveSlide] = useState(0);
     const [network, setNetwork] = useState("");
     const { theme } = useTokenContext();
     const { apiClient } = useTokenContext();
 
-    const handleDotClick = (index) => {
-        if (carouselRef.current) {
-            carouselRef.current.goTo(index);
-            setCurrentSlide(index);
-        }
-    };
-
-    const handleSearchClick = () => {
-        setIsSearching(true);
-    };
-
     const handleBlur = () => {
         if (searchInput.trim() === '') {
             setIsSearching(false);
         }
-    };
-
-    const handleChangeInput = (e) => {
-        setInputValue(e.target.value);
-        // console.log(e.target.value);
-        // const filteredLiveData = rowData.filter((each)=> each.campaignName.includes(e.target.value));
-
-        // const filteredDailyData = dailyData.filter((each)=> each.campaignName.includes(e.target.value));
-        // const filteredAllCampaignsData = campaignData.filter((each)=> each.campaignName.includes(e.target.value));
-        // setRowData(filteredLiveData);
-        // setdailyData(filteredDailyData);
-        // setCampaignData(filteredAllCampaignsData);
     };
 
     const handleSearchClick1 = () => {
@@ -185,57 +145,6 @@ const UsersTable = () => {
         setIsModalVisibleForURLBuilder(true);
     }
 
-    // const handleChangeInput1 = (e) => {
-    //     setInputValue(e.target.value);
-    //     // console.log(e.target.value);
-    //     // const filteredLiveData = rowData.filter((each)=> each.campaignName.includes(e.target.value));
-
-    //     // const filteredDailyData = dailyData.filter((each)=> each.campaignName.includes(e.target.value));
-    //     // const filteredAllCampaignsData = campaignData.filter((each)=> each.campaignName.includes(e.target.value));
-    //     // setRowData(filteredLiveData);
-    //     // setdailyData(filteredDailyData);
-    //     // setCampaignData(filteredAllCampaignsData);
-    // };
-
-    // const [accountsData, setAccountsData] = useState([]);
-    //new Added below
-    // const [openKeys, setOpenKeys] = useState([]);
-    // const [selectedValue, setSelectedValue] = useState(null);
-    // const transformData = (data) => {
-    //     const items = [];
-        
-    //     // Example transformation based on the provided structure
-    //     // You can adjust this based on your specific data structure
-    //     Object.keys(data).forEach((key, index) => {
-    //       const children = data[key].map((itemKey, idx) => ({
-    //         key: `${index + 2}${idx + 1}`,
-    //         label: itemKey,
-    //       }));
-      
-    //       items.push({
-    //         key: `${index + 2}`,
-    //         icon: index === 0 ? <MailOutlined /> : <SettingOutlined />,
-    //         label: key,
-    //         children: children.length ? children : undefined,
-    //       });
-    //     });
-      
-    //     return items;
-    //   };
-
-    // useEffect(() => {
-    //     // Set the default selected value to the key of the first item
-    //     const initialSelectedKey = items.length > 0 ? items[0].key : null;
-    //     setSelectedValue(initialSelectedKey);
-    //   }, []);
-    
-    //   const onOpenChange = (keys) => {
-    //     setOpenKeys(keys);
-    //   };
-    
-    //   const handleSelectChange = (value) => {
-    //     setSelectedValue(value);
-    //   };
     const handleSelectChange = (value) => {
         console.log('Selected value:', value);
     };
@@ -251,7 +160,6 @@ const UsersTable = () => {
           })),
         }));
     };
-    //newly added above
 
     var token = localStorage.getItem("token")
     useEffect(() => {
@@ -293,8 +201,6 @@ const UsersTable = () => {
     }, [userdetails]);
     
     const handleDelete = async (values) => {
-        // console.log(values, "Delete");
-
         try {
             // Check if values.email exists
             const url = values.email ? `/api/deleteUser?email=${values.email}` : '';
@@ -307,28 +213,14 @@ const UsersTable = () => {
                     onOk: async () => {
                         try {
                             const response = await apiClient.delete(url);
-                            // const response = await fetch(url, {
-                            //     method: 'DELETE',
-                            //     headers: {
-                            //         Authorization: token
-                            //     }
-                            // });
-
                             if (response.status === 200) {
-                                // console.log('User deleted successfully');
                                 message.success(`${values.userName} User access removed successfully`);
                                 refreshUsers();
-                                // setTimeout(() => {
-                                //     window.location.reload();
-                                // }, 1500);
-                                // Handle success, such as updating UI or showing a success message
                             } else {
                                 console.error('Failed to delete user');
-                                // Handle error, such as showing an error message
                             }
                         } catch (error) {
                             console.error('Error:', error);
-                            // Handle error, such as showing an error message
                         }
                     },
                     onCancel: () => {
@@ -337,18 +229,14 @@ const UsersTable = () => {
                 });
             } else {
                 console.error('Email address is missing');
-                // Handle error, such as showing an error message
             }
         } catch (error) {
             console.error('Error:', error);
-            // Handle error, such as showing an error message
         }
     };
     const handleStatusChange = async(accountNumber, checked) => {
-        // console.log(checked, "checked");
         const newData = AccountsData.map((item) => {
             if (item.accountNumber === accountNumber) {
-                // console.log(`Account Number: ${item.accountNumber}`);
                 return {
                     ...item,
                     status: checked ? 'Active' : 'InActive',
@@ -356,12 +244,8 @@ const UsersTable = () => {
             }
             return item;
         });
-        // console.log(newData, "newData");
         const newStatus = checked ? 'Active' : 'InActive';
-        // console.log(newStatus, "newStatus");
-        // console.log(token, "token");
         const response = await apiClient.get(`/updateAccount/?accountNumber=${accountNumber}&status=${newStatus}`);
-        // console.log(response.data);
         setAccountsData(newData);
     };
 
@@ -370,7 +254,6 @@ const UsersTable = () => {
             const response = await apiClient.get('/get/usersdata/');
             if (response.status === 200) {
                 setUsersData(response.data);
-                // console.log(response.data, "users")
             } else {
                 console.error('Failed to fetch users data');
             }
@@ -384,14 +267,8 @@ const UsersTable = () => {
     const fetchAccountsData = async () => {
         try {
             const response = await apiClient.get('/api/getAccountsData/');
-            // const response = await axios.get('https://www.testapi.adsgoat.in/api/getAccountsData', {
-            //     headers: {
-            //         Authorization: token
-            //     }
-            // });
             if (response.status === 200) {
                 setAccountsData(response.data);
-                // console.log(response.data, "accounts data")
             } else {
                 console.error('Failed to fetch users data');
             }
@@ -412,10 +289,8 @@ const UsersTable = () => {
     };
 
     const handleNetworkStatusChange = async(revenuePartner, checked) => {
-        // console.log(checked, "checked");
         const newData = networksData.map((item) => {
             if (item.revenuePartner === revenuePartner) {
-                // console.log(`Account Number: ${item.accountNumber}`);
                 return {
                     ...item,
                     Status: checked ? 'Active' : 'InActive',
@@ -423,10 +298,7 @@ const UsersTable = () => {
             }
             return item;
         });
-        // console.log(newData, "newData");
         const newStatus = checked ? 'Active' : 'InActive';
-        // console.log(newStatus, "newStatus");
-        // console.log(token, "token");
         const response = await apiClient.get(`/updateNetwork/?revenuePartner=${revenuePartner}&Status=${newStatus}`);
         console.log(response.data);
         setNetworksData(newData);
@@ -514,13 +386,7 @@ const UsersTable = () => {
                     gutter={[8, 8]}
                     align="middle"
                     wrap
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        flexWrap: 'wrap',
-                        width: '100%',
-                        justifyContent:'center'
-                    }}
+                   className='networks-status-column'
                 >
                     <Col flex="1 1 auto">
                         <span>{text}</span>
@@ -676,7 +542,6 @@ const UsersTable = () => {
         },
     ];
 
-
     const Accountscolumn = [
         {
             title: 'Spend Account ID',
@@ -714,13 +579,7 @@ const UsersTable = () => {
                     gutter={[8, 8]}
                     align="middle"
                     wrap
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        flexWrap: 'wrap',
-                        width: '100%',
-                        justifyContent:'center'
-                    }}
+                    className='networks-status-column'
                 >
                     <Col flex="1 1 auto">
                         <span>{text}</span>
@@ -737,25 +596,11 @@ const UsersTable = () => {
                 </Row>
             ),
         },
-
-        // {
-        //     title: 'Token',
-        //     dataIndex: 'token',
-        //     key: 'token',
-        // },
-
-
-
         {
             title: 'Revenue Account ID',
             dataIndex: 'revenueAccountId',
             key: 'revenueAccountId',
         },
-        // {
-        //     title: 'BM ID',
-        //     dataIndex: 'BMId',
-        //     key: 'BMId',
-        // },
         {
             title: 'BM Name',
             dataIndex: 'BMName',
@@ -766,19 +611,7 @@ const UsersTable = () => {
             dataIndex: 'Holder',
             key: 'Holder',
         },
-
-        // {
-        //     title: 'Agency ID',
-        //     dataIndex: 'agencyId',
-        //     key: 'agencyId',
-        // },
-        // {
-        //     title: 'Agency Name',
-        //     dataIndex: 'agencyName',
-        //     key: 'agencyName',
-        // },
     ];
-
 
     const columns = [
         {
@@ -801,7 +634,6 @@ const UsersTable = () => {
             dataIndex: 'adAccounts',
             key: 'adAccounts',
             render: adAccounts => {
-                // console.log(adAccounts, "adding the accounts");
                 const menuItems = transformData(adAccounts);
                 if(menuItems.length >0){
                     return((
@@ -820,7 +652,7 @@ const UsersTable = () => {
                                 defaultSelectedKeys={['2']}
                                 >
                                 {menuItems.map(item => (
-                                    <SubMenu key={item.key} title={<span style={{width:'150px', display:'flex', justifyContent: 'space-between'}}>{item.label} <DownOutlined size={10}/></span>} className="custom-submenu">
+                                    <SubMenu key={item.key} title={<span className='columns-submenu'>{item.label} <DownOutlined size={10}/></span>} className="custom-submenu">
                                     {item.children && item.children.map(child => (
                                         <Menu.Item key={child.key}>
                                         {child.label}
@@ -837,7 +669,6 @@ const UsersTable = () => {
                                 </Select.Option>
                             ))}
                         </Select>
-    
                     ))
                 }else{
                     return(
@@ -851,10 +682,8 @@ const UsersTable = () => {
                             </Select.Option>
                         </Select>
                     );
-                }
-                
+                }  
             },
-
         },
         {
             title: 'Action',
@@ -893,35 +722,25 @@ const UsersTable = () => {
                                     onClick={() => {}}
                                     style={{ width: 256, maxHeight: 300, overflowY: 'auto' }}
                                     mode="inline"
-                                    // defaultSelectedKeys={['2']}
                                 >
                                     {newDomains.map(item => (
                                         <SubMenu
                                             key={item.key}
                                             title={
-                                                <span style={{ width: '150px', display: 'flex', justifyContent: 'space-between' }}>
+                                                <span className='columns-submenu'>
                                                     {item.name} <DownOutlined size={10} />
                                                 </span>
                                             }
                                             className="custom-submenu"
                                         >
-                                            <div style={{ padding: '10px', display: 'flex', flexDirection: 'column', gap: '8px', marginLeft:'25px' }}>
+                                            <div className='urlbuilder-submenu-container'>
                                                 <p><strong>ID:</strong> {item.id}</p>
                                                 <p><strong>Name:</strong> {item.name}</p>
                                                 <p><strong>Code:</strong> {item.code}</p>
                                                 <p><strong>Account:</strong> {item.account}</p>
                                                 <div style={{ display: 'flex', marginRight:'25px' }}>
                                                     <div style={{ paddingRight: '8px', paddingTop:'10px' }}><strong>URL:</strong></div>
-                                                    <div style={{
-                                                        marginRight:'25px',
-                                                        display: 'block',
-                                                        maxWidth: '200px',       // Limit max width
-                                                        whiteSpace: 'normal',    // Allows text to wrap to new lines
-                                                        wordBreak: 'break-word', // Forces breaks within long words
-                                                        overflowWrap: 'break-word', // Ensures breaking at any possible point
-                                                        lineHeight: '1.5', // Space out lines for readability
-                                                        color: '#000', // Adjust text color if needed
-                                                    }}>
+                                                    <div className='urlbuilder-submenu-container-item'>
                                                         {item.url}
                                                     </div>
                                                 </div>
@@ -931,7 +750,6 @@ const UsersTable = () => {
                                 </Menu>
                             )}
                         >
-                            {/* Placeholder for Select options if needed */}
                         </Select>
                     );
                 } else {
@@ -955,8 +773,6 @@ const UsersTable = () => {
             dataIndex: 'Source',
             key: 'Source',
             render: Source => {
-                // console.log(adAccounts, "adding the accounts");
-                // const menuItems = transformData(adAccounts);
                 const newSource = Source;
                 if(Source && Source.length >0){
                     return((
@@ -972,49 +788,30 @@ const UsersTable = () => {
                                     onClick={() => {}}
                                     style={{ width: 256, maxHeight: 300, overflowY: 'auto' }}
                                     mode="inline"
-                                    // defaultSelectedKeys={['2']}
                                 >
                                     {newSource.map(item => (
                                         <SubMenu
                                             key={item.key}
                                             title={
-                                                <span style={{ width: '150px', display: 'flex', justifyContent: 'space-between' }}>
+                                                <span className='columns-submenu'>
                                                     {item.name} <DownOutlined size={10} />
                                                 </span>
                                             }
                                             className="custom-submenu"
                                         >
-                                            <div style={{ padding: '10px', display: 'flex', flexDirection: 'column', gap: '8px', marginLeft:'25px' }}>
+                                            <div className='urlbuilder-submenu-container'>
                                                 <p><strong>ID:</strong> {item.id}</p>
                                                 <p><strong>Name:</strong> {item.name}</p>
                                                 <p><strong>Code:</strong> {item.code}</p>
                                                 <div style={{ display: 'flex', marginRight:'25px' }}>
                                                     <div style={{ paddingRight: '10px', paddingTop:'10px' }}><strong>CampaignID:</strong></div>
-                                                    <div style={{
-                                                        marginRight:'25px',
-                                                        display: 'block',
-                                                        maxWidth: '200px',       // Limit max width
-                                                        whiteSpace: 'normal',    // Allows text to wrap to new lines
-                                                        wordBreak: 'break-word', // Forces breaks within long words
-                                                        overflowWrap: 'break-word', // Ensures breaking at any possible point
-                                                        lineHeight: '1.5', // Space out lines for readability
-                                                        color: '#000', // Adjust text color if needed
-                                                    }}>
+                                                    <div className='urlbuilder-submenu-container-item'>
                                                         {item.campaignId}
                                                     </div>
                                                 </div>
                                                 <div style={{ display: 'flex', marginRight:'25px' }}>
                                                     <div style={{ paddingRight: '10px', paddingTop:'10px' }}><strong>AdsetID:</strong></div>
-                                                    <div style={{
-                                                        marginRight:'25px',
-                                                        display: 'block',
-                                                        maxWidth: '200px',       // Limit max width
-                                                        whiteSpace: 'normal',    // Allows text to wrap to new lines
-                                                        wordBreak: 'break-word', // Forces breaks within long words
-                                                        overflowWrap: 'break-word', // Ensures breaking at any possible point
-                                                        lineHeight: '1.5', // Space out lines for readability
-                                                        color: '#000', // Adjust text color if needed
-                                                    }}>
+                                                    <div className='urlbuilder-submenu-container-item'>
                                                         {item.AdsetId}
                                                     </div>
                                                 </div>
@@ -1022,41 +819,9 @@ const UsersTable = () => {
                                         </SubMenu>
                                     ))}
                                 </Menu>
-                                // <Menu
-                                // onClick={() => {}}
-                                // style={{ width: 256, maxHeight: 300, overflowY: 'auto'  }}
-                                // mode="inline"
-                                // // defaultSelectedKeys={['2']}
-                                // >
-                                // {newSource.map(item => (
-                                //     <SubMenu
-                                //         key={item.key}
-                                //         title={
-                                //             <span style={{ width: '150px', display: 'flex', justifyContent: 'space-between' }}>
-                                //                 {item.name} <DownOutlined size={10} />
-                                //             </span>
-                                //         }
-                                //         className="custom-submenu"
-                                //     >
-                                //         <div style={{ padding: '10px', display: 'flex', flexDirection: 'column', gap: '8px', marginLeft:'25px' }}>
-                                //             <p><strong>ID:</strong> {item.id}</p>
-                                //             <p><strong>Name:</strong> {item.name}</p>
-                                //             <p><strong>Code:</strong> {item.code}</p>
-                                //             <p><strong>CampaignID:</strong> {item.campaignId}</p>
-                                //             <p><strong>CampaignID:</strong> {item.AdsetId}</p>
-                                //         </div>
-                                //     </SubMenu>
-                                // ))}
-                                // </Menu>
                             )}
                             >
-                            {/* {menuItems.map(item => (
-                                <Select.Option key={item.key} value={item.key}>
-                                {item.label}
-                                </Select.Option>
-                            ))} */}
                         </Select>
-    
                     ))
                 }else{
                     return(
@@ -1078,8 +843,6 @@ const UsersTable = () => {
             dataIndex: 'channels',
             key: 'channels',
             render: channels => {
-                // console.log(adAccounts, "adding the accounts");
-                // const menuItems = transformData(adAccounts);
                 const newChannels = channels;
                 if(channels && channels.length >0){
                     return((
@@ -1095,19 +858,18 @@ const UsersTable = () => {
                                 onClick={() => {}}
                                 style={{ width: 256, maxHeight: 300, overflowY: 'auto'  }}
                                 mode="inline"
-                                // defaultSelectedKeys={['2']}
                                 >
                                 {newChannels.map(item => (
                                     <SubMenu
                                         key={item.key}
                                         title={
-                                            <span style={{ width: '150px', display: 'flex', justifyContent: 'space-between' }}>
+                                            <span className='columns-submenu'>
                                                 {item.name} <DownOutlined size={10} />
                                             </span>
                                         }
                                         className="custom-submenu"
                                     >
-                                        <div style={{ padding: '10px', display: 'flex', flexDirection: 'column', gap: '8px', marginLeft:'25px' }}>
+                                        <div className='urlbuilder-submenu-container'>
                                             <p><strong>ID:</strong> {item.id}</p>
                                             <p><strong>Name:</strong> {item.name}</p>
                                             <p><strong>Source:</strong> {item.source}</p>
@@ -1118,11 +880,6 @@ const UsersTable = () => {
                                 </Menu>
                             )}
                             >
-                            {/* {menuItems.map(item => (
-                                <Select.Option key={item.key} value={item.key}>
-                                {item.label}
-                                </Select.Option>
-                            ))} */}
                         </Select>
     
                     ))
@@ -1147,8 +904,6 @@ const UsersTable = () => {
             key: 'businessData',
             render: businessData => {
                 const newBusinessData = businessData;
-                // console.log(adAccounts, "adding the accounts");
-                // const menuItems = transformData(adAccounts);
                 if(businessData && businessData.length >0){
                     return((
                         <Select
@@ -1167,29 +922,20 @@ const UsersTable = () => {
                                         <SubMenu
                                             key={item.key}
                                             title={
-                                                <span style={{ width: '150px', display: 'flex', justifyContent: 'space-between' }}>
+                                                <span className='columns-submenu'>
                                                     {item.name} <DownOutlined size={10} />
                                                 </span>
                                             }
                                             className="custom-submenu"
                                         >
-                                            <div style={{ padding: '10px', display: 'flex', flexDirection: 'column', gap: '8px', marginLeft: '25px' }}>
+                                            <div className='urlbuilder-submenu-container'>
                                                 <p><strong>ID:</strong> {item.id}</p>
                                                 <p><strong>Name:</strong> {item.name}</p>
                                                 <p><strong>Code:</strong> {item.code}</p>
                                                 <p><strong>Account:</strong> {item.account}</p>
                                                 <div style={{ display: 'flex', marginRight:'25px' }}>
                                                     <div style={{ paddingRight: '8px', paddingTop:'10px' }}><strong>URL:</strong></div>
-                                                    <div style={{
-                                                        marginRight:'25px',
-                                                        display: 'block',
-                                                        maxWidth: '200px',       // Limit max width
-                                                        whiteSpace: 'normal',    // Allows text to wrap to new lines
-                                                        wordBreak: 'break-word', // Forces breaks within long words
-                                                        overflowWrap: 'break-word', // Ensures breaking at any possible point
-                                                        lineHeight: '1.5', // Space out lines for readability
-                                                        color: '#000', // Adjust text color if needed
-                                                    }}>
+                                                    <div className='urlbuilder-submenu-container-item'>
                                                         {item.url}
                                                     </div>
                                                 </div>
@@ -1200,7 +946,6 @@ const UsersTable = () => {
                             )}
                         >
                         </Select>
-    
                     ))
                 }else{
                     return(
@@ -1225,51 +970,136 @@ const UsersTable = () => {
                 <Space size="middle">
                     <Button type="primary" onClick={()=>handleEditUrlBuilder(record)}>Edit</Button>
                     {/* <Button type="dashed" onClick={() => handleDelete(record)}>Remove Access</Button> */}
-                    
                     <EditOutlined style={{ fontSize: '20px', cursor: 'pointer'}} onClick={()=>onClickOpenUrlBuilder(record)}  />
-                    
                 </Space>
             ),
         },
     ];
 
+    // const handleSearchChange = (e) => {
+    //     const searchValue = e.target.value.toLowerCase();
+    //     setSearchInput(searchValue);
+    //     const filtered = usersData.filter((item) =>
+    //         Object.values(item).some((field) =>
+    //             typeof field === 'string' && field.toLowerCase().includes(searchValue)
+    //         )
+    //     );
+    //     setFilteredData(filtered);
+    // };
+
+    // setaccFilteredData(AccountsData);
+    //     setNetworkFilteredData(networksData);
+
+    useEffect(() => {
+        const filterData = (data, searchValue) => {
+            if (!searchValue) return data; // ✅ Restore full list if search bar is empty
+            const filtered = data.filter((item) =>
+                Object.values(item).some(
+                    (field) => typeof field === 'string' && field.toLowerCase().includes(searchValue)
+                )
+            );
+            return filtered.length > 0 ? filtered : []; // ✅ Show empty if no matches
+        };
+    
+        // ✅ Apply filtering logic dynamically for each dataset
+        setFilteredData(filterData(usersData, searchInput));
+        setaccFilteredData(filterData(AccountsData, newSearchInput));
+        setNetworkFilteredData(filterData(networksData, netSearchInput));
+    
+    }, [usersData, searchInput, AccountsData, newSearchInput, networksData, netSearchInput]); // ✅ Dependencies ensure real-time updates
+    
+
     const handleSearchChange = (e) => {
         const searchValue = e.target.value.toLowerCase();
         setSearchInput(searchValue);
-        const filtered = usersData.filter((item) =>
-            Object.values(item).some((field) =>
-                typeof field === 'string' && field.toLowerCase().includes(searchValue)
-            )
-        );
-        setFilteredData(filtered);
+    
+        if (!searchValue) {
+            setFilteredData(usersData);
+        } else {
+            // ✅ Filter usersData dynamically to prevent showing deleted items
+            const filtered = usersData.filter((item) =>
+                Object.values(item).some((field) =>
+                    typeof field === 'string' && field.toLowerCase().includes(searchValue)
+                )
+            );
+    
+            setFilteredData(filtered.length > 0 ? filtered : []); // ✅ Show empty if no match
+        }
     };
+    
+    
+    // const handleaccountSearchChange = (e) => {
+    //     const searchValue = e.target.value.toLowerCase();
+    //     setNewSearchInput(searchValue);
+
+    //     if (!searchValue) {
+    //         setaccFilteredData(AccountsData);
+    //     } else {
+    //         const accfiltered = AccountsData.filter((item) =>
+    //             Object.values(item).some((field) =>
+    //                 typeof field === 'string' && field.toLowerCase().includes(searchValue)
+    //             )
+    //         );
+    //         setaccFilteredData(accfiltered);
+    //     }
+    // };
 
     const handleaccountSearchChange = (e) => {
         const searchValue = e.target.value.toLowerCase();
         setNewSearchInput(searchValue);
-        const accfiltered = AccountsData.filter((item) =>
-            Object.values(item).some((field) =>
-                typeof field === 'string' && field.toLowerCase().includes(searchValue)
-            )
-        );
-        setaccFilteredData(accfiltered);
+    
+        if (!searchValue) {
+            // ✅ Restore full list when search bar is cleared
+            setaccFilteredData(AccountsData);
+        } else {
+            // ✅ Always filter from the latest AccountsData to remove deleted items
+            const accfiltered = AccountsData.filter((item) =>
+                Object.values(item).some((field) =>
+                    typeof field === 'string' && field.toLowerCase().includes(searchValue)
+                )
+            );
+    
+            setaccFilteredData(accfiltered.length > 0 ? accfiltered : []); // ✅ Show empty if no match
+        }
     };
+    
+    // const handleNetworkSearchChange = (e) => {
+    //     const searchValue = e.target.value.toLowerCase();
+    //     setNetSearchInput(searchValue);
+
+    //     if (!searchValue) {
+    //         setNetworkFilteredData(networksData);
+    //     } else {
+    //         // Filtering only fields that are strings
+    //         const networkFiltered = networksData.filter((item) =>
+    //             Object.values(item).some((field) =>
+    //                 typeof field === 'string' && field.toLowerCase().includes(searchValue)
+    //             )
+    //         );
+    //         setNetworkFilteredData(networkFiltered);
+    //     }
+    // };
 
     const handleNetworkSearchChange = (e) => {
         const searchValue = e.target.value.toLowerCase();
         setNetSearchInput(searchValue);
-        
-        // Filtering only fields that are strings
-        const networkFiltered = networksData.filter((item) =>
-            Object.values(item).some((field) =>
-                typeof field === 'string' && field.toLowerCase().includes(searchValue)
-            )
-        );
-        setNetworkFilteredData(networkFiltered);
+    
+        if (!searchValue) {
+            // ✅ Restore full list when search bar is cleared
+            setNetworkFilteredData(networksData);
+        } else {
+            // ✅ Always filter from the latest networksData to remove deleted items
+            const networkFiltered = networksData.filter((item) =>
+                Object.values(item).some((field) =>
+                    typeof field === 'string' && field.toLowerCase().includes(searchValue)
+                )
+            );
+    
+            setNetworkFilteredData(networkFiltered.length > 0 ? networkFiltered : []); // ✅ Show empty if no match
+        }
     };
-
+    
     const showNetworkDrawer = () => {
-        // setNetworkDrawerVisible(true)
     }
 
     useEffect(() => {
@@ -1299,7 +1129,6 @@ const UsersTable = () => {
     const handleEdit = (values) => {
         setusersaccessDrawerVisible(true)
         setusersaccessData(values)
-        // console.log(values, "Edit")
     }
 
     const handleEditUrlBuilder = (record) =>{
@@ -1310,7 +1139,6 @@ const UsersTable = () => {
     const handleEditAccount = (values) => {
         setaccountaccessDrawerVisible(true)
         setaccountaccessData(values)
-        // console.log(values, "Edit")
     }
 
     const handleEditNetwork = (values) => {
@@ -1318,18 +1146,7 @@ const UsersTable = () => {
         setNetworkAccessData(values)
     }
 
-    // const onCloseDrawer = () => {
-    //     setDrawerVisible(false);
-    //     setaccountDrawerVisible(false)
-    //     setusersaccessDrawerVisible(false)
-    //     setaccountaccessDrawerVisible(false)
-    //     setNetworkAccessDrawerVisible(false);
-    // };
-
     const onChangeRole = (value) => {
-        // if(value === 'All'){
-        //     setRole('');
-        // }
         setRole(value);
     }
 
@@ -1342,29 +1159,15 @@ const UsersTable = () => {
     }
 
     const filteredRoleData = role !== 'All' ? usersData?.filter((each)=> each.role.includes(role)) : usersData;
-    // console.log(filteredRoleData, "filteredData");
-    // console.log(usersData, "usersData");
+    
     const filterData = () => {
-        // console.log(status, 'status');
-        // console.log(revenuePartner, 'revenuePartner');
         return AccountsData?.filter(item => 
-            // Check if the status matches the selected status
             (status === 'All' || item.status === status) &&
-            // Check if the revenuePartner matches or is 'All'
             (revenuePartner === 'All' || item.revenuePartner === revenuePartner)
         );
     };
     
     const filteredAccountData = filterData();
-
-    // const rowStyle = {
-    //     backgroundColor: '#e3f2fd', // Light blue background color
-    // };
-    
-    // const rowHoverStyle = {
-    //     backgroundColor: '#bbdefb', // Slightly darker blue for hover effect
-    // };
-    // console.log(filteredAccountData, "filteredAccountData");
 
     const refreshUsers = async () => {
         try {
@@ -1386,10 +1189,8 @@ const UsersTable = () => {
             const response = await fetchAccountsData(); 
             setAccountsData(response.data);  
         } catch (error) {
-            console.error("Error refreshing account data:", error);
-            
+            console.error("Error refreshing account data:", error); 
         } finally {
-          
             setLoading2(false);
         }
     };
@@ -1436,12 +1237,6 @@ const UsersTable = () => {
               )
             );
           } else if (updatedData === "AccountNumber" || updatedData.accountNumber) {
-            // Handle account data update
-            // setAccountsData((prevData) =>
-            //   prevData.map((account) =>
-            //     account.accountNumber === updatedData.accountNumber ? updatedData : account
-            //   )
-            // );
             refreshAccounts();
           } else if (updatedData.revenuePartner) {
             // Handle network data update
@@ -1481,29 +1276,25 @@ const UsersTable = () => {
 
     return (
         <>
-            <Createnewuser visible={drawerVisible} onClose={onCloseDrawer} />
-            <Newaddaccounts visible={accountDrawerVisible} onClose={onCloseDrawer} />
-            <Edituseraccesses editeddata={usersaccessData} visible={usersaccessDrawerVisible} onClose={onCloseDrawer} />
-            <EditAccountAccess editeddata={accountaccessData} visible={accountaccessDrawerVisible} onClose={onCloseDrawer} />
-            <EditNetworkAccess editeddata={networkAccessData} visible={networkAccessDrawerkVisible} onClose={onCloseDrawer} />
-            <EditUrlBuilder editeddata={urlBuilderAccessData} visible={urlBuliderAccessDrawerkVisible} onClose={onCloseDrawer} />
+            {drawerVisible && <DynamicCreatenewuser visible={drawerVisible} onClose={onCloseDrawer} refreshUsers={refreshUsers} />}
+            <DynamicNewaddaccounts visible={accountDrawerVisible} onClose={onCloseDrawer} />
+            <DynamicEdituseraccesses editeddata={usersaccessData} visible={usersaccessDrawerVisible} onClose={onCloseDrawer} />
+            <DynamicEditAccountAccess editeddata={accountaccessData} visible={accountaccessDrawerVisible} onClose={onCloseDrawer} />
+            <DynamicEditNetworkAccess editeddata={networkAccessData} visible={networkAccessDrawerkVisible} onClose={onCloseDrawer} />
+            <DynamicEditUrlBuilder editeddata={urlBuilderAccessData} visible={urlBuliderAccessDrawerkVisible} onClose={onCloseDrawer} />
 
             <div style={{padding:'0px', margin:'0px'}}>
                     {renderCarouselNav()}
             </div>
+
             <Carousel
-                // className="custom-carousel"
                 showArrows={false}
                 showThumbs={false}
                 showIndicators={false}
                 showStatus={false}
                 selectedItem={activeSlide} // Control the active slide
                 onChange={handleCarouselChange} // Sync the tab when the slide changes
-                // showThumbs={false}
-                // showIndicators={false}
-                // showStatus={false}
-            >   
-                
+            >    
                 <div style={{width:'100%'}}>
                     <Card title="Users Access" size="small" className={theme === 'dark' ? 'dark-theme' : 'light-theme'}>
                         <Row align={"bottom"} gutter={[16, 16]}>
@@ -1512,7 +1303,6 @@ const UsersTable = () => {
                                 <Col xs={24} sm={12} md={8}>
                                         <span style={{ color: "#B4B4B4", display: 'block' }}>Search</span>
                                         <div style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
-                                            {/* {isSearching ? ( */}
                                                 <>
                                                     <Button  style={{color: theme === "dark" ? "#333": "#fff"}} icon={<SearchOutlined  style={{color: theme === "dark" ? "#fff": "#333"}} />} />
                                                     <Input
@@ -1531,12 +1321,6 @@ const UsersTable = () => {
                                                         }}
                                                     />
                                                 </>
-                                            {/* ) : (
-                                                <Button
-                                                    icon={<SearchOutlined />}
-                                                    onClick={handleSearchClick}
-                                                />
-                                            )} */}
                                         </div>
                                     </Col>
                                     <Col xs={24} sm={12} md={8}>
@@ -1569,8 +1353,7 @@ const UsersTable = () => {
                                                 { value: "disabled", label: "Disabled", disabled: true },
                                             ]}
                                         />
-                                    </Col>
-                                    
+                                    </Col> 
                                 </Row>
                             </Col>
                             <Col xs={24} md={8}>
@@ -1581,7 +1364,7 @@ const UsersTable = () => {
                                     onClick={refreshUsers}  // Call refresh function when clicked
                                 >
                                 </Button>
-                                <Button type="primary" style={{ float: "right" }} onClick={shownewuserdrawar}>
+                                <Button type="primary" style={{ float: "right" }} onClick={() => setDrawerVisible(true)}>
                                     Create User
                                 </Button>
                             </Col>
@@ -1592,12 +1375,10 @@ const UsersTable = () => {
                     ) : usersData.length > 0 ? (
                         <Table
                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                            dataSource={searchInput ? filteredData.map((item, index) => ({ ...item, key: index })) : filteredRoleData.map((item, index) => ({ ...item, key: index }))}
+                            dataSource={searchInput ? filteredData.map((item, index) => ({ ...item, key: index })) : usersData.map((item, index) => ({ ...item, key: index }))}
                             columns={columns}
                             pagination={{ pageSize: paginationSize }}
                             scroll={{ y: 'calc(80vh - 200px)' }}
-                            // style={{backgroundColor:'skyblue'}}
-                            
                         />
                     ) : (
                         <Result
@@ -1633,7 +1414,7 @@ const UsersTable = () => {
                                                     backgroundColor: theme === 'dark' ? '#333' : '#ffffff',  // Dark theme: dark background, Light theme: white background
                                                     color: theme === 'dark' ? '#ffffff' : '#333',            // Dark theme: white text, Light theme: dark text
                                                     borderColor: theme === 'dark' ? '#444444' : '#d9d9d9'       // Optional: adjust border color as well
-                                                }} // Adjust input width and margin dynamically
+                                                }} 
                                             />
                                         </div>
                                     </Col>
@@ -1666,15 +1447,14 @@ const UsersTable = () => {
                                                 label: item,
                                             }))}
                                         />
-                                    </Col>
-                                    
+                                    </Col>  
                                 </Row>
                             </Col>
                             <Col xs={24} md={8}>
                                 <Button 
                                     type="default" 
                                     icon={<ReloadOutlined />} 
-                                    style={{ float: "right", marginLeft: "10px", backgroundColor: '#C7F39A' }} 
+                                    className='reload-button' 
                                     onClick={refreshAccounts}  // Call refresh function when clicked
                                 >
                                 </Button>
@@ -1688,9 +1468,8 @@ const UsersTable = () => {
                         <Spin />
                     ) : AccountsData.length > 0 ? (
                         <Table
-                            // bordered
                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                            dataSource={newSearchInput ? accFilteredData.map((item, index) => ({ ...item, key: index })) : filteredAccountData.map((item, index) => ({ ...item, key: index }))}
+                            dataSource={newSearchInput ? accFilteredData.map((item, index) => ({ ...item, key: index })) : AccountsData.map((item, index) => ({ ...item, key: index }))}
                             columns={Accountscolumn}
                             pagination={{ pageSize: paginationSize }}
                             scroll={{ y: 'calc(80vh - 200px)' }}
@@ -1712,7 +1491,6 @@ const UsersTable = () => {
                         <Row align={"bottom"} gutter={[16, 16]}>
                             <Col xs={24} md={16}>
                                 <Row gutter={[16, 16]}>
-                                    
                                     <Col xs={24} sm={12} md={8}>
                                         <span style={{ color: "#B4B4B4", display: 'block' }}>Search</span>
                                         <div style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
@@ -1730,7 +1508,7 @@ const UsersTable = () => {
                                                     backgroundColor: theme === 'dark' ? '#333' : '#ffffff',  // Dark theme: dark background, Light theme: white background
                                                     color: theme === 'dark' ? '#ffffff' : '#333',            // Dark theme: white text, Light theme: dark text
                                                     borderColor: theme === 'dark' ? '#444444' : '#d9d9d9'       // Optional: adjust border color as well
-                                                }} // Adjust input width and margin dynamically
+                                                }} 
                                             />
                                         </div>
                                     </Col>
@@ -1763,18 +1541,14 @@ const UsersTable = () => {
                                                 label: item,
                                             }))}
                                         />
-                                    </Col>
-                                    
+                                    </Col>                    
                                 </Row>
                             </Col>
                             <Col xs={24} md={8}>
-                                {/* <Button type="primary" style={{ float: "right", marginLeft: "5%" }} onClick={showNetworkDrawer}>
-                                    Add New Network
-                                </Button> */}
                                 <Button 
                                     type="default" 
                                     icon={<ReloadOutlined />} 
-                                    style={{ float: "right", marginLeft: "10px", backgroundColor: '#C7F39A' }} 
+                                    className='reload-button' 
                                     onClick={refreshNetworks}
                                 >
                                 </Button>
@@ -1785,14 +1559,11 @@ const UsersTable = () => {
                         <Spin />
                     ) : networksData.length > 0 ? ( 
                         <Table
-                            // bordered
                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                            dataSource={netSearchInput ? networkFilteredData.map((item, index) => ({ ...item, key: item.key, id: index })) : filteredNetworkData.map((item, index) => ({ ...item, key: item.key, id: index }))}
+                            dataSource={netSearchInput ? networkFilteredData.map((item, index) => ({ ...item, key: item.key, id: index })) : networksData.map((item, index) => ({ ...item, key: item.key, id: index }))}
                             columns={networksColumn}
                             pagination={{ pageSize: paginationSize }}
                             scroll={{ y: 'calc(80vh - 200px)', x: 'max-content' }}
-                            // style={{ tableLayout: 'auto' }} 
-                            // scroll={{ x: 'max-content' }} 
                         />
                     ) : (
                         <Result
@@ -1820,8 +1591,6 @@ const UsersTable = () => {
                                                 placeholder="Search here"
                                                 autoFocus={isSearchingAccount}  // Only autofocus when searching
                                                 value={newSearchInput}
-                                                // onChange={handleaccountSearchChange}
-                                                // onBlur={handleBlur1}
                                                 style={{
                                                     width: '100%',
                                                     borderRadius: '5px',
@@ -1829,14 +1598,13 @@ const UsersTable = () => {
                                                     backgroundColor: theme === 'dark' ? '#333' : '#ffffff',  // Dark theme: dark background, Light theme: white background
                                                     color: theme === 'dark' ? '#ffffff' : '#333',            // Dark theme: white text, Light theme: dark text
                                                     borderColor: theme === 'dark' ? '#444444' : '#d9d9d9'       // Optional: adjust border color as well
-                                                }} // Adjust input width and margin dynamically
+                                                }} 
                                             />
                                         </div>
                                     </Col>
                                     <Col xs={24} sm={12} md={8}>
                                         <span style={{ color: "#B4B4B4", display: 'block' }}>Network</span>
                                         <Select
-                                            // onChange={onChangeNetwork}
                                             defaultValue="All"
                                             style={{ width: "100%", marginTop: '8px'
                                             }}
@@ -1848,29 +1616,13 @@ const UsersTable = () => {
                                             }))}
                                         />
                                     </Col>
-                                    {/* <Col xs={24} sm={12} md={8}>
-                                        <span style={{ color: "#B4B4B4", display: 'block' }}>Status</span>
-                                        <Select
-                                            // onChange={onChangeStatus}
-                                            defaultValue="All"
-                                            style={{ width: "100%", marginTop: '8px'
-                                            }}
-                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                            options={accountStatus.map((item) => ({
-                                                value: item,
-                                                label: item,
-                                            }))}
-                                        />
-                                    </Col> */}
-                                    
                                 </Row>
                             </Col>
                             <Col xs={24} md={8}>
                                 <Button 
                                     type="default" 
                                     icon={<ReloadOutlined />} 
-                                    style={{ float: "right", marginLeft: "10px", backgroundColor: '#C7F39A' }} 
+                                    className='reload-button'
                                     onClick={refreshUrlBuilder}  // Call refresh function when clicked
                                 >
                                 </Button>
@@ -1884,10 +1636,8 @@ const UsersTable = () => {
                         <Spin />
                     ) : urlBuilderData.length > 0 ? (
                         <Table
-                            // bordered
                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             dataSource={urlBuilderData}
-                            // dataSource={newSearchInput ? accFilteredData.map((item, index) => ({ ...item, key: index })) : filteredAccountData.map((item, index) => ({ ...item, key: index }))}
                             columns={urlbuilder}
                             pagination={{ pageSize: paginationSize }}
                             scroll={{ y: 'calc(80vh - 200px)' }}
@@ -1907,14 +1657,6 @@ const UsersTable = () => {
                         title="URL Builder"
                         visible={isModalVisibleForURLBuilder}
                         onCancel={handleCancelForURLBuilder}
-                        // footer={[
-                        //     <Button key="cancel" onClick={handleCancel}>
-                        //         Cancel
-                        //     </Button>,
-                        //     <Button key="submit" type="primary" onClick={() => setIsModalVisible(false)}>
-                        //         Submit
-                        //     </Button>
-                        // ]}
                         footer={null}
                         width="80%" // Set width of the modal
                         bodyStyle={{ height: '50vh', overflowY: 'auto' }}
@@ -1925,27 +1667,11 @@ const UsersTable = () => {
                 {/* Add the RequestComponent for each network */}
                 <div>
                     <Card title="Ad Account Details" size="small">
-                        <div
-                            style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'flex-start',
-                                padding: '10px',
-                            }}
-                        >
-                            <div
-                                style={{
-                                    maxHeight: '500px',
-                                    width: '100%',
-                                    overflowY: 'auto',
-                                    padding: '10px',
-                                    border: '1px solid #ccc',
-                                    marginBottom: '20px',
-                                }}
-                            >
+                        <div className='account-details-container'>
+                            <div className='user-account-container'>
                                 {userdetails?.adAccounts ? (
                                     Object.keys(userdetails.adAccounts).map((network) => (
-                                        <RequestComponent
+                                        <DynamicRequestComponent
                                             key={network}
                                             network={network}
                                             adAccounts={userdetails.adAccounts[network]}
@@ -1958,22 +1684,7 @@ const UsersTable = () => {
                         </div>
                     </Card>
                 </div>
-                {/* Render RequestComponent for each network */}
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                    <div style={{ maxHeight: '500px', width: '100%', overflowY: 'auto', padding: '10px', border: '1px solid #ccc', marginBottom: '20px' }}>
-                        {userdetails?.adAccounts ? (
-                            Object.keys(userdetails.adAccounts).map((network) => (
-                                <RequestComponent
-                                    key={network}
-                                    network={network}
-                                    adAccounts={userdetails.adAccounts[network]}
-                                />
-                            ))
-                        ) : (
-                            <div>Loading account details...</div> // Fallback while loading
-                        )}
-                    </div>
-                </div>
+               
             </Carousel>
         </>
     );

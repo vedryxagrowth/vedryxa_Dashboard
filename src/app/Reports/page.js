@@ -244,7 +244,7 @@ const MyTablePage = () => {
     };
 
     const handleChangeInput = () => {
-        setInputValue(newInputValue);
+        setInputValue(newInputValue.trim());
         gridRef.current.api.onFilterChanged(); // Trigger AG-Grid to reapply filters
         // console.log(e.target.value);
         // const filteredLiveData = rowData.filter((each)=> each.campaignName.includes(e.target.value));
@@ -257,7 +257,7 @@ const MyTablePage = () => {
     };
 
     const handleChangeNewInputValue = (e) => {
-        setNewInputValue(e.target.value.trim());
+        setNewInputValue(e.target.value);
     }
 
     // const [rowStructure, setRowStructure] = useState(); 
@@ -2870,11 +2870,13 @@ const MyTablePage = () => {
                 sortable: true,
                 filter: 'agTextColumnFilter',
                 resizable: true,
-                minWidth: 350,
+                minWidth: 250,
                 cellStyle: { textAlign: 'left' },
                 suppressMenu: true,
                 menuTabs: [],
                 headerClass: 'hide-menu',
+                cellStyle: { whiteSpace: "normal", lineHeight: "1.5" }, // Enables text wrapping
+                autoHeight: true,
             },
             {
                 headerName: 'Date',
@@ -2896,6 +2898,32 @@ const MyTablePage = () => {
                 headerClass: 'hide-menu',
             },
             {
+                headerName: 'Rpc',
+                field: 'Rpc',
+                sortable: true,
+                filter: 'agNumberColumnFilter',
+                resizable: true,
+                minWidth: 100,
+                suppressMenu: true,
+                menuTabs: [],
+                headerClass: 'hide-menu',
+                aggFunc: (params) => {
+                    let sum = 0;
+                    let count = 0;
+            
+                    params.values.forEach(value => {
+                        const numValue = parseFloat(value); // Ensure the value is a number
+                        if (!isNaN(numValue) && value !== null && value !== undefined) {
+                            sum += numValue;
+                            count++;
+                        }
+                    });
+            
+                    return count > 0 ? (sum / count).toFixed(2) : 0; // Return formatted value, default to 0
+                },
+                valueFormatter: (params) => params.value ? `$${params.value}` : '$0.00', // Format display
+            },
+            {
                 headerName: 'Revenue',
                 field: 'revenue',
                 sortable: true,
@@ -2903,6 +2931,30 @@ const MyTablePage = () => {
                 resizable: true,
                 valueFormatter: (params) => params.value ? `$${params.value.toFixed(2)}` : '$0.00',
                 minWidth: 110,
+                aggFunc: 'sum',
+                suppressMenu: true,
+                menuTabs: [],
+                headerClass: 'hide-menu',
+            },
+            {
+                headerName: 'Clicks',
+                field: 'clicks',
+                sortable: true,
+                filter: 'agNumberColumnFilter',
+                resizable: true,
+                minWidth: 95,
+                aggFunc: 'sum',
+                suppressMenu: true,
+                menuTabs: [],
+                headerClass: 'hide-menu',
+            },
+            {
+                headerName: 'Searches',
+                field: 'searches',
+                sortable: true,
+                filter: 'agNumberColumnFilter',
+                resizable: true,
+                minWidth: 115,
                 aggFunc: 'sum',
                 suppressMenu: true,
                 menuTabs: [],
@@ -2937,30 +2989,6 @@ const MyTablePage = () => {
                 filter: 'agTextColumnFilter',
                 resizable: true,
                 minWidth: 130,
-                suppressMenu: true,
-                menuTabs: [],
-                headerClass: 'hide-menu',
-            },
-            {
-                headerName: 'Searches',
-                field: 'searches',
-                sortable: true,
-                filter: 'agNumberColumnFilter',
-                resizable: true,
-                minWidth: 115,
-                aggFunc: 'sum',
-                suppressMenu: true,
-                menuTabs: [],
-                headerClass: 'hide-menu',
-            },
-            {
-                headerName: 'Clicks',
-                field: 'clicks',
-                sortable: true,
-                filter: 'agNumberColumnFilter',
-                resizable: true,
-                minWidth: 95,
-                aggFunc: 'sum',
                 suppressMenu: true,
                 menuTabs: [],
                 headerClass: 'hide-menu',
@@ -3998,6 +4026,7 @@ const MyTablePage = () => {
                 totalSpend += Revenue;
                 totalClicks += clicks;
                 totalSearches += searches;
+                const rpc = (Revenue/clicks).toFixed(2);
 
                 return {
                     date: eachData.DATE,
@@ -4009,6 +4038,7 @@ const MyTablePage = () => {
                     searches: searches,
                     clicks: clicks,
                     revenue: Revenue,
+                    Rpc: rpc
                 };
             }) : [];
 

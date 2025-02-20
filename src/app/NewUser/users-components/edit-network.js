@@ -86,8 +86,6 @@ const EditNetworkAccess = ({ editeddata, visible, onClose }) => {
       form.setFieldsValue({
         ...editeddata,
         timeZone: timeZoneShortNames[editeddata.timeZone]
-        // pixelID: editeddata?.pixelID || "",
-        // pageID: editeddata?.pageID || "",
       });
     }
   }, [visible, editeddata, form]);
@@ -110,10 +108,8 @@ const EditNetworkAccess = ({ editeddata, visible, onClose }) => {
 
       if (response.status === 200) {
         message.success("Network updated successfully");
-        
         form.resetFields();
         onClose(newValues);  // Pass the updated data to the parent
-        // onClose(); 
       } else {
         message.error("Failed to update Network");
       }
@@ -183,18 +179,8 @@ const EditNetworkAccess = ({ editeddata, visible, onClose }) => {
             
             {isFieldVsible(editeddata?.Password) && (
                 <Form.Item label="Password" name="Password">
-                    <Input.Password
-                        // type = {passwordVisible ? 'text' : 'password'}
-                        // addonAfter = {
-                        //     <Tooltip title = {passwordVisible ? 'Hide Password' : 'Show Password'}>
-                        //         {passwordVisible ? (
-                        //             <EyeInvisibleOutlined onClick={togglePasswordVisibility} />
-                        //         ) : (
-                        //             <EyeOutlined onClick={togglePasswordVisibility} />
-                        //         )}
-                        //     </Tooltip>
-                        // }
-                     />
+                    <Input.Password   
+                    />
                 </Form.Item>
             )}
             
