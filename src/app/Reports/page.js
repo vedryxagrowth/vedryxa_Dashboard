@@ -99,7 +99,7 @@ const MyTablePage = () => {
         "timezone"
     ];
 
-    const storedData = JSON.parse(localStorage.getItem("storedData"));
+    const storedData = localStorage.getItem("storedData") ? JSON.parse(localStorage.getItem("storedData")) : null;
     // console.log(storedData, "storedData");
 
     const defaultDates = [dayjs(storedData ? storedData?.startDate : (startDateFromDashboard ? startDateFromDashboard : yesterday)), dayjs(storedData ? storedData?.endDate : (endDateFromDashboard ? endDateFromDashboard : yesterday))];
