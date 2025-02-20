@@ -947,3 +947,26 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 .hide-menu .ag-header-cell-menu-button {
   display: none !important;
 }
+.ant-result-icon {
+  margin-bottom: -30px !important; /* Adjust value as needed */
+}
+.ant-result-title{
+  margin-bottom: -30px !important; /* Adjust value as needed */
+}
+.ag-theme-alpine {
+  height: 525px; /* Set a specific height */
+  min-height: 500px; /* Prevent collapsing */
+  display: flex;
+  flex-direction: column;
+}
+
+.ag-root-wrapper {
+  flex-grow: 1;
+  min-height: 400px; /* Ensure grid takes up space */
+}
+
+.ag-paging-panel {
+  position: relative;
+  bottom: 0;
+  /* background-color: white; */
+}
