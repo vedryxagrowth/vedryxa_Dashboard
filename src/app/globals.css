@@ -953,12 +953,7 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 .ant-result-title{
   margin-bottom: -30px !important; /* Adjust value as needed */
 }
-.ag-theme-alpine {
-  height: 525px; /* Set a specific height */
-  min-height: 500px; /* Prevent collapsing */
-  display: flex;
-  flex-direction: column;
-}
+
 
 .ag-root-wrapper {
   flex-grow: 1;
@@ -969,4 +964,7 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
   position: relative;
   bottom: 0;
   /* background-color: white; */
+}
+.ag-theme-alpine {
+  overflow: visible !important;
 }

@@ -535,93 +535,94 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
     const functionCall3 = async () => {
         try{
             setLoading2(true);
-        const fetchData = await apiClient.get(`/AllCampaigns?accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}&campaignName=${inputValue}&page=${pageSize}&limit=100`);
-        // console.log(fetchData, "f1");
-        const mainData = fetchData.data.items;
-        timezone.current = mainData[0].accountTimezone;
+            setCampaignData([]);
+            const fetchData = await apiClient.get(`/AllCampaigns?accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}&campaignName=${inputValue}&page=${pageSize}&limit=100`);
+            // console.log(fetchData, "f1");
+            const mainData = fetchData.data.items;
+            timezone.current = mainData[0].accountTimezone;
 
-        const url = `https://prodapis.adsgoat.in/AllCampaigns?accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}&page=${pageSize}&limit=100`;
+            const url = `https://prodapis.adsgoat.in/AllCampaigns?accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}&page=${pageSize}&limit=100`;
 
-        const specifiedTimeZone = selectTimezone[newtime];
-        const filteredData = mainData && mainData.length > 0 ?
-            mainData.map((eachData) => {
-                let revenueData;
-                if (eachData.estimated_revenue === 0) {
-                    revenueData = '0.00';
-                }
-                else if (eachData.estimated_revenue === undefined) {
-                    revenueData = '0.00';
-                }
-                else {
-                    revenueData = eachData.estimated_revenue;
-                }
-                const profit = (revenueData - eachData.spend).toFixed(2);
-                let margin;
-                if (revenueData === '0.00') {
-                    margin = "0";
-                }
-                else {
-                    margin = `${Math.round((((revenueData - eachData.spend) / revenueData) * 100) * 100) / 100}%`;
-                }
-                const rpc = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((revenueData / eachData.conversions) * 100) / 100;
-
-                let cpl;
-                if (eachData.fbLeads == 0) {
-                    cpl = 0;
-                } else {
-                    cpl = Math.round((eachData.spend / eachData.fbLeads) * 100) / 100;
-                }
-                const ncpl = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((eachData.spend / eachData.conversions) * 100) / 100;
-                // console.log(eachData[specifiedTimeZone],"time");
-                return (
-                    {
-                        campaignname: eachData.campaign_name,
-                        adsetname: eachData.adsetName,
-                        date: eachData[specifiedTimeZone],
-                        spend: eachData.spend,
-                        revenue: revenueData,
-                        profit: profit,
-                        fbleads: eachData.fbLeads,
-                        conversions: eachData.conversions,
-                        cpc: eachData.cpc,
-                        fbclicks: eachData.fbClicks,
-                        impressions: eachData.impressions,
-                        campaignid: eachData.campaign_id,
-                        adsetid: eachData.adset_id,
-                        actions: '...'
+            const specifiedTimeZone = selectTimezone[newtime];
+            const filteredData = mainData && mainData.length > 0 ?
+                mainData.map((eachData) => {
+                    let revenueData;
+                    if (eachData.estimated_revenue === 0) {
+                        revenueData = '0.00';
                     }
-                )
-            })
-            : null;
-        totalItems.current = fetchData.data.totalItems;
-        // console.log(mainData);
-        setCampaignData(filteredData);
-        setFixedFooter([
-            {
-                campaignName: 'Total',
-                actions: '',
-                spend: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0).toFixed(2)),
-                revenue: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0).toFixed(2)),
-                profit: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0).toFixed(2)),
-                margin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
-                rpc: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / filteredData?.length).toFixed(2)),
-                cpl: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / filteredData?.length).toFixed(2)),
-                ncpl: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / filteredData?.length).toFixed(2)),
-                fbleads: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0).toFixed(2)),
-                conversions: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0).toFixed(2)),
-                fmargin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
-                roi: parseFloat(((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
-                cpc: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / filteredData?.length).toFixed(2)),
-                fbclicks: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
-                impressions: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
-                ctr: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
-            }
-        ]);
-        newCampaignData.current = filteredData;
-            
-        fetchData.status === 200 && setApiStatus(false) ;
-        // setTrue(false);
-        setLoading2(false);
+                    else if (eachData.estimated_revenue === undefined) {
+                        revenueData = '0.00';
+                    }
+                    else {
+                        revenueData = eachData.estimated_revenue;
+                    }
+                    const profit = (revenueData - eachData.spend).toFixed(2);
+                    let margin;
+                    if (revenueData === '0.00') {
+                        margin = "0";
+                    }
+                    else {
+                        margin = `${Math.round((((revenueData - eachData.spend) / revenueData) * 100) * 100) / 100}%`;
+                    }
+                    const rpc = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((revenueData / eachData.conversions) * 100) / 100;
+
+                    let cpl;
+                    if (eachData.fbLeads == 0) {
+                        cpl = 0;
+                    } else {
+                        cpl = Math.round((eachData.spend / eachData.fbLeads) * 100) / 100;
+                    }
+                    const ncpl = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((eachData.spend / eachData.conversions) * 100) / 100;
+                    // console.log(eachData[specifiedTimeZone],"time");
+                    return (
+                        {
+                            campaignname: eachData.campaign_name,
+                            adsetname: eachData.adsetName,
+                            date: eachData[specifiedTimeZone],
+                            spend: eachData.spend,
+                            revenue: revenueData,
+                            profit: profit,
+                            fbleads: eachData.fbLeads,
+                            conversions: eachData.conversions,
+                            cpc: eachData.cpc,
+                            fbclicks: eachData.fbClicks,
+                            impressions: eachData.impressions,
+                            campaignid: eachData.campaign_id,
+                            adsetid: eachData.adset_id,
+                            actions: '...'
+                        }
+                    )
+                })
+                : null;
+            totalItems.current = fetchData.data.totalItems;
+            // console.log(mainData);
+            setCampaignData(filteredData);
+            setFixedFooter([
+                {
+                    campaignName: 'Total',
+                    actions: '',
+                    spend: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0).toFixed(2)),
+                    revenue: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0).toFixed(2)),
+                    profit: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0).toFixed(2)),
+                    margin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
+                    rpc: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / filteredData?.length).toFixed(2)),
+                    cpl: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / filteredData?.length).toFixed(2)),
+                    ncpl: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / filteredData?.length).toFixed(2)),
+                    fbleads: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0).toFixed(2)),
+                    conversions: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0).toFixed(2)),
+                    fmargin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+                    roi: parseFloat(((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
+                    cpc: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / filteredData?.length).toFixed(2)),
+                    fbclicks: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
+                    impressions: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
+                    ctr: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
+                }
+            ]);
+            newCampaignData.current = filteredData;
+                
+            fetchData.status === 200 && setApiStatus(false) ;
+            // setTrue(false);
+            setLoading2(false);
         }
         catch(error){
             setLoading2(false);

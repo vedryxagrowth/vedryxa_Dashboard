@@ -34,14 +34,14 @@ const newtworkCollections = {
     "FB_Tonic1": "Facebook_Tonic1"
 }
 
-const LiveReports = lazy(() => import('../componentsOfReports/Live'));
-const DailyReports = lazy(() => import('../componentsOfReports/Daily'));
-const CampaignReports = lazy(() => import('../componentsOfReports/AllCampaigns'));
-const DAKeywordReports = lazy(() => import('../componentsOfReports/DAKeywords'));
-const System1KeywordReports = lazy(() => import('../componentsOfReports/System1Keywords'));
-const TonicKeywordReports = lazy(() => import('../componentsOfReports/Tonic1Keywords'));
-const AgencyAndBMNameReports = lazy(() => import('../componentsOfReports/AgencyAndBMName'));
-const MnetDomainReports = lazy(() => import('../componentsOfReports/MnetDomainData'));
+const LiveReports = React.lazy(() => import('../componentsOfReports/Live'));
+const DailyReports = React.lazy(() => import('../componentsOfReports/Daily'));
+const CampaignReports = React.lazy(() => import('../componentsOfReports/AllCampaigns'));
+const DAKeywordReports = React.lazy(() => import('../componentsOfReports/DAKeywords'));
+const System1KeywordReports = React.lazy(() => import('../componentsOfReports/System1Keywords'));
+const TonicKeywordReports = React.lazy(() => import('../componentsOfReports/Tonic1Keywords'));
+const AgencyAndBMNameReports = React.lazy(() => import('../componentsOfReports/AgencyAndBMName'));
+const MnetDomainReports = React.lazy(() => import('../componentsOfReports/MnetDomainData'));
 
 const MyTablePage = () => {
     const { userdetails } = useTokenContext();
@@ -99,7 +99,7 @@ const MyTablePage = () => {
         "timezone"
     ];
 
-    const storedData = localStorage.getItem("storedData") ? JSON.parse(localStorage.getItem("storedData")) : null;
+    const storedData = localStorage.getItem("storedData") && localStorage.getItem("storedData") !== "undefined" && localStorage.getItem("storedData") !== "null" ? JSON.parse(localStorage.getItem("storedData")) : null;
     // console.log(storedData, "storedData");
 
     const defaultDates = [dayjs(storedData ? storedData?.startDate : (startDateFromDashboard ? startDateFromDashboard : yesterday)), dayjs(storedData ? storedData?.endDate : (endDateFromDashboard ? endDateFromDashboard : yesterday))];
@@ -135,7 +135,7 @@ const MyTablePage = () => {
     const [newInputValue, setNewInputValue] = useState(inputValue);
 
     const [refrst, setRefrst] = useState(false);
-    const [activeTab, setActiveTab] = useState(localStorage.getItem("activeTab") ? localStorage.getItem("activeTab") : "1");
+    const [activeTab, setActiveTab] = useState(localStorage.getItem("activeTab") && localStorage.getItem("activeTab") !== "undefined" && localStorage.getItem("activeTab") !== "null" ? localStorage.getItem("activeTab") : "1");
 
     const [columnStructureStatus, setColumnStructureStatus] = useState(false);
     const [commentsStatus, setCommentsStatus] = useState(false);
@@ -1035,7 +1035,7 @@ const MyTablePage = () => {
         spend: {
             headerName: 'Spend',
             field: 'spend',
-            minWidth: 90,
+            minWidth: 100,
             aggFunc: liveSpender,
             sortable: true,
             filter: "agTextColumnFilter", // Keep filter active
@@ -1061,7 +1061,7 @@ const MyTablePage = () => {
         profit: {
             headerName: 'Profit',
             field: 'profit',
-            minWidth: 90,
+            minWidth: 100,
             sortable: true,
             aggFunc: liveSpender,
             cellClassRules: {
@@ -2951,9 +2951,13 @@ const MyTablePage = () => {
         setActiveTab(index);
         // console.log(index);
         // console.log(parseInt(index)-1);
-        carouselRef.current.goTo(parseInt(index))
+        // carouselRef.current.goTo(parseInt(index))
         localStorage.setItem("activeTab", index);
         
+    };
+    const handleTabChange = (key) => {
+        console.log("Switched to Tab:", key); // Debugging log
+        setActiveTab(key);
     };
 
     const renderCarouselNav = () => (
@@ -3129,58 +3133,161 @@ const MyTablePage = () => {
             ) : 
             (
                 <div>
-                <Carousel ref={carouselRef} dots={false} lazyLoad="ondemand">
-                    
-                    {activeTab === '1' && (
-                        <div>
-                            <LiveReports key={activeTab} startDate={newStartDate} endDate={newendDate} newaccount={newaccount} newtime={newtime} newRevenuePratner={newRevenuePratner} inputValue={inputValue} newAccountName={newAccountName} columnDefs={columnDefs} campaignComments={campaignComments} Camapignlevelstatus={Camapignlevelstatus} 
-                            changeRRefrst={resetColumnStructure} debouncedHandleColumnMove={debouncedHandleColumnMove} userdetails={userdetails} refreshComments={refreshComments}/>
-                        </div>
-                    )}
-                   
 
-                    
-                    {activeTab === '2' && (
-                        <div>
-                            <DailyReports key={activeTab} startDate={newStartDate} endDate={newendDate} newaccount={newaccount} newtime={newtime} newRevenuePratner={newRevenuePratner} inputValue={inputValue} newAccountName={newAccountName} columnDefs={columnDefs1} campaignComments={campaignComments} Camapignlevelstatus={Camapignlevelstatus} 
-                            changeRRefrst={resetColumnStructure} debouncedHandleColumnMove={debouncedHandleColumnMove} userdetails={userdetails} refreshComments={refreshComments}/>
-                        </div>
-                    ) }
-                    {activeTab === '3' && (
-                        <div>
-                            <CampaignReports key={activeTab} startDate={newStartDate} endDate={newendDate} newaccount={newaccount} newtime={newtime} newRevenuePratner={newRevenuePratner} inputValue={inputValue} newAccountName={newAccountName} columnDefs={columnDefs2} campaignComments={campaignComments} Camapignlevelstatus={Camapignlevelstatus} 
-                            changeRRefrst={resetColumnStructure} debouncedHandleColumnMove={debouncedHandleColumnMove} userdetails={userdetails} refreshComments={refreshComments}/>
-                        </div>
-                    )}
-                    {activeTab === '4' && (
-                        <div>
-                            <AgencyAndBMNameReports key={activeTab} startDate={newStartDate} endDate={newendDate} newaccount={newaccount} newtime={newtime} newRevenuePratner={newRevenuePratner} inputValue={inputValue} newAccountName={newAccountName}  campaignComments={campaignComments} Camapignlevelstatus={Camapignlevelstatus}  userdetails={userdetails} refreshComments={refreshComments}/>
-                        </div>
-                    )}
-                    {(activeTab === '5' && newRevenuePratner === "FB_Mnet") && (
-                        <div>
-                            <MnetDomainReports key={activeTab} startDate={newStartDate} endDate={newendDate} newaccount={newaccount} newtime={newtime} newRevenuePratner={newRevenuePratner} inputValue={inputValue} newAccountName={newAccountName} campaignComments={campaignComments} Camapignlevelstatus={Camapignlevelstatus} userdetails={userdetails} refreshComments={refreshComments}/>
-                        </div>
-                    )}
-                    {(activeTab === '5' && newRevenuePratner === "FB_DomainActive") && (
-                        <div>
-                            <DAKeywordReports key={activeTab} startDate={newStartDate} endDate={newendDate} newaccount={newaccount} newtime={newtime} newRevenuePratner={newRevenuePratner} inputValue={inputValue} newAccountName={newAccountName} columnDefs={columnDefs3} campaignComments={campaignComments} Camapignlevelstatus={Camapignlevelstatus} 
-                            changeRRefrst={resetColumnStructure} debouncedHandleColumnMove={debouncedHandleColumnMove} userdetails={userdetails} refreshComments={refreshComments}/>
-                        </div>
-                    )}
-                    {(activeTab === '5' && newRevenuePratner === "FB_Tonic1") && (
-                        <div>
-                            <TonicKeywordReports key={activeTab} startDate={newStartDate} endDate={newendDate} newaccount={newaccount} newtime={newtime} newRevenuePratner={newRevenuePratner}  columnDefs={columnDefs4}inputValue={inputValue} newAccountName={newAccountName} campaignComments={campaignComments} Camapignlevelstatus={Camapignlevelstatus} 
-                            changeRRefrst={resetColumnStructure} debouncedHandleColumnMove={debouncedHandleColumnMove} userdetails={userdetails} refreshComments={refreshComments}/>
-                        </div>
-                    )}
-                    {(activeTab === '5' && newRevenuePratner === "FB_System1") && (
-                        <div>
-                            <System1KeywordReports key={activeTab} startDate={newStartDate} endDate={newendDate} newaccount={newaccount} newtime={newtime} newRevenuePratner={newRevenuePratner} inputValue={inputValue} newAccountName={newAccountName} campaignComments={campaignComments} Camapignlevelstatus={Camapignlevelstatus} 
-                            changeRRefrst={resetColumnStructure} userdetails={userdetails} refreshComments={refreshComments}/>
-                        </div>
-                    )}
-                </Carousel>
+                <Tabs activeKey={activeTab} onChange={handleTabChange} renderTabBar={() => <></>}>
+                <Tabs.TabPane key="1">
+                    <LiveReports 
+                    startDate={newStartDate} 
+                    endDate={newendDate} 
+                    newaccount={newaccount} 
+                    newtime={newtime} 
+                    newRevenuePratner={newRevenuePratner} 
+                    inputValue={inputValue} 
+                    newAccountName={newAccountName} 
+                    columnDefs={columnDefs} 
+                    campaignComments={campaignComments} 
+                    Camapignlevelstatus={Camapignlevelstatus} 
+                    changeRRefrst={resetColumnStructure} 
+                    debouncedHandleColumnMove={debouncedHandleColumnMove} 
+                    userdetails={userdetails} 
+                    refreshComments={refreshComments}
+                    />
+                </Tabs.TabPane>
+
+                <Tabs.TabPane key="2">
+                    <DailyReports 
+                    startDate={newStartDate} 
+                    endDate={newendDate} 
+                    newaccount={newaccount} 
+                    newtime={newtime} 
+                    newRevenuePratner={newRevenuePratner} 
+                    inputValue={inputValue} 
+                    newAccountName={newAccountName} 
+                    columnDefs={columnDefs1} 
+                    campaignComments={campaignComments} 
+                    Camapignlevelstatus={Camapignlevelstatus} 
+                    changeRRefrst={resetColumnStructure} 
+                    debouncedHandleColumnMove={debouncedHandleColumnMove} 
+                    userdetails={userdetails} 
+                    refreshComments={refreshComments}
+                    />
+                </Tabs.TabPane>
+
+                <Tabs.TabPane key="3">
+                    <CampaignReports 
+                    startDate={newStartDate} 
+                    endDate={newendDate} 
+                    newaccount={newaccount} 
+                    newtime={newtime} 
+                    newRevenuePratner={newRevenuePratner} 
+                    inputValue={inputValue} 
+                    newAccountName={newAccountName} 
+                    columnDefs={columnDefs2} 
+                    campaignComments={campaignComments} 
+                    Camapignlevelstatus={Camapignlevelstatus} 
+                    changeRRefrst={resetColumnStructure} 
+                    debouncedHandleColumnMove={debouncedHandleColumnMove} 
+                    userdetails={userdetails} 
+                    refreshComments={refreshComments}
+                    />
+                </Tabs.TabPane>
+
+                <Tabs.TabPane key="4">
+                    <AgencyAndBMNameReports 
+                    startDate={newStartDate} 
+                    endDate={newendDate} 
+                    newaccount={newaccount} 
+                    newtime={newtime} 
+                    newRevenuePratner={newRevenuePratner} 
+                    inputValue={inputValue} 
+                    newAccountName={newAccountName} 
+                    campaignComments={campaignComments} 
+                    Camapignlevelstatus={Camapignlevelstatus}  
+                    userdetails={userdetails} 
+                    refreshComments={refreshComments}
+                    />
+                </Tabs.TabPane>
+
+                {newRevenuePratner === "FB_Mnet" && (
+                    <Tabs.TabPane key="5">
+                    <MnetDomainReports 
+                        startDate={newStartDate} 
+                        endDate={newendDate} 
+                        newaccount={newaccount} 
+                        newtime={newtime} 
+                        newRevenuePratner={newRevenuePratner} 
+                        inputValue={inputValue} 
+                        newAccountName={newAccountName} 
+                        campaignComments={campaignComments} 
+                        Camapignlevelstatus={Camapignlevelstatus} 
+                        userdetails={userdetails} 
+                        refreshComments={refreshComments}
+                    />
+                    </Tabs.TabPane>
+                )}
+
+                {newRevenuePratner === "FB_DomainActive" && (
+                    <Tabs.TabPane key="6">
+                    <DAKeywordReports 
+                        startDate={newStartDate} 
+                        endDate={newendDate} 
+                        newaccount={newaccount} 
+                        newtime={newtime} 
+                        newRevenuePratner={newRevenuePratner} 
+                        inputValue={inputValue} 
+                        newAccountName={newAccountName} 
+                        columnDefs={columnDefs3} 
+                        campaignComments={campaignComments} 
+                        Camapignlevelstatus={Camapignlevelstatus} 
+                        changeRRefrst={resetColumnStructure} 
+                        debouncedHandleColumnMove={debouncedHandleColumnMove} 
+                        userdetails={userdetails} 
+                        refreshComments={refreshComments}
+                    />
+                    </Tabs.TabPane>
+                )}
+
+                {newRevenuePratner === "FB_Tonic1" && (
+                    <Tabs.TabPane key="7">
+                    <TonicKeywordReports 
+                        startDate={newStartDate} 
+                        endDate={newendDate} 
+                        newaccount={newaccount} 
+                        newtime={newtime} 
+                        newRevenuePratner={newRevenuePratner}  
+                        columnDefs={columnDefs4} 
+                        inputValue={inputValue} 
+                        newAccountName={newAccountName} 
+                        campaignComments={campaignComments} 
+                        Camapignlevelstatus={Camapignlevelstatus} 
+                        changeRRefrst={resetColumnStructure} 
+                        debouncedHandleColumnMove={debouncedHandleColumnMove} 
+                        userdetails={userdetails} 
+                        refreshComments={refreshComments}
+                    />
+                    </Tabs.TabPane>
+                )}
+
+                {newRevenuePratner === "FB_System1" && (
+                    <Tabs.TabPane key="8">
+                    <System1KeywordReports 
+                        startDate={newStartDate} 
+                        endDate={newendDate} 
+                        newaccount={newaccount} 
+                        newtime={newtime} 
+                        newRevenuePratner={newRevenuePratner} 
+                        inputValue={inputValue} 
+                        newAccountName={newAccountName} 
+                        campaignComments={campaignComments} 
+                        Camapignlevelstatus={Camapignlevelstatus} 
+                        changeRRefrst={resetColumnStructure} 
+                        userdetails={userdetails} 
+                        refreshComments={refreshComments}
+                    />
+                    </Tabs.TabPane>
+                )}
+                </Tabs>
+
             </div>
             )
         }
