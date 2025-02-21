@@ -3227,7 +3227,7 @@ const MyTablePage = () => {
                 )}
 
                 {newRevenuePratner === "FB_DomainActive" && (
-                    <Tabs.TabPane key="6">
+                    <Tabs.TabPane key="5">
                     <DAKeywordReports 
                         startDate={newStartDate} 
                         endDate={newendDate} 
@@ -3248,7 +3248,7 @@ const MyTablePage = () => {
                 )}
 
                 {newRevenuePratner === "FB_Tonic1" && (
-                    <Tabs.TabPane key="7">
+                    <Tabs.TabPane key="5">
                     <TonicKeywordReports 
                         startDate={newStartDate} 
                         endDate={newendDate} 
@@ -3269,7 +3269,7 @@ const MyTablePage = () => {
                 )}
 
                 {newRevenuePratner === "FB_System1" && (
-                    <Tabs.TabPane key="8">
+                    <Tabs.TabPane key="5">
                     <System1KeywordReports 
                         startDate={newStartDate} 
                         endDate={newendDate} 
