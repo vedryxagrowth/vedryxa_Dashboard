@@ -918,7 +918,7 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
     }, [oneTimeFetch.current]);
     
     return(
-                    <div style={{ height: "100%", marginBottom: '20px' }}>
+                    <div style={{ height: "100%", marginBottom: '20px',overflow: "visible" }}>
                         <div style={contentStyle}>
                             {isLoading === true ? (
                                 <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>

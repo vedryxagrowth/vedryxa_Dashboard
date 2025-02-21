@@ -803,10 +803,19 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
             oneTimeFetch.current = false;
         }
     }, [oneTimeFetch.current]);
-    
+
+    useEffect(() => {
+        if (gridRef1.current && gridRef1.current.api) {
+            setTimeout(() => {
+                gridRef1.current.api.refreshCells({ force: true });
+                gridRef1.current.api.redrawRows();
+                gridRef1.current.api.sizeColumnsToFit();
+            }, 200);
+        }
+    }, [memorizedDailyData]);
     
     return(
-                    <div>
+                    <div style={{ height: "100%", marginBottom: '20px' }}>
                         <div style={contentStyle}>
                             {isLoading1 === true ? 
                             (
@@ -895,6 +904,9 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                                             gridRef1.current = params.api; // Store grid API
                                             restoreGridState(gridRef1.current); // Restore state when grid is ready
                                             onGridReady(params, 'grid2', gridRef1);
+                                            if (params.columnApi) {
+                                                params.columnApi.autoSizeAllColumns();
+                                            }
                                         }}
                                         gridOptions={gridOptions1}
                                         getMainMenuItems={getMainMenuItems}
