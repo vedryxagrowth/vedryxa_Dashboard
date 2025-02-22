@@ -144,7 +144,7 @@ const TopBar1 = () => {
         label: (
           <a
             onClick={() => {
-              localStorage.clear();
+              const { storedData, activeTab } = localStorage; localStorage.clear(); Object.assign(localStorage, { storedData, activeTab });
               localStorage.setItem('redirectUrl', router.asPath);
               router.push('/api/auth/signout');
             }}

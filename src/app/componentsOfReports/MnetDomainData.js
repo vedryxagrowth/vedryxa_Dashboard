@@ -1,0 +1,408 @@
+"use client"
+import { useEffect, useMemo, useState, useRef, useCallback } from 'react';
+import { AgGridReact } from 'ag-grid-react';
+import { Audio } from 'react-loader-spinner';
+import React from 'react';
+import moment from 'moment-timezone';
+import {  Button, Result } from 'antd';
+import {  SmileOutlined } from '@ant-design/icons';
+import 'antd/dist/reset.css';
+import '../globals.css';
+import 'ag-grid-enterprise';
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-alpine.css';
+import { useTokenContext } from '../components/parent';
+const contentStyle = {
+    margin: "10px",
+    // height: '800px',
+    color: '#66fc03',
+    lineHeight: '160px',
+    textAlign: 'center',
+    background: '#fbfcfa',
+
+};
+const newtworkCollections = {
+    "FB_Mnet": "Facebook_Mnet",
+    "FB_MnetBing": "Facebook_MnetBing",
+    "FB_Enki": "Facebook_Enki",
+    "FB_System1": 'Facebook_System1',
+    "FB_Rsoc": 'Facebook_Rsoc',
+    "FB_Tonic": 'Facebook_Tonic',
+    "FB_DomainActive": "Facebook_DActive_Names",
+    "FB_Bodies": "Facebook_Bodies",
+    "FB_Bodies1": "Facebook_Bodies1",
+    "Newsbreak_DA": "Newsbreak_DomainActive",
+    "FB_Tonic1": "Facebook_Tonic1"
+}
+
+const MnetDomainReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, userdetails, refreshComments}) => {
+    const {theme} = useTokenContext();
+    const {apiClient} = useTokenContext();
+    const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
+
+    const [domainData, setDomainData] = useState([]);
+
+    const [domainFixedFooter, setDomainFixedFooter] = useState([]);
+
+    const [apiStatus, setApiStatus] = useState(false);
+
+    
+
+    const spender = (params) => {
+        if (!params.values || params.values.length === 0) {
+            return 0; // Return 0 or any fallback value if there are no values to aggregate
+        }
+
+        let total = 0;
+        params.values.forEach((value) => {
+            if (value !== undefined && value !== null && !isNaN(value)) {
+                total += parseFloat(value);
+            }
+        });
+
+        const totalStr = total.toString();
+        const [integerPart, decimalPart] = totalStr.split(".");
+
+        if (decimalPart !== undefined && decimalPart.length > 2) {
+            const formattedTotal = `${integerPart}.${decimalPart.slice(0, 2)}`;
+            return parseFloat(formattedTotal).toFixed(2);
+        }
+
+        return total.toFixed(2);
+    };
+
+    const avgRpcCpl = (params) => {
+        const validValues = params.values.filter(value => !isNaN(value) && isFinite(value));
+        if (validValues.length === 0) {
+            return 0;
+        }
+        const sum = validValues.reduce((acc, value) => acc + value, 0);
+        const average = sum / validValues.length;
+        return parseFloat(average);
+    };
+
+    const average = (params) => {
+        const total = params.values.reduce((acc, value) => acc + parseFloat(value || 0), 0);
+        const count = params.values.filter(value => value !== null && value !== undefined).length;  // Count non-null/undefined values
+        return count > 0 ? Math.round((total / count) * 100) / 100 : 0;  // Avoid division by zero
+    };
+
+    const marginFormatter = (params) => {
+        return `${parseFloat(params.value || 0).toFixed(2)}%`; // Ensure 2 decimal places in currency format
+    };
+
+    const currencyFormatter = (params) => {
+        return `$${parseFloat(params.value || 0).toFixed(2)}`; // Ensure 2 decimal places in currency format
+    };
+
+    const rpcCplFormatter = (params) => {
+        const value = params.value;
+        return isNaN(value) || !isFinite(value) ? '0' : parseFloat(value).toFixed(2);
+    };
+
+    const [isLoading, setLoading] = useState(true);
+
+    const oneTimeFetch = useRef(true);
+
+    function groupAndCalculateProfit(data) {
+        const groupedData = data.reduce((acc, item) => {
+            const key = `${item.domain}-${item[`${newtime}Date`]}`;
+    
+            if (!acc[key]) {
+                acc[key] = {
+                    domain: item.domain,
+                    [`${newtime}Date`]: item[`${newtime}Date`],
+                    estimated_revenue: 0,
+                    spend: 0,
+                    conversions: 0,
+                    fbLeads: 0,
+                    adClicks: 0, // Store total ad_clicks
+                };
+            }
+    
+            acc[key].estimated_revenue += item.estimated_revenue || 0;
+            acc[key].spend += parseFloat(item.spend) || 0;
+            acc[key].conversions += item.conversions || 0;
+            acc[key].fbLeads += parseInt(item.fbLeads) || 0;
+            acc[key].adClicks += item.ad_clicks || 0; // Sum ad_clicks separately
+    
+            return acc;
+        }, {});
+    
+        return Object.values(groupedData).map(item => {
+            const finalConversions = item.adClicks > 0 ? item.adClicks : item.conversions; // ✅ Ensure correct conversions
+    
+            return {
+                ...item,
+                conversions: finalConversions, // ✅ Set correct conversions before using in rpc
+                profit: item.estimated_revenue - item.spend,
+                margin: item.estimated_revenue > 0 ? ((item.estimated_revenue - item.spend) / item.estimated_revenue) * 100 : 0,
+                rpc: finalConversions > 0 ? (item.estimated_revenue / finalConversions) : 0, // ✅ Now uses correct conversions
+                cpl: item.fbLeads > 0 ? (item.spend / item.fbLeads) : 0,  // Cost per Lead
+            };
+        });
+    }
+
+    const domainColumnDefs = [
+        {
+            field: 'domain',
+            headerName: 'Domain',
+            minWidth: 400,
+            // resizable: true,
+            sortable: true,
+            hide: true, // Hide column as it's grouped
+            rowGroup: true,
+            enableRowGroup: true,
+            flex: 8,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+
+        },
+        {
+            field: `${newtime}Date`,
+            headerName: 'Date',
+            flex: 6,
+            minWidth: 120,
+            filter: true,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+        },
+        {
+            field: "spend",
+            resizable: true,
+            sortable: true,
+            filter: true,
+            minWidth: 100,
+            flex: 4,
+            aggFunc: spender,
+            valueFormatter: currencyFormatter,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+        },
+        {
+            field: "estimated_revenue",
+            headerName: "Revenue",
+            resizable: true,
+            sortable: true,
+            filter: true,
+            minWidth: 110,
+            flex: 4,
+            aggFunc: spender,
+            valueFormatter: currencyFormatter,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+        },
+        {
+            field: 'profit',
+            resizable: true,
+            sortable: true,
+            minWidth: 100,
+            flex: 4,
+            cellClassRules: {
+                'font-red': p => p.value < 0
+            },
+            aggFunc: spender,
+            filter: true,
+            valueFormatter: currencyFormatter,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+        },
+        {
+            field: "margin",
+            headerName: 'Margin',
+            aggFunc: average,
+            cellClassRules: {
+                'font-red': p => p.value < 0
+            },
+            minWidth: 110,
+            flex: 4,
+            valueFormatter: marginFormatter,
+            filter: true,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+        },
+        {
+            field: 'rpc',
+            headerName: 'RPC',
+            aggFunc: avgRpcCpl,
+            valueFormatter: rpcCplFormatter,
+            minWidth: 100,
+            flex: 3,
+            filter: true,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+        },
+        {
+            field: 'cpl',
+            headerName: 'CPL',
+            aggFunc: avgRpcCpl,
+            valueFormatter: rpcCplFormatter,
+            minWidth: 100,
+            flex: 3,
+            filter: true,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+        }
+    ];
+
+    const memorizedDomainData = useMemo(()=>domainData, [domainData]);
+    const memorizeddomainColumnDefs = useMemo(()=>domainColumnDefs, [domainColumnDefs]);
+
+    const functionCall1 = async () => {
+       try {
+         setLoading(true);
+         // console.log(newRevenuePratner);
+         const collectionName = newRevenuePratner === "FB_DomainActive" ? "Facebook_DActive_Names" : newtworkCollections[newRevenuePratner];
+         const fetchData = await apiClient.get(`/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${collectionName}`);
+         const mainData1 = fetchData.data;
+         const mainData =  mainData1.filter(obj => !("ad_clicks" in obj));
+         let campaignComments = [];
+ 
+         if (fetchData.status === 200 && mainData1.length > 0) {
+             const groupAndCalculateProfit1 = groupAndCalculateProfit(mainData1);
+ 
+             setDomainData(groupAndCalculateProfit1);
+             setDomainFixedFooter([
+                 {
+                     // domain:'Totals',
+                     [`${newtime}Date`]: 'Totals',
+                     spend: parseFloat(groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0).toFixed(2)),
+                     estimated_revenue: parseFloat(groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.estimated_revenue), 0).toFixed(2)),
+                     profit: parseFloat(groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0).toFixed(2)),
+                     margin: parseFloat((groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr.estimated_revenue), 0) * 100).toFixed(2)),
+                     rpc: parseFloat((groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0)).toFixed(2)),
+                     cpl: parseFloat((groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0)).toFixed(2)),
+                     conversions: parseFloat(groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
+                     // clicks: parseFloat(groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.clicks), 0).toFixed(2)),
+                     // impressions: parseFloat(groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
+                 }
+             ]);
+            fetchData.status === 200 && setApiStatus(false) ;
+         }
+         else{
+             setDomainData([]);
+             setDomainFixedFooter([]);
+             setLoading(false);
+         }
+        setLoading(false);
+       }
+       catch (error) {
+        setApiStatus(true) ;
+        setLoading(false);
+    }
+    
+    }
+    const handleReFetchData = () => {
+        functionCall1();
+        setApiStatus(false);
+    }
+    useEffect(() => {
+        if(oneTimeFetch.current){
+            functionCall1();
+            oneTimeFetch.current = false;
+        }
+    }, [oneTimeFetch.current]);
+    return(
+        <div style={{ height: "100%", marginBottom: '20px' }}>
+                            <div style={contentStyle}>
+                                {isLoading === true ? (
+                                    <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>
+                                        <div className="ag-grid-Loader">
+                                            <Audio
+                                                height="80"
+                                                width="80"
+                                                radius="9"
+                                                color="green"
+                                                ariaLabel="loading"
+                                                wrapperStyle
+                                                wrapperClass
+                                            />
+                                        </div>
+                                    </div>
+                                ) : domainData.length > 0 ? (
+
+                                    <div
+                                        className={`ag-theme-alpine ${gridThemeClass}`}
+                                        style={{ width: '100%', height: '500px' }}
+                                    >
+                                        <AgGridReact
+                                            rowData={memorizedDomainData}
+                                            columnDefs={memorizeddomainColumnDefs}
+                                            // defaultColDef={defaultColDef}
+                                            suppressAggFuncInHeader={true}
+                                            pinnedBottomRowData={domainFixedFooter}
+                                            getRowStyle={(params) => {
+                                                if (params.node.rowPinned) {
+                                                    return {
+                                                        fontWeight: 'bold',
+                                                        // backgroundColor: theme === "dark" ? '#000' : '#fff',
+                                                        // color: theme === "dark" ? '#fff' : '#000',
+                                                    };
+                                                }
+                                                return null;
+                                            }}
+                                            onFilterChanged={(params) => {
+                                                const api = params.api;
+                                                const filteredData = [];
+                                                api.forEachNodeAfterFilterAndSort((node) => {
+                                                    if (!node.rowPinned) {
+                                                        filteredData.push(node.data);
+                                                    }
+                                                });
+
+                                                const updatedFooter = [
+                                                    {
+                                                        [`${newtime}Date`]: 'Totals',
+                                                        spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
+                                                        estimated_revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.estimated_revenue || 0), 0).toFixed(2)),
+                                                        profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
+                                                        margin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.estimated_revenue), 0) * 100).toFixed(2)),
+                                                        rpc: parseFloat(
+                                                            (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc || 0), 0) || 0).toFixed(2)
+                                                        ),
+                                                        cpl: parseFloat(
+                                                            (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl || 0), 0) || 0).toFixed(2)
+                                                        ),
+                                                        // impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0).toFixed(2)),
+                                                    },
+                                                ];
+
+                                                setDomainFixedFooter(updatedFooter);
+                                            }}
+                                        />
+                                    </div>
+
+                                ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
+                                    {apiStatus === true ? 
+                                        <Result
+                                        className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                        // icon={<SmileOutlined />}
+                                        title={`API failed to fetch the data. Please click retry button to fetch the data`}
+                                        extra={<Button type="primary" onClick={handleReFetchData}>Retry</Button>}
+                                    /> :(startDate !== endDate ? <Result
+                                        className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                        icon={<SmileOutlined />}
+                                        title={`No DomainData for ${newaccount} from ${startDate} to ${endDate}`}
+                                    // extra={<Button type="primary">Next</Button>}
+                                    /> : <Result
+                                        className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                        icon={<SmileOutlined />}
+                                        title={`No DomainData for ${newaccount} to ${startDate}`}
+                                    // extra={<Button type="primary">Next</Button>}
+                                    />)}
+                                </div>}
+                            </div>
+                        </div>
+
+    );
+};
+
+export default MnetDomainReports;

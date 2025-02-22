@@ -2091,7 +2091,7 @@ const Dashboard = () => {
                                 const url = `/Reports?${queryString}`;
     
                                 // Open the URL in a new tab
-                                window.open(url, '_blank');
+                                window.open(url, '_blank', 'noopener,noreferrer');
                             }}
                         >
                             {valueWithCount}
@@ -2125,7 +2125,7 @@ const Dashboard = () => {
                 <span
                     style={{ cursor: 'pointer', color: '#1890ff' }}
                     onClick={() => {
-                        window.open(url, '_blank');
+                        window.open(url, '_blank', 'noopener,noreferrer');
                     }}
                 >
                     {accountNumber}
@@ -2183,7 +2183,7 @@ const Dashboard = () => {
                                 const url = `/Reports?${queryString}`;
 
                                 // Open the URL in a new tab
-                                window.open(url, '_blank', 'noopener');
+                                window.open(url, '_blank', 'noopener,noreferrer');
                             }}
                         >
                             {valueWithCount}
@@ -2242,11 +2242,11 @@ const Dashboard = () => {
     
                                 // // Convert data to query string
                                 // const queryString = new URLSearchParams(data).toString();
-                                const url = `/DailyAndCampaignHistory/CampaignHistory/${campaignNameToPass}-${accountNumberToPassToReports}-${time}-${collectionName}`;
+                                const url = `/DailyAndCampaignHistory/CampaignHistory/${campaignNameToPass.replace(/\//g, "*").replace(/-/g, "^")}-${accountNumberToPassToReports}-${time}-${collectionName}`;
                                 console.log(url);
     
                                 // Open the URL in a new tab
-                                window.open(url, '_blank');
+                                window.open(url, '_blank', 'noopener,noreferrer');
                             }}
                         >
                             {valueWithCount}
@@ -2280,7 +2280,7 @@ const Dashboard = () => {
                 <span
                     style={{ cursor: 'pointer', color: '#1890ff' }}
                     onClick={() => {
-                        window.open(url, '_blank');
+                        window.open(url, '_blank', 'noopener,noreferrer');
                     }}
                 >
                     {accountNumber}
