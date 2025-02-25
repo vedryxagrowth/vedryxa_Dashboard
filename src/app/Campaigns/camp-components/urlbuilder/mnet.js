@@ -226,19 +226,19 @@ const MnetUrlBuilder = ({ defaultValues, onReturnMessage, showSubmitButton }) =>
 
   const onClickSubmit = () => {
 
-    if (keywords && channel && memberId && geo && domain && source) {
+    if (keywords && channel && domain && source) {
       // const formattedKeywords = keywords.replace(/\s+/g, '+'); praveen 
       const formattedKeywords = keywords.trimEnd().replace(/\s+/g, '+'); //s
 
       const campaign_id = NetworkData?.Source?.find(item => item.code === source).campaignId;
       const adset_id = NetworkData?.Source?.find(item => item.code === source).AdsetId;
-      const mem_source_geo = `${memberId}_${source}_${geo}`
+      const ad_id = NetworkData?.Source?.find(item => item.code === source).AdId;
       let url = domain;
 
       url = url
         .replace("keywords_replace", formattedKeywords)
         .replace("chanel_replace", channel)
-        .replace("business_code_replace_source_code_replace_region_code_replace", mem_source_geo)
+        .replace("business_code_replace_source_code_replace_region_code_replace", ad_id)
         .replace("campaign_id_replace", campaign_id)
         .replace("adset_id_replace", adset_id);
       onReturnMessage(url);
@@ -250,17 +250,17 @@ const MnetUrlBuilder = ({ defaultValues, onReturnMessage, showSubmitButton }) =>
 
   const onClickGet = () => {
 
-    if (keywords && channel && memberId && geo && domain && source) {
+    if (keywords && channel && domain && source) {
       const formattedKeywords = keywords.trimEnd().replace(/\s+/g, '+');
       const campaign_id = NetworkData?.Source?.find(item => item.code === source).campaignId;
       const adset_id = NetworkData?.Source?.find(item => item.code === source).AdsetId;
-      const mem_source_geo = `${memberId}_${source}_${geo}`
+      const ad_id = NetworkData?.Source?.find(item => item.code === source).AdId;
       let url = domain;
 
       url = url
         .replace("keywords_replace", formattedKeywords)
         .replace("chanel_replace", channel)
-        .replace("business_code_replace_source_code_replace_region_code_replace", mem_source_geo)
+        .replace("business_code_replace_source_code_replace_region_code_replace", ad_id)
         .replace("campaign_id_replace", campaign_id)
         .replace("adset_id_replace", adset_id);
       setErrorMessage(url);
@@ -342,14 +342,14 @@ const MnetUrlBuilder = ({ defaultValues, onReturnMessage, showSubmitButton }) =>
             style={{ width: '100%' }}
           />
         </Col>
-        <Col style={{ display: 'flex', flexDirection: 'column' }} span={5}>
+        {/* <Col style={{ display: 'flex', flexDirection: 'column' }} span={5}>
           <label><span style={{ color: 'red', paddingRight: '2px', paddingTop: '2px' }}>*</span>Member ID</label>
           <Input placeholder="Member ID" value={memberId} required onChange={onChangeMemberId} />
         </Col>
         <Col style={{ display: 'flex', flexDirection: 'column' }} span={3}>
           <label><span style={{ color: 'red', paddingRight: '2px', paddingTop: '2px' }}>*</span>GEO</label>
           <Input placeholder="GEO" value={geo} required onChange={onChangeGeo} />
-        </Col>
+        </Col> */}
       </Row>
       <Row style={{ width: '100%' }}>
         <Col span={24}>
