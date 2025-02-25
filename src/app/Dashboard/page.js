@@ -2084,8 +2084,9 @@ const Dashboard = () => {
                                     time: time,
                                     startDate: startDate,
                                     endDate: endDate,
+                                    accountName: userdetails?.adAccounts[revenuePartnerNameToPassToReports]?.find(each => each.accountNumber === accountNumberToPassToReports)?.accountName
                                 };
-    
+                                console.log(userdetails?.adAccounts[revenuePartnerNameToPassToReports]?.find(each => each.accountNumber === accountNumberToPassToReports)?.accountName);
                                 // Convert data to query string
                                 const queryString = new URLSearchParams(data).toString();
                                 const url = `/Reports?${queryString}`;

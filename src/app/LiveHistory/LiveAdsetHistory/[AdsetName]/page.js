@@ -430,6 +430,34 @@ const MnetLiveAdsetHistory = ({params}) => {
     // const getColumnDefs = (order) => {
     //     return order?.map(colKey => columnDefsObject[colKey]);
     // };
+
+    const onCellClicked = (params) => {
+        if (params.column.getColId() === "adsetName" && params.value) { 
+            // Copy the cell value to clipboard
+            navigator.clipboard.writeText(params.value).then(() => {
+                const originalValue = params.value; // Store original value
+                const copiedText = `${originalValue} Copied!`; // Append "Copied!" to the text
+    
+                // Temporarily update the cell content
+                params.node.setDataValue("adsetName", copiedText);
+    
+                // Revert back to original value after 1.5 seconds
+                setTimeout(() => {
+                    params.node.setDataValue("adsetName", originalValue);
+                }, 1500);
+            }).catch(err => console.error("Copy failed:", err));
+        }
+    };
+
+    const gridOptions = {
+        onCellClicked,
+    };
+
+    // Initialize AG Grid after DOM is loaded
+    document.addEventListener("DOMContentLoaded", function () {
+        const gridDiv = document.querySelector("#myGrid");
+        new agGrid.Grid(gridDiv, gridOptions);
+    });
     
     const columnDefs = [
         {
@@ -478,6 +506,17 @@ const MnetLiveAdsetHistory = ({params}) => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            cellRenderer: (params) => {
+                if (params.value && params.value.includes("Copied!")) {
+                    return (
+                        <span>
+                            {params.value.replace("Copied!", "")}
+                            <span style={{ color: "green", fontWeight: "bold" }}>Copied!</span>
+                        </span>
+                    );
+                }
+                return params.value;
+            }
         },
         // { headerName: 'FB-Hour', field: 'fb-hour', width: 120 },
         // { headerName: 'MNet-Hour', field: 'mnet-hour', width: 120 },
@@ -1435,6 +1474,7 @@ const MnetLiveAdsetHistory = ({params}) => {
                         columnDefs={columnDefs}
                         defaultColDef={defaultColDef}
                         pinnedBottomRowData={domainFixedFooter}
+                        gridOptions={gridOptions}
                         // pagination={true} // Enable pagination
                         // paginationPageSize={5} // Set rows per page
                         // paginationNumberFormatter={(params) => `${params.value}`}
