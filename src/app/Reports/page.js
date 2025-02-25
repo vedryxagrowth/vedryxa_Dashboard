@@ -52,6 +52,7 @@ const MyTablePage = () => {
     const timeFromDashboard = params.get('time');
     const startDateFromDashboard = params.get('startDate');
     const endDateFromDashboard = params.get('endDate');
+    const accountNameFromDashboard = params.get('accountName');
 
     const { theme } = useTokenContext();
     const { apiClient } = useTokenContext();
@@ -102,9 +103,9 @@ const MyTablePage = () => {
     const storedData = localStorage.getItem("storedData") && localStorage.getItem("storedData") !== "undefined" && localStorage.getItem("storedData") !== "null" ? JSON.parse(localStorage.getItem("storedData")) : null;
     // console.log(storedData, "storedData");
 
-    const defaultDates = [dayjs(storedData ? storedData?.startDate : (startDateFromDashboard ? startDateFromDashboard : yesterday)), dayjs(storedData ? storedData?.endDate : (endDateFromDashboard ? endDateFromDashboard : yesterday))];
+    const defaultDates = [dayjs((startDateFromDashboard ? startDateFromDashboard : (storedData ? storedData?.startDate :  yesterday))), dayjs((endDateFromDashboard ? endDateFromDashboard : (storedData ? storedData?.endDate : yesterday)))];
 
-    const [accountNumberToPass, setAccountNumberToPass] = useState(storedData ? storedData?.account :( accountNumberFromDashboard));
+    const [accountNumberToPass, setAccountNumberToPass] = useState(accountNumberFromDashboard ? accountNumberFromDashboard : storedData ? storedData?.account : accountsForAccess[0].accountNumber);
 
     const [initialRowData, setInitialRowData] = useState([]);
 
@@ -118,17 +119,17 @@ const MyTablePage = () => {
 
     const [system1KeywordData, setSystem1KeywordData] = useState([]);
 
-    const [startDate, setStartDate] = useState(storedData ? storedData?.startDate : (startDateFromDashboard ? startDateFromDashboard : yesterday));
+    const [startDate, setStartDate] = useState(startDateFromDashboard ? startDateFromDashboard : (storedData ? storedData?.startDate : (yesterday)));
 
-    const [newStartDate, setNewStartDate] = useState(storedData ? storedData?.startDate : (startDateFromDashboard ? startDateFromDashboard : yesterday));
+    const [newStartDate, setNewStartDate] = useState(startDateFromDashboard ? startDateFromDashboard :(storedData ? storedData?.startDate : (yesterday)));
 
-    const [endDate, setEndDate] = useState(storedData ? storedData?.endDate : (endDateFromDashboard ? endDateFromDashboard : yesterday));
+    const [endDate, setEndDate] = useState(endDateFromDashboard ? endDateFromDashboard :(storedData ? storedData?.endDate : (yesterday)));
 
-    const [newendDate, setNewEndDate] = useState(storedData ? storedData?.endDate : (endDateFromDashboard ? endDateFromDashboard : yesterday));
+    const [newendDate, setNewEndDate] = useState(endDateFromDashboard ? endDateFromDashboard : (storedData ? storedData?.endDate : (yesterday)));
 
-    const [revenuePratner, setRevenuePartner] = useState(storedData ? storedData?.revenuePratner : (networkFromDashboard ? networkFromDashboard : networks[0]));
+    const [revenuePratner, setRevenuePartner] = useState(networkFromDashboard ? networkFromDashboard : (storedData ? storedData?.revenuePratner : (networks[0])));
 
-    const [newRevenuePratner, setNewRevenuePartner] = useState(storedData ? storedData?.revenuePratner : (networkFromDashboard ? networkFromDashboard : networks[0]));
+    const [newRevenuePratner, setNewRevenuePartner] = useState(networkFromDashboard ? networkFromDashboard : (storedData ? storedData?.revenuePratner : (networks[0])));
 
     const [isSearching, setIsSearching] = useState(false);
     const [inputValue, setInputValue] = useState('');
@@ -182,16 +183,16 @@ const MyTablePage = () => {
 
     const [isTrue, setTrue] = useState(false);
 
-    const [account, setAccount] = useState(storedData ? storedData?.account : (accountNumberFromDashboard ? accountNumberFromDashboard : accountsForAccess[0].accountNumber));
+    const [account, setAccount] = useState((accountNumberFromDashboard ? accountNumberFromDashboard : (storedData ? storedData?.account : accountsForAccess[0].accountNumber)));
 
-    const [time, setTime] = useState(storedData ? storedData?.time : (timeFromDashboard ? timeFromDashboard : (revenuePratner === "FB_DomainActive" || revenuePratner === "FB_Tonic1") ? "PDT" : "UTC"));
+    const [time, setTime] = useState((timeFromDashboard ? timeFromDashboard : (storedData ? storedData?.time : (revenuePratner === "FB_DomainActive" || revenuePratner === "FB_Tonic1") ? "PDT" : "UTC")));
 
-    const [newaccount, setNewAccount] = useState(storedData ? storedData?.account : (accountNumberFromDashboard ? accountNumberFromDashboard : accountsForAccess[0].accountNumber));
+    const [newaccount, setNewAccount] = useState((accountNumberFromDashboard ? accountNumberFromDashboard?.replace(/\+/g, " ") : (storedData ? storedData?.account : accountsForAccess[0].accountNumber)));
 
-    const [accountName, setAccountName] = useState(storedData ? storedData?.accountName : (accountsForAccess[0]?.accountName));
+    const [accountName, setAccountName] = useState(accountNameFromDashboard ? accountNameFromDashboard?.replace(/\+/g, " ") : (storedData ? storedData?.accountName : (accountsForAccess[0]?.accountName)));
 
-    const [newAccountName, setnewAccountName] = useState(storedData ? storedData?.accountName : (accountsForAccess[0]?.accountName));
-    const [newtime, setNewTime] = useState(storedData ? storedData?.time : (timeFromDashboard ? timeFromDashboard : (revenuePratner === "FB_DomainActive" || revenuePratner === "FB_Tonic1") ? "PDT" : "UTC"));
+    const [newAccountName, setnewAccountName] = useState(accountNameFromDashboard ? accountNameFromDashboard : (storedData ? storedData?.accountName : (accountsForAccess[0]?.accountName)));
+    const [newtime, setNewTime] = useState((timeFromDashboard ? timeFromDashboard : (storedData ? storedData?.time : (revenuePratner === "FB_DomainActive" || revenuePratner === "FB_Tonic1") ? "PDT" : "UTC")));
 
     const [pageSize, setPageSize] = useState(1);
 
@@ -2626,6 +2627,7 @@ const MyTablePage = () => {
             account,
             accountName
         };
+        console.log(storedData, "storedData");
         localStorage.setItem("storedData", JSON.stringify(storedData));
         setCampaignsStatus(false);
         setCommentsStatus(false);
@@ -2832,7 +2834,7 @@ const MyTablePage = () => {
 
     const [isOpen, setIsOpen] = useState(false); // State to track if dropdown is open
     const [selectedValue, setSelectedValue] = useState(
-        typeof networksData[0] === 'string' ? networksData[0] : networksData[0].accountNumber
+        accountNumberFromDashboard ? accountNumberFromDashboard?.replace(/\+/g, " ") : (storedData ? storedData?.account : typeof networksData[0] === 'string' ? networksData[0] : networksData[0].accountNumber)
     ); // Track selected value
 
     // Handle dropdown open/close state
@@ -3007,7 +3009,7 @@ const MyTablePage = () => {
 
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
                             optionFilterProp="label"
-                            defaultValue={storedData ? storedData?.revenuePratner : (networkFromDashboard ? networkFromDashboard : networks[0])}
+                            defaultValue={networkFromDashboard ? networkFromDashboard : (storedData ? storedData?.revenuePratner : (networks[0]))}
                             options={networks.map((item) => ({
                                 value: item,
                                 label: item,
@@ -3031,7 +3033,7 @@ const MyTablePage = () => {
                             placeholder="Select Account"
                             optionFilterProp="value"
                             value={accountNumberToPass ? accountNumberToPass : selectedValue}  // Set selected value
-                            defaultValue={storedData ? storedData?.account : (accountNumberFromDashboard ? accountNumberFromDashboard : networksData[0].accountNumber)}
+                            defaultValue={accountNumberFromDashboard ? accountNumberFromDashboard : (storedData ? storedData?.account : (networksData[0].accountNumber))}
                             options={accountsAccess.map((item) => createOption(item))} // Create options dynamically
                             onDropdownVisibleChange={handleDropdownVisibleChange} // Toggle dropdown state
                         />

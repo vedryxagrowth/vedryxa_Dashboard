@@ -575,6 +575,34 @@ export default function AdsetNameAndAccount({params}){
     //         campaignid: {headerName: "CampaignId", field:'campaignId'}
     //     };
 
+    const onCellClicked = (params) => {
+      if (params.column.getColId() === "adsetName" && params.value) { 
+          // Copy the cell value to clipboard
+          navigator.clipboard.writeText(params.value).then(() => {
+              const originalValue = params.value; // Store original value
+              const copiedText = `${originalValue} Copied!`; // Append "Copied!" to the text
+  
+              // Temporarily update the cell content
+              params.node.setDataValue("adsetName", copiedText);
+  
+              // Revert back to original value after 1.5 seconds
+              setTimeout(() => {
+                  params.node.setDataValue("adsetName", originalValue);
+              }, 1500);
+          }).catch(err => console.error("Copy failed:", err));
+      }
+    };
+
+    const gridOptions = {
+      onCellClicked,
+    };
+
+    // Initialize AG Grid after DOM is loaded
+    document.addEventListener("DOMContentLoaded", function () {
+        const gridDiv = document.querySelector("#myGrid");
+        new agGrid.Grid(gridDiv, gridOptions);
+    });
+
     const columnDefs = [
       // {headerName:'CampaignName', field:'campaignName',
       //     // rowGroup: true,
@@ -594,6 +622,17 @@ export default function AdsetNameAndAccount({params}){
       suppressMenu: true,
       menuTabs: [],
       headerClass: 'hide-menu',
+      cellRenderer: (params) => {
+        if (params.value && params.value.includes("Copied!")) {
+            return (
+                <span>
+                    {params.value.replace("Copied!", "")}
+                    <span style={{ color: "green", fontWeight: "bold" }}>Copied!</span>
+                </span>
+            );
+        }
+        return params.value;
+      }
       // hide: true,
       // // resizable:false,
       // rowGroup: true,
@@ -670,7 +709,7 @@ export default function AdsetNameAndAccount({params}){
           menuTabs: [],
           headerClass: 'hide-menu',
           width: 105,
-          valueFormatter: (params) => `${params.value}%`,
+          valueFormatter: (params) => `${params.value}`,
           headerToolTip: 'Margin = ((Revenue - Spend) / Revenue) * 100',
           
       },
@@ -713,14 +752,14 @@ export default function AdsetNameAndAccount({params}){
           suppressMenu: true,
           menuTabs: [],
           headerClass: 'hide-menu',
-          valueFormatter: (params) => `$${params.value}`,
+          valueFormatter: (params) => `${params.value}`,
           headerToolTip: 'FMargin = (Profit / Revenue) * 100',
           width: 110},
       { headerName: 'ROI', field: 'roi', valueGetter: getROI,
           suppressMenu: true,
           menuTabs: [],
           headerClass: 'hide-menu',
-          valueFormatter: (params) => `$${params.value}`,
+          valueFormatter: (params) => `${params.value}`,
           headerToolTip: 'ROI = ((Revenue - Spend) / Spend) * 100',
           width: 90},
       { headerName: 'CPC', field: 'cpc',
@@ -1053,6 +1092,7 @@ export default function AdsetNameAndAccount({params}){
                       columnDefs={columnDefs}
                       defaultColDef={defaultColDef}
                       pinnedBottomRowData={domainFixedFooter}
+                      gridOptions={gridOptions}
                       getRowStyle={(params) => {
                           if (params.node.rowPinned) {
                               return {
