@@ -105,8 +105,6 @@ const MyTablePage = () => {
 
     const defaultDates = [dayjs((startDateFromDashboard ? startDateFromDashboard : (storedData ? storedData?.startDate :  yesterday))), dayjs((endDateFromDashboard ? endDateFromDashboard : (storedData ? storedData?.endDate : yesterday)))];
 
-    const [accountNumberToPass, setAccountNumberToPass] = useState(accountNumberFromDashboard ? accountNumberFromDashboard : storedData ? storedData?.account : accountsForAccess[0].accountNumber);
-
     const [initialRowData, setInitialRowData] = useState([]);
 
     const [rowData, setRowData] = useState([]);
@@ -164,6 +162,8 @@ const MyTablePage = () => {
     const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
 
     const [networksData, setNetworksData] = useState(accountsAccess);
+
+    const [accountNumberToPass, setAccountNumberToPass] = useState(accountNumberFromDashboard ? accountNumberFromDashboard : storedData ? storedData?.account : accountsForAccess[0].accountNumber);
 
     // const [isLoading, setLoading] = useState(true);
 
