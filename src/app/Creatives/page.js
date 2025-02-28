@@ -226,109 +226,212 @@ const ImageUploadPage = () => {
         setIsEditorVisible(false);
         setIsModalVisible(true);
     };
+
+
+    // Inside your component:
+const getCloneNumber = (originalFileName) => {
+    // Assume originalFileName is something like "dog.jpg"
+    const dotIndex = originalFileName.lastIndexOf('.');
+    const extension = dotIndex !== -1 ? originalFileName.substring(dotIndex + 1) : "";
+    const baseName = dotIndex !== -1 ? originalFileName.substring(0, dotIndex) : originalFileName;
     
-  // --- Modified: Handle sequential upload for multiple files ---
-  const handleConfirmUpload = async () => {
-    // Get the current file
-    let fileToUpload = editedFile || pendingFiles[currentFileIndex];
-  
-    if (!previewFile || !userdetails?.userName || !fileInputName.trim()) {
-      message.error("User name is missing, no file selected, or file name is empty!");
-      return;
-    }
-  
-    // If uploading from a URL, convert it to a File object
-    if (previewFile.url && previewFile.url.startsWith("http")) {
-      try {
-        const response = await fetch(previewFile.url);
-        if (!response.ok) {
-          message.error("Failed to fetch image from URL.");
-          return;
+    // Look at current images to find clones matching pattern baseName(number).extension
+    let maxNumber = -1;
+    images.forEach((img) => {
+      // Create a regex like: ^dog\((\d+)\)\.jpg$
+      const regex = new RegExp(`^${baseName}\\((\\d+)\\)\\.${extension}$`);
+      const match = img.name.match(regex);
+      if (match && match[1]) {
+        const num = parseInt(match[1], 10);
+        if (num > maxNumber) {
+          maxNumber = num;
         }
-        const blob = await response.blob();
-        fileToUpload = new File([blob], `${fileInputName.trim()}.jpg`, { type: blob.type });
-      } catch (error) {
-        console.error("Error fetching file from URL:", error);
-        return;
       }
-    }
+    });
+    // Next clone number is maxNumber+1 (if no clones exist, returns 0)
+    return maxNumber + 1;
+  };
   
-    if (!fileToUpload) {
-      message.error("No file available for upload!");
-      return;
-    }
-  
-    // Set file size limits: 5MB for images, 100MB for videos.
-    let MAX_FILE_SIZE = 5 * 1024 * 1024;
-    if (fileToUpload.type.startsWith("video/")) {
-      MAX_FILE_SIZE = 100 * 1024 * 1024;
-    }
-    if (fileToUpload.size > MAX_FILE_SIZE) {
-      message.error(`❌ File size exceeds ${MAX_FILE_SIZE / (1024 * 1024)}MB limit!`);
-      return;
-    }
-  
-    const uniqueFilename = `${Date.now()}-${fileInputName.trim()}${fileToUpload.name.substring(fileToUpload.name.lastIndexOf("."))}`;
-    const uploadDate = startDate || moment().format("YYYY-MM-DD");
-    const formData = new FormData();
-    formData.append("file", fileToUpload);
-    formData.append("uploadDate", uploadDate);
-    formData.append("filename", uniqueFilename);
-  
+  const handleCloneFile = async (image) => {
     try {
-      const response = await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
+      // Fetch the file blob from the original image URL
+      const response = await fetch(image.url);
+      if (!response.ok) {
+        throw new Error("Failed to fetch the file. Check CORS settings on the file host.");
+      }
+      const blob = await response.blob();
+  
+      // Determine the file extension and base name
+      const dotIndex = image.name.lastIndexOf('.');
+      const extension = dotIndex !== -1 ? image.name.substring(dotIndex + 1) : "";
+      const baseName = dotIndex !== -1 ? image.name.substring(0, dotIndex) : image.name;
+  
+      // Determine the clone number: if there are already clones, use the next number
+      const cloneNumber = getCloneNumber(image.name);
+      const clonedFileName = `${baseName}(${cloneNumber}).${extension}`;
+  
+      // Create a new File object for the cloned file
+      const clonedFile = new File([blob], clonedFileName, { type: blob.type });
+  
+      // Prepare form data for upload (using your existing API endpoint)
+      const uploadDate = startDate || moment().format("YYYY-MM-DD");
+      const formData = new FormData();
+      formData.append("file", clonedFile);
+      formData.append("uploadDate", uploadDate);
+      formData.append("filename", clonedFileName);
+  
+      // Upload the cloned file using your API
+      const uploadResponse = await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
         headers: {
           Authorization: localStorage.getItem('token'),
-          "Content-Type": "multipart/form-data",
           "username": userdetails?.userName,
         },
       });
   
-      const newImageUrl = response.data.imageUrl;
+      const newImageUrl = uploadResponse.data.imageUrl;
       if (!newImageUrl) {
         message.error("No image URL returned from server!");
         return;
       }
-      // Add the new image to your UI
-      const newImage = { 
-        uid: Date.now(),
-        name: fileInputName.trim(),
-        status: 'done', 
-        url: newImageUrl, 
-        uploadDate 
-      };
-      setImages(prev => [newImage, ...prev]);
-      setFilteredImages(prev => [newImage, ...prev]);
-      notification.success({
-        message: "Upload Successful",
-        description: "Your file has been uploaded successfully!",
-      });
-      setTimeout(fetchUserImages, 500);  
-    } catch (error) {
-      console.error("Upload Error:", error.response ? error.response.data : error.message);
-    }
   
-    // Move to the next file if available:
-    const nextIndex = currentFileIndex + 1;
-    if (nextIndex < pendingFiles.length) {
-      const nextFile = pendingFiles[nextIndex];
-      const previewUrl = URL.createObjectURL(nextFile);
-      setPreviewFile({ uid: nextFile.uid || nextFile.name, url: previewUrl, name: nextFile.name });
-      setCurrentFileIndex(nextIndex);
-      setFileInputName("");
-      setEditedFile(null);
-    } else {
-      // All files processed—close modal and clear states
-      setIsModalVisible(false);
-      setUploadFileList([]);
-      setPendingFiles([]);
-      setPreviewFile(null);
-      setCurrentFileIndex(0);
-      setFileInputName("");
-      setEditedFile(null);
-      setUploadKey(Date.now());
+      // Create a new image object (using a new unique uid)
+      const newImage = {
+        uid: uuidv4(), // Using UUID for uniqueness
+        name: clonedFileName,
+        status: 'done',
+        url: newImageUrl,
+        uploadDate,
+      };
+  
+      // Update state so the cloned file shows in the UI (and later on refresh)
+      setImages((prev) => [newImage, ...prev]);
+      setFilteredImages((prev) => [newImage, ...prev]);
+      notification.success({ message: "Cloned", description: "File cloned successfully" });
+    } catch (error) {
+      console.error("Clone Error:", error);
+      message.error("Failed to clone file. " + error.message);
     }
   };
+  
+      
+    
+      // ------------------------------
+      // EDIT HANDLER: Open editor if file has valid URL
+      // ------------------------------
+      const handleEditFile = (image) => {
+        if (!image.url) {
+          message.error("This image does not have a valid URL for editing.");
+          return;
+        }
+        setSelectedImage(image);
+        setIsEditorVisible(true);
+        // Optionally close other modals:
+        setIsModalVisible(false);
+      };
+    
+    // --- Modified: Handle sequential upload for multiple files ---
+    const handleConfirmUpload = async () => {
+        // Get the current file
+        let fileToUpload = editedFile || (pendingFiles && pendingFiles[currentFileIndex]);
+        
+        if (!previewFile || !userdetails?.userName || !fileInputName.trim()) {
+          message.error("User name is missing, no file selected, or file name is empty!");
+          return;
+        }
+        
+        // If uploading from a URL, convert it to a File object
+        if (previewFile.url && previewFile.url.startsWith("http")) {
+          try {
+            const response = await fetch(previewFile.url);
+            if (!response.ok) {
+              message.error("Failed to fetch image from URL.");
+              return;
+            }
+            const blob = await response.blob();
+            fileToUpload = new File([blob], `${fileInputName.trim()}.jpg`, { type: blob.type });
+          } catch (error) {
+            console.error("Error fetching file from URL:", error);
+            return;
+          }
+        }
+        
+        if (!fileToUpload) {
+          message.error("No file available for upload!");
+          return;
+        }
+        
+        // Set file size limits: 5MB for images, 100MB for videos.
+        let MAX_FILE_SIZE = 5 * 1024 * 1024;
+        if (fileToUpload.type.startsWith("video/")) {
+          MAX_FILE_SIZE = 100 * 1024 * 1024;
+        }
+        if (fileToUpload.size > MAX_FILE_SIZE) {
+          message.error(`❌ File size exceeds ${MAX_FILE_SIZE / (1024 * 1024)}MB limit!`);
+          return;
+        }
+        
+        const uniqueFilename = `${Date.now()}-${fileInputName.trim()}${fileToUpload.name.substring(fileToUpload.name.lastIndexOf("."))}`;
+        const uploadDate = startDate || moment().format("YYYY-MM-DD");
+        const formData = new FormData();
+        formData.append("file", fileToUpload);
+        formData.append("uploadDate", uploadDate);
+        formData.append("filename", uniqueFilename);
+        
+        try {
+          const response = await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
+            headers: {
+              Authorization: localStorage.getItem('token'),
+              "username": userdetails?.userName,
+            },
+          });
+        
+          const newImageUrl = response.data.imageUrl;
+          if (!newImageUrl) {
+            message.error("No image URL returned from server!");
+            return;
+          }
+          // Create a new image object
+          const newImage = { 
+            uid: Date.now(),
+            name: fileInputName.trim(),
+            status: 'done', 
+            url: newImageUrl, 
+            uploadDate 
+          };
+        
+          setImages(prev => [newImage, ...prev]);
+          setFilteredImages(prev => [newImage, ...prev]);
+          notification.success({
+            message: "Upload Successful",
+            description: "Your file has been uploaded successfully!",
+          });
+          setTimeout(fetchUserImages, 500);  
+        } catch (error) {
+          console.error("Upload Error:", error.response ? error.response.data : error.message);
+        }
+        
+        // Move to the next file if available:
+        const nextIndex = currentFileIndex + 1;
+        if (pendingFiles && pendingFiles.length && nextIndex < pendingFiles.length) {
+          const nextFile = pendingFiles[nextIndex];
+          const previewUrl = URL.createObjectURL(nextFile);
+          setPreviewFile({ uid: nextFile.uid || nextFile.name, url: previewUrl, name: nextFile.name });
+          setCurrentFileIndex(nextIndex);
+          setFileInputName("");
+          setEditedFile(null);
+        } else {
+          // All files processed—close modal and clear states
+          setIsModalVisible(false);
+          setUploadFileList([]);
+          setPendingFiles([]);
+          setPreviewFile(null);
+          setCurrentFileIndex(0);
+          setFileInputName("");
+          setEditedFile(null);
+          setUploadKey(Date.now());
+        }
+      };
+      
     
     const handleKeyChange = (key) => {
         setSelectedKey(key);
@@ -489,24 +592,18 @@ const ImageUploadPage = () => {
         }
     };
 
-    const handleEditFile = (image) => {
-        // Set the file you want to edit
-        setSelectedImage(image);
-        // Open the editor modal (FabricCanvas is already imported)
-        setIsEditorVisible(true);
-    };
-
-    // New handler for cloning a file
-    const handleCloneFile = (image) => {
-        const clonedImage = {
-          ...image,
-          uid: uuidv4(),
-          name: image.name + ' (copy)'
-        };
-        // Add cloned image to the images state (or however you want to handle it)
-        setImages(prev => [clonedImage, ...prev]);
-        setFilteredImages(prev => [clonedImage, ...prev]);
-        notification.success({ message: "Cloned", description: "File cloned successfully" });
+    const extractDisplayName = (name) => {
+        if (!name) return '';
+        // Split by "/" and take the last part.
+        const lastSegment = name.split('/').pop();
+        // Split by "-" and check if there's at least 2 parts.
+        const dashParts = lastSegment.split('-');
+        if (dashParts.length > 1) {
+          // Then split the second part by "." to remove the extension.
+          const dotParts = dashParts[1].split('.');
+          return dotParts[0] || name;
+        }
+        return name;
     };
 
     return (
@@ -660,7 +757,19 @@ const ImageUploadPage = () => {
                     onChange={(e) => setUrlInput(e.target.value)}
                     style={{ width: '300px', marginRight: '10px' }}
                 />
-                <Button type="primary" onClick={handleUrlUpload} icon={<UploadOutlined />}>
+                {/* <Button type="primary" onClick={handleUrlUpload} icon={<UploadOutlined />}>
+                    Upload from URL
+                </Button> */}
+                <Button type="primary" onClick={() => {
+                    if (!urlInput.trim()) {
+                        message.error("Please enter a valid image URL.");
+                        return;
+                    }
+                    // Set preview from URL
+                    setPreviewFile({ url: urlInput, name: `image_${Date.now()}.jpg` });
+                    setFileInputName(""); 
+                    setIsModalVisible(true);
+                    }} icon={<UploadOutlined />}>
                     Upload from URL
                 </Button>
                 <Upload
@@ -682,9 +791,6 @@ const ImageUploadPage = () => {
                 marginTop: '20px',}}
             >
                 {filteredImages.map((image) => {
-                    const fullName = image.name
-                    // const nameOnly = fullName?.fullName.split('/').pop().split('-')[1].split('.')[0];
-                    console.log("imagename:", image);
                     const isSelected = selectedImages.some((img) => img.uid === image.uid);
                     return (
                         <div>
@@ -802,9 +908,13 @@ const ImageUploadPage = () => {
                                 )}
                             </div>
                             <div style={{display: 'flex', justifyContent: 'center'}}>
-                                <p style={{ fontWeight: '300', fontSize: '14px', marginTop: '8px' }}>
+                                {/* <p style={{ fontWeight: '300', fontSize: '14px', marginTop: '8px' }}>
                                     {image.name && image.name.split('/').pop().split('-')[1].split('.')[0]}
+                                </p> */}
+                                <p style={{ fontWeight: '300', fontSize: '14px', marginTop: '8px' }}>
+                                    {image.name ? extractDisplayName(image.name) : ''}
                                 </p>
+
                                 <Button 
                                     type="text"
                                     shape="circle"
