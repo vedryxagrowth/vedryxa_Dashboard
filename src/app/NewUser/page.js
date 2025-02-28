@@ -76,7 +76,7 @@ const UsersTable = () => {
     const [newSearchInput, setNewSearchInput] = useState("");
     const [newRefreshUrlBuilder, setNewRefreshUrlbuilder] = useState(null);
 
-    const [role, setRole] = useState('');
+    const [role, setRole] = useState('All');
     const [status, setStatus] = useState('All');
     const [revenuePartner, setRevenuePartner] = useState('All');
     const [isSearching, setIsSearching] = useState(false);
@@ -455,18 +455,27 @@ const UsersTable = () => {
                     </Row>
                 );
             },
-        },               
+        },  
         {
             title: 'Key',
             dataIndex: 'key',
             key: 'displayKey',
             render: (text) => {
-                if (text) {
-                    return `****${text.slice(-5)}`;
-                }
-                return '---';
+                const str = text !== undefined && text !== null ? String(text) : '';
+                return str ? `****${str.slice(-5)}` : '---';
             }
-        },
+        },                       
+        // {
+        //     title: 'Key',
+        //     dataIndex: 'key',
+        //     key: 'displayKey',
+        //     render: (text) => {
+        //         if (text) {
+        //             return `****${text.slice(-5)}`;
+        //         }
+        //         return '---';
+        //     }
+        // },
         {
             title: 'Consumer_Key',
             dataIndex: 'consumer_key',
@@ -991,22 +1000,74 @@ const UsersTable = () => {
     //     setNetworkFilteredData(networksData);
 
     useEffect(() => {
-        const filterData = (data, searchValue) => {
-            if (!searchValue) return data; // ✅ Restore full list if search bar is empty
-            const filtered = data.filter((item) =>
-                Object.values(item).some(
-                    (field) => typeof field === 'string' && field.toLowerCase().includes(searchValue)
-                )
-            );
-            return filtered.length > 0 ? filtered : []; // ✅ Show empty if no matches
+        // Helper function to apply search filter
+        const searchFilter = (data, searchValue) => {
+          if (!searchValue) return data;
+          return data.filter((item) =>
+            Object.values(item).some(
+              (field) =>
+                typeof field === 'string' &&
+                field.toLowerCase().includes(searchValue)
+            )
+          );
         };
+      
+        // For Users – use your existing filterUserData function
+        setFilteredData(filterUserData());
+      
+        // For Accounts: first filter by Status and Revenue Partner, then apply search (if any)
+        let accData = AccountsData?.filter(
+          (item) =>
+            (status === 'All' || item.status === status) &&
+            (revenuePartner === 'All' || item.revenuePartner === revenuePartner)
+        );
+        if (newSearchInput) {
+          accData = searchFilter(accData, newSearchInput);
+        }
+        setaccFilteredData(accData);
+      
+        // For Networks: note that your networks data uses "Status" (capital S)
+        let netData = networksData?.filter(
+          (item) =>
+            (status === 'All' || item.Status === status) &&
+            (revenuePartner === 'All' || item.revenuePartner === revenuePartner)
+        );
+        if (netSearchInput) {
+          netData = searchFilter(netData, netSearchInput);
+        }
+        setNetworkFilteredData(netData);
+      }, [
+        usersData,
+        searchInput,
+        role,
+        status,
+        revenuePartner,
+        AccountsData,
+        newSearchInput,
+        networksData,
+        netSearchInput
+    ]);
+      
+
+    // useEffect(() => {
+    //     const filterData = (data, searchValue) => {
+    //         if (!searchValue) return data; // ✅ Restore full list if search bar is empty
+    //         const filtered = data.filter((item) =>
+    //             Object.values(item).some(
+    //                 (field) => typeof field === 'string' && field.toLowerCase().includes(searchValue)
+    //             )
+    //         );
+    //         return filtered.length > 0 ? filtered : []; // ✅ Show empty if no matches
+    //     };
     
-        // ✅ Apply filtering logic dynamically for each dataset
-        setFilteredData(filterData(usersData, searchInput));
-        setaccFilteredData(filterData(AccountsData, newSearchInput));
-        setNetworkFilteredData(filterData(networksData, netSearchInput));
+    //     // ✅ Apply filtering logic dynamically for each dataset
+    //     setFilteredData(filterData(usersData, searchInput));
+    //     setFilteredData(filterUserData());
+    //     setaccFilteredData(filterData(AccountsData, newSearchInput));
+    //     setNetworkFilteredData(filterData(networksData, netSearchInput));
     
-    }, [usersData, searchInput, AccountsData, newSearchInput, networksData, netSearchInput]); // ✅ Dependencies ensure real-time updates
+    // }, [usersData, searchInput, role,status, 
+    //     revenuePartner, AccountsData, newSearchInput, networksData, netSearchInput]); // ✅ Dependencies ensure real-time updates
     
 
     const handleSearchChange = (e) => {
@@ -1274,6 +1335,18 @@ const UsersTable = () => {
         }
     }
 
+    const filterUserData = () => {
+        return usersData?.filter(item =>
+          // Check if the role matches or if "All" is selected
+          (role === 'All' || item.role === role) &&
+          // Check search input: if empty, include all items; otherwise, match any string field
+          (!searchInput || Object.values(item).some(
+            field => typeof field === 'string' && field.toLowerCase().includes(searchInput.toLowerCase())
+          ))
+        );
+    };
+    
+
     return (
         <>
             {drawerVisible && <DynamicCreatenewuser visible={drawerVisible} onClose={onCloseDrawer} refreshUsers={refreshUsers} />}
@@ -1286,7 +1359,6 @@ const UsersTable = () => {
             <div style={{padding:'0px', margin:'0px'}}>
                     {renderCarouselNav()}
             </div>
-
             <Carousel
                 showArrows={false}
                 showThumbs={false}
@@ -1371,15 +1443,24 @@ const UsersTable = () => {
                         </Row>
                     </Card>
                     {loading1 ? (
-                        <Spin />
+                        <div style={{display:'flex', justifyContent:'center', alignItems:'center', minHeight: 'calc(80vh - 100px)'}}>
+                            <Spin />
+                        </div>   
                     ) : usersData.length > 0 ? (
                         <Table
                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                            dataSource={searchInput ? filteredData.map((item, index) => ({ ...item, key: index })) : usersData.map((item, index) => ({ ...item, key: index }))}
+                            dataSource={filteredData.map((item, index) => ({ ...item, key: index }))}
                             columns={columns}
                             pagination={{ pageSize: paginationSize }}
                             scroll={{ y: 'calc(80vh - 200px)' }}
                         />
+                        // <Table
+                        //     className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                        //     dataSource={searchInput ? filteredData.map((item, index) => ({ ...item, key: index })) : usersData.map((item, index) => ({ ...item, key: index }))}
+                        //     columns={columns}
+                        //     pagination={{ pageSize: paginationSize }}
+                        //     scroll={{ y: 'calc(80vh - 200px)' }}
+                        // />
                     ) : (
                         <Result
                             status="404"
@@ -1454,7 +1535,7 @@ const UsersTable = () => {
                                 <Button 
                                     type="default" 
                                     icon={<ReloadOutlined />} 
-                                    className='reload-button' 
+                                    style={{ float: "right", marginLeft: "10px", backgroundColor: '#C7F39A' }} 
                                     onClick={refreshAccounts}  // Call refresh function when clicked
                                 >
                                 </Button>
@@ -1465,11 +1546,14 @@ const UsersTable = () => {
                         </Row>
                     </Card>
                     {(loading2) ? (
-                        <Spin />
+                        <div style={{display:'flex', justifyContent:'center', alignItems:'center', minHeight: 'calc(80vh - 100px)'}}>
+                            <Spin />
+                        </div> 
                     ) : AccountsData.length > 0 ? (
                         <Table
                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                            dataSource={newSearchInput ? accFilteredData.map((item, index) => ({ ...item, key: index })) : AccountsData.map((item, index) => ({ ...item, key: index }))}
+                            // dataSource={newSearchInput ? accFilteredData.map((item, index) => ({ ...item, key: index })) : AccountsData.map((item, index) => ({ ...item, key: index }))}
+                            dataSource={accFilteredData.map((item, index) => ({ ...item, key: index }))}
                             columns={Accountscolumn}
                             pagination={{ pageSize: paginationSize }}
                             scroll={{ y: 'calc(80vh - 200px)' }}
@@ -1548,19 +1632,22 @@ const UsersTable = () => {
                                 <Button 
                                     type="default" 
                                     icon={<ReloadOutlined />} 
-                                    className='reload-button' 
-                                    onClick={refreshNetworks}
+                                    style={{ float: "right", marginLeft: "10px", backgroundColor: '#C7F39A' }} 
+                                    onClick={refreshNetworks}  // Call refresh function when clicked
                                 >
                                 </Button>
                             </Col>
                         </Row>
                     </Card>
                     {(loading3) ? (
-                        <Spin />
+                        <div style={{display:'flex', justifyContent:'center', alignItems:'center', minHeight: 'calc(80vh - 100px)'}}>
+                            <Spin />
+                        </div> 
                     ) : networksData.length > 0 ? ( 
                         <Table
                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                            dataSource={netSearchInput ? networkFilteredData.map((item, index) => ({ ...item, key: item.key, id: index })) : networksData.map((item, index) => ({ ...item, key: item.key, id: index }))}
+                            // dataSource={netSearchInput ? networkFilteredData.map((item, index) => ({ ...item, key: item.key, id: index })) : networksData.map((item, index) => ({ ...item, key: item.key, id: index }))}
+                            dataSource={networkFilteredData.map((item, index) => ({ ...item, key: item.key || index, id: index }))}
                             columns={networksColumn}
                             pagination={{ pageSize: paginationSize }}
                             scroll={{ y: 'calc(80vh - 200px)', x: 'max-content' }}
@@ -1622,7 +1709,7 @@ const UsersTable = () => {
                                 <Button 
                                     type="default" 
                                     icon={<ReloadOutlined />} 
-                                    className='reload-button'
+                                    style={{ float: "right", marginLeft: "10px", backgroundColor: '#C7F39A' }} 
                                     onClick={refreshUrlBuilder}  // Call refresh function when clicked
                                 >
                                 </Button>
@@ -1633,7 +1720,9 @@ const UsersTable = () => {
                         </Row>
                     </Card>
                     {(loading4) ? (
-                        <Spin />
+                        <div style={{display:'flex', justifyContent:'center', alignItems:'center', minHeight: 'calc(80vh - 100px)'}}>
+                            <Spin />
+                        </div> 
                     ) : urlBuilderData.length > 0 ? (
                         <Table
                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}

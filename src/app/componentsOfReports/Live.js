@@ -743,9 +743,15 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
     };
     const onGridReady = (params, gridId, gridRef) => {
         gridRef.current = params;
-        params.api.applyColumnState({ state: columnDefs, applyOrder: true });
+        params.api.applyColumnState({ state: columnDefs || [], applyOrder: true });
         params.api.addEventListener('dragStopped', (e) => debouncedHandleColumnMove(e, gridId));
     };
+    
+    // const onGridReady = (params, gridId, gridRef) => {
+    //     gridRef.current = params;
+    //     params.api.applyColumnState({ state: columnDefs, applyOrder: true });
+    //     params.api.addEventListener('dragStopped', (e) => debouncedHandleColumnMove(e, gridId));
+    // };
     const GroupCellRenderer = (props) => {
         const [tooltipText, setTooltipText] = useState("Copy to clipboard");
 

@@ -136,7 +136,7 @@
       "static/chunks/8110-08764899858b8375.js",
       "static/chunks/1192-8b662a6745c84c25.js",
       "static/chunks/675.19cd9b9e999f20ef.js",
-      "static/chunks/6458.945ceb99bcb5d82b.js"
+      "static/chunks/6458.43dceea3be300102.js"
     ]
   },
   "app\\Reports\\page.js -> ../componentsOfReports/DAKeywords": {
@@ -145,7 +145,7 @@
       "static/chunks/160b575a-77b68f87c485dc45.js",
       "static/chunks/3458-3169bc118a4e9c0b.js",
       "static/chunks/8110-08764899858b8375.js",
-      "static/chunks/4411.e66b160a67af4646.js"
+      "static/chunks/4411.a5ecb615349e46f4.js"
     ]
   },
   "app\\Reports\\page.js -> ../componentsOfReports/Daily": {
@@ -154,16 +154,34 @@
       "static/chunks/160b575a-77b68f87c485dc45.js",
       "static/chunks/3458-3169bc118a4e9c0b.js",
       "static/chunks/8110-08764899858b8375.js",
-      "static/chunks/1541.a4bb031c0a488f8d.js"
+      "static/chunks/1541.38ad0146623b458a.js"
     ]
   },
   "app\\Reports\\page.js -> ../componentsOfReports/Live": {
-    "id": 53537,
+    "id": 84887,
     "files": [
       "static/chunks/160b575a-77b68f87c485dc45.js",
       "static/chunks/3458-3169bc118a4e9c0b.js",
       "static/chunks/8110-08764899858b8375.js",
-      "static/chunks/3537.ea5030318b997efe.js"
+      "static/chunks/4887.2180992332987e1d.js"
+    ]
+  },
+  "app\\Reports\\page.js -> ../componentsOfReports/MnetAdDaily": {
+    "id": 44521,
+    "files": [
+      "static/chunks/160b575a-77b68f87c485dc45.js",
+      "static/chunks/3458-3169bc118a4e9c0b.js",
+      "static/chunks/8110-08764899858b8375.js",
+      "static/chunks/4521.4609394395f29818.js"
+    ]
+  },
+  "app\\Reports\\page.js -> ../componentsOfReports/MnetAdLive": {
+    "id": 84203,
+    "files": [
+      "static/chunks/160b575a-77b68f87c485dc45.js",
+      "static/chunks/3458-3169bc118a4e9c0b.js",
+      "static/chunks/8110-08764899858b8375.js",
+      "static/chunks/4203.53b6db3a06f6744e.js"
     ]
   },
   "app\\Reports\\page.js -> ../componentsOfReports/MnetDomainData": {
@@ -190,7 +208,7 @@
       "static/chunks/160b575a-77b68f87c485dc45.js",
       "static/chunks/3458-3169bc118a4e9c0b.js",
       "static/chunks/8110-08764899858b8375.js",
-      "static/chunks/1459.afe25bfeef08d762.js"
+      "static/chunks/1459.2a83ac225c314377.js"
     ]
   }
 }
