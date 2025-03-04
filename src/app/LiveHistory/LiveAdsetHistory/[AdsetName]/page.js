@@ -1,6 +1,6 @@
 "use client"
 import React from 'react';
-import { useEffect, useMemo, useState, useRef } from 'react';
+import { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
 import axios from 'axios';
@@ -25,6 +25,8 @@ const MnetLiveAdsetHistory = ({params}) => {
 
     const user = userdetails?.email;
 
+    const gridRef = useRef();
+
     console.log(user, "user");
 
     const { theme } = useTokenContext();
@@ -48,13 +50,38 @@ const MnetLiveAdsetHistory = ({params}) => {
 
     const [endDate1, setEndDate1] = useState();
 
-    // const [columnDefs, setColumnStructure] = useState([]);
+    const [columnDefs, setColumnStructure] = useState([]);
 
     const [decode, setDebounc] = useState("");
 
     const [chartData, setChartData] = useState({ dates: [], sortedData: [], sortedMarginData: [], rpcDate:[], hoursDate:[], hours: [], spend: [], revenue: [], profit: [], margin: [] });
 
     const timeZoneToDisplay = useRef();
+
+    const columnStructure = [
+        "date_n",
+        "date_f",
+        "hour_n",
+        "hour_f",
+        "date",
+        "adsetname",
+        "spend",
+        "revenue",
+        "profit",
+        "margin",
+        "rpc",
+        "cpl",
+        "ncpl",
+        "fbleads",
+        "filteration",
+        "conversions",
+        "fmargin",
+        "roi",
+        "cpc",
+        "fbclicks",
+        "impressions",
+        "ctr"
+    ];
 
     const spender = (params) => {
         var total = 0;
@@ -427,23 +454,46 @@ const MnetLiveAdsetHistory = ({params}) => {
     //     }
     // };
 
-    // const getColumnDefs = (order) => {
-    //     return order?.map(colKey => columnDefsObject[colKey]);
-    // };
+    const getColumnDefs = (order) => {
+        return order?.map(colKey => columnDefsObject[colKey]);
+    };
+
+    const handleColumnMove = async (params, gridId) => {
+        const columnState = params.api.getColumnState();
+        // console.log('Column moved in grid:', gridId);
+        const fieldOrder = columnState.map(col => col.colId);
+        // console.log(fieldOrder);
+        const newFieldOrder = fieldOrder.filter(item => item !== 'ag-Grid-AutoColumn-adsetnname' && item !== 'ag-Grid-AutoColumn' && columnStructure.includes(item));
+        // localStorage.setItem('columnState', JSON.stringify(newFieldOrder));
+        // updatingColumnsStructure(newFieldOrder);
+        // console.log(newFieldOrder);
+        setColumnStructure(getColumnDefs(newFieldOrder));
+        console.log(newFieldOrder);
+        await apiClient.post(`http://localhost:8000/api/updateHistoryPageStructure?email=${userdetails?.email}`, {updateDataArray: newFieldOrder});
+        // console.log(`Updating columns structure for grid: ${gridId}`);
+    };
+    
+    const debouncedHandleColumnMove = useCallback(debounce((params, gridId) => handleColumnMove(params, gridId), 600), []);
+    
+    const onGridReady = (params, gridId, gridRef) => {
+          gridRef.current = params;
+          params.api.applyColumnState({ state: columnDefs, applyOrder: true });
+          params.api.addEventListener('dragStopped', (e) => debouncedHandleColumnMove(e, gridId));
+    };
 
     const onCellClicked = (params) => {
-        if (params.column.getColId() === "adsetName" && params.value) { 
+        if (params.column.getColId() === "adsetname" && params.value) { 
             // Copy the cell value to clipboard
             navigator.clipboard.writeText(params.value).then(() => {
                 const originalValue = params.value; // Store original value
                 const copiedText = `${originalValue} Copied!`; // Append "Copied!" to the text
     
                 // Temporarily update the cell content
-                params.node.setDataValue("adsetName", copiedText);
+                params.node.setDataValue("adsetname", copiedText);
     
                 // Revert back to original value after 1.5 seconds
                 setTimeout(() => {
-                    params.node.setDataValue("adsetName", originalValue);
+                    params.node.setDataValue("adsetname", originalValue);
                 }, 1500);
             }).catch(err => console.error("Copy failed:", err));
         }
@@ -459,12 +509,29 @@ const MnetLiveAdsetHistory = ({params}) => {
         new agGrid.Grid(gridDiv, gridOptions);
     });
     
-    const columnDefs = [
-        {
-            headerName: 'Date_N', field: 'date', minWidth: 125,
+    const columnDefsObject = {
+        date : {
+            headerName: 'Date', field: 'date', minWidth: 125,
+            // resizable: true,
+            // sortable: true,
+            // width: 500,
+            // hide: true,
+            // rowGroup: true,
+            // enableRowGroup: true,
+            // pinned: 'left',
+            // sort: 'desc',
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            hide: true
+            
+            // valueFormatter: (params) => `${params.value} (${moment(params.value).format('ddd')}) `,
+        },
+        date_n : {
+            headerName: 'Date_N', field: 'date_n', minWidth: 125,
             resizable: true,
             sortable: true,
-            // width: 500,
+            width: 500,
             hide: true,
             rowGroup: true,
             enableRowGroup: true,
@@ -489,11 +556,11 @@ const MnetLiveAdsetHistory = ({params}) => {
         //     // enableRowGroup: true,
         //     // autoHeight: true, 
         // },
-        {
-            headerName: 'Adset-Name', field: 'adsetName',
+        adsetname : {
+            headerName: 'Adset-Name', field: 'adsetname',
             // resizeble: true,
             // // sortable: true,
-            width: 280,
+            width: 250,
             // hide: true,
             // // // resizable:false,
             // // rowGroup: true,
@@ -520,8 +587,8 @@ const MnetLiveAdsetHistory = ({params}) => {
         },
         // { headerName: 'FB-Hour', field: 'fb-hour', width: 120 },
         // { headerName: 'MNet-Hour', field: 'mnet-hour', width: 120 },
-        {
-            headerName: 'Hour_N', field: "updatedHour",
+        hour_n : {
+            headerName: 'Hour_N', field: "hour_n",
             comparator: defaultComparator,
             width: 100,
             suppressMenu: true,
@@ -529,16 +596,16 @@ const MnetLiveAdsetHistory = ({params}) => {
             headerClass: 'hide-menu',
         },
         
-        {
-            headerName: 'Hour_F', field: "hour",
+        hour_f : {
+            headerName: 'Hour_F', field: "hour_f",
             comparator: defaultComparator,
             width: 100,
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
         },
-        {
-            headerName: 'Date_F', field: 'date', 
+        date_f : {
+            headerName: 'Date_F', field: 'date_f', 
             width: 150,
             resizable: true,
             sortable: true,
@@ -557,10 +624,10 @@ const MnetLiveAdsetHistory = ({params}) => {
             menuTabs: [],
             headerClass: 'hide-menu',
         },
-        {
+        spend : {
             headerName: 'Spend',
             field: 'spend',
-            width: 90,
+            width: 105,
             aggFunc: spender, // Ensure spender aggregates numeric values
             comparator: (valueA, valueB) => {
                 if (valueA == null && valueB == null) return 0; // Both are null
@@ -577,10 +644,10 @@ const MnetLiveAdsetHistory = ({params}) => {
             menuTabs: [],
             headerClass: 'hide-menu',
         },
-        {
+        revenue : {
             headerName: 'Revenue',
             field: 'revenue',
-            width: 90,
+            width: 95,
             aggFunc: spender, // Ensure spender aggregates numeric values
             filter: true, 
             valueParser: (params) => {
@@ -601,10 +668,10 @@ const MnetLiveAdsetHistory = ({params}) => {
             menuTabs: [],
             headerClass: 'hide-menu',
         },
-        {
+        profit : {
             headerName: 'Profit',
             field: 'profit',
-            width: 90,
+            width: 100,
             aggFunc: spender, // Ensure `spender` returns numeric values
             cellClassRules: {
                 'font-red': (params) => params.value < 0, // Highlight negative values
@@ -624,7 +691,7 @@ const MnetLiveAdsetHistory = ({params}) => {
             headerClass: 'hide-menu',
             headetTooltip: 'Profit = Revenue - Spend',
         },
-        {
+        margin : {
             headerName: 'Margin',
             field: 'margin',
             width: 90,
@@ -646,7 +713,7 @@ const MnetLiveAdsetHistory = ({params}) => {
             headerClass: 'hide-menu',
             headerToolTip: 'Margin = (Revenue - Spend) / Revenue * 100',
         },
-        {
+        rpc : {
             headerName: 'RPC',
             width: 80,
             field: 'rpc',
@@ -668,7 +735,7 @@ const MnetLiveAdsetHistory = ({params}) => {
             headerClass: 'hide-menu',
             headerToolTip: 'RPC = Revenue / Conversions',
         },
-        {
+        cpl : {
             headerName: 'CPL',
             width: 80,
             field: 'cpl',
@@ -690,7 +757,7 @@ const MnetLiveAdsetHistory = ({params}) => {
             headerClass: 'hide-menu',
             headerToolTip: 'CPL = Spend / Conversions',
         },
-        {
+        ncpl : {
             headerName: 'NCPL', field: 'ncpl', valueGetter: getNcpl,
             comparator: defaultComparator,
             width: 80,
@@ -699,7 +766,7 @@ const MnetLiveAdsetHistory = ({params}) => {
             headerClass: 'hide-menu',
             headerToolTip: 'NCPL = Spend / Conversions',
         },
-        {
+        fbleads : {
             headerName: 'FBLeads', field: 'fbleads', minWidth: 90, aggFunc: spender,
             comparator: defaultComparator,
             width: 105,
@@ -707,7 +774,7 @@ const MnetLiveAdsetHistory = ({params}) => {
             menuTabs: [],
             headerClass: 'hide-menu',
         },
-        {
+        conversions : {
             headerName: 'Conv', field: 'conversions', width: 85, aggFunc: newSpender,
             comparator: defaultComparator,
             suppressMenu: true,
@@ -715,7 +782,7 @@ const MnetLiveAdsetHistory = ({params}) => {
             headerClass: 'hide-menu',
             headerToolTip: 'Conversions',
         },
-        {
+        fmargin : {
             headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin,
             comparator: defaultComparator,
             valueFormatter: (params) => `${params.value}%`,
@@ -725,7 +792,7 @@ const MnetLiveAdsetHistory = ({params}) => {
             headerClass: 'hide-menu',
             headerToolTip: 'FMargin = (Profit / Spend) * 100',
         },
-        {
+        roi : {
             headerName: 'ROI', field: 'roi', valueGetter: getROI,
             comparator: defaultComparator,
             valueFormatter: (params) => `${params.value}%`,
@@ -735,7 +802,7 @@ const MnetLiveAdsetHistory = ({params}) => {
             headerClass: 'hide-menu',
             headerToolTip: 'ROI = (Revenue - Spend) / Spend * 100',
         },
-        {
+        cpc : {
             headerName: 'CPC', field: 'cpc', aggFunc: cpcSpender,
             comparator: defaultComparator,
             // valueFormatter: (params) => `${params.value.toFixed(2)}%`,
@@ -745,14 +812,14 @@ const MnetLiveAdsetHistory = ({params}) => {
             headerClass: 'hide-menu',
             headerToolTip: 'CPC = Spend / Clicks',
         },
-        {
+        fbclicks : {
             headerName: 'FBClicks', field: 'fbclicks', width: 90, aggFunc: spender,
             comparator: defaultComparator,
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
         },
-        {
+        impressions : {
             headerName: 'IMP', field: 'impressions', width: 90, aggFunc: spender,
             comparator: defaultComparator,
             suppressMenu: true,
@@ -760,7 +827,7 @@ const MnetLiveAdsetHistory = ({params}) => {
             headerClass: 'hide-menu',
             headerToolTip: 'Impressions',
         },
-        {
+        ctr : {
             headerName: 'CTR', field: 'ctr', valueGetter: getCtr,
             comparator: defaultComparator,
             valueFormatter: (params) => `${params.value}%`,
@@ -769,6 +836,13 @@ const MnetLiveAdsetHistory = ({params}) => {
             menuTabs: [],
             headerClass: 'hide-menu',
             headerToolTip: 'CTR = (Clicks / Impressions) * 100',
+        },
+        filteration : { headerName: "Filteration", field:'filteration', width: 115, 
+          valueFormatter: params => params.value ? `${params.value}%` : '0%',
+          suppressMenu: true,
+          menuTabs: [],
+          headerClass: 'hide-menu',
+          hide: true
         },
         // {
         //     headerName: 'AdsetId', field: 'adsetId',
@@ -782,7 +856,7 @@ const MnetLiveAdsetHistory = ({params}) => {
         //     headerName: 'TimeZone', field: 'timezone',
         //     comparator: defaultComparator,
         // },
-    ];
+    };
 
     const dateOptions = [
         "All",
@@ -859,16 +933,16 @@ const MnetLiveAdsetHistory = ({params}) => {
     
     const token = localStorage.getItem("token")
 
-    // const functionCallForUserColumnStructure = async() => {
-    //     const fetchData = await axios.get(`https://prodapis.adsgoat.in/api/singleUserData?email=${user}`);
-    //     // const data = await fetchData.json();
-    //     const mainData = fetchData.data;
-    //     console.log(mainData.columnStructure, "columnStructure");
-    //     const filteredData = mainData.columnStructure.filter((each)=> each !== "actions");
-    //     console.log(filteredData);
-    //     setColumnStructure(getColumnDefs(filteredData));
-    //     // setRowStructure(mainData.rows); 
-    // }
+    const functionCallForUserColumnStructure = async() => {
+        const fetchData = await apiClient.get(`https://prodapis.adsgoat.in/api/singleUserData?email=${user}`);
+        // const data = await fetchData.json();
+        const mainData = fetchData.data;
+        console.log(mainData.historyStructure, "historyStructure");
+        const filteredData = mainData.historyStructure.filter((each)=> each !== "actions");
+        console.log(filteredData);
+        setColumnStructure(getColumnDefs(filteredData));
+        // setRowStructure(mainData.rows); 
+    }
 
     
     const functionCall = async() =>{
@@ -925,8 +999,10 @@ const MnetLiveAdsetHistory = ({params}) => {
             return(
                 {
                     date: eachData[`${timeZone}Date`],
-                    campaignName: eachData.campaign_name,
-                    adsetName: eachData.adsetName,
+                    date_n: eachData[`${timeZone}Date`],
+                    date_f: eachData[`${timeZone}Date`],
+                    campaignname: eachData.campaign_name,
+                    adsetname: eachData.adsetName,
                     // 'fb-hour': eachData.hour,
                     // 'mnet-hour': eachData.updatedHour,
                     spend:eachData.spend,
@@ -944,8 +1020,9 @@ const MnetLiveAdsetHistory = ({params}) => {
                     adsetId: eachData.adset_id,
                     campaignId: eachData.campaign_id,
                     timezone: eachData[timeZone],
-                    hour: eachData.hour,
-                    updatedHour: eachData.updatedHour,
+                    hour_f: eachData.hour,
+                    hour_n: eachData.updatedHour,
+                    filteration: parseInt(eachData.fbLeads) !== 0 ? Math.round((((parseInt(eachData.fbLeads)-parseInt(eachData.conversions))/parseInt(eachData.fbLeads))*100)*100)/100 : 0,
                 }
             )
         })
@@ -1094,9 +1171,9 @@ const MnetLiveAdsetHistory = ({params}) => {
         ]);
     },[filteredData])
 
-    // const debouncedFunctionCallForUserColumnStructure = debounce(async () => {
-    //     await functionCallForUserColumnStructure();
-    //   }, 1500);
+    const debouncedFunctionCallForUserColumnStructure = debounce(async () => {
+        await functionCallForUserColumnStructure();
+      }, 100);
       
     const debouncedFunctionCall = debounce(async () => {
         await functionCall();
@@ -1105,7 +1182,7 @@ const MnetLiveAdsetHistory = ({params}) => {
       useEffect(() => {
         if (userdetails?.adAccounts) {
           const mainFunctionCall = async () => {
-            // await debouncedFunctionCallForUserColumnStructure();
+            await debouncedFunctionCallForUserColumnStructure();
             await debouncedFunctionCall();
           };
           mainFunctionCall();
@@ -1475,6 +1552,7 @@ const MnetLiveAdsetHistory = ({params}) => {
                         defaultColDef={defaultColDef}
                         pinnedBottomRowData={domainFixedFooter}
                         gridOptions={gridOptions}
+                        onGridReady={(params) => onGridReady(params, 'grid1', gridRef)}
                         // pagination={true} // Enable pagination
                         // paginationPageSize={5} // Set rows per page
                         // paginationNumberFormatter={(params) => `${params.value}`}

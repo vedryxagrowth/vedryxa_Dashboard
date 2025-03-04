@@ -590,14 +590,11 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
        try{
         // console.log(newRevenuePratner);
             setLoading(true);
-            console.log("hi");
             const collectionName = newRevenuePratner === "FB_DomainActive" ? "Facebook_DActive_Names" : newtworkCollections[newRevenuePratner];
             const fetchData = await apiClient.get(`/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${collectionName}`);
             const mainData1 = fetchData.data;
-            console.log("I am");
             const mainData =  mainData1.filter(obj => !("ad_clicks" in obj));
             const specifiedTimeZone = selectTimezone[newtime];
-            console.log("D F");
             const filteredData = mainData && mainData.length > 0 ?
                 mainData.map((eachData) => {
                     let revenueData;
@@ -664,10 +661,9 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
 
             const getFbValue = mainData.filter(item => item.fbCron !== null && item.fbCron !== 'Failed');
             const getRevenueValue = mainData.filter(item => item.revenueCron !== null && item.revenueCron !== 'Failed');
-            console.log("H");
+            
 
             if (mainData.length > 1) {
-                console.log("And");
                 timezone.current = mainData[0].accountTimezone;
                 accountStatus.current = mainData[0].accountStatus;
                 cronStatus.current = mainData[0].cronStatus;
@@ -677,7 +673,6 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
 
                 maxHour.current = findMaxHour(mainData);
                 maxNetworkHour.current = getMaxHour(mainData);
-                console.log("I Live");
             }
             setLiveFixedFooter([
                 {
@@ -700,7 +695,6 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                     ctr: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
                 }
             ]);
-            console.log("Long");
             setRowData(filteredData);
             newRowData.current = filteredData;
             fetchData.status === 200 && console.log("Success") ;
@@ -708,7 +702,6 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
             // setInitialRowData(filteredData);
             // setTrue(false);
             setLoading(false);
-            console.log("With D F");
        }
        catch(error){
             setApiStatus(true);
