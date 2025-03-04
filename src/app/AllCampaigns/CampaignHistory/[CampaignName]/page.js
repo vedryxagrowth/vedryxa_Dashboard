@@ -1,7 +1,7 @@
 "use client"
 import React from 'react';
 import axios from 'axios';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
 import moment from 'moment-timezone';
@@ -25,7 +25,9 @@ export default function CampaignAndAccount({ params }) {
 
     const user = userdetails?.email;
 
-    // const [columnDefs, setColumnStructure] = useState([]);
+    const gridRef = useRef();
+
+    const [columnDefs, setColumnStructure] = useState([]);
     const [darkMode, setDarkMode] = useState(false);
     const { theme } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -57,6 +59,31 @@ export default function CampaignAndAccount({ params }) {
         AST: 'ASTDate',
         DST: 'DSTDate'
     };
+
+    const columnStructure = [
+        "date_n",
+        "date_f",
+        "hour_n",
+        "hour_f",
+        "date",
+        "adsetname",
+        "spend",
+        "revenue",
+        "profit",
+        "margin",
+        "rpc",
+        "cpl",
+        "ncpl",
+        "fbleads",
+        "filteration",
+        "conversions",
+        "fmargin",
+        "roi",
+        "cpc",
+        "fbclicks",
+        "impressions",
+        "ctr"
+    ];
 
     const getMargin = (params) => {
         if (params.data !== undefined) {
@@ -266,9 +293,9 @@ export default function CampaignAndAccount({ params }) {
         return sum;
     }
 
-    // const getColumnDefs = (order) => {
-    //     return order?.map(colKey => columnDefsObject[colKey]);
-    // };
+    const getColumnDefs = (order) => {
+        return order?.map(colKey => columnDefsObject[colKey]);
+    };
 
     const dateOptions = [
         "All",
@@ -345,16 +372,16 @@ export default function CampaignAndAccount({ params }) {
 
     const token = localStorage.getItem("token")
 
-    // const functionCallForUserColumnStructure = async () => {
-    //     const fetchData = await axios.get(`https://prodapis.adsgoat.in/api/singleUserData?email=${user}`);
-    //     // const data = await fetchData.json();
-    //     const mainData = fetchData.data;
-    //     console.log(mainData.columnStructure, "columnStructure");
-    //     const filteredData = mainData.columnStructure.filter((each) => each !== "fb-hour" && each !== "mnet-hour" && each !== "timezone" && each !== "actions" );
-    //     console.log(filteredData);
-    //     setColumnStructure(getColumnDefs(filteredData));
-    //     // setRowStructure(mainData.rows); 
-    // }
+    const functionCallForUserColumnStructure = async () => {
+        const fetchData = await apiClient.get(`https://prodapis.adsgoat.in/api/singleUserData?email=${user}`);
+        // const data = await fetchData.json();
+        const mainData = fetchData.data;
+        console.log(mainData.historyStructure, "historyStructure");
+        const filteredData = mainData.historyStructure.filter((each) => each !== "actions" );
+        console.log(filteredData);
+        setColumnStructure(getColumnDefs(filteredData));
+        // setRowStructure(mainData.rows); 
+    }
 
     const getHistoryData = async () => {
         // const fetchData = await fetch(`http://localhost:8000/MnetCampaignDailyHistory?accountNumber=${accountNumber}&timezone=${timeZone}&campaignName=${decodedString}`);
@@ -388,9 +415,9 @@ export default function CampaignAndAccount({ params }) {
                 fMargin = !isNaN(fMargin) ? `${fMargin}%` : '0%';
                 return (
                     {
-                        campaignName: eachData.campaign_name,
+                        campaignname: eachData.campaign_name,
                         date: eachData[specifiedTimeZone],
-                        adsetName: eachData.adsetName,
+                        adsetname: eachData.adsetName,
                         spend: (eachData.spend).toString(),
                         revenue: mainRvenue,
                         profit: profit.toString(),
@@ -399,6 +426,7 @@ export default function CampaignAndAccount({ params }) {
                         cpl: cpl.toString(),
                         ncpl: ncpl.toString(),
                         roi: roi,
+                        filteration: parseInt(eachData.fbLeads) !== 0 ? Math.round((((parseInt(eachData.fbLeads)-parseInt(eachData.conversions))/parseInt(eachData.fbLeads))*100)*100)/100 : 0,
                         cpc: (eachData.cpc).toString(),
                         fbleads: (eachData.fbLeads).toString(),
                         fbclicks: (eachData.fbClicks).toString(),
@@ -454,9 +482,9 @@ export default function CampaignAndAccount({ params }) {
       ]);
     },[filteredData])
 
-    // const debouncedFunctionCallForUserColumnStructure = debounce(async () => {
-    //     await functionCallForUserColumnStructure();
-    //   }, 1500);
+    const debouncedFunctionCallForUserColumnStructure = debounce(async () => {
+        await functionCallForUserColumnStructure();
+      }, 100);
       
     const debouncedFunctionCall = debounce(async () => {
         await getHistoryData();
@@ -465,7 +493,7 @@ export default function CampaignAndAccount({ params }) {
     useEffect(() => {
         if (userdetails?.adAccounts) {
             const functionCall = async () => {
-                // await debouncedFunctionCallForUserColumnStructure();
+                await debouncedFunctionCallForUserColumnStructure();
                 await debouncedFunctionCall();
             }
             functionCall();
@@ -492,19 +520,42 @@ export default function CampaignAndAccount({ params }) {
     //     }
     // ];
 
+    const handleColumnMove = async (params, gridId) => {
+        const columnState = params.api.getColumnState();
+        // console.log('Column moved in grid:', gridId);
+        const fieldOrder = columnState.map(col => col.colId);
+        // console.log(fieldOrder);
+        const newFieldOrder = fieldOrder.filter(item => item !== 'ag-Grid-AutoColumn-adsetnname' && item !== 'ag-Grid-AutoColumn' && columnStructure.includes(item));
+        // localStorage.setItem('columnState', JSON.stringify(newFieldOrder));
+        // updatingColumnsStructure(newFieldOrder);
+        // console.log(newFieldOrder);
+        setColumnStructure(getColumnDefs(newFieldOrder));
+        console.log(newFieldOrder);
+        await apiClient.post(`http://localhost:8000/api/updateHistoryPageStructure?email=${userdetails?.email}`, {updateDataArray: newFieldOrder});
+        // console.log(`Updating columns structure for grid: ${gridId}`);
+    };
+
+    const debouncedHandleColumnMove = useCallback(debounce((params, gridId) => handleColumnMove(params, gridId), 600), []);
+
+    const onGridReady = (params, gridId, gridRef) => {
+        gridRef.current = params;
+        params.api.applyColumnState({ state: columnDefs, applyOrder: true });
+        params.api.addEventListener('dragStopped', (e) => debouncedHandleColumnMove(e, gridId));
+    };
+
     const onCellClicked = (params) => {
-        if (params.column.getColId() === "adsetName" && params.value) { 
+        if (params.column.getColId() === "adsetname" && params.value) { 
             // Copy the cell value to clipboard
             navigator.clipboard.writeText(params.value).then(() => {
                 const originalValue = params.value; // Store original value
                 const copiedText = `${originalValue} Copied!`; // Append "Copied!" to the text
     
                 // Temporarily update the cell content
-                params.node.setDataValue("adsetName", copiedText);
+                params.node.setDataValue("adsetname", copiedText);
     
                 // Revert back to original value after 1.5 seconds
                 setTimeout(() => {
-                    params.node.setDataValue("adsetName", originalValue);
+                    params.node.setDataValue("adsetname", originalValue);
                 }, 1500);
             }).catch(err => console.error("Copy failed:", err));
         }
@@ -520,7 +571,7 @@ export default function CampaignAndAccount({ params }) {
         new agGrid.Grid(gridDiv, gridOptions);
     });
 
-    const columnDefs = [
+    const columnDefsObject = {
         // {headerName:'CampaignName', field:'campaignName',
         //     // rowGroup: true,
         //     // filter: true,
@@ -530,7 +581,7 @@ export default function CampaignAndAccount({ params }) {
         //     // groupDisplayType: 'group',
         //     width: 450,
         // },
-        { headerName: 'Adset-Name', field: 'adsetName',
+        adsetname : { headerName: 'Adset-Name', field: 'adsetname',
         // resizeble: true,
         // sortable: true,
         width: 300,
@@ -558,42 +609,190 @@ export default function CampaignAndAccount({ params }) {
         // enableRowGroup: true,
         // autoHeight: true, 
         },
-        { headerName: 'Date', field: 'date', width: 160, sort: 'asc',
-        comparator: (valueA, valueB) => {
-            if (valueA == null && valueB == null) return 0;
-            if (valueA == null) return -1;
-            if (valueB == null) return 1;
-  
-            const dateA = new Date(valueA);
-            const dateB = new Date(valueB);
-  
-            // Compare valid dates
-            if (!isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) {
-                return dateA - dateB;
-            }
-  
-            // Fallback for invalid dates (compare as strings)
-            return valueA.toString().localeCompare(valueB.toString());
-        },
-        cellStyle: {
-            fontWeight: 'bold', // Makes the cell text bold
-        },
-        valueFormatter: (params) => {
-            // If the row is grouped or pinned, return the original value (or empty for pinned rows)
-            if (params.node.group) {
-                return "";
-            }
-            if (params.node.rowPinned) {
-                return ''; // Return an empty value for pinnedBottomRowData
-            }
-            // Format the value for leaf nodes
-            return `${params.value} (${moment(params.value).format('ddd')})`;
-        },
-        suppressMenu: true,
-        menuTabs: [],
-        headerClass: 'hide-menu',
+        date: { headerName: 'Date', field: 'date', width: 160, sort: 'asc',
+            comparator: (valueA, valueB) => {
+                if (valueA == null && valueB == null) return 0;
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+    
+                const dateA = new Date(valueA);
+                const dateB = new Date(valueB);
+    
+                // Compare valid dates
+                if (!isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) {
+                    return dateA - dateB;
+                }
+    
+                // Fallback for invalid dates (compare as strings)
+                return valueA.toString().localeCompare(valueB.toString());
+            },
+            cellStyle: {
+                fontWeight: 'bold', // Makes the cell text bold
+            },
+            valueFormatter: (params) => {
+                // If the row is grouped or pinned, return the original value (or empty for pinned rows)
+                if (params.node.group) {
+                    return "";
+                }
+                if (params.node.rowPinned) {
+                    return ''; // Return an empty value for pinnedBottomRowData
+                }
+                // Format the value for leaf nodes
+                return `${params.value} (${moment(params.value).format('ddd')})`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
          },
-        { headerName: 'Spend', field: 'spend', width: 90,
+         hour_f : { headerName: 'Date', field: 'hour_f', width: 160, sort: 'asc',
+          comparator: (valueA, valueB) => {
+              if (valueA == null && valueB == null) return 0;
+              if (valueA == null) return -1;
+              if (valueB == null) return 1;
+    
+              const dateA = new Date(valueA);
+              const dateB = new Date(valueB);
+    
+              // Compare valid dates
+              if (!isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) {
+                  return dateA - dateB;
+              }
+    
+              // Fallback for invalid dates (compare as strings)
+              return valueA.toString().localeCompare(valueB.toString());
+          },
+          
+          cellStyle: {
+              fontWeight: 'bold', // Makes the cell text bold
+          },
+          valueFormatter: (params) => {
+              // If the row is grouped or pinned, return the original value (or empty for pinned rows)
+              if (params.node.group) {
+                  return "";
+              }
+              if (params.node.rowPinned) {
+                  return ''; // Return an empty value for pinnedBottomRowData
+              }
+              // Format the value for leaf nodes
+              return `${params.value} (${moment(params.value).format('ddd')})`;
+          },
+          suppressMenu: true,
+          menuTabs: [],
+          headerClass: 'hide-menu',
+          hide: true
+         },
+         hour_n : { headerName: 'Date', field: 'hour_n', width: 160, sort: 'asc',
+           comparator: (valueA, valueB) => {
+               if (valueA == null && valueB == null) return 0;
+               if (valueA == null) return -1;
+               if (valueB == null) return 1;
+     
+               const dateA = new Date(valueA);
+               const dateB = new Date(valueB);
+     
+               // Compare valid dates
+               if (!isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) {
+                   return dateA - dateB;
+               }
+     
+               // Fallback for invalid dates (compare as strings)
+               return valueA.toString().localeCompare(valueB.toString());
+           },
+           
+           cellStyle: {
+               fontWeight: 'bold', // Makes the cell text bold
+           },
+           valueFormatter: (params) => {
+               // If the row is grouped or pinned, return the original value (or empty for pinned rows)
+               if (params.node.group) {
+                   return "";
+               }
+               if (params.node.rowPinned) {
+                   return ''; // Return an empty value for pinnedBottomRowData
+               }
+               // Format the value for leaf nodes
+               return `${params.value} (${moment(params.value).format('ddd')})`;
+           },
+           suppressMenu: true,
+           menuTabs: [],
+           headerClass: 'hide-menu',
+           hide: true
+         },
+         date_f : { headerName: 'Date', field: 'date_f', width: 160, sort: 'asc',
+            comparator: (valueA, valueB) => {
+                if (valueA == null && valueB == null) return 0;
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+      
+                const dateA = new Date(valueA);
+                const dateB = new Date(valueB);
+      
+                // Compare valid dates
+                if (!isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) {
+                    return dateA - dateB;
+                }
+      
+                // Fallback for invalid dates (compare as strings)
+                return valueA.toString().localeCompare(valueB.toString());
+            },
+            
+            cellStyle: {
+                fontWeight: 'bold', // Makes the cell text bold
+            },
+            valueFormatter: (params) => {
+                // If the row is grouped or pinned, return the original value (or empty for pinned rows)
+                if (params.node.group) {
+                    return "";
+                }
+                if (params.node.rowPinned) {
+                    return ''; // Return an empty value for pinnedBottomRowData
+                }
+                // Format the value for leaf nodes
+                return `${params.value} (${moment(params.value).format('ddd')})`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            hide: true
+         },
+         date_n : { headerName: 'Date', field: 'date_n', width: 160, sort: 'asc',
+             comparator: (valueA, valueB) => {
+                 if (valueA == null && valueB == null) return 0;
+                 if (valueA == null) return -1;
+                 if (valueB == null) return 1;
+       
+                 const dateA = new Date(valueA);
+                 const dateB = new Date(valueB);
+       
+                 // Compare valid dates
+                 if (!isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) {
+                     return dateA - dateB;
+                 }
+       
+                 // Fallback for invalid dates (compare as strings)
+                 return valueA.toString().localeCompare(valueB.toString());
+             },
+             
+             cellStyle: {
+                 fontWeight: 'bold', // Makes the cell text bold
+             },
+             valueFormatter: (params) => {
+                 // If the row is grouped or pinned, return the original value (or empty for pinned rows)
+                 if (params.node.group) {
+                     return "";
+                 }
+                 if (params.node.rowPinned) {
+                     return ''; // Return an empty value for pinnedBottomRowData
+                 }
+                 // Format the value for leaf nodes
+                 return `${params.value} (${moment(params.value).format('ddd')})`;
+             },
+             suppressMenu: true,
+             menuTabs: [],
+             headerClass: 'hide-menu',
+             hide: true
+         },
+         spend : { headerName: 'Spend', field: 'spend', width: 105,
             aggFunc: agFunc, 
             valueFormatter: params => params.value ? Math.round(params.value*100)/100 : '',
             suppressMenu: true,
@@ -601,7 +800,7 @@ export default function CampaignAndAccount({ params }) {
             headerClass: 'hide-menu',
             valueFormatter: (params) => `$${params.value}`,
         },
-        { headerName: 'Revenue', field: 'revenue', width: 105,
+        revenue : { headerName: 'Revenue', field: 'revenue', width: 105,
             aggFunc: agFunc,
             valueFormatter: params => params.value ? Math.round(params.value*100)/100 : '', 
             suppressMenu: true,
@@ -609,7 +808,7 @@ export default function CampaignAndAccount({ params }) {
             headerClass: 'hide-menu',
             valueFormatter: (params) => `$${params.value}`,
         },
-        { headerName: 'Profit', field: 'profit', width: 95, 
+        profit : { headerName: 'Profit', field: 'profit', width: 100, 
             cellClassRules:{
             'font-red': p => p.value < 0
             },
@@ -621,7 +820,7 @@ export default function CampaignAndAccount({ params }) {
             valueFormatter: (params) => `$${params.value}`,
             headerToolTip: 'Profit = Revenue - Spend',
         },
-        { headerName: 'Margin', field: 'margin', valueGetter: getMargin,
+        margin : { headerName: 'Margin', field: 'margin', valueGetter: getMargin,
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -629,56 +828,57 @@ export default function CampaignAndAccount({ params }) {
             headerToolTip: 'Margin = ((Revenue - Spend) / Revenue) * 100',
             
         },
-        { headerName: 'RPC', field: 'rpc', valueGetter: getRpc,
+        rpc : { headerName: 'RPC', field: 'rpc', valueGetter: getRpc,
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
             headerToolTip: 'RPC = Revenue / Conversions',
-            width: 90,},
-        { headerName: 'CPL', field: 'cpl', valueGetter: getCpl,
+            width: 85,},
+        cpl : { headerName: 'CPL', field: 'cpl', valueGetter: getCpl,
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
             headerToolTip: 'CPL = Spend / FBLeads',
-            width: 90,},
-        { headerName: 'NCPL', field: 'ncpl', valueGetter: getNcpl,
+            width: 85,},
+        ncpl : { headerName: 'NCPL', field: 'ncpl', valueGetter: getNcpl,
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
             headerToolTip: 'NCPL = Spend / Conversions',
-            width: 100},
-        { headerName: 'Leads', field: 'fbleads', width: 100, aggFunc: agFunc,
+            width: 95},
+        fbleads : { headerName: 'Leads', field: 'fbleads', width: 100, aggFunc: agFunc,
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', 
           },
         // { headerName: "Filteration", field:'filterarion', width: 120,  valueGetter: getFilteration},
-        // { headerName: "Filteration", field:'filterarion', width: 115, 
-        //     valueFormatter: params => params.value ? `${params.value}%` : '0%',
-        //     suppressMenu: true,
-        //     menuTabs: [],
-        //     headerClass: 'hide-menu',
-        // },
-        { headerName: 'Conv', field: 'conversions', width: 90, aggFunc: agFunc, 
+        filteration : { headerName: "Filteration", field:'filteration', width: 115, 
+            valueFormatter: params => params.value ? `${params.value}%` : '0%',
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            hide: true
+        },
+        conversions : { headerName: 'Conv', field: 'conversions', width: 90, aggFunc: agFunc, 
             suppressMenu: true,
             menuTabs: [],
             headerToolTip: 'Conversions',
             headerClass: 'hide-menu',  },
-        { headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin,
+        fmargin : { headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin,
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
             valueFormatter: (params) => `${params.value}`,
             headerToolTip: 'FMargin = (Profit / Revenue) * 100',
             width: 110},
-        { headerName: 'ROI', field: 'roi', valueGetter: getROI,
+        roi : { headerName: 'ROI', field: 'roi', valueGetter: getROI,
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
             valueFormatter: (params) => `${params.value}`,
             headerToolTip: 'ROI = ((Revenue - Spend) / Spend) * 100',
             width: 90},
-        { headerName: 'CPC', field: 'cpc',
+        cpc : { headerName: 'CPC', field: 'cpc',
             aggFunc: (params) => {
                 const sum = params.values.reduce((sum, value) => sum + parseFloat(value), 0);
                 return sum / params.values.length;
@@ -691,16 +891,16 @@ export default function CampaignAndAccount({ params }) {
             headerToolTip: 'CPC = Spend / FBClicks',
   
         },
-        { headerName: 'FBClicks', field: 'fbclicks', width: 110, aggFunc: agFunc, 
+        fbclicks : { headerName: 'FBClicks', field: 'fbclicks', width: 110, aggFunc: agFunc, 
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', },
-        { headerName: 'IMP', field: 'impressions', width: 80, aggFunc: agFunc,
+        impressions : { headerName: 'IMP', field: 'impressions', width: 80, aggFunc: agFunc,
             suppressMenu: true,
             menuTabs: [],
             headerToolTip: 'Impressions',
             headerClass: 'hide-menu',   },
-        { headerName: 'CTR', field: 'ctr', valueGetter: getCtr,
+        ctr : { headerName: 'CTR', field: 'ctr', valueGetter: getCtr,
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
@@ -709,7 +909,7 @@ export default function CampaignAndAccount({ params }) {
         
         // { headerName: 'AdsetId', field: 'adsetId' },
         // {headerName: "CampaignId", field:'campaignId'}
-    ];
+    };
 
     // const columnDefsObject = {
     //     campaignname: {
@@ -1093,6 +1293,7 @@ export default function CampaignAndAccount({ params }) {
                       defaultColDef={defaultColDef}
                       pinnedBottomRowData={domainFixedFooter}
                       gridOptions={gridOptions}
+                      onGridReady={(params) => onGridReady(params, 'grid1', gridRef)}
                       getRowStyle={(params) => {
                           if (params.node.rowPinned) {
                               return {
