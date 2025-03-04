@@ -532,7 +532,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
         // console.log(newFieldOrder);
         setColumnStructure(getColumnDefs(newFieldOrder));
         console.log(newFieldOrder);
-        await apiClient.post(`http://localhost:8000/api/updateHistoryPageStructure?email=${userdetails?.email}`, {updateDataArray: newFieldOrder});
+        await apiClient.post(`/api/updateHistoryPageStructure?email=${userdetails?.email}`, {updateDataArray: newFieldOrder});
         // console.log(`Updating columns structure for grid: ${gridId}`);
     };
     
