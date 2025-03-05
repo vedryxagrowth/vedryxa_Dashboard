@@ -279,6 +279,7 @@ export default function AdsetNameAndAccount({params}){
       "hour_n",
       "hour_f",
       "date",
+      "campaignname",
       "adsetname",
       "spend",
       "revenue",
@@ -658,15 +659,17 @@ export default function AdsetNameAndAccount({params}){
     });
 
     const columnDefsObject = {
-      // {headerName:'CampaignName', field:'campaignName',
-      //     // rowGroup: true,
-      //     // filter: true,
-      //     // hide: true,
-      //     // resizable: true,
-      //     // enableRowGroup: true,
-      //     // groupDisplayType: 'group',
-      //     width: 450,
-      // },
+      campaignname : {headerName:'CampaignName', field:'campaignname',
+          // rowGroup: true,
+          // filter: true,
+          // hide: true,
+          // resizable: true,
+          // enableRowGroup: true,
+          // groupDisplayType: 'group',
+          width: 450,
+          hide: true,
+
+      },
       adsetname : { headerName: 'Adset-Name', field: 'adsetname',
       // resizeble: true,
       // sortable: true,
@@ -920,7 +923,8 @@ export default function AdsetNameAndAccount({params}){
           menuTabs: [],
           headerClass: 'hide-menu',
           headerToolTip: 'RPC = Revenue / Conversions',
-          width: 85,},
+          width: 85,
+          cellStyle: { fontWeight: 'bold' }},
       cpl : { headerName: 'CPL', field: 'cpl', valueGetter: getCpl,
           suppressMenu: true,
           menuTabs: [],
@@ -1296,6 +1300,7 @@ export default function AdsetNameAndAccount({params}){
                       pinnedBottomRowData={domainFixedFooter}
                       gridOptions={gridOptions}
                       onGridReady={(params) => onGridReady(params, 'grid1', gridRef)}
+                      pagination={true}
                       getRowStyle={(params) => {
                           if (params.node.rowPinned) {
                               return {

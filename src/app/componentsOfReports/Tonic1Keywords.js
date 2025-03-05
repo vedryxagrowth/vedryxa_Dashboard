@@ -51,7 +51,7 @@ const selectTimezone = {
 };
 
 
-const Tonic1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus,changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments}) => {
+const Tonic1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus,changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage}) => {
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -656,6 +656,14 @@ const Tonic1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePrat
         functionCall6();
         setApiStatus(false);
     }
+
+    useEffect(() => {
+        if (refreshpage === "Refresh5" && newRevenuePratner === "FB_Tonic1") {
+            handleReFetchData();
+        }
+    }
+    , [refreshpage]);
+
     useEffect(() => {
         if(oneTimeFetch.current){
             functionCall6();

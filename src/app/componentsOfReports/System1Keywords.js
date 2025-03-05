@@ -39,7 +39,7 @@ const newtworkCollections = {
 }
 
 
-const System1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, userdetails, refreshComments}) => {
+const System1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, userdetails, refreshComments, refreshpage}) => {
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -166,6 +166,7 @@ const System1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePra
                 suppressMenu: true,
                 menuTabs: [],
                 headerClass: 'hide-menu',
+                cellStyle: { fontWeight: 'bold' },
                 aggFunc: (params) => {
                     let sum = 0;
                     let count = 0;
@@ -375,6 +376,13 @@ const System1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePra
         functionCall5();
         setApiStatus(false);
     }
+
+    useEffect(() => {
+        if (refreshpage === "Refresh5" && newRevenuePratner === "FB_System1") {
+            handleReFetchData();
+        }
+    }
+    , [refreshpage]);
 
     useEffect(() => {
         if(oneTimeFetch.current){

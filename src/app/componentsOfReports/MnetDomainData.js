@@ -35,7 +35,7 @@ const newtworkCollections = {
     "FB_Tonic1": "Facebook_Tonic1"
 }
 
-const MnetDomainReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, userdetails, refreshComments}) => {
+const MnetDomainReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, userdetails, refreshComments, refreshpage}) => {
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -237,7 +237,8 @@ const MnetDomainReports = ({startDate, endDate, newaccount, newtime, newRevenueP
             filter: true,
             suppressMenu: true,
             menuTabs: [],
-            headerClass: 'hide-menu' // Add a custom class
+            headerClass: 'hide-menu', // Add a custom class
+            cellStyle: { fontWeight: 'bold' }
         },
         {
             field: 'cpl',
@@ -304,6 +305,13 @@ const MnetDomainReports = ({startDate, endDate, newaccount, newtime, newRevenueP
         functionCall1();
         setApiStatus(false);
     }
+
+    useEffect(() => {
+        if (refreshpage === "Refresh5" && newRevenuePratner === "FB_Mnet") {
+            handleReFetchData();
+        }
+    }
+    , [refreshpage]);
     useEffect(() => {
         if(oneTimeFetch.current){
             functionCall1();

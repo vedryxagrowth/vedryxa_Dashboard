@@ -107,6 +107,8 @@ const MyTablePage = () => {
 
     const defaultDates = [dayjs((startDateFromDashboard ? startDateFromDashboard : (storedData ? storedData?.startDate :  yesterday))), dayjs((endDateFromDashboard ? endDateFromDashboard : (storedData ? storedData?.endDate : yesterday)))];
 
+    const [refreshContent, setRefreshContent] = useState("");
+
     const [initialRowData, setInitialRowData] = useState([]);
 
     const [rowData, setRowData] = useState([]);
@@ -161,7 +163,9 @@ const MyTablePage = () => {
         setNewInputValue(e.target.value);
     }
 
-    const accountsForAccess = adAccounts[revenuePratner];
+    const accountsForAccess = adAccounts[revenuePratner].sort((a, b) => {
+        return a.status === "Active" ? -1 : b.status === "Active" ? 1 : 0;
+    });;
     console.log(accountsForAccess, "accounts Access");
 
     const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
@@ -1230,7 +1234,7 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
             headerTooltip: "RPC = Revenue / Conversions",
-            
+            cellStyle: { fontWeight: 'bold' }
         },
         cpl: {
             headerName: 'CPL',
@@ -1665,6 +1669,7 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
             headerTooltip: "RPC = Revenue / Conversions",
+            cellStyle: { fontWeight: 'bold' }
         },
         cpl: { headerName: 'CPL', field: 'cpl', minWidth:80, valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "CPL = Spend / FBLeads" },
         ncpl: { headerName: 'NCPL', field: 'ncpl', minWidth:90, valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "NCPL = Spend / Conversions" },
@@ -2082,7 +2087,7 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
             headerTooltip: "RPC = Revenue / Conversions",
-            
+            cellStyle: { fontWeight: 'bold' } // Make text bold
         },
         cpl: {
             headerName: 'CPL',
@@ -2486,6 +2491,7 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
             headerTooltip: "RPC = Revenue / Conversions",
+            cellStyle: { fontWeight: 'bold' } // Make text bold
         },
         cpl: { headerName: 'CPL', field: 'cpl', minWidth:80, valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "CPL = Spend / FBLeads" },
         ncpl: { headerName: 'NCPL', field: 'ncpl', minWidth:90, valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "NCPL = Spend / Conversions" },
@@ -2798,6 +2804,7 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
             headerTooltip: 'RPC = Revenue / Conversions',
+            cellStyle: { fontWeight: 'bold' } // Make text bold
         },
         cpl: { headerName: 'CPL', minWidth:80, field: 'cpl', valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: 'CPL = Spend / FBLeads' },
         ncpl: { headerName: 'NCPL',minWidth:90, field: 'ncpl', valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: 'NCPL = Spend / Conversions' },
@@ -3204,7 +3211,7 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
         },
-        rpc: { headerName: 'RPC', minWidth: 80, field: 'rpc', valueGetter: getRpc, sortable: true, filter: 'agNumberColumnFilter', headerTooltip: 'RPC = Revenue / Conversions', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        rpc: { headerName: 'RPC', minWidth: 80, field: 'rpc', valueGetter: getRpc, sortable: true, filter: 'agNumberColumnFilter', headerTooltip: 'RPC = Revenue / Conversions', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu',    cellStyle: { fontWeight: 'bold' }  },
         cpl: { headerName: 'CPL', minWidth: 80, field: 'cpl', valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter', headerTooltip: 'CPL = Spend / FBLeads', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         ncpl: { headerName: 'NCPL', minWidth: 90, field: 'ncpl', valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter', headerTooltip: 'NCPL = Spend / Conversions', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         fmargin: {
@@ -3745,9 +3752,18 @@ const MyTablePage = () => {
             ],
         },
     ];
-
+    
+    const refreshComponent = (activeTab) => {
+        setRefreshContent("");
+        setTimeout(() => {
+            setRefreshContent("Refresh"+activeTab);
+        }
+        , 100);
+    };
 
     const onClickRefresh = () => {
+        console.log(activeTab);
+        refreshComponent(activeTab);
         // refreshGrid(gridRef);  // Refresh gridRef
         // refreshGrid1(gridRef1); // Refresh gridRef1
         // refreshGrid2(gridRef2); // Refresh gridRef2
@@ -4112,6 +4128,7 @@ const MyTablePage = () => {
                     debouncedHandleColumnMove={debouncedHandleColumnMove} 
                     userdetails={userdetails} 
                     refreshComments={refreshComments}
+                    refreshpage={refreshContent}
                     />
                 </Tabs.TabPane>
 
@@ -4131,6 +4148,7 @@ const MyTablePage = () => {
                     debouncedHandleColumnMove={debouncedHandleColumnMove} 
                     userdetails={userdetails} 
                     refreshComments={refreshComments}
+                    refreshpage={refreshContent}
                     />
                 </Tabs.TabPane>
 
@@ -4150,6 +4168,7 @@ const MyTablePage = () => {
                     debouncedHandleColumnMove={debouncedHandleColumnMove} 
                     userdetails={userdetails} 
                     refreshComments={refreshComments}
+                    refreshpage={refreshContent}
                     />
                 </Tabs.TabPane>
 
@@ -4166,6 +4185,7 @@ const MyTablePage = () => {
                     Camapignlevelstatus={Camapignlevelstatus}  
                     userdetails={userdetails} 
                     refreshComments={refreshComments}
+                    refreshpage={refreshContent}
                     />
                 </Tabs.TabPane>
 
@@ -4183,6 +4203,7 @@ const MyTablePage = () => {
                         Camapignlevelstatus={Camapignlevelstatus} 
                         userdetails={userdetails} 
                         refreshComments={refreshComments}
+                        refreshpage={refreshContent}
                     />
                     </Tabs.TabPane>
                 )}
@@ -4204,6 +4225,7 @@ const MyTablePage = () => {
                         debouncedHandleColumnMove={debouncedHandleColumnMove} 
                         userdetails={userdetails} 
                         refreshComments={refreshComments}
+                        refreshpage={refreshContent}
                     />
                     </Tabs.TabPane>
                 )}
@@ -4225,6 +4247,7 @@ const MyTablePage = () => {
                         debouncedHandleColumnMove={debouncedHandleColumnMove} 
                         userdetails={userdetails} 
                         refreshComments={refreshComments}
+                        refreshpage={refreshContent}
                     />
                     </Tabs.TabPane>
                 )}
@@ -4244,6 +4267,7 @@ const MyTablePage = () => {
                         changeRRefrst={resetColumnStructure} 
                         userdetails={userdetails} 
                         refreshComments={refreshComments}
+                        refreshpage={refreshContent}
                     />
                     </Tabs.TabPane>
                 )}
@@ -4266,6 +4290,7 @@ const MyTablePage = () => {
                             debouncedHandleColumnMove={debouncedHandleColumnMove} 
                             userdetails={userdetails} 
                             refreshComments={refreshComments}
+                            refreshpage={refreshContent}
                         />
                     </Tabs.TabPane>
                 )}
@@ -4287,6 +4312,7 @@ const MyTablePage = () => {
                         debouncedHandleColumnMove={debouncedHandleColumnMove} 
                         userdetails={userdetails} 
                         refreshComments={refreshComments}
+                        refreshpage={refreshContent}
                         />
                     </Tabs.TabPane>
                 )}

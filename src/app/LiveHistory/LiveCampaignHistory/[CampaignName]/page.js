@@ -27,6 +27,16 @@ const MnetLiveCampaignHistory = ({ params }) => {
 
     const user = userdetails?.email;
 
+    const paramsData = ((params.CampaignName).split("-"));
+    let decodedString = decodeURIComponent(paramsData[0]);
+    decodedString = decodedString.replace(/\*/g, "/").replace(/\^/g, "-");
+    const accountNumber = paramsData[1];
+    const timeZone = paramsData[2];
+    // timeZoneToDisplay.current = timeZone;
+    let network = paramsData[3];
+    console.log(network, "network");
+    console.log(decodedString, "decode");
+
     const gridRef = useRef();
 
     const { theme } = useTokenContext();
@@ -42,7 +52,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
 
     const [input, setInput] = useState();
 
-    const [account, setAccount] = useState('674038077865381');
+    const [account, setAccount] = useState();
 
     const [time, setTime] = useState('UTC');
 
@@ -51,6 +61,9 @@ const MnetLiveCampaignHistory = ({ params }) => {
     const [dateStart1, setDateStart1] = useState();
 
     const [endDate1, setEndDate1] = useState();
+
+    const [columns, setColumns] = useState([]);
+    const [comment, setComment] = useState("");
 
     const [columnDefs, setColumnStructure] = useState([]);
 
@@ -66,6 +79,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
         "hour_n",
         "hour_f",
         "date",
+        "campaignname",
         "adsetname",
         "spend",
         "revenue",
@@ -530,6 +544,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
         // localStorage.setItem('columnState', JSON.stringify(newFieldOrder));
         // updatingColumnsStructure(newFieldOrder);
         // console.log(newFieldOrder);
+        setColumns(newFieldOrder);
         setColumnStructure(getColumnDefs(newFieldOrder));
         console.log(newFieldOrder);
         await apiClient.post(`/api/updateHistoryPageStructure?email=${userdetails?.email}`, {updateDataArray: newFieldOrder});
@@ -545,18 +560,18 @@ const MnetLiveCampaignHistory = ({ params }) => {
     };
 
     const onCellClicked = (params) => {
-        if (params.column.getColId() === "adsetname" && params.value) { 
+        if (params.column.getColId() === "campaignname" && params.value) { 
             // Copy the cell value to clipboard
             navigator.clipboard.writeText(params.value).then(() => {
                 const originalValue = params.value; // Store original value
                 const copiedText = `${originalValue} Copied!`; // Append "Copied!" to the text
     
                 // Temporarily update the cell content
-                params.node.setDataValue("adsetname", copiedText);
+                params.node.setDataValue("campaignname", copiedText);
     
                 // Revert back to original value after 1.5 seconds
                 setTimeout(() => {
-                    params.node.setDataValue("adsetname", originalValue);
+                    params.node.setDataValue("campaignname", originalValue);
                 }, 1500);
             }).catch(err => console.error("Copy failed:", err));
         }
@@ -571,6 +586,16 @@ const MnetLiveCampaignHistory = ({ params }) => {
         const gridDiv = document.querySelector("#myGrid");
         new agGrid.Grid(gridDiv, gridOptions);
     });
+
+    useEffect(() => {
+        if(columns.length > 0){
+            setColumnStructure(getColumnDefs(columns));
+        }   
+    }, [columns]);
+
+    const getTooltipValue = (params) => {
+        return comment ? `${comment}` : null; // Show comment only if it's not empty
+    };
 
     const columnDefsObject = {
         date_n : {
@@ -607,19 +632,36 @@ const MnetLiveCampaignHistory = ({ params }) => {
             
             // valueFormatter: (params) => `${params.value} (${moment(params.value).format('ddd')}) `,
         },
-        // {
-        //     headerName: 'CampaignName', field: 'campaignName', resizeble: true,
-        //     // sortable: true,
-        //     minWidth: 400,
-        //     // hide: true,
-        //     // // // resizable:false,
-        //     // rowGroup: true,
-        //     // filter: true,
-        //     // groupDisplayType: 'group',
-        //     // pinned: 'left',
-        //     // enableRowGroup: true,
-        //     // autoHeight: true, 
-        // },
+        campaignname : {
+            headerName: 'CampaignName', field: 'campaignname',
+            // resizeble: true,
+            // // sortable: true,
+            minWidth: 250,
+            // hide: true,
+            // // // resizable:false,
+            // // rowGroup: true,
+            // filter: true,
+            // pinned: 'left',
+            // enableRowGroup: true,
+            // autoHeight: true, 
+            cellStyle: { whiteSpace: "normal", lineHeight: "1.5" }, // Enables text wrapping
+            autoHeight: true,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            tooltipValueGetter: getTooltipValue,
+            cellRenderer: (params) => {
+                if (params.value && params.value.includes("Copied!")) {
+                    return (
+                        <span>
+                            {params.value.replace("Copied!", "")}
+                            <span style={{ color: "green", fontWeight: "bold" }}>Copied!</span>
+                        </span>
+                    );
+                }
+                return params.value;
+            }
+        },
         adsetname : {
             headerName: 'Adset-Name', field: 'adsetname',
             // resizeble: true,
@@ -637,17 +679,18 @@ const MnetLiveCampaignHistory = ({ params }) => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
-            cellRenderer: (params) => {
-                if (params.value && params.value.includes("Copied!")) {
-                    return (
-                        <span>
-                            {params.value.replace("Copied!", "")}
-                            <span style={{ color: "green", fontWeight: "bold" }}>Copied!</span>
-                        </span>
-                    );
-                }
-                return params.value;
-            }
+            // cellRenderer: (params) => {
+            //     if (params.value && params.value.includes("Copied!")) {
+            //         return (
+            //             <span>
+            //                 {params.value.replace("Copied!", "")}
+            //                 <span style={{ color: "green", fontWeight: "bold" }}>Copied!</span>
+            //             </span>
+            //         );
+            //     }
+            //     return params.value;
+            // }
+            hide: true
         },
         // { headerName: 'FB-Hour', field: 'fb-hour', width: 120 },
         // { headerName: 'MNet-Hour', field: 'mnet-hour', width: 120 },
@@ -781,6 +824,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
             headerName: 'RPC',
             minWidth: 80,
             field: 'rpc',
+            cellStyle: { fontWeight: 'bold' },
             valueGetter: getRpc, // Custom logic to calculate RPC
             comparator: (valueA, valueB) => {
                 const numA = parseFloat(valueA);
@@ -1001,6 +1045,22 @@ const MnetLiveCampaignHistory = ({ params }) => {
 
     const token = localStorage.getItem("token")
 
+    const functionCallForCommnets = async (accountNumber) => {
+        try{
+            const commentFetch = await apiClient.get(`/Comments/${accountNumber}`);
+            const campaignComments = commentFetch.data; // Set comments only if fetched successfully
+            if(campaignComments.length > 0){
+                const comment = campaignComments.find(comment => comment.campaignname === decodedString);
+                console.log(comment, "comment");
+                console.log(comment?.comment, "comment");
+                setComment(comment?.comment ? comment?.comment : "");
+            }
+            
+        }catch(err){
+            setComment("");
+        }   
+    };
+
     const functionCallForUserColumnStructure = async () => {
         console.log(user, "user email");
         const fetchData = await apiClient.get(`https://prodapis.adsgoat.in/api/singleUserData?email=${user}`);
@@ -1009,7 +1069,8 @@ const MnetLiveCampaignHistory = ({ params }) => {
         console.log(mainData);
         console.log(mainData.historyStructure, "historyStructure");
         const filteredData = mainData.historyStructure?.filter((each) => each !== "actions");
-        console.log(filteredData);
+        // console.log(filteredData);
+        setColumns(filteredData);
         setColumnStructure(getColumnDefs(filteredData));
         // setRowStructure(mainData.rows); 
     }
@@ -1102,16 +1163,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
 
     // }
     const functionCall = async () => {
-        const paramsData = ((params.CampaignName).split("-"));
-        let decodedString = decodeURIComponent(paramsData[0]);
-        decodedString = decodedString.replace(/\*/g, "/").replace(/\^/g, "-");
-        const accountNumber = paramsData[1];
-        const timeZone = paramsData[2];
-        timeZoneToDisplay.current = timeZone;
-        let network = paramsData[3];
-        setDebounc(decodedString);
-        console.log(network, "network");
-        console.log(decodedString, "decode");
+        
 
         const fetchData = await apiClient.get(`/LiveCampaignHistory?campaignName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`);
 
@@ -1329,6 +1381,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
     useEffect(() => {
         if (userdetails?.adAccounts) {
             const mainFunctionCall = async () => {
+                await functionCallForCommnets(accountNumber)
                 await debouncedFunctionCallForUserColumnStructure();
                 await debouncedFunctionCall();
             };
@@ -1404,7 +1457,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                         <h3 style={{ textAlign: 'center' }}>{decode}</h3>
                     </div>
                     <div style={{ width: '120px' }}>
-                        <p>Timezone: <span style={{ fontWeight: 'bold' }}>{timeZoneToDisplay.current}</span></p>
+                        <p>Timezone: <span style={{ fontWeight: 'bold' }}>{timeZone}</span></p>
                     </div>
 
                 </Col>}
@@ -1709,7 +1762,8 @@ const MnetLiveCampaignHistory = ({ params }) => {
                             pinnedBottomRowData={domainFixedFooter}
                             gridOptions={gridOptions}
                             onGridReady={(params) => onGridReady(params, 'grid1', gridRef)}
-                            // pagination={true} // Enable pagination
+                            tooltipShowDelay={0} // Show tooltip instantly
+                            pagination={true} // Enable pagination
                             // paginationPageSize={5} // Set rows per page
                             // paginationNumberFormatter={(params) => `${params.value}`}
                             getRowStyle={(params) => {

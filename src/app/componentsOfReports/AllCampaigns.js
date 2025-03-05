@@ -53,7 +53,7 @@ const selectTimezone = {
 };
 
 
-const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments}) => {
+const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage}) => {
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -757,6 +757,13 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
         functionCall3();
         setApiStatus(false);
     }
+
+    useEffect(() => {
+        if (refreshpage === "Refresh3") {
+            handleReFetchData();
+        }
+    }
+    , [refreshpage]);
 
     useEffect(() => {
         functionCall3();
