@@ -53,7 +53,7 @@ const selectTimezone = {
 };
 
 
-const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments}) => {
+const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage}) => {
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -809,6 +809,13 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
             oneTimeFetch.current = false;
         }
     }, [oneTimeFetch.current]);
+
+    useEffect(() => {
+        if (refreshpage === "Refresh2") {
+            handleReFetchData();
+        }
+    }
+    , [refreshpage]);
 
     useEffect(() => {
         if (gridRef1.current && gridRef1.current.api) {

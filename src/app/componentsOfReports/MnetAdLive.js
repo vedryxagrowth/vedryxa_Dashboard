@@ -53,7 +53,7 @@ const selectTimezone = {
     DST: 'DSTDate'
 };
 
-const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments}) => {
+const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage}) => {
     console.log(columnDefs.current);
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
@@ -970,6 +970,13 @@ const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenueP
             oneTimeFetch.current = false;
         }
     }, [oneTimeFetch.current]);
+
+    useEffect(() => {
+        if (refreshpage === "Refresh6" && newRevenuePratner === "FB_Mnet") {
+            handleReFetchData();
+        }
+    }
+    , [refreshpage]);
     
     return(
                     <div style={{ height: "100%", marginBottom: '20px',overflow: "visible" }}>

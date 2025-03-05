@@ -27,7 +27,10 @@ export default function CampaignAndAccount({ params }) {
 
     const gridRef = useRef();
 
+    const [columns, setColumns] = useState([]);
+
     const [columnDefs, setColumnStructure] = useState([]);
+    const [comment, setComment] = useState("");
     const [darkMode, setDarkMode] = useState(false);
     const { theme } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -66,6 +69,7 @@ export default function CampaignAndAccount({ params }) {
         "hour_n",
         "hour_f",
         "date",
+        "campaignname",
         "adsetname",
         "spend",
         "revenue",
@@ -372,6 +376,22 @@ export default function CampaignAndAccount({ params }) {
 
     const token = localStorage.getItem("token")
 
+    const functionCallForCommnets = async (accountNumber) => {
+        try{
+            const commentFetch = await apiClient.get(`/Comments/${accountNumber}`);
+            const campaignComments = commentFetch.data; // Set comments only if fetched successfully
+            if(campaignComments.length > 0){
+                const comment = campaignComments.find(comment => comment.campaignname === decodedString);
+                console.log(comment, "comment");
+                console.log(comment?.comment, "comment");
+                setComment(comment?.comment ? comment?.comment : "");
+            }
+            
+        }catch(err){
+            setComment("");
+        }   
+    };
+
     const functionCallForUserColumnStructure = async () => {
         const fetchData = await apiClient.get(`https://prodapis.adsgoat.in/api/singleUserData?email=${user}`);
         // const data = await fetchData.json();
@@ -379,6 +399,7 @@ export default function CampaignAndAccount({ params }) {
         console.log(mainData.historyStructure, "historyStructure");
         const filteredData = mainData.historyStructure.filter((each) => each !== "actions" );
         console.log(filteredData);
+        setColumns(filteredData);
         setColumnStructure(getColumnDefs(filteredData));
         // setRowStructure(mainData.rows); 
     }
@@ -493,12 +514,20 @@ export default function CampaignAndAccount({ params }) {
     useEffect(() => {
         if (userdetails?.adAccounts) {
             const functionCall = async () => {
+                await functionCallForCommnets(accountNumber);
                 await debouncedFunctionCallForUserColumnStructure();
                 await debouncedFunctionCall();
             }
             functionCall();
         }
     }, [userdetails]);
+
+    useEffect(() => {
+        if (gridRef.current) {
+            gridRef.current.refreshCells({ columns: ["campaignname"], force: true });
+        }
+    }, [comment]);
+
     // const pinnedBottomRowData = [
     //     {
     //         adsetName: 'Total',
@@ -529,8 +558,10 @@ export default function CampaignAndAccount({ params }) {
         // localStorage.setItem('columnState', JSON.stringify(newFieldOrder));
         // updatingColumnsStructure(newFieldOrder);
         // console.log(newFieldOrder);
+
         setColumnStructure(getColumnDefs(newFieldOrder));
-        console.log(newFieldOrder);
+        // console.log(newFieldOrder);
+        setColumns(newFieldOrder);
         await apiClient.post(`/api/updateHistoryPageStructure?email=${userdetails?.email}`, {updateDataArray: newFieldOrder});
         // console.log(`Updating columns structure for grid: ${gridId}`);
     };
@@ -539,23 +570,24 @@ export default function CampaignAndAccount({ params }) {
 
     const onGridReady = (params, gridId, gridRef) => {
         gridRef.current = params;
+        gridRef.current = params.api;
         params.api.applyColumnState({ state: columnDefs, applyOrder: true });
         params.api.addEventListener('dragStopped', (e) => debouncedHandleColumnMove(e, gridId));
     };
 
     const onCellClicked = (params) => {
-        if (params.column.getColId() === "adsetname" && params.value) { 
+        if (params.column.getColId() === "campaignname" && params.value) { 
             // Copy the cell value to clipboard
             navigator.clipboard.writeText(params.value).then(() => {
                 const originalValue = params.value; // Store original value
                 const copiedText = `${originalValue} Copied!`; // Append "Copied!" to the text
     
                 // Temporarily update the cell content
-                params.node.setDataValue("adsetname", copiedText);
+                params.node.setDataValue("campaignname", copiedText);
     
                 // Revert back to original value after 1.5 seconds
                 setTimeout(() => {
-                    params.node.setDataValue("adsetname", originalValue);
+                    params.node.setDataValue("campaignname", originalValue);
                 }, 1500);
             }).catch(err => console.error("Copy failed:", err));
         }
@@ -571,25 +603,19 @@ export default function CampaignAndAccount({ params }) {
         new agGrid.Grid(gridDiv, gridOptions);
     });
 
+    const getTooltipValue = (params) => {
+        return comment ? `${comment}` : null; // Show comment only if it's not empty
+    };
+
     const columnDefsObject = {
-        // {headerName:'CampaignName', field:'campaignName',
-        //     // rowGroup: true,
-        //     // filter: true,
-        //     // hide: true,
-        //     // resizable: true,
-        //     // enableRowGroup: true,
-        //     // groupDisplayType: 'group',
-        //     width: 450,
-        // },
-        adsetname : { headerName: 'Adset-Name', field: 'adsetname',
-        // resizeble: true,
-        // sortable: true,
-        width: 300,
+        campaignname : {headerName:'CampaignName', field:'campaignname',
+            width: 300,
         cellStyle: { whiteSpace: "normal", lineHeight: "1.5" }, // Enables text wrapping
         autoHeight: true,
         suppressMenu: true,
         menuTabs: [],
         headerClass: 'hide-menu',
+        tooltipValueGetter: getTooltipValue,
         cellRenderer: (params) => {
             if (params.value && params.value.includes("Copied!")) {
                 return (
@@ -601,6 +627,28 @@ export default function CampaignAndAccount({ params }) {
             }
             return params.value;
         }
+        },
+        adsetname : { headerName: 'Adset-Name', field: 'adsetname',
+        // resizeble: true,
+        // sortable: true,
+        width: 300,
+        cellStyle: { whiteSpace: "normal", lineHeight: "1.5" }, // Enables text wrapping
+        autoHeight: true,
+        suppressMenu: true,
+        menuTabs: [],
+        headerClass: 'hide-menu',
+        hide: true,
+        // cellRenderer: (params) => {
+        //     if (params.value && params.value.includes("Copied!")) {
+        //         return (
+        //             <span>
+        //                 {params.value.replace("Copied!", "")}
+        //                 <span style={{ color: "green", fontWeight: "bold" }}>Copied!</span>
+        //             </span>
+        //         );
+        //     }
+        //     return params.value;
+        // }
         // hide: true,
         // // resizable:false,
         // rowGroup: true,
@@ -833,7 +881,8 @@ export default function CampaignAndAccount({ params }) {
             menuTabs: [],
             headerClass: 'hide-menu',
             headerToolTip: 'RPC = Revenue / Conversions',
-            width: 85,},
+            width: 85,
+            cellStyle: { fontWeight: 'bold' }},
         cpl : { headerName: 'CPL', field: 'cpl', valueGetter: getCpl,
             suppressMenu: true,
             menuTabs: [],
@@ -910,6 +959,12 @@ export default function CampaignAndAccount({ params }) {
         // { headerName: 'AdsetId', field: 'adsetId' },
         // {headerName: "CampaignId", field:'campaignId'}
     };
+
+    useEffect(() => {
+        if(columns.length > 0){
+            setColumnStructure(getColumnDefs(columns));
+        }   
+    }, [columns]);
 
     // const columnDefsObject = {
     //     campaignname: {
@@ -1294,6 +1349,8 @@ export default function CampaignAndAccount({ params }) {
                       pinnedBottomRowData={domainFixedFooter}
                       gridOptions={gridOptions}
                       onGridReady={(params) => onGridReady(params, 'grid1', gridRef)}
+                      tooltipShowDelay={0} // Show tooltip instantly
+                      pagination={true}
                       getRowStyle={(params) => {
                           if (params.node.rowPinned) {
                               return {

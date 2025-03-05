@@ -64,6 +64,7 @@ const MnetLiveAdsetHistory = ({params}) => {
         "hour_n",
         "hour_f",
         "date",
+        "campaignname",
         "adsetname",
         "spend",
         "revenue",
@@ -543,19 +544,19 @@ const MnetLiveAdsetHistory = ({params}) => {
             
             // valueFormatter: (params) => `${params.value} (${moment(params.value).format('ddd')}) `,
         },
-        // {
-        //     headerName: 'CampaignName', field: 'campaignName', resizeble: true,
-        //     // sortable: true,
-        //     minWidth: 400,
-        //     // hide: true,
-        //     // // // resizable:false,
-        //     // rowGroup: true,
-        //     // filter: true,
-        //     // groupDisplayType: 'group',
-        //     // pinned: 'left',
-        //     // enableRowGroup: true,
-        //     // autoHeight: true, 
-        // },
+        campaignname :  {
+            headerName: 'CampaignName', field: 'campaignname', resizeble: true,
+            // sortable: true,
+            minWidth: 400,
+            hide: true,
+            // // // resizable:false,
+            // rowGroup: true,
+            // filter: true,
+            // groupDisplayType: 'group',
+            // pinned: 'left',
+            // enableRowGroup: true,
+            // autoHeight: true, 
+        },
         adsetname : {
             headerName: 'Adset-Name', field: 'adsetname',
             // resizeble: true,
@@ -717,6 +718,7 @@ const MnetLiveAdsetHistory = ({params}) => {
             headerName: 'RPC',
             width: 80,
             field: 'rpc',
+            cellStyle: { fontWeight: 'bold' },
             valueGetter: getRpc, // Custom logic to calculate RPC
             comparator: (valueA, valueB) => {
                 const numA = parseFloat(valueA);
@@ -1553,7 +1555,7 @@ const MnetLiveAdsetHistory = ({params}) => {
                         pinnedBottomRowData={domainFixedFooter}
                         gridOptions={gridOptions}
                         onGridReady={(params) => onGridReady(params, 'grid1', gridRef)}
-                        // pagination={true} // Enable pagination
+                        pagination={true} // Enable pagination
                         // paginationPageSize={5} // Set rows per page
                         // paginationNumberFormatter={(params) => `${params.value}`}
                         getRowStyle={(params) => {

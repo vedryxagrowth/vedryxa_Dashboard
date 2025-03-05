@@ -53,7 +53,7 @@ const selectTimezone = {
 };
 
 
-const MnetDailyAdReport = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments}) => {
+const MnetDailyAdReport = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage}) => {
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -653,11 +653,7 @@ const MnetDailyAdReport = ({startDate, endDate, newaccount, newtime, newRevenueP
                     const roi = eachData.spend !== 0 ? `${Math.round((((Revenue - eachData.spend) / eachData.spend) * 100) * 100) / 100}%` : '0%';
                     const ctr = eachData.impressions !== 0 ? `${Math.round(((eachData.fbClicks / eachData.impressions) * 100) * 100) / 100}%` : '0%';
                     const mainRvenue = ((Math.round(Revenue * 100) / 100)).toString();
-                    const conversions = newRevenuePratner === "FB_Mnet" && newtime === "UTC" 
-                    ? eachData.ad_clicks !== undefined 
-                        ? eachData.ad_clicks 
-                        : '0'
-                    : eachData.conversions !== undefined 
+                    const conversions = eachData.conversions !== undefined 
                         ? eachData.conversions 
                         : '0';
                     rpc = !isNaN(rpc) ? rpc : 0;
@@ -858,6 +854,13 @@ const MnetDailyAdReport = ({startDate, endDate, newaccount, newtime, newRevenueP
             oneTimeFetch.current = false;
         }
     }, [oneTimeFetch.current]);
+
+    useEffect(() => {
+        if (refreshpage === "Refresh7" && newRevenuePratner === "FB_Mnet") {
+            handleReFetchData();
+        }
+    }
+    , [refreshpage]);
 
     useEffect(() => {
         if (gridRef1.current && gridRef1.current.api) {

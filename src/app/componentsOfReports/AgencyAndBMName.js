@@ -34,7 +34,7 @@ const newtworkCollections = {
     "FB_Tonic1": "Facebook_Tonic1"
 }
 
-const AgencyAndBMNameReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, userdetails, refreshComments}) => {
+const AgencyAndBMNameReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, userdetails, refreshComments, refreshpage}) => {
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -204,7 +204,8 @@ const AgencyAndBMNameReports = ({startDate, endDate, newaccount, newtime, newRev
             filter: true,
             suppressMenu: true,
             menuTabs: [],
-            headerClass: 'hide-menu' // Add a custom class
+            headerClass: 'hide-menu', // Add a custom class
+            cellStyle: { fontWeight: 'bold' }
         },
         {
             field: 'cpl',
@@ -323,6 +324,13 @@ const AgencyAndBMNameReports = ({startDate, endDate, newaccount, newtime, newRev
             oneTimeFetch.current = false;
         }
     }, [oneTimeFetch.current]);
+
+    useEffect(() => {
+        if (refreshpage === "Refresh4") {
+            handleReFetchData();
+        }
+    }
+    , [refreshpage]);
     console.log(BMNameData);
     return(
         <div style={{ height: "100%", marginBottom: '20px' }}>
