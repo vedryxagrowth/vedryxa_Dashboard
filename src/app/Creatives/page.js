@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { useTokenContext } from "../components/parent";
 import React, { useState, useEffect } from 'react';
 import { Upload, Modal, Input, Button, Row, Col, Select, message, notification, Badge } from 'antd';
-import { EditOutlined, UploadOutlined, PlusOutlined, SearchOutlined, CheckCircleFilled, CloseCircleFilled, ReloadOutlined, EyeOutlined, DeleteOutlined} from '@ant-design/icons';
+import { EditOutlined, UploadOutlined, PlusOutlined, SearchOutlined, CheckCircleFilled, CloseCircleFilled, ReloadOutlined, EyeOutlined, DeleteOutlined, CopyOutlined} from '@ant-design/icons';
 import Image from 'next/image';
 import dynamic from "next/dynamic";
 import { DatePicker, Space, ConfigProvider, Flex, Spin, Skeleton } from 'antd';
@@ -27,7 +27,7 @@ const ImageUploadPage = () => {
     const [isEditorVisible, setIsEditorVisible] = useState(false);
     const [urlInput, setUrlInput] = useState('');
     const [previewFile, setPreviewFile] = useState(null);
-    const [pendingFile, setPendingFile] = useState(null);
+    const [pendingFiles, setPendingFiles] = useState(null);
     const [editedFile, setEditedFile] = useState(null);
     const [filteredImages, setFilteredImages] = useState([]); // Store filtered images
 
@@ -49,6 +49,14 @@ const ImageUploadPage = () => {
     const [selectedImages, setSelectedImages] = useState([]);
     const [fileInputName, setFileInputName] = useState("");
     const [searchQuery, setSearchQuery] = useState(""); // State to store search input
+
+     // Track the current file index from pendingFiless
+    const [currentFileIndex, setCurrentFileIndex] = useState(0);
+     // Add a new state for controlling the Upload component key
+    const [uploadKey, setUploadKey] = useState(Date.now());
+
+    const [uploadFileList, setUploadFileList] = useState([]);
+
 
     const { userdetails } = useTokenContext();
     const router = useRouter();
@@ -102,7 +110,7 @@ const ImageUploadPage = () => {
             if (response.data.images && Array.isArray(response.data.images)) {
                 const imagesWithFileNames = response.data.images.map(file => ({
                     uid: file.key,
-                    name: file.filename || `Unnamed File ${file.key}`, // 🔹 Use filename from API or default text
+                    name: file.filename || `${file.key}`, // 🔹 Use filename from API or default text
                     status: 'done',
                     url: `https://sudheer-fbimages.s3.amazonaws.com/${file.key}`,
                     uploadDate: moment(file.uploadDate).format("YYYY-MM-DD"), // Assuming `uploadDate` is sent with the file
@@ -144,25 +152,55 @@ const ImageUploadPage = () => {
         setIsModalVisible(true); // Open existing modal
     };
 
-    const handleCancel = () =>{
+    // const handleCancel = () =>{
+    //     setIsModalVisible(false);
+    //     setPreviewFile(null);
+    // }
+
+    // Update your handleCancel function to clear file-related states and update uploadKey
+    const handleCancel = () => {
         setIsModalVisible(false);
         setPreviewFile(null);
-    }
+        setPendingFiles([]);
+        setUploadFileList([]);
+        setCurrentFileIndex(0);
+        setFileInputName("");
+        setEditedFile(null);
+      };
+      
 
-    const handleFileChange = ({ fileList }) => {
-        if (fileList.length === 0) return;
-        console.log(fileList);
-        setPreviewFile(null);
-        setPendingFile(null);
-        setEditedFile(null); 
-        // Preview selected file
-        const file = fileList[fileList.length-1].originFileObj;
-        const previewUrl = URL.createObjectURL(file);
-        // Show confirmation popup before uploading
-        setPreviewFile({ uid: file.uid, url: previewUrl });
-        setPendingFile(file);
-        setIsModalVisible(true); // Show modal to confirm upload
-    };
+   // In your handleFileChange function, clear any previous file list and then set new ones:
+   const handleFileChange = ({ fileList }) => {
+    if (fileList.length === 0) return;
+    // Update controlled file list
+    setUploadFileList(fileList);
+    // Convert fileList to an array of File objects:
+    const files = fileList.map(item => item.originFileObj);
+    setPendingFiles(files);
+    if (files.length > 0) {
+      const firstFile = files[0];
+      const previewUrl = URL.createObjectURL(firstFile);
+      setPreviewFile({ uid: firstFile.uid || firstFile.name, url: previewUrl, name: firstFile.name });
+      setCurrentFileIndex(0);
+      setIsModalVisible(true);
+    }
+  };
+  
+
+    // const handleFileChange = ({ fileList }) => {
+    //     if (fileList.length === 0) return;
+    //     console.log(fileList);
+    //     setPreviewFile(null);
+    //     setPendingFiles(null);
+    //     setEditedFile(null); 
+    //     // Preview selected file
+    //     const file = fileList[fileList.length-1].originFileObj;
+    //     const previewUrl = URL.createObjectURL(file);
+    //     // Show confirmation popup before uploading
+    //     setPreviewFile({ uid: file.uid, url: previewUrl });
+    //     setPendingFiles(file);
+    //     setIsModalVisible(true); // Show modal to confirm upload
+    // };
     
     const handleEditUploadedFile = () => {
         if (previewFile) {
@@ -188,94 +226,212 @@ const ImageUploadPage = () => {
         setIsEditorVisible(false);
         setIsModalVisible(true);
     };
+
+
+    // Inside your component:
+const getCloneNumber = (originalFileName) => {
+    // Assume originalFileName is something like "dog.jpg"
+    const dotIndex = originalFileName.lastIndexOf('.');
+    const extension = dotIndex !== -1 ? originalFileName.substring(dotIndex + 1) : "";
+    const baseName = dotIndex !== -1 ? originalFileName.substring(0, dotIndex) : originalFileName;
     
+    // Look at current images to find clones matching pattern baseName(number).extension
+    let maxNumber = -1;
+    images.forEach((img) => {
+      // Create a regex like: ^dog\((\d+)\)\.jpg$
+      const regex = new RegExp(`^${baseName}\\((\\d+)\\)\\.${extension}$`);
+      const match = img.name.match(regex);
+      if (match && match[1]) {
+        const num = parseInt(match[1], 10);
+        if (num > maxNumber) {
+          maxNumber = num;
+        }
+      }
+    });
+    // Next clone number is maxNumber+1 (if no clones exist, returns 0)
+    return maxNumber + 1;
+  };
+  
+  const handleCloneFile = async (image) => {
+    try {
+      // Fetch the file blob from the original image URL
+      const response = await fetch(image.url);
+      if (!response.ok) {
+        throw new Error("Failed to fetch the file. Check CORS settings on the file host.");
+      }
+      const blob = await response.blob();
+  
+      // Determine the file extension and base name
+      const dotIndex = image.name.lastIndexOf('.');
+      const extension = dotIndex !== -1 ? image.name.substring(dotIndex + 1) : "";
+      const baseName = dotIndex !== -1 ? image.name.substring(0, dotIndex) : image.name;
+  
+      // Determine the clone number: if there are already clones, use the next number
+      const cloneNumber = getCloneNumber(image.name);
+      const clonedFileName = `${baseName}(${cloneNumber}).${extension}`;
+  
+      // Create a new File object for the cloned file
+      const clonedFile = new File([blob], clonedFileName, { type: blob.type });
+  
+      // Prepare form data for upload (using your existing API endpoint)
+      const uploadDate = startDate || moment().format("YYYY-MM-DD");
+      const formData = new FormData();
+      formData.append("file", clonedFile);
+      formData.append("uploadDate", uploadDate);
+      formData.append("filename", clonedFileName);
+  
+      // Upload the cloned file using your API
+      const uploadResponse = await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
+        headers: {
+          Authorization: localStorage.getItem('token'),
+          "username": userdetails?.userName,
+        },
+      });
+  
+      const newImageUrl = uploadResponse.data.imageUrl;
+      if (!newImageUrl) {
+        message.error("No image URL returned from server!");
+        return;
+      }
+  
+      // Create a new image object (using a new unique uid)
+      const newImage = {
+        uid: uuidv4(), // Using UUID for uniqueness
+        name: clonedFileName,
+        status: 'done',
+        url: newImageUrl,
+        uploadDate,
+      };
+  
+      // Update state so the cloned file shows in the UI (and later on refresh)
+      setImages((prev) => [newImage, ...prev]);
+      setFilteredImages((prev) => [newImage, ...prev]);
+      notification.success({ message: "Cloned", description: "File cloned successfully" });
+    } catch (error) {
+      console.error("Clone Error:", error);
+      message.error("Failed to clone file. " + error.message);
+    }
+  };
+  
+      
+    
+      // ------------------------------
+      // EDIT HANDLER: Open editor if file has valid URL
+      // ------------------------------
+      const handleEditFile = (image) => {
+        if (!image.url) {
+          message.error("This image does not have a valid URL for editing.");
+          return;
+        }
+        setSelectedImage(image);
+        setIsEditorVisible(true);
+        // Optionally close other modals:
+        setIsModalVisible(false);
+      };
+    
+    // --- Modified: Handle sequential upload for multiple files ---
     const handleConfirmUpload = async () => {
-        let fileToUpload = editedFile || pendingFile;
-
+        // Get the current file
+        let fileToUpload = editedFile || (pendingFiles && pendingFiles[currentFileIndex]);
+        
         if (!previewFile || !userdetails?.userName || !fileInputName.trim()) {
-            message.error("User name is missing, no file selected, or file name is empty!");
-            return;
+          message.error("User name is missing, no file selected, or file name is empty!");
+          return;
         }
-
-        // If the file is from a URL, convert it into a File object before uploading
-        if (previewFile.url) {
-            try {
-                const response = await fetch(previewFile.url);
-                if (!response.ok) {
-                    message.error("Failed to fetch image from URL.");
-                    return;
-                }
-
-                const blob = await response.blob();
-                fileToUpload = new File([blob], `${fileInputName.trim()}.jpg`, { type: blob.type });
-            } catch (error) {
-                console.error("Error fetching file from URL:", error);
-                return;
+        
+        // If uploading from a URL, convert it to a File object
+        if (previewFile.url && previewFile.url.startsWith("http")) {
+          try {
+            const response = await fetch(previewFile.url);
+            if (!response.ok) {
+              message.error("Failed to fetch image from URL.");
+              return;
             }
+            const blob = await response.blob();
+            fileToUpload = new File([blob], `${fileInputName.trim()}.jpg`, { type: blob.type });
+          } catch (error) {
+            console.error("Error fetching file from URL:", error);
+            return;
+          }
         }
-        //Ensure `fileToUpload` exists before checking `size`
+        
         if (!fileToUpload) {
-            message.error("No file available for upload!");
-            return;
+          message.error("No file available for upload!");
+          return;
         }
-         // Check file size (Limit: 5MB)
-        const MAX_FILE_SIZE = 1024 * 1024; // 5MB
+        
+        // Set file size limits: 5MB for images, 100MB for videos.
+        let MAX_FILE_SIZE = 5 * 1024 * 1024;
+        if (fileToUpload.type.startsWith("video/")) {
+          MAX_FILE_SIZE = 100 * 1024 * 1024;
+        }
         if (fileToUpload.size > MAX_FILE_SIZE) {
-            message.error("❌ File size exceeds 5MB limit! Please upload a smaller file.");
-            return;
+          message.error(`❌ File size exceeds ${MAX_FILE_SIZE / (1024 * 1024)}MB limit!`);
+          return;
         }
-
+        
         const uniqueFilename = `${Date.now()}-${fileInputName.trim()}${fileToUpload.name.substring(fileToUpload.name.lastIndexOf("."))}`;
         const uploadDate = startDate || moment().format("YYYY-MM-DD");
-    
         const formData = new FormData();
         formData.append("file", fileToUpload);
         formData.append("uploadDate", uploadDate);
-        formData.append("filename", uniqueFilename); // 🔹 Send unique filename
-    
+        formData.append("filename", uniqueFilename);
+        
         try {
-            const response = await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
-                headers: {
-                    Authorization: localStorage.getItem('token'),
-                    "Content-Type": "multipart/form-data",
-                    "username": userdetails?.userName,
-                },
-            });
-    
-            const newImageUrl = response.data.imageUrl;
-            if (!newImageUrl) {
-                message.error("No image URL returned from server!");
-                return;
-            }
-            // 🔹 Add image with selected date
-            const newImage = { 
-                uid: Date.now(),
-                name: fileInputName.trim(), // Save the chosen filename
-                status: 'done', 
-                url: newImageUrl, 
-                uploadDate 
-            };
-    
-            setImages((prevImages) => [newImage, ...prevImages]);
-            setFilteredImages((prevImages) => [newImage, ...prevImages]);
-            // Show success notification
-            notification.success({
-                message: "Upload Successful",
-                description: "Your file has been uploaded successfully!",
-            });
-            // Refresh images
-            setTimeout(fetchUserImages, 500);  
+          const response = await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
+            headers: {
+              Authorization: localStorage.getItem('token'),
+              "username": userdetails?.userName,
+            },
+          });
+        
+          const newImageUrl = response.data.imageUrl;
+          if (!newImageUrl) {
+            message.error("No image URL returned from server!");
+            return;
+          }
+          // Create a new image object
+          const newImage = { 
+            uid: Date.now(),
+            name: fileInputName.trim(),
+            status: 'done', 
+            url: newImageUrl, 
+            uploadDate 
+          };
+        
+          setImages(prev => [newImage, ...prev]);
+          setFilteredImages(prev => [newImage, ...prev]);
+          notification.success({
+            message: "Upload Successful",
+            description: "Your file has been uploaded successfully!",
+          });
+          setTimeout(fetchUserImages, 500);  
         } catch (error) {
-            console.error("Upload Error:", error.response ? error.response.data : error.message);
+          console.error("Upload Error:", error.response ? error.response.data : error.message);
         }
-        setIsModalVisible(false);
-        setPreviewFile(null);
-        setPendingFile(null);
-        setEditedFile(null);
-        setSelectedImage(null);
-        setFileInputName("");
-        setUrlInput("");
-    };
+        
+        // Move to the next file if available:
+        const nextIndex = currentFileIndex + 1;
+        if (pendingFiles && pendingFiles.length && nextIndex < pendingFiles.length) {
+          const nextFile = pendingFiles[nextIndex];
+          const previewUrl = URL.createObjectURL(nextFile);
+          setPreviewFile({ uid: nextFile.uid || nextFile.name, url: previewUrl, name: nextFile.name });
+          setCurrentFileIndex(nextIndex);
+          setFileInputName("");
+          setEditedFile(null);
+        } else {
+          // All files processed—close modal and clear states
+          setIsModalVisible(false);
+          setUploadFileList([]);
+          setPendingFiles([]);
+          setPreviewFile(null);
+          setCurrentFileIndex(0);
+          setFileInputName("");
+          setEditedFile(null);
+          setUploadKey(Date.now());
+        }
+      };
+      
     
     const handleKeyChange = (key) => {
         setSelectedKey(key);
@@ -436,6 +592,20 @@ const ImageUploadPage = () => {
         }
     };
 
+    const extractDisplayName = (name) => {
+        if (!name) return '';
+        // Split by "/" and take the last part.
+        const lastSegment = name.split('/').pop();
+        // Split by "-" and check if there's at least 2 parts.
+        const dashParts = lastSegment.split('-');
+        if (dashParts.length > 1) {
+          // Then split the second part by "." to remove the extension.
+          const dotParts = dashParts[1].split('.');
+          return dotParts[0] || name;
+        }
+        return name;
+    };
+
     return (
         <div style={{ padding: '20px' }}>
             <CreateCampaign 
@@ -587,15 +757,29 @@ const ImageUploadPage = () => {
                     onChange={(e) => setUrlInput(e.target.value)}
                     style={{ width: '300px', marginRight: '10px' }}
                 />
-                <Button type="primary" onClick={handleUrlUpload} icon={<UploadOutlined />}>
+                {/* <Button type="primary" onClick={handleUrlUpload} icon={<UploadOutlined />}>
+                    Upload from URL
+                </Button> */}
+                <Button type="primary" onClick={() => {
+                    if (!urlInput.trim()) {
+                        message.error("Please enter a valid image URL.");
+                        return;
+                    }
+                    // Set preview from URL
+                    setPreviewFile({ url: urlInput, name: `image_${Date.now()}.jpg` });
+                    setFileInputName(""); 
+                    setIsModalVisible(true);
+                    }} icon={<UploadOutlined />}>
                     Upload from URL
                 </Button>
                 <Upload
+                    key={uploadKey}
+                    fileList={uploadFileList} // Controlled file list
                     multiple
                     showUploadList={false}
                     beforeUpload={() => false}
                     onChange={handleFileChange}
-                    accept=".png,.jpg,.jpeg"
+                    accept=".png,.jpg,.jpeg,.mp4,.mov"
                 >
                     <Button style={{marginLeft: '10px'}} icon={<UploadOutlined />}>Select Files</Button>
                 </Upload>
@@ -609,99 +793,147 @@ const ImageUploadPage = () => {
                 {filteredImages.map((image) => {
                     const isSelected = selectedImages.some((img) => img.uid === image.uid);
                     return (
-                        <div 
-                            key={image.uid} 
-                            style={{
-                                position: 'relative', 
-                                width: '150px', 
-                                height: '150px', 
-                                cursor: 'pointer',
-                                borderRadius: '8px',
-                                overflow: 'hidden'
-                            }}
-                            onMouseEnter={() => setHoveredImage(image.uid)}
-                            onMouseLeave={() => setHoveredImage(null)}
-                            onClick={() => handleImageSelect(image)}
-                        >
-                            {/* Checkmark Badge for Selected Images */}
-                            {isSelected && (
-                                <div style={{
-                                    position: 'absolute',
-                                    top: '8px',
-                                    right: '8px',
-                                    width: '24px',
-                                    height: '24px',
-                                    backgroundColor: 'blue',
-                                    color: 'white',
-                                    borderRadius: '50%',
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    fontSize: '16px',
-                                    fontWeight: 'bold',
-                                    zIndex: 10
-                                }}>
-                                    ✓
-                                </div>
-                            )}
-                            <img
-                                src={image.url}
-                                alt="Uploaded Image"
-                                style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }}
-                            />
-                            <p>
-                                 {image?.name}
-                            </p>
-                            {/* View & Delete Icons (Show Only on Hover) */}
-                            {hoveredImage === image.uid && (
-                                <div 
-                                    style={{
+                        <div>
+                            <div 
+                                key={image.uid} 
+                                style={{
+                                    position: 'relative', 
+                                    width: '150px', 
+                                    height: '150px', 
+                                    cursor: 'pointer',
+                                    borderRadius: '8px',
+                                    overflow: 'hidden'
+                                }}
+                                onMouseEnter={() => setHoveredImage(image.uid)}
+                                onMouseLeave={() => setHoveredImage(null)}
+                                onClick={() => handleImageSelect(image)}
+                            >
+                                {/* Checkmark Badge for Selected Images */}
+                                {isSelected && (
+                                    <div style={{
                                         position: 'absolute',
-                                        top: 0,
-                                        left: 0,
-                                        width: '100%',
-                                        height: '100%',
-                                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                                        top: '8px',
+                                        right: '8px',
+                                        width: '24px',
+                                        height: '24px',
+                                        backgroundColor: 'blue',
+                                        color: 'white',
+                                        borderRadius: '50%',
                                         display: 'flex',
                                         justifyContent: 'center',
                                         alignItems: 'center',
-                                        gap: '10px',
-                                        borderRadius: '8px'
+                                        fontSize: '16px',
+                                        fontWeight: 'bold',
+                                        zIndex: 10
+                                    }}>
+                                        ✓
+                                    </div>
+                                )}
+                                <img
+                                    src={image.url}
+                                    alt="Uploaded Image"
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }}
+                                />
+                                {/* <p style={{fontWeight: '300', fontSize: '14px', marginBottom:'10px'}}>
+                                    {image.name}
+                                </p> */}
+                                
+                                {/* View & Delete Icons (Show Only on Hover) */}
+                                {hoveredImage === image.uid && (
+                                    <div 
+                                        style={{
+                                            position: 'absolute',
+                                            top: 0,
+                                            left: 0,
+                                            width: '100%',
+                                            height: '100%',
+                                            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            gap: '10px',
+                                            borderRadius: '8px'
+                                        }}
+                                    >
+                                        {/* View Icon */}
+                                        <Button 
+                                            type="text"
+                                            shape="circle"
+                                            icon={<EyeOutlined />} 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleViewImage(image);
+                                            }}
+                                            style={{
+                                                color: 'white',
+                                                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                                                border: 'none'
+                                            }}
+                                        />
+                                        {/* Edit Icon */}
+                                        <Button 
+                                            type="text"
+                                            shape="circle"
+                                            icon={<EditOutlined />} 
+                                            onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleEditFile(image);
+                                            }}
+                                            style={{
+                                                position: 'absolute',
+                                                top: '8px',
+                                                left: '8px',                                
+                                                color: 'white',
+                                                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                                                border: 'none'
+                                            }}
+                                        />
+                                        {/* Delete Icon */}
+                                        <Button 
+                                            type="text"
+                                            shape="circle"
+                                            icon={<DeleteOutlined />} 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                showDeleteModal(image);
+                                            }}
+                                            style={{
+                                                color: 'red',
+                                                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                                                border: 'none'
+                                            }}
+                                        />
+                                    </div>
+                                    
+                                )}
+                            </div>
+                            <div style={{display: 'flex', justifyContent: 'center'}}>
+                                {/* <p style={{ fontWeight: '300', fontSize: '14px', marginTop: '8px' }}>
+                                    {image.name && image.name.split('/').pop().split('-')[1].split('.')[0]}
+                                </p> */}
+                                <p style={{ fontWeight: '300', fontSize: '14px', marginTop: '8px' }}>
+                                    {image.name ? extractDisplayName(image.name) : ''}
+                                </p>
+
+                                <Button 
+                                    type="text"
+                                    shape="circle"
+                                    icon={<CopyOutlined />} 
+                                    onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleCloneFile(image);
                                     }}
-                                >
-                                    {/* View Icon */}
-                                    <Button 
-                                        type="text"
-                                        shape="circle"
-                                        icon={<EyeOutlined />} 
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleViewImage(image);
-                                        }}
-                                        style={{
-                                            color: 'white',
-                                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                                            border: 'none'
-                                        }}
-                                    />
-                                    {/* Delete Icon */}
-                                    <Button 
-                                        type="text"
-                                        shape="circle"
-                                        icon={<DeleteOutlined />} 
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            showDeleteModal(image);
-                                        }}
-                                        style={{
-                                            color: 'red',
-                                            backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                                            border: 'none'
-                                        }}
-                                    />
-                                </div>
-                            )}
-                        </div>
+                                    style={{
+                                        color: 'grey',
+                                        // backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                                        border: 'none',
+                                        size: '10px',
+                                        marginTop: '0px',
+                                        marginLeft: '8px'
+                                    }}
+                                />                                                  
+                            </div>
+                        </div>  
                     );
                 })}
             </div>
@@ -735,9 +967,29 @@ const ImageUploadPage = () => {
             </Modal>
             {/* Confirmation Modal for Uploaded Image */}
             <Modal
-                title="Confirm Upload"
+                title={
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span>Confirm Upload</span>
+                        {pendingFiles && pendingFiles.length > 1 && (
+                            <Badge 
+                                count={`${currentFileIndex + 1} / ${pendingFiles.length}`}
+                                style={{ backgroundColor: '#52c41a', marginRight: '20px' }}
+                            />
+                        )}
+                    </div>
+                }
                 open={isModalVisible}
                 onCancel={handleCancel}
+                onAfterClose={() => {
+                    // Clear all file-related states when modal fully closes
+                    setPendingFiles([]);
+                    setUploadFileList([]);
+                    setCurrentFileIndex(0);
+                    setPreviewFile(null);
+                    setFileInputName("");
+                    setEditedFile(null);
+                    setUploadKey(Date.now());
+                  }}
                 footer={[
                     <Button key="edit" type="primary" onClick={handleEditUploadedFile} icon={<EditOutlined />}>
                         Edit
@@ -749,19 +1001,38 @@ const ImageUploadPage = () => {
             >
                 {previewFile && (
                     <>
-                        <img
+                        {(() => {
+                        const ext = previewFile.name.split('.').pop().toLowerCase();
+                        if (ext === 'mp4' || ext === 'mov') {
+                            return (
+                            <video
+                                width="100%"
+                                height="auto"
+                                controls
+                                style={{ borderRadius: '8px' }}
+                            >
+                                <source src={previewFile.url} type={`video/${ext}`} />
+                                Your browser does not support the video tag.
+                            </video>
+                            );
+                        }
+                        return (
+                            <img
                             src={previewFile.url}
                             alt="Uploaded Preview"
-                            style={{ width: "100%", height: "auto", borderRadius: "8px" }}
-                        />
+                            style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
+                            />
+                        );
+                        })()}
                         <Input 
-                            placeholder="Enter file name" 
-                            value={fileInputName}
-                            onChange={(e) => setFileInputName(e.target.value)}
-                            style={{ marginTop: 10 }}
+                        placeholder="Enter file name" 
+                        value={fileInputName}
+                        onChange={(e) => setFileInputName(e.target.value)}
+                        style={{ marginTop: 10 }}
                         />
                     </>
-                )}   
+                )}
+  
             </Modal>
             {/* Image Editor */}
             {isEditorVisible && selectedImage && (

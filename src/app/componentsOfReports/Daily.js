@@ -53,7 +53,7 @@ const selectTimezone = {
 };
 
 
-const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments}) => {
+const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage}) => {
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -720,9 +720,15 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
     };
     const onGridReady = (params, gridId, gridRef) => {
         gridRef.current = params;
-        params.api.applyColumnState({ state: columnDefs, applyOrder: true });
+        params.api.applyColumnState({ state: columnDefs || [], applyOrder: true });
         params.api.addEventListener('dragStopped', (e) => debouncedHandleColumnMove(e, gridId));
     };
+    
+    // const onGridReady = (params, gridId, gridRef) => {
+    //     gridRef.current = params;
+    //     params.api.applyColumnState({ state: columnDefs, applyOrder: true });
+    //     params.api.addEventListener('dragStopped', (e) => debouncedHandleColumnMove(e, gridId));
+    // };
     const GroupCellRenderer = (props) => {
         const [tooltipText, setTooltipText] = useState("Copy to clipboard");
 
@@ -803,6 +809,13 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
             oneTimeFetch.current = false;
         }
     }, [oneTimeFetch.current]);
+
+    useEffect(() => {
+        if (refreshpage === "Refresh2") {
+            handleReFetchData();
+        }
+    }
+    , [refreshpage]);
 
     useEffect(() => {
         if (gridRef1.current && gridRef1.current.api) {

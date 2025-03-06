@@ -54,7 +54,7 @@ const selectTimezone = {
 };
 
 
-const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments}) => {
+const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage}) => {
     const {theme} = useTokenContext(); 
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -557,9 +557,15 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
     };
     const onGridReady = (params, gridId, gridRef) => {
         gridRef.current = params;
-        params.api.applyColumnState({ state: columnDefs, applyOrder: true });
+        params.api.applyColumnState({ state: columnDefs || [], applyOrder: true });
         params.api.addEventListener('dragStopped', (e) => debouncedHandleColumnMove(e, gridId));
     };
+    
+    // const onGridReady = (params, gridId, gridRef) => {
+    //     gridRef.current = params;
+    //     params.api.applyColumnState({ state: columnDefs, applyOrder: true });
+    //     params.api.addEventListener('dragStopped', (e) => debouncedHandleColumnMove(e, gridId));
+    // };
     const GroupCellRenderer = (props) => {
         const [tooltipText, setTooltipText] = useState("Copy to clipboard");
 
@@ -657,6 +663,12 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
             oneTimeFetch.current = false;
         }
     }, [oneTimeFetch.current]);
+    useEffect(() => {
+        if (refreshpage === "Refresh5" && newRevenuePratner === "FB_DomainActive") {
+            handleReFetchData();
+        }
+    }
+    , [refreshpage]);
     return(
         <div>
             <div style={contentStyle}>

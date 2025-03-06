@@ -53,7 +53,7 @@ const selectTimezone = {
     DST: 'DSTDate'
 };
 
-const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments}) => {
+const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage}) => {
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -240,6 +240,7 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                 const relatedStatus = getStatusForCampaign(campaignName, newaccount);
                 const relatedComment = getCommentForCampaign(campaignName);
                 const valueWithCount = `${firstColumnValue}`;
+                // console.log(editUserANdTime);
 
                 const [tooltipText, setTooltipText] = useState("Click to Copy");
                 const [isModalVisibles, setIsModalVisibles] = useState(false);
@@ -536,31 +537,47 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                             {valueWithCount}
                         </span>
                         <Modal
-                            title={firstColumnValue}
+                             title={
+                                    firstColumnValue
+                            }
                             visible={isModalVisibles}
                             onOk={handleOks} // Default Ok button functionality
                             onCancel={handleCancels} // Default Cancel button functionality
                             footer={[
-                                <Button
-                                    key="delete"
-                                    type="danger"
-                                    onClick={handleDelete}
-                                    style={{ marginRight: 'auto', border: "1px solid black" }} // Push Delete button to the far left
-                                >
-                                    Delete
-                                </Button>,
-                                <Button key="cancel" onClick={handleCancels}>
-                                    Cancel
-                                </Button>,
-                                <Button key="ok" type="primary" onClick={handleOks}>
-                                    Ok
-                                </Button>,
+                                <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+                                    <div style={{display:'flex', flexDirection:"column"}}>
+                                        <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                            Last Edited Time:
+                                        </span>
+                                        <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                            {editUserANdTime ? editUserANdTime?.editedTime : ""}
+                                        </span>
+
+                                    </div>
+                                    <div>
+                                    <Button
+                                        key="delete"
+                                        type="danger"
+                                        onClick={handleDelete}
+                                        style={{ marginRight: 'auto', border: "1px solid black" }} // Push Delete button to the far left
+                                    >
+                                        Delete
+                                    </Button>
+                                    <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
+                                        Cancel
+                                    </Button>
+                                    <Button key="ok" type="primary" onClick={handleOks} style={{marginLeft:"4px"}}>
+                                        Ok
+                                    </Button>
+                                    </div>
+                                </div>
                             ]}
                         >
                             <Input.TextArea
                                 placeholder="Enter your comments here"
                                 value={comment}
                                 onChange={(e) => setComment(e.target.value)}
+                                style={{color: theme === "dark" ? "white" : "black"}}
                             />
                         </Modal>
                     </div>
@@ -590,14 +607,11 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
        try{
         // console.log(newRevenuePratner);
             setLoading(true);
-            console.log("hi");
             const collectionName = newRevenuePratner === "FB_DomainActive" ? "Facebook_DActive_Names" : newtworkCollections[newRevenuePratner];
             const fetchData = await apiClient.get(`/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${collectionName}`);
             const mainData1 = fetchData.data;
-            console.log("I am");
             const mainData =  mainData1.filter(obj => !("ad_clicks" in obj));
             const specifiedTimeZone = selectTimezone[newtime];
-            console.log("D F");
             const filteredData = mainData && mainData.length > 0 ?
                 mainData.map((eachData) => {
                     let revenueData;
@@ -664,10 +678,9 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
 
             const getFbValue = mainData.filter(item => item.fbCron !== null && item.fbCron !== 'Failed');
             const getRevenueValue = mainData.filter(item => item.revenueCron !== null && item.revenueCron !== 'Failed');
-            console.log("H");
+            
 
             if (mainData.length > 1) {
-                console.log("And");
                 timezone.current = mainData[0].accountTimezone;
                 accountStatus.current = mainData[0].accountStatus;
                 cronStatus.current = mainData[0].cronStatus;
@@ -677,7 +690,6 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
 
                 maxHour.current = findMaxHour(mainData);
                 maxNetworkHour.current = getMaxHour(mainData);
-                console.log("I Live");
             }
             setLiveFixedFooter([
                 {
@@ -700,7 +712,6 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                     ctr: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
                 }
             ]);
-            console.log("Long");
             setRowData(filteredData);
             newRowData.current = filteredData;
             fetchData.status === 200 && console.log("Success") ;
@@ -708,7 +719,6 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
             // setInitialRowData(filteredData);
             // setTrue(false);
             setLoading(false);
-            console.log("With D F");
        }
        catch(error){
             setApiStatus(true);
@@ -743,9 +753,15 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
     };
     const onGridReady = (params, gridId, gridRef) => {
         gridRef.current = params;
-        params.api.applyColumnState({ state: columnDefs, applyOrder: true });
+        params.api.applyColumnState({ state: columnDefs || [], applyOrder: true });
         params.api.addEventListener('dragStopped', (e) => debouncedHandleColumnMove(e, gridId));
     };
+    
+    // const onGridReady = (params, gridId, gridRef) => {
+    //     gridRef.current = params;
+    //     params.api.applyColumnState({ state: columnDefs, applyOrder: true });
+    //     params.api.addEventListener('dragStopped', (e) => debouncedHandleColumnMove(e, gridId));
+    // };
     const GroupCellRenderer = (props) => {
         const [tooltipText, setTooltipText] = useState("Copy to clipboard");
 
@@ -916,6 +932,13 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
             oneTimeFetch.current = false;
         }
     }, [oneTimeFetch.current]);
+
+    useEffect(() => {
+        if (refreshpage === "Refresh1") {
+            handleReFetchData();
+        }
+    }
+    , [refreshpage]);
     
     return(
                     <div style={{ height: "100%", marginBottom: '20px',overflow: "visible" }}>
