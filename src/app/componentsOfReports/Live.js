@@ -53,7 +53,7 @@ const selectTimezone = {
     DST: 'DSTDate'
 };
 
-const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage}) => {
+const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems}) => {
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -67,6 +67,9 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
     
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const [selectedCells, setSelectedCells] = useState([]); // Store selected cell positions
+    const [firstSelectedCell, setFirstSelectedCell] = useState(null); // Store the first selected cell
 
     const timezone = useRef();
 
@@ -181,6 +184,8 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
             // If both campaigns have the same pinned status, fallback to alphabetical sorting
             return campaignA.localeCompare(campaignB);
         },
+
+        cellRenderer: "agGroupCellRenderer", // ✅ Use AG Grid's built-in renderer
         cellRendererParams: {
             suppressCount: false,
             innerRenderer: (params) => {
@@ -583,6 +588,22 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                     </div>
                 );
             }
+        },
+        processCellForClipboard: (params) => {
+            if (params.node.group) {
+                console.log("Processing group column for copy..."); // Debugging log
+    
+                // ✅ Fix: Ensure `params.node.parent` exists before accessing its properties
+                if (!params.node.parent || !params.node.parent.childrenAfterGroup) {
+                    return params.node.key;
+                }
+    
+                // ✅ Only copy group name for the first row in the group
+                return params.node.rowIndex === params.node.parent.childrenAfterGroup[0]?.rowIndex
+                    ? params.node.key
+                    : ""; // Prevent duplicate copies
+            }
+            return params.value; // Normal copy behavior for regular cells
         }
     };
 
@@ -742,12 +763,13 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
         suppressHeaderContextMenu: false,
     };
     const onCellClickedLive = (event) => {
-        if (event.colDef.field === 'adsetname') {
+        // setSelectedCell({ rowIndex: event.node.rowIndex, colId: event.column.getId() });
+
+        if (event.colDef.field === "adsetname") {
             const value = event.value;
             if (value !== undefined) {
                 const url = `/LiveHistory/LiveAdsetHistory/${value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
-                window.open(url, '_blank', 'noopener,noreferrer');
-                // console.log(`Adset clicked: ${value}`);
+                window.open(url, "_blank", "noopener,noreferrer");
             }
         }
     };
@@ -892,36 +914,45 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
     const showModal = () => {
         setIsModalOpen(true);
     };
-    const getMainMenuItems = (params) => {
-        const defaultItems = params.defaultItems.slice();
+    // const getMainMenuItems = (params) => {
+    //     const defaultItems = params.defaultItems.slice();
 
-        // Find and override the "Reset Columns" option
-        const resetColumnsItemIndex = defaultItems.findIndex(item => item === 'resetColumns');
-        if (resetColumnsItemIndex > -1) {
-            defaultItems[resetColumnsItemIndex] = {
-                name: 'Reset Columns (Custom)',
-                action: () => {
-                    changeRRefrst();
-                },
-                cssClasses: ['custom-reset-columns-item']
-            };
-            defaultItems.splice(resetColumnsItemIndex + 1, 0, {
-                name: 'Add New Column',
-                action: showModal,
-                cssClasses: ['custom-new-item'], // Assign a custom class for skyblue background
-            });
-        }
+    //     // Find and override the "Reset Columns" option
+    //     const resetColumnsItemIndex = defaultItems.findIndex(item => item === 'resetColumns');
+    //     if (resetColumnsItemIndex > -1) {
+    //         defaultItems[resetColumnsItemIndex] = {
+    //             name: 'Reset Columns (Custom)',
+    //             action: () => {
+    //                 changeRRefrst();
+    //             },
+    //             cssClasses: ['custom-reset-columns-item']
+    //         };
+    //         defaultItems.splice(resetColumnsItemIndex + 1, 0, {
+    //             name: 'Add New Column',
+    //             action: showModal,
+    //             cssClasses: ['custom-new-item'], // Assign a custom class for skyblue background
+    //         });
+    //     }
 
-        return defaultItems;
-    };
+    //     return defaultItems;
+    // };
     const gridOptions = {
         onColumnMoved: (params) => debouncedHandleColumnMove(params, 'grid1'),
         defaultColDef: {
             suppressMenu: true,
             headerClass: "custom-header" // Apply to all columns by default
 
-        }
+        },
+        ensureDomOrder: false,
     };
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const gridDiv = document.getElementById("myGrid");
+        new agGrid.Grid(gridDiv, gridOptions);
+      
+        // Set column definitions separately after grid initialization
+        gridOptions.api.setColumnDefs(columnDefs);
+    });
     const handleReFetchData = () => {
         functionCall1();
         setApiStatus(false);
@@ -939,6 +970,60 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
         }
     }
     , [refreshpage]);
+
+    // const onCellClickedLive = (event) => {
+    //     setSelectedCell({ rowIndex: event.node.rowIndex, colId: event.column.getId() });
+
+    //     if (event.colDef.field === "adsetname") {
+    //         const value = event.value;
+    //         if (value !== undefined) {
+    //             const url = `/LiveHistory/LiveAdsetHistory/${value.replace(/\//g, "*").replace(/-/g, "^")}`;
+    //             window.open(url, "_blank", "noopener,noreferrer");
+    //         }
+    //     }
+    // };
+
+    // const onRangeSelectionChanged = (params) => {
+    //     const selected = [];
+    //     const rangeSelections = params.api.getCellRanges();
+    
+    //     if (rangeSelections) {
+    //         rangeSelections.forEach((range) => {
+    //             const startRow = Math.min(range.startRow.rowIndex, range.endRow.rowIndex);
+    //             const endRow = Math.max(range.startRow.rowIndex, range.endRow.rowIndex);
+    //             const columns = range.columns.map((col) => col.getColId());
+    
+    //             for (let rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
+    //                 const node = params.api.getDisplayedRowAtIndex(rowIndex);
+    
+    //                 if (!node.group && node.data) { // ✅ Ensures only data rows are selected
+    //                     if (!firstSelectedCell) {
+    //                         setFirstSelectedCell({ rowIndex, colId: columns[0] }); // ✅ Ensure first cell is recorded
+    //                     }
+    //                     selected.push({ rowIndex, columns });
+    //                 }
+    //             }
+    //         });
+    //     }
+    
+    //     setSelectedCells(selected);
+    // };
+    
+    const onCellKeyDown = (params) => {
+        if (params.event.ctrlKey && params.event.key === "c") {
+            params.event.preventDefault(); // Prevent default copy behavior
+    
+            // ✅ Prepare data to copy: Rows separated by \n, Columns by \t
+            const copiedText = selectedCells
+                .map(({ rowIndex, columns }) =>
+                    columns.map((colId) => params.api.getValue(colId, params.api.getDisplayedRowAtIndex(rowIndex))).join("\t")
+                )
+                .join("\n"); // Each row on a new line
+    
+            navigator.clipboard.writeText(copiedText);
+            params.api.copySelectedRangeToClipboard(); // ✅ Restore AG Grid blinking effect
+        }
+    };
     
     return(
                     <div style={{ height: "100%", marginBottom: '20px',overflow: "visible" }}>
@@ -1026,30 +1111,51 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                                         paginationPageSize={100}
                                         paginationPageSizeSelector={[20, 40, 60, 80, 100]}
                                         suppressAggFuncInHeader={true}
+                                        getMainMenuItems={getMainMenuItems}
+    
+                                        // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
+                                        // onCellKeyDown={onCellKeyDown}
                                         // domLayout="normal"
                                         // groupIncludeTotalFooter={rowData.length > 0 ? true : false}
                                         // groupIncludeFooter={rowData.length > 0 ? true : false}
                                         autoGroupColumnDef={autoGroupColumnDefLive}
                                         onGridReady={(params) => onGridReady(params, 'grid1', gridRef)}
-                                        gridOptions={gridOptions}
+                                        gridOptions={{
+                                            ...gridOptions,
+                                            ensureDomOrder: false,
+                                            suppressRowClickSelection: true,
+                                            suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                            enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                            groupSelectsChildren: true, // ✅ Ensures child rows are selected properly
+                                        }}
                                         frameworkComponents={{ GroupCellRenderer }}
                                         groupDisplayType='multipleColumns'
                                         // rowGroupPanelShow='always'
                                         // onFilterChanged={onFilterChanged} // Use the custom filter handler
                                         pinnedBottomRowData={liveFixedFooter}
-                                        getRowStyle={params => {
+                                        suppressCellSelection={true}
+                                        getRowStyle={(params) => {
                                             if (params.node.rowPinned) {
                                                 return {
-                                                    fontWeight: 'bold',
-                                                    backgroundColor: theme === "dark" ? '#1a1918' : '#fff', // Dark mode background should be dark, light mode should be light
-                                                    color: theme === "dark" ? '#fff' : '#000',           // Text color should contrast with the background
+                                                    fontWeight: "bold",
+                                                    backgroundColor: theme === "dark" ? "#1a1918" : "#fff", // Dark mode or light mode
+                                                    color: theme === "dark" ? "#fff" : "#000",
                                                 };
                                             }
-
-                                            return null;
+                                            return null; // Keep other row styles unchanged
                                         }}
-
-                                        getMainMenuItems={getMainMenuItems}
+                                        getCellStyle={(params) => {
+                                            const isSelected = selectedCells.some(
+                                                (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
+                                            );
+                                    
+                                            // ✅ Ensure first cell inside a group is highlighted
+                                            const isFirstSelected = firstSelectedCell &&
+                                                firstSelectedCell.rowIndex === params.node.rowIndex &&
+                                                firstSelectedCell.colId === params.column.getId();
+                                    
+                                            return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
+                                        }}
                                         onFilterChanged={(params) => {
                                             const api = params.api;
                                             const filteredData = [];
