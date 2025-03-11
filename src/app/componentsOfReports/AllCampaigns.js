@@ -53,7 +53,7 @@ const selectTimezone = {
 };
 
 
-const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage}) => {
+const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems}) => {
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -70,6 +70,9 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
     const [fixedFooter, setFixedFooter] = useState([]);
 
     const [isLoading2, setLoading2] = useState(true);
+
+    const [selectedCells, setSelectedCells] = useState([]);
+    const [firstSelectedCell, setFirstSelectedCell] = useState(null);
 
     const timezone = useRef();
 
@@ -653,6 +656,15 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                 window.open(url, '_blank', 'noopener,noreferrer');
             }
         }
+        // ✅ Ensure first selected cell gets highlighted
+        if (event.event.shiftKey || event.event.ctrlKey) {
+            // Add to selection when Shift/Ctrl is pressed
+            setSelectedCells((prev) => [...prev, { rowIndex: event.node.rowIndex, colId: event.column.getId() }]);
+        } else {
+            // Single click selects only one cell
+            setFirstSelectedCell({ rowIndex: event.node.rowIndex, colId: event.column.getId() });
+            setSelectedCells([{ rowIndex: event.node.rowIndex, colId: event.column.getId() }]);
+        }
     };
     const onGridReady = (params, gridId, gridRef) => {
         gridRef.current = params;
@@ -693,27 +705,86 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
     const showModal = () => {
         setIsModalOpen(true);
     };
-    const getMainMenuItems = (params) => {
-        const defaultItems = params.defaultItems.slice();
+    // const getMainMenuItems = (params) => {
+    //     const defaultItems = params.defaultItems.slice();
 
-        // Find and override the "Reset Columns" option
-        const resetColumnsItemIndex = defaultItems.findIndex(item => item === 'resetColumns');
-        if (resetColumnsItemIndex > -1) {
-            defaultItems[resetColumnsItemIndex] = {
-                name: 'Reset Columns (Custom)',
-                action: () => {
-                    changeRRefrst();
-                },
-                cssClasses: ['custom-reset-columns-item']
-            };
-            defaultItems.splice(resetColumnsItemIndex + 1, 0, {
-                name: 'Add New Column',
-                action: showModal,
-                cssClasses: ['custom-new-item'], // Assign a custom class for skyblue background
+    //     // Find and override the "Reset Columns" option
+    //     const resetColumnsItemIndex = defaultItems.findIndex(item => item === 'resetColumns');
+    //     if (resetColumnsItemIndex > -1) {
+    //         defaultItems[resetColumnsItemIndex] = {
+    //             name: 'Reset Columns (Custom)',
+    //             action: () => {
+    //                 changeRRefrst();
+    //             },
+    //             cssClasses: ['custom-reset-columns-item']
+    //         };
+    //         defaultItems.splice(resetColumnsItemIndex + 1, 0, {
+    //             name: 'Add New Column',
+    //             action: showModal,
+    //             cssClasses: ['custom-new-item'], // Assign a custom class for skyblue background
+    //         });
+    //     }
+
+    //     return defaultItems;
+    // };
+
+    // const onRangeSelectionChanged = (params) => {
+    //     // Capture all selected cell positions when range is selected
+    //     const selected = [];
+    //     const rangeSelections = params.api.getCellRanges();
+    
+    //     if (rangeSelections) {
+    //         rangeSelections.forEach((range) => {
+    //             const startRow = Math.min(range.startRow.rowIndex, range.endRow.rowIndex);
+    //             const endRow = Math.max(range.startRow.rowIndex, range.endRow.rowIndex);
+    //             const columns = range.columns.map((col) => col.getColId());
+    
+    //             for (let rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
+    //                 selected.push({ rowIndex, columns });
+    //             }
+    //         });
+    //     }
+    
+    //     setSelectedCells(selected);
+    // };
+    
+    const onCellKeyDown = (params) => {
+        if (params.event.ctrlKey && params.event.key === "c") {
+            params.event.preventDefault(); // Prevent default copy behavior
+    
+            // ✅ Ensure `selectedCells` is not empty
+            if (!selectedCells.length) return;
+    
+            // ✅ Prepare data to copy: Rows separated by \n, Columns by \t
+            const copiedText = selectedCells
+                .map(({ rowIndex, columns }) => {
+                    if (!columns || !Array.isArray(columns)) {
+                        // ✅ Handle case where only one cell is selected
+                        const singleColId = selectedCells[0]?.colId; 
+                        const row = params.api.getDisplayedRowAtIndex(rowIndex);
+                        return row && singleColId ? params.api.getValue(singleColId, row) : "";
+                    }
+                    
+                    // ✅ Multi-cell copying logic
+                    return columns
+                        .map((colId) => {
+                            const row = params.api.getDisplayedRowAtIndex(rowIndex);
+                            return row ? params.api.getValue(colId, row) : "";
+                        })
+                        .join("\t");
+                })
+                .join("\n"); // Each row on a new line
+    
+            // ✅ Copy text to clipboard
+            navigator.clipboard.writeText(copiedText).then(() => {
+                console.log("Copied to clipboard:", copiedText);
+            }).catch((err) => {
+                console.error("Clipboard copy failed:", err);
             });
+    
+            // ✅ Trigger AG Grid’s built-in copy effect (blinking dark blue selection)
+            params.api.copySelectedRangeToClipboard();
         }
-
-        return defaultItems;
     };
 
     const GroupRowRenderer = (props) => {
@@ -833,7 +904,17 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                                                 onGridReady(params, 'grid3', gridRef2);
                                                 params.api.refreshCells(); // Refresh cells to apply the theme dynamically
                                             }}
-                                            gridOptions={gridOptions2}
+    
+                                            // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
+                                            onCellKeyDown={onCellKeyDown}
+                                            gridOptions={{
+                                                ...gridOptions2,
+                                                ensureDomOrder: false,
+                                                suppressRowClickSelection: true,
+                                                suppressClipboardPaste: true,
+                                                enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                enableCellTextSelection: true, // ✅ Allows text selection inside cells
+                                            }}
                                             suppressMenuHide={true}
                                             getMainMenuItems={getMainMenuItems}
                                             pinnedBottomRowData={campaignData.length > 0 ? fixedFooter : []}
@@ -846,6 +927,13 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                                                     };
                                                 }
                                                 return null;
+                                            }}
+                                            getCellStyle={(params) => {
+                                                // Check if the current cell is selected
+                                                const isSelected = selectedCells.some(
+                                                    (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
+                                                );
+                                                return isSelected ? { backgroundColor: "#007bff", color: "#fff" } : {}; // ✅ Highlight only selected cells
                                             }}
                                             onFilterChanged={(params) => {
                                                 const api = params.api;

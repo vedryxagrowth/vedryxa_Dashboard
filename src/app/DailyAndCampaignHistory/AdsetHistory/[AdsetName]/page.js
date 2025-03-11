@@ -24,6 +24,9 @@ export default function AdsetNameAndAccount({params}){
 
     const gridRef = useRef();
 
+    const [selectedCells, setSelectedCells] = useState([]);
+    const [firstSelectedCell, setFirstSelectedCell] = useState(null);
+
     const { theme } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
 
@@ -646,6 +649,15 @@ export default function AdsetNameAndAccount({params}){
               }, 1500);
           }).catch(err => console.error("Copy failed:", err));
       }
+      // ✅ Ensure first selected cell gets highlighted
+      if (params.event?.shiftKey || params.event?.ctrlKey) {
+          // Add to selection when Shift/Ctrl is pressed
+          setSelectedCells((prev) => [...prev, { rowIndex: params.node.rowIndex, colId: params.column.getId() }]);
+      } else {
+          // Single click selects only one cell
+          setFirstSelectedCell({ rowIndex: params.node.rowIndex, colId: params.column.getId() });
+          setSelectedCells([{ rowIndex: params.node.rowIndex, colId: params.column.getId() }]);
+      }
     };
 
     const gridOptions = {
@@ -1022,6 +1034,45 @@ export default function AdsetNameAndAccount({params}){
         filter: true,    // Enable filtering for all columns
     };
 
+    const onCellKeyDown = (params) => {
+      if (params.event.ctrlKey && params.event.key === "c") {
+          params.event.preventDefault(); // Prevent default copy behavior
+  
+          // ✅ Ensure `selectedCells` is not empty
+          if (!selectedCells.length) return;
+  
+          // ✅ Prepare data to copy: Rows separated by \n, Columns by \t
+          const copiedText = selectedCells
+              .map(({ rowIndex, columns }) => {
+                  if (!columns || !Array.isArray(columns)) {
+                      // ✅ Handle case where only one cell is selected
+                      const singleColId = selectedCells[0]?.colId; 
+                      const row = params.api.getDisplayedRowAtIndex(rowIndex);
+                      return row && singleColId ? params.api.getValue(singleColId, row) : "";
+                  }
+                  
+                  // ✅ Multi-cell copying logic
+                  return columns
+                      .map((colId) => {
+                          const row = params.api.getDisplayedRowAtIndex(rowIndex);
+                          return row ? params.api.getValue(colId, row) : "";
+                      })
+                      .join("\t");
+              })
+              .join("\n"); // Each row on a new line
+  
+          // ✅ Copy text to clipboard
+          navigator.clipboard.writeText(copiedText).then(() => {
+              console.log("Copied to clipboard:", copiedText);
+          }).catch((err) => {
+              console.error("Clipboard copy failed:", err);
+          });
+  
+          // ✅ Trigger AG Grid’s built-in copy effect (blinking dark blue selection)
+          params.api.copySelectedRangeToClipboard();
+      }
+  };
+
     const getRandomColor = () => {
         const letters = '0123456789ABCDEF';
         let color = '#';
@@ -1298,7 +1349,14 @@ export default function AdsetNameAndAccount({params}){
                       columnDefs={columnDefs}
                       defaultColDef={defaultColDef}
                       pinnedBottomRowData={domainFixedFooter}
-                      gridOptions={gridOptions}
+                      onCellClicked={onCellClicked}
+                      gridOptions={{
+                          ensureDomOrder: false,
+                          suppressRowClickSelection: true,
+                          suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                          enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                          groupSelectsChildren: true, // ✅ Ensures child rows are selected properly
+                      }}
                       onGridReady={(params) => onGridReady(params, 'grid1', gridRef)}
                       pagination={true}
                       getRowStyle={(params) => {
@@ -1310,6 +1368,19 @@ export default function AdsetNameAndAccount({params}){
                               };
                           }
                           return null;
+                      }}
+                      onCellKeyDown={onCellKeyDown}
+                      getCellStyle={(params) => {
+                        const isSelected = selectedCells.some(
+                            (cell) => cell.rowIndex === params.node.rowIndex && cell.colId === params.column.getId()
+                        );
+                
+                        // ✅ Ensure first selected cell is highlighted
+                        const isFirstSelected = firstSelectedCell &&
+                            firstSelectedCell.rowIndex === params.node.rowIndex &&
+                            firstSelectedCell.colId === params.column.getId();
+                
+                        return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
                       }}
                       groupDisplayType="multipleColumns"
                       suppressAggFuncInHeader={true}
