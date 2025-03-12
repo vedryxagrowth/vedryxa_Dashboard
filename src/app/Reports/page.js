@@ -669,16 +669,15 @@ const MyTablePage = () => {
 
             }
         }
-        if (params.node.aggData !== undefined && params.node.aggData !== null) {
-            const { revenue = 0, spend = 0 } = params.node.aggData; // ✅ Default values to prevent errors
-        
-            if (revenue !== "0.00" && revenue !== undefined) {
+        if (params.node.aggData !== undefined) {
+            const { revenue, spend } = params.node.aggData;
+            if (revenue !== "0.00" || revenue !== undefined) {
                 const RPC = ((revenue - spend) / revenue) * 100;
                 if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
-                    console.warn("Invalid RPC value:", RPC);
-                } else {
-                    console.log("RPC:", RPC);
+                    return `0`;
                 }
+                return `${Math.round(RPC * 100) / 100}`;
+
             }
         }
 
