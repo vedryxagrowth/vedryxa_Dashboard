@@ -1428,7 +1428,12 @@ const UsersTable = () => {
                                     </Col> 
                                 </Row>
                             </Col>
-                            <Col xs={24} md={8}>
+                            <Col xs={24} sm={12} md={3}>
+                                <div style={{marginLeft: '0px', fontWeight: 'bold', color: theme === 'dark' ? '#fff' : '#333' }}>
+                                    Total.No Of Records {filteredData.length}
+                                </div>
+                            </Col>
+                            <Col xs={24} md={5}>
                                 <Button 
                                     type="default" 
                                     icon={<ReloadOutlined />} 
@@ -1436,7 +1441,7 @@ const UsersTable = () => {
                                     onClick={refreshUsers}  // Call refresh function when clicked
                                 >
                                 </Button>
-                                <Button type="primary" style={{ float: "right" }} onClick={() => setDrawerVisible(true)}>
+                                <Button style={{ float: "right", border: 'none', backgroundColor: '#C7F39A' }} onClick={() => setDrawerVisible(true)}>
                                     Create User
                                 </Button>
                             </Col>
@@ -1531,7 +1536,12 @@ const UsersTable = () => {
                                     </Col>  
                                 </Row>
                             </Col>
-                            <Col xs={24} md={8}>
+                            <Col xs={24} sm={12} md={3}>
+                                <div style={{marginLeft: '0px', fontWeight: 'bold', color: theme === 'dark' ? '#fff' : '#333' }}>
+                                    Total.No Of Records {accFilteredData.length}
+                                </div>
+                            </Col>
+                            <Col xs={24} md={5}>
                                 <Button 
                                     type="default" 
                                     icon={<ReloadOutlined />} 
@@ -1539,7 +1549,7 @@ const UsersTable = () => {
                                     onClick={refreshAccounts}  // Call refresh function when clicked
                                 >
                                 </Button>
-                                <Button type="primary" style={{ float: "right", marginLeft: "5%" }} onClick={shownnewaccountdrawar}>
+                                <Button style={{ float: "right", border: 'none', backgroundColor: '#C7F39A' }} onClick={shownnewaccountdrawar}>
                                     Add New Account
                                 </Button>
                             </Col>
@@ -1628,7 +1638,12 @@ const UsersTable = () => {
                                     </Col>                    
                                 </Row>
                             </Col>
-                            <Col xs={24} md={8}>
+                            <Col xs={24} sm={12} md={3}>
+                                <div style={{marginLeft: '0px', fontWeight: 'bold', color: theme === 'dark' ? '#fff' : '#333' }}>
+                                    Total.No Of Records {networkFilteredData.length}
+                                </div>
+                            </Col>
+                            <Col xs={24} md={5}>
                                 <Button 
                                     type="default" 
                                     icon={<ReloadOutlined />} 

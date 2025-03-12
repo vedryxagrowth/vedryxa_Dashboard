@@ -450,6 +450,7 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
             let totalCpc = 0;
             let totalFbleads = 0;
             let totalFbclicks = 0;
+            let totalFblinkclicks = 0;
             let totalImpressions = 0;
             let totalConversions = 0;
             const specifiedTimeZone = selectTimezone[newtime];
@@ -467,6 +468,7 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
                     totalFbclicks += eachData.fbClicks;
                     totalFbleads += eachData.fbLeads;
                     totalImpressions += eachData.impressions;
+                    totalFblinkclicks += eachData.fbLinkClicks;
                 }) : null;
 
             const filteredData = mainData && mainData.length > 0 ?
@@ -486,6 +488,10 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
                     rpc = !isNaN(rpc) ? rpc : 0;
                     ncpl = !isNaN(ncpl) ? ncpl : 0;
                     fMargin = !isNaN(fMargin) ? `${fMargin}%` : '0%';
+                    const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
+                    const spend = parseFloat(eachData.spend);
+                    const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0 ? 0 : Math.round((spend / fbLClicks)*100)/100;
+
                     return (
                         {
                             campaignname: eachData.campaign_name,
@@ -501,7 +507,9 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
                             fbleads: parseInt(eachData.fbLeads),
                             conversions: parseInt(conversions),
                             cpc: parseFloat(eachData.cpc),
+                            cpclinkclicks: cpcLinkClicks,
                             fbclicks: parseInt(eachData.fbClicks),
+                            fblinkclicks: parseInt(eachData.fblinkClicks),
                             impressions: parseInt(eachData.impressions),
                             ctr: ctr,
                             rpc: parseFloat(rpc),
@@ -661,6 +669,8 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
             roi: parseFloat(((keywordData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - keywordData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / keywordData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
             cpc: parseFloat((keywordData.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / keywordData.length).toFixed(2)),
             fbclicks: parseFloat(keywordData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
+            cpclinkclicks: parseFloat((keywordData.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks), 0) / keywordData.length).toFixed(2)),
+            fblinkclicks: parseFloat(keywordData.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0).toFixed(2)),
             impressions: parseFloat(keywordData.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
             ctr: parseFloat((keywordData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / keywordData.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
         }
