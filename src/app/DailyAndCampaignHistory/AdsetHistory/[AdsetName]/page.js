@@ -116,6 +116,29 @@ export default function AdsetNameAndAccount({params}){
         return 0;
     };
 
+    const getCpcLc = (params) => {
+        if (params.data !== undefined) {
+            const { spend, fblinkclicks } = params.data;
+            if (fblinkclicks !== 0) {
+                const RPC = spend / fblinkclicks;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return Number(RPC.toFixed(2));
+
+            }
+        }
+        if (params.node.aggData !== undefined) {
+            const { spend, fblinkclicks } = params.node.aggData;
+            if (fblinkclicks !== 0) {
+                const RPC = spend / fblinkclicks;
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        return 0;
+    }
+
     const getRpc = (params) => {
         if (params.data !== undefined) {
             const { revenue, conversions} = params.data;
@@ -440,6 +463,9 @@ export default function AdsetNameAndAccount({params}){
             rpc = !isNaN(rpc) ? rpc : 0;
             ncpl = !isNaN(ncpl) ? ncpl : 0;
             fMargin = !isNaN(fMargin) ? `${fMargin}%`: '0%';
+            const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
+            const spend = parseFloat(eachData.spend);
+            const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0 ? 0 : Math.round((spend / fbLClicks)*100)/100;
             return(
                 {
                     campaignName: eachData.campaign_name,
@@ -458,10 +484,12 @@ export default function AdsetNameAndAccount({params}){
                     ncpl:ncpl.toString(),
                     roi: roi,
                     cpc: (eachData.cpc).toString(),
+                    cpclinkclicks: cpcLinkClicks.toString(),
                     fbleads: (eachData.fbLeads).toString(),
                     // filterarion: eachData.fbLeads && parseInt((eachData.fbLeads)) !==0 ? (((parseInt(eachData.fbLeads)-parseInt(eachData.conversions))/parseInt(eachData.fbLeads))*100).toString(2) : 0,
                     filteration: parseInt(eachData.fbLeads) !== 0 ? Math.round((((parseInt(eachData.fbLeads)-parseInt(eachData.conversions))/parseInt(eachData.fbLeads))*100)*100)/100 : 0,
                     fbclicks: (eachData.fbClicks).toString(),
+                    fblinkclicks: (eachData.fbLinkClicks).toString(),
                     impressions: (eachData.impressions).toString(),
                     conversions: conversions.toString(),
                     fmargin: fMargin,
@@ -507,6 +535,8 @@ export default function AdsetNameAndAccount({params}){
               roi: `${(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100}%`,
               cpc: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / filteredData?.length,
               fbclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0),
+              cpclinkclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks), 0) / filteredData?.length,
+              fblinkclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0),
               impressions: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0),
               ctr: `${(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)}%`
           }
@@ -993,10 +1023,28 @@ export default function AdsetNameAndAccount({params}){
           headerToolTip: 'CPC = Spend / FBClicks',
 
       },
+      cpclinkclicks: {
+        headerName: 'CPC_LC',
+        field: 'cpclinkclicks',
+        // aggFunc: cpcSpender,
+        valueGetter:getCpcLc,
+        minWidth: 80,
+        sortable: true,
+        filter: "agNumberColumnFilter",
+        suppressMenu: true,
+        menuTabs: [],
+        headerClass: 'hide-menu', // Add a custom class
+        headerTooltip: "CPC = Spend / FBLinkClicks",
+        
+    },
       fbclicks :{ headerName: 'FBClicks', field: 'fbclicks', width: 110, aggFunc: agFunc, 
           suppressMenu: true,
           menuTabs: [],
           headerClass: 'hide-menu', },
+    fblinkclicks :{ headerName: 'FB_LC', field: 'fblinkclicks', width: 110, aggFunc: agFunc, 
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', },
       impressions : { headerName: 'IMP', field: 'impressions', width: 80, aggFunc: agFunc,
           suppressMenu: true,
           menuTabs: [],
@@ -1434,6 +1482,10 @@ export default function AdsetNameAndAccount({params}){
                                       filteredData.reduce((acc, curr) => acc + parseFloat(curr.cpc || 0), 0) / filteredData.length || 0
                                   ).toFixed(2),
                                   fbclicks: filteredData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks || 0), 0),
+                                  cpclinkclicks: (
+                                    filteredData.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks || 0), 0) / filteredData.length || 0
+                                    ).toFixed(2),
+                                fblinkclicks: filteredData.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks || 0), 0),
                                   impressions: filteredData.reduce((acc, curr) => acc + parseFloat(curr.impressions || 0), 0),
                                   ctr: `${(
                                       (filteredData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks || 0), 0) /

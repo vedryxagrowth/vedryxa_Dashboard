@@ -388,6 +388,8 @@ const MnetLiveAdsetHistory = ({params}) => {
             roi: parseFloat(((rowData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - rowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
             cpc: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / rowData?.length).toFixed(2)),
             fbclicks: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
+            cpclinkclicks: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks), 0) / rowData?.length).toFixed(2)),
+            fblinkclicks: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0).toFixed(2)),
             impressions: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
             ctr: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
         }
@@ -522,6 +524,29 @@ const MnetLiveAdsetHistory = ({params}) => {
         const gridDiv = document.querySelector("#myGrid");
         new agGrid.Grid(gridDiv, gridOptions);
     });
+
+    const getCpcLc = (params) => {
+        if (params.data !== undefined) {
+            const { spend, fblinkclicks } = params.data;
+            if (fblinkclicks !== 0) {
+                const RPC = spend / fblinkclicks;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return Number(RPC.toFixed(2));
+
+            }
+        }
+        if (params.node.aggData !== undefined) {
+            const { spend, fblinkclicks } = params.node.aggData;
+            if (fblinkclicks !== 0) {
+                const RPC = spend / fblinkclicks;
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        return 0;
+    }
     
     const columnDefsObject = {
         date : {
@@ -827,8 +852,26 @@ const MnetLiveAdsetHistory = ({params}) => {
             headerClass: 'hide-menu',
             headerToolTip: 'CPC = Spend / Clicks',
         },
+        cpclinkclicks : {
+            headerName: 'CPC_LC', field: 'cpclinkclicks', 
+            // aggFunc: cpcSpender,
+            comparator: defaultComparator,
+            valueGetter: getCpcLc,
+            width: 85,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            headerToolTip: 'CPC = Spend / FBLinkClicks',
+        },
         fbclicks : {
             headerName: 'FBClicks', field: 'fbclicks', width: 90, aggFunc: spender,
+            comparator: defaultComparator,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
+        fblinkclicks : {
+            headerName: 'FB_LC', field: 'fblinkclicks', width: 90, aggFunc: spender,
             comparator: defaultComparator,
             suppressMenu: true,
             menuTabs: [],
@@ -1010,7 +1053,9 @@ const MnetLiveAdsetHistory = ({params}) => {
                 cpl = Math.round((eachData.spend/eachData.fbLeads)*100)/100;
             } 
             const ncpl = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((eachData.spend/eachData.conversions)*100)/100;
-            
+            const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
+            const spend = parseFloat(eachData.spend);
+            const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0 ? 0 : Math.round((spend / fbLClicks)*100)/100;
             return(
                 {
                     date: eachData[`${timeZone}Date`],
@@ -1027,7 +1072,9 @@ const MnetLiveAdsetHistory = ({params}) => {
                     fbleads: eachData.fbLeads,
                     conversions: eachData.conversions !== null ? eachData.conversions : 0,
                     cpc: eachData.cpc,
+                    cpclinkclicks: cpcLinkClicks,
                     fbclicks: eachData.fbClicks,
+                    fblinkclicks: eachData.fbLinkClicks,
                     impressions: eachData.impressions,
                     rpc:rpc,
                     cpl:cpl,
@@ -1180,6 +1227,8 @@ const MnetLiveAdsetHistory = ({params}) => {
                 roi: `${(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100}%`,
                 cpc: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / filteredData?.length,
                 fbclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0),
+                cpclinkclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks), 0) / filteredData?.length,
+                fblinkclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0),
                 impressions: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0),
                 ctr: `${(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)}%`
             }
@@ -1687,6 +1736,11 @@ const MnetLiveAdsetHistory = ({params}) => {
                                         (filteredData?.length || 1)
                                     ).toFixed(2),
                                     fbclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks || 0), 0),
+                                    cpclinkclicks: (
+                                        filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks || 0), 0) /
+                                        (filteredData?.length || 1)
+                                    ).toFixed(2),
+                                    fblinkclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks || 0), 0),
                                     impressions: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0),
                                     ctr: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0)
                                         ? `${(

@@ -510,6 +510,29 @@ const MyTablePage = () => {
         return 0;
     };
 
+    const getCpcLc = (params) => {
+        if (params.data !== undefined) {
+            const { spend, fblinkclicks } = params.data;
+            if (fblinkclicks !== 0) {
+                const RPC = spend / fblinkclicks;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return Number(RPC.toFixed(2));
+
+            }
+        }
+        if (params.node.aggData !== undefined) {
+            const { spend, fblinkclicks } = params.node.aggData;
+            if (fblinkclicks !== 0) {
+                const RPC = spend / fblinkclicks;
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        return 0;
+    }
+
     const getRpc = (params) => {
         if (params.data !== undefined) {
             const { revenue, conversions } = params.data;
@@ -646,16 +669,15 @@ const MyTablePage = () => {
 
             }
         }
-        if (params.node.aggData !== undefined && params.node.aggData !== null) {
-            const { revenue = 0, spend = 0 } = params.node.aggData; // ✅ Default values to prevent errors
-        
-            if (revenue !== "0.00" && revenue !== undefined) {
+        if (params.node.aggData !== undefined) {
+            const { revenue, spend } = params.node.aggData;
+            if (revenue !== "0.00" || revenue !== undefined) {
                 const RPC = ((revenue - spend) / revenue) * 100;
                 if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
-                    console.warn("Invalid RPC value:", RPC);
-                } else {
-                    console.log("RPC:", RPC);
+                    return `0`;
                 }
+                return `${Math.round(RPC * 100) / 100}`;
+
             }
         }
 
@@ -1181,9 +1203,35 @@ const MyTablePage = () => {
             headerTooltip: "CPC = Spend / FBClicks",
             
         },
+        cpclinkclicks: {
+            headerName: 'CPC_LC',
+            field: 'cpclinkclicks',
+            // aggFunc: cpcSpender,
+            valueGetter:getCpcLc,
+            minWidth: 80,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "CPC = Spend / FBLinkClicks",
+            
+        },
         fbclicks: {
             headerName: 'FBClicks',
             field: 'fbclicks',
+            minWidth: 110,
+            aggFunc: newSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+            
+        },
+        fblinkclicks: {
+            headerName: 'FB_LC',
+            field: 'fblinkclicks',
             minWidth: 110,
             aggFunc: newSpender,
             sortable: true,
@@ -1646,7 +1694,22 @@ const MyTablePage = () => {
             headerTooltip: "CPC = Spend / FBClicks",
 
         },
+        cpclinkclicks: {
+            headerName: 'CPC_LC',
+            field: 'cpclinkclicks',
+            // aggFunc: cpcSpender,
+            valueGetter:getCpcLc,
+            minWidth: 80,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "CPC = Spend / FBLinkClicks",
+            
+        },
         fbclicks: { headerName: 'FBClicks', field: 'fbclicks', minWidth: 110, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        fblinkclicks: { headerName: 'FB_LC', field: 'fblinkclicks', minWidth: 110, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         impressions: { headerName: 'IMP', field: 'impressions', headerTooltip:"Impressions", minWidth: 80, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         ctr: {
             headerName: 'CTR', field: 'ctr', valueGetter: getCtr, sortable: true,
@@ -2034,9 +2097,35 @@ const MyTablePage = () => {
             headerTooltip: "CPC = Spend / FBClicks",
             
         },
+        cpclinkclicks: {
+            headerName: 'CPC_LC',
+            field: 'cpclinkclicks',
+            // aggFunc: cpcSpender,
+            valueGetter:getCpcLc,
+            minWidth: 80,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "CPC = Spend / FBLinkClicks",
+            
+        },
         fbclicks: {
             headerName: 'FBClicks',
             field: 'fbclicks',
+            minWidth: 110,
+            aggFunc: newSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+            
+        },
+        fblinkclicks: {
+            headerName: 'FB_LC',
+            field: 'fblinkclicks',
             minWidth: 110,
             aggFunc: newSpender,
             sortable: true,
@@ -2468,6 +2557,21 @@ const MyTablePage = () => {
             headerTooltip: "CPC = Spend / FBClicks",
 
         },
+        cpclinkclicks: {
+            headerName: 'CPC_LC',
+            field: 'cpclinkclicks',
+            // aggFunc: cpcSpender,
+            valueGetter:getCpcLc,
+            minWidth: 80,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "CPC = Spend / FBLinkClicks",
+            
+        },
+        fblinkclicks: { headerName: 'FB_LC', field: 'fblinkclicks', minWidth: 110, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         fbclicks: { headerName: 'FBClicks', field: 'fbclicks', minWidth: 110, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         impressions: { headerName: 'IMP', field: 'impressions', headerTooltip:"Impressions", minWidth: 80, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         ctr: {
@@ -2781,7 +2885,22 @@ const MyTablePage = () => {
             headerClass: 'hide-menu', // Add a custom class
             headerTooltip: 'CPC = Spend / FBClicks',
         },
+        cpclinkclicks: {
+            headerName: 'CPC_LC',
+            field: 'cpclinkclicks',
+            // aggFunc: cpcSpender,
+            valueGetter:getCpcLc,
+            minWidth: 80,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "CPC = Spend / FBLinkClicks",
+            
+        },
         fbclicks: { headerName: 'FBClicks', field: 'fbclicks', minWidth: 110, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        fblinkclicks: { headerName: 'FB_LC', field: 'fblinkclicks', minWidth: 110, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         impressions: { headerName: 'IMP', headerTooltip:'Impressions', field: 'impressions', minWidth: 80, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         ctr: {
             headerName: 'CTR', field: 'ctr', valueGetter: getCtr, sortable: true, filter: 'agNumberColumnFilter',
@@ -3195,7 +3314,22 @@ const MyTablePage = () => {
             headerClass: 'hide-menu',
 
         },
+        cpclinkclicks: {
+            headerName: 'CPC_LC',
+            field: 'cpclinkclicks',
+            // aggFunc: cpcSpender,
+            valueGetter:getCpcLc,
+            minWidth: 80,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "CPC = Spend / FBLinkClicks",
+            
+        },
         fbclicks: { headerName: 'FBClicks', field: 'fbclicks', minWidth: 110, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        fblinkclicks: { headerName: 'FB_LC', field: 'fblinkclicks', minWidth: 110, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         impressions: { headerName: 'IMP', headerTooltip:'Impressions', field: 'impressions', minWidth: 80, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         ctr: {
             headerName: 'CTR', field: 'ctr', valueGetter: getCtr, sortable: true,

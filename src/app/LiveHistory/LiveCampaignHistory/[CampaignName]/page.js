@@ -610,6 +610,29 @@ const MnetLiveCampaignHistory = ({ params }) => {
         return comment ? `${comment}` : null; // Show comment only if it's not empty
     };
 
+    const getCpcLc = (params) => {
+        if (params.data !== undefined) {
+            const { spend, fblinkclicks } = params.data;
+            if (fblinkclicks !== 0) {
+                const RPC = spend / fblinkclicks;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return Number(RPC.toFixed(2));
+
+            }
+        }
+        if (params.node.aggData !== undefined) {
+            const { spend, fblinkclicks } = params.node.aggData;
+            if (fblinkclicks !== 0) {
+                const RPC = spend / fblinkclicks;
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        return 0;
+    }
+
     const columnDefsObject = {
         date_n : {
             headerName: 'Date_N', field: 'date_n', minWidth: 100,
@@ -933,8 +956,26 @@ const MnetLiveCampaignHistory = ({ params }) => {
             headerClass: 'hide-menu',
             headerToolTip: 'CPC = Spend / Clicks',
         },
+        cpclinkclicks : {
+            headerName: 'CPC_LC', field: 'cpclinkclicks', 
+            // aggFunc: cpcSpender,
+            comparator: defaultComparator,
+            valueGetter: getCpcLc,
+            minWidth: 85,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            headerToolTip: 'CPC = Spend / FBLinkClicks',
+        },
         fbclicks : {
-            headerName: 'FBClicks', field: 'fbclicks', minWidth: 90, aggFunc: spender,
+            headerName: 'FB_LC', field: 'fbclicks', minWidth: 90, aggFunc: spender,
+            comparator: defaultComparator,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
+        fblinkclicks : {
+            headerName: 'FB_LC', field: 'fblinkclicks', minWidth: 90, aggFunc: spender,
             comparator: defaultComparator,
             suppressMenu: true,
             menuTabs: [],
@@ -1199,6 +1240,10 @@ const MnetLiveCampaignHistory = ({ params }) => {
                 }
                 const ncpl = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((eachData.spend / eachData.conversions) * 100) / 100;
                 console.log(eachData[`${timeZone}Date`], `${timeZone}Date`);
+
+                const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
+                const spend = parseFloat(eachData.spend);
+                const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0 ? 0 : Math.round((spend / fbLClicks)*100)/100;
                 return {
                     date: eachData[`${timeZone}Date`],
                     date_n: eachData[`${timeZone}Date`],
@@ -1212,7 +1257,9 @@ const MnetLiveCampaignHistory = ({ params }) => {
                     fbleads: eachData.fbLeads,
                     conversions: eachData.conversions !== null ? eachData.conversions : 0,
                     cpc: eachData.cpc,
+                    cpclinkclicks: cpcLinkClicks,
                     fbclicks: eachData.fbClicks,
+                    fblinkclicks: eachData.fbLinkClicks,
                     impressions: eachData.impressions,
                     rpc: rpc,
                     cpl: cpl,
@@ -1381,6 +1428,8 @@ const MnetLiveCampaignHistory = ({ params }) => {
                 roi: `${(filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) - filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0)) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100}%`,
                 cpc: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.cpc), 0) / filteredData?.length,
                 fbclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0),
+                cpclinkclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks), 0) / filteredData?.length,
+                fblinkclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0),
                 impressions: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0),
                 ctr: `${(filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2)}%`
             }
@@ -1895,6 +1944,11 @@ const MnetLiveCampaignHistory = ({ params }) => {
                                             (filteredData?.length || 1)
                                         ).toFixed(2),
                                         fbclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks || 0), 0),
+                                        cpclinkclicks: (
+                                            filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks || 0), 0) /
+                                            (filteredData?.length || 1)
+                                        ).toFixed(2),
+                                        fblinkclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks || 0), 0),
                                         impressions: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0),
                                         ctr: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0)
                                             ? `${(
