@@ -576,6 +576,7 @@ export default function CampaignAndAccount({ params }) {
                 revenue: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue || 0), 0).toFixed(2),
                 profit: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit || 0), 0).toFixed(2),
                 margin: `${(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)}%`,
+                filteration: `${(((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0) - filteredData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0)) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0)) * 100).toFixed(2)}`,
                 rpc: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / filteredData?.length,
                 cpl: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / filteredData?.length,
                 ncpl: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / filteredData?.length,
@@ -1589,6 +1590,7 @@ export default function CampaignAndAccount({ params }) {
                                                 filteredData.reduce((acc, curr) => acc + parseFloat(curr.revenue || 0), 0)) *
                                             100
                                         ).toFixed(2)}%`,
+                                        filteration: `${(((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0) - filteredData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0)) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0)) * 100).toFixed(2)}`,
                                         rpc: (
                                             filteredData.reduce((acc, curr) => acc + parseFloat(curr.rpc || 0), 0) / filteredData.length || 0
                                         ).toFixed(2),
