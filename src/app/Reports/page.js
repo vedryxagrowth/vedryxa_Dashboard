@@ -99,7 +99,9 @@ const MyTablePage = () => {
         "mnet-hour",
         "adsetid",
         "campaignid",
-        "timezone"
+        "timezone",
+        "fblinkclicks",
+        "cpclinkclicks",
     ];
 
     const storedData = localStorage.getItem("storedData") && localStorage.getItem("storedData") !== "undefined" && localStorage.getItem("storedData") !== "null" ? JSON.parse(localStorage.getItem("storedData")) : null;
@@ -147,6 +149,7 @@ const MyTablePage = () => {
 
     const [colDefs, setColDefs] = useState([]);
     const [colDailyDefs, setColDailyDefs] = useState([]);
+    
 
     const handleBlur = () => {
         if (inputValue.trim() === '') {

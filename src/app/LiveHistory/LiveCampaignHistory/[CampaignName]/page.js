@@ -102,7 +102,9 @@ const MnetLiveCampaignHistory = ({ params }) => {
         "cpc",
         "fbclicks",
         "impressions",
-        "ctr"
+        "ctr",
+        "fblinkclicks",
+        "cpclinkclicks",
     ];
 
     const spender = (params) => {

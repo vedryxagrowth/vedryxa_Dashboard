@@ -160,7 +160,7 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
     };
 
     const autoGroupColumnDefLive = {
-        headerName: 'Campaign-Name',
+        headerName: 'CampaignName',
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting
@@ -556,7 +556,7 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                                         <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
                                             Last Edited Time:
                                         </span>
-                                        <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                        <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
                                             {editUserANdTime ? editUserANdTime?.editedTime : ""}
                                         </span>
 

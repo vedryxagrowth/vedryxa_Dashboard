@@ -348,7 +348,9 @@ export default function CampaignAndAccount({ params }) {
         "cpc",
         "fbclicks",
         "impressions",
-        "ctr"
+        "ctr",
+        "fblinkclicks",
+        "cpclinkclicks",
         ];
 
     const handleColumnMove = async (params, gridId) => {

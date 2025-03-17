@@ -324,7 +324,9 @@ export default function AdsetNameAndAccount({params}){
       "cpc",
       "fbclicks",
       "impressions",
-      "ctr"
+      "ctr",
+      "fblinkclicks",
+      "cpclinkclicks",
       ];
 
     const dateOptions = [

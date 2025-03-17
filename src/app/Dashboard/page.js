@@ -1215,9 +1215,9 @@ const Dashboard = () => {
             return data?.reduce((acc, obj) => {
                 const campaignKey = obj?.campaign_name;
                 const dateKey = obj[`${time}Date`]; // directly access the specifiedDate field from the object
-        
+                const accountNumber = obj?.accountNumber;
                 // Create a combined key for grouping by both campaign_name and specifiedDate
-                const key = `${campaignKey}_${dateKey}`;
+                const key = `${campaignKey}_${dateKey}_${accountNumber}`;
         
                 // Find if the combined key already exists in the accumulator array
                 let entry = acc.find(item => item.key === key);
@@ -1539,18 +1539,23 @@ const Dashboard = () => {
         console.log(responseData[0], "hi");
         const groupedData = groupByAccountNumberAndDate(responseData, time);
 
-        function groupByAccountNumber(data) {
+        function groupByAccountNumber(data, specifiedDateKey) {
             return data?.reduce((acc, obj) => {
-                const dateKey = obj.accountNumber; // dynamically access the specified date field
+                const accountKey = obj.accountNumber;
+                const dateKey = obj[`${specifiedDateKey}Date`]; // dynamically access the specified date field
         
-                // Find if the date key already exists in the accumulator array
-                let entry = acc.find(item => item.accountNumber === dateKey);
+                // Create a combined key for grouping by both accountNumber and dynamically passed date field
+                const key = `${accountKey}_${dateKey}`;
+        
+                // Find if the combined key already exists in the accumulator array
+                let entry = acc.find(item => item.key === key);
         
                 if (!entry) {
                     // If not found, create a new entry for this date
                     acc.push({
                         // date: dateKey,
                         accountNumber: obj.accountNumber,
+                        specifiedDate: obj.specifiedDate,
                         spend: obj.spend ? parseFloat(obj.spend) : 0,
                         estimated_revenue: obj.estimated_revenue ? parseFloat(obj.estimated_revenue) : 0,
                         fbLeads: obj.fbLeads ? parseInt(obj.fbLeads) : 0,
@@ -1575,7 +1580,7 @@ const Dashboard = () => {
             });
         }
 
-        const groupByAccountNumberData = groupByAccountNumber(groupedData);
+        const groupByAccountNumberData = groupByAccountNumber(groupedData, time);
 
         setByAccountNumber(groupByAccountNumberData);
 
@@ -2564,7 +2569,7 @@ const Dashboard = () => {
             
 
         }, // Group by Network
-        // {field:'specifiedDate', headerName:'Date'},
+        {field:'specifiedDate', headerName:'Date'},
         {
             field: "spend",
             aggFunc: spender,
@@ -3734,7 +3739,16 @@ const Dashboard = () => {
                                             style={{ width: '100%', height: '400px' }}
                                         >
                                             <AgGridReact
-                                                rowData={byAccountNumber?.slice().sort((a, b) => b.spend - a.spend).slice(0, 5)}
+                                                rowData={Object.values(
+                                                    byAccountNumber?.reduce((acc, curr) => {
+                                                      (acc[curr.specifiedDate] = acc[curr.specifiedDate] || []).push(curr);
+                                                      return acc;
+                                                    }, {})
+                                                  ).flatMap(records =>
+                                                    records
+                                                      .sort((a, b) => b.spend - a.spend) // Sort by spend (descending)
+                                                      .slice(0, 5) // Get top 5 records per date
+                                                  )}
                                                 columnDefs={columnDefs1}
                                                 defaultColDef={defaultColDef}
                                                 rowGroupPanelShow="always"
@@ -3756,7 +3770,16 @@ const Dashboard = () => {
                                             style={{ width: '100%', height: '400px' }}
                                         >
                                             <AgGridReact
-                                                rowData={byAccountNumber?.slice().sort((a, b) => b.estimated_revenue - a.estimated_revenue).slice(0, 5)}
+                                                rowData={Object.values(
+                                                    byAccountNumber?.reduce((acc, curr) => {
+                                                      (acc[curr.specifiedDate] = acc[curr.specifiedDate] || []).push(curr);
+                                                      return acc;
+                                                    }, {})
+                                                  ).flatMap(records =>
+                                                    records
+                                                      .sort((a, b) => b.estimated_revenue - a.estimated_revenue) // Sort by spend (descending)
+                                                      .slice(0, 5) // Get top 5 records per date
+                                                  )}
                                                 columnDefs={columnDefs1}
                                                 defaultColDef={defaultColDef}
                                                 rowGroupPanelShow="always"
@@ -3778,7 +3801,16 @@ const Dashboard = () => {
                                             style={{ width: '100%', height: '400px' }}
                                         >
                                             <AgGridReact
-                                                rowData={byAccountNumber?.slice().sort((a, b) => b.profit - a.profit).slice(0, 5)}
+                                                rowData={Object.values(
+                                                    byAccountNumber?.reduce((acc, curr) => {
+                                                      (acc[curr.specifiedDate] = acc[curr.specifiedDate] || []).push(curr);
+                                                      return acc;
+                                                    }, {})
+                                                  ).flatMap(records =>
+                                                    records
+                                                      .sort((a, b) => b.profit - a.profit) // Sort by spend (descending)
+                                                      .slice(0, 5) // Get top 5 records per date
+                                                  )}
                                                 columnDefs={columnDefs1}
                                                 defaultColDef={defaultColDef}
                                                 rowGroupPanelShow="always"

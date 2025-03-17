@@ -91,8 +91,33 @@ export default function CampaignAndAccount({ params }) {
         "cpc",
         "fbclicks",
         "impressions",
-        "ctr"
+        "ctr",
+        "fblinkclicks",
+        "cpclinkclicks",
     ];
+
+    const getCpcLc = (params) => {
+        if (params.data !== undefined) {
+            const { spend, fblinkclicks } = params.data;
+            if (fblinkclicks !== 0) {
+                const RPC = spend / fblinkclicks;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return Number(RPC.toFixed(2));
+
+            }
+        }
+        if (params.node.aggData !== undefined) {
+            const { spend, fblinkclicks } = params.node.aggData;
+            if (fblinkclicks !== 0) {
+                const RPC = spend / fblinkclicks;
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        return 0;
+    }
 
     const getMargin = (params) => {
         if (params.data !== undefined) {
@@ -439,6 +464,9 @@ export default function CampaignAndAccount({ params }) {
                 rpc = !isNaN(rpc) ? rpc : 0;
                 ncpl = !isNaN(ncpl) ? ncpl : 0;
                 fMargin = !isNaN(fMargin) ? `${fMargin}%` : '0%';
+                const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
+                const spend = parseFloat(eachData.spend);
+                const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0 ? 0 : Math.round((spend / fbLClicks)*100)/100;
                 return (
                     {
                         campaignname: eachData.campaign_name,
@@ -462,7 +490,8 @@ export default function CampaignAndAccount({ params }) {
                         ctr: ctr,
                         adsetId: eachData.adset_id,
                         campaignId: eachData.campaign_id,
-
+                        cpclinkclicks: cpcLinkClicks.toString(),
+                        fblinkclicks: (eachData.fbLinkClicks).toString(),
 
                     }
                 )
@@ -503,7 +532,9 @@ export default function CampaignAndAccount({ params }) {
               cpc: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / filteredData?.length,
               fbclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0),
               impressions: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0),
-              ctr: `${(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)}%`
+              ctr: `${(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)}%`,
+              cpclinkclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks), 0) / filteredData?.length,
+              fblinkclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0),
           }
       ]);
     },[filteredData])
@@ -969,6 +1000,24 @@ export default function CampaignAndAccount({ params }) {
             headerClass: 'hide-menu',
             headerToolTip: 'CTR = (FBClicks / Impressions) * 100',
         width: 90},
+        cpclinkclicks: {
+            headerName: 'CPC_LC',
+            field: 'cpclinkclicks',
+            // aggFunc: cpcSpender,
+            valueGetter:getCpcLc,
+            minWidth: 80,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "CPC = Spend / FBLinkClicks",
+            
+        },
+        fblinkclicks: { headerName: 'FB_LC', field: 'fblinkclicks', width: 110, aggFunc: agFunc, 
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', },
         
         // { headerName: 'AdsetId', field: 'adsetId' },
         // {headerName: "CampaignId", field:'campaignId'}
@@ -1500,6 +1549,10 @@ export default function CampaignAndAccount({ params }) {
                                           filteredData.reduce((acc, curr) => acc + parseFloat(curr.impressions || 0), 0)) *
                                       100
                                   ).toFixed(2)}%`,
+                                  cpclinkclicks: (
+                                    filteredData.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks || 0), 0) / filteredData.length || 0
+                                    ).toFixed(2),
+                                  fblinkclicks: filteredData.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks || 0), 0),
                               },
                           ];
 
