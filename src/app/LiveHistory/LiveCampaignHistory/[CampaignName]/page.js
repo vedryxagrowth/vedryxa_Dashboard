@@ -12,7 +12,7 @@ import { useTokenContext } from '../../../components/parent'
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
 import { color } from 'chart.js/helpers';
-import { Spin, Row, Col, Select } from 'antd';
+import { Spin, Row, Col, Select, Input } from 'antd';
 import debounce from 'lodash.debounce';
 
 Chart.register(...registerables);
@@ -38,6 +38,8 @@ const MnetLiveCampaignHistory = ({ params }) => {
     console.log(decodedString, "decode");
 
     const gridRef = useRef();
+
+    const [searchText, setSearchText] = useState("");
 
     const { theme } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -1822,7 +1824,14 @@ const MnetLiveCampaignHistory = ({ params }) => {
 
 
             </Col>
-            <Col style={{display:'flex', justifyContent:'flex-end'}}>
+            <Col style={{display:'flex', justifyContent:'space-between', marginTop: '10px'}}>
+                <Input
+                    type="text"
+                    placeholder="Search table..."
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    style={{ width: "200px", padding: "3px" }}
+                />
                 <Select
                     placeholder="Select a range"
                     value={selectedValue}
@@ -1859,6 +1868,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                         <AgGridReact
                             rowData={filteredData}
                             columnDefs={columnDefs}
+                            quickFilterText={searchText}
                             defaultColDef={defaultColDef}
                             pinnedBottomRowData={domainFixedFooter}
                             // gridOptions={gridOptions}
