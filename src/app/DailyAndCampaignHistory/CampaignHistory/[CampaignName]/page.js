@@ -11,7 +11,7 @@ import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { useTokenContext } from '../../../components/parent'
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
-import { Spin, Row, Col, Select } from 'antd';
+import { Spin, Row, Col, Select, Input } from 'antd';
 Chart.register(...registerables);
 import debounce from 'lodash.debounce';
 
@@ -22,6 +22,8 @@ export default function CampaignAndAccount({ params }) {
     const { apiClient } = useTokenContext();
 
     const gridRef = useRef();
+
+    const [searchText, setSearchText] = useState("");
 
     const [selectedCells, setSelectedCells] = useState([]);
     const [firstSelectedCell, setFirstSelectedCell] = useState(null);
@@ -574,6 +576,7 @@ export default function CampaignAndAccount({ params }) {
                 revenue: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue || 0), 0).toFixed(2),
                 profit: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit || 0), 0).toFixed(2),
                 margin: `${(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)}%`,
+                filteration: `${(((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0) - filteredData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0)) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0)) * 100).toFixed(2)}`,
                 rpc: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / filteredData?.length,
                 cpl: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / filteredData?.length,
                 ncpl: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / filteredData?.length,
@@ -837,7 +840,7 @@ export default function CampaignAndAccount({ params }) {
         // enableRowGroup: true,
         // autoHeight: true, 
         },
-        date : { headerName: 'Date', field: 'date', width: 160, sort: 'asc',
+        date : { headerName: 'Date', field: 'date', width: 160, sort: 'desc',
         comparator: (valueA, valueB) => {
             if (valueA == null && valueB == null) return 0;
             if (valueA == null) return -1;
@@ -1481,7 +1484,14 @@ export default function CampaignAndAccount({ params }) {
                     </table>
                 </div>
             </Col>
-            <Col style={{display:'flex', justifyContent:'flex-end'}}>
+            <Col style={{display:'flex', justifyContent:'space-between', marginTop: '10px'}}>
+                <Input
+                    type="text"
+                    placeholder="Search table..."
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    style={{ width: "200px", padding: "3px" }}
+                />
                 <Select
                     placeholder="Select a range"
                     value={selectedValue}
@@ -1517,6 +1527,7 @@ export default function CampaignAndAccount({ params }) {
                         <AgGridReact
                             rowData={filteredData}
                             columnDefs={columnDefs}
+                            quickFilterText={searchText}
                             defaultColDef={defaultColDef}
                             pinnedBottomRowData={domainFixedFooter}
                             onCellClicked={onCellClicked}
@@ -1579,6 +1590,7 @@ export default function CampaignAndAccount({ params }) {
                                                 filteredData.reduce((acc, curr) => acc + parseFloat(curr.revenue || 0), 0)) *
                                             100
                                         ).toFixed(2)}%`,
+                                        filteration: `${(((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0) - filteredData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0)) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0)) * 100).toFixed(2)}`,
                                         rpc: (
                                             filteredData.reduce((acc, curr) => acc + parseFloat(curr.rpc || 0), 0) / filteredData.length || 0
                                         ).toFixed(2),

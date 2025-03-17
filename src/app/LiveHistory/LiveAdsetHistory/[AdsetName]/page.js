@@ -10,7 +10,7 @@ import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
-import { Spin, Row, Col, Select } from 'antd';
+import { Spin, Row, Col, Select, Input } from 'antd';
 Chart.register(...registerables);
 import debounce from 'lodash.debounce';
 
@@ -26,6 +26,8 @@ const MnetLiveAdsetHistory = ({params}) => {
     const user = userdetails?.email;
 
     const gridRef = useRef();
+
+    const [searchText, setSearchText] = useState("");
 
     console.log(user, "user");
 
@@ -1616,7 +1618,14 @@ const MnetLiveAdsetHistory = ({params}) => {
 
 
             </Col>
-            <Col style={{display:'flex', justifyContent:'flex-end'}}>
+            <Col style={{display:'flex', justifyContent:'space-between', marginTop: '10px'}}>
+                <Input
+                    type="text"
+                    placeholder="Search table..."
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    style={{ width: "200px", padding: "3px" }}
+                />
                 <Select
                     placeholder="Select a range"
                     value={selectedValue}
@@ -1652,6 +1661,7 @@ const MnetLiveAdsetHistory = ({params}) => {
                     <AgGridReact
                         rowData={filteredData}
                         columnDefs={columnDefs}
+                        quickFilterText={searchText}
                         defaultColDef={defaultColDef}
                         pinnedBottomRowData={domainFixedFooter}
                         onCellClicked={onCellClicked}

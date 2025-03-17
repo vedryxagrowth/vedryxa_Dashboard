@@ -82,6 +82,9 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
 
     const totalItems = useRef();
 
+    const prevPageRef = useRef(pageSize);
+    const prevInputRef = useRef(inputValue);
+
     const memorizedColumnDef2 = useMemo(()=> columnDefs.current, [columnDefs.current]);
     const memorizedCampaignsData = useMemo(()=>campaignData?.filter((each) => {
         const normalizedCampaign = each?.campaignname?.trim().toLowerCase();
@@ -843,9 +846,29 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
     }
     , [refreshpage]);
 
+    // useEffect(() => {
+    //     if(inputValue){
+    //         setPageSize(1);
+    //     }
+    //     functionCall3();
+    // }, [pageSize, inputValue]);
+
+    useEffect(() => {
+        if (prevInputRef.current === '' && inputValue !== '') {
+          prevPageRef.current = pageSize;
+          setPageSize(1);
+        }
+        else if (prevInputRef.current !== '' && inputValue === '') {
+          setPageSize(prevPageRef.current);
+        }
+        prevInputRef.current = inputValue;
+    }, [inputValue]);
+      
     useEffect(() => {
         functionCall3();
-    }, [pageSize, inputValue]);
+    }, [pageSize]);
+      
+
     return(
                     <div>
                         <div style={contentStyle}>
