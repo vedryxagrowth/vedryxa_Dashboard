@@ -124,7 +124,7 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
     };
 
     const autoGroupColumnDef3 = {
-        headerName: 'Campaign-Name',
+        headerName: 'CampaignName',
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting
@@ -133,18 +133,22 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
             if (!campaignA) return 1;
             if (!campaignB) return -1;
 
-            const getStarredForCampaign = (campaignName) => {
-                const relatedComment = campaignComments.find(comment => comment?.campaignname === campaignName);
-                return relatedComment ? relatedComment.starred : false;
+            // Function to get the 'pinned' status of a campaign
+            const getPinStatusForCampaign = (campaignName) => {
+                const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+                return relatedComment ? relatedComment.pinned : false;
             };
 
-            const isStarredA = getStarredForCampaign(campaignA);
-            const isStarredB = getStarredForCampaign(campaignB);
+            // Prioritize pinned campaigns first (pinned campaigns should come to the top)
+            const isPinnedA = getPinStatusForCampaign(campaignA);
+            const isPinnedB = getPinStatusForCampaign(campaignB);
 
-            if (isStarredA === isStarredB) {
-                return campaignA.localeCompare(campaignB);
+            if (isPinnedA !== isPinnedB) {
+                return isPinnedA ? -1 : 1;  // Pinned campaigns should come first
             }
-            return isStarredA ? -1 : 1;
+
+            // If both campaigns have the same pinned status, fallback to alphabetical sorting
+            return campaignA.localeCompare(campaignB);
         },
 
         cellRendererParams: {
@@ -154,18 +158,18 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
                     return 'Total';
                 }
 
-                const firstColumnValue = params?.node?.key;  // campaign name
-                const campaignName = params?.node?.key;
+                const firstColumnValue = params.node.key;  // campaign name
+                const campaignName = params.node.key;
 
                 let campaignid, adsetid;
 
-                if (params?.node?.group && params?.node?.childrenAfterGroup && params?.node?.childrenAfterGroup?.length > 0) {
-                    const firstChild = params?.node?.childrenAfterGroup[0]?.data;
-                    campaignid = firstChild?.campaignid;
-                    adsetid = firstChild?.adsetid;
-                } else if (params?.data) {
-                    campaignid = params?.data?.campaignid;
-                    adsetid = params?.data?.adsetid;
+                if (params.node.group && params.node.childrenAfterGroup && params.node.childrenAfterGroup.length > 0) {
+                    const firstChild = params.node.childrenAfterGroup[0].data;
+                    campaignid = firstChild.campaignid;
+                    adsetid = firstChild.adsetid;
+                } else if (params.data) {
+                    campaignid = params.data.campaignid;
+                    adsetid = params.data.adsetid;
                 } else {
                     console.error('Missing campaignid or adsetid for campaign:', campaignName);
                     return (
@@ -175,42 +179,51 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
                     );
                 }
                 const getEditedUserAndTime = (campaignName, newaccount) => {
-                    const relatedStatus = campaignComments?.find(comment => comment?.campaignname === campaignName && comment?.Account === newaccount);
+                    const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
                     // console.log(relatedStatus, "relatedStatus");
                     const relatedStatusEditedTime = relatedStatus ? relatedStatus : null;
                     // console.log(relatedStatusTrue);
                     return relatedStatusEditedTime;
                 }
+
+                const getPinEditedUserAndTime = (campaignName, newaccount) => {
+                    const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
+                    return relatedStatus ? relatedStatus : null;
+                };
+
                 const getStatusForCampaign = (campaignName, newaccount) => {
-                    const relatedStatus = campaignComments?.find(comment => comment?.campaignname === campaignName && comment?.Account === newaccount);
+                    const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
                     // console.log(relatedStatus, "relatedStatus");
-                    const relatedStatusTrue = relatedStatus !== undefined && relatedStatus?.status === true ? true : relatedStatus !== undefined ? false : null;
+                    const relatedStatusTrue = relatedStatus !== undefined && relatedStatus.status === true ? true : relatedStatus !== undefined ? false : null;
                     // console.log(relatedStatusTrue);
                     return relatedStatusTrue;
                 }
 
                 const getCommentForCampaign = (campaignName) => {
-                    const relatedComment = campaignComments?.find(comment => comment?.campaignname === campaignName);
-                    return relatedComment ? relatedComment?.comment : null;
+                    const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+                    return relatedComment ? relatedComment.comment : null;
                 };
 
-                const getStarredForCampaign = (campaignName) => {
-                    const relatedComment = campaignComments?.find(comment => comment?.campaignname === campaignName);
-                    return relatedComment ? relatedComment?.starred : false;
+                const getPinStatusForCampaign = (campaignName) => {
+                    const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+                    return relatedComment ? relatedComment.pinned : false;
                 };
+
                 const editUserANdTime = getEditedUserAndTime(campaignName, newaccount);
+                const editPinUserANdTime = getPinEditedUserAndTime(campaignName, newaccount);
                 const relatedStatus = getStatusForCampaign(campaignName, newaccount);
                 const relatedComment = getCommentForCampaign(campaignName);
-                const isStarred = getStarredForCampaign(campaignName);
+                // const isStarred = getStarredForCampaign(campaignName);
                 const valueWithCount = `${firstColumnValue}`;
 
                 const [tooltipText, setTooltipText] = useState("Click to Copy");
                 const [isModalVisibles, setIsModalVisibles] = useState(false);
                 const [comment, setComment] = useState(relatedComment || '');
-                const [starred, setStarred] = useState(isStarred);
+                // const [starred, setStarred] = useState(isStarred);
+                const [pinned, setPinned] = useState(getPinStatusForCampaign(campaignName));
 
                 const copyToClipboard = () => {
-                    navigator?.clipboard?.writeText(firstColumnValue)
+                    navigator.clipboard.writeText(firstColumnValue)
                         .then(() => {
                             setTooltipText("Copied!");
                             setTimeout(() => setTooltipText("Click to Copy"), 2000);
@@ -229,7 +242,7 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
                         const response = await apiClient.post('/Comments', {
                             commentsdatas: logData,
                         });
-                        console.log('Response from server:', response.data);
+                        // console.log('Response from server:', response.data);
                     } catch (error) {
                         console.error('Error sending data to server:', error);
                     }
@@ -238,14 +251,14 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
                 const sendEditedCommentToAPI = async (logData) => {
                     try {
                         const response = await apiClient.post('/Comments/edit', {
-                            campaignname: logData?.campaignname,
-                            comment: logData?.comment,
-                            Account: logData?.Account,
-                            adsetid: logData?.adsetid,
-                            campaignid: logData?.campaignid,
+                            campaignname: logData.campaignname,
+                            comment: logData.comment,
+                            Account: logData.Account,
+                            adsetid: logData.adsetid,
+                            campaignid: logData.campaignid,
                             status: true
                         });
-                        console.log('Response from server (edited comment):', response.data);
+                        // console.log('Response from server (edited comment):', response.data);
                         return response.data;
                     } catch (error) {
                         console.error('Error sending edited comment to server:', error);
@@ -253,33 +266,41 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
                     }
                 };
 
-                const sendStarStatusToAPI = async (campaignname, isStarred) => {
+                const handleDelete = async () => {
                     try {
-                        const endpoint = isStarred ? '/Star' : '/Unstar';
-                        const response = await apiClient.post(endpoint, {
-                            campaignname: campaignname,
-                            Account: account,
-                            usercommit: userdetails?.email,
+                        // Prepare the payload for the API call
+                        const payload = {
+                            campaignname: firstColumnValue,
+                            Account: newaccount,
+                            adsetid: adsetid,
                             campaignid: campaignid,
-                            adsetid: adsetid
-                        });
-                        console.log('Response from server (starred status):', response.data);
+                        };
+                
+                        // Call the backend API to delete the comment
+                        const response = await apiClient.post('/Comments/delete', payload);
+                
+                        if (response.status === 200) {
+                            // Remove the comment from the local state
+                            // const updatedComments = campaignComments.filter(
+                            //     (comment) => comment.campaignname !== firstColumnValue
+                            // );
+                
+                            // // Update the state with the updated comments
+                            // setCampaignComments(updatedComments);
+                            refreshComments(newaccount);
+                
+                            // Refresh the table or any other UI component
+                            // changeRRefrst();
+                
+                            message.success('Comment deleted successfully!');
+                            setIsModalVisibles(false); // Close the popup
+                        } else {
+                            message.error('Failed to delete the comment. Please try again.');
+                        }
                     } catch (error) {
-                        console.error('Error updating star status:', error);
+                        console.error('Error deleting the comment:', error);
+                        message.error('Failed to delete the comment. Please try again.');
                     }
-                };
-
-                const handleStarClick = async () => {
-                    const updatedStarred = !starred;
-                    setStarred(updatedStarred);
-                    await sendStarStatusToAPI(firstColumnValue, updatedStarred);
-                    message.success(updatedStarred ? "Campaign starred!" : "Campaign unstarred!");
-
-                    const updatedComments = campaignComments?.map(cmt =>
-                        cmt.campaignname === firstColumnValue ? { ...cmt, starred: updatedStarred } : cmt
-                    );
-                    setCampaignComments(updatedComments);
-                    changeRRefrst();
                 };
 
                 const handleOks = async () => {
@@ -302,6 +323,8 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
                             refreshComments(newaccount);
                             message.success("New comment added successfully!");
                         }
+
+                        
                         setIsModalVisibles(false);
                     } catch (error) {
                         console.error('Error while submitting comment:', error);
@@ -320,12 +343,101 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
                     </div>
                 );
 
+                const handlePinClick = async (campaignName, campaignid, adsetid, currentPinStatus) => {
+                    const updatedPinStatus = !currentPinStatus;
+
+                    try {
+                        let response;
+                        if (updatedPinStatus) {
+                            response = await apiClient.post('/Pin', {
+                                campaignname: campaignName,
+                                Account: newaccount,
+                                campaignid: campaignid,
+                                adsetid: adsetid,
+                                userPin: userdetails?.email,
+                                comment: comment || ''
+                            });
+                            // changeRRefrst();
+                            if(response.status ===200){
+                                refreshComments(newaccount);
+                            }
+
+                            message.success("Campaign pinned!");
+                        } else {
+                            response = await apiClient.post('/Unpin', {
+                                campaignname: campaignName,
+                                Account: newaccount,
+                                campaignid: campaignid,
+                                adsetid: adsetid
+                            });
+                            // changeRRefrst();
+                            if(response.status ===200){
+                                refreshComments(newaccount);
+                            }
+
+                            message.success("Campaign unpinned!");
+                        }
+
+                        // Update campaignComments with the new pinned status and edited user/time
+                        // const updatedComments = campaignComments.map(cmt =>
+                        //     cmt.campaignname === campaignName
+                        //         ? {
+                        //             ...cmt,
+                        //             pinned: updatedPinStatus,
+                        //             editedPinTime: response.data.editedPinTime || new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+                        //             userPin: userdetails?.email
+                        //         }
+                        //         : cmt
+                        // );
+
+                        // if (!campaignComments.some(cmt => cmt.campaignname === campaignName)) {
+                        //     updatedComments.push({
+                        //         campaignname: campaignName,
+                        //         pinned: updatedPinStatus,
+                        //         editedPinTime: response.data.editedPinTime || new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+                        //         userPin: userdetails?.email
+                        //     });
+                        // }
+                        // const sortedComments = updatedComments.sort((a, b) => b.pinned - a.pinned);
+                        // setCampaignComments(sortedComments);
+                        setPinned(updatedPinStatus);
+                    } catch (error) {
+                        console.error('Error toggling pin status', error);
+                        message.error('Error while updating pin status.');
+                    }
+                };
+
+                const PinIcon = ({ campaignName, campaignid, adsetid, pinned }) => {
+                    return (
+                        <Tooltip title={pinned ? <CustomTooltipContent editedTime={editPinUserANdTime?.editedPinTime} usercommit={editPinUserANdTime?.userPin} /> : null}>
+                            <button
+                                onClick={() => handlePinClick(campaignName, campaignid, adsetid, pinned)}
+                                style={{
+                                    border: "none",
+                                    background: "none",
+                                    cursor: "pointer",
+                                    fontSize: "16px",
+                                }}
+                            >
+                                {pinned ? "📌" : "📍"}
+                            </button>
+                        </Tooltip>
+                    );
+                };
+
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                        <PinIcon
+                            campaignName={campaignName}
+                            campaignid={campaignid}
+                            adsetid={adsetid}
+                            // pinned={getPinStatusForCampaign(campaignName)}
+                            pinned={pinned}
+                        />
                         <div style={{ marginLeft: '10px' }}>
                             {(() => {
                                 // Find the matching campaign in the Camapignlevelstatus array
-                                const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
+                                const campaignStatus = Camapignlevelstatus.find(statusObj => statusObj.name === campaignName);
 
                                 if (campaignStatus) {
                                     const { status, start, end } = campaignStatus;
@@ -368,13 +480,6 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
                                 }
                             })()}
                         </div>
-                        {relatedComment && (
-                            starred ? (
-                                <StarFilled className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px', color: "gold" }} />
-                            ) : (
-                                <StarOutlined className='startview' onClick={handleStarClick} style={{ cursor: 'pointer', marginRight: '10px' }} />
-                            )
-                        )}
                         {relatedComment ? (
                             <Tooltip title={(
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -405,8 +510,37 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
                         <Modal
                             title={firstColumnValue}
                             visible={isModalVisibles}
-                            onOk={handleOks}
-                            onCancel={handleCancels}
+                            onOk={handleOks} // Default Ok button functionality
+                            onCancel={handleCancels} // Default Cancel button functionality
+                            footer={[
+                                <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+                                    <div style={{display:'flex', flexDirection:"column"}}>
+                                        <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                            Last Edited Time:
+                                        </span>
+                                        <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                            {editUserANdTime ? editUserANdTime?.editedTime : ""}
+                                        </span>
+
+                                    </div>
+                                    <div>
+                                    <Button
+                                        key="delete"
+                                        type="danger"
+                                        onClick={handleDelete}
+                                        style={{ marginRight: 'auto', border: "1px solid black" }} // Push Delete button to the far left
+                                    >
+                                        Delete
+                                    </Button>
+                                    <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
+                                        Cancel
+                                    </Button>
+                                    <Button key="ok" type="primary" onClick={handleOks} style={{marginLeft:"4px"}}>
+                                        Ok
+                                    </Button>
+                                    </div>
+                                </div>
+                            ]}
                         >
                             <Input.TextArea
                                 placeholder="Enter your comments here"
@@ -564,15 +698,15 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
                 window.open(url, '_blank', 'noopener,noreferrer');
             }
         }
-        // ✅ Ensure first selected cell gets highlighted
-        if (event.event.shiftKey || event.event.ctrlKey) {
-            // Add to selection when Shift/Ctrl is pressed
-            setSelectedCells((prev) => [...prev, { rowIndex: event.node.rowIndex, colId: event.column.getId() }]);
-        } else {
-            // Single click selects only one cell
-            setFirstSelectedCell({ rowIndex: event.node.rowIndex, colId: event.column.getId() });
-            setSelectedCells([{ rowIndex: event.node.rowIndex, colId: event.column.getId() }]);
-        }
+        // // ✅ Ensure first selected cell gets highlighted
+        // if (event.event.shiftKey || event.event.ctrlKey) {
+        //     // Add to selection when Shift/Ctrl is pressed
+        //     setSelectedCells((prev) => [...prev, { rowIndex: event.node.rowIndex, colId: event.column.getId() }]);
+        // } else {
+        //     // Single click selects only one cell
+        //     setFirstSelectedCell({ rowIndex: event.node.rowIndex, colId: event.column.getId() });
+        //     setSelectedCells([{ rowIndex: event.node.rowIndex, colId: event.column.getId() }]);
+        // }
 
     };
     const onGridReady = (params, gridId, gridRef) => {

@@ -151,7 +151,7 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
     };
 
     const autoGroupColumnDef = {
-        headerName: 'Campaign-Name',
+        headerName: 'CampaignName',
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting
@@ -540,20 +540,33 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                             onOk={handleOks} // Default Ok button functionality
                             onCancel={handleCancels} // Default Cancel button functionality
                             footer={[
-                                <Button
-                                    key="delete"
-                                    type="danger"
-                                    onClick={handleDelete}
-                                    style={{ marginRight: 'auto', border: "1px solid black" }} // Push Delete button to the far left
-                                >
-                                    Delete
-                                </Button>,
-                                <Button key="cancel" onClick={handleCancels}>
-                                    Cancel
-                                </Button>,
-                                <Button key="ok" type="primary" onClick={handleOks}>
-                                    Ok
-                                </Button>,
+                                <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+                                    <div style={{display:'flex', flexDirection:"column"}}>
+                                        <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                            Last Edited Time:
+                                        </span>
+                                        <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                            {editUserANdTime ? editUserANdTime?.editedTime : ""}
+                                        </span>
+
+                                    </div>
+                                    <div>
+                                    <Button
+                                        key="delete"
+                                        type="danger"
+                                        onClick={handleDelete}
+                                        style={{ marginRight: 'auto', border: "1px solid black" }} // Push Delete button to the far left
+                                    >
+                                        Delete
+                                    </Button>
+                                    <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
+                                        Cancel
+                                    </Button>
+                                    <Button key="ok" type="primary" onClick={handleOks} style={{marginLeft:"4px"}}>
+                                        Ok
+                                    </Button>
+                                    </div>
+                                </div>
                             ]}
                         >
                             <Input.TextArea
@@ -730,15 +743,15 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                 window.open(url, '_blank', 'noopener,noreferrer');
             }
         }
-        // ✅ Ensure first selected cell gets highlighted
-        if (event.event.shiftKey || event.event.ctrlKey) {
-            // Add to selection when Shift/Ctrl is pressed
-            setSelectedCells((prev) => [...prev, { rowIndex: event.node.rowIndex, colId: event.column.getId() }]);
-        } else {
-            // Single click selects only one cell
-            setFirstSelectedCell({ rowIndex: event.node.rowIndex, colId: event.column.getId() });
-            setSelectedCells([{ rowIndex: event.node.rowIndex, colId: event.column.getId() }]);
-        }
+        // // ✅ Ensure first selected cell gets highlighted
+        // if (event.event.shiftKey || event.event.ctrlKey) {
+        //     // Add to selection when Shift/Ctrl is pressed
+        //     setSelectedCells((prev) => [...prev, { rowIndex: event.node.rowIndex, colId: event.column.getId() }]);
+        // } else {
+        //     // Single click selects only one cell
+        //     setFirstSelectedCell({ rowIndex: event.node.rowIndex, colId: event.column.getId() });
+        //     setSelectedCells([{ rowIndex: event.node.rowIndex, colId: event.column.getId() }]);
+        // }
 
     };
     const onGridReady = (params, gridId, gridRef) => {
