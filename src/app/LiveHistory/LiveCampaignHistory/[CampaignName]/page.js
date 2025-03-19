@@ -12,7 +12,8 @@ import { useTokenContext } from '../../../components/parent'
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
 import { color } from 'chart.js/helpers';
-import { Spin, Row, Col, Select, Input } from 'antd';
+import { Spin, Row, Col, Select, Input, Button } from 'antd';
+import { ReloadOutlined } from '@ant-design/icons';
 import debounce from 'lodash.debounce';
 
 Chart.register(...registerables);
@@ -1553,6 +1554,16 @@ const MnetLiveCampaignHistory = ({ params }) => {
 
     console.log(columnDefs);
 
+    const handleReload = () => {
+        setLoading(true);
+        const mainFunctionCall = async () => {
+            await functionCallForCommnets(accountNumber)
+            await debouncedFunctionCallForUserColumnStructure();
+            await debouncedFunctionCall();
+        };
+        mainFunctionCall();
+    };
+
     return (
         <Row style={{ display: 'flex', flexDirection: 'column' }}>
             {/* Chart.js integration */}
@@ -1827,13 +1838,21 @@ const MnetLiveCampaignHistory = ({ params }) => {
 
             </Col>
             <Col style={{display:'flex', justifyContent:'space-between', marginTop: '10px'}}>
-                <Input
-                    type="text"
-                    placeholder="Search table..."
-                    value={searchText}
-                    onChange={(e) => setSearchText(e.target.value)}
-                    style={{ width: "200px", padding: "3px" }}
-                />
+                <Col>
+                    <Input
+                        type="text"
+                        placeholder="Search table..."
+                        value={searchText}
+                        onChange={(e) => setSearchText(e.target.value)}
+                        style={{ width: "200px", padding: "3px" }}
+                    />
+                    <Button 
+                        type="default" 
+                        icon={<ReloadOutlined />} 
+                        style={{ height: "30px", marginLeft: "10px", backgroundColor: '#C7F39A', border: 'none' }} 
+                        onClick={handleReload}  // Call refresh function when clicked
+                    />
+                </Col>
                 <Select
                     placeholder="Select a range"
                     value={selectedValue}

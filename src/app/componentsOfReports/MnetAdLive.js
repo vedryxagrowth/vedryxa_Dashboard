@@ -54,7 +54,7 @@ const selectTimezone = {
 };
 
 const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems}) => {
-    console.log(columnDefs.current);
+    console.log(columnDefs);
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -726,7 +726,7 @@ const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenueP
                             cpl: parseFloat(cpl),
                             ncpl: parseFloat(ncpl),
                             adsetid: eachData.adset_id,
-                            ad_id: eachData.ad_id ? eachData.ad_id : "",
+                            adid: eachData.ad_id ? eachData.ad_id : "",
                             campaignid: eachData.campaign_id,
                             timezone: eachData[newtime],
                             comment: relatedComment ? relatedComment.comment : null,
@@ -1030,7 +1030,7 @@ const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenueP
     };
 
     const gridOptions = {
-        onColumnMoved: (params) => debouncedHandleColumnMove(params, 'grid1'),
+        onColumnMoved: (params) => debouncedHandleColumnMove(params, 'grid10'),
         defaultColDef: {
             suppressMenu: true,
             headerClass: "custom-header" // Apply to all columns by default
@@ -1145,7 +1145,7 @@ const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenueP
                                         // groupIncludeTotalFooter={rowData.length > 0 ? true : false}
                                         // groupIncludeFooter={rowData.length > 0 ? true : false}
                                         autoGroupColumnDef={autoGroupColumnDefLive}
-                                        onGridReady={(params) => onGridReady(params, 'grid1', gridRef)}
+                                        onGridReady={(params) => onGridReady(params, 'grid10', gridRef)}
                                         gridOptions={{
                                             ...gridOptions,
                                             ensureDomOrder: false,

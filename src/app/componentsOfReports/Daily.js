@@ -668,6 +668,8 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                             campaignid: eachData.campaign_id,
                             adsetid: eachData.adset_id,
                             timezone: 'UTC',
+                            adid: "",
+                            adname: "",
                             actions: '...'
                             // compaignid: eachData.campaign_id,
                         }
@@ -757,7 +759,9 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
     const onGridReady = (params, gridId, gridRef) => {
         gridRef.current = params;
         params.api.applyColumnState({ state: columnDefs || [], applyOrder: true });
-        params.api.addEventListener('dragStopped', (e) => debouncedHandleColumnMove(e, gridId));
+        params.api.addEventListener('dragStopped', (e) => {
+            debouncedHandleColumnMove(e, gridId);
+        });
     };
     
     // const onGridReady = (params, gridId, gridRef) => {
@@ -816,7 +820,10 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
     //     return defaultItems;
     // };
     const gridOptions1 = {
-        onColumnMoved: (params) => debouncedHandleColumnMove(params, 'grid2'),
+        onColumnMoved: (params) => {
+            
+            debouncedHandleColumnMove(params, 'grid2');
+        },
         defaultColDef: {
             suppressMenu: true,
             headerClass: "custom-header" // Apply to all columns by default

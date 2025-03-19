@@ -108,11 +108,11 @@ const timezones = [
 
 const rangePresets = [
     {
-        label: 'ToDay',
+        label: 'Today',
         value: [dayjs().add(0, 'd'), dayjs().add(0, 'd')],
     },
     {
-        label: 'YesterDay',
+        label: 'Yesterday',
         value: [dayjs().add(-1, 'd'), dayjs().add(-1, 'd')],
     },
     {
@@ -394,6 +394,9 @@ const RevenuePartnerDashboard = () => {
                   }
                   return params.value; // Return for 'Totals' row
                 },
+                suppressMenu: true,
+                menuTabs: [],
+                headerClass: 'hide-menu',
             },
             {
                 field: "spend",
@@ -401,7 +404,10 @@ const RevenuePartnerDashboard = () => {
                 sortable: true,
                 minWidth: 150,
                 aggFunc:spender,
-                valueFormatter:currencyFormatter
+                valueFormatter:currencyFormatter,
+                suppressMenu: true,
+                menuTabs: [],
+                headerClass: 'hide-menu',
             },
             {
                 field: "revenue",
@@ -409,7 +415,10 @@ const RevenuePartnerDashboard = () => {
                 sortable: true,
                 minWidth: 150,
                 aggFunc:spender,
-                valueFormatter:currencyFormatter
+                valueFormatter:currencyFormatter,
+                suppressMenu: true,
+                menuTabs: [],
+                headerClass: 'hide-menu',
             },
             { 
                 field: 'profit', 
@@ -420,7 +429,10 @@ const RevenuePartnerDashboard = () => {
                 cellClassRules: {
                     'font-red': p => p.value < 0
                 },
-                valueFormatter:currencyFormatter
+                valueFormatter:currencyFormatter,
+                suppressMenu: true,
+                menuTabs: [],
+                headerClass: 'hide-menu',
             },
             {
                 field: "margin",
@@ -430,7 +442,10 @@ const RevenuePartnerDashboard = () => {
                     'font-red': p => p.value < 0
                 },
                 minWidth: 150,
-                valueFormatter: marginFormatter
+                valueFormatter: marginFormatter,
+                suppressMenu: true,
+                menuTabs: [],
+                headerClass: 'hide-menu',
             },
             {
                 field: 'rpc',
@@ -438,7 +453,10 @@ const RevenuePartnerDashboard = () => {
                 aggFunc: avgRpcCpl,
                 valueFormatter: rpcCplFormatter,
                 minWidth: 100,
-                flex: 3
+                flex: 3,
+                suppressMenu: true,
+                menuTabs: [],
+                headerClass: 'hide-menu',
             },
             {
                 field: 'cpl',
@@ -446,7 +464,10 @@ const RevenuePartnerDashboard = () => {
                 aggFunc: avgRpcCpl,
                 valueFormatter: rpcCplFormatter,
                 minWidth: 100,
-                flex: 3
+                flex: 3,
+                suppressMenu: true,
+                menuTabs: [],
+                headerClass: 'hide-menu',
             }
         ]);
         setFixedFooter([
@@ -625,7 +646,15 @@ const RevenuePartnerDashboard = () => {
                         </Space>
                     </Col>
                     <Col xs={16} sm={16} md={10} lg={8}>
-                        <ConfigProvider locale={locale}>
+                        <ConfigProvider 
+                            locale={locale}
+                            theme={{
+                                token: {
+                                  colorPrimary: '#C7F39A', 
+                                  colorTextLightSolid: '#000',
+                                },
+                            }}
+                        >
                             <RangePicker
                                 presets={rangePresets}
                                 onChange={handleChange}
@@ -650,7 +679,7 @@ const RevenuePartnerDashboard = () => {
                         />
                     </Col>
                     <Col xs={12} sm={12} md={2}>
-                        <Button onClick={onClickSubmit} type='primary' block>
+                        <Button onClick={onClickSubmit} style={{backgroundColor: '#C7F39A',}}>
                             Submit
                         </Button>
                     </Col>
@@ -678,6 +707,12 @@ const RevenuePartnerDashboard = () => {
                                     rowData={revenuePartnerData}
                                     columnDefs={columnDefs}
                                     defaultColDef={defaultColDef}
+                                    gridOptions={{
+                                        ensureDomOrder: false,
+                                        suppressRowClickSelection: true,
+                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                    }}
                                     suppressAggFuncInHeader={true}
                                     pinnedBottomRowData={fixedFooter}
                                     getRowStyle={(params) => {
@@ -741,6 +776,12 @@ const RevenuePartnerDashboard = () => {
                                         columnDefs={domainColumnDefs}
                                         defaultColDef={defaultColDef}
                                         suppressAggFuncInHeader={true}
+                                        gridOptions={{
+                                            ensureDomOrder: false,
+                                            suppressRowClickSelection: true,
+                                            suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                            enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                        }}
                                         pinnedBottomRowData={domainFixedFooter}
                                         getRowStyle={(params) => {
                                             if (params.node.rowPinned) {
@@ -1924,26 +1965,32 @@ const Dashboard = () => {
                     </div>
 
                     <Checkbox.Group
-                        options={filteredData.map((item) => {
-                            const accountNumber = item?.accountNumber ? item.accountNumber.toString() : 'Unknown';
-                            return {
-                                label: (
-                                    <div style={{
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                        padding: '5px 10px',
-                                        borderBottom: '1px solid #ddd',
-                                    }}>
-                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                            <span style={{ fontWeight: '600' }}>{accountNumber}</span>
-                                            <span>{item.accountName || ''}</span>
+                        options={filteredData
+                            .sort((a, b) => {
+                                if (a.status === 'Active' && b.status !== 'Active') return -1;
+                                if (a.status !== 'Active' && b.status === 'Active') return 1;
+                                return 0;
+                            })
+                            .map((item) => {
+                                const accountNumber = item?.accountNumber ? item.accountNumber.toString() : 'Unknown';
+                                return {
+                                    label: (
+                                        <div style={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            padding: '5px 10px',
+                                            borderBottom: '1px solid #ddd',
+                                        }}>
+                                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                <span style={{ fontWeight: '600' }}>{accountNumber}</span>
+                                                <span>{item.accountName || ''}</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                ),
-                                value: accountNumber,
-                            };
-                        })}
+                                    ),
+                                    value: accountNumber,
+                                };
+                            })}
                         value={selectedItems[category]?.map(item => item.accountNumber?.toString()) || []}
                         onChange={(checkedValues) => handleGroupChange(checkedValues, category)}
                         className={theme === 'dark' ? 'checkbox-group-dark' : 'checkbox-group-light'}
@@ -2050,7 +2097,7 @@ const Dashboard = () => {
 
     const autoGroupColumnDefProfit = {
         headerName: 'AccountNumber',
-        minWidth: 200,
+        minWidth: 210,
         sortable: true,
         cellRendererParams: {
             suppressCount: false,
@@ -2297,10 +2344,11 @@ const Dashboard = () => {
 
     const [columnDefs] = useState([
         {
+            headerName: 'Project Name',
             field: "revenuePartner",
             resizable: true,
             sortable: true,
-            // width: 500,
+            width: 100,
             hide: true,
             rowGroup: true,
             enableRowGroup: true,
@@ -2309,30 +2357,52 @@ const Dashboard = () => {
             field: "holder",
             resizable: true,
             sortable: true,
+            width: 100,
             hide: true, // Hide column as it's grouped
             rowGroup: true,
             enableRowGroup: true,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         }, // Group by Holder
         { field: 'accountNumber', headerName: 'AccountNumber',
         resizable: true,
+        width: 150,
         sortable: true,
         hide: true, // Hide column as it's grouped
         rowGroup: true,
-        enableRowGroup: true, },
-        {field:'specifiedDate', headerName:'Date'},
+        enableRowGroup: true,
+        suppressMenu: true,
+        menuTabs: [],
+        headerClass: 'hide-menu', },
+        {field:'specifiedDate', headerName:'Date',
+            minWidth: 115,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',},
         {
+            headerName: 'User',
             field: "mediaBuyerName",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         }, // Display Media Buyer name
         {
             field: "spend",
             aggFunc: spender,
             valueFormatter: currencyFormatter,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         }, // Summing Spend column
         {
             headerName: 'Revenue',
             field: "estimated_revenue",
             aggFunc: spender,
             valueFormatter: currencyFormatter,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         }, // Summing Revenue column
         {
             field: "profit",
@@ -2341,29 +2411,44 @@ const Dashboard = () => {
                 'font-red': p => p.value < 0
             },
             valueFormatter: currencyFormatter,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         }, // Custom aggregation for Profit
         {
             field: 'rpc',
             headerName: 'RPC',
             valueGetter: avgRpcCpl,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
             // valueFormatter: rpcCplFormatter,
         },
         {
             field: 'cpl',
             headerName: 'CPL',
             valueGetter: avgCpl,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
             // valueFormatter: rpcCplFormatter,
         }, 
         {
             field: 'conversions',
-            headerName: 'Conversions',
+            headerName: 'Conv',
             aggFunc: spender,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
             // valueFormatter: rpcCplFormatter,
         }, 
         {
             field: 'fbLeads',
             headerName: 'FbLeads',
             aggFunc: spender,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
             // valueFormatter: rpcCplFormatter,
         }, 
 
@@ -2569,17 +2654,26 @@ const Dashboard = () => {
             
 
         }, // Group by Network
-        {field:'specifiedDate', headerName:'Date'},
+        {field:'specifiedDate', headerName:'Date',
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',},
         {
             field: "spend",
             aggFunc: spender,
             valueFormatter: currencyFormatter,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         }, // Summing Spend column
         {
             headerName: 'Revenue',
             field: "estimated_revenue",
             aggFunc: spender,
             valueFormatter: currencyFormatter,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         }, // Summing Revenue column
         {
             field: "profit",
@@ -2589,15 +2683,28 @@ const Dashboard = () => {
                 'font-red': p => p.value < 0
             },
             valueFormatter: currencyFormatter,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
         {
+            headerName: 'Project Name',
             field: "revenuePartner",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         }, // Group by Holder
         {
-            field: "holder",// Group by MediaBuyerName
+            field: "holder",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
         {
-            field: "mediaBuyerName", headerName:'User'// Group by MediaBuyerName
+            field: "mediaBuyerName", headerName:'User',
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
     ]);
     
@@ -2611,23 +2718,35 @@ const Dashboard = () => {
             enableRowGroup: true,
         },
         {
-            field: "accountNumber", minWidth:180
+            field: "accountNumber", minWidth:170,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
 
         }, // Group by Network
         {field:'Date',
-        minWidth: 125},
+        minWidth: 112,
+        suppressMenu: true,
+        menuTabs: [],
+        headerClass: 'hide-menu',},
         {
             field: "spend",
             aggFunc: spender,
             valueFormatter: currencyFormatter,
-            minWidth: 125
+            minWidth: 108,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         }, // Summing Spend column
         {
             headerName: 'Revenue',
             field: "estimated_revenue",
             aggFunc: spender,
             valueFormatter: currencyFormatter,
-            minWidth: 125
+            minWidth: 108,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         }, // Summing Revenue column
         {
             field: "profit",
@@ -2636,19 +2755,32 @@ const Dashboard = () => {
                 'font-red': p => p.value < 0
             },
             valueFormatter: currencyFormatter,
-            minWidth: 125
+            minWidth: 108,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
         {
+            headerName: 'Project Name',
             field: "revenuePartner",
-            minWidth: 180
+            minWidth: 150,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         }, // Group by Holder
         {
             field: "holder",
-            minWidth: 125// Group by MediaBuyerName
+            minWidth: 125,// Group by MediaBuyerName,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
         {
             field: "mediaBuyerName", headerName:'User',
-            minWidth: 125// Group by MediaBuyerName
+            minWidth: 125,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
     ]);
     const [columnDefs3] = useState([
@@ -2667,22 +2799,34 @@ const Dashboard = () => {
             hide: true, // Hide column as it's grouped
             rowGroup: true,
             enableRowGroup: true,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
 
         }, // Group by Network
         {field:'specifiedDate', headerName:"Date",
-        minWidth: 125},
+        minWidth: 125,
+        suppressMenu: true,
+        menuTabs: [],
+        headerClass: 'hide-menu',},
         {
             field: "spend",
             aggFunc: spender,
             valueFormatter: currencyFormatter,
-            minWidth: 125
+            minWidth: 125,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         }, // Summing Spend column
         {
             headerName: 'Revenue',
             field: "estimated_revenue",
             aggFunc: spender,
             valueFormatter: currencyFormatter,
-            minWidth: 125
+            minWidth: 125,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         }, // Summing Revenue column
         {
             field: "profit",
@@ -2691,19 +2835,32 @@ const Dashboard = () => {
                 'font-red': p => p.value < 0
             },
             valueFormatter: currencyFormatter,
-            minWidth: 125
+            minWidth: 125,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
         {
+            headerName: 'Project Name',
             field: "revenuePartner",
-            minWidth: 180
+            minWidth: 180,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         }, // Group by Holder
         {
             field: "Holder",
-            minWidth: 125// Group by MediaBuyerName
+            minWidth: 125,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
         {
             field: "MediaBuyerName", headerName:'User',
-            minWidth: 125// Group by MediaBuyerName
+            minWidth: 125,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
     ]);
     const [columnDefs4] = useState([
@@ -2714,30 +2871,45 @@ const Dashboard = () => {
             hide: true, // Hide column as it's grouped
             rowGroup: true,
             enableRowGroup: true,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
         {
             field: "AgencyName", minWidth:180,
             resizable: true,
             sortable: true,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
             // hide: true, // Hide column as it's grouped
             // rowGroup: true,
             // enableRowGroup: true,
 
         }, // Group by Network
         {field:'specifiedDate', headerName:"Date",
-        minWidth: 125},
+        minWidth: 125,
+        suppressMenu: true,
+        menuTabs: [],
+        headerClass: 'hide-menu',},
         {
             field: "spend",
             aggFunc: spender,
             valueFormatter: currencyFormatter,
-            minWidth: 125
+            minWidth: 125,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         }, // Summing Spend column
         {
             headerName: 'Revenue',
             field: "estimated_revenue",
             aggFunc: spender,
             valueFormatter: currencyFormatter,
-            minWidth: 125
+            minWidth: 125,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         }, // Summing Revenue column
         {
             field: "profit",
@@ -2746,9 +2918,22 @@ const Dashboard = () => {
                 'font-red': p => p.value < 0
             },
             valueFormatter: currencyFormatter,
-            minWidth: 125
+            minWidth: 125,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         }
     ]);
+
+    const autoGroupColumnDefOverAllReport = {
+        headerName: 'Group', // Display name for the grouped column
+        minWidth: 250, // Set width for grouped rows
+        resizable: true, // Enable resizing
+        sortable: true, // Enable sorting
+        cellRendererParams: {
+          suppressCount: true, // Suppress row count in the grouped column
+        },
+      };
 
     const autoGroupColumnDef = {
         headerName: 'Campaign Name', // Display name for the grouped column
@@ -2889,7 +3074,7 @@ const Dashboard = () => {
                                         // width: '100%',
                                     }}
                                     className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                    placeholder="Select Categories"
+                                    placeholder="Select Projects"
                                     value={firstSelectValues}
                                     onChange={handleFirstSelectChange}
                                     maxTagCount="responsive"
@@ -2923,7 +3108,7 @@ const Dashboard = () => {
                 onSearch={handleSearchChange}  // Update searchValue dynamically
                 style={{ width: '100%' }}
                 className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                placeholder="Select items"
+                placeholder="Select Accounts"
                 dropdownClassName={theme === 'dark' && 'custom-dropdown'}
                 value={[]} // This should be updated to reflect selectedItems based on the selected categories
                 dropdownRender={() => (
@@ -2954,7 +3139,15 @@ const Dashboard = () => {
                             </Col>
     
                             <Col span={8}>
-                                <ConfigProvider locale={locale}>
+                                <ConfigProvider 
+                                    locale={locale}
+                                    theme={{
+                                        token: {
+                                          colorPrimary: '#C7F39A', 
+                                          colorTextLightSolid: '#000',
+                                        },
+                                    }}
+                                >
                                     <RangePicker
                                         presets={rangePresets}
                                         value={selectedDates}
@@ -2979,7 +3172,7 @@ const Dashboard = () => {
                                                 Close
                                             </Button>
                                             <Button
-                                                type="primary"
+                                                style={{ backgroundColor: '#C7F39A' }} 
                                                 onClick={handleSubmit}
                                             >
                                                 Submit
@@ -3675,6 +3868,13 @@ const Dashboard = () => {
                                         rowData={rowData}
                                         columnDefs={columnDefs}
                                         defaultColDef={defaultColDef}
+                                        gridOptions={{
+                                            ensureDomOrder: false,
+                                            suppressRowClickSelection: true,
+                                            suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                            enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                        }}
+                                        autoGroupColumnDef={autoGroupColumnDefOverAllReport}
                                         rowGroupPanelShow="always"
                                         suppressAggFuncInHeader={true}
                                         groupIncludeFooter={true}
@@ -3700,6 +3900,12 @@ const Dashboard = () => {
                                                 rowData={rowData?.filter((each) => each.profit > 0)}
                                                 columnDefs={columnDefs1}
                                                 defaultColDef={defaultColDef}
+                                                gridOptions={{
+                                                    ensureDomOrder: false,
+                                                    suppressRowClickSelection: true,
+                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                }}
                                                 rowGroupPanelShow="always"
                                                 suppressAggFuncInHeader={true}
                                                 groupIncludeFooter={true}
@@ -3721,6 +3927,12 @@ const Dashboard = () => {
                                                 rowData={rowData?.filter(each => each.profit < 0)}
                                                 columnDefs={columnDefs1}
                                                 defaultColDef={defaultColDef}
+                                                gridOptions={{
+                                                    ensureDomOrder: false,
+                                                    suppressRowClickSelection: true,
+                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                }}
                                                 rowGroupPanelShow="always"
                                                 suppressAggFuncInHeader={true}
                                                 groupIncludeFooter={true}
@@ -3751,6 +3963,12 @@ const Dashboard = () => {
                                                   )}
                                                 columnDefs={columnDefs1}
                                                 defaultColDef={defaultColDef}
+                                                gridOptions={{
+                                                    ensureDomOrder: false,
+                                                    suppressRowClickSelection: true,
+                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                }}
                                                 rowGroupPanelShow="always"
                                                 suppressAggFuncInHeader={true}
                                                 groupIncludeFooter={true}
@@ -3782,6 +4000,12 @@ const Dashboard = () => {
                                                   )}
                                                 columnDefs={columnDefs1}
                                                 defaultColDef={defaultColDef}
+                                                gridOptions={{
+                                                    ensureDomOrder: false,
+                                                    suppressRowClickSelection: true,
+                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                }}
                                                 rowGroupPanelShow="always"
                                                 suppressAggFuncInHeader={true}
                                                 groupIncludeFooter={true}
@@ -3813,6 +4037,12 @@ const Dashboard = () => {
                                                   )}
                                                 columnDefs={columnDefs1}
                                                 defaultColDef={defaultColDef}
+                                                gridOptions={{
+                                                    ensureDomOrder: false,
+                                                    suppressRowClickSelection: true,
+                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                }}
                                                 rowGroupPanelShow="always"
                                                 suppressAggFuncInHeader={true}
                                                 groupIncludeFooter={true}
@@ -3843,6 +4073,12 @@ const Dashboard = () => {
                                                 rowData={top5Campaigns}
                                                 columnDefs={columnDefs2}
                                                 defaultColDef={defaultColDef}
+                                                gridOptions={{
+                                                    ensureDomOrder: false,
+                                                    suppressRowClickSelection: true,
+                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                }}
                                                 rowGroupPanelShow="always"
                                                 suppressAggFuncInHeader={true}
                                                 groupIncludeFooter={true}
@@ -3863,6 +4099,12 @@ const Dashboard = () => {
                                                 rowData={top5RevenueCampaigns}
                                                 columnDefs={columnDefs2}
                                                 defaultColDef={defaultColDef}
+                                                gridOptions={{
+                                                    ensureDomOrder: false,
+                                                    suppressRowClickSelection: true,
+                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                }}
                                                 rowGroupPanelShow="always"
                                                 suppressAggFuncInHeader={true}
                                                 groupIncludeFooter={true}
@@ -3883,6 +4125,12 @@ const Dashboard = () => {
                                                 rowData={top5ProfitCampaigns}
                                                 columnDefs={columnDefs2}
                                                 defaultColDef={defaultColDef}
+                                                gridOptions={{
+                                                    ensureDomOrder: false,
+                                                    suppressRowClickSelection: true,
+                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                }}
                                                 rowGroupPanelShow="always"
                                                 suppressAggFuncInHeader={true}
                                                 groupIncludeFooter={true}
@@ -3903,6 +4151,12 @@ const Dashboard = () => {
                                                 rowData={overAllProfitCampaigns}
                                                 columnDefs={columnDefs2}
                                                 defaultColDef={defaultColDef}
+                                                gridOptions={{
+                                                    ensureDomOrder: false,
+                                                    suppressRowClickSelection: true,
+                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                }}
                                                 rowGroupPanelShow="always"
                                                 suppressAggFuncInHeader={true}
                                                 groupIncludeFooter={true}
@@ -3923,6 +4177,12 @@ const Dashboard = () => {
                                                 rowData={overAllLossCampaigns}
                                                 columnDefs={columnDefs2}
                                                 defaultColDef={defaultColDef}
+                                                gridOptions={{
+                                                    ensureDomOrder: false,
+                                                    suppressRowClickSelection: true,
+                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                }}
                                                 rowGroupPanelShow="always"
                                                 suppressAggFuncInHeader={true}
                                                 groupIncludeFooter={true}
@@ -3949,6 +4209,12 @@ const Dashboard = () => {
                                                 rowData={domainWiseData}
                                                 columnDefs={columnDefs3}
                                                 defaultColDef={defaultColDef}
+                                                gridOptions={{
+                                                    ensureDomOrder: false,
+                                                    suppressRowClickSelection: true,
+                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                }}
                                                 // rowGroupPanelShow="always"
                                                 suppressAggFuncInHeader={true}
                                                 // groupIncludeFooter={true}
@@ -3970,7 +4236,11 @@ const Dashboard = () => {
                                                         columnDefs={columnDefs4}
                                                         defaultColDef={defaultColDef}
                                                         gridOptions={{
-                                                            groupDefaultExpanded: -1, // Expands all groups by default
+                                                            groupDefaultExpanded: -1, 
+                                                            ensureDomOrder: false,
+                                                            suppressRowClickSelection: true,
+                                                            suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                            enableRangeSelection: true,// Expands all groups by default
                                                         }}
                                                         // rowGroupPanelShow="always"
                                                         suppressAggFuncInHeader={true}

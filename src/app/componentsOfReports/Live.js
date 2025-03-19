@@ -54,6 +54,7 @@ const selectTimezone = {
 };
 
 const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems}) => {
+    console.log(columnDefs, "columnDefs");
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -201,13 +202,18 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
 
                 let campaignid, adsetid;
 
-                if (params.node.group && params.node.childrenAfterGroup && params.node.childrenAfterGroup.length > 0) {
-                    const firstChild = params.node.childrenAfterGroup[0].data;
-                    campaignid = firstChild.campaignid;
-                    adsetid = firstChild.adsetid;
+                if (params.node.group && Array.isArray(params.node.childrenAfterGroup) && params.node.childrenAfterGroup.length > 0) {
+                    const firstChild = params.node.childrenAfterGroup[0]?.data;  // Safe access with optional chaining
+                
+                    if (firstChild) {  // Ensure firstChild is not undefined before accessing properties
+                        campaignid = firstChild.campaignid ?? null;  // Use null-safe access
+                        adsetid = firstChild.adsetid ?? null;
+                    } else {
+                        console.log("First child data is undefined", params.node.childrenAfterGroup[0]);
+                    }
                 } else if (params.data) {
-                    campaignid = params.data.campaignid;
-                    adsetid = params.data.adsetid;
+                    campaignid = params.data.campaignid ?? null;
+                    adsetid = params.data.adsetid ?? null;
                 } else {
                     console.error('Missing campaignid or adsetid for campaign:', campaignName);
                     return (
@@ -698,6 +704,8 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                             campaignid: eachData.campaign_id,
                             timezone: eachData[newtime],
                             comment: relatedComment ? relatedComment.comment : null,
+                            adid: "",
+                            adname: "",
                             actions: '...'
                         }
                     )
@@ -785,7 +793,9 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
     const onGridReady = (params, gridId, gridRef) => {
         gridRef.current = params;
         params.api.applyColumnState({ state: columnDefs || [], applyOrder: true });
-        params.api.addEventListener('dragStopped', (e) => debouncedHandleColumnMove(e, gridId));
+        params.api.addEventListener('dragStopped', (e) => {
+            debouncedHandleColumnMove(e, gridId);
+        });
     };
     
     // const onGridReady = (params, gridId, gridRef) => {
@@ -946,7 +956,9 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
     //     return defaultItems;
     // };
     const gridOptions = {
-        onColumnMoved: (params) => debouncedHandleColumnMove(params, 'grid1'),
+        onColumnMoved: (params) => {
+            debouncedHandleColumnMove(params, 'grid1');
+        },
         defaultColDef: {
             suppressMenu: true,
             headerClass: "custom-header" // Apply to all columns by default
