@@ -968,3 +968,23 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 .ag-theme-alpine {
   overflow: visible !important;
 }
+
+/* 1) Make the default pseudo-element transparent 
+   so it doesn't create a dark gap. */
+.ant-picker-cell-range-start:not(.ant-picker-cell-range-start-single)::before,
+.ant-picker-cell-range-end:not(.ant-picker-cell-end-single)::before,
+.ant-picker-cell-in-range::before {
+  background-color: transparent !important;
+  border-radius: 0 !important;
+  content: '' !important;
+}
+   
+/* 2) Directly set the background for all in-range cells 
+(including start, end, and single-date selections). */
+.ant-picker-cell.ant-picker-cell-in-view.ant-picker-cell-in-range,
+.ant-picker-cell.ant-picker-cell-in-view.ant-picker-cell-range-start,
+.ant-picker-cell.ant-picker-cell-in-view.ant-picker-cell-range-end,
+.ant-picker-cell.ant-picker-cell-in-view.ant-picker-cell-selected {
+  background-color: #C7F39A !important; /* your highlight color */
+  color: #000 !important;              /* text color on top */
+}

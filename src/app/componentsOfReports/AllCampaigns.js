@@ -613,7 +613,9 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                             impressions: eachData.impressions,
                             campaignid: eachData.campaign_id,
                             adsetid: eachData.adset_id,
-                            actions: '...'
+                            actions: '...',
+                            adid: "",
+                            adname: "",
                         }
                     )
                 })

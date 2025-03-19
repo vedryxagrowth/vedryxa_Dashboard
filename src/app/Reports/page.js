@@ -102,6 +102,8 @@ const MyTablePage = () => {
         "timezone",
         "fblinkclicks",
         "cpclinkclicks",
+        "adname",
+        "adid"
     ];
 
     const storedData = localStorage.getItem("storedData") && localStorage.getItem("storedData") !== "undefined" && localStorage.getItem("storedData") !== "null" ? JSON.parse(localStorage.getItem("storedData")) : null;
@@ -166,9 +168,7 @@ const MyTablePage = () => {
         setNewInputValue(e.target.value);
     }
 
-    const accountsForAccess = adAccounts[revenuePratner].sort((a, b) => {
-        return a.status === "Active" ? -1 : b.status === "Active" ? 1 : 0;
-    });;
+    const accountsForAccess = adAccounts[revenuePratner];
     console.log(accountsForAccess, "accounts Access");
 
     const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
@@ -846,23 +846,23 @@ const MyTablePage = () => {
     };
 
     const columnDefsObjectOfAdID = {
-        // campaignname: {
-        //     headerName: 'Campaign-Name',
-        //     field: 'campaignname',
-        //     resizable: true,
-        //     sortable: true,
-        //     width: 500,
-        //     hide: true,
-        //     rowGroup: true,
-        //     rowGroupIndex: 0, // Level 0
-        //     pinned: 'left',
-        //     enableRowGroup: true,
-        //     onClick: (event) => {
-        //         const url = `/history/${event}-${account}-${time}`;
-        //         window.open(url, '_blank', 'noopener,noreferrer');
-        //     },
-        //     cellRenderer: campaignNameRenderer,
-        // },
+        campaignname: {
+            headerName: 'CampaignName',
+            field: 'campaignname',
+            resizable: true,
+            sortable: true,
+            width: 500,
+            hide: true,
+            // rowGroup: true,
+            // rowGroupIndex: 0, // Level 0
+            // pinned: 'left',
+            // enableRowGroup: true,
+            // onClick: (event) => {
+            //     const url = `/history/${event}-${account}-${time}`;
+            //     window.open(url, '_blank', 'noopener,noreferrer');
+            // },
+            // cellRenderer: campaignNameRenderer,
+        },
         adsetname: {
             headerName: 'Adset-Name', field: 'adsetname',
             // resizeble: true,
@@ -895,7 +895,7 @@ const MyTablePage = () => {
         },
         adid: {
             headerName: 'AdID',
-            field: 'ad_id',
+            field: 'adid',
             sortable: true,
             minWidth: 200,
             filter: 'agSetColumnFilter',
@@ -1052,6 +1052,7 @@ const MyTablePage = () => {
             field: 'date',
             minWidth: 110,
             sortable: true,
+            sort: "asc",
             filter: "agDateColumnFilter",
             suppressMenu: true,
             menuTabs: [],
@@ -1382,23 +1383,23 @@ const MyTablePage = () => {
     };
 
     const columnDefsObjectOfDailyAdID = {
-        // campaignname: {
-        //     headerName: 'Campaign-Name',
-        //     field: 'campaignname',
-        //     resizable: true,
-        //     sortable: true,
-        //     width: 500,
-        //     hide: true,
-        //     rowGroup: true,
-        //     rowGroupIndex: 0, // Level 0
-        //     pinned: 'left',
-        //     enableRowGroup: true,
-        //     onClick: (event) => {
-        //         const url = `/history/${event}-${account}-${time}`;
-        //         window.open(url, '_blank', 'noopener,noreferrer');
-        //     },
-        //     cellRenderer: campaignNameRenderer,
-        // },
+        campaignname: {
+            headerName: 'CampaignName',
+            field: 'campaignname',
+            resizable: true,
+            sortable: true,
+            width: 500,
+            hide: true,
+            // rowGroup: true,
+            // rowGroupIndex: 0, // Level 0
+            // pinned: 'left',
+            // enableRowGroup: true,
+            // onClick: (event) => {
+            //     const url = `/history/${event}-${account}-${time}`;
+            //     window.open(url, '_blank', 'noopener,noreferrer');
+            // },
+            // cellRenderer: campaignNameRenderer,
+        },
         actions: {
             headerName: 'Actions',
             field: 'actions',
@@ -1548,7 +1549,7 @@ const MyTablePage = () => {
         },
         adid: {
             headerName: 'AdID',
-            field: 'ad_id',
+            field: 'adid',
             sortable: true,
             minWidth: 350,
             filter: 'agSetColumnFilter',
@@ -1591,6 +1592,7 @@ const MyTablePage = () => {
         date: {
             headerName: 'Date', field: 'date', minWidth: 110, sortable: true,
             filter: "agDateColumnFilter",
+            sort: "asc",
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
@@ -1777,7 +1779,7 @@ const MyTablePage = () => {
 
     const columnDefsObject = {
         campaignname: {
-            headerName: 'Campaign-Name',
+            headerName: 'CampaignName',
             field: 'campaignname',
             resizable: true,
             sortable: true,
@@ -1941,11 +1943,42 @@ const MyTablePage = () => {
             suppressMenu: true,    // Suppress the column menu
             
         },
+        adname: {
+            headerName: 'Ad-Name', field: 'adname',
+            // resizeble: true,
+            // sortable: true,
+            // width: 300,
+            // rowGroup: true, 
+            // rowGroupIndex: 1, // Level 2
+            // hide: true,
+            // filter: 'agSetColumnFilter',
+            // filterParams: {
+            //     comparator: (a, b) => a.localeCompare(b),
+            //     suppressAndOrCondition: true,
+            // }, 
+            // showRowGroup: 'adname',
+            hide: true,
+        },
+        adid: {
+            headerName: 'AdID',
+            field: 'adid',
+            // sortable: true,
+            // minWidth: 200,
+            // filter: 'agSetColumnFilter',
+            hide: true,
+            // filterParams: {
+            //     comparator: (a, b) => a.localeCompare(b),
+            //     suppressAndOrCondition: true,
+            // },
+            // suppressMenu: true,    // Suppress the column menu
+            
+        },
         date: {
             headerName: 'Date',
             field: 'date',
             minWidth: 110,
             sortable: true,
+            sort: "asc",
             filter: "agDateColumnFilter",
             suppressMenu: true,
             menuTabs: [],
@@ -2277,7 +2310,7 @@ const MyTablePage = () => {
 
     const columnDefsObject1 = {
         campaignname: {
-            headerName: 'Campaign-Name',
+            headerName: 'CampaignName',
             field: 'campaignname',
             resizable: true,
             sortable: true,
@@ -2451,9 +2484,40 @@ const MyTablePage = () => {
                 suppressAndOrCondition: true,
             }, 
         },
+        adname: {
+            headerName: 'Ad-Name', field: 'adname',
+            // resizeble: true,
+            // sortable: true,
+            // width: 300,
+            // rowGroup: true, 
+            // rowGroupIndex: 1, // Level 2
+            // hide: true,
+            // filter: 'agSetColumnFilter',
+            // filterParams: {
+            //     comparator: (a, b) => a.localeCompare(b),
+            //     suppressAndOrCondition: true,
+            // }, 
+            // showRowGroup: 'adname',
+            hide: true,
+        },
+        adid: {
+            headerName: 'AdID',
+            field: 'adid',
+            // sortable: true,
+            // minWidth: 200,
+            // filter: 'agSetColumnFilter',
+            hide: true,
+            // filterParams: {
+            //     comparator: (a, b) => a.localeCompare(b),
+            //     suppressAndOrCondition: true,
+            // },
+            // suppressMenu: true,    // Suppress the column menu
+            
+        },
         date: {
             headerName: 'Date', field: 'date', minWidth: 110, sortable: true,
             filter: "agDateColumnFilter",
+            sort: "asc",
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
@@ -2640,7 +2704,7 @@ const MyTablePage = () => {
 
     const columnDefsObject2 = {
         campaignname: {
-            headerName: 'Campaign-Name', field: 'campaignname', resizeble: true,
+            headerName: 'CampaignName', field: 'campaignname', resizeble: true,
             // sortable: true,
             resizeble: true,
             sortable: true,
@@ -2808,9 +2872,40 @@ const MyTablePage = () => {
             width: 350,
             filter: true,
         },
+        adname: {
+            headerName: 'Ad-Name', field: 'adname',
+            // resizeble: true,
+            // sortable: true,
+            // width: 300,
+            // rowGroup: true, 
+            // rowGroupIndex: 1, // Level 2
+            // hide: true,
+            // filter: 'agSetColumnFilter',
+            // filterParams: {
+            //     comparator: (a, b) => a.localeCompare(b),
+            //     suppressAndOrCondition: true,
+            // }, 
+            // // showRowGroup: 'adname',
+            hide: true,
+        },
+        adid: {
+            headerName: 'AdID',
+            field: 'adid',
+            // sortable: true,
+            // minWidth: 200,
+            // filter: 'agSetColumnFilter',
+            hide: true,
+            // filterParams: {
+            //     comparator: (a, b) => a.localeCompare(b),
+            //     suppressAndOrCondition: true,
+            // },
+            // suppressMenu: true,    // Suppress the column menu
+            
+        },
         date: {
             headerName: 'Date', field: 'date', sort: 'asc', sortable: true,
             filter: "agDateColumnFilter",
+            sort: "asc",
             minWidth: 110,
             filterParams: {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
@@ -3016,7 +3111,7 @@ const MyTablePage = () => {
 
     const columnDefsObject3 = {
         campaignname: {
-            headerName: 'Campaign-Name',
+            headerName: 'CampaignName',
             field: 'campaignname',
             resizable: true,
             sortable: true,
@@ -3207,8 +3302,39 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
         },
+        adname: {
+            headerName: 'Ad-Name', field: 'adname',
+            // resizeble: true,
+            // sortable: true,
+            // width: 300,
+            // rowGroup: true, 
+            // rowGroupIndex: 1, // Level 2
+            // hide: true,
+            // filter: 'agSetColumnFilter',
+            // filterParams: {
+            //     comparator: (a, b) => a.localeCompare(b),
+            //     suppressAndOrCondition: true,
+            // }, 
+            // showRowGroup: 'adname',
+            hide: true,
+        },
+        adid: {
+            headerName: 'AdID',
+            field: 'adid',
+            // sortable: true,
+            // minWidth: 200,
+            // filter: 'agSetColumnFilter',
+            hide: true,
+            // filterParams: {
+            //     comparator: (a, b) => a.localeCompare(b),
+            //     suppressAndOrCondition: true,
+            // },
+            // suppressMenu: true,    // Suppress the column menu
+            
+        },
         date: {
             headerName: 'Date', field: 'date', minWidth: 120, sortable: true,
+            sort: "asc",
             filter: "agDateColumnFilter",
             filterParams: {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
@@ -3521,11 +3647,11 @@ const MyTablePage = () => {
     // };
 
     const getColumnDefsObjectOfAdID = (order) => {
-        return order?.map(colKey => columnDefsObjectOfAdID[colKey]).filter(col => col !== undefined);
+        return order?.map(colKey => columnDefsObjectOfAdID[colKey]).filter(item => item);
     }      
 
     const getColumnDefsObjectOfDailyAdID = (order) => {
-        return order?.map(colKey => columnDefsObjectOfDailyAdID[colKey]).filter(col => col !== undefined);
+        return order?.map(colKey => columnDefsObjectOfDailyAdID[colKey]).filter(item => item);
     } 
 
     const getColumnDefs = (order) => {
@@ -3572,6 +3698,7 @@ const MyTablePage = () => {
 
 
     const updatingColumnsStructure = async (updateDataArray) => {
+        console.log(updateDataArray);
         const response = await apiClient.put(`/api/updateUserData?email=${userdetails.email}`,
             {
                 updateDataArray
@@ -3581,6 +3708,8 @@ const MyTablePage = () => {
         columnDefs2.current = (getColumnDefs2(updateDataArray));
         columnDefs3.current = (getColumnDefs3(updateDataArray));
         columnDefs4.current = (getColumnDefs4(updateDataArray));
+        setColDefs(getColumnDefsObjectOfAdID(updateDataArray));
+        setColDailyDefs(getColumnDefsObjectOfDailyAdID(updateDataArray));
         columnDefsOfAdID.current = (getColumnDefsObjectOfAdID(updateDataArray));
         columnDefsOfDailyAdID.current = (getColumnDefsObjectOfDailyAdID(updateDataArray));
         
@@ -3837,7 +3966,7 @@ const MyTablePage = () => {
 
     const handleColumnMove = (params, gridId) => {
         const columnState = params.api.getColumnState();
-        // console.log('Column moved in grid:', gridId);
+        console.log('Column moved in grid:', gridId);
         const fieldOrder = columnState.map(col => col.colId);
         const newFieldOrder = fieldOrder.filter(item => item !== 'ag-Grid-AutoColumn-campaignname' && item !== 'ag-Grid-AutoColumn' && columnStructure.includes(item));
         localStorage.setItem('columnState', JSON.stringify(newFieldOrder));
@@ -3851,11 +3980,11 @@ const MyTablePage = () => {
 
     const rangePresets = [
         {
-            label: 'ToDay',
+            label: 'Today',
             value: [dayjs().add(0, 'd'), dayjs().add(0, 'd')],
         },
         {
-            label: 'YesterDay',
+            label: 'Yesterday',
             value: [dayjs().add(-1, 'd'), dayjs().add(-1, 'd')],
         },
         {
@@ -4152,7 +4281,15 @@ const MyTablePage = () => {
                         />
                     </Col>
                     <Col xs={24} sm={24} md={15} lg={6}>
-                        <ConfigProvider locale={locale}>
+                        <ConfigProvider 
+                            locale={locale}
+                            theme={{
+                                token: {
+                                  colorPrimary: '#C7F39A', 
+                                  colorTextLightSolid: '#000',
+                                },
+                            }}
+                        >
                             <RangePicker
                                 presets={rangePresets}
                                 onChange={handleChange}

@@ -655,6 +655,8 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
                             adsetid: eachData.adset_id,
                             timezone: 'UTC',
                             actions: '...',
+                            adid: "",
+                            adname: "",
                             adId: eachData.tg7,
                             searchKeyword: eachData.searchKeyword
                             // compaignid: eachData.campaign_id,

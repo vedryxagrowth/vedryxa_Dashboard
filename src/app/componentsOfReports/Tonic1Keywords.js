@@ -621,6 +621,8 @@ const Tonic1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePrat
                             adsetid: eachData.adset_id,
                             timezone: 'UTC',
                             actions: '...',
+                            adid: "",
+                            adname: "",
                             keyword: eachData.keyword
                             // compaignid: eachData.campaign_id,
                         }

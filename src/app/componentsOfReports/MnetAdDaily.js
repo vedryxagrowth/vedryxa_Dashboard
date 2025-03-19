@@ -54,6 +54,7 @@ const selectTimezone = {
 
 
 const MnetDailyAdReport = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems}) => {
+    console.log(columnDefs, "columnDefs")
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -714,7 +715,7 @@ const MnetDailyAdReport = ({startDate, endDate, newaccount, newtime, newRevenueP
                             fmargin: fMargin,
                             campaignid: eachData.campaign_id,
                             adsetid: eachData.adset_id,
-                            ad_id: eachData.ad_id,
+                            adid: eachData.ad_id,
                             timezone: 'UTC',
                             actions: '...'
                             // compaignid: eachData.campaign_id,
@@ -805,7 +806,10 @@ const MnetDailyAdReport = ({startDate, endDate, newaccount, newtime, newRevenueP
     const onGridReady = (params, gridId, gridRef) => {
         gridRef.current = params;
         params.api.applyColumnState({ state: columnDefs || [], applyOrder: true });
-        params.api.addEventListener('dragStopped', (e) => debouncedHandleColumnMove(e, gridId));
+        params.api.addEventListener('dragStopped', (e) => {
+            console.log("4444");
+            debouncedHandleColumnMove(e, gridId)
+        });
     };
     
     // const onGridReady = (params, gridId, gridRef) => {
@@ -864,7 +868,10 @@ const MnetDailyAdReport = ({startDate, endDate, newaccount, newtime, newRevenueP
     //     return defaultItems;
     // };
     const gridOptions1 = {
-        onColumnMoved: (params) => debouncedHandleColumnMove(params, 'grid2'),
+        onColumnMoved: (params) => {
+            console.log("1111");
+            debouncedHandleColumnMove(params, 'grid20')
+        },
         defaultColDef: {
             suppressMenu: true,
             headerClass: "custom-header" // Apply to all columns by default
@@ -1057,13 +1064,13 @@ const MnetDailyAdReport = ({startDate, endDate, newaccount, newtime, newRevenueP
                                         onGridReady={(params) => {
                                             gridRef1.current = params.api; // Store grid API
                                             restoreGridState(gridRef1.current); // Restore state when grid is ready
-                                            onGridReady(params, 'grid2', gridRef1);
+                                            onGridReady(params, 'grid20', gridRef1);
                                             if (params.columnApi) {
                                                 params.columnApi.autoSizeAllColumns();
                                             }
                                         }}
                                         gridOptions={{
-                                            ...gridOptions1,
+                                            // ...gridOptions1,
                                             ensureDomOrder: false,
                                             suppressRowClickSelection: true,
                                             suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
