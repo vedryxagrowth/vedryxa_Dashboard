@@ -3840,8 +3840,8 @@ const Dashboard = () => {
     
                         <Row style={{ display: 'flex', flexDirection: 'column' }}>
                             <Col>
-                                <h2 >
-                                    Over All Report
+                                <h2>
+                                    Overall Report
                                 </h2>
     
                             </Col>
@@ -3884,7 +3884,7 @@ const Dashboard = () => {
                             </Col>
     
                         </Row>
-                        <h1>Accounts</h1>
+                        <h2 style={{marginTop: "15px"}}>Accounts</h2>
                         <div style={{padding:'0px', margin:'0px'}}>
                             {renderCarouselNav()}
                         </div>
@@ -4056,7 +4056,7 @@ const Dashboard = () => {
                             </div>
                         </Carousel>
 
-                        <h1>Top 5 Campaigns</h1>
+                        <h2 style={{marginTop: "15px"}}>Top 5 Campaigns</h2>
 
                         <div style={{padding:'0px', margin:'0px'}}>
                             {renderCarouselNav1()}
