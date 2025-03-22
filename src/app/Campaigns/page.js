@@ -942,7 +942,7 @@ const App = () => {
                     <Col span={3}>
                         <Select
                             showSearch
-                            placeholder="Select Network"
+                            placeholder="Select Project"
                             style={{ width: '100%' }}
                             onChange={handleKeyChange}
                             value={selectedKey}
@@ -977,7 +977,7 @@ const App = () => {
                     <Col span={4}>
                         <Select
                             showSearch
-                            placeholder="Select Account"
+                            placeholder="Select Accounts"
                             style={{ width: '100%' }}
                             onChange={handleValueChange}
                             disabled={!selectedKey}
