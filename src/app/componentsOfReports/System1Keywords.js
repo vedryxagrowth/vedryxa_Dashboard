@@ -477,14 +477,14 @@ const System1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePra
                             <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                 <Text style={{ fontWeight: '600' }}>Timezone: {timezone.current}</Text>
                             </Col>
-                            <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                            {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                 <Text style={{ fontWeight: '600' }}>
                                     Cron/Acc status: {cronStatus.current} /{' '}
                                     <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
                                         {accountStatus.current}
                                     </span>
                                 </Text>
-                            </Col>
+                            </Col> */}
                             <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                 <Tooltip title="Export to CSV">
                                     <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef4, "Domain")} />

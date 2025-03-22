@@ -4,7 +4,7 @@ import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
 import moment from 'moment-timezone';
 import React from 'react';
-import { Input, Button, Row, Col, Typography, Result, Modal, message} from 'antd';
+import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch} from 'antd';
 import {  DownloadOutlined,  SmileOutlined, CopyOutlined,  EditOutlined,  MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { Tooltip} from 'antd';
 import { Space } from 'antd';
@@ -53,7 +53,7 @@ const selectTimezone = {
 };
 
 
-const MnetDailyAdReport = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems}) => {
+const MnetDailyAdReport = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle}) => {
     console.log(columnDefs, "columnDefs")
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
@@ -803,14 +803,32 @@ const MnetDailyAdReport = ({startDate, endDate, newaccount, newtime, newRevenueP
         // }
 
     };
-    const onGridReady = (params, gridId, gridRef) => {
-        gridRef.current = params;
-        params.api.applyColumnState({ state: columnDefs || [], applyOrder: true });
-        params.api.addEventListener('dragStopped', (e) => {
-            console.log("4444");
-            debouncedHandleColumnMove(e, gridId)
+    const onGridReady = (params, gridId) => {
+        gridRef1.current = params;
+    
+        params.api.applyColumnState({ 
+            state: columnDefs || [], 
+            applyOrder: true 
         });
     };
+    
+    // Effect to handle event listener based on toggleStatus
+    useEffect(() => {
+        if (!gridRef1.current) return; // Ensure gridRef exists
+    
+        const gridApi = gridRef1.current.api;
+        const handleDragStopped = (e) => debouncedHandleColumnMove(e, 'grid20');
+    
+        if (toggleStatus) {
+            gridApi.addEventListener('dragStopped', handleDragStopped);
+        } else {
+            gridApi.removeEventListener('dragStopped', handleDragStopped);
+        }
+    
+        return () => {
+            gridApi.removeEventListener('dragStopped', handleDragStopped); // Cleanup on unmount
+        };
+    }, [toggleStatus]); 
     
     // const onGridReady = (params, gridId, gridRef) => {
     //     gridRef.current = params;
@@ -869,8 +887,10 @@ const MnetDailyAdReport = ({startDate, endDate, newaccount, newtime, newRevenueP
     // };
     const gridOptions1 = {
         onColumnMoved: (params) => {
-            console.log("1111");
-            debouncedHandleColumnMove(params, 'grid20')
+            // console.log("1111");
+            if (toggleStatus){ 
+                debouncedHandleColumnMove(params, 'grid20')
+            }
         },
         defaultColDef: {
             suppressMenu: true,
@@ -1022,6 +1042,14 @@ const MnetDailyAdReport = ({startDate, endDate, newaccount, newtime, newRevenueP
                                                 <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px' }} />
                                             </Tooltip>
                                         </Col> */}
+                                        <Col>
+                                            <Tooltip 
+                                                title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
+                                                mouseEnterDelay={0} // Tooltip appears after 1 second
+                                            >
+                                                <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#C7F39A" }}/>
+                                            </Tooltip>
+                                        </Col>
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                             <Tooltip title="Export to CSV">
                                                 <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef1, "Daily")} />

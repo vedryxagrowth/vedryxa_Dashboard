@@ -1,10 +1,10 @@
 "use client"
-import { useEffect, useMemo, useState, useRef } from 'react';
+import { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
 import React from 'react';
 import moment from 'moment-timezone';
-import {  Input, Button, Row, Col, Typography, Result, Modal, message } from 'antd';
+import {  Input, Button, Row, Col, Typography, Result, Modal, message, Switch } from 'antd';
 import {  InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import { Space } from 'antd';
@@ -53,7 +53,7 @@ const selectTimezone = {
     DST: 'DSTDate'
 };
 
-const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems}) => {
+const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle}) => {
     console.log(columnDefs);
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
@@ -826,11 +826,32 @@ const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenueP
         //     setSelectedCells([{ rowIndex: event.node.rowIndex, colId: event.column.getId() }]);
         // }
     };
-    const onGridReady = (params, gridId, gridRef) => {
+    const onGridReady = (params, gridId) => {
         gridRef.current = params;
-        params.api.applyColumnState({ state: columnDefs || [], applyOrder: true });
-        params.api.addEventListener('dragStopped', (e) => debouncedHandleColumnMove(e, gridId));
+    
+        params.api.applyColumnState({ 
+            state: columnDefs || [], 
+            applyOrder: true 
+        });
     };
+    
+    // Effect to handle event listener based on toggleStatus
+    useEffect(() => {
+        if (!gridRef.current) return; // Ensure gridRef exists
+    
+        const gridApi = gridRef.current.api;
+        const handleDragStopped = (e) => debouncedHandleColumnMove(e, 'grid10');
+    
+        if (toggleStatus) {
+            gridApi.addEventListener('dragStopped', handleDragStopped);
+        } else {
+            gridApi.removeEventListener('dragStopped', handleDragStopped);
+        }
+    
+        return () => {
+            gridApi.removeEventListener('dragStopped', handleDragStopped); // Cleanup on unmount
+        };
+    }, [toggleStatus]); 
     
     // const onGridReady = (params, gridId, gridRef) => {
     //     gridRef.current = params;
@@ -1029,12 +1050,17 @@ const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenueP
         }
     };
 
+    const onColumnMoved = useCallback((params) => {
+        if (toggleStatus) {
+            debouncedHandleColumnMove(params, 'grid10');
+        }
+    }, [toggleStatus]); // Reacts to changes in toggleStatus
+    
     const gridOptions = {
-        onColumnMoved: (params) => debouncedHandleColumnMove(params, 'grid10'),
+        onColumnMoved,
         defaultColDef: {
             suppressMenu: true,
             headerClass: "custom-header" // Apply to all columns by default
-
         }
     };
     const handleReFetchData = () => {
@@ -1103,24 +1129,38 @@ const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenueP
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ fontWeight: '600' }}>F/N Hour: {maxHour.current}:00 / {maxNetworkHour.current}:00</Text>
                                         </Col>
-                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                        {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ fontWeight: '600' }}>
                                                 Cron/Acc status: {cronStatus.current} /{' '}
                                                 <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
                                                     {accountStatus.current}
                                                 </span>
                                             </Text>
-                                        </Col>
+                                        </Col> */}
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
                                             <Tooltip
                                             title={
                                                 <>
-                                                <div>FbAcc Status: {`${fbCron.current}`}</div>
-                                                <div>RevAcc Status: {`${revenueCron.current}`}</div>
+                                                    <div>FbAcc Status: {`${fbCron.current}`}</div>
+                                                    <div>RevAcc Status: {`${revenueCron.current}`}</div>
+                                                    <Text style={{ fontWeight: '600', color:'white' }}>
+                                                        Cron/Acc status: {cronStatus.current} /{' '}
+                                                        <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
+                                                            {accountStatus.current}
+                                                        </span>
+                                                    </Text>
                                                 </>
                                             }
                                             >
-                                                <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px' }} />
+                                                <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color:"#C7F39A" }} />
+                                            </Tooltip>
+                                        </Col>
+                                        <Col>
+                                            <Tooltip 
+                                                title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
+                                                mouseEnterDelay={0} // Tooltip appears after 1 second
+                                            >
+                                                <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#C7F39A" }}/>
                                             </Tooltip>
                                         </Col>
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>

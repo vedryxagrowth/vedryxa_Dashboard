@@ -4,7 +4,7 @@ import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
 import React from 'react';
 import moment from 'moment-timezone';
-import { Input, Button, Pagination, Row, Col, Typography, Result, Modal, message } from 'antd';
+import { Input, Button, Pagination, Row, Col, Typography, Result, Modal, message, Switch } from 'antd';
 import { DownloadOutlined,  ArrowLeftOutlined, ArrowRightOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import { Space } from 'antd';
@@ -53,7 +53,7 @@ const selectTimezone = {
 };
 
 
-const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems}) => {
+const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle}) => {
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -573,7 +573,7 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                         revenueData = '0.00';
                     }
                     else {
-                        revenueData = eachData.estimated_revenue;
+                        revenueData = parseFloat(eachData.estimated_revenue).toFixed(2);
                     }
                     const profit = (revenueData - eachData.spend).toFixed(2);
                     let margin;
@@ -601,7 +601,7 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                             campaignname: eachData.campaign_name,
                             adsetname: eachData.adsetName,
                             date: eachData[specifiedTimeZone],
-                            spend: eachData.spend,
+                            spend: parseFloat(eachData.spend).toFixed(2),
                             revenue: revenueData,
                             profit: profit,
                             fbleads: eachData.fbLeads,
@@ -691,11 +691,32 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
         //     setSelectedCells([{ rowIndex: event.node.rowIndex, colId: event.column.getId() }]);
         // }
     };
-    const onGridReady = (params, gridId, gridRef) => {
-        gridRef.current = params;
-        params.api.applyColumnState({ state: columnDefs || [], applyOrder: true });
-        params.api.addEventListener('dragStopped', (e) => debouncedHandleColumnMove(e, gridId));
+    const onGridReady = (params, gridId) => {
+        gridRef2.current = params;
+    
+        params.api.applyColumnState({ 
+            state: columnDefs || [], 
+            applyOrder: true 
+        });
     };
+    
+    // Effect to handle event listener based on toggleStatus
+    useEffect(() => {
+        if (!gridRef2.current) return; // Ensure gridRef exists
+    
+        const gridApi = gridRef2.current.api;
+        const handleDragStopped = (e) => debouncedHandleColumnMove(e, 'grid3');
+    
+        if (toggleStatus) {
+            gridApi.addEventListener('dragStopped', handleDragStopped);
+        } else {
+            gridApi.removeEventListener('dragStopped', handleDragStopped);
+        }
+    
+        return () => {
+            gridApi.removeEventListener('dragStopped', handleDragStopped); // Cleanup on unmount
+        };
+    }, [toggleStatus]);
     
     // const onGridReady = (params, gridId, gridRef) => {
     //     gridRef.current = params;
@@ -830,14 +851,18 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
         // Add your custom onClick functionality here
     };
 
-    const gridOptions2 = {
-        onColumnMoved: (params) => debouncedHandleColumnMove(params, 'grid3'),
+    const gridOptions2 = useMemo(() => ({
+        onColumnMoved: (params) => {
+            if (toggleStatus) {
+                debouncedHandleColumnMove(params, 'grid3');
+            }
+        },
         defaultColDef: {
             suppressMenu: true,
             headerClass: "custom-header" // Apply to all columns by default
-
-        }
-    };
+        },
+        ensureDomOrder: false
+    }), [toggleStatus]);
 
     const itemRender = (_, type, originalElement) => {
         if (type === 'prev') {
@@ -926,6 +951,14 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ fontWeight: '600' }}>Timezone: {timezone.current}</Text>
+                                        </Col>
+                                        <Col>
+                                            <Tooltip 
+                                                title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
+                                                mouseEnterDelay={0} // Tooltip appears after 1 second
+                                            >
+                                                <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#C7F39A" }}/>
+                                            </Tooltip>
                                         </Col>
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                             <Tooltip title="Export to CSV">
