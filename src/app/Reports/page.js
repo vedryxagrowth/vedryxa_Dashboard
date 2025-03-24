@@ -99,7 +99,11 @@ const MyTablePage = () => {
         "mnet-hour",
         "adsetid",
         "campaignid",
-        "timezone"
+        "timezone",
+        "fblinkclicks",
+        "cpclinkclicks",
+        "adname",
+        "adid"
     ];
 
     const storedData = localStorage.getItem("storedData") && localStorage.getItem("storedData") !== "undefined" && localStorage.getItem("storedData") !== "null" ? JSON.parse(localStorage.getItem("storedData")) : null;
@@ -148,6 +152,13 @@ const MyTablePage = () => {
     const [colDefs, setColDefs] = useState([]);
     const [colDailyDefs, setColDailyDefs] = useState([]);
 
+    const [checked, setChecked] = useState(false);
+
+    const handleChangeToggle = () => {
+        setChecked((prev) => !prev);
+    };
+    
+
     const handleBlur = () => {
         if (inputValue.trim() === '') {
             setIsSearching(false);
@@ -163,9 +174,7 @@ const MyTablePage = () => {
         setNewInputValue(e.target.value);
     }
 
-    const accountsForAccess = adAccounts[revenuePratner].sort((a, b) => {
-        return a.status === "Active" ? -1 : b.status === "Active" ? 1 : 0;
-    });;
+    const accountsForAccess = adAccounts[revenuePratner];
     console.log(accountsForAccess, "accounts Access");
 
     const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
@@ -263,104 +272,94 @@ const MyTablePage = () => {
 
     const handleOk = () => {
         if (!newColumnName || !formula) {
-            message.error('Please fill in all fields.');
+            message.error("Please fill in all fields.");
             return;
         }
-
+    
         const lowerCaseFormula = formula.toLowerCase();
-
-        try {
-            // Define the new column definition
-            const newColumnDef = {
-                headerName: newColumnName,
-                field: newColumnName.toLowerCase(),
-                valueGetter: (params) => {
-                    if (!params.data) return null;
-                    try {
-                        const originalKeys = Object.keys(params.data);
-                        const sanitizedKeys = originalKeys.map(key => key.replace(/[^a-zA-Z_$0-9]/g, '_'));
-                        const values = Object.values(params.data);
-
-                        const keyMapping = {};
-                        sanitizedKeys.forEach((key, index) => {
-                            keyMapping[key] = originalKeys[index];
-                        });
-
-                        // Constructing the function safely using sanitized keys
-                        const func = new Function(...sanitizedKeys, `return ${lowerCaseFormula}`);
-
-                        // Map the values back to their original keys for function execution
-                        const mappedValues = sanitizedKeys.map(key => params.data[keyMapping[key]]);
-                        return func(...mappedValues);
-                    } catch (error) {
-                        console.error('Error evaluatings formula:', error);
-                        return null;
+    
+        const newColumnDef = {
+            headerName: newColumnName,
+            field: newColumnName.toLowerCase(),
+            valueGetter: (params) => {
+                if (params.node.group && params.node.aggData) {
+                    return sanitizeNumericValue(params.node.aggData[newColumnName.toLowerCase()]) || 0;
+                }
+    
+                const data = params.data;
+                if (!data) return 0;
+    
+                try {
+                    // ✅ Compute margin and ROI dynamically
+                    const values = { ...data };
+                    if (lowerCaseFormula.includes("margin")) {
+                        values.margin = computeMargin(data);
                     }
-                },
-                sortable: true,
-                filter: true,
-                aggFunc: (params) => {
-                    try {
-                        const values = params.values;
-                        const sum = values.reduce((acc, value) => acc + (value || 0), 0);
-
-                        return sum; // Replace with other aggregation logic if needed
-                    } catch (error) {
-                        console.error('Error in aggregation function:', error);
-                        return null;
+                    if (lowerCaseFormula.includes("fmargin")) {
+                        values.fmargin = computeFMargin(data);
                     }
-                },
-                cellStyle: { backgroundColor: 'skyblue' },
-                headerCellStyle: { backgroundColor: 'skyblue', color: 'black' }
-            };
-
-            // Update the column definitions
-            setColumnDefs((prevDefs) => [...prevDefs, newColumnDef]);
-            columnDefs1.current = [...columnDefs1.current, newColumnDef];
-            columnDefs2.current = [...columnDefs2.current, newColumnDef];
-            columnDefs3.current = [...columnDefs3.current, newColumnDef];
-
-            // Common function to update data
-            const updateData = (prevData) => {
-                return prevData.map((row) => {
-                    const updatedRow = { ...row };
-                    try {
-                        const originalKeys = Object.keys(row);
-                        const sanitizedKeys = originalKeys.map(key => key.replace(/[^a-zA-Z_$0-9]/g, '_'));
-                        const values = Object.values(row);
-                        // console.log(values, "values1");
-
-                        const keyMapping = {};
-                        sanitizedKeys.forEach((key, index) => {
-                            keyMapping[key] = originalKeys[index];
-                        });
-
-                        const func = new Function(...sanitizedKeys, `return ${lowerCaseFormula}`);
-                        const mappedValues = sanitizedKeys.map(key => row[keyMapping[key]]);
-                        updatedRow[newColumnName.toLowerCase()] = func(...mappedValues);
-                    } catch (error) {
-                        console.error('Error evaluating formula for data update:', error);
-                        updatedRow[newColumnName.toLowerCase()] = null;
+                    if (lowerCaseFormula.includes("cpclinkclikcs")) {
+                        values.cpclinkclicks = computeCPCLC(data);
                     }
-                    return updatedRow;
-                });
-            };
-
-            // Update data with the new column
-            setRowData((prevData) => updateData(prevData));
-            setdailyData((prevData) => updateData(prevData));
-            setCampaignData((prevData) => updateData(prevData));
-            setKeywordData((prevData) => updateData(prevData));
-            setSystem1KeywordData((prevData) => updateData(prevData));
-
-        } catch (error) {
-            console.error('Error adding column:', error);
-        }
-        setNewColumnName('');
-        setFormula('');
+                    if (lowerCaseFormula.includes("roi")) {
+                        values.roi = computeROI(data);
+                    }
+                    if (lowerCaseFormula.includes("ctr")) {
+                        values.ctr = computeCTR(data);
+                    }
+                    if (lowerCaseFormula.includes("rpc")) {
+                        values.rpc = computeRPC(data);
+                    }
+                    if (lowerCaseFormula.includes("cpc")) {  // ✅ Compute CPC for individual rows
+                        values.cpc = sanitizeNumericValue(data.cpc);
+                    }
+                    if (lowerCaseFormula.includes("cpl")) {
+                        values.cpl = computeCPL(data);
+                    }
+                    if (lowerCaseFormula.includes("ncpl")) {
+                        values.ncpl = computeNCPL(data);
+                    }
+    
+                    const originalKeys = Object.keys(values);
+                    const sanitizedKeys = originalKeys.map(key => key.replace(/[^a-zA-Z_$0-9]/g, '_'));
+    
+                    const keyMapping = {};
+                    sanitizedKeys.forEach((key, index) => {
+                        keyMapping[key] = originalKeys[index];
+                    });
+    
+                    const sanitizedValues = sanitizedKeys.map(key => sanitizeNumericValue(values[keyMapping[key]]));
+    
+                    const safeFormula = lowerCaseFormula.replace(/\/(\s*)0/g, "/(0 === 0 ? 1 : 0)");
+    
+                    const func = new Function(...sanitizedKeys, `return ${safeFormula}`);
+                    const result = func(...sanitizedValues);
+    
+                    return isNaN(result) || !isFinite(result) ? 0 : Number(result.toFixed(2));
+                } catch (error) {
+                    console.error("Error evaluating formula:", error);
+                    return 0;
+                }
+            },
+            sortable: true,
+            filter: true,
+            aggFunc: (params) => params.rowNode.group ? customAggFunc(params, lowerCaseFormula) : null, 
+            cellStyle: { backgroundColor: "skyblue" },
+            headerCellStyle: { backgroundColor: "skyblue", color: "black" },
+        };
+    
+        setColumnDefs((prevDefs) => [...prevDefs, newColumnDef]);
+        setColDefs((prevDefs) => [...prevDefs, newColumnDef]);
+        setColDailyDefs((prevDefs) => [...prevDefs, newColumnDef]);
+        columnDefs1.current = [...columnDefs1.current, newColumnDef];
+        columnDefs2.current = [...columnDefs2.current, newColumnDef];
+        columnDefs3.current = [...columnDefs3.current, newColumnDef];
+    
+        setNewColumnName("");
+        setFormula("");
         setIsModalOpen(false);
     };
-
+    
     // Restore grid state (filters and sorting) from localStorage
     const restoreGridState = (gridApi) => {
         const filterModel = JSON.parse(localStorage.getItem('gridFilterModel'));
@@ -466,6 +465,23 @@ const MyTablePage = () => {
         return total;
     }
 
+    const cpcSpender1 = (params) => {
+        let total = 0;
+        let count = 0;
+    
+        params.values.forEach((value) => {
+            const num = parseFloat(value);
+            if (!isNaN(num)) {
+                total += num;
+                count += 1;
+            }
+        });
+    
+        if (count === 0) return 0; // ✅ Prevent divide by zero
+    
+        return Number((total / count));
+    };
+
     const cpcSpender = (params) => {
         var total = 0;
         var count = 0;
@@ -510,6 +526,29 @@ const MyTablePage = () => {
         return 0;
     };
 
+    const getCpcLc = (params) => {
+        if (params.data !== undefined) {
+            const { spend, fblinkclicks } = params.data;
+            if (fblinkclicks !== 0) {
+                const RPC = spend / fblinkclicks;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return Number(RPC.toFixed(2));
+
+            }
+        }
+        if (params.node.aggData !== undefined) {
+            const { spend, fblinkclicks } = params.node.aggData;
+            if (fblinkclicks !== 0) {
+                const RPC = spend / fblinkclicks;
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        return 0;
+    }
+
     const getRpc = (params) => {
         if (params.data !== undefined) {
             const { revenue, conversions } = params.data;
@@ -534,26 +573,22 @@ const MyTablePage = () => {
     }
 
     const getCtr = (params) => {
-        if (params.data !== undefined) {
-            const { impressions, fbclicks } = params.data;
-            if (impressions !== 0) {
-                const RPC = (fbclicks / impressions) * 100;
-                if (RPC === Infinity || isNaN(RPC)) {
-                    return 0;
-                }
-                return `${Number(RPC.toFixed(2))}`;
-
-            }
+        const data = params.node.group ? params.node.aggData : params.data;
+        if (!data) return 0;
+    
+        const impressions = sanitizeNumericValue(data.impressions);
+        const fbclicks = sanitizeNumericValue(data.fbclicks);
+    
+        if (isNaN(impressions) || impressions <= 0) return 0;
+    
+        const margin = (fbclicks / impressions) * 100;
+        const roundedMargin = isFinite(margin) && !isNaN(margin) ? Math.round(margin * 100) / 100 : 0;
+    
+        if (params.node.group) {
+            params.node.aggData["ctr"] = roundedMargin;
         }
-        if (params.node.aggData !== undefined) {
-            const { impressions, fbclicks } = params.node.aggData;
-            if (impressions !== 0) {
-                const RPC = (fbclicks / impressions) * 100;
-                return `${Number(RPC.toFixed(2))}`;
-            }
-        }
-
-        return 0;
+    
+        return roundedMargin;
     }
 
     const getDev = (params) => {
@@ -633,60 +668,291 @@ const MyTablePage = () => {
         return 0;
     }
 
+    const sanitizeNumericValue = (value) => {
+        if (typeof value === 'string') {
+            return parseFloat(value.replace(/[%$,]/g, '').trim()) || 0;
+        }
+        return isNaN(value) || value === undefined || value === null ? 0 : value;
+    };
+    
+    // ✅ Compute Margin Correctly (for both Normal & Grouped Rows)
     const getMargin = (params) => {
-        if (params.data !== undefined) {
-            const { revenue, spend } = params.data;
-
-            if (revenue !== "0.00" || revenue !== undefined) {
-                const RPC = ((revenue - spend) / revenue) * 100;
-                if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
-                    return `0`;
-                }
-                return `${Math.round(RPC * 100) / 100}`;
-
-            }
+        const data = params.node.group ? params.node.aggData : params.data;
+        if (!data) return 0;
+    
+        const revenue = sanitizeNumericValue(data.revenue);
+        const spend = sanitizeNumericValue(data.spend);
+    
+        if (isNaN(revenue) || revenue <= 0) return 0;
+    
+        const margin = ((revenue - spend) / revenue) * 100;
+        const roundedMargin = isFinite(margin) && !isNaN(margin) ? Math.round(margin * 100) / 100 : 0;
+    
+        if (params.node.group) {
+            params.node.aggData["margin"] = roundedMargin;
         }
-        if (params.node.aggData !== undefined) {
-            const { revenue, spend } = params.node.aggData;
-            if (revenue !== "0.00" || revenue !== undefined) {
-                const RPC = ((revenue - spend) / revenue) * 100;
-                if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
-                    return `0`;
-                }
-                return `${Math.round(RPC * 100) / 100}`;
-
-            }
+    
+        return roundedMargin;
+    };
+    
+    // ✅ Custom Margin Getter for Dynamically Added Columns
+    const getCustomMargin = (params) => {
+        if (params.node.group && params.node.aggData) {
+            return sanitizeNumericValue(params.node.aggData["margin"]);
         }
+        return getMargin(params);
+    };
+    
+    // ✅ Aggregation Function for Grouped Row Calculation
 
+    const computeRPC = (data) => {
+        const revenue = sanitizeNumericValue(data.revenue);
+        const conversions = sanitizeNumericValue(data.conversions);
+    
+        if (conversions > 0) {
+            return Number(((revenue / conversions)).toFixed(2));
+        }
         return 0;
-    }
+    };
+
+    const computeCPCLC = (data) => {
+        const fblinkClicks = sanitizeNumericValue(data.fblinkclicks);
+        const spend = sanitizeNumericValue(data.spend);
+    
+        if (fblinkClicks > 0) {
+            return Number((((spend) / fblinkClicks)).toFixed(2));
+        }
+        return 0;
+    };
+
+    const computeCPL = (data) => {
+        const fbleads = sanitizeNumericValue(data.fbleads);
+        const spend = sanitizeNumericValue(data.spend);
+    
+        if (fbleads > 0) {
+            return Number((((spend) / fbleads)).toFixed(2));
+        }
+        return 0;
+    };
+
+    const computeNCPL = (data) => {
+        const conversions = sanitizeNumericValue(data.conversions);
+        const spend = sanitizeNumericValue(data.spend);
+    
+        if (conversions > 0) {
+            return Number((((spend) / conversions)).toFixed(2));
+        }
+        return 0;
+    };
+
+    const computeMargin = (data) => {
+        const revenue = sanitizeNumericValue(data.revenue);
+        const spend = sanitizeNumericValue(data.spend);
+    
+        if (revenue > 0) {
+            return Number((((revenue - spend) / revenue) * 100).toFixed(2));
+        }
+        return 0;
+    };
+
+    const computeFMargin = (data) => {
+        const spend = sanitizeNumericValue(data.spend);
+        const revenue1 = sanitizeNumericValue(data.revenue);
+        const fbleads = sanitizeNumericValue(data.fbleads);
+        const revenue = computeRPC(data) * fbleads;
+    
+        if (revenue > 0) {
+            return Number((((revenue1-spend) / revenue) * 100).toFixed(2));
+        }
+        return 0;
+    };
+    
+    // ✅ Compute ROI for Individual Child Rows
+    const computeROI = (data) => {
+        const revenue = sanitizeNumericValue(data.revenue);
+        const spend = sanitizeNumericValue(data.spend);
+    
+        if (spend > 0) {
+            return Number((((revenue-spend) / spend) * 100).toFixed(2));
+        }
+        return 0;
+    };
+
+    const computeCTR = (data) => {
+        const impressions = sanitizeNumericValue(data.impressions);
+        const fbclicks = sanitizeNumericValue(data.fbclicks);
+    
+        if (impressions > 0) {
+            return Number(((fbclicks / impressions) * 100).toFixed(2));
+        }
+        return 0;
+    };
+
+    const computeAggregatedRPC = (params) => {
+        const totalConversions = params.rowNode.allLeafChildren.reduce((acc, child) => acc + sanitizeNumericValue(child.data.conversions), 0);
+        const totalRevenue = params.rowNode.allLeafChildren.reduce((acc, child) => acc + sanitizeNumericValue(child.data.revenue), 0);
+    
+        if (totalConversions > 0) {
+            return Number(((totalRevenue / totalConversions)).toFixed(2));
+        }
+        return 0;
+    };
+
+    const computeAggregatedCPCLC = (params) => {
+        const totalSpend = params.rowNode.allLeafChildren.reduce((acc, child) => acc + sanitizeNumericValue(child.data.spend), 0);
+        const totalFBLinkClicks = params.rowNode.allLeafChildren.reduce((acc, child) => acc + sanitizeNumericValue(child.data.fblinkclicks), 0);
+    
+        if (totalFBLinkClicks > 0) {
+            return Number(((totalSpend / totalFBLinkClicks)).toFixed(2));
+        }
+        return 0;
+    };
+
+    const computeAggregatedNCPL = (params) => {
+        const totalSpend = params.rowNode.allLeafChildren.reduce((acc, child) => acc + sanitizeNumericValue(child.data.spend), 0);
+        const totalConversions = params.rowNode.allLeafChildren.reduce((acc, child) => acc + sanitizeNumericValue(child.data.conversions), 0);
+    
+        if (totalConversions > 0) {
+            return Number(((totalSpend / totalConversions)).toFixed(2));
+        }
+        return 0;
+    };
+
+    const computeAggregatedCPL = (params) => {
+        const totalSpend = params.rowNode.allLeafChildren.reduce((acc, child) => acc + sanitizeNumericValue(child.data.spend), 0);
+        const totalFbleads = params.rowNode.allLeafChildren.reduce((acc, child) => acc + sanitizeNumericValue(child.data.fbleads), 0);
+    
+        if (totalFbleads > 0) {
+            return Number(((totalSpend / totalFbleads)).toFixed(2));
+        }
+        return 0;
+    };
+    
+    // ✅ Compute Aggregated Margin for Grouped Rows
+    const computeAggregatedMargin = (params) => {
+        const totalSpend = params.rowNode.allLeafChildren.reduce((acc, child) => acc + sanitizeNumericValue(child.data.spend), 0);
+        const totalRevenue = params.rowNode.allLeafChildren.reduce((acc, child) => acc + sanitizeNumericValue(child.data.revenue), 0);
+    
+        if (totalRevenue > 0) {
+            return Number((((totalRevenue - totalSpend) / totalRevenue) * 100).toFixed(2));
+        }
+        return 0;
+    };
+
+    const computeAggregatedFMargin = (params) => {
+        const totalSpend = params.rowNode.allLeafChildren.reduce((acc, child) => acc + sanitizeNumericValue(child.data.spend), 0);
+        const totalRevenue1 = params.rowNode.allLeafChildren.reduce((acc, child) => acc + sanitizeNumericValue(child.data.revenue), 0);
+        const totalFbleads = params.rowNode.allLeafChildren.reduce((acc, child) => acc + sanitizeNumericValue(child.data.fbleads), 0);
+        const totalRevenue = computeAggregatedRPC(params) * totalFbleads;
+    
+        if (totalRevenue > 0) {
+            return Number((((totalRevenue1-totalSpend) / totalRevenue) * 100).toFixed(2));
+        }
+        return 0;
+    };
+    
+    // ✅ Compute Aggregated ROI for Grouped Rows
+    const computeAggregatedROI = (params) => {
+        const totalSpend = params.rowNode.allLeafChildren.reduce((acc, child) => acc + sanitizeNumericValue(child.data.spend), 0);
+        const totalRevenue = params.rowNode.allLeafChildren.reduce((acc, child) => acc + sanitizeNumericValue(child.data.revenue), 0);
+    
+        if (totalSpend > 0) {
+            return Number((((totalRevenue-totalSpend) / totalSpend) * 100).toFixed(2));
+        }
+        return 0;
+    };
+
+    const computeAggregatedCTR = (params) => {
+        const totalImpressions = params.rowNode.allLeafChildren.reduce((acc, child) => acc + sanitizeNumericValue(child.data.impressions), 0);
+        const totalFBClicks = params.rowNode.allLeafChildren.reduce((acc, child) => acc + sanitizeNumericValue(child.data.fbclicks), 0);
+    
+        if (totalImpressions > 0) {
+            return Number(((totalFBClicks / totalImpressions) * 100).toFixed(2));
+        }
+        return 0;
+    };
+    
+    // ✅ Custom Aggregation Function (Handles Grouped Rows & Computes Full Formula)
+    const customAggFunc = (params, formula) => {
+        if (!params.rowNode.group) return null; // ✅ Only for grouped rows
+    
+        const aggregatedValues = {};
+        const formulaKeys = formula.match(/[a-zA-Z_]\w*/g) || [];
+    
+        formulaKeys.forEach((key) => {
+            const keyLower = key.toLowerCase();
+    
+            if (params.rowNode.group) {
+                if (keyLower === "margin") {
+                    aggregatedValues[keyLower] = computeAggregatedMargin(params);
+                } 
+                else if (keyLower === "fmargin") {
+                    aggregatedValues[keyLower] = computeAggregatedFMargin(params);
+                }
+                else if (keyLower === "cpclinkclicks") {
+                    aggregatedValues[keyLower] = computeAggregatedCPCLC(params);
+                }
+                else if (keyLower === "rpc") {
+                    aggregatedValues[keyLower] = computeAggregatedRPC(params);
+                }
+                else if (keyLower === "cpc") {  // ✅ Apply Average for CPC
+                    aggregatedValues[keyLower] = cpcSpender1(params);
+                }
+                else if (keyLower === "cpl") {
+                    aggregatedValues[keyLower] = computeAggregatedCPL(params);
+                }
+                else if (keyLower === "ncpl") {
+                    aggregatedValues[keyLower] = computeAggregatedNCPL(params);
+                }
+                else if (keyLower === "roi") {
+                    aggregatedValues[keyLower] = computeAggregatedROI(params);
+                } else if (keyLower === "ctr") {
+                    aggregatedValues[keyLower] = computeAggregatedCTR(params);
+                }else {
+                    aggregatedValues[keyLower] = params.rowNode.allLeafChildren.reduce(
+                        (acc, child) => acc + sanitizeNumericValue(child.data[keyLower]), 0
+                    );
+                }
+            }
+        });
+    
+        try {
+            const sanitizedKeys = Object.keys(aggregatedValues).map(key => key.replace(/[^a-zA-Z_$0-9]/g, '_'));
+            const keyMapping = {};
+            sanitizedKeys.forEach((key, index) => {
+                keyMapping[key] = Object.keys(aggregatedValues)[index];
+            });
+    
+            const sanitizedValues = sanitizedKeys.map(key => aggregatedValues[keyMapping[key]]);
+            const safeFormula = formula.replace(/\/(\s*)0/g, '/(0 === 0 ? 1 : 0)');
+    
+            const func = new Function(...sanitizedKeys, `return ${safeFormula}`);
+            const result = func(...sanitizedValues);
+    
+            return isNaN(result) || !isFinite(result) ? 0 : Number(result.toFixed(2));
+        } catch (error) {
+            console.error("Error evaluating aggregated formula:", error);
+            return 0;
+        }
+    };
 
     const getROI = (params) => {
-        if (params.data !== undefined) {
-            const { revenue, spend } = params.data;
-
-            if (revenue !== "0.00" || revenue !== undefined) {
-                const RPC = ((revenue - spend) / spend) * 100;
-                if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
-                    return `0`;
-                }
-                return `${Math.round(RPC * 100) / 100}`;
-
-            }
+        const data = params.node.group ? params.node.aggData : params.data;
+        if (!data) return 0;
+    
+        const revenue = sanitizeNumericValue(data.revenue);
+        const spend = sanitizeNumericValue(data.spend);
+    
+        if (isNaN(spend) || spend <= 0) return 0;
+    
+        const margin = ((revenue - spend) / spend) * 100;
+        const roundedMargin = isFinite(margin) && !isNaN(margin) ? Math.round(margin * 100) / 100 : 0;
+    
+        if (params.node.group) {
+            params.node.aggData["roi"] = roundedMargin;
         }
-        if (params.node.aggData !== undefined) {
-            const { revenue, spend } = params.node.aggData;
-            if (revenue !== "0.00" || revenue !== undefined) {
-                const RPC = ((revenue - spend) / spend) * 100;
-                if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
-                    return `0`;
-                }
-                return `${Math.round(RPC * 100) / 100}`;
-
-            }
-        }
-
-        return 0;
+    
+        return roundedMargin;
     }
 
     const agFunc = (params) => {
@@ -820,23 +1086,23 @@ const MyTablePage = () => {
     };
 
     const columnDefsObjectOfAdID = {
-        // campaignname: {
-        //     headerName: 'Campaign-Name',
-        //     field: 'campaignname',
-        //     resizable: true,
-        //     sortable: true,
-        //     width: 500,
-        //     hide: true,
-        //     rowGroup: true,
-        //     rowGroupIndex: 0, // Level 0
-        //     pinned: 'left',
-        //     enableRowGroup: true,
-        //     onClick: (event) => {
-        //         const url = `/history/${event}-${account}-${time}`;
-        //         window.open(url, '_blank', 'noopener,noreferrer');
-        //     },
-        //     cellRenderer: campaignNameRenderer,
-        // },
+        campaignname: {
+            headerName: 'CampaignName',
+            field: 'campaignname',
+            resizable: true,
+            sortable: true,
+            width: 500,
+            hide: true,
+            // rowGroup: true,
+            // rowGroupIndex: 0, // Level 0
+            // pinned: 'left',
+            // enableRowGroup: true,
+            // onClick: (event) => {
+            //     const url = `/history/${event}-${account}-${time}`;
+            //     window.open(url, '_blank', 'noopener,noreferrer');
+            // },
+            // cellRenderer: campaignNameRenderer,
+        },
         adsetname: {
             headerName: 'Adset-Name', field: 'adsetname',
             // resizeble: true,
@@ -869,7 +1135,7 @@ const MyTablePage = () => {
         },
         adid: {
             headerName: 'AdID',
-            field: 'ad_id',
+            field: 'adid',
             sortable: true,
             minWidth: 200,
             filter: 'agSetColumnFilter',
@@ -1026,6 +1292,7 @@ const MyTablePage = () => {
             field: 'date',
             minWidth: 110,
             sortable: true,
+            sort: "asc",
             filter: "agDateColumnFilter",
             suppressMenu: true,
             menuTabs: [],
@@ -1081,7 +1348,7 @@ const MyTablePage = () => {
         spend: {
             headerName: 'Spend',
             field: 'spend',
-            minWidth: 100,
+            minWidth: 105,
             aggFunc: liveSpender,
             sortable: true,
             filter: "agTextColumnFilter", // Keep filter active
@@ -1107,7 +1374,7 @@ const MyTablePage = () => {
         profit: {
             headerName: 'Profit',
             field: 'profit',
-            minWidth: 100,
+            minWidth: 105,
             sortable: true,
             aggFunc: liveSpender,
             cellClassRules: {
@@ -1180,9 +1447,36 @@ const MyTablePage = () => {
             headerTooltip: "CPC = Spend / FBClicks",
             
         },
+        cpclinkclicks: {
+            headerName: 'CPC_LC',
+            field: 'cpclinkclicks',
+            // aggFunc: cpcSpender,
+            valueGetter:getCpcLc,
+            minWidth: 80,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "cpclinkclicks = Spend / FBLinkClicks",
+            
+        },
         fbclicks: {
             headerName: 'FBClicks',
             field: 'fbclicks',
+            minWidth: 110,
+            aggFunc: newSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+            
+        },
+        fblinkclicks: {
+            headerName: 'FB_LC',
+            field: 'fblinkclicks',
+            headerTooltip:'fblinkclicks',
             minWidth: 110,
             aggFunc: newSpender,
             sortable: true,
@@ -1208,7 +1502,7 @@ const MyTablePage = () => {
             headerName: 'CTR',
             field: 'ctr',
             valueGetter: getCtr,
-            minWidth: 80,
+            minWidth: 100,
             sortable: true,
             filter: "agTextColumnFilter",
             comparator: (valueA, valueB) => {
@@ -1285,7 +1579,7 @@ const MyTablePage = () => {
         roi: {
             headerName: 'ROI',
             field: 'roi',
-            minWidth: 80,
+            minWidth: 100,
             valueGetter: getROI,
             filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
@@ -1330,23 +1624,23 @@ const MyTablePage = () => {
     };
 
     const columnDefsObjectOfDailyAdID = {
-        // campaignname: {
-        //     headerName: 'Campaign-Name',
-        //     field: 'campaignname',
-        //     resizable: true,
-        //     sortable: true,
-        //     width: 500,
-        //     hide: true,
-        //     rowGroup: true,
-        //     rowGroupIndex: 0, // Level 0
-        //     pinned: 'left',
-        //     enableRowGroup: true,
-        //     onClick: (event) => {
-        //         const url = `/history/${event}-${account}-${time}`;
-        //         window.open(url, '_blank', 'noopener,noreferrer');
-        //     },
-        //     cellRenderer: campaignNameRenderer,
-        // },
+        campaignname: {
+            headerName: 'CampaignName',
+            field: 'campaignname',
+            resizable: true,
+            sortable: true,
+            width: 500,
+            hide: true,
+            // rowGroup: true,
+            // rowGroupIndex: 0, // Level 0
+            // pinned: 'left',
+            // enableRowGroup: true,
+            // onClick: (event) => {
+            //     const url = `/history/${event}-${account}-${time}`;
+            //     window.open(url, '_blank', 'noopener,noreferrer');
+            // },
+            // cellRenderer: campaignNameRenderer,
+        },
         actions: {
             headerName: 'Actions',
             field: 'actions',
@@ -1496,7 +1790,7 @@ const MyTablePage = () => {
         },
         adid: {
             headerName: 'AdID',
-            field: 'ad_id',
+            field: 'adid',
             sortable: true,
             minWidth: 350,
             filter: 'agSetColumnFilter',
@@ -1539,6 +1833,7 @@ const MyTablePage = () => {
         date: {
             headerName: 'Date', field: 'date', minWidth: 110, sortable: true,
             filter: "agDateColumnFilter",
+            sort: "asc",
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
@@ -1573,7 +1868,7 @@ const MyTablePage = () => {
         spend: {
             headerName: 'Spend',
             field: 'spend',
-            minWidth: 90,
+            minWidth: 105,
             aggFunc: liveSpender,
             sortable: true,
             filter: "agNumberColumnFilter",
@@ -1599,7 +1894,7 @@ const MyTablePage = () => {
         profit: {
             headerName: 'Profit',
             field: 'profit',
-            minWidth: 90,
+            minWidth: 105,
             aggFunc: liveSpender,
             sortable: true,
             cellClassRules: {
@@ -1645,11 +1940,26 @@ const MyTablePage = () => {
             headerTooltip: "CPC = Spend / FBClicks",
 
         },
+        cpclinkclicks: {
+            headerName: 'CPC_LC',
+            field: 'cpclinkclicks',
+            // aggFunc: cpcSpender,
+            valueGetter:getCpcLc,
+            minWidth: 80,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "cpclinkclicks = Spend / FBLinkClicks",
+            
+        },
         fbclicks: { headerName: 'FBClicks', field: 'fbclicks', minWidth: 110, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        fblinkclicks: { headerName: 'FB_LC', field: 'fblinkclicks', headerTooltip:'fblinkclicks', minWidth: 110, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         impressions: { headerName: 'IMP', field: 'impressions', headerTooltip:"Impressions", minWidth: 80, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         ctr: {
             headerName: 'CTR', field: 'ctr', valueGetter: getCtr, sortable: true,
-            minWidth: 80,
+            minWidth: 100,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -1696,7 +2006,7 @@ const MyTablePage = () => {
                 if (valueB == null) return 1;
                 return valueA - valueB;
             },
-            minWidth: 80,
+            minWidth: 100,
             valueFormatter: (params) => `${params.value}%`,
             suppressMenu: true,
             menuTabs: [],
@@ -1710,7 +2020,7 @@ const MyTablePage = () => {
 
     const columnDefsObject = {
         campaignname: {
-            headerName: 'Campaign-Name',
+            headerName: 'CampaignName',
             field: 'campaignname',
             resizable: true,
             sortable: true,
@@ -1874,11 +2184,42 @@ const MyTablePage = () => {
             suppressMenu: true,    // Suppress the column menu
             
         },
+        adname: {
+            headerName: 'Ad-Name', field: 'adname',
+            // resizeble: true,
+            // sortable: true,
+            // width: 300,
+            // rowGroup: true, 
+            // rowGroupIndex: 1, // Level 2
+            // hide: true,
+            // filter: 'agSetColumnFilter',
+            // filterParams: {
+            //     comparator: (a, b) => a.localeCompare(b),
+            //     suppressAndOrCondition: true,
+            // }, 
+            // showRowGroup: 'adname',
+            hide: true,
+        },
+        adid: {
+            headerName: 'AdID',
+            field: 'adid',
+            // sortable: true,
+            // minWidth: 200,
+            // filter: 'agSetColumnFilter',
+            hide: true,
+            // filterParams: {
+            //     comparator: (a, b) => a.localeCompare(b),
+            //     suppressAndOrCondition: true,
+            // },
+            // suppressMenu: true,    // Suppress the column menu
+            
+        },
         date: {
             headerName: 'Date',
             field: 'date',
             minWidth: 110,
             sortable: true,
+            sort: "asc",
             filter: "agDateColumnFilter",
             suppressMenu: true,
             menuTabs: [],
@@ -1934,7 +2275,7 @@ const MyTablePage = () => {
         spend: {
             headerName: 'Spend',
             field: 'spend',
-            minWidth: 100,
+            minWidth: 95,
             aggFunc: liveSpender,
             sortable: true,
             filter: "agTextColumnFilter", // Keep filter active
@@ -1960,7 +2301,7 @@ const MyTablePage = () => {
         profit: {
             headerName: 'Profit',
             field: 'profit',
-            minWidth: 100,
+            minWidth: 95,
             sortable: true,
             aggFunc: liveSpender,
             cellClassRules: {
@@ -2023,6 +2364,12 @@ const MyTablePage = () => {
         cpc: {
             headerName: 'CPC',
             field: 'cpc',
+            // valueGetter: (params) => {
+            //     if (params.node.group && params.node.aggData) {
+            //         return sanitizeNumericValue(params.node.aggData["cpc"]) || 0;
+            //     }
+            //     return sanitizeNumericValue(params.data?.cpc);
+            // },
             aggFunc: cpcSpender,
             minWidth: 80,
             sortable: true,
@@ -2033,9 +2380,36 @@ const MyTablePage = () => {
             headerTooltip: "CPC = Spend / FBClicks",
             
         },
+        cpclinkclicks: {
+            headerName: 'CPC_LC',
+            field: 'cpclinkclicks',
+            // aggFunc: cpcSpender,
+            valueGetter:getCpcLc,
+            minWidth: 80,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "cpclinkclicks = Spend / FBLinkClicks",
+            
+        },
         fbclicks: {
             headerName: 'FBClicks',
             field: 'fbclicks',
+            minWidth: 110,
+            aggFunc: newSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+            
+        },
+        fblinkclicks: {
+            headerName: 'FB_LC',
+            field: 'fblinkclicks', 
+            headerTooltip:'fblinkclicks',
             minWidth: 110,
             aggFunc: newSpender,
             sortable: true,
@@ -2061,7 +2435,7 @@ const MyTablePage = () => {
             headerName: 'CTR',
             field: 'ctr',
             valueGetter: getCtr,
-            minWidth: 80,
+            minWidth: 100,
             sortable: true,
             filter: "agTextColumnFilter",
             comparator: (valueA, valueB) => {
@@ -2138,7 +2512,7 @@ const MyTablePage = () => {
         roi: {
             headerName: 'ROI',
             field: 'roi',
-            minWidth: 80,
+            minWidth: 100,
             valueGetter: getROI,
             filter: "agNumberColumnFilter",
             comparator: (valueA, valueB) => {
@@ -2184,7 +2558,7 @@ const MyTablePage = () => {
 
     const columnDefsObject1 = {
         campaignname: {
-            headerName: 'Campaign-Name',
+            headerName: 'CampaignName',
             field: 'campaignname',
             resizable: true,
             sortable: true,
@@ -2358,9 +2732,40 @@ const MyTablePage = () => {
                 suppressAndOrCondition: true,
             }, 
         },
+        adname: {
+            headerName: 'Ad-Name', field: 'adname',
+            // resizeble: true,
+            // sortable: true,
+            // width: 300,
+            // rowGroup: true, 
+            // rowGroupIndex: 1, // Level 2
+            // hide: true,
+            // filter: 'agSetColumnFilter',
+            // filterParams: {
+            //     comparator: (a, b) => a.localeCompare(b),
+            //     suppressAndOrCondition: true,
+            // }, 
+            // showRowGroup: 'adname',
+            hide: true,
+        },
+        adid: {
+            headerName: 'AdID',
+            field: 'adid',
+            // sortable: true,
+            // minWidth: 200,
+            // filter: 'agSetColumnFilter',
+            hide: true,
+            // filterParams: {
+            //     comparator: (a, b) => a.localeCompare(b),
+            //     suppressAndOrCondition: true,
+            // },
+            // suppressMenu: true,    // Suppress the column menu
+            
+        },
         date: {
             headerName: 'Date', field: 'date', minWidth: 110, sortable: true,
             filter: "agDateColumnFilter",
+            sort: "asc",
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', // Add a custom class
@@ -2395,7 +2800,7 @@ const MyTablePage = () => {
         spend: {
             headerName: 'Spend',
             field: 'spend',
-            minWidth: 90,
+            minWidth: 95,
             aggFunc: liveSpender,
             sortable: true,
             filter: "agNumberColumnFilter",
@@ -2421,7 +2826,7 @@ const MyTablePage = () => {
         profit: {
             headerName: 'Profit',
             field: 'profit',
-            minWidth: 90,
+            minWidth: 95,
             aggFunc: liveSpender,
             sortable: true,
             cellClassRules: {
@@ -2467,11 +2872,26 @@ const MyTablePage = () => {
             headerTooltip: "CPC = Spend / FBClicks",
 
         },
+        cpclinkclicks: {
+            headerName: 'CPC_LC',
+            field: 'cpclinkclicks',
+            // aggFunc: cpcSpender,
+            valueGetter:getCpcLc,
+            minWidth: 80,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "cpclinkclicks = Spend / FBLinkClicks",
+            
+        },
+        fblinkclicks: { headerName: 'FB_LC', field: 'fblinkclicks', headerTooltip:'fblinkclicks', minWidth: 110, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         fbclicks: { headerName: 'FBClicks', field: 'fbclicks', minWidth: 110, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         impressions: { headerName: 'IMP', field: 'impressions', headerTooltip:"Impressions", minWidth: 80, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         ctr: {
             headerName: 'CTR', field: 'ctr', valueGetter: getCtr, sortable: true,
-            minWidth: 80,
+            minWidth: 100,
             comparator: (valueA, valueB) => {
                 // Handle sorting based on the computed margin value
                 if (valueA == null) return -1;
@@ -2518,7 +2938,7 @@ const MyTablePage = () => {
                 if (valueB == null) return 1;
                 return valueA - valueB;
             },
-            minWidth: 80,
+            minWidth: 100,
             valueFormatter: (params) => `${params.value}%`,
             suppressMenu: true,
             menuTabs: [],
@@ -2532,7 +2952,7 @@ const MyTablePage = () => {
 
     const columnDefsObject2 = {
         campaignname: {
-            headerName: 'Campaign-Name', field: 'campaignname', resizeble: true,
+            headerName: 'CampaignName', field: 'campaignname', resizeble: true,
             // sortable: true,
             resizeble: true,
             sortable: true,
@@ -2700,9 +3120,40 @@ const MyTablePage = () => {
             width: 350,
             filter: true,
         },
+        adname: {
+            headerName: 'Ad-Name', field: 'adname',
+            // resizeble: true,
+            // sortable: true,
+            // width: 300,
+            // rowGroup: true, 
+            // rowGroupIndex: 1, // Level 2
+            // hide: true,
+            // filter: 'agSetColumnFilter',
+            // filterParams: {
+            //     comparator: (a, b) => a.localeCompare(b),
+            //     suppressAndOrCondition: true,
+            // }, 
+            // // showRowGroup: 'adname',
+            hide: true,
+        },
+        adid: {
+            headerName: 'AdID',
+            field: 'adid',
+            // sortable: true,
+            // minWidth: 200,
+            // filter: 'agSetColumnFilter',
+            hide: true,
+            // filterParams: {
+            //     comparator: (a, b) => a.localeCompare(b),
+            //     suppressAndOrCondition: true,
+            // },
+            // suppressMenu: true,    // Suppress the column menu
+            
+        },
         date: {
             headerName: 'Date', field: 'date', sort: 'asc', sortable: true,
             filter: "agDateColumnFilter",
+            sort: "asc",
             minWidth: 110,
             filterParams: {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
@@ -2734,7 +3185,7 @@ const MyTablePage = () => {
             headerClass: 'hide-menu', // Add a custom class
         },
         spend: {
-            headerName: 'Spend', field: 'spend', minWidth: 90, aggFunc: spender, sortable: true, filter: 'agNumberColumnFilter',
+            headerName: 'Spend', field: 'spend', minWidth: 110, aggFunc: spender, sortable: true, filter: 'agNumberColumnFilter',
             valueFormatter: currencyFormatter, comparator: numberComparator,
             suppressMenu: true,
             menuTabs: [],
@@ -2748,7 +3199,7 @@ const MyTablePage = () => {
             headerClass: 'hide-menu', // Add a custom class
         },
         profit: {
-            headerName: 'Profit', field: 'profit', minWidth: 90, aggFunc: spender, cellClassRules: {
+            headerName: 'Profit', field: 'profit', minWidth: 105, aggFunc: spender, cellClassRules: {
                 'font-red': p => p.value < 0
             }, sortable: true, headerTooltip: 'Profit = Revenue - Spend', filter: 'agNumberColumnFilter',
             valueFormatter: currencyFormatter, comparator: numberComparator,
@@ -2780,7 +3231,22 @@ const MyTablePage = () => {
             headerClass: 'hide-menu', // Add a custom class
             headerTooltip: 'CPC = Spend / FBClicks',
         },
+        cpclinkclicks: {
+            headerName: 'CPC_LC',
+            field: 'cpclinkclicks',
+            // aggFunc: cpcSpender,
+            valueGetter:getCpcLc,
+            minWidth: 80,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "cpclinkclicks = Spend / FBLinkClicks",
+            
+        },
         fbclicks: { headerName: 'FBClicks', field: 'fbclicks', minWidth: 110, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        fblinkclicks: { headerName: 'FB_LC', headerTooltip:'fblinkclicks', field: 'fblinkclicks', minWidth: 110, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         impressions: { headerName: 'IMP', headerTooltip:'Impressions', field: 'impressions', minWidth: 80, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         ctr: {
             headerName: 'CTR', field: 'ctr', valueGetter: getCtr, sortable: true, filter: 'agNumberColumnFilter',
@@ -2790,7 +3256,7 @@ const MyTablePage = () => {
                 if (valueB == null) return 1;
                 return valueA - valueB;
             },
-            minWidth: 80,
+            minWidth: 100,
             valueFormatter: (params) => `${params.value}%`,
             suppressMenu: true,
             menuTabs: [],
@@ -2831,7 +3297,7 @@ const MyTablePage = () => {
                 if (valueB == null) return 1;
                 return valueA - valueB;
             },
-            minWidth: 80,
+            minWidth: 100,
             valueFormatter: (params) => `${params.value}%`,
             suppressMenu: true,
             menuTabs: [],
@@ -2893,7 +3359,7 @@ const MyTablePage = () => {
 
     const columnDefsObject3 = {
         campaignname: {
-            headerName: 'Campaign-Name',
+            headerName: 'CampaignName',
             field: 'campaignname',
             resizable: true,
             sortable: true,
@@ -3084,8 +3550,39 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
         },
+        adname: {
+            headerName: 'Ad-Name', field: 'adname',
+            // resizeble: true,
+            // sortable: true,
+            // width: 300,
+            // rowGroup: true, 
+            // rowGroupIndex: 1, // Level 2
+            // hide: true,
+            // filter: 'agSetColumnFilter',
+            // filterParams: {
+            //     comparator: (a, b) => a.localeCompare(b),
+            //     suppressAndOrCondition: true,
+            // }, 
+            // showRowGroup: 'adname',
+            hide: true,
+        },
+        adid: {
+            headerName: 'AdID',
+            field: 'adid',
+            // sortable: true,
+            // minWidth: 200,
+            // filter: 'agSetColumnFilter',
+            hide: true,
+            // filterParams: {
+            //     comparator: (a, b) => a.localeCompare(b),
+            //     suppressAndOrCondition: true,
+            // },
+            // suppressMenu: true,    // Suppress the column menu
+            
+        },
         date: {
             headerName: 'Date', field: 'date', minWidth: 120, sortable: true,
+            sort: "asc",
             filter: "agDateColumnFilter",
             filterParams: {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
@@ -3121,7 +3618,7 @@ const MyTablePage = () => {
         spend: {
             headerName: 'Spend',
             field: 'spend',
-            minWidth: 90,
+            minWidth: 105,
             aggFunc: liveSpender,
             sortable: true,
             filter: "agNumberColumnFilter",
@@ -3147,7 +3644,7 @@ const MyTablePage = () => {
         profit: {
             headerName: 'Profit',
             field: 'profit',
-            minWidth: 90,
+            minWidth: 100,
             aggFunc: liveSpender,
             sortable: true,
             cellClassRules: {
@@ -3194,7 +3691,22 @@ const MyTablePage = () => {
             headerClass: 'hide-menu',
 
         },
+        cpclinkclicks: {
+            headerName: 'CPC_LC',
+            field: 'cpclinkclicks',
+            // aggFunc: cpcSpender,
+            valueGetter:getCpcLc,
+            minWidth: 80,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "cpclinkclicks = Spend / FBLinkClicks",
+            
+        },
         fbclicks: { headerName: 'FBClicks', field: 'fbclicks', minWidth: 110, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        fblinkclicks: { headerName: 'FB_LC', headerTooltip:'fblinkclicks', field: 'fblinkclicks', minWidth: 110, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         impressions: { headerName: 'IMP', headerTooltip:'Impressions', field: 'impressions', minWidth: 80, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         ctr: {
             headerName: 'CTR', field: 'ctr', valueGetter: getCtr, sortable: true,
@@ -3204,7 +3716,7 @@ const MyTablePage = () => {
                 if (valueB == null) return 1;
                 return valueA - valueB;
             },
-            minWidth:80,
+            minWidth:100,
             valueFormatter: (params) => `${params.value}%`,
             headerTooltip: 'CTR = (FBClicks / Impressions) * 100',
             suppressMenu: true,
@@ -3237,7 +3749,7 @@ const MyTablePage = () => {
                 if (valueB == null) return 1;
                 return valueA - valueB;
             },
-            minWidth: 80,
+            minWidth: 100,
             valueFormatter: (params) => `${params.value}%`,
             headerTooltip: 'ROI = ((Revenue - Spend) / Spend) * 100',
             suppressMenu: true,
@@ -3383,11 +3895,11 @@ const MyTablePage = () => {
     // };
 
     const getColumnDefsObjectOfAdID = (order) => {
-        return order?.map(colKey => columnDefsObjectOfAdID[colKey]).filter(col => col !== undefined);
+        return order?.map(colKey => columnDefsObjectOfAdID[colKey]).filter(item => item);
     }      
 
     const getColumnDefsObjectOfDailyAdID = (order) => {
-        return order?.map(colKey => columnDefsObjectOfDailyAdID[colKey]).filter(col => col !== undefined);
+        return order?.map(colKey => columnDefsObjectOfDailyAdID[colKey]).filter(item => item);
     } 
 
     const getColumnDefs = (order) => {
@@ -3434,6 +3946,7 @@ const MyTablePage = () => {
 
 
     const updatingColumnsStructure = async (updateDataArray) => {
+        console.log(updateDataArray);
         const response = await apiClient.put(`/api/updateUserData?email=${userdetails.email}`,
             {
                 updateDataArray
@@ -3443,6 +3956,8 @@ const MyTablePage = () => {
         columnDefs2.current = (getColumnDefs2(updateDataArray));
         columnDefs3.current = (getColumnDefs3(updateDataArray));
         columnDefs4.current = (getColumnDefs4(updateDataArray));
+        setColDefs(getColumnDefsObjectOfAdID(updateDataArray));
+        setColDailyDefs(getColumnDefsObjectOfDailyAdID(updateDataArray));
         columnDefsOfAdID.current = (getColumnDefsObjectOfAdID(updateDataArray));
         columnDefsOfDailyAdID.current = (getColumnDefsObjectOfDailyAdID(updateDataArray));
         
@@ -3699,7 +4214,7 @@ const MyTablePage = () => {
 
     const handleColumnMove = (params, gridId) => {
         const columnState = params.api.getColumnState();
-        // console.log('Column moved in grid:', gridId);
+        console.log('Column moved in grid:', gridId);
         const fieldOrder = columnState.map(col => col.colId);
         const newFieldOrder = fieldOrder.filter(item => item !== 'ag-Grid-AutoColumn-campaignname' && item !== 'ag-Grid-AutoColumn' && columnStructure.includes(item));
         localStorage.setItem('columnState', JSON.stringify(newFieldOrder));
@@ -3713,11 +4228,11 @@ const MyTablePage = () => {
 
     const rangePresets = [
         {
-            label: 'ToDay',
+            label: 'Today',
             value: [dayjs().add(0, 'd'), dayjs().add(0, 'd')],
         },
         {
-            label: 'YesterDay',
+            label: 'Yesterday',
             value: [dayjs().add(-1, 'd'), dayjs().add(-1, 'd')],
         },
         {
@@ -4014,7 +4529,15 @@ const MyTablePage = () => {
                         />
                     </Col>
                     <Col xs={24} sm={24} md={15} lg={6}>
-                        <ConfigProvider locale={locale}>
+                        <ConfigProvider 
+                            locale={locale}
+                            theme={{
+                                token: {
+                                  colorPrimary: '#C7F39A', 
+                                  colorTextLightSolid: '#000',
+                                },
+                            }}
+                        >
                             <RangePicker
                                 presets={rangePresets}
                                 onChange={handleChange}
@@ -4059,6 +4582,9 @@ const MyTablePage = () => {
                     {renderCarouselNav()}
                     <div style={{display: 'flex', marginRight: '15px'}}>
                         {/* <Row gutter={8} style={{ marginTop: '16px' }}>  */}
+                            {/* <Col>
+                                <Switch style={{marginTop:'5px'}}/>
+                            </Col> */}
                             <Col>
                                 <Input
                                 placeholder="Search here"
@@ -4129,6 +4655,9 @@ const MyTablePage = () => {
                     userdetails={userdetails} 
                     refreshComments={refreshComments}
                     refreshpage={refreshContent}
+                    getMainMenuItems={getMainMenuItems}
+                    toggleStatus={checked}
+                    handleChangeToggle={handleChangeToggle}
                     />
                 </Tabs.TabPane>
 
@@ -4149,6 +4678,9 @@ const MyTablePage = () => {
                     userdetails={userdetails} 
                     refreshComments={refreshComments}
                     refreshpage={refreshContent}
+                    getMainMenuItems={getMainMenuItems}
+                    toggleStatus={checked}
+                    handleChangeToggle={handleChangeToggle}
                     />
                 </Tabs.TabPane>
 
@@ -4169,6 +4701,9 @@ const MyTablePage = () => {
                     userdetails={userdetails} 
                     refreshComments={refreshComments}
                     refreshpage={refreshContent}
+                    getMainMenuItems={getMainMenuItems}
+                    toggleStatus={checked}
+                    handleChangeToggle={handleChangeToggle}
                     />
                 </Tabs.TabPane>
 
@@ -4186,6 +4721,7 @@ const MyTablePage = () => {
                     userdetails={userdetails} 
                     refreshComments={refreshComments}
                     refreshpage={refreshContent}
+                    getMainMenuItems={getMainMenuItems}
                     />
                 </Tabs.TabPane>
 
@@ -4204,6 +4740,7 @@ const MyTablePage = () => {
                         userdetails={userdetails} 
                         refreshComments={refreshComments}
                         refreshpage={refreshContent}
+                        getMainMenuItems={getMainMenuItems}
                     />
                     </Tabs.TabPane>
                 )}
@@ -4226,6 +4763,9 @@ const MyTablePage = () => {
                         userdetails={userdetails} 
                         refreshComments={refreshComments}
                         refreshpage={refreshContent}
+                        getMainMenuItems={getMainMenuItems}
+                        toggleStatus={checked}
+                        handleChangeToggle={handleChangeToggle}
                     />
                     </Tabs.TabPane>
                 )}
@@ -4248,6 +4788,7 @@ const MyTablePage = () => {
                         userdetails={userdetails} 
                         refreshComments={refreshComments}
                         refreshpage={refreshContent}
+                        getMainMenuItems={getMainMenuItems}
                     />
                     </Tabs.TabPane>
                 )}
@@ -4268,6 +4809,7 @@ const MyTablePage = () => {
                         userdetails={userdetails} 
                         refreshComments={refreshComments}
                         refreshpage={refreshContent}
+                        getMainMenuItems={getMainMenuItems}
                     />
                     </Tabs.TabPane>
                 )}
@@ -4291,6 +4833,9 @@ const MyTablePage = () => {
                             userdetails={userdetails} 
                             refreshComments={refreshComments}
                             refreshpage={refreshContent}
+                            getMainMenuItems={getMainMenuItems}
+                            toggleStatus={checked}
+                            handleChangeToggle={handleChangeToggle}
                         />
                     </Tabs.TabPane>
                 )}
@@ -4313,6 +4858,9 @@ const MyTablePage = () => {
                         userdetails={userdetails} 
                         refreshComments={refreshComments}
                         refreshpage={refreshContent}
+                        getMainMenuItems={getMainMenuItems}
+                        toggleStatus={checked}
+                        handleChangeToggle={handleChangeToggle}
                         />
                     </Tabs.TabPane>
                 )}

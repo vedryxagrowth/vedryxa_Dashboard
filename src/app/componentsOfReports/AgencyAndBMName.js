@@ -43,6 +43,10 @@ const AgencyAndBMNameReports = ({startDate, endDate, newaccount, newtime, newRev
 
     const [apiStatus, setApiStatus] = useState(false);
 
+    
+
+    const [selectedCells, setSelectedCells] = useState([]);
+
     const spender = (params) => {
         if (!params.values || params.values.length === 0) {
             return 0; // Return 0 or any fallback value if there are no values to aggregate
@@ -266,6 +270,64 @@ const AgencyAndBMNameReports = ({startDate, endDate, newaccount, newtime, newRev
             };
         });
     }
+    // const onRangeSelectionChanged = (params) => {
+    //     // Capture all selected cell positions when range is selected
+    //     const selected = [];
+    //     const rangeSelections = params.api.getCellRanges();
+    
+    //     if (rangeSelections) {
+    //         rangeSelections.forEach((range) => {
+    //             const startRow = Math.min(range.startRow.rowIndex, range.endRow.rowIndex);
+    //             const endRow = Math.max(range.startRow.rowIndex, range.endRow.rowIndex);
+    //             const columns = range.columns.map((col) => col.getColId());
+    
+    //             for (let rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
+    //                 selected.push({ rowIndex, columns });
+    //             }
+    //         });
+    //     }
+    
+    //     setSelectedCells(selected);
+    // };
+    
+    const onCellKeyDown = (params) => {
+        if (params.event.ctrlKey && params.event.key === "c") {
+            params.event.preventDefault(); // Prevent default copy behavior
+    
+            // ✅ Ensure `selectedCells` is not empty
+            if (!selectedCells.length) return;
+    
+            // ✅ Prepare data to copy: Rows separated by \n, Columns by \t
+            const copiedText = selectedCells
+                .map(({ rowIndex, columns }) => {
+                    if (!columns || !Array.isArray(columns)) {
+                        // ✅ Handle case where only one cell is selected
+                        const singleColId = selectedCells[0]?.colId; 
+                        const row = params.api.getDisplayedRowAtIndex(rowIndex);
+                        return row && singleColId ? params.api.getValue(singleColId, row) : "";
+                    }
+                    
+                    // ✅ Multi-cell copying logic
+                    return columns
+                        .map((colId) => {
+                            const row = params.api.getDisplayedRowAtIndex(rowIndex);
+                            return row ? params.api.getValue(colId, row) : "";
+                        })
+                        .join("\t");
+                })
+                .join("\n"); // Each row on a new line
+    
+            // ✅ Copy text to clipboard
+            navigator.clipboard.writeText(copiedText).then(() => {
+                console.log("Copied to clipboard:", copiedText);
+            }).catch((err) => {
+                console.error("Clipboard copy failed:", err);
+            });
+    
+            // ✅ Trigger AG Grid’s built-in copy effect (blinking dark blue selection)
+            params.api.copySelectedRangeToClipboard();
+        }
+    };
 
     const memorizedBMNameData = useMemo(()=> BMNameData, [BMNameData]);
     const memorizedBMNameColumnDefs = useMemo(()=>BMNameColumnDefs, [BMNameColumnDefs]);
@@ -360,9 +422,16 @@ const AgencyAndBMNameReports = ({startDate, endDate, newaccount, newtime, newRev
                             // defaultColDef={defaultColDef}
                             gridOptions={{
                                 groupDefaultExpanded: -1, // Expands all groups by default
+                                ensureDomOrder: false,
+                                suppressRowClickSelection: true,
+                                suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
                             }}
                             suppressAggFuncInHeader={true}
                             pinnedBottomRowData={BMNameFixedFooter}
+    
+                            // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
+                            onCellKeyDown={onCellKeyDown}
                             getRowStyle={(params) => {
                                 if (params.node.rowPinned) {
                                     return {
@@ -372,6 +441,13 @@ const AgencyAndBMNameReports = ({startDate, endDate, newaccount, newtime, newRev
                                     };
                                 }
                                 return null;
+                            }}
+                            getCellStyle={(params) => {
+                                // Check if the current cell is selected
+                                const isSelected = selectedCells.some(
+                                    (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
+                                );
+                                return isSelected ? { backgroundColor: "#007bff", color: "#fff" } : {}; // ✅ Highlight only selected cells
                             }}
                             onFilterChanged={(params) => {
                                 const api = params.api;

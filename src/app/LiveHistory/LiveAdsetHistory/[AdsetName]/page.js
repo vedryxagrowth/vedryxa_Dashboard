@@ -10,7 +10,8 @@ import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
-import { Spin, Row, Col, Select } from 'antd';
+import { Spin, Row, Col, Select, Input, Button } from 'antd';
+import { ReloadOutlined } from '@ant-design/icons';
 Chart.register(...registerables);
 import debounce from 'lodash.debounce';
 
@@ -27,10 +28,16 @@ const MnetLiveAdsetHistory = ({params}) => {
 
     const gridRef = useRef();
 
+    const [searchText, setSearchText] = useState("");
+
     console.log(user, "user");
 
     const { theme } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
+
+
+    const [selectedCells, setSelectedCells] = useState([]); // Store selected cell positions
+    const [firstSelectedCell, setFirstSelectedCell] = useState(null); // Store the first selected cell
 
     const [rowData, setRowData] = useState([]);
 
@@ -81,7 +88,9 @@ const MnetLiveAdsetHistory = ({params}) => {
         "cpc",
         "fbclicks",
         "impressions",
-        "ctr"
+        "ctr",
+        "fblinkclicks",
+        "cpclinkclicks",
     ];
 
     const spender = (params) => {
@@ -384,6 +393,8 @@ const MnetLiveAdsetHistory = ({params}) => {
             roi: parseFloat(((rowData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - rowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
             cpc: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / rowData?.length).toFixed(2)),
             fbclicks: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
+            cpclinkclicks: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks), 0) / rowData?.length).toFixed(2)),
+            fblinkclicks: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0).toFixed(2)),
             impressions: parseFloat(rowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
             ctr: parseFloat((rowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / rowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
         }
@@ -498,6 +509,15 @@ const MnetLiveAdsetHistory = ({params}) => {
                 }, 1500);
             }).catch(err => console.error("Copy failed:", err));
         }
+        // ✅ Ensure first selected cell gets highlighted
+        if (params.event?.shiftKey || params.event?.ctrlKey) {
+            // Add to selection when Shift/Ctrl is pressed
+            setSelectedCells((prev) => [...prev, { rowIndex: params.node.rowIndex, colId: params.column.getId() }]);
+        } else {
+            // Single click selects only one cell
+            setFirstSelectedCell({ rowIndex: params.node.rowIndex, colId: params.column.getId() });
+            setSelectedCells([{ rowIndex: params.node.rowIndex, colId: params.column.getId() }]);
+        }
     };
 
     const gridOptions = {
@@ -509,6 +529,29 @@ const MnetLiveAdsetHistory = ({params}) => {
         const gridDiv = document.querySelector("#myGrid");
         new agGrid.Grid(gridDiv, gridOptions);
     });
+
+    const getCpcLc = (params) => {
+        if (params.data !== undefined) {
+            const { spend, fblinkclicks } = params.data;
+            if (fblinkclicks !== 0) {
+                const RPC = spend / fblinkclicks;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return Number(RPC.toFixed(2));
+
+            }
+        }
+        if (params.node.aggData !== undefined) {
+            const { spend, fblinkclicks } = params.node.aggData;
+            if (fblinkclicks !== 0) {
+                const RPC = spend / fblinkclicks;
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        return 0;
+    }
     
     const columnDefsObject = {
         date : {
@@ -814,8 +857,26 @@ const MnetLiveAdsetHistory = ({params}) => {
             headerClass: 'hide-menu',
             headerToolTip: 'CPC = Spend / Clicks',
         },
+        cpclinkclicks : {
+            headerName: 'CPC_LC', field: 'cpclinkclicks', 
+            // aggFunc: cpcSpender,
+            comparator: defaultComparator,
+            valueGetter: getCpcLc,
+            width: 85,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            headerToolTip: 'CPC = Spend / FBLinkClicks',
+        },
         fbclicks : {
             headerName: 'FBClicks', field: 'fbclicks', width: 90, aggFunc: spender,
+            comparator: defaultComparator,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
+        fblinkclicks : {
+            headerName: 'FB_LC', field: 'fblinkclicks', width: 90, aggFunc: spender,
             comparator: defaultComparator,
             suppressMenu: true,
             menuTabs: [],
@@ -997,7 +1058,9 @@ const MnetLiveAdsetHistory = ({params}) => {
                 cpl = Math.round((eachData.spend/eachData.fbLeads)*100)/100;
             } 
             const ncpl = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((eachData.spend/eachData.conversions)*100)/100;
-            
+            const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
+            const spend = parseFloat(eachData.spend);
+            const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0 ? 0 : Math.round((spend / fbLClicks)*100)/100;
             return(
                 {
                     date: eachData[`${timeZone}Date`],
@@ -1014,7 +1077,9 @@ const MnetLiveAdsetHistory = ({params}) => {
                     fbleads: eachData.fbLeads,
                     conversions: eachData.conversions !== null ? eachData.conversions : 0,
                     cpc: eachData.cpc,
+                    cpclinkclicks: cpcLinkClicks,
                     fbclicks: eachData.fbClicks,
+                    fblinkclicks: eachData.fbLinkClicks,
                     impressions: eachData.impressions,
                     rpc:rpc,
                     cpl:cpl,
@@ -1167,6 +1232,8 @@ const MnetLiveAdsetHistory = ({params}) => {
                 roi: `${(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100}%`,
                 cpc: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / filteredData?.length,
                 fbclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0),
+                cpclinkclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks), 0) / filteredData?.length,
+                fblinkclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0),
                 impressions: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0),
                 ctr: `${(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)}%`
             }
@@ -1221,6 +1288,45 @@ const MnetLiveAdsetHistory = ({params}) => {
         
     // };
 
+    const onCellKeyDown = (params) => {
+        if (params.event.ctrlKey && params.event.key === "c") {
+            params.event.preventDefault(); // Prevent default copy behavior
+    
+            // ✅ Ensure `selectedCells` is not empty
+            if (!selectedCells.length) return;
+    
+            // ✅ Prepare data to copy: Rows separated by \n, Columns by \t
+            const copiedText = selectedCells
+                .map(({ rowIndex, columns }) => {
+                    if (!columns || !Array.isArray(columns)) {
+                        // ✅ Handle case where only one cell is selected
+                        const singleColId = selectedCells[0]?.colId; 
+                        const row = params.api.getDisplayedRowAtIndex(rowIndex);
+                        return row && singleColId ? params.api.getValue(singleColId, row) : "";
+                    }
+                    
+                    // ✅ Multi-cell copying logic
+                    return columns
+                        .map((colId) => {
+                            const row = params.api.getDisplayedRowAtIndex(rowIndex);
+                            return row ? params.api.getValue(colId, row) : "";
+                        })
+                        .join("\t");
+                })
+                .join("\n"); // Each row on a new line
+    
+            // ✅ Copy text to clipboard
+            navigator.clipboard.writeText(copiedText).then(() => {
+                console.log("Copied to clipboard:", copiedText);
+            }).catch((err) => {
+                console.error("Clipboard copy failed:", err);
+            });
+    
+            // ✅ Trigger AG Grid’s built-in copy effect (blinking dark blue selection)
+            params.api.copySelectedRangeToClipboard();
+        }
+    };
+
     const getRandomColor = () => {
         const letters = '0123456789ABCDEF';
         let color = '#';
@@ -1240,6 +1346,15 @@ const MnetLiveAdsetHistory = ({params}) => {
     };
 
     console.log(columnDefs);
+
+    const handleReload = () => {
+        setLoading(true);
+        const mainFunctionCall = async () => {
+            await debouncedFunctionCallForUserColumnStructure();
+            await debouncedFunctionCall();
+        };
+        mainFunctionCall();
+    };
 
     return (
         <Row style={{display:'flex', flexDirection:'column'}}>
@@ -1515,7 +1630,22 @@ const MnetLiveAdsetHistory = ({params}) => {
 
 
             </Col>
-            <Col style={{display:'flex', justifyContent:'flex-end'}}>
+            <Col style={{display:'flex', justifyContent:'space-between', marginTop: '10px'}}>
+                <Col>
+                    <Input
+                        type="text"
+                        placeholder="Search table..."
+                        value={searchText}
+                        onChange={(e) => setSearchText(e.target.value)}
+                        style={{ width: "200px", padding: "3px" }}
+                    />
+                    <Button 
+                        type="default" 
+                        icon={<ReloadOutlined />} 
+                        style={{ height: "30px", marginLeft: "10px", backgroundColor: '#C7F39A', border: 'none' }} 
+                        onClick={handleReload}  // Call refresh function when clicked
+                    />
+                </Col>
                 <Select
                     placeholder="Select a range"
                     value={selectedValue}
@@ -1551,9 +1681,17 @@ const MnetLiveAdsetHistory = ({params}) => {
                     <AgGridReact
                         rowData={filteredData}
                         columnDefs={columnDefs}
+                        quickFilterText={searchText}
                         defaultColDef={defaultColDef}
                         pinnedBottomRowData={domainFixedFooter}
-                        gridOptions={gridOptions}
+                        onCellClicked={onCellClicked}
+                        gridOptions={{
+                            ensureDomOrder: false,
+                            suppressRowClickSelection: true,
+                            suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                            enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                            groupSelectsChildren: true, // ✅ Ensures child rows are selected properly
+                        }}
                         onGridReady={(params) => onGridReady(params, 'grid1', gridRef)}
                         pagination={true} // Enable pagination
                         // paginationPageSize={5} // Set rows per page
@@ -1568,9 +1706,23 @@ const MnetLiveAdsetHistory = ({params}) => {
                             }
                             return null;
                         }}
+
+                        getCellStyle={(params) => {
+                            const isSelected = selectedCells.some(
+                                (cell) => cell.rowIndex === params.node.rowIndex && cell.colId === params.column.getId()
+                            );
+                    
+                            // ✅ Ensure first selected cell is highlighted
+                            const isFirstSelected = firstSelectedCell &&
+                                firstSelectedCell.rowIndex === params.node.rowIndex &&
+                                firstSelectedCell.colId === params.column.getId();
+                    
+                            return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
+                        }}
                         groupDisplayType="multipleColumns"
                         suppressAggFuncInHeader={true}
                         groupSuppressBlankHeader={true}
+                        onCellKeyDown={onCellKeyDown}
                         onFilterChanged={(params) => {
                             const api = params.api;
                             const filteredData = [];
@@ -1614,6 +1766,11 @@ const MnetLiveAdsetHistory = ({params}) => {
                                         (filteredData?.length || 1)
                                     ).toFixed(2),
                                     fbclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks || 0), 0),
+                                    cpclinkclicks: (
+                                        filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks || 0), 0) /
+                                        (filteredData?.length || 1)
+                                    ).toFixed(2),
+                                    fblinkclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks || 0), 0),
                                     impressions: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0),
                                     ctr: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0)
                                         ? `${(

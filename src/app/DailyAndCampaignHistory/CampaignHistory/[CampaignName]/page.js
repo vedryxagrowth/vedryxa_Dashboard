@@ -11,7 +11,8 @@ import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { useTokenContext } from '../../../components/parent'
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
-import { Spin, Row, Col, Select } from 'antd';
+import { Spin, Row, Col, Select, Input, Button } from 'antd';
+import { ReloadOutlined } from '@ant-design/icons';
 Chart.register(...registerables);
 import debounce from 'lodash.debounce';
 
@@ -22,6 +23,11 @@ export default function CampaignAndAccount({ params }) {
     const { apiClient } = useTokenContext();
 
     const gridRef = useRef();
+
+    const [searchText, setSearchText] = useState("");
+
+    const [selectedCells, setSelectedCells] = useState([]);
+    const [firstSelectedCell, setFirstSelectedCell] = useState(null);
 
     // console.log(userdetails, "userDetails");
 
@@ -183,6 +189,29 @@ export default function CampaignAndAccount({ params }) {
         return 0;
     }
 
+    const getCpcLc = (params) => {
+        if (params.data !== undefined) {
+            const { spend, fblinkclicks } = params.data;
+            if (fblinkclicks !== 0) {
+                const RPC = spend / fblinkclicks;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return Number(RPC.toFixed(2));
+
+            }
+        }
+        if (params.node.aggData !== undefined) {
+            const { spend, fblinkclicks } = params.node.aggData;
+            if (fblinkclicks !== 0) {
+                const RPC = spend / fblinkclicks;
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        return 0;
+    }
+
     const getDev = (params) => {
         const rpc = getRpc(params);
         if (params.data !== undefined) {
@@ -320,7 +349,9 @@ export default function CampaignAndAccount({ params }) {
         "cpc",
         "fbclicks",
         "impressions",
-        "ctr"
+        "ctr",
+        "fblinkclicks",
+        "cpclinkclicks",
         ];
 
     const handleColumnMove = async (params, gridId) => {
@@ -482,6 +513,11 @@ export default function CampaignAndAccount({ params }) {
                 rpc = !isNaN(rpc) ? rpc : 0;
                 ncpl = !isNaN(ncpl) ? ncpl : 0;
                 fMargin = !isNaN(fMargin) ? `${fMargin}%` : '0%';
+
+                const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
+                const spend = parseFloat(eachData.spend);
+                const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0 ? 0 : Math.round((spend / fbLClicks)*100)/100;
+
                 return (
                     {
                         campaignname: eachData.campaign_name,
@@ -500,9 +536,11 @@ export default function CampaignAndAccount({ params }) {
                         ncpl: ncpl.toString(),
                         roi: roi,
                         cpc: (eachData.cpc).toString(),
+                        cpclinkclicks: cpcLinkClicks.toString(),
                         fbleads: (eachData.fbLeads).toString(),
                         filteration: parseInt(eachData.fbLeads) !== 0 ? Math.round((((parseInt(eachData.fbLeads)-parseInt(eachData.conversions))/parseInt(eachData.fbLeads))*100)*100)/100 : 0,
                         fbclicks: (eachData.fbClicks).toString(),
+                        fblinkclicks: (eachData.fbLinkClicks).toString(),
                         impressions: (eachData.impressions).toString(),
                         conversions: conversions.toString(),
                         fmargin: fMargin,
@@ -541,6 +579,7 @@ export default function CampaignAndAccount({ params }) {
                 revenue: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue || 0), 0).toFixed(2),
                 profit: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit || 0), 0).toFixed(2),
                 margin: `${(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)}%`,
+                filteration: `${(((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0) - filteredData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0)) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0)) * 100).toFixed(2)}`,
                 rpc: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / filteredData?.length,
                 cpl: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / filteredData?.length,
                 ncpl: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / filteredData?.length,
@@ -550,6 +589,8 @@ export default function CampaignAndAccount({ params }) {
                 roi: `${(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100}%`,
                 cpc: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / filteredData?.length,
                 fbclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0),
+                cpclinkclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks), 0) / filteredData?.length,
+                fblinkclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0),
                 impressions: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0),
                 ctr: `${(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)}%`
             }
@@ -802,7 +843,7 @@ export default function CampaignAndAccount({ params }) {
         // enableRowGroup: true,
         // autoHeight: true, 
         },
-        date : { headerName: 'Date', field: 'date', width: 160, sort: 'asc',
+        date : { headerName: 'Date', field: 'date', width: 160, sort: 'desc',
         comparator: (valueA, valueB) => {
             if (valueA == null && valueB == null) return 0;
             if (valueA == null) return -1;
@@ -1086,10 +1127,28 @@ export default function CampaignAndAccount({ params }) {
             headerToolTip: 'CPC = Spend / FBClicks',
   
         },
+        cpclinkclicks: {
+            headerName: 'CPC_LC',
+            field: 'cpclinkclicks',
+            // aggFunc: cpcSpender,
+            valueGetter:getCpcLc,
+            minWidth: 80,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "CPC = Spend / FBLinkClicks",
+            
+        },
         fbclicks:{ headerName: 'FBClicks', field: 'fbclicks', width: 110, aggFunc: agFunc, 
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu', },
+        fblinkclicks:{ headerName: 'FB_LC', field: 'fblinkclicks', width: 110, aggFunc: agFunc, 
+                suppressMenu: true,
+                menuTabs: [],
+                headerClass: 'hide-menu', },
         impressions: { headerName: 'IMP', field: 'impressions', width: 80, aggFunc: agFunc,
             suppressMenu: true,
             menuTabs: [],
@@ -1104,6 +1163,45 @@ export default function CampaignAndAccount({ params }) {
         
         // { headerName: 'AdsetId', field: 'adsetId' },
         // {headerName: "CampaignId", field:'campaignId'}
+    };
+
+    const onCellKeyDown = (params) => {
+        if (params.event.ctrlKey && params.event.key === "c") {
+            params.event.preventDefault(); // Prevent default copy behavior
+    
+            // ✅ Ensure `selectedCells` is not empty
+            if (!selectedCells.length) return;
+    
+            // ✅ Prepare data to copy: Rows separated by \n, Columns by \t
+            const copiedText = selectedCells
+                .map(({ rowIndex, columns }) => {
+                    if (!columns || !Array.isArray(columns)) {
+                        // ✅ Handle case where only one cell is selected
+                        const singleColId = selectedCells[0]?.colId; 
+                        const row = params.api.getDisplayedRowAtIndex(rowIndex);
+                        return row && singleColId ? params.api.getValue(singleColId, row) : "";
+                    }
+                    
+                    // ✅ Multi-cell copying logic
+                    return columns
+                        .map((colId) => {
+                            const row = params.api.getDisplayedRowAtIndex(rowIndex);
+                            return row ? params.api.getValue(colId, row) : "";
+                        })
+                        .join("\t");
+                })
+                .join("\n"); // Each row on a new line
+    
+            // ✅ Copy text to clipboard
+            navigator.clipboard.writeText(copiedText).then(() => {
+                console.log("Copied to clipboard:", copiedText);
+            }).catch((err) => {
+                console.error("Clipboard copy failed:", err);
+            });
+    
+            // ✅ Trigger AG Grid’s built-in copy effect (blinking dark blue selection)
+            params.api.copySelectedRangeToClipboard();
+        }
     };
 
     const getRandomColor = () => {
@@ -1140,6 +1238,15 @@ export default function CampaignAndAccount({ params }) {
                 }, 1500);
             }).catch(err => console.error("Copy failed:", err));
         }
+        // ✅ Ensure first selected cell gets highlighted
+        if (params.event?.shiftKey || params.event?.ctrlKey) {
+            // Add to selection when Shift/Ctrl is pressed
+            setSelectedCells((prev) => [...prev, { rowIndex: params.node.rowIndex, colId: params.column.getId() }]);
+        } else {
+            // Single click selects only one cell
+            setFirstSelectedCell({ rowIndex: params.node.rowIndex, colId: params.column.getId() });
+            setSelectedCells([{ rowIndex: params.node.rowIndex, colId: params.column.getId() }]);
+        }
     };
     
     
@@ -1155,10 +1262,19 @@ export default function CampaignAndAccount({ params }) {
         new agGrid.Grid(gridDiv, gridOptions);
     });
 
+    const handleReload = () => {
+        setLoading(true);
+        const functionCall = async () => {
+            await functionCallForCommnets(accountNumber);
+            await debouncedFunctionCallForUserColumnStructure();
+            await debouncedFunctionCall();
+        }
+        functionCall();
+    };
 
-    console.log(filteredData);
-    console.log(dailyData);
-    console.log(columnDefs);
+    // console.log(filteredData);
+    // console.log(dailyData);
+    // console.log(columnDefs);
 
     return (
         <Row style={{display:'flex', flexDirection:'column'}}>
@@ -1380,7 +1496,22 @@ export default function CampaignAndAccount({ params }) {
                     </table>
                 </div>
             </Col>
-            <Col style={{display:'flex', justifyContent:'flex-end'}}>
+            <Col style={{display:'flex', justifyContent:'space-between', marginTop: '10px'}}>
+                <Col>
+                    <Input
+                        type="text"
+                        placeholder="Search table..."
+                        value={searchText}
+                        onChange={(e) => setSearchText(e.target.value)}
+                        style={{ width: "200px", padding: "3px" }}
+                    />
+                    <Button 
+                        type="default" 
+                        icon={<ReloadOutlined />} 
+                        style={{ height: "30px", marginLeft: "10px", backgroundColor: '#C7F39A', border: 'none' }} 
+                        onClick={handleReload}  // Call refresh function when clicked
+                    />
+                </Col>
                 <Select
                     placeholder="Select a range"
                     value={selectedValue}
@@ -1416,9 +1547,17 @@ export default function CampaignAndAccount({ params }) {
                         <AgGridReact
                             rowData={filteredData}
                             columnDefs={columnDefs}
+                            quickFilterText={searchText}
                             defaultColDef={defaultColDef}
                             pinnedBottomRowData={domainFixedFooter}
-                            gridOptions={gridOptions}
+                            onCellClicked={onCellClicked}
+                            gridOptions={{
+                                ensureDomOrder: false,
+                                suppressRowClickSelection: true,
+                                suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                groupSelectsChildren: true, // ✅ Ensures child rows are selected properly
+                            }}
                             onGridReady={(params) => onGridReady(params, 'grid1', gridRef)}
                             tooltipShowDelay={0} // Show tooltip instantly
                             pagination={true}
@@ -1431,6 +1570,19 @@ export default function CampaignAndAccount({ params }) {
                                     };
                                 }
                                 return null;
+                            }}
+                            onCellKeyDown={onCellKeyDown}
+                            getCellStyle={(params) => {
+                                const isSelected = selectedCells.some(
+                                    (cell) => cell.rowIndex === params.node.rowIndex && cell.colId === params.column.getId()
+                                );
+                        
+                                // ✅ Ensure first selected cell is highlighted
+                                const isFirstSelected = firstSelectedCell &&
+                                    firstSelectedCell.rowIndex === params.node.rowIndex &&
+                                    firstSelectedCell.colId === params.column.getId();
+                        
+                                return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
                             }}
                             groupDisplayType="multipleColumns"
                             suppressAggFuncInHeader={true}
@@ -1458,6 +1610,7 @@ export default function CampaignAndAccount({ params }) {
                                                 filteredData.reduce((acc, curr) => acc + parseFloat(curr.revenue || 0), 0)) *
                                             100
                                         ).toFixed(2)}%`,
+                                        filteration: `${(((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0) - filteredData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0)) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0)) * 100).toFixed(2)}`,
                                         rpc: (
                                             filteredData.reduce((acc, curr) => acc + parseFloat(curr.rpc || 0), 0) / filteredData.length || 0
                                         ).toFixed(2),
@@ -1484,6 +1637,10 @@ export default function CampaignAndAccount({ params }) {
                                             filteredData.reduce((acc, curr) => acc + parseFloat(curr.cpc || 0), 0) / filteredData.length || 0
                                         ).toFixed(2),
                                         fbclicks: filteredData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks || 0), 0),
+                                        cpclinkclicks: (
+                                            filteredData.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks || 0), 0) / filteredData.length || 0
+                                        ).toFixed(2),
+                                        fblinkclicks: filteredData.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks || 0), 0),
                                         impressions: filteredData.reduce((acc, curr) => acc + parseFloat(curr.impressions || 0), 0),
                                         ctr: `${(
                                             (filteredData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks || 0), 0) /

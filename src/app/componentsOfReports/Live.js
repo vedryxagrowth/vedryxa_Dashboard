@@ -4,7 +4,7 @@ import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
 import React from 'react';
 import moment from 'moment-timezone';
-import {  Input, Button, Row, Col, Typography, Result, Modal, message } from 'antd';
+import {  Input, Button, Row, Col, Typography, Result, Modal, message, Switch } from 'antd';
 import {  InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import { Space } from 'antd';
@@ -53,7 +53,8 @@ const selectTimezone = {
     DST: 'DSTDate'
 };
 
-const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage}) => {
+const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle }) => {
+    console.log(columnDefs, "columnDefs");
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -67,6 +68,9 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
     
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const [selectedCells, setSelectedCells] = useState([]); // Store selected cell positions
+    const [firstSelectedCell, setFirstSelectedCell] = useState(null); // Store the first selected cell
 
     const timezone = useRef();
 
@@ -118,7 +122,9 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                 fmargin: parseFloat((memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
                 roi: parseFloat(((memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
                 cpc: parseFloat((memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / memorizedRowData?.length).toFixed(2)),
+                cpclinkclicks: parseFloat((memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks), 0) / memorizedRowData?.length).toFixed(2)),
                 fbclicks: parseFloat(memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
+                fblinkclicks: parseFloat(memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0).toFixed(2)),
                 impressions: parseFloat(memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
                 ctr: parseFloat((memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
             }
@@ -155,7 +161,7 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
     };
 
     const autoGroupColumnDefLive = {
-        headerName: 'Campaign-Name',
+        headerName: 'CampaignName',
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting
@@ -181,6 +187,8 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
             // If both campaigns have the same pinned status, fallback to alphabetical sorting
             return campaignA.localeCompare(campaignB);
         },
+
+        cellRenderer: "agGroupCellRenderer", // ✅ Use AG Grid's built-in renderer
         cellRendererParams: {
             suppressCount: false,
             innerRenderer: (params) => {
@@ -194,13 +202,18 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
 
                 let campaignid, adsetid;
 
-                if (params.node.group && params.node.childrenAfterGroup && params.node.childrenAfterGroup.length > 0) {
-                    const firstChild = params.node.childrenAfterGroup[0].data;
-                    campaignid = firstChild.campaignid;
-                    adsetid = firstChild.adsetid;
+                if (params.node.group && Array.isArray(params.node.childrenAfterGroup) && params.node.childrenAfterGroup.length > 0) {
+                    const firstChild = params.node.childrenAfterGroup[0]?.data;  // Safe access with optional chaining
+                
+                    if (firstChild) {  // Ensure firstChild is not undefined before accessing properties
+                        campaignid = firstChild.campaignid ?? null;  // Use null-safe access
+                        adsetid = firstChild.adsetid ?? null;
+                    } else {
+                        console.log("First child data is undefined", params.node.childrenAfterGroup[0]);
+                    }
                 } else if (params.data) {
-                    campaignid = params.data.campaignid;
-                    adsetid = params.data.adsetid;
+                    campaignid = params.data.campaignid ?? null;
+                    adsetid = params.data.adsetid ?? null;
                 } else {
                     console.error('Missing campaignid or adsetid for campaign:', campaignName);
                     return (
@@ -549,7 +562,7 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                                         <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
                                             Last Edited Time:
                                         </span>
-                                        <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                        <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
                                             {editUserANdTime ? editUserANdTime?.editedTime : ""}
                                         </span>
 
@@ -583,6 +596,22 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                     </div>
                 );
             }
+        },
+        processCellForClipboard: (params) => {
+            if (params.node.group) {
+                console.log("Processing group column for copy..."); // Debugging log
+    
+                // ✅ Fix: Ensure `params.node.parent` exists before accessing its properties
+                if (!params.node.parent || !params.node.parent.childrenAfterGroup) {
+                    return params.node.key;
+                }
+    
+                // ✅ Only copy group name for the first row in the group
+                return params.node.rowIndex === params.node.parent.childrenAfterGroup[0]?.rowIndex
+                    ? params.node.key
+                    : ""; // Prevent duplicate copies
+            }
+            return params.value; // Normal copy behavior for regular cells
         }
     };
 
@@ -625,7 +654,7 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                         revenueData = 0;
                     }
                     else {
-                        revenueData = eachData.estimated_revenue;
+                        revenueData = parseFloat(eachData.estimated_revenue).toFixed(2);
                     }
                     const profit = (revenueData - eachData.spend).toFixed(2);
                     let margin;
@@ -646,6 +675,9 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                     const ncpl = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((eachData.spend / eachData.conversions) * 100) / 100;
                     // console.log(revenueData, "revenueData");
                     const relatedComment = campaignComments.find(comment => comment.campaignname === eachData.campaign_name);
+                    const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
+                    const spend = parseFloat(eachData.spend);
+                    const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0 ? 0 : Math.round((spend / fbLClicks)*100)/100;
                     return (
 
                         {
@@ -654,14 +686,16 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                             date: eachData[specifiedTimeZone],
                             'fb-hour': eachData.hour,
                             'mnet-hour': eachData.updatedHour,
-                            spend: parseFloat(eachData.spend),
+                            spend: parseFloat(eachData.spend).toFixed(2),
                             revenue: revenueData ? revenueData : 0,
                             profit: parseFloat(profit),
-                            margin: margin,
+                            // margin: margin,
                             fbleads: parseInt(eachData.fbLeads),
                             conversions: eachData.conversions !== null && eachData.conversions !== 0 ? parseInt(eachData.conversions) : 0,
                             cpc: parseFloat(eachData.cpc),
+                            cpclinkclicks: cpcLinkClicks,
                             fbclicks: parseInt(eachData.fbClicks),
+                            fblinkclicks: parseInt(eachData.fbLinkClicks),
                             impressions: parseInt(eachData.impressions),
                             rpc: parseFloat(rpc),
                             cpl: parseFloat(cpl),
@@ -670,6 +704,8 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                             campaignid: eachData.campaign_id,
                             timezone: eachData[newtime],
                             comment: relatedComment ? relatedComment.comment : null,
+                            adid: "",
+                            adname: "",
                             actions: '...'
                         }
                     )
@@ -707,7 +743,9 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                     fmargin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
                     roi: parseFloat(((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
                     cpc: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / filteredData?.length).toFixed(2)),
+                    cpclinkclicks: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks), 0) / filteredData?.length).toFixed(2)),
                     fbclicks: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
+                    fblinkclicks: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0).toFixed(2)),
                     impressions: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
                     ctr: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
                 }
@@ -742,26 +780,49 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
         suppressHeaderContextMenu: false,
     };
     const onCellClickedLive = (event) => {
-        if (event.colDef.field === 'adsetname') {
+        // setSelectedCell({ rowIndex: event.node.rowIndex, colId: event.column.getId() });
+
+        if (event.colDef.field === "adsetname") {
             const value = event.value;
             if (value !== undefined) {
                 const url = `/LiveHistory/LiveAdsetHistory/${value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
-                window.open(url, '_blank', 'noopener,noreferrer');
-                // console.log(`Adset clicked: ${value}`);
+                window.open(url, "_blank", "noopener,noreferrer");
             }
         }
     };
+    // const onGridReady = (params, gridId) => {
+    //     gridRef.current = params;
+    
+    //     params.api.applyColumnState({ 
+    //         state: columnDefs || [], 
+    //         applyOrder: true 
+    //     });
+    // };
+    
+    // // Use useEffect to track changes in toggleStatus
+    // useEffect(() => {
+    //     if (!gridRef.current) return; // Ensure gridRef exists
+    
+    //     const gridApi = gridRef.current.api;
+    
+    //     const handleDragStopped = (e) => debouncedHandleColumnMove(e, 'grid1');
+    
+    //     if (toggleStatus) {
+    //         gridApi.addEventListener('dragStopped', handleDragStopped);
+    //     } else {
+    //         gridApi.removeEventListener('dragStopped', handleDragStopped);
+    //     }
+    
+    //     return () => {
+    //         gridApi.removeEventListener('dragStopped', handleDragStopped);
+    //     };
+    // }, [toggleStatus]);
+    
     const onGridReady = (params, gridId, gridRef) => {
         gridRef.current = params;
-        params.api.applyColumnState({ state: columnDefs || [], applyOrder: true });
+        params.api.applyColumnState({ state: columnDefs, applyOrder: true });
         params.api.addEventListener('dragStopped', (e) => debouncedHandleColumnMove(e, gridId));
     };
-    
-    // const onGridReady = (params, gridId, gridRef) => {
-    //     gridRef.current = params;
-    //     params.api.applyColumnState({ state: columnDefs, applyOrder: true });
-    //     params.api.addEventListener('dragStopped', (e) => debouncedHandleColumnMove(e, gridId));
-    // };
     const GroupCellRenderer = (props) => {
         const [tooltipText, setTooltipText] = useState("Copy to clipboard");
 
@@ -892,36 +953,48 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
     const showModal = () => {
         setIsModalOpen(true);
     };
-    const getMainMenuItems = (params) => {
-        const defaultItems = params.defaultItems.slice();
+    // const getMainMenuItems = (params) => {
+    //     const defaultItems = params.defaultItems.slice();
 
-        // Find and override the "Reset Columns" option
-        const resetColumnsItemIndex = defaultItems.findIndex(item => item === 'resetColumns');
-        if (resetColumnsItemIndex > -1) {
-            defaultItems[resetColumnsItemIndex] = {
-                name: 'Reset Columns (Custom)',
-                action: () => {
-                    changeRRefrst();
-                },
-                cssClasses: ['custom-reset-columns-item']
-            };
-            defaultItems.splice(resetColumnsItemIndex + 1, 0, {
-                name: 'Add New Column',
-                action: showModal,
-                cssClasses: ['custom-new-item'], // Assign a custom class for skyblue background
-            });
-        }
+    //     // Find and override the "Reset Columns" option
+    //     const resetColumnsItemIndex = defaultItems.findIndex(item => item === 'resetColumns');
+    //     if (resetColumnsItemIndex > -1) {
+    //         defaultItems[resetColumnsItemIndex] = {
+    //             name: 'Reset Columns (Custom)',
+    //             action: () => {
+    //                 changeRRefrst();
+    //             },
+    //             cssClasses: ['custom-reset-columns-item']
+    //         };
+    //         defaultItems.splice(resetColumnsItemIndex + 1, 0, {
+    //             name: 'Add New Column',
+    //             action: showModal,
+    //             cssClasses: ['custom-new-item'], // Assign a custom class for skyblue background
+    //         });
+    //     }
 
-        return defaultItems;
-    };
-    const gridOptions = {
-        onColumnMoved: (params) => debouncedHandleColumnMove(params, 'grid1'),
+    //     return defaultItems;
+    // };
+    const gridOptions = useMemo(() => ({
+        onColumnMoved: (params) => {
+            // if (toggleStatus) {
+                debouncedHandleColumnMove(params, 'grid1');
+            // }
+        },
         defaultColDef: {
             suppressMenu: true,
             headerClass: "custom-header" // Apply to all columns by default
+        },
+        ensureDomOrder: false
+    }), []);
 
-        }
-    };
+    document.addEventListener("DOMContentLoaded", function () {
+        const gridDiv = document.getElementById("myGrid");
+        new agGrid.Grid(gridDiv, gridOptions);
+      
+        // Set column definitions separately after grid initialization
+        gridOptions.api.setColumnDefs(columnDefs);
+    });
     const handleReFetchData = () => {
         functionCall1();
         setApiStatus(false);
@@ -939,6 +1012,60 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
         }
     }
     , [refreshpage]);
+
+    // const onCellClickedLive = (event) => {
+    //     setSelectedCell({ rowIndex: event.node.rowIndex, colId: event.column.getId() });
+
+    //     if (event.colDef.field === "adsetname") {
+    //         const value = event.value;
+    //         if (value !== undefined) {
+    //             const url = `/LiveHistory/LiveAdsetHistory/${value.replace(/\//g, "*").replace(/-/g, "^")}`;
+    //             window.open(url, "_blank", "noopener,noreferrer");
+    //         }
+    //     }
+    // };
+
+    // const onRangeSelectionChanged = (params) => {
+    //     const selected = [];
+    //     const rangeSelections = params.api.getCellRanges();
+    
+    //     if (rangeSelections) {
+    //         rangeSelections.forEach((range) => {
+    //             const startRow = Math.min(range.startRow.rowIndex, range.endRow.rowIndex);
+    //             const endRow = Math.max(range.startRow.rowIndex, range.endRow.rowIndex);
+    //             const columns = range.columns.map((col) => col.getColId());
+    
+    //             for (let rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
+    //                 const node = params.api.getDisplayedRowAtIndex(rowIndex);
+    
+    //                 if (!node.group && node.data) { // ✅ Ensures only data rows are selected
+    //                     if (!firstSelectedCell) {
+    //                         setFirstSelectedCell({ rowIndex, colId: columns[0] }); // ✅ Ensure first cell is recorded
+    //                     }
+    //                     selected.push({ rowIndex, columns });
+    //                 }
+    //             }
+    //         });
+    //     }
+    
+    //     setSelectedCells(selected);
+    // };
+    
+    const onCellKeyDown = (params) => {
+        if (params.event.ctrlKey && params.event.key === "c") {
+            params.event.preventDefault(); // Prevent default copy behavior
+    
+            // ✅ Prepare data to copy: Rows separated by \n, Columns by \t
+            const copiedText = selectedCells
+                .map(({ rowIndex, columns }) =>
+                    columns.map((colId) => params.api.getValue(colId, params.api.getDisplayedRowAtIndex(rowIndex))).join("\t")
+                )
+                .join("\n"); // Each row on a new line
+    
+            navigator.clipboard.writeText(copiedText);
+            params.api.copySelectedRangeToClipboard(); // ✅ Restore AG Grid blinking effect
+        }
+    };
     
     return(
                     <div style={{ height: "100%", marginBottom: '20px',overflow: "visible" }}>
@@ -988,26 +1115,40 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ fontWeight: '600' }}>F/N Hour: {maxHour.current}:00 / {maxNetworkHour.current}:00</Text>
                                         </Col>
-                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                        {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ fontWeight: '600' }}>
                                                 Cron/Acc status: {cronStatus.current} /{' '}
                                                 <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
                                                     {accountStatus.current}
                                                 </span>
                                             </Text>
-                                        </Col>
+                                        </Col> */}
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
                                             <Tooltip
                                             title={
                                                 <>
-                                                <div>FbAcc Status: {`${fbCron.current}`}</div>
-                                                <div>RevAcc Status: {`${revenueCron.current}`}</div>
+                                                    <div>FbAcc Status: {`${fbCron.current}`}</div>
+                                                    <div>RevAcc Status: {`${revenueCron.current}`}</div>
+                                                    <Text style={{ fontWeight: '600', color: "white" }}>
+                                                        Cron/Acc status: {cronStatus.current} /{' '}
+                                                        <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
+                                                            {accountStatus.current}
+                                                        </span>
+                                                    </Text>
                                                 </>
                                             }
                                             >
-                                                <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px' }} />
+                                                <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color:"#C7F39A" }} />
                                             </Tooltip>
                                         </Col>
+                                        {/* <Col>
+                                            <Tooltip 
+                                                title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
+                                                mouseEnterDelay={0} // Tooltip appears after 1 second
+                                            >
+                                                <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#C7F39A" }}/>
+                                            </Tooltip>
+                                        </Col> */}
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                             <Tooltip title="Export to CSV">
                                                 <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={onBtExport1} />
@@ -1026,30 +1167,51 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                                         paginationPageSize={100}
                                         paginationPageSizeSelector={[20, 40, 60, 80, 100]}
                                         suppressAggFuncInHeader={true}
+                                        getMainMenuItems={getMainMenuItems}
+    
+                                        // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
+                                        // onCellKeyDown={onCellKeyDown}
                                         // domLayout="normal"
                                         // groupIncludeTotalFooter={rowData.length > 0 ? true : false}
                                         // groupIncludeFooter={rowData.length > 0 ? true : false}
                                         autoGroupColumnDef={autoGroupColumnDefLive}
                                         onGridReady={(params) => onGridReady(params, 'grid1', gridRef)}
-                                        gridOptions={gridOptions}
+                                        gridOptions={{
+                                            ...gridOptions,
+                                            ensureDomOrder: false,
+                                            suppressRowClickSelection: true,
+                                            suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                            enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                            groupSelectsChildren: true, // ✅ Ensures child rows are selected properly
+                                        }}
                                         frameworkComponents={{ GroupCellRenderer }}
                                         groupDisplayType='multipleColumns'
                                         // rowGroupPanelShow='always'
                                         // onFilterChanged={onFilterChanged} // Use the custom filter handler
                                         pinnedBottomRowData={liveFixedFooter}
-                                        getRowStyle={params => {
+                                        suppressCellSelection={true}
+                                        getRowStyle={(params) => {
                                             if (params.node.rowPinned) {
                                                 return {
-                                                    fontWeight: 'bold',
-                                                    backgroundColor: theme === "dark" ? '#1a1918' : '#fff', // Dark mode background should be dark, light mode should be light
-                                                    color: theme === "dark" ? '#fff' : '#000',           // Text color should contrast with the background
+                                                    fontWeight: "bold",
+                                                    backgroundColor: theme === "dark" ? "#1a1918" : "#fff", // Dark mode or light mode
+                                                    color: theme === "dark" ? "#fff" : "#000",
                                                 };
                                             }
-
-                                            return null;
+                                            return null; // Keep other row styles unchanged
                                         }}
-
-                                        getMainMenuItems={getMainMenuItems}
+                                        getCellStyle={(params) => {
+                                            const isSelected = selectedCells.some(
+                                                (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
+                                            );
+                                    
+                                            // ✅ Ensure first cell inside a group is highlighted
+                                            const isFirstSelected = firstSelectedCell &&
+                                                firstSelectedCell.rowIndex === params.node.rowIndex &&
+                                                firstSelectedCell.colId === params.column.getId();
+                                    
+                                            return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
+                                        }}
                                         onFilterChanged={(params) => {
                                             const api = params.api;
                                             const filteredData = [];
@@ -1092,7 +1254,9 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                                                     fmargin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
                                                     roi: parseFloat(((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) - filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0)) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
                                                     cpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpc), 0) / filteredData.length).toFixed(2)),
+                                                    cpclinkclicks: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks), 0) / filteredData.length).toFixed(2)),
                                                     fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
+                                                    fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
                                                     impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
                                                     ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2))
                                                 },

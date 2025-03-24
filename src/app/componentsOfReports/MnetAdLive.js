@@ -1,10 +1,10 @@
 "use client"
-import { useEffect, useMemo, useState, useRef } from 'react';
+import { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
 import React from 'react';
 import moment from 'moment-timezone';
-import {  Input, Button, Row, Col, Typography, Result, Modal, message } from 'antd';
+import {  Input, Button, Row, Col, Typography, Result, Modal, message, Switch } from 'antd';
 import {  InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import { Space } from 'antd';
@@ -53,8 +53,8 @@ const selectTimezone = {
     DST: 'DSTDate'
 };
 
-const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage}) => {
-    console.log(columnDefs.current);
+const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle}) => {
+    console.log(columnDefs);
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -68,6 +68,11 @@ const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenueP
     
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    
+
+    const [selectedCells, setSelectedCells] = useState([]);
+    const [firstSelectedCell, setFirstSelectedCell] = useState(null);
 
     const timezone = useRef();
 
@@ -127,6 +132,8 @@ const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenueP
                 roi: parseFloat(((memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
                 cpc: parseFloat((memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / memorizedRowData?.length).toFixed(2)),
                 fbclicks: parseFloat(memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
+                cpclinkclicks: parseFloat((memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks), 0) / memorizedRowData?.length).toFixed(2)),
+                fblinkclicks: parseFloat(memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0).toFixed(2)),
                 impressions: parseFloat(memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
                 ctr: parseFloat((memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
             }
@@ -586,20 +593,33 @@ const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenueP
                             onOk={handleOks} // Default Ok button functionality
                             onCancel={handleCancels} // Default Cancel button functionality
                             footer={[
-                                <Button
-                                    key="delete"
-                                    type="danger"
-                                    onClick={handleDelete}
-                                    style={{ marginRight: 'auto', border: "1px solid black" }} // Push Delete button to the far left
-                                >
-                                    Delete
-                                </Button>,
-                                <Button key="cancel" onClick={handleCancels}>
-                                    Cancel
-                                </Button>,
-                                <Button key="ok" type="primary" onClick={handleOks}>
-                                    Ok
-                                </Button>,
+                                <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+                                    <div style={{display:'flex', flexDirection:"column"}}>
+                                        <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                            Last Edited Time:
+                                        </span>
+                                        <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                            {editUserANdTime ? editUserANdTime?.editedTime : ""}
+                                        </span>
+
+                                    </div>
+                                    <div>
+                                    <Button
+                                        key="delete"
+                                        type="danger"
+                                        onClick={handleDelete}
+                                        style={{ marginRight: 'auto', border: "1px solid black" }} // Push Delete button to the far left
+                                    >
+                                        Delete
+                                    </Button>
+                                    <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
+                                        Cancel
+                                    </Button>
+                                    <Button key="ok" type="primary" onClick={handleOks} style={{marginLeft:"4px"}}>
+                                        Ok
+                                    </Button>
+                                    </div>
+                                </div>
                             ]}
                         >
                             <Input.TextArea
@@ -678,6 +698,10 @@ const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenueP
                     const ncpl = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((eachData.spend / eachData.conversions) * 100) / 100;
                     // console.log(revenueData, "revenueData");
                     const relatedComment = campaignComments.find(comment => comment.campaignname === eachData.campaign_name);
+                    const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
+                    const spend = parseFloat(eachData.spend);
+                    const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0 ? 0 : Math.round((spend / fbLClicks)*100)/100;
+
                     return (
 
                         {
@@ -694,13 +718,15 @@ const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenueP
                             fbleads: parseInt(eachData.fbLeads),
                             conversions: eachData.conversions !== null && eachData.conversions !== 0 ? parseInt(eachData.conversions) : 0,
                             cpc: parseFloat(eachData.cpc),
+                            cpclinkclicks: cpcLinkClicks,
                             fbclicks: parseInt(eachData.fbClicks),
+                            fblinkclicks: parseInt(eachData.fbLinkClicks),
                             impressions: parseInt(eachData.impressions),
                             rpc: parseFloat(rpc),
                             cpl: parseFloat(cpl),
                             ncpl: parseFloat(ncpl),
                             adsetid: eachData.adset_id,
-                            ad_id: eachData.ad_id ? eachData.ad_id : "",
+                            adid: eachData.ad_id ? eachData.ad_id : "",
                             campaignid: eachData.campaign_id,
                             timezone: eachData[newtime],
                             comment: relatedComment ? relatedComment.comment : null,
@@ -744,6 +770,8 @@ const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenueP
                     roi: parseFloat(((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
                     cpc: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / filteredData?.length).toFixed(2)),
                     fbclicks: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
+                    cpclinkclicks: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks), 0) / filteredData?.length).toFixed(2)),
+                    fblinkclicks: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0).toFixed(2)),
                     impressions: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
                     ctr: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
                 }
@@ -788,18 +816,48 @@ const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenueP
                 // console.log(`Adset clicked: ${value}`);
             }
         }
+        // // ✅ Ensure first selected cell gets highlighted
+        // if (event.event.shiftKey || event.event.ctrlKey) {
+        //     // Add to selection when Shift/Ctrl is pressed
+        //     setSelectedCells((prev) => [...prev, { rowIndex: event.node.rowIndex, colId: event.column.getId() }]);
+        // } else {
+        //     // Single click selects only one cell
+        //     setFirstSelectedCell({ rowIndex: event.node.rowIndex, colId: event.column.getId() });
+        //     setSelectedCells([{ rowIndex: event.node.rowIndex, colId: event.column.getId() }]);
+        // }
     };
+    // const onGridReady = (params, gridId) => {
+    //     gridRef.current = params;
+    
+    //     params.api.applyColumnState({ 
+    //         state: columnDefs || [], 
+    //         applyOrder: true 
+    //     });
+    // };
+    
+    // // Effect to handle event listener based on toggleStatus
+    // useEffect(() => {
+    //     if (!gridRef.current) return; // Ensure gridRef exists
+    
+    //     const gridApi = gridRef.current.api;
+    //     const handleDragStopped = (e) => debouncedHandleColumnMove(e, 'grid10');
+    
+    //     if (toggleStatus) {
+    //         gridApi.addEventListener('dragStopped', handleDragStopped);
+    //     } else {
+    //         gridApi.removeEventListener('dragStopped', handleDragStopped);
+    //     }
+    
+    //     return () => {
+    //         gridApi.removeEventListener('dragStopped', handleDragStopped); // Cleanup on unmount
+    //     };
+    // }, [toggleStatus]); 
+    
     const onGridReady = (params, gridId, gridRef) => {
         gridRef.current = params;
-        params.api.applyColumnState({ state: columnDefs || [], applyOrder: true });
+        params.api.applyColumnState({ state: columnDefs, applyOrder: true });
         params.api.addEventListener('dragStopped', (e) => debouncedHandleColumnMove(e, gridId));
     };
-    
-    // const onGridReady = (params, gridId, gridRef) => {
-    //     gridRef.current = params;
-    //     params.api.applyColumnState({ state: columnDefs, applyOrder: true });
-    //     params.api.addEventListener('dragStopped', (e) => debouncedHandleColumnMove(e, gridId));
-    // };
     const GroupCellRenderer = (props) => {
         const [tooltipText, setTooltipText] = useState("Copy to clipboard");
 
@@ -930,34 +988,79 @@ const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenueP
     const showModal = () => {
         setIsModalOpen(true);
     };
-    const getMainMenuItems = (params) => {
-        const defaultItems = params.defaultItems.slice();
+    // const getMainMenuItems = (params) => {
+    //     const defaultItems = params.defaultItems.slice();
 
-        // Find and override the "Reset Columns" option
-        const resetColumnsItemIndex = defaultItems.findIndex(item => item === 'resetColumns');
-        if (resetColumnsItemIndex > -1) {
-            defaultItems[resetColumnsItemIndex] = {
-                name: 'Reset Columns (Custom)',
-                action: () => {
-                    changeRRefrst();
-                },
-                cssClasses: ['custom-reset-columns-item']
-            };
-            defaultItems.splice(resetColumnsItemIndex + 1, 0, {
-                name: 'Add New Column',
-                action: showModal,
-                cssClasses: ['custom-new-item'], // Assign a custom class for skyblue background
+    //     // Find and override the "Reset Columns" option
+    //     const resetColumnsItemIndex = defaultItems.findIndex(item => item === 'resetColumns');
+    //     if (resetColumnsItemIndex > -1) {
+    //         defaultItems[resetColumnsItemIndex] = {
+    //             name: 'Reset Columns (Custom)',
+    //             action: () => {
+    //                 changeRRefrst();
+    //             },
+    //             cssClasses: ['custom-reset-columns-item']
+    //         };
+    //         defaultItems.splice(resetColumnsItemIndex + 1, 0, {
+    //             name: 'Add New Column',
+    //             action: showModal,
+    //             cssClasses: ['custom-new-item'], // Assign a custom class for skyblue background
+    //         });
+    //     }
+
+    //     return defaultItems;
+    // };
+
+    const onCellKeyDown = (params) => {
+        if (params.event.ctrlKey && params.event.key === "c") {
+            params.event.preventDefault(); // Prevent default copy behavior
+    
+            // ✅ Ensure `selectedCells` is not empty
+            if (!selectedCells.length) return;
+    
+            // ✅ Prepare data to copy: Rows separated by \n, Columns by \t
+            const copiedText = selectedCells
+                .map(({ rowIndex, columns }) => {
+                    if (!columns || !Array.isArray(columns)) {
+                        // ✅ Handle case where only one cell is selected
+                        const singleColId = selectedCells[0]?.colId; 
+                        const row = params.api.getDisplayedRowAtIndex(rowIndex);
+                        return row && singleColId ? params.api.getValue(singleColId, row) : "";
+                    }
+                    
+                    // ✅ Multi-cell copying logic
+                    return columns
+                        .map((colId) => {
+                            const row = params.api.getDisplayedRowAtIndex(rowIndex);
+                            return row ? params.api.getValue(colId, row) : "";
+                        })
+                        .join("\t");
+                })
+                .join("\n"); // Each row on a new line
+    
+            // ✅ Copy text to clipboard
+            navigator.clipboard.writeText(copiedText).then(() => {
+                console.log("Copied to clipboard:", copiedText);
+            }).catch((err) => {
+                console.error("Clipboard copy failed:", err);
             });
+    
+            // ✅ Trigger AG Grid’s built-in copy effect (blinking dark blue selection)
+            params.api.copySelectedRangeToClipboard();
         }
-
-        return defaultItems;
     };
+
+    const onColumnMoved = useCallback((params) => {
+        // if (toggleStatus) {
+            debouncedHandleColumnMove(params, 'grid10');
+        // }
+    }, []); // Reacts to changes in toggleStatus
+    
     const gridOptions = {
-        onColumnMoved: (params) => debouncedHandleColumnMove(params, 'grid1'),
+        onColumnMoved,
         defaultColDef: {
             suppressMenu: true,
             headerClass: "custom-header" // Apply to all columns by default
-
         }
     };
     const handleReFetchData = () => {
@@ -1026,26 +1129,40 @@ const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenueP
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ fontWeight: '600' }}>F/N Hour: {maxHour.current}:00 / {maxNetworkHour.current}:00</Text>
                                         </Col>
-                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                        {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ fontWeight: '600' }}>
                                                 Cron/Acc status: {cronStatus.current} /{' '}
                                                 <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
                                                     {accountStatus.current}
                                                 </span>
                                             </Text>
-                                        </Col>
+                                        </Col> */}
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
                                             <Tooltip
                                             title={
                                                 <>
-                                                <div>FbAcc Status: {`${fbCron.current}`}</div>
-                                                <div>RevAcc Status: {`${revenueCron.current}`}</div>
+                                                    <div>FbAcc Status: {`${fbCron.current}`}</div>
+                                                    <div>RevAcc Status: {`${revenueCron.current}`}</div>
+                                                    <Text style={{ fontWeight: '600', color:'white' }}>
+                                                        Cron/Acc status: {cronStatus.current} /{' '}
+                                                        <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
+                                                            {accountStatus.current}
+                                                        </span>
+                                                    </Text>
                                                 </>
                                             }
                                             >
-                                                <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px' }} />
+                                                <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color:"#C7F39A" }} />
                                             </Tooltip>
                                         </Col>
+                                        {/* <Col>
+                                            <Tooltip 
+                                                title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
+                                                mouseEnterDelay={0} // Tooltip appears after 1 second
+                                            >
+                                                <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#C7F39A" }}/>
+                                            </Tooltip>
+                                        </Col> */}
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                             <Tooltip title="Export to CSV">
                                                 <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={onBtExport1} />
@@ -1068,8 +1185,14 @@ const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenueP
                                         // groupIncludeTotalFooter={rowData.length > 0 ? true : false}
                                         // groupIncludeFooter={rowData.length > 0 ? true : false}
                                         autoGroupColumnDef={autoGroupColumnDefLive}
-                                        onGridReady={(params) => onGridReady(params, 'grid1', gridRef)}
-                                        gridOptions={gridOptions}
+                                        onGridReady={(params) => onGridReady(params, 'grid10', gridRef)}
+                                        gridOptions={{
+                                            ...gridOptions,
+                                            ensureDomOrder: false,
+                                            suppressRowClickSelection: true,
+                                            suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                            enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                        }}
                                         frameworkComponents={{ GroupCellRenderer }}
                                         groupDisplayType='multipleColumns'
                                         // rowGroupPanelShow='always'
@@ -1085,6 +1208,19 @@ const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenueP
                                             }
 
                                             return null;
+                                        }}
+                                        onCellKeyDown={onCellKeyDown}
+                                        getCellStyle={(params) => {
+                                            const isSelected = selectedCells.some(
+                                                (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
+                                            );
+                                    
+                                            // ✅ Ensure first cell inside a group is highlighted
+                                            const isFirstSelected = firstSelectedCell &&
+                                                firstSelectedCell.rowIndex === params.node.rowIndex &&
+                                                firstSelectedCell.colId === params.column.getId();
+                                    
+                                            return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
                                         }}
 
                                         getMainMenuItems={getMainMenuItems}
@@ -1131,6 +1267,8 @@ const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenueP
                                                     roi: parseFloat(((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) - filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0)) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
                                                     cpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpc), 0) / filteredData.length).toFixed(2)),
                                                     fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
+                                                    cpclinkclicks: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks), 0) / filteredData.length).toFixed(2)),
+                                                    fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
                                                     impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
                                                     ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2))
                                                 },

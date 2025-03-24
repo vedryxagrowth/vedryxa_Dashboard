@@ -4,7 +4,7 @@ import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
 import React from 'react';
 import moment from 'moment-timezone';
-import { Input, Button, Pagination, Row, Col, Typography, Result, Modal, message } from 'antd';
+import { Input, Button, Pagination, Row, Col, Typography, Result, Modal, message, Switch } from 'antd';
 import { DownloadOutlined,  ArrowLeftOutlined, ArrowRightOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import { Space } from 'antd';
@@ -53,7 +53,7 @@ const selectTimezone = {
 };
 
 
-const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage}) => {
+const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle}) => {
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -71,6 +71,9 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
 
     const [isLoading2, setLoading2] = useState(true);
 
+    const [selectedCells, setSelectedCells] = useState([]);
+    const [firstSelectedCell, setFirstSelectedCell] = useState(null);
+
     const timezone = useRef();
 
     const gridRef2 = useRef();
@@ -78,6 +81,9 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
     const newCampaignData = useRef();
 
     const totalItems = useRef();
+
+    const prevPageRef = useRef(pageSize);
+    const prevInputRef = useRef(inputValue);
 
     const memorizedColumnDef2 = useMemo(()=> columnDefs.current, [columnDefs.current]);
     const memorizedCampaignsData = useMemo(()=>campaignData?.filter((each) => {
@@ -123,7 +129,7 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
     };
 
     const autoGroupColumnDef2 = {
-        headerName: 'Campaign-Name',
+        headerName: 'CampaignName',
         minWidth: 450,
         pinned: 'left',
 
@@ -487,20 +493,33 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                             onOk={handleOk} // Default Ok button functionality
                             onCancel={handleCancel} // Default Cancel button functionality
                             footer={[
-                                <Button
-                                    key="delete"
-                                    type="danger"
-                                    onClick={handleDelete}
-                                    style={{ marginRight: 'auto', border: "1px solid black" }} // Push Delete button to the far left
-                                >
-                                    Delete
-                                </Button>,
-                                <Button key="cancel" onClick={handleCancel}>
-                                    Cancel
-                                </Button>,
-                                <Button key="ok" type="primary" onClick={handleOk}>
-                                    Ok
-                                </Button>,
+                                <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+                                    <div style={{display:'flex', flexDirection:"column"}}>
+                                        <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                            Last Edited Time:
+                                        </span>
+                                        <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                            {editUserANdTime ? editUserANdTime?.editedTime : ""}
+                                        </span>
+
+                                    </div>
+                                    <div>
+                                    <Button
+                                        key="delete"
+                                        type="danger"
+                                        onClick={handleDelete}
+                                        style={{ marginRight: 'auto', border: "1px solid black" }} // Push Delete button to the far left
+                                    >
+                                        Delete
+                                    </Button>
+                                    <Button key="cancel" onClick={handleCancel} style={{marginLeft:"4px"}}>
+                                        Cancel
+                                    </Button>
+                                    <Button key="ok" type="primary" onClick={handleOk} style={{marginLeft:"4px"}}>
+                                        Ok
+                                    </Button>
+                                    </div>
+                                </div>
                             ]}
                         >
                             <Input.TextArea
@@ -554,7 +573,7 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                         revenueData = '0.00';
                     }
                     else {
-                        revenueData = eachData.estimated_revenue;
+                        revenueData = parseFloat(eachData.estimated_revenue).toFixed(2);
                     }
                     const profit = (revenueData - eachData.spend).toFixed(2);
                     let margin;
@@ -574,22 +593,29 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                     }
                     const ncpl = eachData.conversions === 0 || eachData.conversions === undefined ? 0 : Math.round((eachData.spend / eachData.conversions) * 100) / 100;
                     // console.log(eachData[specifiedTimeZone],"time");
+                    const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
+                    const spend = parseFloat(eachData.spend);
+                    const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0 ? 0 : Math.round((spend / fbLClicks)*100)/100;
                     return (
                         {
                             campaignname: eachData.campaign_name,
                             adsetname: eachData.adsetName,
                             date: eachData[specifiedTimeZone],
-                            spend: eachData.spend,
+                            spend: parseFloat(eachData.spend).toFixed(2),
                             revenue: revenueData,
                             profit: profit,
                             fbleads: eachData.fbLeads,
                             conversions: eachData.conversions,
                             cpc: eachData.cpc,
+                            cpclinkclicks: cpcLinkClicks,
                             fbclicks: eachData.fbClicks,
+                            fblinkclicks: eachData.fbLinkClicks,
                             impressions: eachData.impressions,
                             campaignid: eachData.campaign_id,
                             adsetid: eachData.adset_id,
-                            actions: '...'
+                            actions: '...',
+                            adid: "",
+                            adname: "",
                         }
                     )
                 })
@@ -614,6 +640,8 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                     roi: parseFloat(((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)),
                     cpc: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / filteredData?.length).toFixed(2)),
                     fbclicks: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
+                    cpclinkclicks: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks), 0) / filteredData?.length).toFixed(2)),
+                    fblinkclicks: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0).toFixed(2)),
                     impressions: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
                     ctr: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
                 }
@@ -653,18 +681,48 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                 window.open(url, '_blank', 'noopener,noreferrer');
             }
         }
+        // // ✅ Ensure first selected cell gets highlighted
+        // if (event.event.shiftKey || event.event.ctrlKey) {
+        //     // Add to selection when Shift/Ctrl is pressed
+        //     setSelectedCells((prev) => [...prev, { rowIndex: event.node.rowIndex, colId: event.column.getId() }]);
+        // } else {
+        //     // Single click selects only one cell
+        //     setFirstSelectedCell({ rowIndex: event.node.rowIndex, colId: event.column.getId() });
+        //     setSelectedCells([{ rowIndex: event.node.rowIndex, colId: event.column.getId() }]);
+        // }
     };
+    // const onGridReady = (params, gridId) => {
+    //     gridRef2.current = params;
+    
+    //     params.api.applyColumnState({ 
+    //         state: columnDefs || [], 
+    //         applyOrder: true 
+    //     });
+    // };
+    
+    // // Effect to handle event listener based on toggleStatus
+    // useEffect(() => {
+    //     if (!gridRef2.current) return; // Ensure gridRef exists
+    
+    //     const gridApi = gridRef2.current.api;
+    //     const handleDragStopped = (e) => debouncedHandleColumnMove(e, 'grid3');
+    
+    //     if (toggleStatus) {
+    //         gridApi.addEventListener('dragStopped', handleDragStopped);
+    //     } else {
+    //         gridApi.removeEventListener('dragStopped', handleDragStopped);
+    //     }
+    
+    //     return () => {
+    //         gridApi.removeEventListener('dragStopped', handleDragStopped); // Cleanup on unmount
+    //     };
+    // }, [toggleStatus]);
+    
     const onGridReady = (params, gridId, gridRef) => {
         gridRef.current = params;
-        params.api.applyColumnState({ state: columnDefs || [], applyOrder: true });
+        params.api.applyColumnState({ state: columnDefs, applyOrder: true });
         params.api.addEventListener('dragStopped', (e) => debouncedHandleColumnMove(e, gridId));
     };
-    
-    // const onGridReady = (params, gridId, gridRef) => {
-    //     gridRef.current = params;
-    //     params.api.applyColumnState({ state: columnDefs, applyOrder: true });
-    //     params.api.addEventListener('dragStopped', (e) => debouncedHandleColumnMove(e, gridId));
-    // };
     const GroupCellRenderer = (props) => {
         const [tooltipText, setTooltipText] = useState("Copy to clipboard");
 
@@ -693,27 +751,86 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
     const showModal = () => {
         setIsModalOpen(true);
     };
-    const getMainMenuItems = (params) => {
-        const defaultItems = params.defaultItems.slice();
+    // const getMainMenuItems = (params) => {
+    //     const defaultItems = params.defaultItems.slice();
 
-        // Find and override the "Reset Columns" option
-        const resetColumnsItemIndex = defaultItems.findIndex(item => item === 'resetColumns');
-        if (resetColumnsItemIndex > -1) {
-            defaultItems[resetColumnsItemIndex] = {
-                name: 'Reset Columns (Custom)',
-                action: () => {
-                    changeRRefrst();
-                },
-                cssClasses: ['custom-reset-columns-item']
-            };
-            defaultItems.splice(resetColumnsItemIndex + 1, 0, {
-                name: 'Add New Column',
-                action: showModal,
-                cssClasses: ['custom-new-item'], // Assign a custom class for skyblue background
+    //     // Find and override the "Reset Columns" option
+    //     const resetColumnsItemIndex = defaultItems.findIndex(item => item === 'resetColumns');
+    //     if (resetColumnsItemIndex > -1) {
+    //         defaultItems[resetColumnsItemIndex] = {
+    //             name: 'Reset Columns (Custom)',
+    //             action: () => {
+    //                 changeRRefrst();
+    //             },
+    //             cssClasses: ['custom-reset-columns-item']
+    //         };
+    //         defaultItems.splice(resetColumnsItemIndex + 1, 0, {
+    //             name: 'Add New Column',
+    //             action: showModal,
+    //             cssClasses: ['custom-new-item'], // Assign a custom class for skyblue background
+    //         });
+    //     }
+
+    //     return defaultItems;
+    // };
+
+    // const onRangeSelectionChanged = (params) => {
+    //     // Capture all selected cell positions when range is selected
+    //     const selected = [];
+    //     const rangeSelections = params.api.getCellRanges();
+    
+    //     if (rangeSelections) {
+    //         rangeSelections.forEach((range) => {
+    //             const startRow = Math.min(range.startRow.rowIndex, range.endRow.rowIndex);
+    //             const endRow = Math.max(range.startRow.rowIndex, range.endRow.rowIndex);
+    //             const columns = range.columns.map((col) => col.getColId());
+    
+    //             for (let rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
+    //                 selected.push({ rowIndex, columns });
+    //             }
+    //         });
+    //     }
+    
+    //     setSelectedCells(selected);
+    // };
+    
+    const onCellKeyDown = (params) => {
+        if (params.event.ctrlKey && params.event.key === "c") {
+            params.event.preventDefault(); // Prevent default copy behavior
+    
+            // ✅ Ensure `selectedCells` is not empty
+            if (!selectedCells.length) return;
+    
+            // ✅ Prepare data to copy: Rows separated by \n, Columns by \t
+            const copiedText = selectedCells
+                .map(({ rowIndex, columns }) => {
+                    if (!columns || !Array.isArray(columns)) {
+                        // ✅ Handle case where only one cell is selected
+                        const singleColId = selectedCells[0]?.colId; 
+                        const row = params.api.getDisplayedRowAtIndex(rowIndex);
+                        return row && singleColId ? params.api.getValue(singleColId, row) : "";
+                    }
+                    
+                    // ✅ Multi-cell copying logic
+                    return columns
+                        .map((colId) => {
+                            const row = params.api.getDisplayedRowAtIndex(rowIndex);
+                            return row ? params.api.getValue(colId, row) : "";
+                        })
+                        .join("\t");
+                })
+                .join("\n"); // Each row on a new line
+    
+            // ✅ Copy text to clipboard
+            navigator.clipboard.writeText(copiedText).then(() => {
+                console.log("Copied to clipboard:", copiedText);
+            }).catch((err) => {
+                console.error("Clipboard copy failed:", err);
             });
+    
+            // ✅ Trigger AG Grid’s built-in copy effect (blinking dark blue selection)
+            params.api.copySelectedRangeToClipboard();
         }
-
-        return defaultItems;
     };
 
     const GroupRowRenderer = (props) => {
@@ -734,14 +851,18 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
         // Add your custom onClick functionality here
     };
 
-    const gridOptions2 = {
-        onColumnMoved: (params) => debouncedHandleColumnMove(params, 'grid3'),
+    const gridOptions2 = useMemo(() => ({
+        onColumnMoved: (params) => {
+            // if (toggleStatus) {
+                debouncedHandleColumnMove(params, 'grid3');
+            // }
+        },
         defaultColDef: {
             suppressMenu: true,
             headerClass: "custom-header" // Apply to all columns by default
-
-        }
-    };
+        },
+        ensureDomOrder: false
+    }), []);
 
     const itemRender = (_, type, originalElement) => {
         if (type === 'prev') {
@@ -765,9 +886,29 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
     }
     , [refreshpage]);
 
+    // useEffect(() => {
+    //     if(inputValue){
+    //         setPageSize(1);
+    //     }
+    //     functionCall3();
+    // }, [pageSize, inputValue]);
+
+    useEffect(() => {
+        if (prevInputRef.current === '' && inputValue !== '') {
+          prevPageRef.current = pageSize;
+          setPageSize(1);
+        }
+        else if (prevInputRef.current !== '' && inputValue === '') {
+          setPageSize(prevPageRef.current);
+        }
+        prevInputRef.current = inputValue;
+    }, [inputValue]);
+      
     useEffect(() => {
         functionCall3();
     }, [pageSize, inputValue]);
+      
+
     return(
                     <div>
                         <div style={contentStyle}>
@@ -811,6 +952,14 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ fontWeight: '600' }}>Timezone: {timezone.current}</Text>
                                         </Col>
+                                        {/* <Col>
+                                            <Tooltip 
+                                                title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
+                                                mouseEnterDelay={0} // Tooltip appears after 1 second
+                                            >
+                                                <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#C7F39A" }}/>
+                                            </Tooltip>
+                                        </Col> */}
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                             <Tooltip title="Export to CSV">
                                                 <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef2, "AllCampaigns")} />
@@ -833,7 +982,17 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                                                 onGridReady(params, 'grid3', gridRef2);
                                                 params.api.refreshCells(); // Refresh cells to apply the theme dynamically
                                             }}
-                                            gridOptions={gridOptions2}
+    
+                                            // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
+                                            onCellKeyDown={onCellKeyDown}
+                                            gridOptions={{
+                                                ...gridOptions2,
+                                                ensureDomOrder: false,
+                                                suppressRowClickSelection: true,
+                                                suppressClipboardPaste: true,
+                                                enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                enableCellTextSelection: true, // ✅ Allows text selection inside cells
+                                            }}
                                             suppressMenuHide={true}
                                             getMainMenuItems={getMainMenuItems}
                                             pinnedBottomRowData={campaignData.length > 0 ? fixedFooter : []}
@@ -846,6 +1005,13 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                                                     };
                                                 }
                                                 return null;
+                                            }}
+                                            getCellStyle={(params) => {
+                                                // Check if the current cell is selected
+                                                const isSelected = selectedCells.some(
+                                                    (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
+                                                );
+                                                return isSelected ? { backgroundColor: "#007bff", color: "#fff" } : {}; // ✅ Highlight only selected cells
                                             }}
                                             onFilterChanged={(params) => {
                                                 const api = params.api;
@@ -886,6 +1052,8 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                                                         roi: parseFloat(((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) - filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0)) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
                                                         cpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpc), 0) / filteredData.length).toFixed(2)),
                                                         fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
+                                                        cpclinkclicks: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks), 0) / filteredData.length).toFixed(2)),
+                                                        fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
                                                         impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
                                                         ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2))
                                                     },
