@@ -8,15 +8,21 @@ import { useRouter } from "next/navigation";
 import axios from 'axios';
 const { Header } = Layout;
 import { useTokenContext } from './parent';
+import Draggable from "react-draggable";
 import moment from 'moment-timezone';
 import ContactForm from './mail';
 import { BellFilled, EyeOutlined, GoogleOutlined, LockOutlined, PlusOutlined, UserOutlined, UploadOutlined  } from '@ant-design/icons';
-import { Bell, Edit3Icon, Moon, Sun } from 'lucide-react';
+import { Bell, Edit3Icon, Moon, Sun, StickyNote } from 'lucide-react';
 import { getSession } from 'next-auth/react';
 import debounce from 'lodash.debounce';
 import soundFile from "../../../public/notification_sounds.mp3";
 import jwt from 'jsonwebtoken';
 import { UAParser } from "ua-parser-js";
+import StickyNotes from './StickyNotes';
+import { LuStickyNote } from "react-icons/lu";
+import { ImBook } from "react-icons/im";
+import { SlNotebook } from "react-icons/sl";
+import { LuNotebook } from "react-icons/lu";
 
 import { message } from 'antd';
 
@@ -346,6 +352,7 @@ const Topbar = ({onComplete}) => {
   const [avatarUrl, setAvatarUrl] = useState('');
   const [previewImage, setPreviewImage] = useState(null);  // State for image preview
   const [imageFile, setImageFile] = useState(null);  // Temporary state for storing the file before upload
+  // const [open, setOpen] = useState(false);  
 
 
   // Fetch the user's avatar URL on page load or when userdetails change
@@ -534,6 +541,10 @@ const Topbar = ({onComplete}) => {
     },
   };
 
+  const onChangeStickyNotes = () => {
+    setOpen(true);
+  };
+
   return (
     <div
       style={{
@@ -589,7 +600,10 @@ const Topbar = ({onComplete}) => {
               </div>
             </div>
 
-
+            <button className={`theme-toggle-btn ${darkMode ? 'dark-mode' : 'light-mode'}`}>
+                <SlNotebook  size={20}  onClick={onChangeStickyNotes}/>
+                {/* <StickyNote size={20}  onClick={onChangeStickyNotes}/> */}
+            </button>
 
             <button
               onClick={toggleTheme}
@@ -781,6 +795,38 @@ const Topbar = ({onComplete}) => {
         </div>
       </div>
     </Modal>
+    {open && (
+        // <Draggable>
+          <div 
+            style={{
+              position: "absolute",
+              top: "20px", // or wherever you want it to start
+              right: "20px",
+              background: "white", // or transparent if you'd like
+              boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+              borderRadius: "8px",
+              zIndex: 9999
+            }}
+          >
+            {/* A close button to hide it again */}
+            {/* <button 
+              onClick={() => setOpen(false)}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                float: "right",
+                fontSize: "16px"
+              }}
+            >
+              ✖
+            </button> */}
+
+            {/* The actual sticky notes component */}
+            <StickyNotes userEmail={userdetails?.email} setOpen={setOpen} userdetails={userdetails} />
+          </div>
+        // </Draggable>
+      )}
 
     </div>
   );

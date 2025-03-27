@@ -299,7 +299,7 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                         // Call the backend API to delete the comment
                         const response = await apiClient.post('/Comments/delete', payload);
                 
-                        if (response.status === 200) {
+                        if (response.status === 200  || response.status === 201) {
                             // Remove the comment from the local state
                             // const updatedComments = campaignComments.filter(
                             //     (comment) => comment.campaignname !== firstColumnValue
@@ -401,7 +401,7 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                                 userPin: userdetails?.email,
                                 comment: comment || ''
                             });
-                            if(response.status ===200){
+                            if(response.status ===200 || response.status === 201){
                                 refreshComments(newaccount);
                             }
 
@@ -413,7 +413,7 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                                 campaignid: campaignid,
                                 adsetid: adsetid
                             });
-                            if(response.status ===200){
+                            if(response.status ===200 || response.status === 201){
                                 refreshComments(newaccount);
                             }
 

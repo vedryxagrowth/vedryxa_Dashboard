@@ -184,11 +184,15 @@ const RevenuePartnerDashboard = () => {
 
     const today = dayjs().subtract(0, 'days').format('YYYY-MM-DD');
 
-    const defaultDates = [dayjs(last7Days), dayjs(today)];
+    const thisYear = dayjs().format('YYYY');
 
-    const [startDate, setStartDate] = useState(last7Days);
+    const yesterday = dayjs().subtract(1, 'days').format('YYYY-MM-DD');
 
-    const [endDate, setEndDate] = useState(today);
+    const defaultDates = [dayjs(yesterday), dayjs(yesterday)];
+
+    const [startDate, setStartDate] = useState(yesterday);
+
+    const [endDate, setEndDate] = useState(yesterday);
 
     const [revenuePartnerData, setRevenuePartnerData] = useState([]);
 
@@ -353,17 +357,17 @@ const RevenuePartnerDashboard = () => {
                 rowGroup: true,
                 enableRowGroup: true,
                 minWidth: 150,
-                flex:5,
+                flex:6,
 
             },
             {
                 field: `${timeZoneForColumnDefs.current}Date`,
                 headerName: 'Date',
                 flex: 5,
-                minWidth: 200,
+                minWidth: 100,
                 valueFormatter: (params) => {
                   // Format the date with the short weekday
-                  if (params.value !== 'Totals') {
+                  if (params.value !== 'Total') {
                     const date = dayjs(params.value); // Assuming you are using dayjs
                     const weekday = date.format('ddd'); // Short weekday (e.g., Mon, Tue)
                     return `${params.value} (${weekday})`; // e.g., "2023-11-25 (Sat)"
@@ -371,7 +375,7 @@ const RevenuePartnerDashboard = () => {
                   return params.value; // For 'Totals' row
                 },
                 cellRenderer: (params) => {
-                  if (params.value !== 'Totals') {
+                  if (params.value !== 'Total') {
                     const date = dayjs(params.value); // Assuming you are using dayjs
                     const weekday = date.format('ddd'); // Short weekday (e.g., Mon, Tue)
                     
@@ -472,7 +476,7 @@ const RevenuePartnerDashboard = () => {
         ]);
         setFixedFooter([
             {
-                [`${timeZoneForColumnDefs.current}Date`]: 'Totals',
+                [`${timeZoneForColumnDefs.current}Date`]: 'Total',
                 spend: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0).toFixed(2)),
                 revenue: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0).toFixed(2)),
                 profit: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0).toFixed(2)),
@@ -505,14 +509,20 @@ const RevenuePartnerDashboard = () => {
                 hide: true, // Hide column as it's grouped
                 rowGroup: true,
                 enableRowGroup: true,
-                flex: 8
+                flex: 8,
+                suppressMenu: true,
+                menuTabs: [],
+                headerClass: 'hide-menu',
 
             },
             {
                 field: `${timeZoneForColumnDefs.current}Date`,
                 headerName: 'Date',
-                flex: 6,
-                minWidth: 200,
+                flex: 3,
+                minWidth: 120,
+                suppressMenu: true,
+                menuTabs: [],
+                headerClass: 'hide-menu',
             },
             {
                 field: "spend",
@@ -520,7 +530,10 @@ const RevenuePartnerDashboard = () => {
                 sortable: true,
                 minWidth: 150,
                 aggFunc:spender,
-                valueFormatter:currencyFormatter
+                valueFormatter:currencyFormatter,
+                suppressMenu: true,
+                menuTabs: [],
+                headerClass: 'hide-menu',
             },
             {
                 field: "revenue",
@@ -528,7 +541,10 @@ const RevenuePartnerDashboard = () => {
                 sortable: true,
                 minWidth: 150,
                 aggFunc:spender,
-                valueFormatter:currencyFormatter
+                valueFormatter:currencyFormatter,
+                suppressMenu: true,
+                menuTabs: [],
+                headerClass: 'hide-menu',
             },
             { 
                 field: 'profit', 
@@ -539,7 +555,10 @@ const RevenuePartnerDashboard = () => {
                     'font-red': p => p.value < 0
                 },
                 aggFunc:spender,
-                valueFormatter:currencyFormatter
+                valueFormatter:currencyFormatter,
+                suppressMenu: true,
+                menuTabs: [],
+                headerClass: 'hide-menu',
             },
             {
                 field: "margin",
@@ -549,7 +568,10 @@ const RevenuePartnerDashboard = () => {
                     'font-red': p => p.value < 0
                 },
                 minWidth: 150,
-                valueFormatter: marginFormatter
+                valueFormatter: marginFormatter,
+                suppressMenu: true,
+                menuTabs: [],
+                headerClass: 'hide-menu',
             },
             {
                 field: 'rpc',
@@ -557,7 +579,10 @@ const RevenuePartnerDashboard = () => {
                 aggFunc: avgRpcCpl,
                 valueFormatter: rpcCplFormatter,
                 minWidth: 100,
-                flex: 3
+                flex: 3,
+                suppressMenu: true,
+                menuTabs: [],
+                headerClass: 'hide-menu',
             },
             {
                 field: 'cpl',
@@ -565,13 +590,16 @@ const RevenuePartnerDashboard = () => {
                 aggFunc: avgRpcCpl,
                 valueFormatter: rpcCplFormatter,
                 minWidth: 100,
-                flex: 3
+                flex: 3,
+                suppressMenu: true,
+                menuTabs: [],
+                headerClass: 'hide-menu',
             }
         ]);
         setDomainFixedFooter([
             {
                 // domain:'Totals',
-                [`${timeZoneForColumnDefs.current}Date`]: 'Totals',
+                [`${timeZoneForColumnDefs.current}Date`]: 'Total',
                 spend: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0).toFixed(2)),
                 revenue: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0).toFixed(2)),
                 profit: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0).toFixed(2)),
@@ -618,7 +646,7 @@ const RevenuePartnerDashboard = () => {
             width: '100%',
         },
         options,
-        placeholder: 'Select Item...',
+        placeholder: 'Select Projects',
         maxTagCount: 'responsive',
     };
 
@@ -628,6 +656,26 @@ const RevenuePartnerDashboard = () => {
     const selectProps = {
         value: revenuePratner,
         onChange: setRevenuePartner,
+    };
+
+    const autoGroupColumnDefRevPartner = {
+        headerName: 'Projects', // Display name for the grouped column
+        minWidth: 250, // Set width for grouped rows
+        resizable: true, // Enable resizing
+        sortable: true, // Enable sorting
+        cellRendererParams: {
+            suppressCount: true, // Suppress row count in the grouped column
+        },
+    };
+
+    const autoGroupColumnDefRevenuePartnerDomainData = {
+        headerName: 'Domains', // Display name for the grouped column
+        minWidth: 300, // Set width for grouped rows
+        resizable: true, // Enable resizing
+        sortable: true, // Enable sorting
+        cellRendererParams: {
+            suppressCount: true, // Suppress row count in the grouped column
+        },
     };
 
     return (
@@ -694,7 +742,7 @@ const RevenuePartnerDashboard = () => {
             <Carousel dots={false}  ref={carouselRef} beforeChange={handleSlideChange}>
                 <div>
                     {loading ? (
-                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '75vh' }}>
                             <Spin indicator={<LoadingOutlined spin />} size="large" />
                         </div>
                     ) : (
@@ -715,6 +763,7 @@ const RevenuePartnerDashboard = () => {
                                     }}
                                     suppressAggFuncInHeader={true}
                                     pinnedBottomRowData={fixedFooter}
+                                    autoGroupColumnDef={autoGroupColumnDefRevPartner}
                                     getRowStyle={(params) => {
                                         if (params.node.rowPinned) {
                                             return {
@@ -736,7 +785,7 @@ const RevenuePartnerDashboard = () => {
 
                                         const updatedFooter = [
                                             {
-                                                [`${timeZoneForColumnDefs.current}Date`]: 'Totals',
+                                                [`${timeZoneForColumnDefs.current}Date`]: 'Total',
                                                 spend: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
                                                 revenue: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
                                                 profit: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
@@ -769,7 +818,7 @@ const RevenuePartnerDashboard = () => {
                             revenuePartnerDomainData.length > 0 ? (
                                 <div
                                     className={`ag-theme-alpine ${gridThemeClass}`}
-                                    style={{ width: '100%', height: '70vh' }}
+                                    style={{ width: '100%', height: '60vh' }}
                                 >
                                     <AgGridReact
                                         rowData={revenuePartnerDomainData}
@@ -782,6 +831,7 @@ const RevenuePartnerDashboard = () => {
                                             suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
                                             enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
                                         }}
+                                        autoGroupColumnDef={autoGroupColumnDefRevenuePartnerDomainData}
                                         pinnedBottomRowData={domainFixedFooter}
                                         getRowStyle={(params) => {
                                             if (params.node.rowPinned) {
@@ -804,7 +854,7 @@ const RevenuePartnerDashboard = () => {
 
                                             const updatedFooter = [
                                                 {
-                                                    [`${timeZoneForColumnDefs.current}Date`]: 'Totals',
+                                                    [`${timeZoneForColumnDefs.current}Date`]: 'Total',
                                                     spend: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
                                                     revenue: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
                                                     profit: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
@@ -828,6 +878,7 @@ const RevenuePartnerDashboard = () => {
                 
                     </div>}
             </Carousel>
+            
         </div>
     );
 };

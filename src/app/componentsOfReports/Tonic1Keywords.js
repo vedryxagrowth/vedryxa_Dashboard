@@ -277,7 +277,7 @@ const Tonic1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePrat
                         // Call the backend API to delete the comment
                         const response = await apiClient.post('/Comments/delete', payload);
                 
-                        if (response.status === 200) {
+                        if (response.status === 200 || response.status === 201) {
                             // Remove the comment from the local state
                             // const updatedComments = campaignComments.filter(
                             //     (comment) => comment.campaignname !== firstColumnValue
@@ -356,7 +356,7 @@ const Tonic1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePrat
                                 comment: comment || ''
                             });
                             // changeRRefrst();
-                            if(response.status ===200){
+                            if(response.status ===200 || response.status === 201){
                                 refreshComments(newaccount);
                             }
 
@@ -369,7 +369,7 @@ const Tonic1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePrat
                                 adsetid: adsetid
                             });
                             // changeRRefrst();
-                            if(response.status ===200){
+                            if(response.status ===200 || response.status === 201){
                                 refreshComments(newaccount);
                             }
 

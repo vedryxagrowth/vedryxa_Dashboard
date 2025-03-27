@@ -276,7 +276,7 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                         // Call the backend API to delete the comment
                         const response = await apiClient.post('/Comments/delete', payload);
                 
-                        if (response.status === 200) {
+                        if (response.status === 200 || response.status === 201) {
                             // Remove the comment from the local state
                             refreshComments(newaccount);
                 
@@ -338,7 +338,7 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                                 comment: comment || ''
                             });
                             // changeRRefrst();
-                            if(response.status === 200){
+                            if(response.status === 200 || response.status === 201){
                                 refreshComments(newaccount);
                             }
 
@@ -351,7 +351,7 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                                 adsetid: adsetid
                             });
                             // changeRRefrst();
-                            if(response.status === 200){
+                            if(response.status === 200 || response.status === 201){
                                 refreshComments(newaccount);
                             }
 
