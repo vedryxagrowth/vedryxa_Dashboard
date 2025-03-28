@@ -55,8 +55,7 @@
     "id": 97264,
     "files": [
       "static/chunks/2626716e-b496a3b36b79551a.js",
-      "static/chunks/5408-ee7cba18e9b26d9b.js",
-      "static/chunks/3134-24ad641dbc8a0358.js",
+      "static/chunks/7254-4c3248e4af6fef3d.js",
       "static/chunks/4851-73fa33467a3cc491.js",
       "static/chunks/207-156229673f5139e9.js",
       "static/chunks/1652-9aaffb8e4d0d4c14.js",
@@ -66,56 +65,50 @@
   "app\\NewUser\\page.js -> ../CronDashboard/crons": {
     "id": 16771,
     "files": [
-      "static/chunks/7271-1a0ffdfc2aaf8bcf.js",
       "static/chunks/4851-73fa33467a3cc491.js",
+      "static/chunks/7271-1a0ffdfc2aaf8bcf.js",
       "static/chunks/6771.336a0c6a1be83cc6.js"
     ]
   },
   "app\\NewUser\\page.js -> ./users-components/add-newaccount": {
     "id": 72834,
     "files": [
-      "static/chunks/5408-ee7cba18e9b26d9b.js",
-      "static/chunks/3134-24ad641dbc8a0358.js",
+      "static/chunks/7254-4c3248e4af6fef3d.js",
       "static/chunks/2834.13a8037eb6547971.js"
     ]
   },
   "app\\NewUser\\page.js -> ./users-components/create-newuser": {
     "id": 18718,
     "files": [
-      "static/chunks/5408-ee7cba18e9b26d9b.js",
-      "static/chunks/3134-24ad641dbc8a0358.js",
+      "static/chunks/7254-4c3248e4af6fef3d.js",
       "static/chunks/8718.80d3be07677c92be.js"
     ]
   },
   "app\\NewUser\\page.js -> ./users-components/edit-accountaccess": {
     "id": 88081,
     "files": [
-      "static/chunks/5408-ee7cba18e9b26d9b.js",
-      "static/chunks/3134-24ad641dbc8a0358.js",
+      "static/chunks/7254-4c3248e4af6fef3d.js",
       "static/chunks/8081.c0801dcc046bf950.js"
     ]
   },
   "app\\NewUser\\page.js -> ./users-components/edit-network": {
     "id": 1474,
     "files": [
-      "static/chunks/5408-ee7cba18e9b26d9b.js",
-      "static/chunks/3134-24ad641dbc8a0358.js",
+      "static/chunks/7254-4c3248e4af6fef3d.js",
       "static/chunks/1474.7aa199d07fbf75b4.js"
     ]
   },
   "app\\NewUser\\page.js -> ./users-components/edit-urlbulder": {
     "id": 83881,
     "files": [
-      "static/chunks/5408-ee7cba18e9b26d9b.js",
-      "static/chunks/3134-24ad641dbc8a0358.js",
+      "static/chunks/7254-4c3248e4af6fef3d.js",
       "static/chunks/3881.2e20f56e18b5045c.js"
     ]
   },
   "app\\NewUser\\page.js -> ./users-components/edit-usersaccess": {
     "id": 39976,
     "files": [
-      "static/chunks/5408-ee7cba18e9b26d9b.js",
-      "static/chunks/3134-24ad641dbc8a0358.js",
+      "static/chunks/7254-4c3248e4af6fef3d.js",
       "static/chunks/9976.d9fab20495f82862.js"
     ]
   },
@@ -134,7 +127,13 @@
       "static/chunks/160b575a-77b68f87c485dc45.js",
       "static/chunks/3458-3169bc118a4e9c0b.js",
       "static/chunks/8110-08764899858b8375.js",
+<<<<<<< HEAD
+      "static/chunks/1192-cdc459bd43416b2a.js",
+      "static/chunks/675.19cd9b9e999f20ef.js",
+      "static/chunks/6458.9b1b6cf781163cb1.js"
+=======
       "static/chunks/6300.815fd4862a53a818.js"
+>>>>>>> DevUi
     ]
   },
   "app\\Reports\\page.js -> ../componentsOfReports/DAKeywords": {
