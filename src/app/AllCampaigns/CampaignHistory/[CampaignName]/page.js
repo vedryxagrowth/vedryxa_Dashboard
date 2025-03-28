@@ -11,8 +11,8 @@ import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { useTokenContext } from '../../../components/parent'
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
-import { Spin, Row, Col, Select, Input, Button } from 'antd';
-import { ReloadOutlined } from '@ant-design/icons';
+import { Spin, Row, Col, Select, Input, Button, Modal, message } from 'antd';
+import { ReloadOutlined, EditOutlined } from '@ant-design/icons';
 Chart.register(...registerables);
 import debounce from 'lodash.debounce';
 
@@ -34,6 +34,12 @@ export default function CampaignAndAccount({ params }) {
     const [firstSelectedCell, setFirstSelectedCell] = useState(null);
 
     const [columns, setColumns] = useState([]);
+
+    const [isModalVisibles, setIsModalVisibles] = useState(false);
+    
+    const [campaignComments, setCampaignComments] = useState([]);
+    const [campaignid, setCampaignId] = useState("");
+    const [adsetid, setAdsetID] = useState("");
 
     const [columnDefs, setColumnStructure] = useState([]);
     const [comment, setComment] = useState("");
@@ -411,6 +417,7 @@ export default function CampaignAndAccount({ params }) {
         try{
             const commentFetch = await apiClient.get(`/Comments/${accountNumber}`);
             const campaignComments = commentFetch.data; // Set comments only if fetched successfully
+            setCampaignComments(campaignComments);
             if(campaignComments.length > 0){
                 const comment = campaignComments.find(comment => comment.campaignname === decodedString);
                 console.log(comment, "comment");
@@ -445,6 +452,10 @@ export default function CampaignAndAccount({ params }) {
 
         const mainData = fetchData.data;
         console.log(mainData);
+
+        setCampaignId(mainData[0].campaign_id);
+        setAdsetID(mainData[0].adset_id);
+
         const specifiedTimeZone = selectTimezone[timeZone];
         // const sortedArray = mainData?.sort((a, b) => new Date(a[specifiedTimeZone]) - new Date(b[specifiedTimeZone]));
         // console.log(sortedArray, "sort");
@@ -661,7 +672,7 @@ export default function CampaignAndAccount({ params }) {
         suppressMenu: true,
         menuTabs: [],
         headerClass: 'hide-menu',
-        tooltipValueGetter: getTooltipValue,
+        // tooltipValueGetter: getTooltipValue,
         cellRenderer: (params) => {
             if (params.value && params.value.includes("Copied!")) {
                 return (
@@ -1161,14 +1172,14 @@ export default function CampaignAndAccount({ params }) {
                 })
                 .join("\n"); // Each row on a new line
     
-            // ✅ Copy text to clipboard
+            //Copy text to clipboard
             navigator.clipboard.writeText(copiedText).then(() => {
                 console.log("Copied to clipboard:", copiedText);
             }).catch((err) => {
                 console.error("Clipboard copy failed:", err);
             });
     
-            // ✅ Trigger AG Grid’s built-in copy effect (blinking dark blue selection)
+            //Trigger AG Grid’s built-in copy effect (blinking dark blue selection)
             params.api.copySelectedRangeToClipboard();
         }
     };
@@ -1200,6 +1211,134 @@ export default function CampaignAndAccount({ params }) {
         }
         functionCall();
     };
+
+    const sendEditedCommentToAPI = async () => {
+        try {
+            console.log("comment:")
+            const response = await apiClient.post('/Comments/edit', {
+                campaignname: decodedString,
+                comment: comment,
+                Account: accountNumber,
+                adsetid: adsetid,
+                campaignid: campaignid,
+                status: true
+
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error sending edited comment to server:', error);
+            throw error;
+        }
+    };
+
+    const handleOks = async () => {
+        try {
+            const logData = {
+                Account: accountNumber,
+                usercommit: userdetails?.email,
+                campaignname: decodedString,
+                comment: comment,
+                campaignid: campaignid,
+                adsetid: adsetid
+            };
+
+            // if (relatedComment) {
+                await sendEditedCommentToAPI(logData);
+            //     refreshComments(account);
+            //     message.success("Comment updated successfully!");
+            // } else {
+            //     await sendNewCommentToAPI(logData);
+            //     refreshComments(account);
+            //     message.success("New comment added successfully!");
+            // }
+
+            // const updatedComments = relatedComment
+            //     ? campaignComments.map(cmt => (cmt.campaignname === firstColumnValue ? { ...cmt, comment } : cmt))
+            //     : [...campaignComments, logData];
+            // setCampaignComments(updatedComments);
+
+            // changeRRefrst();
+            
+            //Update local state immediately
+            const updatedComments = [...campaignComments];
+            const index = updatedComments.findIndex(c => c.campaignname === decodedString && c.Account === accountNumber);
+            if (index !== -1) {
+                updatedComments[index] = {
+                    ...updatedComments[index],
+                    comment: comment,
+                    editedTime: new Date().toISOString(), // optional: update time
+                };
+            } else {
+                updatedComments.push({
+                    campaignname: decodedString,
+                    Account: accountNumber,
+                    comment: comment,
+                    editedTime: new Date().toISOString(),
+                });
+            }
+            setCampaignComments(updatedComments);
+            setComment(comment); // refresh comment display
+            message.success("Comment saved!");
+            setIsModalVisibles(false);
+        } catch (error) {
+            console.error('Error while submitting comment:', error);
+            message.error("Error while submitting the comment.");
+        }
+    };
+
+    const handleDelete = async () => {
+        try {
+            // Prepare the payload for the API call
+            const payload = {
+                campaignname: decodedString,
+                Account: accountNumber,
+                adsetid: adsetid,
+                campaignid: campaignid,
+            };
+            // console.log(payload);
+    
+            // Call the backend API to delete the comment
+            const response = await apiClient.post('/Comments/delete', payload);
+    
+            if (response.status === 200) {
+                //Update local state immediately
+                const updatedComments = campaignComments.filter(
+                    (comment) => !(comment.campaignname === decodedString && comment.Account === accountNumber)
+                );
+                setCampaignComments(updatedComments);
+                setComment(""); // clear comment in UI
+                // Remove the comment from the local state
+                // const updatedComments = campaignComments.filter(
+                //     (comment) => comment.campaignname !== firstColumnValue
+                // );
+                // refreshComments(account);
+    
+                // // Update the state with the updated comments
+                // setCampaignComments(updatedComments);
+    
+                // // Refresh the table or any other UI component
+                // // changeRRefrst();
+    
+                message.success('Comment deleted successfully!');
+                setIsModalVisibles(false); // Close the popup
+            } else {
+                message.error('Failed to delete the comment. Please try again.-1');
+            }
+        } catch (error) {
+            console.error('Error deleting the comment:', error);
+            message.error('Failed to delete the comment. Please try again.');
+        }
+    };
+
+    const getEditedUserAndTime = (campaignName, newaccount) => {
+        const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
+        return relatedStatus ? relatedStatus : null;
+    };
+
+    const handleCancels = () => {
+        setIsModalVisibles(false);
+    };
+    const editUserANdTime = getEditedUserAndTime(decodedString, accountNumber);
 
 
     return (
@@ -1424,7 +1563,7 @@ export default function CampaignAndAccount({ params }) {
             
             {/* <h1>CampaignName: {decodedString}</h1> */}
             <Col style={{display:'flex', justifyContent:'space-between', marginTop: '10px'}}>
-                <Col>
+                <Col style={{display:'flex', justifyContent:"space-between", alignItems:'center'}}>
                     <Input
                         type="text"
                         placeholder="Search table..."
@@ -1438,6 +1577,13 @@ export default function CampaignAndAccount({ params }) {
                         style={{ height: "30px", marginLeft: "10px", backgroundColor: '#C7F39A', border: 'none' }} 
                         onClick={handleReload}  // Call refresh function when clicked
                     />
+                    <p style={{marginLeft:"10px"}}>{comment}</p>
+                    {comment && (
+                        <EditOutlined 
+                            onClick={() => setIsModalVisibles(true)} 
+                            style={{ marginLeft: '10px', color: 'blue', cursor: 'pointer' }} 
+                        />
+                    )}
                 </Col>
                 <Select
                     placeholder="Select a range"
@@ -1587,6 +1733,50 @@ export default function CampaignAndAccount({ params }) {
                 </div>
             ) }
             </Col>
+            <Modal
+                             title={
+                                    decodedString
+                            }
+                            visible={isModalVisibles}
+                            onOk={handleOks} // Default Ok button functionality
+                            onCancel={handleCancels} // Default Cancel button functionality
+                            footer={[
+                                <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+                                    <div style={{display:'flex', flexDirection:"column"}}>
+                                        <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                            Last Edited Time:
+                                        </span>
+                                        <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                            {editUserANdTime ? editUserANdTime?.editedTime : ""}
+                                        </span>
+
+                                    </div>
+                                    <div>
+                                    <Button
+                                        key="delete"
+                                        type="danger"
+                                        onClick={handleDelete}
+                                        style={{ marginRight: 'auto', border: "1px solid black" }} // Push Delete button to the far left
+                                    >
+                                        Delete
+                                    </Button>
+                                    <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
+                                        Cancel
+                                    </Button>
+                                    <Button key="ok" type="primary" onClick={handleOks} style={{marginLeft:"4px"}}>
+                                        Ok
+                                    </Button>
+                                    </div>
+                                </div>
+                            ]}
+                        >
+                            <Input.TextArea
+                                placeholder="Enter your comments here"
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                                style={{color: theme === "dark" ? "white" : "black"}}
+                            />
+                        </Modal>
         </Row>
     )
 }
