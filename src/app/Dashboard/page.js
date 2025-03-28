@@ -2301,8 +2301,10 @@ const Dashboard = () => {
     
     const autoGroupColumnDefCampaigns = {
         headerName: 'Campaign Name',
-        minWidth: 200,
+        minWidth: 250,
         sortable: true,
+        cellStyle: { whiteSpace: "normal", lineHeight: "1.5" }, // Enables text wrapping
+        autoHeight: true,
         cellRendererParams: {
             suppressCount: false,
             innerRenderer: (params) => {
@@ -3106,7 +3108,7 @@ const Dashboard = () => {
             {userdetails?.role !== "Revenue_Partner" &&  */}
             <div>
             {rendering === true ? <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><Spin size="large"/></div> : (
-                <div style={{ padding: '20px' }}>
+                <div style={{ padding: '20px', paddingBottom:'0px' }}>
                 <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ width: '40%' }}>
                         <h1 style={{  color: theme === 'dark' ? 'white' : 'black' , fontSize: '22px', textAlign: 'start' }}>
@@ -3249,7 +3251,7 @@ const Dashboard = () => {
                 {skeletonLoading ? (
                     <Skeleton active paragraph={{ rows: 15 }} />
                 ) : (
-                    <div style={{ height: '100%', paddingBottom: '40px' }}>
+                    <div style={{ height: '100%' }}>
                         <Row gutter={24} style={{ marginTop: '20px' }} justify="space-between">
                             <Col flex="1">
                                 <Card>
@@ -3708,23 +3710,28 @@ const Dashboard = () => {
                                                 },
                                             },
                                             tooltip: {
-                                                mode: 'index', // Ensure all datasets at this x-axis point are shown
-                                                intersect: true, // Show tooltip only when hovering directly over a bubble/point
+                                                mode: 'index',
+                                                intersect: true,
                                                 callbacks: {
-                                                label: function (tooltipItem) {
+                                                  title: function (tooltipItems) {
+                                                    const index = tooltipItems[0].dataIndex;
+                                                    const rawDate = chartDataByDate.datesByDate[index];
+                                                    const dateObj = new Date(rawDate);
+                                              
+                                                    const weekday = dateObj.toLocaleDateString('en-US', { weekday: 'long' });
+                                              
+                                                    return `${rawDate} (${weekday})`; // 👈 2025-03-27 (Thursday)
+                                                  },
+                                                  label: function (tooltipItem) {
                                                     const index = tooltipItem.dataIndex;
                                                     const dataset = tooltipItem.dataset;
                                                     const value = dataset.data[index];
                                                     const datasetLabel = dataset.label || '';
-
-                                                    // Return label with value and date
+                                              
                                                     return `${datasetLabel}: ${value} (Date: ${chartDataByDate.datesByDate[index]})`;
+                                                  },
                                                 },
-                                                },
-                                                displayColors: true, // Enable color box for each dataset
-                                                boxWidth: 15, // Adjust the width of the color box
-                                                boxHeight: 15, // Adjust the height of the color box
-                                            },
+                                              },
                                             },
                                         }}
                                         height={350}
@@ -4305,9 +4312,7 @@ const Dashboard = () => {
                                 </Row>
                             </div>
                         </Carousel>
-                        <Row></Row>
-    
-    
+                        {/* <Row></Row> */}
                     </div>
                 )}
             </div>
@@ -4315,9 +4320,6 @@ const Dashboard = () => {
             </div>
             {/* } */}
         </div>
-        
-
-
     );
 };
 
