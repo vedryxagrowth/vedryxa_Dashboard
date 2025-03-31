@@ -545,77 +545,59 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd"
 const { Text } = Typography
 const { useToken } = theme
 
-const timezoneAbbreviations = [
-  { abbr: 'UTC', city: 'Universal Time', country: 'Worldwide' },
-  { abbr: 'EEST', city: 'Eastern European Summer Time', country: 'Eastern Europe' },
-  { abbr: 'EDT', city: 'Eastern Daylight Time', country: 'USA/Canada' },
-  { abbr: 'CST', city: 'Central Standard Time', country: 'USA/Canada' },
-  { abbr: 'PDT', city: 'Pacific Daylight Time', country: 'USA/Canada' },
-  { abbr: 'IST', city: 'India Standard Time', country: 'India' },
-  { abbr: 'BST', city: 'British Summer Time', country: 'UK' },
-  { abbr: 'GMT', city: 'Greenwich Mean Time', country: 'UK' },
-  { abbr: 'MST', city: 'Mountain Standard Time', country: 'USA/Canada' },
-  { abbr: 'CDT', city: 'Central Daylight Time', country: 'USA/Canada' },
-  { abbr: 'AST', city: 'Atlantic Standard Time', country: 'Canada/Caribbean' },
-  { abbr: 'DST', city: 'Daylight Saving Time', country: 'Various' },
-  { abbr: 'ADT', city: 'Atlantic Daylight Time', country: 'Canada' },
-  { abbr: 'AKDT', city: 'Alaska Daylight Time', country: 'USA' },
-  { abbr: 'AKST', city: 'Alaska Standard Time', country: 'USA' },
-  { abbr: 'ART', city: 'Argentina Time', country: 'Argentina' },
-  { abbr: 'BDT', city: 'Bangladesh Time', country: 'Bangladesh' },
-  { abbr: 'CET', city: 'Central European Time', country: 'Europe' },
-  { abbr: 'CEST', city: 'Central European Summer Time', country: 'Europe' },
-  { abbr: 'CLT', city: 'Chile Standard Time', country: 'Chile' },
-  { abbr: 'CLST', city: 'Chile Summer Time', country: 'Chile' },
-  { abbr: 'EAT', city: 'East Africa Time', country: 'Africa' },
-  { abbr: 'EST', city: 'Eastern Standard Time', country: 'USA/Canada' },
-  { abbr: 'HKT', city: 'Hong Kong Time', country: 'Hong Kong' },
-  { abbr: 'HST', city: 'Hawaii Standard Time', country: 'USA' },
-  { abbr: 'ICT', city: 'Indochina Time', country: 'Thailand, Vietnam' },
-  { abbr: 'IRDT', city: 'Iran Daylight Time', country: 'Iran' },
-  { abbr: 'IRST', city: 'Iran Standard Time', country: 'Iran' },
-  { abbr: 'JST', city: 'Japan Standard Time', country: 'Japan' },
-  { abbr: 'KST', city: 'Korea Standard Time', country: 'South Korea' },
-  { abbr: 'MDT', city: 'Mountain Daylight Time', country: 'USA/Canada' },
-  { abbr: 'MSD', city: 'Moscow Daylight Time', country: 'Russia' },
-  { abbr: 'MSK', city: 'Moscow Standard Time', country: 'Russia' },
-  { abbr: 'NZDT', city: 'New Zealand Daylight Time', country: 'New Zealand' },
-  { abbr: 'NZST', city: 'New Zealand Standard Time', country: 'New Zealand' },
-  { abbr: 'PKT', city: 'Pakistan Standard Time', country: 'Pakistan' },
-  { abbr: 'PST', city: 'Pacific Standard Time', country: 'USA/Canada' },
-  { abbr: 'SAMT', city: 'Samara Time', country: 'Russia' },
-  { abbr: 'SAST', city: 'South Africa Standard Time', country: 'South Africa' },
-  { abbr: 'SGT', city: 'Singapore Time', country: 'Singapore' },
-  { abbr: 'THA', city: 'Thailand Time', country: 'Thailand' },
-  { abbr: 'WAT', city: 'West Africa Time', country: 'Africa' },
-  { abbr: 'WET', city: 'Western European Time', country: 'Europe' },
-  { abbr: 'WEST', city: 'Western European Summer Time', country: 'Europe' },
-  { abbr: 'WIB', city: 'Western Indonesia Time', country: 'Indonesia' },
-  { abbr: 'WIT', city: 'Eastern Indonesia Time', country: 'Indonesia' },
-  { abbr: 'YAKT', city: 'Yakutsk Time', country: 'Russia' },
-]
+
+
+// const timezones = [
+//   { zone: "Europe/London", city: "London", country: "United Kingdom", abbr: "BST" },
+//   { zone: "Africa/Cairo", city: "Cairo", country: "Egypt", abbr: "EET" },
+//   { zone: "Europe/Moscow", city: "Moscow", country: "Russia", abbr: "MSK" },
+//   { zone: "UTC", city: "UTC", country: "Coordinated Universal Time", abbr: "UTC" },
+//   { zone: "Asia/Kolkata", city: "Kolkata", country: "India", abbr: "IST" },
+//   { zone: "America/New_York", city: "New York", country: "USA", abbr: "EDT" },
+//   { zone: "America/Los_Angeles", city: "Los Angeles", country: "USA", abbr: "PDT" },
+//   { zone: "Asia/Tokyo", city: "Tokyo", country: "Japan", abbr: "JST" },
+//   { zone: "Australia/Sydney", city: "Sydney", country: "Australia", abbr: "AEST" },
+//   { zone: "Europe/Paris", city: "Paris", country: "France", abbr: "CEST" },
+//   { zone: "Asia/Dubai", city: "Dubai", country: "UAE", abbr: "GST" },
+//   { zone: "Asia/Singapore", city: "Singapore", country: "Singapore", abbr: "SGT" },
+//   { zone: "America/Chicago", city: "Chicago", country: "USA", abbr: "CDT" },
+//   { zone: "America/Denver", city: "Denver", country: "USA", abbr: "MDT" },
+//   { zone: "America/Toronto", city: "Toronto", country: "Canada", abbr: "EDT" },
+//   { zone: "America/Vancouver", city: "Vancouver", country: "Canada", abbr: "PDT" },
+//   { zone: "America/Sao_Paulo", city: "Sao Paulo", country: "Brazil", abbr: "BRT" },
+//   { zone: "Europe/Berlin", city: "Berlin", country: "Germany", abbr: "CEST" },
+//   { zone: "Europe/Madrid", city: "Madrid", country: "Spain", abbr: "CEST" },
+//   { zone: "Europe/Rome", city: "Rome", country: "Italy", abbr: "CEST" },
+//   { zone: "Asia/Bangkok", city: "Bangkok", country: "Thailand", abbr: "ICT" },
+//   { zone: "Asia/Seoul", city: "Seoul", country: "South Korea", abbr: "KST" },
+//   { zone: "Asia/Ho_Chi_Minh", city: "Ho Chi Minh", country: "Vietnam", abbr: "ICT" },
+//   { zone: "Asia/Jakarta", city: "Jakarta", country: "Indonesia", abbr: "WIB" },
+//   { zone: "Africa/Lagos", city: "Lagos", country: "Nigeria", abbr: "WAT" },
+//   { zone: "Africa/Johannesburg", city: "Johannesburg", country: "South Africa", abbr: "SAST" },
+//   { zone: "Pacific/Auckland", city: "Auckland", country: "New Zealand", abbr: "NZDT" },
+//   { zone: "Pacific/Honolulu", city: "Honolulu", country: "USA", abbr: "HST" },
+//   { zone: "Asia/Kathmandu", city: "Kathmandu", country: "Nepal", abbr: "NPT" },
+//   { zone: "Asia/Tehran", city: "Tehran", country: "Iran", abbr: "IRST" },
+//   { zone: "Asia/Tashkent", city: "Tashkent", country: "Uzbekistan", abbr: "UZT" },
+//   { zone: "Asia/Yangon", city: "Yangon", country: "Myanmar", abbr: "MMT" }
+// ]
 
 const timezones = [
+  { zone: "Asia/Kolkata", city: "Kolkata", country: "India", abbr: "IST" },
   { zone: "Europe/London", city: "London", country: "United Kingdom", abbr: "BST" },
   { zone: "Africa/Cairo", city: "Cairo", country: "Egypt", abbr: "EET" },
-  { zone: "Europe/Moscow", city: "Moscow", country: "Russia", abbr: "MSK" },
-  { zone: "UTC", city: "UTC", country: "Coordinated Universal Time", abbr: "UTC" },
-  { zone: "Asia/Kolkata", city: "Kolkata", country: "India", abbr: "IST" },
-  { zone: "America/New_York", city: "New York", country: "USA", abbr: "EDT" },
   { zone: "America/Los_Angeles", city: "Los Angeles", country: "USA", abbr: "PDT" },
+  { zone: "UTC", city: "UTC", country: "Coordinated Universal Time", abbr: "UTC" },
+  { zone: "Europe/Moscow", city: "Moscow", country: "Russia", abbr: "MSK" },
+  { zone: "America/New_York", city: "New York", country: "USA", abbr: "EDT" },
   { zone: "Asia/Tokyo", city: "Tokyo", country: "Japan", abbr: "JST" },
   { zone: "Australia/Sydney", city: "Sydney", country: "Australia", abbr: "AEST" },
   { zone: "Europe/Paris", city: "Paris", country: "France", abbr: "CEST" },
-  { zone: "Asia/Dubai", city: "Dubai", country: "UAE", abbr: "GST" },
+  { zone: "Asia/Dubai", city: "Dubai", country: "United Arab Emirates", abbr: "GST" },
   { zone: "Asia/Singapore", city: "Singapore", country: "Singapore", abbr: "SGT" },
   { zone: "America/Chicago", city: "Chicago", country: "USA", abbr: "CDT" },
   { zone: "America/Denver", city: "Denver", country: "USA", abbr: "MDT" },
-  { zone: "America/Toronto", city: "Toronto", country: "Canada", abbr: "EDT" },
-  { zone: "America/Vancouver", city: "Vancouver", country: "Canada", abbr: "PDT" },
   { zone: "America/Sao_Paulo", city: "Sao Paulo", country: "Brazil", abbr: "BRT" },
-  { zone: "Europe/Berlin", city: "Berlin", country: "Germany", abbr: "CEST" },
-  { zone: "Europe/Madrid", city: "Madrid", country: "Spain", abbr: "CEST" },
-  { zone: "Europe/Rome", city: "Rome", country: "Italy", abbr: "CEST" },
   { zone: "Asia/Bangkok", city: "Bangkok", country: "Thailand", abbr: "ICT" },
   { zone: "Asia/Seoul", city: "Seoul", country: "South Korea", abbr: "KST" },
   { zone: "Asia/Ho_Chi_Minh", city: "Ho Chi Minh", country: "Vietnam", abbr: "ICT" },
@@ -627,8 +609,14 @@ const timezones = [
   { zone: "Asia/Kathmandu", city: "Kathmandu", country: "Nepal", abbr: "NPT" },
   { zone: "Asia/Tehran", city: "Tehran", country: "Iran", abbr: "IRST" },
   { zone: "Asia/Tashkent", city: "Tashkent", country: "Uzbekistan", abbr: "UZT" },
-  { zone: "Asia/Yangon", city: "Yangon", country: "Myanmar", abbr: "MMT" }
+  { zone: "Asia/Yangon", city: "Yangon", country: "Myanmar", abbr: "MMT" },
+  { zone: "Europe/Berlin", city: "Berlin", country: "Germany", abbr: "CEST" },
+  { zone: "Europe/Madrid", city: "Madrid", country: "Spain", abbr: "CEST" },
+  { zone: "Europe/Rome", city: "Rome", country: "Italy", abbr: "CEST" },
+  { zone: "America/Toronto", city: "Toronto", country: "Canada", abbr: "EDT" },
+  { zone: "America/Vancouver", city: "Vancouver", country: "Canada", abbr: "PDT" }
 ]
+
 
 export default function WorldTimeBuddy() {
   const { token } = useToken()
@@ -683,18 +671,28 @@ export default function WorldTimeBuddy() {
       <h1 style={{ textAlign: "center", fontSize: 28, fontWeight: 600, marginBottom: 24 }}>🌐 Global Clockwise</h1>
       <Row gutter={[12, 12]} align="middle" style={{ marginBottom: 16 }}>
         <Col flex="auto">
+        
           <Select
-            showSearch
-            placeholder="Select timezone"
-            style={{ width: "100%" }}
-            onChange={addTimezone}
-            options={timezones
-              .filter((tz) => !selectedTimezones.includes(tz.zone))
-              .map((tz) => ({
-                value: tz.zone,
-                label: `${tz.city}, ${tz.country} (${tz.abbr})`,
-              }))}
-          />
+  showSearch
+  filterOption={(input, option) => {
+    const label = option?.label?.toLowerCase?.() || ""
+    const value = option?.value?.toLowerCase?.() || ""
+    return (
+      label.includes(input.toLowerCase()) ||
+      value.includes(input.toLowerCase())
+    )
+  }}
+  placeholder="Select timezone"
+  style={{ width: "100%" }}
+  onChange={addTimezone}
+  options={timezones
+    .filter((tz) => !selectedTimezones.includes(tz.zone))
+    .map((tz) => ({
+      value: tz.zone,
+      label: `${tz.city}, ${tz.country} (${tz.abbr})`,
+    }))}
+  />
+
         </Col>
         <Col>
           <Space>
@@ -815,7 +813,7 @@ export default function WorldTimeBuddy() {
                           position: "relative",
                         }}
                       >
-                        <div>{h.isNewDay && <div style={{ fontSize: 10, fontWeight: 'bold', color: '#666' }}>{h.dt.toFormat('ccc').toUpperCase()}<br />{h.dt.toFormat('LLL d')}</div>}{h.label}</div>
+                        <div>{h.isNewDay && <div style={{ fontSize: 7, fontWeight: 'bold', color: '#666' }}>{h.dt.toFormat('ccc').toUpperCase()}<br />{h.dt.toFormat('LLL d')}</div>}{h.label}</div>
                         <div style={{ fontSize: 10 }}>{h.ampm}</div>
                         {hoveredHourIndex === i && (
                           <div
@@ -825,7 +823,7 @@ export default function WorldTimeBuddy() {
                               bottom: 0,
                               left: 0,
                               right: 0,
-                              border: "2px solid black",
+                              border: "1px solid black",
                               pointerEvents: "none",
                             }}
                           ></div>
