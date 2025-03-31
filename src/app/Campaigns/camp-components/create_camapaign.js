@@ -813,7 +813,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                     formData.append('file', file);
                     formData.append('access_token', token);
 
-                    fbResponse = await axios.post(`https://graph.facebook.com/v20.0/act_${account}/adimages`, formData, {
+                    fbResponse = await axios.post(`https://graph.facebook.com/v21.0/act_${account}/adimages`, formData, {
                         headers: { 'Content-Type': 'multipart/form-data' }
                     });
 
@@ -839,7 +839,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
 
                     formData.append('access_token', token);
 
-                    fbResponse = await axios.post(`https://graph.facebook.com/v20.0/act_${account}/advideos`, formData, {
+                    fbResponse = await axios.post(`https://graph.facebook.com/v21.0/act_${account}/advideos`, formData, {
                         headers: { 'Content-Type': 'multipart/form-data' }
                     });
 
@@ -847,7 +847,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                         const videoid = fbResponse?.data?.id;
                         await new Promise(resolve => setTimeout(resolve, 10000));
 
-                        const thumbnailResponse = await axios.get(`https://graph.facebook.com/v20.0/${videoid}`, {
+                        const thumbnailResponse = await axios.get(`https://graph.facebook.com/v21.0/${videoid}`, {
                             params: {
                                 access_token: token,
                                 fields: 'thumbnails',
@@ -913,7 +913,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     //                 formData.append('filename', file.name);
     //                 formData.append('access_token', token);
 
-    //                 fbResponse = await axios.post(`https://graph.facebook.com/v19.0/act_${account}/adimages`, formData, {
+    //                 fbResponse = await axios.post(`https://graph.facebook.com/v11.0/act_${account}/adimages`, formData, {
     //                     headers: { 'Content-Type': 'multipart/form-data' }
     //                 });
 
@@ -942,7 +942,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     //                 formData.append('access_token', token);
 
     //                 // Upload video to Facebook
-    //                 fbResponse = await axios.post(`https://graph.facebook.com/v19.0/act_${account}/advideos`, formData, {
+    //                 fbResponse = await axios.post(`https://graph.facebook.com/v11.0/act_${account}/advideos`, formData, {
     //                     headers: { 'Content-Type': 'multipart/form-data' }
     //                 });
 
@@ -952,7 +952,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     //                     await new Promise(resolve => setTimeout(resolve, 10000));
 
     //                     // Get thumbnail URL
-    //                     const thumbnailResponse = await axios.get(`https://graph.facebook.com/v19.0/${videoid}`, {
+    //                     const thumbnailResponse = await axios.get(`https://graph.facebook.com/v11.0/${videoid}`, {
     //                         params: {
     //                             access_token: token,
     //                             fields: 'thumbnails',
@@ -1039,7 +1039,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                 const imageHashArray = await customRequest(onSuccess, onError);
 
                 if (imageHashArray.length > 0) {  // Only proceed if all images are uploaded successfully
-                    console.log("Image Hashes just before postData:", imageHashArray);
+                    console.log("Image Hashes just before postData:", { ...formValues, imageHashes: imageHashArray });
                     await postData({ ...formValues, imageHashes: imageHashArray });
                     changeRRefrst();
                     message.success("Campaign created successfully");
@@ -1096,7 +1096,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                 }
             });
 
-            console.log("Add Level Data:", addLevelData);
+            // console.log("Add Level Data:", moment(values.DatePicker.$d).utc().format("YYYY-MM-DDTHH:mm:ssZ"),);
 
             const data1 = {
                 campaign_name: values.Name,
@@ -1451,7 +1451,12 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     style={{ flex: '1 1 150px' }}
                                     initialValue={currentDate}
                                 >
-                                    <DatePicker style={{ width: '100%' }} />
+                                    <DatePicker showTime 
+    //                                 onChange={(value, dateString) => {
+    //     console.log("Local Time:", dateString)
+    //     console.log("UTC ISO:", moment(value).utc().format("YYYY-MM-DDTHH:mm:ssZ"))
+    //   }}
+                                    style={{ width: '100%' }} />
                                 </Form.Item>
                                 <Form.Item
                                     name="action_source"

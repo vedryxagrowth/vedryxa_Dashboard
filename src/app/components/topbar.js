@@ -858,7 +858,7 @@ const Topbar = ({onComplete}) => {
         <WorldTime setOpenWorldTime={setOpenWorldTime} />
       </div>
     </Modal> */}
-    <Drawer open={openWorldTime} width="100%" onClose={()=> setOpenWorldTime(false)}>
+    <Drawer open={openWorldTime} width="95%" onClose={()=> setOpenWorldTime(false)}>
       <div>
         <WorldTime setOpenWorldTime={setOpenWorldTime} />
       </div>
@@ -868,7 +868,7 @@ const Topbar = ({onComplete}) => {
         <Calculator setOpenCalculator={setOpenCalculator} />
       </div>
     </Modal> */}
-    <Drawer open={openCalculator} width="30%" onClose={()=> setOpenCalculator(false)}>
+    <Drawer open={openCalculator} width="32%" onClose={()=> setOpenCalculator(false)}>
       <div>
         <Calculator setOpenCalculator={setOpenCalculator} />
       </div>
