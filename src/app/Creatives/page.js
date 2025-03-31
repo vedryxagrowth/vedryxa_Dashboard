@@ -1023,15 +1023,16 @@ const ImageUploadPage = () => {
                 </Col>
                 <Col span={5}>
                     <ConfigProvider>
-                        <RangePicker
-                            presets={rangePresets}
-                            onChange={handleChange}
-                            disabledDate={disabledDate}
-                            defaultValue={[dayjs().subtract(1, 'day'), dayjs().subtract(1, 'day')]}
-                            format="YYYY-MM-DD"
-                            allowClear={true}  // 🔹 Enables clearing the selection
-                            style={{ width: '100%' }}                            
-                        />                        
+                    <RangePicker
+  presets={rangePresets}
+  onChange={handleChange}
+  disabledDate={disabledDate}
+  defaultValue={[dayjs().subtract(7, 'day'), dayjs().subtract(1, 'day')]}
+  format="YYYY-MM-DD"
+  allowClear={true}
+  style={{ width: '100%' }}
+/>
+                        
                     </ConfigProvider>                       
                 </Col>
                 <Col span={3}>
