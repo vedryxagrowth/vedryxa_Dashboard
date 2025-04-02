@@ -668,7 +668,7 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
             setCampaignData([]);
     
             const fetchData = await apiClient.get(
-                `https://prodapis.adsgoat.in/AllCampaigns?accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}&campaignName=${inputValue}`
+                `/AllCampaigns?accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}&campaignName=${inputValue}`
             );
     
             const mainData = fetchData.data.items || [];
@@ -1115,7 +1115,7 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                                         </Col>
                                     </Row>
 
-                                    <div style={{ height: '90%' }}>
+                                    <div style={{ height: '100%' }}>
                                         <AgGridReact
                                             ref={gridRef2}
                                             rowData={memorizedCampaignsData}
@@ -1123,7 +1123,8 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                                             onCellClicked={onCellClickedAllCampaigns}
                                             autoGroupColumnDef={autoGroupColumnDef2}
                                             defaultColDef={defaultColDef}
-                                            groupDisplayType='multipleColumns'
+                                            // groupDisplayType='multipleColumns'
+                                            groupDisplayType={null}
                                             suppressAggFuncInHeader={true}
                                             groupRowRenderer={GroupRowRenderer}
                                             onGridReady={(params) => {

@@ -81,8 +81,14 @@ const ImageUploadPage = () => {
                 label: key
             }));
             setOptions(adAccountOptions);
+            // Auto-select the first project key
+            if (!selectedKey) {
+                const firstKey = adAccountOptions[0].value;
+                setSelectedKey(firstKey);
+            }
         } else {
             setOptions([]);  // Clear options if no accounts exist
+            setSelectedKey(null);
         }
     }, [userdetails]);  // Add userdetails as dependency
     
@@ -95,8 +101,13 @@ const ImageUploadPage = () => {
                 status: account.status // Store status for conditional rendering
             }));
             setValueOptions(accounts);
+            // Auto-select the first account
+            if (accounts.length > 0 && !selectedValue) {
+                setSelectedValue(accounts[0].value);
+            }
         } else {
             setValueOptions([]);
+            setSelectedValue(null);
         }
     }, [selectedKey, userdetails]);
 
@@ -215,85 +226,176 @@ const ImageUploadPage = () => {
 
     // Update your handleCancel function to clear file-related states and update uploadKey
     
+    // const handleUploadURL = async () => {
+    //     if (!urlInput.trim()) {
+    //         message.error("Please enter a valid image or video URL.");
+    //         return;
+    //     }
+    
+    //     try {
+    //         console.log("⬇️ Fetching file from URL:", urlInput);
+    
+    //         setLoading(true); // Show loading state
+    
+    //         const proxyUrl = `https://prodapis.adsgoat.in/proxy?url=${encodeURIComponent(urlInput)}`;
+    //         const response = await fetch(proxyUrl);
+    
+    //         if (!response.ok) {
+    //             throw new Error(`Failed to fetch file. HTTP Status: ${response.status}`);
+    //         }
+    
+    //         const contentType = response.headers.get("content-type") || "";
+    //         console.log("✅ Detected Content-Type:", contentType);
+    
+    //         if (!contentType.startsWith("image") && !contentType.startsWith("video")) {
+    //             throw new Error("Unsupported file type. Ensure it's a direct link to an image or video.");
+    //         }
+    
+    //         // Get file extension based on Content-Type
+    //         let fileExtension = contentType.split("/")[1] || (contentType.includes("image") ? "jpg" : "mp4");
+    
+    //         if (!fileExtension || fileExtension.length > 4) {
+    //             console.warn("⚠️ Invalid file extension detected, defaulting...");
+    //             fileExtension = contentType.includes("image") ? "jpg" : "mp4";
+    //         }
+    
+    //         // Generate a unique filename
+    //         const fileName = `url_file_${Date.now()}.${fileExtension}`;
+    
+    //         // 🔹 Use Streams for large files
+    //         const reader = response.body.getReader();
+    //         const chunks = [];
+    //         let receivedLength = 0;
+    //         const contentLength = response.headers.get("content-length");
+    
+    //         while (true) {
+    //             const { done, value } = await reader.read();
+    //             if (done) break;
+    //             chunks.push(value);
+    //             receivedLength += value.length;
+    
+    //             // Optional: Show progress (if content length is available)
+    //             if (contentLength) {
+    //                 console.log(`Downloading: ${Math.round((receivedLength / contentLength) * 100)}%`);
+    //             }
+    //         }
+    
+    //         const blob = new Blob(chunks, { type: contentType });
+    //         const file = new File([blob], fileName, { type: contentType });
+    
+    //         console.log("✅ Created File:", file);
+    
+    //         // ✅ Reset and update state
+    //         setPreviewFile({
+    //             url: URL.createObjectURL(blob),
+    //             name: fileName,
+    //             file: file,
+    //             type: contentType.startsWith("video") ? "video" : "image",
+    //         });
+    
+    //         setPendingFiles(prev => (prev ? [...prev, file] : [file]));
+    //         setTotalFiles(prev => prev + 1);
+    //         setFileInputName(fileName.replace(/\.[^/.]+$/, ""));
+    //         setUrlInput(""); // Clear input field
+    //         setIsModalVisible(true);
+    //     } catch (error) {
+    //         console.error("❌ Upload Error:", error);
+    //         message.error(error.message || "Failed to fetch file. Ensure it's a direct link to an image or video.");
+    //     } finally {
+    //         setLoading(false); // Hide loading state
+    //     }
+    // };
+
     const handleUploadURL = async () => {
         if (!urlInput.trim()) {
-            message.error("Please enter a valid image or video URL.");
+            message.error("Please enter a valid URL.");
             return;
         }
     
         try {
-            console.log("⬇️ Fetching file from URL:", urlInput);
+            setLoading(true);
+            let finalUrl = urlInput.trim();
     
-            setLoading(true); // Show loading state
+            // ✅ Handle base64 Data URLs
+            if (finalUrl.startsWith("data:")) {
+                const matches = finalUrl.match(/^data:(.+);base64,(.+)$/);
+                if (!matches) throw new Error("Invalid data URL format.");
     
-            const proxyUrl = `https://prodapis.adsgoat.in/proxy?url=${encodeURIComponent(urlInput)}`;
+                const contentType = matches[1];
+                const base64Data = matches[2];
+                const byteString = atob(base64Data);
+                const uint8Array = new Uint8Array(byteString.length);
+                for (let i = 0; i < byteString.length; i++) {
+                    uint8Array[i] = byteString.charCodeAt(i);
+                }
+    
+                const blob = new Blob([uint8Array], { type: contentType });
+                const ext = contentType.split("/")[1] || "jpg";
+                const fileName = `data_url_${Date.now()}.${ext}`;
+                const file = new File([blob], fileName, { type: contentType });
+    
+                setPreviewFile({
+                    url: URL.createObjectURL(blob),
+                    name: fileName,
+                    file,
+                    type: contentType.startsWith("video") ? "video" : "image",
+                });
+    
+                setPendingFiles(prev => (prev ? [...prev, file] : [file]));
+                setTotalFiles(prev => prev + 1);
+                setFileInputName(fileName.replace(/\.[^/.]+$/, ""));
+                setUrlInput("");
+                setIsModalVisible(true);
+                return;
+            }
+    
+            // Try to extract real image from Google redirect-style URL
+            const urlObj = new URL(finalUrl);
+            const imgurlParam = urlObj.searchParams.get("imgurl");
+            if (imgurlParam && imgurlParam.startsWith("http")) {
+                finalUrl = decodeURIComponent(imgurlParam);
+            }
+    
+            // Use backend proxy
+            const proxyUrl = `https://prodapis.adsgoat.in/proxy?url=${encodeURIComponent(finalUrl)}`;
             const response = await fetch(proxyUrl);
     
             if (!response.ok) {
-                throw new Error(`Failed to fetch file. HTTP Status: ${response.status}`);
+                throw new Error(`Failed to fetch file. Status: ${response.status}`);
             }
     
             const contentType = response.headers.get("content-type") || "";
-            console.log("✅ Detected Content-Type:", contentType);
     
             if (!contentType.startsWith("image") && !contentType.startsWith("video")) {
-                throw new Error("Unsupported file type. Ensure it's a direct link to an image or video.");
+                throw new Error("The URL does not point to a valid image or video file.");
             }
     
-            // Get file extension based on Content-Type
-            let fileExtension = contentType.split("/")[1] || (contentType.includes("image") ? "jpg" : "mp4");
-    
-            if (!fileExtension || fileExtension.length > 4) {
-                console.warn("⚠️ Invalid file extension detected, defaulting...");
-                fileExtension = contentType.includes("image") ? "jpg" : "mp4";
-            }
-    
-            // Generate a unique filename
-            const fileName = `url_file_${Date.now()}.${fileExtension}`;
-    
-            // 🔹 Use Streams for large files
-            const reader = response.body.getReader();
-            const chunks = [];
-            let receivedLength = 0;
-            const contentLength = response.headers.get("content-length");
-    
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                chunks.push(value);
-                receivedLength += value.length;
-    
-                // Optional: Show progress (if content length is available)
-                if (contentLength) {
-                    console.log(`Downloading: ${Math.round((receivedLength / contentLength) * 100)}%`);
-                }
-            }
-    
-            const blob = new Blob(chunks, { type: contentType });
+            const extension = contentType.split("/")[1] || "jpg";
+            const blob = await response.blob();
+            const fileName = `url_file_${Date.now()}.${extension}`;
             const file = new File([blob], fileName, { type: contentType });
     
-            console.log("✅ Created File:", file);
-    
-            // ✅ Reset and update state
             setPreviewFile({
                 url: URL.createObjectURL(blob),
                 name: fileName,
-                file: file,
+                file,
                 type: contentType.startsWith("video") ? "video" : "image",
             });
     
             setPendingFiles(prev => (prev ? [...prev, file] : [file]));
             setTotalFiles(prev => prev + 1);
             setFileInputName(fileName.replace(/\.[^/.]+$/, ""));
-            setUrlInput(""); // Clear input field
+            setUrlInput("");
             setIsModalVisible(true);
         } catch (error) {
             console.error("❌ Upload Error:", error);
-            message.error(error.message || "Failed to fetch file. Ensure it's a direct link to an image or video.");
+            message.error(error.message || "Failed to fetch or decode the file.");
         } finally {
-            setLoading(false); // Hide loading state
+            setLoading(false);
         }
     };
+    
+    
     
     
     const handleCancel = () => {
@@ -1023,15 +1125,15 @@ const ImageUploadPage = () => {
                 </Col>
                 <Col span={5}>
                     <ConfigProvider>
-                    <RangePicker
-  presets={rangePresets}
-  onChange={handleChange}
-  disabledDate={disabledDate}
-  defaultValue={[dayjs().subtract(7, 'day'), dayjs().subtract(1, 'day')]}
-  format="YYYY-MM-DD"
-  allowClear={true}
-  style={{ width: '100%' }}
-/>
+                        <RangePicker
+                            presets={rangePresets}
+                            onChange={handleChange}
+                            disabledDate={disabledDate}
+                            defaultValue={[dayjs().subtract(7, 'day'), dayjs().subtract(1, 'day')]}
+                            format="YYYY-MM-DD"
+                            allowClear={true}
+                            style={{ width: '100%' }}
+                        />
                         
                     </ConfigProvider>                       
                 </Col>
