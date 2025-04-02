@@ -12,8 +12,8 @@ import { useTokenContext } from '../../../components/parent'
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
 import { color } from 'chart.js/helpers';
-import { Spin, Row, Col, Select, Input, Button, Modal, message } from 'antd';
-import { ReloadOutlined, EditOutlined } from '@ant-design/icons';
+import { Spin, Row, Col, Select, Input, Button, Modal, message, Switch } from 'antd';
+import { ReloadOutlined, EditOutlined, BarChartOutlined } from '@ant-design/icons';
 import debounce from 'lodash.debounce';
 
 Chart.register(...registerables);
@@ -68,6 +68,11 @@ const MnetLiveCampaignHistory = ({ params }) => {
     const [dateStart1, setDateStart1] = useState();
 
     const [endDate1, setEndDate1] = useState();
+
+    const [isGraphVisible, setIsGraphVisible] = useState(() => {
+        const stored = localStorage.getItem('isGraphVisible');
+        return stored ? JSON.parse(stored) : false; 
+    });
 
     const [columns, setColumns] = useState([]);
     const [comment, setComment] = useState("");
@@ -685,7 +690,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
             // resizeble: true,
             // // sortable: true,
             minWidth: 250,
-            // hide: true,
+            hide: true,
             // // // resizable:false,
             // // rowGroup: true,
             // filter: true,
@@ -1702,6 +1707,14 @@ const MnetLiveCampaignHistory = ({ params }) => {
     };
     const editUserANdTime = getEditedUserAndTime(decodedString, accountNumber);
 
+    const onClickBarChart = () => {
+        setIsGraphVisible(prev => {
+            const newValue = !prev;
+            localStorage.setItem('isGraphVisible', JSON.stringify(newValue));
+            return newValue;
+        });
+    }
+
     return (
         <Row style={{ display: 'flex', flexDirection: 'column' }}>
             {/* Chart.js integration */}
@@ -1715,7 +1728,11 @@ const MnetLiveCampaignHistory = ({ params }) => {
                     </div>
 
                 </Col>}
-            <Col style={{ height: '400px', marginBottom: '10px' }}> {/* Container with fixed height */}
+            <Col style={{display: 'flex', justifyContent: 'flex-end'}}>
+                <Switch checked={isGraphVisible} style={{fontSize:"20px", paddingTop:'5px', marginRight:'10px', backgroundColor: isGraphVisible ? '#C7F39A' : undefined}} onClick={onClickBarChart}/>            
+            </Col>
+            {isGraphVisible && (
+                <Col style={{ height: '400px', marginBottom: '10px' }}> {/* Container with fixed height */}
                 {chartData.dates.length === 0 ? (<div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><Spin size="large" /></div>) : (
                     <Line
                     data={{
@@ -1860,6 +1877,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                   />
                 )}
             </Col>
+            )}
             <Col style={{ display: 'flex', width: '100%', marginLeft: '2%' }}>
                 {/* Left Table: Top 5 RPC Today */}
                 <div style={{ marginLeft: "1%", width: '20%' }}>
@@ -1990,13 +2008,16 @@ const MnetLiveCampaignHistory = ({ params }) => {
                         style={{ height: "30px", marginLeft: "10px", backgroundColor: '#C7F39A', border: 'none' }} 
                         onClick={handleReload}  // Call refresh function when clicked
                     />
-                    <p style={{marginLeft:"10px"}}>{comment}</p>
+                    {/* <p style={{marginLeft:"10px"}}>{comment}</p> */}
                     {comment && (
                         <EditOutlined 
                             onClick={() => setIsModalVisibles(true)} 
-                            style={{ marginLeft: '10px', color: 'blue', cursor: 'pointer' }} 
+                            style={{ marginLeft: '15px', color: 'black', cursor: 'pointer' }} 
                         />
                     )}
+                    <div style={{ width: '100%' }}>
+                        <h3 style={{ textAlign: 'center', marginLeft:'20px' }}>{decodedString}</h3>
+                    </div>
                 </Col>
                 <Select
                     placeholder="Select a range"
