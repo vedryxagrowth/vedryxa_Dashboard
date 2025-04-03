@@ -1448,14 +1448,14 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                     Daily_amount: parseFloat(campaignLevelDailyBudget) * 100,
                     Status: "PAUSED",
                     access_token: imagehash.token,
-                    createdDate: moment().tz('Asia/Kolkata').format('YYYY-MM-DD')
+                    createdDate: moment().tz(imagehash.timeZone).format('YYYY-MM-DD')
                 },
                 adsetlevel: {
                     AdsetName: values.AdsetName,
                     Daily_amount: adsetLevelDailyBudget !== 0 ? parseFloat(adsetLevelDailyBudget) * 100 : "",
                     optimization_goal: values.optimization_goal,
                     billing_event: values.billing_event,
-                    start_time: moment(values.DatePicker.$d).utc().format("YYYY-MM-DDTHH:mm:ssZ"),
+                    start_time: moment(values.DatePicker.$d).tz(imagehash.timeZone).format("YYYY-MM-DDTHH:mm:ssZ"),
                     action_source: values.action_source,
                     custom_event_type: values.custom_event_type,
                     pixel_id: values.pixel_id,
@@ -1845,7 +1845,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                         initialValue={currentDate}
 
                                     >
-                                        <DatePicker />
+                                        <DatePicker showTime/>
                                     </Form.Item>
                                     <Form.Item
                                         name="action_source"
