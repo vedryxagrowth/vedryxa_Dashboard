@@ -791,7 +791,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                     }
         
                     if (file?.url) {
-                        if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith('.mp4')) {
+                        if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") || file?.url?.endsWith('.mp4')) {
                             const formData = new FormData();
                             const response = await fetch(`https://prodapis.adsgoat.in/s3?s3Url=${file.url}`, {
                                 method: 'GET',
@@ -811,7 +811,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                             // console.log(formData);
         
                             let fbResponse;
-                            if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg')) {
+                            if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") ) {
                                 formData.append('file', uploadFile, file.name);
                                 formData.append('access_token', token);
                                 const fileName = file.name.split('/').pop();
@@ -1276,6 +1276,9 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
 
             if (response.ok) {
                 console.log('Form data submitted successfully');
+                setSelectedFilesFromCreatives([]);
+                setSelectedFilesFromMedia([]);
+                setSelectedFiles([]);
                 onClose();
             } else {
                 console.error('Failed to submit form data');
@@ -1391,7 +1394,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                 uid: file.uid || `-${index+1}`,
                 name: file?.name,
                 status: 'done',
-                type: `${file?.url?.endsWith(".jpg") || file?.url?.endsWith(".png") ? file?.url?.endsWith(".jpg") ? "image/jpg" : "image/png" : "video/"}`,
+                type: `${file?.url?.endsWith(".jpg") || file?.url?.endsWith(".png") || file?.url?.endsWith(".jpeg") ? file?.url?.endsWith(".jpg") ? "image/jpg" : file?.url?.endsWith(".jpeg") ? "image/jpeg" : "image/png" : "video/"}`,
                 url: file?.url,
             })
         })]);
@@ -1400,7 +1403,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                 uid: file.uid || `-${index+1}`,
                 name: file?.name,
                 status: 'done',
-                type: `${file?.url?.endsWith(".jpg") || file?.url?.endsWith(".png") ? file?.url?.endsWith(".jpg") ? "image/jpg" : "image/png" : "video/"}`,
+                type: `${file?.url?.endsWith(".jpg") || file?.url?.endsWith(".png") || file?.url?.endsWith(".jpeg") ? file?.url?.endsWith(".jpg") ? "image/jpg" : file?.url?.endsWith(".jpeg") ? "image/jpeg" : "image/png" : "video/"}`,
                 url: file?.url,
             })
         })]);
@@ -1948,173 +1951,177 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                             <div style={{ display: "flex", justifyContent: "space-between" }}>
                                 <div style={{ flex: "70%", marginRight: "5%" }}>
                                     <div style={{ display: 'flex', gap: '16px' }}>
-                                    <Form.Item
-  label={<span style={{ color: "#B4B4B4" }}>Select Source</span>}
-  style={{ flex: 1 }}
->
-  <Select
-    defaultValue="upload"
-    onChange={(value) => {
-      setSelectedOption(value);
-      form.validateFields(["MediaContent"]); // Revalidate when switching source
-    }}
-    style={{ marginBottom: 16 }}
-  >
-    <Option value="upload">Upload</Option>
-    <Option value="creative">Creative Library</Option>
-  </Select>
-</Form.Item>
+                                    <div style={{display:'flex', flexDirection:'column'}}>
+                                        <Form.Item
+                                            label={<span style={{ color: "#B4B4B4" }}>Select Source</span>}
+                                            style={{ flex: 1 }}
+                                            >
+                                            <Select
+                                                defaultValue="upload"
+                                                onChange={(value) => {
+                                                setSelectedOption(value);
+                                                form.validateFields(["MediaContent"]); // Revalidate when switching source
+                                                }}
+                                                style={{ marginBottom: 16 }}
+                                            >
+                                                <Option value="upload">Upload</Option>
+                                                <Option value="creative">Creative Library</Option>
+                                            </Select>
+                                            </Form.Item>
 
-<Form.Item
-  name="MediaContent"
-  rules={[
-    {
-      validator: async () => {
-        if (
-          (selectedOption === "upload" && selectedFilesFromMedia.length === 0) ||
-          (selectedOption === "creative" && selectedFilesFromCreatives.length === 0)
-        ) {
-          throw new Error("Please select Upload!");
-        }
-        return Promise.resolve();
-      },
-    },
-  ]}
->
-  <div>
-    {/* Upload UI */}
-    <div style={{ display: selectedOption === "upload" ? "block" : "none" }}>
-      <Upload
-        beforeUpload={() => false}
-        onChange={(info) => {
-          const newFiles = info.fileList.map((file) => ({
-            ...file,
-            uid: file.uid || `-${Date.now()}`,
-            source: "media",
-            thumbUrl:
-              file.thumbUrl ||
-              (file.originFileObj
-                ? URL.createObjectURL(file.originFileObj)
-                : undefined),
-          }));
+                                            <Form.Item
+                                            name="MediaContent"
+                                            rules={[
+                                                {
+                                                validator: async () => {
+                                                    if (
+                                                    (selectedOption === "upload" && selectedFilesFromMedia.length === 0) ||
+                                                    (selectedOption === "creative" && selectedFilesFromCreatives.length === 0)
+                                                    ) {
+                                                    throw new Error("Please select Upload!");
+                                                    }
+                                                    return Promise.resolve();
+                                                },
+                                                },
+                                            ]}
+                                            >
+                                                <div>
+                                                    {/* Upload UI */}
+                                                    <div style={{ display: selectedOption === "upload" ? "block" : "none" }}>
+                                                    <Upload
+                                                        beforeUpload={() => false}
+                                                        onChange={(info) => {
+                                                        const newFiles = info.fileList.map((file) => ({
+                                                            ...file,
+                                                            uid: file.uid || `-${Date.now()}`,
+                                                            source: "media",
+                                                            thumbUrl:
+                                                            file.thumbUrl ||
+                                                            (file.originFileObj
+                                                                ? URL.createObjectURL(file.originFileObj)
+                                                                : undefined),
+                                                        }));
 
-          setSelectedFiles((prev) => {
-            const existingUids = new Set(prev.map((f) => f.uid));
-            const filteredNewFiles = newFiles.filter((f) => !existingUids.has(f.uid));
-            const updated = [...prev, ...filteredNewFiles];
-            form.setFieldsValue({ MediaContent: updated });
-            form.validateFields(["MediaContent"]);
-            return updated;
-          });
+                                                        setSelectedFiles((prev) => {
+                                                            const existingUids = new Set(prev.map((f) => f.uid));
+                                                            const filteredNewFiles = newFiles.filter((f) => !existingUids.has(f.uid));
+                                                            const updated = [...prev, ...filteredNewFiles];
+                                                            form.setFieldsValue({ MediaContent: updated });
+                                                            form.validateFields(["MediaContent"]);
+                                                            return updated;
+                                                        });
 
-          setSelectedFilesFromMedia((prev) => {
-            const existingUids = new Set(prev.map((f) => f.uid));
-            const filteredNewFiles = newFiles.filter((f) => !existingUids.has(f.uid));
-            const updated = [...prev, ...filteredNewFiles];
-            form.setFieldsValue({ MediaContent: updated });
-            form.validateFields(["MediaContent"]);
-            return updated;
-          });
-        }}
-        onRemove={(fileToRemove) => {
-          setSelectedFilesFromMedia((prev) => {
-            const updated = prev.filter((file) => file.uid !== fileToRemove.uid);
-            form.setFieldsValue({ MediaContent: updated });
-            form.validateFields(["MediaContent"]);
-            return updated;
-          });
+                                                        setSelectedFilesFromMedia((prev) => {
+                                                            const existingUids = new Set(prev.map((f) => f.uid));
+                                                            const filteredNewFiles = newFiles.filter((f) => !existingUids.has(f.uid));
+                                                            const updated = [...prev, ...filteredNewFiles];
+                                                            form.setFieldsValue({ MediaContent: updated });
+                                                            form.validateFields(["MediaContent"]);
+                                                            return updated;
+                                                        });
+                                                        }}
+                                                        onRemove={(fileToRemove) => {
+                                                        setSelectedFilesFromMedia((prev) => {
+                                                            const updated = prev.filter((file) => file.uid !== fileToRemove.uid);
+                                                            form.setFieldsValue({ MediaContent: updated });
+                                                            form.validateFields(["MediaContent"]);
+                                                            return updated;
+                                                        });
 
-          setSelectedFiles((prev) => {
-            const updated = prev.filter((file) => file.uid !== fileToRemove.uid);
-            form.setFieldsValue({ MediaContent: updated });
-            form.validateFields(["MediaContent"]);
-            return updated;
-          });
+                                                        setSelectedFiles((prev) => {
+                                                            const updated = prev.filter((file) => file.uid !== fileToRemove.uid);
+                                                            form.setFieldsValue({ MediaContent: updated });
+                                                            form.validateFields(["MediaContent"]);
+                                                            return updated;
+                                                        });
 
-          return true;
-        }}
-        multiple
-        maxCount={10}
-        fileList={selectedFilesFromMedia}
-        listType="picture"
-        accept="image/*, video/*"
-      >
-        <Button icon={<UploadOutlined />}>Select Files</Button>
-      </Upload>
-    </div>
+                                                        return true;
+                                                        }}
+                                                        multiple
+                                                        maxCount={10}
+                                                        fileList={selectedFilesFromMedia}
+                                                        listType="picture"
+                                                        accept="image/*, video/*"
+                                                    >
+                                                        <Button icon={<UploadOutlined />}>Select Files</Button>
+                                                    </Upload>
+                                                    </div>
 
-    {/* Creative Library UI */}
-    {selectedOption === "creative" && (
-      <div>
-        <Button icon={<UploadOutlined />} onClick={onClickCreativesDrawer}>
-          Select Files
-        </Button>
+                                                    {/* Creative Library UI */}
+                                                    {selectedOption === "creative" && (
+                                                    <div>
+                                                        <Button icon={<UploadOutlined />} onClick={onClickCreativesDrawer}>
+                                                        Select Files
+                                                        </Button>
 
-        {selectedFilesFromCreatives?.length > 0 && (
-          <div style={{ marginTop: "10px" }}>
-            {selectedFilesFromCreatives.map((file, index) => (
-              <div
-                key={index}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  marginBottom: 8,
-                }}
-              >
-                <PaperClipOutlined style={{ marginRight: 8 }} />
-                <Tooltip title={file.name}>
-                  <span
-                    style={{
-                      maxWidth: 160,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {file.name}
-                  </span>
-                </Tooltip>
+                                                        {selectedFilesFromCreatives?.length > 0 && (
+                                                        <div style={{ marginTop: "10px" }}>
+                                                            {selectedFilesFromCreatives.map((file, index) => (
+                                                            <div
+                                                                key={index}
+                                                                style={{
+                                                                display: "flex",
+                                                                alignItems: "center",
+                                                                marginBottom: 8,
+                                                                }}
+                                                            >
+                                                                {/* <PaperClipOutlined style={{ marginRight: 8 }} /> */}
+                                                                {/* <Tooltip title={file.name}> */}
+                                                                {file.type?.startsWith("image/") && (
+                                                                <img
+                                                                    src={
+                                                                    file.originFileObj
+                                                                        ? URL.createObjectURL(file.originFileObj)
+                                                                        : file.url
+                                                                    }
+                                                                    alt="preview"
+                                                                    style={{
+                                                                    width: 40,
+                                                                    height: 40,
+                                                                    objectFit: "cover",
+                                                                    borderRadius: 4,
+                                                                    marginLeft: 8,
+                                                                    }}
+                                                                />
+                                                                )}
+                                                                <span
+                                                                    style={{
+                                                                    maxWidth: 160,
+                                                                    overflow: "hidden",
+                                                                    textOverflow: "ellipsis",
+                                                                    whiteSpace: "nowrap",
+                                                                    paddingLeft: 8,
+                                                                    }}
+                                                                >
+                                                                    {file.name}
+                                                                </span>
+                                                                {/* </Tooltip> */}
 
-                {file.type?.startsWith("image/") && (
-                  <img
-                    src={
-                      file.originFileObj
-                        ? URL.createObjectURL(file.originFileObj)
-                        : file.url
-                    }
-                    alt="preview"
-                    style={{
-                      width: 40,
-                      height: 40,
-                      objectFit: "cover",
-                      borderRadius: 4,
-                      marginLeft: 8,
-                    }}
-                  />
-                )}
+                                                                
 
-                <DeleteOutlined
-                  onClick={() => {
-                    const updated = selectedFilesFromCreatives.filter(
-                      (f) => f.uid !== file.uid
-                    );
-                    setSelectedFilesFromCreatives(updated);
-                    setSelectedFiles((prev) =>
-                      prev.filter((f) => f.uid !== file.uid)
-                    );
-                    form.setFieldsValue({ MediaContent: updated });
-                    form.validateFields(["MediaContent"]);
-                  }}
-                  style={{ color: "red", marginLeft: 12, cursor: "pointer" }}
-                />
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    )}
-  </div>
-</Form.Item>
+                                                                <DeleteOutlined
+                                                                onClick={() => {
+                                                                    const updated = selectedFilesFromCreatives.filter(
+                                                                    (f) => f.uid !== file.uid
+                                                                    );
+                                                                    setSelectedFilesFromCreatives(updated);
+                                                                    setSelectedFiles((prev) =>
+                                                                    prev.filter((f) => f.uid !== file.uid)
+                                                                    );
+                                                                    form.setFieldsValue({ MediaContent: updated });
+                                                                    form.validateFields(["MediaContent"]);
+                                                                }}
+                                                                style={{ color: "red", marginLeft: 12, cursor: "pointer" }}
+                                                                />
+                                                            </div>
+                                                            ))}
+                                                        </div>
+                                                        )}
+                                                    </div>
+                                                    )}
+                                                </div>
+                                        </Form.Item>
+                                    </div>
 
                                         <Form.Item
                                             name="page_id"
@@ -2307,7 +2314,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             selectedFiles.map((file, index) => (
                                                 <Badge
                                                     count={
-                                                        (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith('.mp4')) ? 
+                                                        (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") || file?.url?.endsWith('.mp4')) ? 
                                                         null:
                                                         <EditOutlined
                                                             style={{ fontSize: '25px', color: '#fff' }}
@@ -2331,7 +2338,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                                             <div className="ad-heading">
                                                                 <div className="img">
                                                                     {/* {file?.filename?.endsWith('.png') && console.log(file)} */}
-                                                                    {file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') ? (
+                                                                    {file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") ? (
                                                                         <img
                                                                             src={file?.url}
                                                                             alt="page id"
@@ -2402,7 +2409,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                                                 {primaryText}
                                                             </div>
                                                             <div className="ad-image" style={{ width: '350px', height: '200px' }}>
-                                                                    {file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') ? (
+                                                                    {file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") ? (
                                                                         <img
                                                                             src={file?.url}
                                                                             alt="ad content"
