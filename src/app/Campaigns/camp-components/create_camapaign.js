@@ -1408,6 +1408,29 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
             })
         })]);
         setOpenCreativesDrawer(false);
+        
+        if (data.length > 0) {
+            const currentMediaContent = form.getFieldValue("MediaContent") || [];
+        
+            const newFiles = data.map((file, index) => ({
+                uid: file.uid || `-${index + 1}`,
+                name: file?.name,
+                status: 'done',
+                type: file?.url?.endsWith(".jpg")
+                    ? "image/jpg"
+                    : file?.url?.endsWith(".jpeg")
+                    ? "image/jpeg"
+                    : file?.url?.endsWith(".png")
+                    ? "image/png"
+                    : "video/",
+                url: file?.url,
+            }));
+        
+            const updatedMediaContent = [...currentMediaContent, ...newFiles];
+        
+            form.setFieldsValue({ MediaContent: updatedMediaContent });
+            form.validateFields(["MediaContent"]);
+        }
     }
 
     console.log("Selected Files:", selectedFiles);
@@ -1576,7 +1599,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                             </div>
                         </Panel>
 
-                        <Panel header="ADSET LEVEL" key="2">
+                        <Panel header="ADSET LEVEL" key="2" forceRender>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
                                 <Form.Item
                                     name="AdsetName"

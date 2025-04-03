@@ -152,8 +152,15 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
         cellRendererParams: {
             suppressCount: false, // Allow count to be shown
             innerRenderer: (params) => {
-                if (params.node.footer) {
-                    return 'Total'; // Custom footer label
+                // if (params.node.footer) {
+                //     return 'Total'; // Custom footer label
+                // }
+                if (params.node.footer || params.node.rowPinned) {
+                    return 'Total'; // Or just '' if you prefer no label
+                }
+                // Handle ungrouped rows — skip icons and render plain name
+                if (!params.node.group) {
+                    return params.value || ''; // Just the campaign name
                 }
 
                 const firstColumnValue = params.node.key; // This should give you the campaign name
