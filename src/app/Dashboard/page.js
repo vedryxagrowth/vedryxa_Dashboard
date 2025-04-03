@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 // pages/index.js
 import React from 'react';
 import axios from 'axios';
-import { Select, Tag, theme, Button,Carousel,Tabs, Tooltip, message } from 'antd';
+import { Select, Tag, theme, Button,Carousel,Tabs, Tooltip, message, Switch } from 'antd';
 import StickyBox from 'react-sticky-box';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
@@ -69,7 +69,7 @@ import {
     Checkbox
 } from 'antd';
 
-import { LoadingOutlined } from '@ant-design/icons';
+import { LoadingOutlined, BarChartOutlined } from '@ant-design/icons';
 import { PiWarningCircleFill } from "react-icons/pi";
 // import {
 //     TrophyOutlined,
@@ -969,6 +969,8 @@ const Dashboard = () => {
     const [activeTab2, setActiveTab2] = useState("1");
 
     const [activeTab3, setActiveTab3] = useState("1");
+
+    const [showGraphs, setShowGraphs] = useState(localStorage.getItem("showGraph") === "true" ? true : false);
     // const toggleTheme = () => {
     //     setDarkMode(!darkMode);
     // };
@@ -3095,10 +3097,15 @@ const Dashboard = () => {
         return colorMap[value]; // Return the assigned color
       };
 
+    const onClickBarChart = (value) =>{
+        // console.log(value);
+        localStorage.setItem('showGraph', value);
+        setShowGraphs(value);
+        
+    }
 
 
-
-
+    console.log(showGraphs, "showGraphs");
 
     // console.log(rowData?.map(each=> each.profit > 0));
     // console.log(chartData.revenue, "data");
@@ -3576,322 +3583,329 @@ const Dashboard = () => {
                         height={350}
                         />
                     </Row> */}
-                        <div style={{padding:'0px', marginTop:'15px'}}>
-                            <RenderCarouselNav2/>
-                        </div>
-                        <Carousel ref={carouselRef2} beforeChange={handleSlideChange2} dots={false}>
-                            <div>
-                                <Row
-                                    style={{
-                                        height: '400px',
-                                        marginBottom: '10px',
-                                        marginTop: '25px',
-                                        padding: '0px',
-                                        marginLeft: '0px',
-                                        marginRight: '0px',
-                                    }}
-                                >
-                                    <Line
-                                        data={{
-                                            labels: chartDataByDate.datesByDate, // X-axis labels (dates)
-                                            datasets: [
-                                            {
-                                                label: 'Spend',
-                                                data: chartDataByDate.spendByDate,
-                                                borderColor: 'rgba(44, 144, 192, 1)',
-                                                backgroundColor: 'rgba(44, 144, 192, 0.2)',
-                                                fill: true,
-                                                hidden: true,
-                                                tension: 0.3,
-                                                pointRadius: 5,
-                                                pointHoverRadius: 8,
-                                                pointBackgroundColor: 'rgba(44, 144, 192, 1)',
-                                                pointHoverBackgroundColor: 'rgba(44, 144, 192, 1)',
-                                            },
-                                            {
-                                                label: 'Revenue',
-                                                data: chartDataByDate.revenueByDate,
-                                                borderColor: 'rgba(99, 200, 99, 1)',
-                                                backgroundColor: 'rgba(99, 200, 99, 0.2)',
-                                                fill: true,
-                                                hidden: true,
-                                                tension: 0.3,
-                                                pointRadius: 5,
-                                                pointHoverRadius: 8,
-                                                pointBackgroundColor: 'rgba(99, 200, 99, 1)',
-                                                pointHoverBackgroundColor: 'rgba(99, 200, 99, 1)',
-                                            },
-                                            {
-                                                label: 'RPC',
-                                                data: chartDataByDate.rpcByDate,
-                                                borderColor: 'rgba(255, 99, 132, 1)',
-                                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                                                fill: true,
-                                                hidden: true,
-                                                tension: 0.3,
-                                                pointRadius: 5,
-                                                pointHoverRadius: 8,
-                                                pointBackgroundColor: 'rgba(255, 99, 132, 1)',
-                                                pointHoverBackgroundColor: 'rgba(255, 99, 132, 1)',
-                                            },
-                                            {
-                                                label: 'CPL',
-                                                data: chartDataByDate.cplByDate,
-                                                borderColor: 'rgba(255, 159, 64, 1)',
-                                                backgroundColor: 'rgba(255, 159, 64, 0.2)',
-                                                fill: true,
-                                                hidden: true,
-                                                tension: 0.3,
-                                                pointRadius: 5,
-                                                pointHoverRadius: 8,
-                                                pointBackgroundColor: 'rgba(255, 159, 64, 1)',
-                                                pointHoverBackgroundColor: 'rgba(255, 159, 64, 1)',
-                                            },
-                                            {
-                                                label: 'Profit',
-                                                data: chartDataByDate.profitByDate,
-                                                borderColor: 'rgba(255, 206, 86, 1)',
-                                                backgroundColor: 'rgba(255, 206, 86, 0.2)',
-                                                fill: true,
-                                                tension: 0.3,
-                                                pointRadius: 5,
-                                                pointHoverRadius: 8,
-                                                pointBackgroundColor: 'rgba(255, 206, 86, 1)',
-                                                pointHoverBackgroundColor: 'rgba(255, 206, 86, 1)',
-                                            },
-                                            {
-                                                label: 'Margin',
-                                                data: chartDataByDate.marginByDate,
-                                                borderColor: 'rgba(153, 102, 255, 1)',
-                                                backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                                                fill: true,
-                                                hidden: true,
-                                                tension: 0.3,
-                                                pointRadius: 5,
-                                                pointHoverRadius: 8,
-                                                pointBackgroundColor: 'rgba(153, 102, 255, 1)',
-                                                pointHoverBackgroundColor: 'rgba(153, 102, 255, 1)',
-                                            },
-                                            ],
-                                        }}
-                                        options={{
-                                            responsive: true,
-                                            maintainAspectRatio: false,
-                                            scales: {
-                                            x: {
-                                                ticks: {
-                                                padding: 30,
-                                                color: (context) => {
-                                                    const label = chartDataByDate.datesByDate[context.index];
-                                                    return getColorForValue(label);
-                                                },
-                                                },
-                                                grid: {
-                                                color: darkMode ? '#444' : '#e0e0e0',
-                                                },
-                                            },
-                                            y: {
-                                                beginAtZero: true,
-                                                ticks: {
-                                                callback: function (value) {
-                                                    return value.toFixed(2);
-                                                },
-                                                color: darkMode ? '#fff' : '#000',
-                                                },
-                                                grid: {
-                                                color: darkMode ? '#444' : '#e0e0e0',
-                                                },
-                                            },
-                                            },
-                                            plugins: {
-                                            legend: {
-                                                labels: {
-                                                color: darkMode ? '#fff' : '#000',
-                                                },
-                                            },
-                                            tooltip: {
-                                                mode: 'index',
-                                                intersect: true,
-                                                callbacks: {
-                                                  title: function (tooltipItems) {
-                                                    const index = tooltipItems[0].dataIndex;
-                                                    const rawDate = chartDataByDate.datesByDate[index];
-                                                    const dateObj = new Date(rawDate);
-                                              
-                                                    const weekday = dateObj.toLocaleDateString('en-US', { weekday: 'long' });
-                                              
-                                                    return `${rawDate} (${weekday})`; // 👈 2025-03-27 (Thursday)
-                                                  },
-                                                  label: function (tooltipItem) {
-                                                    const index = tooltipItem.dataIndex;
-                                                    const dataset = tooltipItem.dataset;
-                                                    const value = dataset.data[index];
-                                                    const datasetLabel = dataset.label || '';
-                                              
-                                                    return `${datasetLabel}: ${value} (Date: ${chartDataByDate.datesByDate[index]})`;
-                                                  },
-                                                },
-                                              },
-                                            },
-                                        }}
-                                        height={350}
-                                    />
-                                </Row>
+                        <Row style={{display:'flex', justifyContent:'flex-end', alignItems:'center'}}>
+                            <Col style={{marginTop:'10px'}}>
+                                <Switch checked={showGraphs} style={{backgroundColor: showGraphs && "#A3F254"}} onClick={onClickBarChart}/> Chart
+                            </Col>
+                        </Row>
+                        <div style={{ display: showGraphs ? 'flex' : "none", flexDirection: 'column' }}>
+                            <div style={{padding:'0px', marginTop:'15px'}}>
+                                <RenderCarouselNav2/>
                             </div>
-                            <div>
-                                <Row
-                                    style={{
-                                        height: '400px',
-                                        marginBottom: '10px',
-                                        marginTop: '25px',
-                                        padding: '0px',
-                                        marginLeft: '0px',
-                                        marginRight: '0px',
-                                    }}
-                                >
-                                    <Line
-                                        data={{
-                                            labels: chartData?.dates, // X-axis labels (dates)
-                                            datasets: [
-                                            {
-                                                label: 'Spend',
-                                                data: chartData?.spend,
-                                                borderColor: 'rgba(44, 144, 192, 1)',
-                                                backgroundColor: 'rgba(44, 144, 192, 0.2)',
-                                                fill: true,
-                                                hidden: true,
-                                                tension: 0.3,
-                                                pointRadius: 5,
-                                                pointHoverRadius: 8,
-                                                pointBackgroundColor: 'rgba(44, 144, 192, 1)',
-                                                pointHoverBackgroundColor: 'rgba(44, 144, 192, 1)',
-                                            },
-                                            {
-                                                label: 'Revenue',
-                                                data: chartData?.revenue,
-                                                borderColor: 'rgba(99, 200, 99, 1)',
-                                                backgroundColor: 'rgba(99, 200, 99, 0.2)',
-                                                fill: true,
-                                                hidden: true,
-                                                tension: 0.3,
-                                                pointRadius: 5,
-                                                pointHoverRadius: 8,
-                                                pointBackgroundColor: 'rgba(99, 200, 99, 1)',
-                                                pointHoverBackgroundColor: 'rgba(99, 200, 99, 1)',
-                                            },
-                                            {
-                                                label: 'RPC',
-                                                data: chartData.rpc,
-                                                borderColor: 'rgba(255, 99, 132, 1)',
-                                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                                                fill: true,
-                                                hidden: true,
-                                                tension: 0.3,
-                                                pointRadius: 5,
-                                                pointHoverRadius: 8,
-                                                pointBackgroundColor: 'rgba(255, 99, 132, 1)',
-                                                pointHoverBackgroundColor: 'rgba(255, 99, 132, 1)',
-                                            },
-                                            {
-                                                label: 'CPL',
-                                                data: chartData?.cpl,
-                                                borderColor: 'rgba(255, 159, 64, 1)',
-                                                backgroundColor: 'rgba(255, 159, 64, 0.2)',
-                                                fill: true,
-                                                hidden: true,
-                                                tension: 0.3,
-                                                pointRadius: 5,
-                                                pointHoverRadius: 8,
-                                                pointBackgroundColor: 'rgba(255, 159, 64, 1)',
-                                                pointHoverBackgroundColor: 'rgba(255, 159, 64, 1)',
-                                            },
-                                            {
-                                                label: 'Profit',
-                                                data: chartData?.profit,
-                                                borderColor: 'rgba(255, 206, 86, 1)',
-                                                backgroundColor: 'rgba(255, 206, 86, 0.2)',
-                                                fill: true,
-                                                tension: 0.3,
-                                                pointRadius: 5,
-                                                pointHoverRadius: 8,
-                                                pointBackgroundColor: 'rgba(255, 206, 86, 1)',
-                                                pointHoverBackgroundColor: 'rgba(255, 206, 86, 1)',
-                                            },
-                                            {
-                                                label: 'Margin',
-                                                data: chartData?.margin,
-                                                borderColor: 'rgba(153, 102, 255, 1)',
-                                                backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                                                fill: true,
-                                                hidden: true,
-                                                tension: 0.3,
-                                                pointRadius: 5,
-                                                pointHoverRadius: 8,
-                                                pointBackgroundColor: 'rgba(153, 102, 255, 1)',
-                                                pointHoverBackgroundColor: 'rgba(153, 102, 255, 1)',
-                                            },
-                                            ],
+                            <Carousel ref={carouselRef2} beforeChange={handleSlideChange2} dots={false}>
+                                <div>
+                                    <Row
+                                        style={{
+                                            height: '400px',
+                                            marginBottom: '10px',
+                                            marginTop: '25px',
+                                            padding: '0px',
+                                            marginLeft: '0px',
+                                            marginRight: '0px',
                                         }}
-                                        options={{
-                                            responsive: true,
-                                            maintainAspectRatio: false,
-                                            scales: {
-                                            x: {
-                                                ticks: {
-                                                padding: 30,
-                                                color: (context) => {
-                                                    const label = chartData?.dates[context.index];
-                                                    return getColorForValue(label);
+                                    >
+                                        <Line
+                                            data={{
+                                                labels: chartDataByDate.datesByDate, // X-axis labels (dates)
+                                                datasets: [
+                                                {
+                                                    label: 'Spend',
+                                                    data: chartDataByDate.spendByDate,
+                                                    borderColor: 'rgba(44, 144, 192, 1)',
+                                                    backgroundColor: 'rgba(44, 144, 192, 0.2)',
+                                                    fill: true,
+                                                    hidden: true,
+                                                    tension: 0.3,
+                                                    pointRadius: 5,
+                                                    pointHoverRadius: 8,
+                                                    pointBackgroundColor: 'rgba(44, 144, 192, 1)',
+                                                    pointHoverBackgroundColor: 'rgba(44, 144, 192, 1)',
+                                                },
+                                                {
+                                                    label: 'Revenue',
+                                                    data: chartDataByDate.revenueByDate,
+                                                    borderColor: 'rgba(99, 200, 99, 1)',
+                                                    backgroundColor: 'rgba(99, 200, 99, 0.2)',
+                                                    fill: true,
+                                                    hidden: true,
+                                                    tension: 0.3,
+                                                    pointRadius: 5,
+                                                    pointHoverRadius: 8,
+                                                    pointBackgroundColor: 'rgba(99, 200, 99, 1)',
+                                                    pointHoverBackgroundColor: 'rgba(99, 200, 99, 1)',
+                                                },
+                                                {
+                                                    label: 'RPC',
+                                                    data: chartDataByDate.rpcByDate,
+                                                    borderColor: 'rgba(255, 99, 132, 1)',
+                                                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                                    fill: true,
+                                                    hidden: true,
+                                                    tension: 0.3,
+                                                    pointRadius: 5,
+                                                    pointHoverRadius: 8,
+                                                    pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+                                                    pointHoverBackgroundColor: 'rgba(255, 99, 132, 1)',
+                                                },
+                                                {
+                                                    label: 'CPL',
+                                                    data: chartDataByDate.cplByDate,
+                                                    borderColor: 'rgba(255, 159, 64, 1)',
+                                                    backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                                                    fill: true,
+                                                    hidden: true,
+                                                    tension: 0.3,
+                                                    pointRadius: 5,
+                                                    pointHoverRadius: 8,
+                                                    pointBackgroundColor: 'rgba(255, 159, 64, 1)',
+                                                    pointHoverBackgroundColor: 'rgba(255, 159, 64, 1)',
+                                                },
+                                                {
+                                                    label: 'Profit',
+                                                    data: chartDataByDate.profitByDate,
+                                                    borderColor: 'rgba(255, 206, 86, 1)',
+                                                    backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                                                    fill: true,
+                                                    tension: 0.3,
+                                                    pointRadius: 5,
+                                                    pointHoverRadius: 8,
+                                                    pointBackgroundColor: 'rgba(255, 206, 86, 1)',
+                                                    pointHoverBackgroundColor: 'rgba(255, 206, 86, 1)',
+                                                },
+                                                {
+                                                    label: 'Margin',
+                                                    data: chartDataByDate.marginByDate,
+                                                    borderColor: 'rgba(153, 102, 255, 1)',
+                                                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                                                    fill: true,
+                                                    hidden: true,
+                                                    tension: 0.3,
+                                                    pointRadius: 5,
+                                                    pointHoverRadius: 8,
+                                                    pointBackgroundColor: 'rgba(153, 102, 255, 1)',
+                                                    pointHoverBackgroundColor: 'rgba(153, 102, 255, 1)',
+                                                },
+                                                ],
+                                            }}
+                                            options={{
+                                                responsive: true,
+                                                maintainAspectRatio: false,
+                                                scales: {
+                                                x: {
+                                                    ticks: {
+                                                    padding: 30,
+                                                    color: (context) => {
+                                                        const label = chartDataByDate.datesByDate[context.index];
+                                                        return getColorForValue(label);
+                                                    },
+                                                    },
+                                                    grid: {
+                                                    color: darkMode ? '#444' : '#e0e0e0',
+                                                    },
+                                                },
+                                                y: {
+                                                    beginAtZero: true,
+                                                    ticks: {
+                                                    callback: function (value) {
+                                                        return value.toFixed(2);
+                                                    },
+                                                    color: darkMode ? '#fff' : '#000',
+                                                    },
+                                                    grid: {
+                                                    color: darkMode ? '#444' : '#e0e0e0',
+                                                    },
                                                 },
                                                 },
-                                                grid: {
-                                                color: darkMode ? '#444' : '#e0e0e0',
+                                                plugins: {
+                                                legend: {
+                                                    labels: {
+                                                    color: darkMode ? '#fff' : '#000',
+                                                    },
                                                 },
-                                            },
-                                            y: {
-                                                beginAtZero: true,
-                                                ticks: {
-                                                callback: function (value) {
-                                                    return value.toFixed(2);
+                                                tooltip: {
+                                                    mode: 'index',
+                                                    intersect: true,
+                                                    callbacks: {
+                                                    title: function (tooltipItems) {
+                                                        const index = tooltipItems[0].dataIndex;
+                                                        const rawDate = chartDataByDate.datesByDate[index];
+                                                        const dateObj = new Date(rawDate);
+                                                
+                                                        const weekday = dateObj.toLocaleDateString('en-US', { weekday: 'long' });
+                                                
+                                                        return `${rawDate} (${weekday})`; // 👈 2025-03-27 (Thursday)
+                                                    },
+                                                    label: function (tooltipItem) {
+                                                        const index = tooltipItem.dataIndex;
+                                                        const dataset = tooltipItem.dataset;
+                                                        const value = dataset.data[index];
+                                                        const datasetLabel = dataset.label || '';
+                                                
+                                                        return `${datasetLabel}: ${value} (Date: ${chartDataByDate.datesByDate[index]})`;
+                                                    },
+                                                    },
                                                 },
-                                                color: darkMode ? '#fff' : '#000',
                                                 },
-                                                grid: {
-                                                color: darkMode ? '#444' : '#e0e0e0',
+                                            }}
+                                            height={350}
+                                        />
+                                    </Row>
+                                </div>
+                                <div>
+                                    <Row
+                                        style={{
+                                            height: '400px',
+                                            marginBottom: '10px',
+                                            marginTop: '25px',
+                                            padding: '0px',
+                                            marginLeft: '0px',
+                                            marginRight: '0px',
+                                        }}
+                                    >
+                                        <Line
+                                            data={{
+                                                labels: chartData?.dates, // X-axis labels (dates)
+                                                datasets: [
+                                                {
+                                                    label: 'Spend',
+                                                    data: chartData?.spend,
+                                                    borderColor: 'rgba(44, 144, 192, 1)',
+                                                    backgroundColor: 'rgba(44, 144, 192, 0.2)',
+                                                    fill: true,
+                                                    hidden: true,
+                                                    tension: 0.3,
+                                                    pointRadius: 5,
+                                                    pointHoverRadius: 8,
+                                                    pointBackgroundColor: 'rgba(44, 144, 192, 1)',
+                                                    pointHoverBackgroundColor: 'rgba(44, 144, 192, 1)',
                                                 },
-                                            },
-                                            },
-                                            plugins: {
-                                            legend: {
-                                                labels: {
-                                                color: darkMode ? '#fff' : '#000',
+                                                {
+                                                    label: 'Revenue',
+                                                    data: chartData?.revenue,
+                                                    borderColor: 'rgba(99, 200, 99, 1)',
+                                                    backgroundColor: 'rgba(99, 200, 99, 0.2)',
+                                                    fill: true,
+                                                    hidden: true,
+                                                    tension: 0.3,
+                                                    pointRadius: 5,
+                                                    pointHoverRadius: 8,
+                                                    pointBackgroundColor: 'rgba(99, 200, 99, 1)',
+                                                    pointHoverBackgroundColor: 'rgba(99, 200, 99, 1)',
                                                 },
-                                            },
-                                            tooltip: {
-                                                mode: 'index', // Ensure all datasets at this x-axis point are shown
-                                                intersect: true, // Show tooltip only when hovering directly over a bubble/point
-                                                callbacks: {
-                                                label: function (tooltipItem) {
-                                                    const index = tooltipItem.dataIndex;
-                                                    const dataset = tooltipItem.dataset;
-                                                    const value = dataset.data[index];
-                                                    const datasetLabel = dataset.label || '';
+                                                {
+                                                    label: 'RPC',
+                                                    data: chartData.rpc,
+                                                    borderColor: 'rgba(255, 99, 132, 1)',
+                                                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                                    fill: true,
+                                                    hidden: true,
+                                                    tension: 0.3,
+                                                    pointRadius: 5,
+                                                    pointHoverRadius: 8,
+                                                    pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+                                                    pointHoverBackgroundColor: 'rgba(255, 99, 132, 1)',
+                                                },
+                                                {
+                                                    label: 'CPL',
+                                                    data: chartData?.cpl,
+                                                    borderColor: 'rgba(255, 159, 64, 1)',
+                                                    backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                                                    fill: true,
+                                                    hidden: true,
+                                                    tension: 0.3,
+                                                    pointRadius: 5,
+                                                    pointHoverRadius: 8,
+                                                    pointBackgroundColor: 'rgba(255, 159, 64, 1)',
+                                                    pointHoverBackgroundColor: 'rgba(255, 159, 64, 1)',
+                                                },
+                                                {
+                                                    label: 'Profit',
+                                                    data: chartData?.profit,
+                                                    borderColor: 'rgba(255, 206, 86, 1)',
+                                                    backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                                                    fill: true,
+                                                    tension: 0.3,
+                                                    pointRadius: 5,
+                                                    pointHoverRadius: 8,
+                                                    pointBackgroundColor: 'rgba(255, 206, 86, 1)',
+                                                    pointHoverBackgroundColor: 'rgba(255, 206, 86, 1)',
+                                                },
+                                                {
+                                                    label: 'Margin',
+                                                    data: chartData?.margin,
+                                                    borderColor: 'rgba(153, 102, 255, 1)',
+                                                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                                                    fill: true,
+                                                    hidden: true,
+                                                    tension: 0.3,
+                                                    pointRadius: 5,
+                                                    pointHoverRadius: 8,
+                                                    pointBackgroundColor: 'rgba(153, 102, 255, 1)',
+                                                    pointHoverBackgroundColor: 'rgba(153, 102, 255, 1)',
+                                                },
+                                                ],
+                                            }}
+                                            options={{
+                                                responsive: true,
+                                                maintainAspectRatio: false,
+                                                scales: {
+                                                x: {
+                                                    ticks: {
+                                                    padding: 30,
+                                                    color: (context) => {
+                                                        const label = chartData?.dates[context.index];
+                                                        return getColorForValue(label);
+                                                    },
+                                                    },
+                                                    grid: {
+                                                    color: darkMode ? '#444' : '#e0e0e0',
+                                                    },
+                                                },
+                                                y: {
+                                                    beginAtZero: true,
+                                                    ticks: {
+                                                    callback: function (value) {
+                                                        return value.toFixed(2);
+                                                    },
+                                                    color: darkMode ? '#fff' : '#000',
+                                                    },
+                                                    grid: {
+                                                    color: darkMode ? '#444' : '#e0e0e0',
+                                                    },
+                                                },
+                                                },
+                                                plugins: {
+                                                legend: {
+                                                    labels: {
+                                                    color: darkMode ? '#fff' : '#000',
+                                                    },
+                                                },
+                                                tooltip: {
+                                                    mode: 'index', // Ensure all datasets at this x-axis point are shown
+                                                    intersect: true, // Show tooltip only when hovering directly over a bubble/point
+                                                    callbacks: {
+                                                    label: function (tooltipItem) {
+                                                        const index = tooltipItem.dataIndex;
+                                                        const dataset = tooltipItem.dataset;
+                                                        const value = dataset.data[index];
+                                                        const datasetLabel = dataset.label || '';
 
-                                                    // Return label with value and date
-                                                    return `${datasetLabel}: ${value} (Date: ${chartData?.newDates[index]})`;
+                                                        // Return label with value and date
+                                                        return `${datasetLabel}: ${value} (Date: ${chartData?.newDates[index]})`;
+                                                    },
+                                                    },
+                                                    displayColors: true, // Enable color box for each dataset
+                                                    boxWidth: 15, // Adjust the width of the color box
+                                                    boxHeight: 15, // Adjust the height of the color box
                                                 },
                                                 },
-                                                displayColors: true, // Enable color box for each dataset
-                                                boxWidth: 15, // Adjust the width of the color box
-                                                boxHeight: 15, // Adjust the height of the color box
-                                            },
-                                            },
-                                        }}
-                                        height={350}
-                                    />
-                                </Row>
-                            </div>
-                        </Carousel>
+                                            }}
+                                            height={350}
+                                        />
+                                    </Row>
+                                </div>
+                            </Carousel>
+                        </div>
                         
 
                         
