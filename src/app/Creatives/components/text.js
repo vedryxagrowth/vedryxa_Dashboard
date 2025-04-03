@@ -903,104 +903,192 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         const uploadFilesSequentially = async (selectedFiles) => {
             const mediaHashArray = [];
         
-            for (const file of selectedFiles) {
-                try {
-                    const fileType = file.type;
-                    if (!fileType.startsWith("image/") && !fileType.startsWith("video/")) {
-                        onError("Unsupported file type");
-                        continue;
-                    }
+            // for (const file of selectedFiles) {
+            //     try {
+            //         const fileType = file.type;
+            //         if (!fileType.startsWith("image/") && !fileType.startsWith("video/")) {
+            //             onError("Unsupported file type");
+            //             continue;
+            //         }
         
-                    if (file?.url) {
-                        if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith('.mp4')) {
-                            const formData = new FormData();
-                            const response = await fetch(`https://prodapis.adsgoat.in/s3?s3Url=${file.url}`, {
-                                method: 'GET',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    Authorization: localStorage.getItem("token"),
-                                },
-                            });
+            //         if (file?.url) {
+            //             if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith('.mp4')) {
+            //                 const formData = new FormData();
+            //                 const response = await fetch(`https://prodapis.adsgoat.in/s3?s3Url=${file.url}`, {
+            //                     method: 'GET',
+            //                     headers: {
+            //                         'Content-Type': 'application/json',
+            //                         Authorization: localStorage.getItem("token"),
+            //                     },
+            //                 });
         
-                            const uploadFile = await response.blob();
-                            if (!(uploadFile instanceof Blob)) {
-                                console.error("The fetched file is not a Blob:", uploadFile);
-                                continue;
-                            }
+            //                 const uploadFile = await response.blob();
+            //                 if (!(uploadFile instanceof Blob)) {
+            //                     console.error("The fetched file is not a Blob:", uploadFile);
+            //                     continue;
+            //                 }
         
-                            formData.append("file", uploadFile, file.name);
-                            // console.log(formData);
+            //                 formData.append("file", uploadFile, file.name);
+            //                 // console.log(formData);
         
-                            let fbResponse;
-                            if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg')) {
-                                formData.append('file', uploadFile, file.name);
-                                formData.append('access_token', token);
-                                const fileName = file.name.split('/').pop();
+            //                 let fbResponse;
+            //                 if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg')) {
+            //                     formData.append('file', uploadFile, file.name);
+            //                     formData.append('access_token', token);
+            //                     const fileName = file.name.split('/').pop();
         
-                                fbResponse = await axios.post(
-                                    `https://graph.facebook.com/v20.0/act_${account}/adimages`,
-                                    formData,
-                                    { headers: { 'Content-Type': 'multipart/form-data' } }
-                                );
+            //                     fbResponse = await axios.post(
+            //                         `https://graph.facebook.com/v20.0/act_${account}/adimages`,
+            //                         formData,
+            //                         { headers: { 'Content-Type': 'multipart/form-data' } }
+            //                     );
         
-                                if (fbResponse.status === 200) {
-                                    onSuccess("ok", response);
-                                    mediaHashArray.push({
-                                        filename: file?.url,
-                                        imag_hash: fbResponse.data?.images?.[fileName]?.hash,
-                                    });
-                                } else {
-                                    onError("error", response);
-                                    console.error("Image upload failed");
-                                }
-                            } else if (file?.url?.endsWith('.mp4')) {
-                                formData.append('access_token', token);
-                                fbResponse = await axios.post(
-                                    `https://graph.facebook.com/v20.0/act_${account}/advideos`,
-                                    formData,
-                                    { headers: { 'Content-Type': 'multipart/form-data' } }
-                                );
+            //                     if (fbResponse.status === 200) {
+            //                         onSuccess("ok", response);
+            //                         mediaHashArray.push({
+            //                             filename: file?.url,
+            //                             imag_hash: fbResponse.data?.images?.[fileName]?.hash,
+            //                         });
+            //                     } else {
+            //                         onError("error", response);
+            //                         console.error("Image upload failed");
+            //                     }
+            //                 } else if (file?.url?.endsWith('.mp4')) {
+            //                     formData.append('access_token', token);
+            //                     fbResponse = await axios.post(
+            //                         `https://graph.facebook.com/v20.0/act_${account}/advideos`,
+            //                         formData,
+            //                         { headers: { 'Content-Type': 'multipart/form-data' } }
+            //                     );
         
-                                if (fbResponse.status === 200) {
-                                    const videoid = fbResponse?.data?.id;
-                                    await new Promise(resolve => setTimeout(resolve, 10000));
+            //                     if (fbResponse.status === 200) {
+            //                         const videoid = fbResponse?.data?.id;
+            //                         await new Promise(resolve => setTimeout(resolve, 10000));
         
-                                    const thumbnailResponse = await axios.get(
-                                        `https://graph.facebook.com/v20.0/${videoid}`,
-                                        {
-                                            params: {
-                                                access_token: token,
-                                                fields: 'thumbnails',
-                                                is_preferred: true
-                                            }
-                                        }
-                                    );
+            //                         const thumbnailResponse = await axios.get(
+            //                             `https://graph.facebook.com/v20.0/${videoid}`,
+            //                             {
+            //                                 params: {
+            //                                     access_token: token,
+            //                                     fields: 'thumbnails',
+            //                                     is_preferred: true
+            //                                 }
+            //                             }
+            //                         );
         
-                                    const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
-                                    const uri = preferredThumbnail ? preferredThumbnail.uri : "";
-                                    // console.log(videoid);
-                                    // console.log(uri);
+            //                         const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
+            //                         const uri = preferredThumbnail ? preferredThumbnail.uri : "";
+            //                         // console.log(videoid);
+            //                         // console.log(uri);
         
-                                    onSuccess("ok", fbResponse);
-                                    mediaHashArray.push({
-                                        filename: file?.url,
-                                        videoid: videoid,
-                                        thambnailurl: uri,
-                                    });
-                                } else {
-                                    onError("error", fbResponse);
-                                    console.error("Video upload to Facebook failed");
-                                }
-                            }
-                        }
-                    } 
-                } catch (error) {
-                    console.error("Error uploading file:", error);
-                    onError("error", error);
-                }
-            }
+            //                         onSuccess("ok", fbResponse);
+            //                         mediaHashArray.push({
+            //                             filename: file?.url,
+            //                             videoid: videoid,
+            //                             thambnailurl: uri,
+            //                         });
+            //                     } else {
+            //                         onError("error", fbResponse);
+            //                         console.error("Video upload to Facebook failed");
+            //                     }
+            //                 }
+            //             }
+            //         } 
+            //     } catch (error) {
+            //         console.error("Error uploading file:", error);
+            //         onError("error", error);
+            //     }
+            // }
         
             // console.log("All media files uploaded successfully:", mediaHashArray);
+            
+            for (const file of selectedFiles) {
+                try {
+                  const fileType = file.type;
+              
+                  if (!fileType.startsWith("image/") && !fileType.startsWith("video/")) {
+                    onError("Unsupported file type");
+                    continue;
+                  }
+              
+                  if (file?.url) {
+                    const fileName = file.name.split('/').pop();
+              
+                    const response = await fetch(`https://prodapis.adsgoat.in/s3?s3Url=${file.url}`, {
+                      method: 'GET',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: localStorage.getItem("token"),
+                      },
+                    });
+              
+                    const uploadFile = await response.blob();
+                    if (!(uploadFile instanceof Blob)) {
+                      console.error("Fetched file is not a Blob");
+                      continue;
+                    }
+              
+                    // ❗ Create FormData inside this block (not reused)
+                    const formData = new FormData();
+              
+                    if (fileType.startsWith('image/')) {
+                      formData.append('file', uploadFile, fileName);
+                      formData.append('access_token', token);
+              
+                      const fbResponse = await axios.post(
+                        `https://graph.facebook.com/v20.0/act_${account}/adimages`,
+                        formData,
+                        { headers: { 'Content-Type': 'multipart/form-data' } }
+                      );
+              
+                      if (fbResponse.status === 200) {
+                        mediaHashArray.push({
+                          filename: file.url,
+                          imag_hash: fbResponse.data?.images?.[fileName]?.hash,
+                        });
+                      }
+                    } else if (fileType.startsWith('video/')) {
+                      formData.append('file', uploadFile, fileName);
+                      formData.append('access_token', token);
+              
+                      const fbResponse = await axios.post(
+                        `https://graph.facebook.com/v20.0/act_${account}/advideos`,
+                        formData,
+                        { headers: { 'Content-Type': 'multipart/form-data' } }
+                      );
+              
+                      if (fbResponse.status === 200) {
+                        const videoid = fbResponse.data.id;
+                        await new Promise(resolve => setTimeout(resolve, 10000));
+              
+                        const thumbnailResponse = await axios.get(
+                          `https://graph.facebook.com/v20.0/${videoid}`,
+                          {
+                            params: {
+                              access_token: token,
+                              fields: 'thumbnails',
+                            },
+                          }
+                        );
+              
+                        const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(
+                          t => t.is_preferred
+                        );
+              
+                        mediaHashArray.push({
+                          filename: file.url,
+                          videoid,
+                          thambnailurl: preferredThumbnail?.uri || "",
+                        });
+                      }
+                    }
+                  }
+                } catch (err) {
+                  console.error("Upload failed:", err);
+                  onError("upload_error", err);
+                }
+            }
+              
             return mediaHashArray;
         };
 
