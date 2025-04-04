@@ -4572,7 +4572,7 @@ const MyTablePage = () => {
             {/* className='select-container' */}
             <Space direction="vertical" style={{ width: '100%', padding: "1%" }}>
                 <Row gutter={[16, 16]}>
-                    <Col xs={24} sm={12} md={4}>
+                    <Col xs={24} sm={12} md={6} lg={5} xl={4} xxl={3}>
                         <Select
                             showSearch
                             className='select-element'
@@ -4594,7 +4594,7 @@ const MyTablePage = () => {
                         />
                     </Col>
 
-                    <Col xs={24} sm={12} md={4} style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}>
+                    <Col xs={24} sm={12} md={8} lg={6} xl={5} xxl={4} style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}>
                         <Select
                             showSearch
                             onChange={handleChange1} // Handle value selection
@@ -4641,13 +4641,14 @@ const MyTablePage = () => {
                         </ConfigProvider>
                     </Col>
 
-                    <Col xs={24} sm={12} md={3}>
+                    <Col xs={24} sm={12} md={3} lg={3} xl={2}>
                         <Select
                             showSearch
                             onChange={onChangeTime}
                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             placeholder="Select Timezone"
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                            style={{width: '100%'}}
                             optionFilterProp="label"
                             value={time}
                             options={timezones.map((item) => ({

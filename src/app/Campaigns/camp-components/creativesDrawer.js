@@ -148,7 +148,7 @@ const CreativesDrawer = ({selectedFilesData}) => {
         return <Spin size="large" style={{ display: "flex", justifyContent: "center", marginTop: "20px" }} />;
     }
     // Redirect non-admin users
-    if (userdetails?.role !== "Admin") {
+    if (userdetails?.role === "Revenue_Partner") {
         router.push("/Dashboard");
         return null;
     }

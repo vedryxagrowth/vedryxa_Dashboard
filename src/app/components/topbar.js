@@ -598,7 +598,7 @@ const Topbar = ({onComplete}) => {
         {/* Conditional rendering based on authentication and authorization status */}
         {isUserAuthorized ? (
           <>
-            <div className="relative inline-block" ref={wrapperRef}>
+            {userdetails?.role !== "Revenue_Partner" && <div className="relative inline-block" ref={wrapperRef}>
               <div className="cursor-pointer" onClick={openNotificationsList}>
                 <Bell size={20} />
                 {notifications.length > 0 && (
@@ -611,18 +611,18 @@ const Topbar = ({onComplete}) => {
                   </Badge>
                 )}
               </div>
-            </div>
+            </div>}
 
-            <button  style={{padding: '0px', margin:'0px'}} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onChangeStickyNotes}>
+            {userdetails?.role !== "Revenue_Partner" && <button  style={{padding: '0px', margin:'0px'}} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onChangeStickyNotes}>
                 <SlNotebook  size={20}/>
-            </button>
+            </button>}
 
-            <button style={{padding: '0px', margin:'0px'}} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickCalculator}>
+            {userdetails?.role !== "Revenue_Partner" && <button style={{padding: '0px', margin:'0px'}} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickCalculator}>
                  <CalculatorOutlined style={{fontSize:'20px',padding: '0px', margin:'0px'}}/>
-            </button>
-            <button style={{padding: '0px', margin:'0px'}} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickWorlTime}>
+            </button>}
+            {userdetails?.role !== "Revenue_Partner" && <button style={{padding: '0px', margin:'0px'}} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickWorlTime}>
                  <TfiWorld size={20} />
-            </button>
+            </button>}
 
             <button
               onClick={toggleTheme}

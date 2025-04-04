@@ -11,7 +11,7 @@ import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { useTokenContext } from '../../../components/parent'
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
-import { Spin, Row, Col, Select, Input, Button, Modal, message, Switch } from 'antd';
+import { Spin, Row, Col, Select, Input, Button, Modal, message, Switch, Tooltip } from 'antd';
 import { ReloadOutlined, EditOutlined, BarChartOutlined } from '@ant-design/icons';
 Chart.register(...registerables);
 import debounce from 'lodash.debounce';
@@ -52,6 +52,14 @@ export default function CampaignAndAccount({ params }) {
     const [isLoading, setLoading] = useState(true);
     const [dailyData, setdailyData] = useState([]);
     const [chartData, setChartData] = useState({ dates: [], spend: [], revenue: [], profit: [], margin: [] });
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText(decodedString).then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1500); // Reset after 1.5 seconds
+        });
+    };
     const { theme } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
     const [darkMode, setDarkMode] = useState(false);
@@ -1673,8 +1681,18 @@ export default function CampaignAndAccount({ params }) {
                             style={{ marginLeft: '15px', color: 'blue', cursor: 'pointer' }} 
                         />
                     )}
-                    <div style={{width:'100%'}}>
-                        <h3 style={{textAlign:'center'}}>{decodedString}</h3>
+                    <div style={{ width: '100%' }}>
+                        <Tooltip
+                            title={copied ? 'Copied!' : 'Click to copy'}
+                            // color={copied ? 'green' : undefined}
+                        >
+                            <h3
+                            style={{ textAlign: 'center', cursor: 'pointer' }}
+                            onClick={handleCopy}
+                            >
+                            {decodedString}
+                            </h3>
+                        </Tooltip>
                     </div>
                 </Col>
                 <Select
@@ -1868,6 +1886,8 @@ export default function CampaignAndAccount({ params }) {
                                 value={comment}
                                 onChange={(e) => setComment(e.target.value)}
                                 style={{color: theme === "dark" ? "white" : "black"}}
+                                backgroundColor= {theme === "dark" ? "#1e1e1e" : "white"}   // background color
+                                borderColor={ theme === "dark" ? "#555" : "#d9d9d9" }
                             />
                         </Modal>
         </Row>
