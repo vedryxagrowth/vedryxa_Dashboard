@@ -12,7 +12,7 @@ import { useTokenContext } from '../../../components/parent'
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
 import { color } from 'chart.js/helpers';
-import { Spin, Row, Col, Select, Input, Button, Modal, message, Switch } from 'antd';
+import { Spin, Row, Col, Select, Input, Button, Modal, message, Switch,Tooltip } from 'antd';
 import { ReloadOutlined, EditOutlined, BarChartOutlined } from '@ant-design/icons';
 import debounce from 'lodash.debounce';
 
@@ -89,6 +89,15 @@ const MnetLiveCampaignHistory = ({ params }) => {
     const [decode, setDebounc] = useState("");
 
     const [chartData, setChartData] = useState({ dates: [], sortedData: [], sortedMarginData: [], rpcDate: [], hoursDate: [], hours: [], spend: [], revenue: [], profit: [], margin: [] });
+
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText(decodedString).then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1500); // Reset after 1.5 seconds
+        });
+    };
 
     const timeZoneToDisplay = useRef();
 
@@ -2016,7 +2025,17 @@ const MnetLiveCampaignHistory = ({ params }) => {
                         />
                     )}
                     <div style={{ width: '100%' }}>
-                        <h3 style={{ textAlign: 'center', marginLeft:'20px' }}>{decodedString}</h3>
+                        <Tooltip
+                            title={copied ? 'Copied!' : 'Click to copy'}
+                            // color={copied ? 'green' : undefined}
+                        >
+                            <h3
+                            style={{ textAlign: 'center', cursor: 'pointer' }}
+                            onClick={handleCopy}
+                            >
+                            {decodedString}
+                            </h3>
+                        </Tooltip>
                     </div>
                 </Col>
                 <Select
@@ -2207,6 +2226,8 @@ const MnetLiveCampaignHistory = ({ params }) => {
                                 value={comment}
                                 onChange={(e) => setComment(e.target.value)}
                                 style={{color: theme === "dark" ? "white" : "black"}}
+                                backgroundColor= {theme === "dark" ? "#1e1e1e" : "white"}   // background color
+                                borderColor={ theme === "dark" ? "#555" : "#d9d9d9" }
                             />
                         </Modal>
         </Row>

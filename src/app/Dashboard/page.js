@@ -3700,7 +3700,7 @@ const Dashboard = () => {
                                                     },
                                                     },
                                                     grid: {
-                                                    color: darkMode ? '#444' : '#e0e0e0',
+                                                    color: theme === "dark" ? '#444' : '#e0e0e0',
                                                     },
                                                 },
                                                 y: {
@@ -3709,17 +3709,17 @@ const Dashboard = () => {
                                                     callback: function (value) {
                                                         return value.toFixed(2);
                                                     },
-                                                    color: darkMode ? '#fff' : '#000',
+                                                    color: theme === "dark" ? '#fff' : '#000',
                                                     },
                                                     grid: {
-                                                    color: darkMode ? '#444' : '#e0e0e0',
+                                                    color: theme === "dark" ? '#444' : '#e0e0e0',
                                                     },
                                                 },
                                                 },
                                                 plugins: {
                                                 legend: {
                                                     labels: {
-                                                    color: darkMode ? '#fff' : '#000',
+                                                    color: theme === "dark" ? '#fff' : '#000',
                                                     },
                                                 },
                                                 tooltip: {
@@ -3858,7 +3858,7 @@ const Dashboard = () => {
                                                     },
                                                     },
                                                     grid: {
-                                                    color: darkMode ? '#444' : '#e0e0e0',
+                                                    color: theme === "dark" ? '#444' : '#e0e0e0',
                                                     },
                                                 },
                                                 y: {
@@ -3867,17 +3867,17 @@ const Dashboard = () => {
                                                     callback: function (value) {
                                                         return value.toFixed(2);
                                                     },
-                                                    color: darkMode ? '#fff' : '#000',
+                                                    color: theme === "dark" ? '#fff' : '#000',
                                                     },
                                                     grid: {
-                                                    color: darkMode ? '#444' : '#e0e0e0',
+                                                    color: theme === "dark" ? '#444' : '#e0e0e0',
                                                     },
                                                 },
                                                 },
                                                 plugins: {
                                                 legend: {
                                                     labels: {
-                                                    color: darkMode ? '#fff' : '#000',
+                                                    color: theme === "dark" ? '#fff' : '#000',
                                                     },
                                                 },
                                                 tooltip: {
