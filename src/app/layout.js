@@ -121,7 +121,7 @@ const UserActivities = ({ children, onComplete }) => {
     if(sessionClose === "close"){
         const handleSignOutAcrossTabs = () => {
             console.log("Sign-out triggered across all tabs.");
-            const { storedData, activeTab } = localStorage; localStorage.clear(); Object.assign(localStorage, { storedData, activeTab });
+            const { storedData, activeTab, showGraph } = localStorage; localStorage.clear(); Object.assign(localStorage, { storedData, activeTab, showGraph });
             localStorage.removeItem("token");
             signOut(); // Sign out the user using your existing auth logic
              // Trigger the onComplete callback
@@ -175,7 +175,7 @@ const UserActivities = ({ children, onComplete }) => {
             localStorage.setItem("signout", "true");
   
             // Clear local changes and log out
-            const { storedData, activeTab } = localStorage; localStorage.clear(); Object.assign(localStorage, { storedData, activeTab });
+            const { storedData, activeTab, showGraph } = localStorage; localStorage.clear(); Object.assign(localStorage, { storedData, activeTab, showGraph });
             localStorage.removeItem("token");
             localStorage.setItem("redirectUrl", router.pathname);
             signOut();
@@ -207,7 +207,7 @@ const UserActivities = ({ children, onComplete }) => {
     }
     if(status === "unauthenticated"){
       console.log("users");
-      const { storedData, activeTab } = localStorage; localStorage.clear(); Object.assign(localStorage, { storedData, activeTab });
+      const { storedData, activeTab, showGraph } = localStorage; localStorage.clear(); Object.assign(localStorage, { storedData, activeTab, showGraph });
       onComplete();
       // signOut();
       console.log("un auth");

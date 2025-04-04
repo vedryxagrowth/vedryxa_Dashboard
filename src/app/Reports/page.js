@@ -174,10 +174,35 @@ const MyTablePage = () => {
         setNewInputValue(e.target.value);
     }
 
+    const sortAccountsForAccess = (accountsForAccess) => {
+        return [...accountsForAccess]
+          .sort((a, b) => {
+            // 1. Sort by status: Active first
+            if (a.status !== b.status) {
+              return a.status === 'Active' ? -1 : 1;
+            }
+      
+            // 2. Sort by accountNumber
+            if (a.accountNumber !== b.accountNumber) {
+              return a.accountNumber.localeCompare(b.accountNumber);
+            }
+      
+            // 3. Sort by accountName if present
+            if (a.accountName && b.accountName && a.accountName !== b.accountName) {
+              return a.accountName.localeCompare(b.accountName);
+            }
+      
+            // 4. Maintain stable order (no-op)
+            return 0;
+        });
+    };
+
     const accountsForAccess = adAccounts[revenuePratner];
     console.log(accountsForAccess, "accounts Access");
 
     const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
+
+    console.log(accountsAccess, "accounts Access");
 
     const [networksData, setNetworksData] = useState(accountsAccess);
 
@@ -1104,7 +1129,7 @@ const MyTablePage = () => {
             // cellRenderer: campaignNameRenderer,
         },
         adsetname: {
-            headerName: 'Adset-Name', field: 'adsetname',
+            headerName: 'AdsetName', field: 'adsetname',
             // resizeble: true,
             sortable: true,
             width: 350,
@@ -1119,7 +1144,7 @@ const MyTablePage = () => {
             showRowGroup: 'adsetname'
         },
         adname: {
-            headerName: 'Ad-Name', field: 'adname',
+            headerName: 'AdName', field: 'adname',
             // resizeble: true,
             sortable: true,
             width: 300,
@@ -1165,6 +1190,7 @@ const MyTablePage = () => {
                 const [newgroupedData, setNewGroupedData] = useState([]);
                 const [changeBudget, onChangeBudget] = useState();
                 const [campaignStatus, setCampaignStatus] = useState(true);
+                const [campaignActualSpend, setCampaignActualSpend] = useState({});
 
                 const onChangeSpendAndStatus = async () => {
                     if (params?.node?.rowPinned === 'bottom') {
@@ -1177,15 +1203,22 @@ const MyTablePage = () => {
 
                     // Fetch all the rows under the current group
                     const groupedData = allLeafChildren.map(node => node.data) || [];
+                    // console.log(groupedData, "groupedData");
                     setNewGroupedData(groupedData);
+                    const campaignId = groupedData[0]?.campaignid;
 
                     // Only show the modal if there is data (groupedData length is greater than 0)
                     if (groupedData.length > 0) {
                         const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
+                        const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
                         if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
                             setGroupedData(getCampaignResponse.data);
                             setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
                             onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
+                        }
+                        if(getCampaignActualSpend.status === 200){
+                            console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                            setCampaignActualSpend(getCampaignActualSpend.data);
                         }
                         else {
                             setGroupedData(groupedData);
@@ -1222,7 +1255,7 @@ const MyTablePage = () => {
                 const getTotalSpend = (data) => {
                     if (!data || data.length === 0) return 0;
                     const total = data.reduce((total, item) => {
-                        return total + (item?.spend || 0);
+                        return total + (parseFloat(item?.spend) || 0);
                     }, 0);
                     return Math.round(total * 100) / 100; // Round to 2 decimal places
                 };
@@ -1264,21 +1297,22 @@ const MyTablePage = () => {
                                 onOk={handleOk}
                                 onCancel={handleCancel}
                                 width={600}  
-                                style={{ padding: '20px' }}  
+                                style={{ padding: '20px' }} 
+                                okButtonProps={{ style: { backgroundColor: '#C7F39A', borderColor: '#C7F39A' } }} 
                             >
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                         <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-                                        <Switch checked={campaignStatus} onChange={onChangeCampaignStatus} />
+                                        <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#C7F39A"}} onChange={onChangeCampaignStatus} />
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                        <Typography.Text strong style={{ marginBottom: '10px' }}>Budget:</Typography.Text>
-                                        <Input placeholder="Enter your value here" defaultValue={groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData)} onChange={onChangeBudgetValue} />
+                                        <Typography.Text strong style={{ marginBottom: '10px' }}>Budget: <span style={{fontWeight:'normal'}}>{campaignActualSpend.daily_budget ? "Daily" : campaignActualSpend.lifetime_budget ? "Lifetime" : "Adset"}</span></Typography.Text>
+                                        <Input placeholder="Enter your value here" defaultValue={campaignActualSpend.daily_budget ? parseFloat(campaignActualSpend.daily_budget)/100 : campaignActualSpend.lifetime_budget ? parseFloat(campaignActualSpend.lifetime_budget)/100 : (groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData))} onChange={onChangeBudgetValue} />
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong>Campaign ID:</Typography.Text>
-                                        <p>{groupedData?.length > 0 && groupedData?.length !== 1 ? groupedData[0]?.campaignid : groupedData.campaignid}</p>
+                                        <p>{campaignActualSpend?.id}</p>
                                     </div>
                                 </div>
                             </Modal>
@@ -1658,6 +1692,7 @@ const MyTablePage = () => {
                 const [groupedData, setGroupedData] = useState([]);
                 const [changeBudget, onChangeBudget] = useState();
                 const [campaignStatus, setCampaignStatus] = useState(true);
+                const [campaignActualSpend, setCampaignActualSpend] = useState({});
 
                 const onChangeSpendAndStatus = async () => {
                     // Check if it's a group footer row (for groupIncludeFooter)
@@ -1669,17 +1704,22 @@ const MyTablePage = () => {
                     // Ensure allLeafChildren exists and is an array before proceeding
                     const allLeafChildren = params.node?.allLeafChildren || [];
                     setNewGroupedData(groupedData);
-
                     // Fetch all the rows under the current group
                     const groupedData = allLeafChildren.map(node => node.data) || [];
+                    const campaignId = groupedData[0]?.campaignid;
 
                     // Only show the modal if there is data (groupedData length is greater than 0)
                     if (groupedData.length > 0) {
                         const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
+                        const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
                         if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
                             setGroupedData(getCampaignResponse.data);
                             setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
                             onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
+                        }
+                        if(getCampaignActualSpend.status === 200){
+                            console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                            setCampaignActualSpend(getCampaignActualSpend.data);
                         }
                         else {
                             setGroupedData(groupedData);
@@ -1717,7 +1757,7 @@ const MyTablePage = () => {
                 const getTotalSpend = (data) => {
                     if (!data || data.length === 0) return 0;
                     const total = data.reduce((total, item) => {
-                        return total + (item?.spend || 0);
+                        return total + (parseFloat(item?.spend) || 0);
                     }, 0);
                     return Math.round(total * 100) / 100; // Round to 2 decimal places
                 };
@@ -1761,23 +1801,24 @@ const MyTablePage = () => {
                                 onCancel={handleCancel}
                                 width={600}  // Set a custom width for the modal
                                 style={{ padding: '20px' }}  // Adjust body padding
+                                okButtonProps={{ style: { backgroundColor: '#C7F39A', borderColor: '#C7F39A' } }} 
                             >
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                         <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-                                        <Switch checked={campaignStatus} onChange={onChangeCampaignStatus} />
+                                        <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#C7F39A"}} onChange={onChangeCampaignStatus} />
                                     </div>
 
                                     {/* Input Field */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                        <Typography.Text strong style={{ marginBottom: '10px' }}>Budget:</Typography.Text>
-                                        <Input placeholder="Enter your value here" defaultValue={groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData)} onChange={onChangeBudgetValue} />
+                                        <Typography.Text strong style={{ marginBottom: '10px' }}>Budget: <span style={{fontWeight:'normal'}}>{campaignActualSpend.daily_budget ? "Daily" : campaignActualSpend.lifetime_budget ? "Lifetime" : "Adset"}</span></Typography.Text>
+                                        <Input placeholder="Enter your value here" defaultValue={campaignActualSpend.daily_budget ? parseFloat(campaignActualSpend.daily_budget)/100 : campaignActualSpend.lifetime_budget ? parseFloat(campaignActualSpend.lifetime_budget)/100 : (groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData))} onChange={onChangeBudgetValue} />
                                     </div>
 
                                     {/* Campaign ID */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong>Campaign ID:</Typography.Text>
-                                        <p>{groupedData?.length > 0 && groupedData?.length !== 0 ? groupedData[0]?.campaignid : groupedData.campaignid}</p>
+                                        <p>{campaignActualSpend?.id}</p>
                                     </div>
                                 </div>
                             </Modal>
@@ -1803,7 +1844,7 @@ const MyTablePage = () => {
             
         },
         adsetname: {
-            headerName: 'Adset-Name', field: 'adsetname',
+            headerName: 'AdsetName', field: 'adsetname',
             // resizeble: true,
             sortable: true,
             width: 350,
@@ -1817,7 +1858,7 @@ const MyTablePage = () => {
             }, 
         },
         adname: {
-            headerName: 'Ad-Name', field: 'adname',
+            headerName: 'AdName', field: 'adname',
             // resizeble: true,
             sortable: true,
             width: 300,
@@ -2049,6 +2090,7 @@ const MyTablePage = () => {
                 const [newgroupedData, setNewGroupedData] = useState([]);
                 const [changeBudget, onChangeBudget] = useState();
                 const [campaignStatus, setCampaignStatus] = useState(true);
+                const [campaignActualSpend, setCampaignActualSpend] = useState({});
 
                 const onChangeSpendAndStatus = async () => {
                     if (params?.node?.rowPinned === 'bottom') {
@@ -2062,14 +2104,22 @@ const MyTablePage = () => {
                     // Fetch all the rows under the current group
                     const groupedData = allLeafChildren.map(node => node.data) || [];
                     setNewGroupedData(groupedData);
+                    const campaignId = groupedData[0]?.campaignid;
+                    // console.log(groupedData, "groupedData");
 
                     // Only show the modal if there is data (groupedData length is greater than 0)
                     if (groupedData.length > 0) {
                         const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
+                        const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
                         if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
+                            
                             setGroupedData(getCampaignResponse.data);
                             setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
                             onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
+                        }
+                        if(getCampaignActualSpend.status === 200){
+                            console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                            setCampaignActualSpend(getCampaignActualSpend.data);
                         }
                         else {
                             setGroupedData(groupedData);
@@ -2077,6 +2127,13 @@ const MyTablePage = () => {
                         // Set the grouped data for the modal
                         setIsModalVisible(true); // Show the modal for non-footer rows
                     }
+                    // if(groupedData.length > 0) {
+                        
+                    //     const getCampaignActualSpend = await apiClient.get(`http://localhost:8000/get/ActualCampaginSpend?campaignId=${campaignId}`);
+                    //     if (getCampaignActualSpend.status === 200){
+                    //         setCampaignActualSpend(getCampaignActualSpend.data);
+                    //     }
+                    // }
                 };
 
                 const handleOk = async () => {
@@ -2106,8 +2163,9 @@ const MyTablePage = () => {
                 const getTotalSpend = (data) => {
                     if (!data || data.length === 0) return 0;
                     const total = data.reduce((total, item) => {
-                        return total + (item?.spend || 0);
+                        return total + (parseFloat(item?.spend) || 0);
                     }, 0);
+                    console.log(total, "total");
                     return Math.round(total * 100) / 100; // Round to 2 decimal places
                 };
 
@@ -2135,6 +2193,7 @@ const MyTablePage = () => {
                         message.error('Error updating campaign status.');
                     }
                 };
+                console.log()
 
                 return (
                     <div>
@@ -2148,21 +2207,22 @@ const MyTablePage = () => {
                                 onOk={handleOk}
                                 onCancel={handleCancel}
                                 width={600}  
-                                style={{ padding: '20px' }}  
+                                style={{ padding: '20px' }}
+                                okButtonProps={{ style: { backgroundColor: '#C7F39A', borderColor: '#C7F39A' } }} 
                             >
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                         <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-                                        <Switch checked={campaignStatus} onChange={onChangeCampaignStatus} />
+                                        <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#C7F39A"}} onChange={onChangeCampaignStatus} />
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                        <Typography.Text strong style={{ marginBottom: '10px' }}>Budget:</Typography.Text>
-                                        <Input placeholder="Enter your value here" defaultValue={groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData)} onChange={onChangeBudgetValue} />
+                                        <Typography.Text strong style={{ marginBottom: '10px' }}>Budget: <span style={{fontWeight:'normal'}}>{campaignActualSpend.daily_budget ? "Daily" : campaignActualSpend.lifetime_budget ? "Lifetime" : "Adset"}</span></Typography.Text>
+                                        <Input placeholder="Enter your value here" defaultValue={campaignActualSpend.daily_budget ? parseFloat(campaignActualSpend.daily_budget)/100 : campaignActualSpend.lifetime_budget ? parseFloat(campaignActualSpend.lifetime_budget)/100 : (groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData))} onChange={onChangeBudgetValue} />
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong>Campaign ID:</Typography.Text>
-                                        <p>{groupedData?.length > 0 && groupedData?.length !== 1 ? groupedData[0]?.campaignid : groupedData.campaignid}</p>
+                                        <p>{campaignActualSpend?.id}</p>
                                     </div>
                                 </div>
                             </Modal>
@@ -2172,10 +2232,10 @@ const MyTablePage = () => {
             },
         },
         adsetname: {
-            headerName: 'Adset-Name',
+            headerName: 'AdsetName',
             field: 'adsetname',
             sortable: true,
-            minWidth: 400,
+            minWidth: 450,
             filter: 'agSetColumnFilter',
             filterParams: {
                 comparator: (a, b) => a.localeCompare(b),
@@ -2185,7 +2245,7 @@ const MyTablePage = () => {
             
         },
         adname: {
-            headerName: 'Ad-Name', field: 'adname',
+            headerName: 'AdName', field: 'adname',
             // resizeble: true,
             // sortable: true,
             // width: 300,
@@ -2275,7 +2335,7 @@ const MyTablePage = () => {
         spend: {
             headerName: 'Spend',
             field: 'spend',
-            minWidth: 95,
+            minWidth: 105,
             aggFunc: liveSpender,
             sortable: true,
             filter: "agTextColumnFilter", // Keep filter active
@@ -2301,7 +2361,7 @@ const MyTablePage = () => {
         profit: {
             headerName: 'Profit',
             field: 'profit',
-            minWidth: 95,
+            minWidth: 105,
             sortable: true,
             aggFunc: liveSpender,
             cellClassRules: {
@@ -2422,7 +2482,7 @@ const MyTablePage = () => {
         impressions: {
             headerName: 'IMP',
             field: 'impressions',
-            minWidth: 80,
+            minWidth: 100,
             aggFunc: newSpender,
             sortable: true,
             filter: "agNumberColumnFilter",
@@ -2590,6 +2650,7 @@ const MyTablePage = () => {
                 const [groupedData, setGroupedData] = useState([]);
                 const [changeBudget, onChangeBudget] = useState();
                 const [campaignStatus, setCampaignStatus] = useState(true);
+                const [campaignActualSpend, setCampaignActualSpend] = useState({});
 
                 const onChangeSpendAndStatus = async () => {
                     // Check if it's a group footer row (for groupIncludeFooter)
@@ -2604,15 +2665,22 @@ const MyTablePage = () => {
 
                     // Fetch all the rows under the current group
                     const groupedData = allLeafChildren.map(node => node.data) || [];
+                    const campaignId = groupedData[0]?.campaignid;
 
                     // Only show the modal if there is data (groupedData length is greater than 0)
                     if (groupedData.length > 0) {
                         const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
+                        const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
                         if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
                             setGroupedData(getCampaignResponse.data);
                             setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
                             onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
                         }
+                        if(getCampaignActualSpend.status === 200){
+                            console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                            setCampaignActualSpend(getCampaignActualSpend.data);
+                        }
+
                         else {
                             setGroupedData(groupedData);
                             // console.log("dailyadd");
@@ -2649,7 +2717,7 @@ const MyTablePage = () => {
                 const getTotalSpend = (data) => {
                     if (!data || data.length === 0) return 0;
                     const total = data.reduce((total, item) => {
-                        return total + (item?.spend || 0);
+                        return total + (parseFloat(item?.spend) || 0);
                     }, 0);
                     return Math.round(total * 100) / 100; // Round to 2 decimal places
                 };
@@ -2693,23 +2761,24 @@ const MyTablePage = () => {
                                 onCancel={handleCancel}
                                 width={600}  // Set a custom width for the modal
                                 style={{ padding: '20px' }}  // Adjust body padding
+                                okButtonProps={{ style: { backgroundColor: '#C7F39A', borderColor: '#C7F39A' } }} 
                             >
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                         <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-                                        <Switch checked={campaignStatus} onChange={onChangeCampaignStatus} />
+                                        <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#C7F39A"}} onChange={onChangeCampaignStatus} />
                                     </div>
 
                                     {/* Input Field */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                        <Typography.Text strong style={{ marginBottom: '10px' }}>Budget:</Typography.Text>
-                                        <Input placeholder="Enter your value here" defaultValue={groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData)} onChange={onChangeBudgetValue} />
+                                        <Typography.Text strong style={{ marginBottom: '10px' }}>Budget: <span style={{fontWeight:'normal'}}>{campaignActualSpend.daily_budget ? "Daily" : campaignActualSpend.lifetime_budget ? "Lifetime" : "Adset"}</span></Typography.Text>
+                                        <Input placeholder="Enter your value here" defaultValue={campaignActualSpend.daily_budget ? parseFloat(campaignActualSpend.daily_budget)/100 : campaignActualSpend.lifetime_budget ? parseFloat(campaignActualSpend.lifetime_budget)/100 : (groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData))} onChange={onChangeBudgetValue} />
                                     </div>
 
                                     {/* Campaign ID */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong>Campaign ID:</Typography.Text>
-                                        <p>{groupedData?.length > 0 && groupedData?.length !== 0 ? groupedData[0]?.campaignid : groupedData.campaignid}</p>
+                                        <p>{campaignActualSpend?.id}</p>
                                     </div>
                                 </div>
                             </Modal>
@@ -2722,10 +2791,10 @@ const MyTablePage = () => {
         },
 
         adsetname: {
-            headerName: 'Adset-Name', field: 'adsetname',
+            headerName: 'AdsetName', field: 'adsetname',
             // resizeble: true,
             sortable: true,
-            width: 350,
+            minWidth: 450,
             filter: 'agSetColumnFilter',
             filterParams: {
                 comparator: (a, b) => a.localeCompare(b),
@@ -2733,7 +2802,7 @@ const MyTablePage = () => {
             }, 
         },
         adname: {
-            headerName: 'Ad-Name', field: 'adname',
+            headerName: 'AdName', field: 'adname',
             // resizeble: true,
             // sortable: true,
             // width: 300,
@@ -2800,7 +2869,7 @@ const MyTablePage = () => {
         spend: {
             headerName: 'Spend',
             field: 'spend',
-            minWidth: 95,
+            minWidth: 105,
             aggFunc: liveSpender,
             sortable: true,
             filter: "agNumberColumnFilter",
@@ -2826,7 +2895,7 @@ const MyTablePage = () => {
         profit: {
             headerName: 'Profit',
             field: 'profit',
-            minWidth: 95,
+            minWidth: 105,
             aggFunc: liveSpender,
             sortable: true,
             cellClassRules: {
@@ -2888,7 +2957,7 @@ const MyTablePage = () => {
         },
         fblinkclicks: { headerName: 'FB_LC', field: 'fblinkclicks', headerTooltip:'fblinkclicks', minWidth: 110, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         fbclicks: { headerName: 'FBClicks', field: 'fbclicks', minWidth: 110, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
-        impressions: { headerName: 'IMP', field: 'impressions', headerTooltip:"Impressions", minWidth: 80, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        impressions: { headerName: 'IMP', field: 'impressions', headerTooltip:"Impressions", minWidth: 100, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         ctr: {
             headerName: 'CTR', field: 'ctr', valueGetter: getCtr, sortable: true,
             minWidth: 100,
@@ -2981,6 +3050,8 @@ const MyTablePage = () => {
                 const [groupedData, setGroupedData] = useState([]);
                 const [changeBudget, onChangeBudget] = useState();
                 const [campaignStatus, setCampaignStatus] = useState(true);
+                
+                const [campaignActualSpend, setCampaignActualSpend] = useState({});
 
                 const onChangeSpendAndStatus = async () => {
                     // Check if it's a group footer row (for groupIncludeFooter)
@@ -2995,14 +3066,20 @@ const MyTablePage = () => {
                     // Fetch all the rows under the current group
                     const groupedData = allLeafChildren.map(node => node.data) || [];
                     setNewGroupedData(groupedData);
+                    const campaignId = groupedData[0]?.campaignid;
 
                     // Only show the modal if there is data (groupedData length is greater than 0)
                     if (groupedData.length > 0) {
                         const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
+                        const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
                         if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
                             setGroupedData(getCampaignResponse.data);
                             setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
                             onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
+                        }
+                        if(getCampaignActualSpend.status === 200){
+                            console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                            setCampaignActualSpend(getCampaignActualSpend.data);
                         }
                         else {
                             setGroupedData(groupedData);
@@ -3039,7 +3116,7 @@ const MyTablePage = () => {
                 const getTotalSpend = (data) => {
                     if (!data || data.length === 0) return 0;
                     const total = data.reduce((total, item) => {
-                        return total + (item?.spend || 0);
+                        return total + (parseFloat(item?.spend) || 0);
                     }, 0);
                     return Math.round(total * 100) / 100; // Round to 2 decimal places
                 };
@@ -3087,23 +3164,24 @@ const MyTablePage = () => {
                                 onCancel={handleCancel}
                                 width={600}  // Set a custom width for the modal
                                 style={{ padding: '20px' }}  // Adjust body padding
+                                okButtonProps={{ style: { backgroundColor: '#C7F39A', borderColor: '#C7F39A' } }} 
                             >
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                         <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-                                        <Switch checked={campaignStatus} onChange={onChangeCampaignStatus} />
+                                        <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#C7F39A"}} onChange={onChangeCampaignStatus} />
                                     </div>
 
                                     {/* Input Field */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                        <Typography.Text strong style={{ marginBottom: '10px' }}>Budget:</Typography.Text>
-                                        <Input placeholder="Enter your value here" defaultValue={groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData)} onChange={onChangeBudgetValue} />
+                                        <Typography.Text strong style={{ marginBottom: '10px' }}>Budget: <span style={{fontWeight:'normal'}}>{campaignActualSpend.daily_budget ? "Daily" : campaignActualSpend.lifetime_budget ? "Lifetime" : "Adset"}</span></Typography.Text>
+                                        <Input placeholder="Enter your value here" defaultValue={campaignActualSpend.daily_budget ? parseFloat(campaignActualSpend.daily_budget)/100 : campaignActualSpend.lifetime_budget ? parseFloat(campaignActualSpend.lifetime_budget)/100 : (groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData))} onChange={onChangeBudgetValue} />
                                     </div>
 
                                     {/* Campaign ID */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong>Campaign ID:</Typography.Text>
-                                        <p>{groupedData?.length > 0 && groupedData?.length !== 0 ? groupedData[0]?.campaignid : groupedData.campaignid}</p>
+                                        <p>{campaignActualSpend?.id}</p>
                                     </div>
                                 </div>
                             </Modal>
@@ -3115,13 +3193,13 @@ const MyTablePage = () => {
 
         },
         adsetname: {
-            headerName: 'Adset-Name', field: 'adsetname',
+            headerName: 'AdsetName', field: 'adsetname',
             sortable: true,
-            width: 350,
+            minWidth: 450,
             filter: true,
         },
         adname: {
-            headerName: 'Ad-Name', field: 'adname',
+            headerName: 'AdName', field: 'adname',
             // resizeble: true,
             // sortable: true,
             // width: 300,
@@ -3247,7 +3325,7 @@ const MyTablePage = () => {
         },
         fbclicks: { headerName: 'FBClicks', field: 'fbclicks', minWidth: 110, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         fblinkclicks: { headerName: 'FB_LC', headerTooltip:'fblinkclicks', field: 'fblinkclicks', minWidth: 110, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
-        impressions: { headerName: 'IMP', headerTooltip:'Impressions', field: 'impressions', minWidth: 80, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        impressions: { headerName: 'IMP', headerTooltip:'Impressions', field: 'impressions', minWidth: 100, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         ctr: {
             headerName: 'CTR', field: 'ctr', valueGetter: getCtr, sortable: true, filter: 'agNumberColumnFilter',
             comparator: (valueA, valueB) => {
@@ -3418,6 +3496,8 @@ const MyTablePage = () => {
                 const [groupedData, setGroupedData] = useState([]);
                 const [changeBudget, onChangeBudget] = useState();
                 const [campaignStatus, setCampaignStatus] = useState(true);
+                
+                const [campaignActualSpend, setCampaignActualSpend] = useState({});
 
                 const onChangeSpendAndStatus = async () => {
                     // Check if it's a group footer row (for groupIncludeFooter)
@@ -3432,14 +3512,20 @@ const MyTablePage = () => {
                     // Fetch all the rows under the current group
                     const groupedData = allLeafChildren.map(node => node.data) || [];
                     setNewGroupedData(groupedData);
+                    const campaignId = groupedData[0]?.campaignid;
 
                     // Only show the modal if there is data (groupedData length is greater than 0)
                     if (groupedData.length > 0) {
                         const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
+                        const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
                         if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
                             setGroupedData(getCampaignResponse.data);
                             setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
                             onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
+                        }
+                        if(getCampaignActualSpend.status === 200){
+                            console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                            setCampaignActualSpend(getCampaignActualSpend.data);
                         }
                         else {
                             setGroupedData(groupedData);
@@ -3477,7 +3563,7 @@ const MyTablePage = () => {
                 const getTotalSpend = (data) => {
                     if (!data || data.length === 0) return 0;
                     const total = data.reduce((total, item) => {
-                        return total + (item?.spend || 0);
+                        return total + (parseFloat(item?.spend) || 0);
                     }, 0);
                     return Math.round(total * 100) / 100; // Round to 2 decimal places
                 };
@@ -3508,23 +3594,24 @@ const MyTablePage = () => {
                                 onCancel={handleCancel}
                                 width={600}  // Set a custom width for the modal
                                 style={{ padding: '20px' }}  // Adjust body padding
+                                okButtonProps={{ style: { backgroundColor: '#C7F39A', borderColor: '#C7F39A' } }} 
                             >
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                         <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-                                        <Switch checked={campaignStatus} onChange={onChangeCampaignStatus} />
+                                        <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#C7F39A"}} onChange={onChangeCampaignStatus} />
                                     </div>
 
                                     {/* Input Field */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                        <Typography.Text strong style={{ marginBottom: '10px' }}>Budget:</Typography.Text>
-                                        <Input placeholder="Enter your value here" defaultValue={groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData)} onChange={onChangeBudgetValue} />
+                                        <Typography.Text strong style={{ marginBottom: '10px' }}>Budget: <span style={{fontWeight:'normal'}}>{campaignActualSpend.daily_budget ? "Daily" : campaignActualSpend.lifetime_budget ? "Lifetime" : "Adset"}</span></Typography.Text>
+                                        <Input placeholder="Enter your value here" defaultValue={campaignActualSpend.daily_budget ? parseFloat(campaignActualSpend.daily_budget)/100 : campaignActualSpend.lifetime_budget ? parseFloat(campaignActualSpend.lifetime_budget)/100 : (groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData))} onChange={onChangeBudgetValue} />
                                     </div>
 
                                     {/* Campaign ID */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong>Campaign ID:</Typography.Text>
-                                        <p>{groupedData?.length > 0 && groupedData?.length !== 0 ? groupedData[0]?.campaignid : groupedData.campaignid}</p>
+                                        <p>{campaignActualSpend?.id}</p>
                                     </div>
                                 </div>
                             </Modal>
@@ -3537,10 +3624,10 @@ const MyTablePage = () => {
         },
 
         adsetname: {
-            headerName: 'Adset-Name', field: 'adsetname',
+            headerName: 'AdsetName', field: 'adsetname',
             // resizeble: true,
             sortable: true,
-            width: 350,
+            minWidth: 450,
             filter: 'agSetColumnFilter',
             filterParams: {
                 comparator: (a, b) => a.localeCompare(b),
@@ -3551,7 +3638,7 @@ const MyTablePage = () => {
             headerClass: 'hide-menu',
         },
         adname: {
-            headerName: 'Ad-Name', field: 'adname',
+            headerName: 'AdName', field: 'adname',
             // resizeble: true,
             // sortable: true,
             // width: 300,
@@ -3644,7 +3731,7 @@ const MyTablePage = () => {
         profit: {
             headerName: 'Profit',
             field: 'profit',
-            minWidth: 100,
+            minWidth: 105,
             aggFunc: liveSpender,
             sortable: true,
             cellClassRules: {
@@ -3707,7 +3794,7 @@ const MyTablePage = () => {
         },
         fbclicks: { headerName: 'FBClicks', field: 'fbclicks', minWidth: 110, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         fblinkclicks: { headerName: 'FB_LC', headerTooltip:'fblinkclicks', field: 'fblinkclicks', minWidth: 110, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
-        impressions: { headerName: 'IMP', headerTooltip:'Impressions', field: 'impressions', minWidth: 80, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        impressions: { headerName: 'IMP', headerTooltip:'Impressions', field: 'impressions', minWidth: 100, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
         ctr: {
             headerName: 'CTR', field: 'ctr', valueGetter: getCtr, sortable: true,
             comparator: (valueA, valueB) => {

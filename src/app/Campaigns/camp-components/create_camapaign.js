@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect } from 'react';
 import { Drawer, Button, DatePicker, Space, Form, Input, Select, Collapse, Upload, Steps, Modal, message, Spin, Badge, Tooltip } from 'antd';
-import { PlusOutlined, UploadOutlined, ShareAltOutlined, CommentOutlined, LikeOutlined, MoreOutlined, CloseOutlined, GlobalOutlined, EditOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { PlusOutlined, UploadOutlined, ShareAltOutlined, CommentOutlined, LikeOutlined, MoreOutlined, CloseOutlined, GlobalOutlined, EditOutlined, QuestionCircleOutlined,PaperClipOutlined,DeleteOutlined  } from '@ant-design/icons';
 import moment from 'moment-timezone';
 import { useState, useRef } from 'react';
 import TextArea from 'antd/es/input/TextArea';
@@ -14,7 +14,7 @@ import MnetUrlBuilder from './urlbuilder/mnet';
 import TonicUrlBuilder from './urlbuilder/tonic';
 import System1UrlBuilder from './urlbuilder/system1';
 import DActiveUrlBuilder from './urlbuilder/dactive';
-
+import CreativesDrawer from './creativesDrawer';
 
 const FabricCanvas = dynamic(() => import('./Fabricanvas'), { ssr: false });
 
@@ -503,6 +503,9 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     const [campaignLevelDailyBudget, setCampaignLevelDailyBudget] = useState(0);
     const [adsetLevelDailyBudget, setAdsetLevelDailyBudget] = useState(0);
     const [activeKey, setActiveKey] = useState(['1']); // State to control active panels
+    const [selectedFilesFromCreatives, setSelectedFilesFromCreatives] = useState([]);
+    const [selectedFilesFromMedia, setSelectedFilesFromMedia] = useState([]);
+    const [openCreativesDrawer, setOpenCreativesDrawer] = useState(false);
 
 
     const handleModeChange = (value) => {
@@ -776,109 +779,223 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         const token = imagehash.token;
         const account = imagehash.accountNumber;
 
-        const uploadPromises = selectedFiles.map(async (file) => {
-            try {
-                const formData = new FormData();
-                const fileId = file.name;
-                const editedImage = editedImages[fileId];
-
-                // Use edited image if available, otherwise original file
-                const uploadFile = editedImage ? await fetch(editedImage).then(res => res.blob()) : file;
-
-                // Log the MIME type of the file
-                const fileType = uploadFile.type;
-                console.log("File type:", fileType);
-
-                if (!fileType.startsWith("image/") && !fileType.startsWith("video/")) {
-                    onError("Unsupported file type");
-                    return;
-                }
-
-                formData.append("file", uploadFile, `blob/${file.name}`);
-
-
-                let response, fbResponse;
-
-                if (file.type.startsWith('image/')) {
-                    response = await axios.post('https://www.testapi.adsgoat.in/upload', formData, {
-                        headers: { 'Authorization': localStorage.getItem("token"), "Content-Type": "multipart/form-data" },
-                    });
-                    if (!response.data.imageUrl) {
-                        onError("Error: Image URL not returned from custom API");
-                        throw new Error("Image upload to custom API failed, imageUrl missing");
+        const uploadFilesSequentially = async (selectedFiles) => {
+            const mediaHashArray = [];
+        
+            for (const file of selectedFiles) {
+                try {
+                    const fileType = file.type;
+                    if (!fileType.startsWith("image/") && !fileType.startsWith("video/")) {
+                        onError("Unsupported file type");
+                        continue;
                     }
-
-                    console.log("Custom API response imageUrl:", response);
-
-                    formData.append('file', file);
-                    formData.append('access_token', token);
-
-                    fbResponse = await axios.post(`https://graph.facebook.com/v20.0/act_${account}/adimages`, formData, {
-                        headers: { 'Content-Type': 'multipart/form-data' }
-                    });
-
-                    if (response.status === 200 && fbResponse.status === 200) {
-                        onSuccess("ok", response);
-                        return {
-                            filename: response.data.imageUrl,
-                            imag_hash: fbResponse.data?.images?.[file.name]?.hash,
-                        };
-                    } else {
-                        onError("error", response);
-                        throw new Error("Image upload failed");
-                    }
-                } else if (file.type.startsWith('video/')) {
-                    response = await axios.post('https://www.testapi.adsgoat.in/upload', formData, {
-                        headers: { 'Authorization': localStorage.getItem("token"), "Content-Type": "multipart/form-data" },
-                    });
-
-                    if (response.status !== 200) {
-                        onError("error", response);
-                        throw new Error("Video upload to custom API failed");
-                    }
-
-                    formData.append('access_token', token);
-
-                    fbResponse = await axios.post(`https://graph.facebook.com/v20.0/act_${account}/advideos`, formData, {
-                        headers: { 'Content-Type': 'multipart/form-data' }
-                    });
-
-                    if (fbResponse.status === 200) {
-                        const videoid = fbResponse?.data?.id;
-                        await new Promise(resolve => setTimeout(resolve, 10000));
-
-                        const thumbnailResponse = await axios.get(`https://graph.facebook.com/v20.0/${videoid}`, {
-                            params: {
-                                access_token: token,
-                                fields: 'thumbnails',
-                                is_preferred: true
+        
+                    if (file?.url) {
+                        if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") || file?.url?.endsWith('.mp4')) {
+                            const formData = new FormData();
+                            const response = await fetch(`https://prodapis.adsgoat.in/s3?s3Url=${file.url}`, {
+                                method: 'GET',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    Authorization: localStorage.getItem("token"),
+                                },
+                            });
+        
+                            const uploadFile = await response.blob();
+                            if (!(uploadFile instanceof Blob)) {
+                                console.error("The fetched file is not a Blob:", uploadFile);
+                                continue;
                             }
-                        });
-
-                        const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
-                        const uri = preferredThumbnail ? preferredThumbnail.uri : "";
-
-                        onSuccess("ok", fbResponse);
-
-                        return {
-                            filename: response.data.imageUrl,
-                            videoid: videoid,
-                            thambnailurl: uri,
-                        };
+        
+                            formData.append("file", uploadFile, file.name);
+                            // console.log(formData);
+        
+                            let fbResponse;
+                            if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") ) {
+                                formData.append('file', uploadFile, file.name);
+                                formData.append('access_token', token);
+                                const fileName = file.name.split('/').pop();
+        
+                                fbResponse = await axios.post(
+                                    `https://graph.facebook.com/v20.0/act_${account}/adimages`,
+                                    formData,
+                                    { headers: { 'Content-Type': 'multipart/form-data' } }
+                                );
+        
+                                if (fbResponse.status === 200) {
+                                    onSuccess("ok", response);
+                                    mediaHashArray.push({
+                                        filename: file?.url,
+                                        imag_hash: fbResponse.data?.images?.[fileName]?.hash,
+                                    });
+                                } else {
+                                    onError("error", response);
+                                    console.error("Image upload failed");
+                                }
+                            } else if (file?.url?.endsWith('.mp4')) {
+                                formData.append('access_token', token);
+                                fbResponse = await axios.post(
+                                    `https://graph.facebook.com/v20.0/act_${account}/advideos`,
+                                    formData,
+                                    { headers: { 'Content-Type': 'multipart/form-data' } }
+                                );
+        
+                                if (fbResponse.status === 200) {
+                                    const videoid = fbResponse?.data?.id;
+                                    await new Promise(resolve => setTimeout(resolve, 10000));
+        
+                                    const thumbnailResponse = await axios.get(
+                                        `https://graph.facebook.com/v20.0/${videoid}`,
+                                        {
+                                            params: {
+                                                access_token: token,
+                                                fields: 'thumbnails',
+                                                is_preferred: true
+                                            }
+                                        }
+                                    );
+        
+                                    const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
+                                    const uri = preferredThumbnail ? preferredThumbnail.uri : "";
+                                    // console.log(videoid);
+                                    // console.log(uri);
+        
+                                    onSuccess("ok", fbResponse);
+                                    mediaHashArray.push({
+                                        filename: file?.url,
+                                        videoid: videoid,
+                                        thambnailurl: uri,
+                                    });
+                                } else {
+                                    onError("error", fbResponse);
+                                    console.error("Video upload to Facebook failed");
+                                }
+                            }
+                        }
                     } else {
-                        onError("error", fbResponse);
-                        throw new Error("Video upload to Facebook failed");
+                        if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
+                            const formData = new FormData();
+                            const fileId = file.name;
+                            const editedImage = editedImages[fileId];
+                            const uploadFile = editedImage ? await fetch(editedImage).then(res => res.blob()) : null;
+        
+                            console.log(file.originFileObj.name);
+        
+                            if (uploadFile) {
+                                formData.append("file", uploadFile, `blob/${file.name}`);
+                            } else {
+                                formData.append("file", file.originFileObj, `blob/${file.originFileObj.name}`);
+                            }
+        
+                            // console.log(formData);
+                            let response, fbResponse;
+        
+                            if (file.type.startsWith('image/')) {
+                                response = await axios.post(
+                                    'https://www.testapi.adsgoat.in/upload',
+                                    formData,
+                                    {
+                                        headers: {
+                                            'Authorization': localStorage.getItem("token"),
+                                            "Content-Type": "multipart/form-data"
+                                        },
+                                    }
+                                );
+        
+                                if (!response.data.imageUrl) {
+                                    onError("Error: Image URL not returned from custom API");
+                                    console.error("Image upload to custom API failed, imageUrl missing");
+                                    continue;
+                                }
+        
+                                // console.log("Custom API response imageUrl:", response);
+                                formData.append('access_token', token);
+        
+                                fbResponse = await axios.post(
+                                    `https://graph.facebook.com/v20.0/act_${account}/adimages`,
+                                    formData,
+                                    { headers: { 'Content-Type': 'multipart/form-data' } }
+                                );
+        
+                                if (response.status === 200 && fbResponse.status === 200) {
+                                    onSuccess("ok", response);
+                                    mediaHashArray.push({
+                                        filename: response.data.imageUrl,
+                                        imag_hash: fbResponse.data?.images?.[fileId]?.hash,
+                                    });
+                                } else {
+                                    onError("error", response);
+                                    console.error("Image upload failed");
+                                }
+                            } else if (file.type.startsWith('video/')) {
+                                response = await axios.post(
+                                    'https://www.testapi.adsgoat.in/upload',
+                                    formData,
+                                    {
+                                        headers: {
+                                            'Authorization': localStorage.getItem("token"),
+                                            "Content-Type": "multipart/form-data"
+                                        },
+                                    }
+                                );
+        
+                                if (response.status !== 200) {
+                                    onError("error", response);
+                                    console.error("Video upload to custom API failed");
+                                    continue;
+                                }
+        
+                                formData.append('access_token', token);
+        
+                                fbResponse = await axios.post(
+                                    `https://graph.facebook.com/v20.0/act_${account}/advideos`,
+                                    formData,
+                                    { headers: { 'Content-Type': 'multipart/form-data' } }
+                                );
+        
+                                if (fbResponse.status === 200) {
+                                    const videoid = fbResponse?.data?.id;
+                                    await new Promise(resolve => setTimeout(resolve, 10000));
+        
+                                    const thumbnailResponse = await axios.get(
+                                        `https://graph.facebook.com/v20.0/${videoid}`,
+                                        {
+                                            params: {
+                                                access_token: token,
+                                                fields: 'thumbnails',
+                                                is_preferred: true
+                                            }
+                                        }
+                                    );
+        
+                                    const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
+                                    const uri = preferredThumbnail ? preferredThumbnail.uri : "";
+        
+                                    onSuccess("ok", fbResponse);
+                                    mediaHashArray.push({
+                                        filename: response.data.imageUrl,
+                                        videoid: videoid,
+                                        thambnailurl: uri,
+                                    });
+                                } else {
+                                    onError("error", fbResponse);
+                                    console.error("Video upload to Facebook failed");
+                                }
+                            }
+                        }
                     }
+                } catch (error) {
+                    console.error("Error uploading file:", error);
+                    onError("error", error);
                 }
-            } catch (error) {
-                console.error("Error uploading file:", error);
-                onError("error", error);
-                throw error;
             }
-        });
+        
+            // console.log("All media files uploaded successfully:", mediaHashArray);
+            return mediaHashArray;
+        };
 
         try {
-            const mediaHashArray = await Promise.all(uploadPromises);
+            const mediaHashArray = uploadFilesSequentially(selectedFiles);
             console.log("All media files uploaded successfully. Media Hash Array:", mediaHashArray);
             return mediaHashArray;
         } catch (error) {
@@ -913,7 +1030,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     //                 formData.append('filename', file.name);
     //                 formData.append('access_token', token);
 
-    //                 fbResponse = await axios.post(`https://graph.facebook.com/v19.0/act_${account}/adimages`, formData, {
+    //                 fbResponse = await axios.post(`https://graph.facebook.com/v11.0/act_${account}/adimages`, formData, {
     //                     headers: { 'Content-Type': 'multipart/form-data' }
     //                 });
 
@@ -942,7 +1059,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     //                 formData.append('access_token', token);
 
     //                 // Upload video to Facebook
-    //                 fbResponse = await axios.post(`https://graph.facebook.com/v19.0/act_${account}/advideos`, formData, {
+    //                 fbResponse = await axios.post(`https://graph.facebook.com/v11.0/act_${account}/advideos`, formData, {
     //                     headers: { 'Content-Type': 'multipart/form-data' }
     //                 });
 
@@ -952,7 +1069,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     //                     await new Promise(resolve => setTimeout(resolve, 10000));
 
     //                     // Get thumbnail URL
-    //                     const thumbnailResponse = await axios.get(`https://graph.facebook.com/v19.0/${videoid}`, {
+    //                     const thumbnailResponse = await axios.get(`https://graph.facebook.com/v11.0/${videoid}`, {
     //                         params: {
     //                             access_token: token,
     //                             fields: 'thumbnails',
@@ -1037,9 +1154,10 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
 
             try {
                 const imageHashArray = await customRequest(onSuccess, onError);
+                console.log("Image Hash Array:", imageHashArray);
 
                 if (imageHashArray.length > 0) {  // Only proceed if all images are uploaded successfully
-                    console.log("Image Hashes just before postData:", imageHashArray);
+                    console.log("Image Hashes just before postData:", { ...formValues, imageHashes: imageHashArray });
                     await postData({ ...formValues, imageHashes: imageHashArray });
                     changeRRefrst();
                     message.success("Campaign created successfully");
@@ -1057,6 +1175,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     };
 
     const postData = async (values) => {
+        console.log("Form Values:", values);
         setLoading(true); // Start the spinner
         try {
             console.log("Image Hashes before creating addlevel:", values.imageHashes);
@@ -1096,7 +1215,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                 }
             });
 
-            console.log("Add Level Data:", addLevelData);
+            // console.log("Add Level Data:", moment(values.DatePicker.$d).utc().format("YYYY-MM-DDTHH:mm:ssZ"),);
 
             const data1 = {
                 campaign_name: values.Name,
@@ -1112,14 +1231,14 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                     Daily_amount: parseFloat(values.Daily_amount) * 100,
                     Status: values.Status,
                     access_token: imagehash.token,
-                    createdDate: moment().tz('Asia/Kolkata').format('YYYY-MM-DD')
+                    createdDate: moment().tz(imagehash.timeZone).format('YYYY-MM-DD')
                 },
                 adsetlevel: {
                     AdsetName: values.AdsetName,
                     Daily_amount: values.DailyAdd_amount ? parseFloat(values.DailyAdd_amount) * 100 : "",
                     optimization_goal: values.optimization_goal,
                     billing_event: values.billing_event,
-                    start_time: moment(values.DatePicker.$d).utc().format("YYYY-MM-DDTHH:mm:ssZ"),
+                    start_time: moment(values.DatePicker.$d).tz(imagehash.timeZone).format("YYYY-MM-DDTHH:mm:ssZ"),
                     action_source: values.action_source,
                     custom_event_type: values.custom_event_type,
                     pixel_id: values.pixel_id,
@@ -1157,6 +1276,9 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
 
             if (response.ok) {
                 console.log('Form data submitted successfully');
+                setSelectedFilesFromCreatives([]);
+                setSelectedFilesFromMedia([]);
+                setSelectedFiles([]);
                 onClose();
             } else {
                 console.error('Failed to submit form data');
@@ -1172,8 +1294,25 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
 
 
     const handleChange = (info) => {
-        setSelectedFiles(info.fileList.map(file => file.originFileObj));
-    };
+        const newFiles = info.fileList.map(file => ({
+          ...file,
+          uid: file.uid || `-${Date.now()}`,
+          source: "media",
+        }));
+      
+        setSelectedFiles(prev => {
+          const existingUids = new Set(prev.map(f => f.uid));
+          const filteredNewFiles = newFiles.filter(f => !existingUids.has(f.uid));
+          return [...prev, ...filteredNewFiles];
+        });
+      
+        // 👇 Update selectedFilesFromMedia — preserve + append
+        setSelectedFilesFromMedia(prev => {
+          const existingUids = new Set(prev.map(f => f.uid));
+          const filteredNewFiles = newFiles.filter(f => !existingUids.has(f.uid));
+          return [...prev, ...filteredNewFiles];
+        });
+      };
 
     const currentDate = dayjs();
     console.log(moment(), "currentDate")
@@ -1183,6 +1322,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         Special_categories: "NONE",
         Bid_strategy: "LOWEST_COST_WITHOUT_CAP",
         Status: "PAUSED",
+        DatePicker: currentDate,
         optimization_goal: "OFFSITE_CONVERSIONS",
         billing_event: "IMPRESSIONS",
         action_source: "website",
@@ -1236,6 +1376,80 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         setActiveKey(['1']);
     };
 
+    const [selectedOption, setSelectedOption] = useState("upload");
+
+    const handleSelectChange = (value) => {
+        setSelectedOption(value);
+    };
+
+    const onClickCreativesDrawer = () => {
+        console.log("Creatives Drawer Opened");
+        setOpenCreativesDrawer(true);
+    }
+
+    const selectedFilesData = (data) => {
+        console.log("Selected Files Data:", data);
+        setSelectedFiles(prev => [...prev, ...data.map((file, index)=>{
+            return({
+                uid: file.uid || `-${index+1}`,
+                name: file?.name,
+                status: 'done',
+                type: `${file?.url?.endsWith(".jpg") || file?.url?.endsWith(".png") || file?.url?.endsWith(".jpeg") ? file?.url?.endsWith(".jpg") ? "image/jpg" : file?.url?.endsWith(".jpeg") ? "image/jpeg" : "image/png" : "video/"}`,
+                url: file?.url,
+            })
+        })]);
+        setSelectedFilesFromCreatives(prev => [...prev, ...data.map((file, index)=>{
+            return({
+                uid: file.uid || `-${index+1}`,
+                name: file?.name,
+                status: 'done',
+                type: `${file?.url?.endsWith(".jpg") || file?.url?.endsWith(".png") || file?.url?.endsWith(".jpeg") ? file?.url?.endsWith(".jpg") ? "image/jpg" : file?.url?.endsWith(".jpeg") ? "image/jpeg" : "image/png" : "video/"}`,
+                url: file?.url,
+            })
+        })]);
+        setOpenCreativesDrawer(false);
+        
+        if (data.length > 0) {
+            const currentMediaContent = form.getFieldValue("MediaContent") || [];
+        
+            const newFiles = data.map((file, index) => ({
+                uid: file.uid || `-${index + 1}`,
+                name: file?.name,
+                status: 'done',
+                type: file?.url?.endsWith(".jpg")
+                    ? "image/jpg"
+                    : file?.url?.endsWith(".jpeg")
+                    ? "image/jpeg"
+                    : file?.url?.endsWith(".png")
+                    ? "image/png"
+                    : "video/",
+                url: file?.url,
+            }));
+        
+            const updatedMediaContent = [...currentMediaContent, ...newFiles];
+        
+            form.setFieldsValue({ MediaContent: updatedMediaContent });
+            form.validateFields(["MediaContent"]);
+        }
+    }
+
+    console.log("Selected Files:", selectedFiles);
+
+    const handleRemoveFile = (uidToRemove) => {
+        setSelectedFilesFromCreatives(prev =>
+            prev.filter(file => file.uid !== uidToRemove)
+        );
+        setSelectedFiles(prev =>
+            prev.filter(file => file.uid !== uidToRemove)
+        );
+    };
+
+    const handleRemove = (fileToRemove) => {
+        setSelectedFilesFromMedia(prev => prev.filter(file => file.uid !== fileToRemove.uid));
+        setSelectedFiles(prev =>
+          prev.filter(file => file.uid !== fileToRemove.uid)
+        );
+    };
 
     return (
         <Drawer
@@ -1385,7 +1599,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                             </div>
                         </Panel>
 
-                        <Panel header="ADSET LEVEL" key="2">
+                        <Panel header="ADSET LEVEL" key="2" forceRender>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
                                 <Form.Item
                                     name="AdsetName"
@@ -1451,7 +1665,12 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     style={{ flex: '1 1 150px' }}
                                     initialValue={currentDate}
                                 >
-                                    <DatePicker style={{ width: '100%' }} />
+                                    <DatePicker showTime 
+    //                                 onChange={(value, dateString) => {
+    //     console.log("Local Time:", dateString)
+    //     console.log("UTC ISO:", moment(value).utc().format("YYYY-MM-DDTHH:mm:ssZ"))
+    //   }}
+                                    style={{ width: '100%' }} />
                                 </Form.Item>
                                 <Form.Item
                                     name="action_source"
@@ -1755,27 +1974,177 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                             <div style={{ display: "flex", justifyContent: "space-between" }}>
                                 <div style={{ flex: "70%", marginRight: "5%" }}>
                                     <div style={{ display: 'flex', gap: '16px' }}>
+                                    <div style={{display:'flex', flexDirection:'column'}}>
                                         <Form.Item
+                                            label={<span style={{ color: "#B4B4B4" }}>Select Source</span>}
+                                            style={{ flex: 1 }}
+                                            >
+                                            <Select
+                                                defaultValue="upload"
+                                                onChange={(value) => {
+                                                setSelectedOption(value);
+                                                form.validateFields(["MediaContent"]); // Revalidate when switching source
+                                                }}
+                                                style={{ marginBottom: 16 }}
+                                            >
+                                                <Option value="upload">Upload</Option>
+                                                <Option value="creative">Creative Library</Option>
+                                            </Select>
+                                            </Form.Item>
+
+                                            <Form.Item
                                             name="MediaContent"
-                                            label={<span style={{ color: "#B4B4B4" }}>Upload</span>}
                                             rules={[
                                                 {
-                                                    required: true,
-                                                    message: "Please select Upload!",
+                                                validator: async () => {
+                                                    if (
+                                                    (selectedOption === "upload" && selectedFilesFromMedia.length === 0) ||
+                                                    (selectedOption === "creative" && selectedFilesFromCreatives.length === 0)
+                                                    ) {
+                                                    throw new Error("Please select Upload!");
+                                                    }
+                                                    return Promise.resolve();
+                                                },
                                                 },
                                             ]}
-                                            style={{ flex: 1 }}
-                                        >
-                                            <Upload
-                                                beforeUpload={handleBeforeUpload}
-                                                onChange={handleChange}
-                                                multiple
-                                                maxCount={10} // Limit to 10 files, for example
-                                                accept="image/*, video/*"
                                             >
-                                                <Button icon={<UploadOutlined />}>Select Files</Button>
-                                            </Upload>
+                                                <div>
+                                                    {/* Upload UI */}
+                                                    <div style={{ display: selectedOption === "upload" ? "block" : "none" }}>
+                                                    <Upload
+                                                        beforeUpload={() => false}
+                                                        onChange={(info) => {
+                                                        const newFiles = info.fileList.map((file) => ({
+                                                            ...file,
+                                                            uid: file.uid || `-${Date.now()}`,
+                                                            source: "media",
+                                                            thumbUrl:
+                                                            file.thumbUrl ||
+                                                            (file.originFileObj
+                                                                ? URL.createObjectURL(file.originFileObj)
+                                                                : undefined),
+                                                        }));
+
+                                                        setSelectedFiles((prev) => {
+                                                            const existingUids = new Set(prev.map((f) => f.uid));
+                                                            const filteredNewFiles = newFiles.filter((f) => !existingUids.has(f.uid));
+                                                            const updated = [...prev, ...filteredNewFiles];
+                                                            form.setFieldsValue({ MediaContent: updated });
+                                                            form.validateFields(["MediaContent"]);
+                                                            return updated;
+                                                        });
+
+                                                        setSelectedFilesFromMedia((prev) => {
+                                                            const existingUids = new Set(prev.map((f) => f.uid));
+                                                            const filteredNewFiles = newFiles.filter((f) => !existingUids.has(f.uid));
+                                                            const updated = [...prev, ...filteredNewFiles];
+                                                            form.setFieldsValue({ MediaContent: updated });
+                                                            form.validateFields(["MediaContent"]);
+                                                            return updated;
+                                                        });
+                                                        }}
+                                                        onRemove={(fileToRemove) => {
+                                                        setSelectedFilesFromMedia((prev) => {
+                                                            const updated = prev.filter((file) => file.uid !== fileToRemove.uid);
+                                                            form.setFieldsValue({ MediaContent: updated });
+                                                            form.validateFields(["MediaContent"]);
+                                                            return updated;
+                                                        });
+
+                                                        setSelectedFiles((prev) => {
+                                                            const updated = prev.filter((file) => file.uid !== fileToRemove.uid);
+                                                            form.setFieldsValue({ MediaContent: updated });
+                                                            form.validateFields(["MediaContent"]);
+                                                            return updated;
+                                                        });
+
+                                                        return true;
+                                                        }}
+                                                        multiple
+                                                        maxCount={10}
+                                                        fileList={selectedFilesFromMedia}
+                                                        listType="picture"
+                                                        accept="image/*, video/*"
+                                                    >
+                                                        <Button icon={<UploadOutlined />}>Select Files</Button>
+                                                    </Upload>
+                                                    </div>
+
+                                                    {/* Creative Library UI */}
+                                                    {selectedOption === "creative" && (
+                                                    <div>
+                                                        <Button icon={<UploadOutlined />} onClick={onClickCreativesDrawer}>
+                                                        Select Files
+                                                        </Button>
+
+                                                        {selectedFilesFromCreatives?.length > 0 && (
+                                                        <div style={{ marginTop: "10px" }}>
+                                                            {selectedFilesFromCreatives.map((file, index) => (
+                                                            <div
+                                                                key={index}
+                                                                style={{
+                                                                display: "flex",
+                                                                alignItems: "center",
+                                                                marginBottom: 8,
+                                                                }}
+                                                            >
+                                                                {/* <PaperClipOutlined style={{ marginRight: 8 }} /> */}
+                                                                {/* <Tooltip title={file.name}> */}
+                                                                {file.type?.startsWith("image/") && (
+                                                                <img
+                                                                    src={
+                                                                    file.originFileObj
+                                                                        ? URL.createObjectURL(file.originFileObj)
+                                                                        : file.url
+                                                                    }
+                                                                    alt="preview"
+                                                                    style={{
+                                                                    width: 40,
+                                                                    height: 40,
+                                                                    objectFit: "cover",
+                                                                    borderRadius: 4,
+                                                                    marginLeft: 8,
+                                                                    }}
+                                                                />
+                                                                )}
+                                                                <span
+                                                                    style={{
+                                                                    maxWidth: 160,
+                                                                    overflow: "hidden",
+                                                                    textOverflow: "ellipsis",
+                                                                    whiteSpace: "nowrap",
+                                                                    paddingLeft: 8,
+                                                                    }}
+                                                                >
+                                                                    {file.name}
+                                                                </span>
+                                                                {/* </Tooltip> */}
+
+                                                                
+
+                                                                <DeleteOutlined
+                                                                onClick={() => {
+                                                                    const updated = selectedFilesFromCreatives.filter(
+                                                                    (f) => f.uid !== file.uid
+                                                                    );
+                                                                    setSelectedFilesFromCreatives(updated);
+                                                                    setSelectedFiles((prev) =>
+                                                                    prev.filter((f) => f.uid !== file.uid)
+                                                                    );
+                                                                    form.setFieldsValue({ MediaContent: updated });
+                                                                    form.validateFields(["MediaContent"]);
+                                                                }}
+                                                                style={{ color: "red", marginLeft: 12, cursor: "pointer" }}
+                                                                />
+                                                            </div>
+                                                            ))}
+                                                        </div>
+                                                        )}
+                                                    </div>
+                                                    )}
+                                                </div>
                                         </Form.Item>
+                                    </div>
 
                                         <Form.Item
                                             name="page_id"
@@ -1964,125 +2333,234 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 </div>
 
                                 <div style={{ flex: "30%" }}>
-                                    {selectedFiles.length > 0 && (
-                                        selectedFiles.map((file, index) => (
-                                            <Badge
-                                                count={
-                                                    <EditOutlined
-                                                        style={{ fontSize: '25px', color: '#fff' }}
-                                                        onClick={() => handleEditClick(file)} // Edit icon click handler
-                                                    />
-                                                }
-                                                style={{
-                                                    backgroundColor: '#52c41a',
-                                                    borderRadius: '50%',
-                                                    position: 'absolute',
-                                                    top: '5px',
-                                                    right: '5px',
-                                                    zIndex: 10,
-                                                    cursor: 'pointer',
-                                                }}
-                                                offset={[5, 5]}
-                                                key={index}
-                                            >
-                                                <div key={index} className="container-ad-preview">
-                                                    <div className="ad-preview" style={{ width: "350px" }}>
-                                                        <div className="ad-heading">
-                                                            <div className="img">
-                                                                {file.type.startsWith('image/') ? (
-                                                                    <img
-                                                                        src={URL.createObjectURL(file)}
-                                                                        alt="page id"
-                                                                        width="40"
-                                                                        height="40"
-                                                                        style={{ objectFit: 'cover' }}
-                                                                    />
+                                        {selectedFiles && selectedFiles.length > 0 ? (
+                                            selectedFiles.map((file, index) => (
+                                                <Badge
+                                                    count={
+                                                        (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") || file?.url?.endsWith('.mp4')) ? 
+                                                        null:
+                                                        <EditOutlined
+                                                            style={{ fontSize: '25px', color: '#fff' }}
+                                                            onClick={() => handleEditClick(file)} // Edit icon click handler
+                                                        />
+                                                    }
+                                                    style={{
+                                                        backgroundColor: '#52c41a',
+                                                        borderRadius: '50%',
+                                                        position: 'absolute',
+                                                        top: '5px',
+                                                        right: '5px',
+                                                        zIndex: 10,
+                                                        cursor: 'pointer',
+                                                    }}
+                                                    offset={[5, 5]}
+                                                    key={index}
+                                                >
+                                                    <div key={index} className="container-ad-preview">
+                                                        <div className="ad-preview" style={{ width: "350px" }}>
+                                                            <div className="ad-heading">
+                                                                <div className="img">
+                                                                    {/* {file?.filename?.endsWith('.png') && console.log(file)} */}
+                                                                    {file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") ? (
+                                                                        <img
+                                                                            src={file?.url}
+                                                                            alt="page id"
+                                                                            width="40"
+                                                                            height="40"
+                                                                            style={{ objectFit: 'cover' }}
+                                                                        />
+                                                                    ) : file?.url?.endsWith('.mp4') ? (
+                                                                        <video
+                                                                            src={file?.url}
+                                                                            alt="page id"
+                                                                            width="40"
+                                                                            height="30"
+                                                                            style={{ objectFit: 'cover' }}
+                                                                            muted // Muted to prevent sound on preview
+                                                                        />
+                                                                    ) : 
+                                                                    file?.type?.startsWith('image/') ? (
+                                                                        <img
+                                                                            src={editedImages[file?.name] ? editedImages[file?.name]:  file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url}
+                                                                            alt="page id"
+                                                                            width="40"
+                                                                            height="40"
+                                                                            style={{ objectFit: 'cover' }}
+                                                                        />
+                                                                    ) 
+                                                                    : 
+                                                                    (
+                                                                        <video
+                                                                            src={file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url}
+                                                                            alt="page id"
+                                                                            width="40"
+                                                                            height="30"
+                                                                            style={{ objectFit: 'cover' }}
+                                                                            muted // Muted to prevent sound on preview
+                                                                        />
+                                                                    )
+                                                                    // null
+                                                                    }
 
-
-                                                                ) : (
-                                                                    <video
-                                                                        src={URL.createObjectURL(file)}
-                                                                        alt="page id"
-                                                                        width="40"
-                                                                        height="30"
-                                                                        style={{ objectFit: 'cover' }}
-                                                                        muted // Muted to prevent sound on preview
-                                                                    />
-                                                                )}
-                                                            </div>
-
-                                                            <div className="title">
-                                                                <div className="main">{addName}</div>
-                                                                <div className="sub">
-                                                                    {imagehash?.pageName ? (
-                                                                        <>
-                                                                            {imagehash.pageName} <GlobalOutlined style={{ opacity: "0.6" }} />
-                                                                        </>
-                                                                    ) : (
-                                                                        <GlobalOutlined style={{ opacity: "0.6" }} />
-                                                                    )}
+                                                                    
                                                                 </div>
 
+                                                                <div className="title">
+                                                                    <div className="main" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
+                                                                        {addName}
+                                                                        {/* </div>                                                            <div className="sub">
+                                                                        Sponsored <GlobalOutlined style={{ opacity: "0.6" }} /> */}
+                                                                        <div className="sub">
+                                                                            {imagehash?.pageName ? (
+                                                                                <>
+                                                                                    {imagehash.pageName} <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                                                </>
+                                                                            ) : (
+                                                                                <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="close">
+                                                                    <CloseOutlined style={{ fontSize: "20px" }} />
+                                                                </div>
+                                                                <div className="moreoptions">
+                                                                    <MoreOutlined style={{ fontSize: "20px" }} />
+                                                                </div>
                                                             </div>
-                                                            <div className="close">
-                                                                <CloseOutlined style={{ fontSize: "20px" }} />
+                                                            <div className="ad-desc" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
+                                                                {primaryText}
                                                             </div>
-                                                            <div className="moreoptions">
-                                                                <MoreOutlined style={{ fontSize: "20px" }} />
+                                                            <div className="ad-image" style={{ width: '350px', height: '200px' }}>
+                                                                    {file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") ? (
+                                                                        <img
+                                                                            src={file?.url}
+                                                                            alt="ad content"
+                                                                            style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                        />
+                                                                    ) : file?.url?.endsWith('.mp4') ? (
+                                                                        <video
+                                                                        controls
+                                                                        style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                        >
+                                                                            <source src={file?.url} />
+                                                                            Your browser does not support the video tag.
+                                                                        </video>
+                                                                    ) 
+                                                                    :
+                                                                    file?.type?.startsWith('image/') ? (
+                                                                        <img
+                                                                            src={editedImages[file?.name] ? editedImages[file?.name]:  file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url} // Use edited image if available
+                                                                            alt="ad content"
+                                                                            style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                        />
+                                                                    ) : 
+                                                                    (
+                                                                        <video
+                                                                            controls
+                                                                            style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                        >
+                                                                            <source src={file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url} />
+                                                                            Your browser does not support the video tag.
+                                                                        </video>
+                                                                    )
+                                                                    // null
+                                                                    }
                                                             </div>
-                                                        </div>
-                                                        <div className="ad-desc">{primaryText}</div>
-                                                        <div className="ad-image" style={{ width: '350px', height: '200px' }}>
-                                                            {file.type.startsWith('image/') ? (
-                                                                <img
-                                                                    src={editedImages[file.name] || URL.createObjectURL(file)} // Use edited image if available
-                                                                    alt="ad content"
-                                                                    style={{ width: '350px', height: '200px', objectFit: 'cover' }}
-                                                                />
-                                                            ) : (
-                                                                <video
-                                                                    controls
-                                                                    style={{ width: '350px', height: '200px', objectFit: 'cover' }}
-                                                                >
-                                                                    <source src={URL.createObjectURL(file)} type={file.type} />
-                                                                    Your browser does not support the video tag.
-                                                                </video>
-                                                            )}
-                                                        </div>
 
-                                                        <div className="ad-cta">
-                                                            <div className="details">
-                                                                <div className="link">{caption}</div>
-                                                                <div className="title">{headline}</div>
-                                                                <div className="desc">{description}</div>
+                                                            <div className="ad-cta">
+                                                                <div className="details">
+                                                                    <div className="link">{caption}</div>
+                                                                    <div className="title">{headline}</div>
+                                                                    <div className="desc">{description}</div>
+                                                                </div>
+                                                                <div className="ad-button">
+                                                                    <button type="button">Learn More</button>
+                                                                </div>
                                                             </div>
-                                                            <div className="ad-button">
-                                                                <button type="button">Learn More</button>
-                                                            </div>
-                                                        </div>
-                                                        <a href={websiteURL} target="_blank" rel="noopener noreferrer" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: '#0066cc', padding: '10px' }}>
-                                                            {websiteURL}
-                                                        </a>
-                                                        <div className="icons">
-                                                            <div className="like">
-                                                                <LikeOutlined style={{ fontSize: "20px" }} />
-                                                                Like
-                                                            </div>
-                                                            <div className="comment">
-                                                                <CommentOutlined style={{ fontSize: "20px" }} />
-                                                                Comment
-                                                            </div>
-                                                            <div className="share">
-                                                                <ShareAltOutlined style={{ fontSize: "20px" }} />
-                                                                Share
+                                                            <a href={websiteURL} target="_blank" rel="noopener noreferrer" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: '#0066cc', padding: '10px' }}>
+                                                                {websiteURL}
+                                                            </a>                                                <div className="icons">
+                                                                <div className="like">
+                                                                    <LikeOutlined style={{ fontSize: "20px" }} />
+                                                                    Like
+                                                                </div>
+                                                                <div className="comment">
+                                                                    <CommentOutlined style={{ fontSize: "20px" }} />
+                                                                    Comment
+                                                                </div>
+                                                                <div className="share">
+                                                                    <ShareAltOutlined style={{ fontSize: "20px" }} />
+                                                                    Share
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </Badge>
-                                        ))
-                                    )}
-                                </div>
+                                                </Badge>
+
+                                            ))
+                                        ) : null
+                                        // (
+                                        //     <div className="container-ad-preview">
+                                        //         <div className="ad-preview">
+                                        //             <div className="ad-heading">
+                                        //                 <div className="filename">
+                                        //                     <img
+                                        //                         src={initialValues?.filename}
+                                        //                         alt="page id"
+                                        //                         width="40"
+                                        //                         height="40"
+                                        //                     />
+                                        //                 </div>
+                                        //                 <div className="title">
+                                        //                     <div className="main">{"Facebook Page"}</div>
+                                        //                     <div className="sub">
+                                        //                         Sponsored <GlobalOutlined style={{ opacity: "0.6" }} />
+                                        //                     </div>
+                                        //                 </div>
+                                        //                 <div className="close">
+                                        //                     <CloseOutlined style={{ fontSize: "20px" }} />
+                                        //                 </div>
+                                        //                 <div className="moreoptions">
+                                        //                     <MoreOutlined style={{ fontSize: "20px" }} />
+                                        //                 </div>
+                                        //             </div>
+                                        //             <div className="ad-desc">{"adMessage"}</div>
+                                        //             <div className="ad-image">
+                                        //                 <img
+                                        //                     src={initialValues?.filename}
+                                        //                     alt="ad content"
+                                        //                 />
+                                        //             </div>
+                                        //             <div className="ad-cta">
+                                        //                 <div className="details">
+                                        //                     <div className="link">{"adCaption"}</div>
+                                        //                     <div className="title">{"adName"}</div>
+                                        //                     <div className="desc">{"adDesc"}</div>
+                                        //                 </div>
+                                        //                 <div className="ad-button">
+                                        //                     <button type="button">Learn More</button>
+                                        //                 </div>
+                                        //             </div>
+                                        //             <div className="icons">
+                                        //                 <div className="like">
+                                        //                     <LikeOutlined style={{ fontSize: "20px" }} />
+                                        //                     Like
+                                        //                 </div>
+                                        //                 <div className="comment">
+                                        //                     <CommentOutlined style={{ fontSize: "20px" }} />
+                                        //                     Comment
+                                        //                 </div>
+                                        //                 <div className="share">
+                                        //                     <ShareAltOutlined style={{ fontSize: "20px" }} />
+                                        //                     Share
+                                        //                 </div>
+                                        //             </div>
+                                        //         </div>
+                                        //     </div>
+                                        // )
+                                        }
+                                    </div>
 
                             </div>
 
@@ -2097,12 +2575,12 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                         )}
                     </Form.Item>
                     {isImgEditorShown && currentFile && (
-                        <FabricCanvas
-                            fileId={currentFile.name} // Pass a unique identifier
-                            initialImage={URL.createObjectURL(currentFile)}
-                            closeCanvasModal={closeCanvasModal}
-                            onSaveEditedImage={handleSaveEditedImage}
-                        />
+                            <FabricCanvas
+                                fileId={currentFile.name} // Pass a unique identifier
+                                initialImage={currentFile?.originFileObj ? URL.createObjectURL(currentFile.originFileObj) : currentFile?.url}
+                                closeCanvasModal={closeCanvasModal}
+                                onSaveEditedImage={handleSaveEditedImage}
+                            />
                     )}
 
                     {/* {isImgEditorShown && currentFile && (
@@ -2122,6 +2600,19 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                     </Modal>
                 </Form>
             </Spin>
+            {openCreativesDrawer && (
+                <Drawer
+                    title="Select Creatives"
+                    width="95%"
+                    open={openCreativesDrawer}
+                    onClose={() => setOpenCreativesDrawer(false)}
+                >
+                    <CreativesDrawer
+                        selectedFilesData={selectedFilesData}
+                        
+                    />
+                </Drawer>
+            )}
         </Drawer>
     );
 };

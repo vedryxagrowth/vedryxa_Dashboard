@@ -12,8 +12,8 @@ import { useTokenContext } from '../../../components/parent'
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
 import { color } from 'chart.js/helpers';
-import { Spin, Row, Col, Select, Input, Button } from 'antd';
-import { ReloadOutlined } from '@ant-design/icons';
+import { Spin, Row, Col, Select, Input, Button, Modal, message, Switch } from 'antd';
+import { ReloadOutlined, EditOutlined, BarChartOutlined } from '@ant-design/icons';
 import debounce from 'lodash.debounce';
 
 Chart.register(...registerables);
@@ -69,8 +69,20 @@ const MnetLiveCampaignHistory = ({ params }) => {
 
     const [endDate1, setEndDate1] = useState();
 
+    const [isGraphVisible, setIsGraphVisible] = useState(() => {
+        const stored = localStorage.getItem('isGraphVisible');
+        return stored ? JSON.parse(stored) : false; 
+    });
+
     const [columns, setColumns] = useState([]);
     const [comment, setComment] = useState("");
+
+    const [isModalVisibles, setIsModalVisibles] = useState(false);
+    
+    const [campaignComments, setCampaignComments] = useState([]);
+    const [campaignid, setCampaignId] = useState("");
+    const [adsetid, setAdsetID] = useState("");
+ 
 
     const [columnDefs, setColumnStructure] = useState([]);
 
@@ -678,7 +690,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
             // resizeble: true,
             // // sortable: true,
             minWidth: 250,
-            // hide: true,
+            hide: true,
             // // // resizable:false,
             // // rowGroup: true,
             // filter: true,
@@ -690,7 +702,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
-            tooltipValueGetter: getTooltipValue,
+            // tooltipValueGetter: getTooltipValue,
             cellRenderer: (params) => {
                 if (params.value && params.value.includes("Copied!")) {
                     return (
@@ -1108,6 +1120,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
         try{
             const commentFetch = await apiClient.get(`/Comments/${accountNumber}`);
             const campaignComments = commentFetch.data; // Set comments only if fetched successfully
+            setCampaignComments(campaignComments);
             if(campaignComments.length > 0){
                 const comment = campaignComments.find(comment => comment.campaignname === decodedString);
                 console.log(comment, "comment");
@@ -1228,6 +1241,9 @@ const MnetLiveCampaignHistory = ({ params }) => {
 
         const mainData = fetchData?.data?.filter(obj => !("ad_clicks" in obj));
         console.log(mainData[0]);
+
+        setCampaignId(mainData[0].campaign_id);
+        setAdsetID(mainData[0].adset_id);
 
         const filteredData = mainData && mainData.length > 0 ?
             mainData.map((eachData) => {
@@ -1564,6 +1580,141 @@ const MnetLiveCampaignHistory = ({ params }) => {
         mainFunctionCall();
     };
 
+    const sendEditedCommentToAPI = async () => {
+        try {
+            console.log("comment:")
+            const response = await apiClient.post('/Comments/edit', {
+                campaignname: decodedString,
+                comment: comment,
+                Account: accountNumber,
+                adsetid: adsetid,
+                campaignid: campaignid,
+                status: true
+
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error sending edited comment to server:', error);
+            throw error;
+        }
+    };
+
+    const handleOks = async () => {
+        try {
+            const logData = {
+                Account: accountNumber,
+                usercommit: userdetails?.email,
+                campaignname: decodedString,
+                comment: comment,
+                campaignid: campaignid,
+                adsetid: adsetid
+            };
+
+            // if (relatedComment) {
+                await sendEditedCommentToAPI(logData);
+            //     refreshComments(account);
+            //     message.success("Comment updated successfully!");
+            // } else {
+            //     await sendNewCommentToAPI(logData);
+            //     refreshComments(account);
+            //     message.success("New comment added successfully!");
+            // }
+
+            // const updatedComments = relatedComment
+            //     ? campaignComments.map(cmt => (cmt.campaignname === firstColumnValue ? { ...cmt, comment } : cmt))
+            //     : [...campaignComments, logData];
+            // setCampaignComments(updatedComments);
+
+            // changeRRefrst();
+            // ✅ Update local state immediately
+            const updatedComments = [...campaignComments];
+            const index = updatedComments.findIndex(c => c.campaignname === decodedString && c.Account === accountNumber);
+            if (index !== -1) {
+                updatedComments[index] = {
+                    ...updatedComments[index],
+                    comment: comment,
+                    editedTime: new Date().toISOString(), // optional: update time
+                };
+            } else {
+                updatedComments.push({
+                    campaignname: decodedString,
+                    Account: accountNumber,
+                    comment: comment,
+                    editedTime: new Date().toISOString(),
+                });
+            }
+            setCampaignComments(updatedComments);
+            setComment(comment); 
+            message.success("Comment saved!");
+            setIsModalVisibles(false);
+        } catch (error) {
+            console.error('Error while submitting comment:', error);
+            message.error("Error while submitting the comment.");
+        }
+    };
+
+    const handleDelete = async () => {
+        try {
+            // Prepare the payload for the API call
+            const payload = {
+                campaignname: decodedString,
+                Account: accountNumber,
+                adsetid: adsetid,
+                campaignid: campaignid,
+            };
+            // console.log(payload);
+    
+            // Call the backend API to delete the comment
+            const response = await apiClient.post('/Comments/delete', payload);
+    
+            if (response.status === 200) {
+                // Remove the comment from the local state
+                // const updatedComments = campaignComments.filter(
+                //     (comment) => comment.campaignname !== firstColumnValue
+                // );
+                // refreshComments(account);
+    
+                // // Update the state with the updated comments
+                // setCampaignComments(updatedComments);
+    
+                // // Refresh the table or any other UI component
+                // // changeRRefrst();
+                //Update local state immediately
+                const updatedComments = campaignComments.filter(
+                    (comment) => !(comment.campaignname === decodedString && comment.Account === accountNumber)
+                );
+                setCampaignComments(updatedComments);
+                setComment(""); // clear comment in UI
+        
+                message.success('Comment deleted successfully!');
+                setIsModalVisibles(false); 
+            } else {
+                message.error('Failed to delete the comment. Please try again.-1');
+            }
+        } catch (error) {
+            console.error('Error deleting the comment:', error);
+            message.error('Failed to delete the comment. Please try again.');
+        }
+    };
+
+    const getEditedUserAndTime = (campaignName, newaccount) => {
+        const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
+        return relatedStatus ? relatedStatus : null;
+    };
+
+    const handleCancels = () => {
+        setIsModalVisibles(false);
+    };
+    const editUserANdTime = getEditedUserAndTime(decodedString, accountNumber);
+
+    const onClickBarChart = () => {
+        setIsGraphVisible(prev => {
+            const newValue = !prev;
+            localStorage.setItem('isGraphVisible', JSON.stringify(newValue));
+            return newValue;
+        });
+    }
+
     return (
         <Row style={{ display: 'flex', flexDirection: 'column' }}>
             {/* Chart.js integration */}
@@ -1577,7 +1728,11 @@ const MnetLiveCampaignHistory = ({ params }) => {
                     </div>
 
                 </Col>}
-            <Col style={{ height: '400px', marginBottom: '10px' }}> {/* Container with fixed height */}
+            <Col style={{display: 'flex', justifyContent: 'flex-end'}}>
+                <Switch checked={isGraphVisible} style={{fontSize:"20px", paddingTop:'5px', marginRight:'10px', backgroundColor: isGraphVisible ? '#C7F39A' : undefined}} onClick={onClickBarChart}/>            
+            </Col>
+            {isGraphVisible && (
+                <Col style={{ height: '400px', marginBottom: '10px' }}> {/* Container with fixed height */}
                 {chartData.dates.length === 0 ? (<div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><Spin size="large" /></div>) : (
                     <Line
                     data={{
@@ -1722,6 +1877,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                   />
                 )}
             </Col>
+            )}
             <Col style={{ display: 'flex', width: '100%', marginLeft: '2%' }}>
                 {/* Left Table: Top 5 RPC Today */}
                 <div style={{ marginLeft: "1%", width: '20%' }}>
@@ -1838,7 +1994,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
 
             </Col>
             <Col style={{display:'flex', justifyContent:'space-between', marginTop: '10px'}}>
-                <Col>
+                <Col style={{display:'flex', justifyContent:"space-between", alignItems:'center'}}>
                     <Input
                         type="text"
                         placeholder="Search table..."
@@ -1852,6 +2008,16 @@ const MnetLiveCampaignHistory = ({ params }) => {
                         style={{ height: "30px", marginLeft: "10px", backgroundColor: '#C7F39A', border: 'none' }} 
                         onClick={handleReload}  // Call refresh function when clicked
                     />
+                    {/* <p style={{marginLeft:"10px"}}>{comment}</p> */}
+                    {comment && (
+                        <EditOutlined 
+                            onClick={() => setIsModalVisibles(true)} 
+                            style={{ marginLeft: '15px', color: 'black', cursor: 'pointer' }} 
+                        />
+                    )}
+                    <div style={{ width: '100%' }}>
+                        <h3 style={{ textAlign: 'center', marginLeft:'20px' }}>{decodedString}</h3>
+                    </div>
                 </Col>
                 <Select
                     placeholder="Select a range"
@@ -1999,6 +2165,50 @@ const MnetLiveCampaignHistory = ({ params }) => {
                     </div>
                 )}
             </Col>
+            <Modal
+                             title={
+                                    decodedString
+                            }
+                            visible={isModalVisibles}
+                            onOk={handleOks} // Default Ok button functionality
+                            onCancel={handleCancels} // Default Cancel button functionality
+                            footer={[
+                                <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+                                    <div style={{display:'flex', flexDirection:"column"}}>
+                                        <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                            Last Edited Time:
+                                        </span>
+                                        <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                            {editUserANdTime ? editUserANdTime?.editedTime : ""}
+                                        </span>
+
+                                    </div>
+                                    <div>
+                                    <Button
+                                        key="delete"
+                                        type="danger"
+                                        onClick={handleDelete}
+                                        style={{ marginRight: 'auto', border: "1px solid black" }} // Push Delete button to the far left
+                                    >
+                                        Delete
+                                    </Button>
+                                    <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
+                                        Cancel
+                                    </Button>
+                                    <Button key="ok" type="primary" onClick={handleOks} style={{marginLeft:"4px"}}>
+                                        Ok
+                                    </Button>
+                                    </div>
+                                </div>
+                            ]}
+                        >
+                            <Input.TextArea
+                                placeholder="Enter your comments here"
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                                style={{color: theme === "dark" ? "white" : "black"}}
+                            />
+                        </Modal>
         </Row>
     );
 

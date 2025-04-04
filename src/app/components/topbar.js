@@ -2,21 +2,30 @@
 import { useState, useEffect, useRef } from 'react';
 import { SessionProvider, useSession, signIn, signOut } from 'next-auth/react';
 import Image from "next/image";
-import { Layout, Avatar, Dropdown, Button, Switch, Spin, Form, Input, Divider, Modal, Badge, Card, Upload, notification } from "antd";
+import { Layout, Avatar, Dropdown, Button, Switch, Spin, Form, Input, Divider, Modal, Badge, Card, Upload, notification, Drawer } from "antd";
 import React from "react";
 import { useRouter } from "next/navigation";
 import axios from 'axios';
 const { Header } = Layout;
 import { useTokenContext } from './parent';
+import Draggable from "react-draggable";
 import moment from 'moment-timezone';
 import ContactForm from './mail';
-import { BellFilled, EyeOutlined, GoogleOutlined, LockOutlined, PlusOutlined, UserOutlined, UploadOutlined  } from '@ant-design/icons';
-import { Bell, Edit3Icon, Moon, Sun } from 'lucide-react';
+import { BellFilled, EyeOutlined, GoogleOutlined, LockOutlined, PlusOutlined, UserOutlined, UploadOutlined, CalculatorOutlined  } from '@ant-design/icons';
+import { Bell, Edit3Icon, Moon, Sun, StickyNote } from 'lucide-react';
 import { getSession } from 'next-auth/react';
 import debounce from 'lodash.debounce';
 import soundFile from "../../../public/notification_sounds.mp3";
 import jwt from 'jsonwebtoken';
 import { UAParser } from "ua-parser-js";
+import StickyNotes from './StickyNotes';
+import Calculator from './calculator';
+import WorldTime from './worldtimebuddy';
+import { LuStickyNote } from "react-icons/lu";
+import { ImBook } from "react-icons/im";
+import { SlNotebook } from "react-icons/sl";
+import { LuNotebook } from "react-icons/lu";
+import { TfiWorld } from "react-icons/tfi";
 
 import { message } from 'antd';
 
@@ -29,6 +38,8 @@ const Topbar = ({onComplete}) => {
   const { userdetails } = useTokenContext(); // User details from your context
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [open, setOpen] = useState(false);
+  const [openCalculator, setOpenCalculator] = useState(false);
+  const [openWorldTime, setOpenWorldTime] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [modalText, setModalText] = useState('Content of the modal');
   const [notifications, setNotifications] = useState([]); // New state for notifications
@@ -318,7 +329,7 @@ const Topbar = ({onComplete}) => {
       label: (
         <a
           onClick={() => {
-            const { storedData, activeTab } = localStorage; localStorage.clear(); Object.assign(localStorage, { storedData, activeTab });
+            const { storedData, activeTab, showGraph } = localStorage; localStorage.clear(); Object.assign(localStorage, { storedData, activeTab, showGraph });
             localStorage.setItem('redirectUrl', router.asPath);
             router.push('/api/auth/signout');
           }}
@@ -346,6 +357,7 @@ const Topbar = ({onComplete}) => {
   const [avatarUrl, setAvatarUrl] = useState('');
   const [previewImage, setPreviewImage] = useState(null);  // State for image preview
   const [imageFile, setImageFile] = useState(null);  // Temporary state for storing the file before upload
+  // const [open, setOpen] = useState(false);  
 
 
   // Fetch the user's avatar URL on page load or when userdetails change
@@ -534,6 +546,18 @@ const Topbar = ({onComplete}) => {
     },
   };
 
+  const onChangeStickyNotes = () => {
+    setOpen(true);
+  };
+
+  const onClickCalculator = () => {
+    setOpenCalculator(true);
+  };
+
+  const onClickWorlTime = () => {
+    setOpenWorldTime(true);
+  }
+
   return (
     <div
       style={{
@@ -589,11 +613,21 @@ const Topbar = ({onComplete}) => {
               </div>
             </div>
 
+            <button  style={{padding: '0px', margin:'0px'}} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onChangeStickyNotes}>
+                <SlNotebook  size={20}/>
+            </button>
 
+            <button style={{padding: '0px', margin:'0px'}} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickCalculator}>
+                 <CalculatorOutlined style={{fontSize:'20px',padding: '0px', margin:'0px'}}/>
+            </button>
+            <button style={{padding: '0px', margin:'0px'}} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickWorlTime}>
+                 <TfiWorld size={20} />
+            </button>
 
             <button
               onClick={toggleTheme}
-              className={`theme-toggle-btn ${darkMode ? 'dark-mode' : 'light-mode'}`}
+              style={{padding: '0px', margin:'0px'}}
+              className={`${darkMode ? 'dark-mode' : 'light-mode'}`}
             >
               {darkMode ? (
                 <Sun className="icon sun-icon" style={{ width: "20px", height: "20px" }}/>
@@ -781,7 +815,65 @@ const Topbar = ({onComplete}) => {
         </div>
       </div>
     </Modal>
+    {open && (
+        // <Draggable>
+          <div 
+            style={{
+              position: "absolute",
+              top: "20px", // or wherever you want it to start
+              right: "20px",
+              background: "white", // or transparent if you'd like
+              boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+              borderRadius: "8px",
+              zIndex: 9999
+            }}
+          >
+            {/* A close button to hide it again */}
+            {/* <button 
+              onClick={() => setOpen(false)}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                float: "right",
+                fontSize: "16px"
+              }}
+            >
+              ✖
+            </button> */}
 
+            {/* The actual sticky notes component */}
+            <StickyNotes userEmail={userdetails?.email} setOpen={setOpen} userdetails={userdetails} />
+          </div>
+        // </Draggable>
+      )}
+
+      {openCalculator && 
+        (<div>
+          <Calculator setOpenCalculator={setOpenCalculator} />
+        </div>)
+      }
+    {/* <Modal open={openWorldTime} width="100%" onCancel={()=> setOpenWorldTime(false)}>
+      <div>
+        <WorldTime setOpenWorldTime={setOpenWorldTime} />
+      </div>
+    </Modal> */}
+    <Drawer open={openWorldTime} width="95%" onClose={()=> setOpenWorldTime(false)}>
+      <div>
+        <WorldTime setOpenWorldTime={setOpenWorldTime} />
+      </div>
+    </Drawer>
+    {/* <Modal open={openCalculator} width="100%" onCancel={()=> setOpenCalculator(false)}>
+      <div>
+        <Calculator setOpenCalculator={setOpenCalculator} />
+      </div>
+    </Modal> */}
+    <Drawer open={openCalculator} width="32%" onClose={()=> setOpenCalculator(false)}>
+      <div>
+        <Calculator setOpenCalculator={setOpenCalculator} />
+      </div>
+    </Drawer>
+      
     </div>
   );
 };

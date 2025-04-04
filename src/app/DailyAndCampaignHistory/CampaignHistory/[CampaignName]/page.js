@@ -11,8 +11,8 @@ import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { useTokenContext } from '../../../components/parent'
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
-import { Spin, Row, Col, Select, Input, Button } from 'antd';
-import { ReloadOutlined } from '@ant-design/icons';
+import { Spin, Row, Col, Select, Input, Button, Modal, message, Switch } from 'antd';
+import { ReloadOutlined, EditOutlined, BarChartOutlined } from '@ant-design/icons';
 Chart.register(...registerables);
 import debounce from 'lodash.debounce';
 
@@ -33,8 +33,19 @@ export default function CampaignAndAccount({ params }) {
 
     const user = userdetails?.email;
 
+    const [isGraphVisible, setIsGraphVisible] = useState(() => {
+        const stored = localStorage.getItem('isGraphVisible');
+        return stored ? JSON.parse(stored) : false
+    });
+
     const [columns, setColumns] = useState([]);
     const [comment, setComment] = useState("");
+
+    const [isModalVisibles, setIsModalVisibles] = useState(false);
+    
+    const [campaignComments, setCampaignComments] = useState([]);
+    const [campaignid, setCampaignId] = useState("");
+    const [adsetid, setAdsetID] = useState("");
 
     const [columnDefs, setColumnStructure] = useState([]);
 
@@ -459,6 +470,7 @@ export default function CampaignAndAccount({ params }) {
         try{
             const commentFetch = await apiClient.get(`/Comments/${accountNumber}`);
             const campaignComments = commentFetch.data; // Set comments only if fetched successfully
+            setCampaignComments(campaignComments);
             if(campaignComments.length > 0){
                 const comment = campaignComments.find(comment => comment.campaignname === decodedString);
                 console.log(comment, "comment");
@@ -493,6 +505,8 @@ export default function CampaignAndAccount({ params }) {
 
         const mainData = fetchData.data;
         console.log(mainData);
+        setCampaignId(mainData[0].campaign_id);
+        setAdsetID(mainData[0].adset_id);
         const specifiedTimeZone = selectTimezone[timeZone];
         // const sortedArray = mainData?.sort((a, b) => new Date(a[specifiedTimeZone]) - new Date(b[specifiedTimeZone]));
         // console.log(sortedArray, "sort");
@@ -792,7 +806,7 @@ export default function CampaignAndAccount({ params }) {
         campaignname : {headerName:'CampaignName', field:'campaignname',
             // rowGroup: true,
             // filter: true,
-            // hide: true,
+            hide: true,
             // resizable: true,
             // enableRowGroup: true,
             // groupDisplayType: 'group',
@@ -802,7 +816,7 @@ export default function CampaignAndAccount({ params }) {
         suppressMenu: true,
         menuTabs: [],
         headerClass: 'hide-menu',
-        tooltipValueGetter: getTooltipValue,
+        // tooltipValueGetter: getTooltipValue,
         cellRenderer: (params) => {
             if (params.value && params.value.includes("Copied!")) {
                 return (
@@ -1276,6 +1290,143 @@ export default function CampaignAndAccount({ params }) {
     // console.log(dailyData);
     // console.log(columnDefs);
 
+    const sendEditedCommentToAPI = async () => {
+        try {
+            console.log("comment:")
+            const response = await apiClient.post('/Comments/edit', {
+                campaignname: decodedString,
+                comment: comment,
+                Account: accountNumber,
+                adsetid: adsetid,
+                campaignid: campaignid,
+                status: true
+
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error sending edited comment to server:', error);
+            throw error;
+        }
+    };
+
+    const handleOks = async () => {
+        try {
+            const logData = {
+                Account: accountNumber,
+                usercommit: userdetails?.email,
+                campaignname: decodedString,
+                comment: comment,
+                campaignid: campaignid,
+                adsetid: adsetid
+            };
+
+            // if (relatedComment) {
+                await sendEditedCommentToAPI(logData);
+            //     refreshComments(account);
+            //     message.success("Comment updated successfully!");
+            // } else {
+            //     await sendNewCommentToAPI(logData);
+            //     refreshComments(account);
+            //     message.success("New comment added successfully!");
+            // }
+
+            // const updatedComments = relatedComment
+            //     ? campaignComments.map(cmt => (cmt.campaignname === firstColumnValue ? { ...cmt, comment } : cmt))
+            //     : [...campaignComments, logData];
+            // setCampaignComments(updatedComments);
+
+            // changeRRefrst();
+
+            // Update local state immediately
+            const updatedComments = [...campaignComments];
+            const index = updatedComments.findIndex(c => c.campaignname === decodedString && c.Account === accountNumber);
+            if (index !== -1) {
+                updatedComments[index] = {
+                    ...updatedComments[index],
+                    comment: comment,
+                    editedTime: new Date().toISOString(), // optional: update time
+                };
+            } else {
+                updatedComments.push({
+                    campaignname: decodedString,
+                    Account: accountNumber,
+                    comment: comment,
+                    editedTime: new Date().toISOString(),
+                });
+            }
+            setCampaignComments(updatedComments);
+            setComment(comment); // refresh comment display
+            message.success("Comment saved!");
+            setIsModalVisibles(false);
+        } catch (error) {
+            console.error('Error while submitting comment:', error);
+            message.error("Error while submitting the comment.");
+        }
+    };
+
+    const handleDelete = async () => {
+        try {
+            // Prepare the payload for the API call
+            const payload = {
+                campaignname: decodedString,
+                Account: accountNumber,
+                adsetid: adsetid,
+                campaignid: campaignid,
+            };
+            // console.log(payload);
+    
+            // Call the backend API to delete the comment
+            const response = await apiClient.post('/Comments/delete', payload);
+    
+            if (response.status === 200) {
+                // Remove the comment from the local state
+                // const updatedComments = campaignComments.filter(
+                //     (comment) => comment.campaignname !== firstColumnValue
+                // );
+                // refreshComments(account);
+    
+                // // Update the state with the updated comments
+                // setCampaignComments(updatedComments);
+    
+                // // Refresh the table or any other UI component
+                // // changeRRefrst();
+
+                // Update local state immediately
+                const updatedComments = campaignComments.filter(
+                    (comment) => !(comment.campaignname === decodedString && comment.Account === accountNumber)
+                );
+                setCampaignComments(updatedComments);
+                setComment(""); // clear comment in UI
+    
+                message.success('Comment deleted successfully!');
+                setIsModalVisibles(false); // Close the popup
+            } else {
+                message.error('Failed to delete the comment. Please try again.-1');
+            }
+        } catch (error) {
+            console.error('Error deleting the comment:', error);
+            message.error('Failed to delete the comment. Please try again.');
+        }
+    };
+
+    const getEditedUserAndTime = (campaignName, newaccount) => {
+        const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
+        return relatedStatus ? relatedStatus : null;
+    };
+
+    const handleCancels = () => {
+        setIsModalVisibles(false);
+    };
+    const editUserANdTime = getEditedUserAndTime(decodedString, accountNumber);
+
+    const onClickBarChart = () => {
+        setIsGraphVisible(prev => {
+            const newValue = !prev;
+            localStorage.setItem('isGraphVisible', JSON.stringify(newValue));
+            return newValue
+        });
+    }
+
     return (
         <Row style={{display:'flex', flexDirection:'column'}}>
             <Col style={{width:'100%', display:'flex', alignItems:'center'}}>
@@ -1284,157 +1435,161 @@ export default function CampaignAndAccount({ params }) {
                 </div>
                 <div style={{width:'120px'}}>
                     <p>Timezone: <span style={{fontWeight:'bold'}}>{timeZone}</span></p>
-                </div>
-                    
+                </div>    
             </Col>
+            <Col style={{display: 'flex', justifyContent: 'flex-end'}}>
+                <Switch checked={isGraphVisible} style={{fontSize:"20px", paddingTop:'5px', marginRight:'10px', backgroundColor: isGraphVisible ? '#C7F39A' : undefined}} onClick={onClickBarChart}/>
+            </Col> 
             {/* <h1>{params.campaignAndAccount}hi</h1> */}
-            <Col style={{ height: '400px', marginBottom: '10px' }}> {/* Container with fixed height */}
-              {chartData.dates.length === 0 ? (<div style={{width:'100%', height:'100%', display:'flex', justifyContent:'center', alignItems:'center'}}><Spin size="large" /></div>):
-                (
-                    <Line
-                    data={{
-                      labels: chartData.dates, // X-axis labels (dates)
-                      datasets: [
-                        {
-                          label: 'Spend',
-                          data: chartData.spend,
-                          borderColor: 'rgba(75, 192, 192, 1)', // Teal
-                          backgroundColor: 'rgba(75, 192, 192, 0.2)', // Light Teal
-                          fill: true,
-                          hidden: true,
-                          tension: 0.3,
-                          pointRadius: 5,
-                          pointHoverRadius: 8,
-                          pointBackgroundColor: 'rgba(75, 192, 192, 1)',
-                          pointHoverBackgroundColor: 'rgba(75, 192, 192, 1)',
-                        },
-                        {
-                          label: 'Revenue',
-                          data: chartData.revenue,
-                          borderColor: 'rgba(54, 162, 235, 1)', // Blue
-                          backgroundColor: 'rgba(54, 162, 235, 0.2)', // Light Blue
-                          fill: true,
-                          hidden: true,
-                          tension: 0.3,
-                          pointRadius: 5,
-                          pointHoverRadius: 8,
-                          pointBackgroundColor: 'rgba(54, 162, 235, 1)',
-                          pointHoverBackgroundColor: 'rgba(54, 162, 235, 1)',
-                        },
-                        {
-                          label: 'RPC',
-                          data: chartData.rpc,
-                          borderColor: 'rgba(255, 99, 132, 1)', // Red
-                          backgroundColor: 'rgba(255, 99, 132, 0.2)', // Light Red
-                          fill: true,
-                          hidden: true,
-                          tension: 0.3,
-                          pointRadius: 5,
-                          pointHoverRadius: 8,
-                          pointBackgroundColor: 'rgba(255, 99, 132, 1)',
-                          pointHoverBackgroundColor: 'rgba(255, 99, 132, 1)',
-                        },
-                        {
-                          label: 'CPL',
-                          data: chartData.cpl,
-                          borderColor: 'rgba(255, 159, 64, 1)', // Orange
-                          backgroundColor: 'rgba(255, 159, 64, 0.2)', // Light Orange
-                          fill: true,
-                          hidden: true,
-                          tension: 0.3,
-                          pointRadius: 5,
-                          pointHoverRadius: 8,
-                          pointBackgroundColor: 'rgba(255, 159, 64, 1)',
-                          pointHoverBackgroundColor: 'rgba(255, 159, 64, 1)',
-                        },
-                        {
-                          label: 'Profit',
-                          data: chartData.profit,
-                          borderColor: 'rgba(255, 206, 86, 1)', // Yellow
-                          backgroundColor: 'rgba(255, 206, 86, 0.2)', // Light Yellow
-                          fill: true,
-                          tension: 0.3,
-                          pointRadius: 5,
-                          pointHoverRadius: 8,
-                          pointBackgroundColor: 'rgba(255, 206, 86, 1)',
-                          pointHoverBackgroundColor: 'rgba(255, 206, 86, 1)',
-                        },
-                        {
-                          label: 'Margin',
-                          data: chartData.margin,
-                          borderColor: 'rgba(153, 102, 255, 1)', // Purple
-                          backgroundColor: 'rgba(153, 102, 255, 0.2)', // Light Purple
-                          fill: true,
-                          hidden: true,
-                          tension: 0.3,
-                          pointRadius: 5,
-                          pointHoverRadius: 8,
-                          pointBackgroundColor: 'rgba(153, 102, 255, 1)',
-                          pointHoverBackgroundColor: 'rgba(153, 102, 255, 1)',
-                        },
-                      ],
-                    }}
-                    options={{
-                      responsive: true,
-                      maintainAspectRatio: false, // Allow the chart to take the full height of its container
-                      scales: {
-                        x: {
-                        //   ticks: {
-                        //     padding: 30, // Increase padding between labels and the axis
-                        //     color: (context) => {
-                        //       // Dynamically set color for x-axis labels
-                        //       const label = chartData.dates[context.index];
-                        //       return getColorForValue(label); // Add your custom color logic here
-                        //     },
-                        //   },
-                          grid: {
-                            color: theme === "dark" ? '#444' : '#e0e0e0', // Adjust gridline color based on theme
-                          },
-                        },
-                        y: {
-                          beginAtZero: true, // Ensure the y-axis starts at zero
-                          ticks: {
-                            callback: function (value) {
-                              return value.toFixed(2); // Format y-axis values to 2 decimals
-                            },
-                            color: theme === "dark" ? '#e0e0e0':'#050505', // Axis label color based on theme
-                          },
-                          grid: {
-                            color: theme === "dark" ? '#444' : '#e0e0e0', // Adjust gridline color based on theme
-                          },
-                        },
-                      },
-                      plugins: {
-                        legend: {
-                          labels: {
-                            color: theme === "dark" ? '#faf7f7' : '#050505', // Legend text color
-                          },
-                        },
-                        tooltip: {
-                          mode: 'index', // Ensure all datasets at this x-axis point are shown
-                          intersect: true, // Show tooltip only when hovering directly over a point
-                          callbacks: {
-                            label: function (tooltipItem) {
-                              const index = tooltipItem.dataIndex;
-                              const dataset = tooltipItem.dataset;
-                              const value = dataset.data[index];
-                              const datasetLabel = dataset.label || '';
-                  
-                              // Return label with value and date
-                              return `${datasetLabel}: ${value} (Date: ${chartData.dates[index]})`;
-                            },
-                          },
-                          displayColors: true, // Enable color box for each dataset
-                          boxWidth: 15, // Adjust the width of the color box
-                          boxHeight: 15, // Adjust the height of the color box
-                        },
-                      },
-                    }}
-                    height={350} // Set the height of the chart
-                  />
-                  
-                )}
-            </Col>
+            {isGraphVisible && (
+                 <Col style={{ height: '400px', marginBottom: '10px' }}> {/* Container with fixed height */}
+                 {chartData.dates.length === 0 ? (<div style={{width:'100%', height:'100%', display:'flex', justifyContent:'center', alignItems:'center'}}><Spin size="large" /></div>):
+                   (
+                       <Line
+                       data={{
+                         labels: chartData.dates, // X-axis labels (dates)
+                         datasets: [
+                           {
+                             label: 'Spend',
+                             data: chartData.spend,
+                             borderColor: 'rgba(75, 192, 192, 1)', // Teal
+                             backgroundColor: 'rgba(75, 192, 192, 0.2)', // Light Teal
+                             fill: true,
+                             hidden: true,
+                             tension: 0.3,
+                             pointRadius: 5,
+                             pointHoverRadius: 8,
+                             pointBackgroundColor: 'rgba(75, 192, 192, 1)',
+                             pointHoverBackgroundColor: 'rgba(75, 192, 192, 1)',
+                           },
+                           {
+                             label: 'Revenue',
+                             data: chartData.revenue,
+                             borderColor: 'rgba(54, 162, 235, 1)', // Blue
+                             backgroundColor: 'rgba(54, 162, 235, 0.2)', // Light Blue
+                             fill: true,
+                             hidden: true,
+                             tension: 0.3,
+                             pointRadius: 5,
+                             pointHoverRadius: 8,
+                             pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                             pointHoverBackgroundColor: 'rgba(54, 162, 235, 1)',
+                           },
+                           {
+                             label: 'RPC',
+                             data: chartData.rpc,
+                             borderColor: 'rgba(255, 99, 132, 1)', // Red
+                             backgroundColor: 'rgba(255, 99, 132, 0.2)', // Light Red
+                             fill: true,
+                             hidden: true,
+                             tension: 0.3,
+                             pointRadius: 5,
+                             pointHoverRadius: 8,
+                             pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+                             pointHoverBackgroundColor: 'rgba(255, 99, 132, 1)',
+                           },
+                           {
+                             label: 'CPL',
+                             data: chartData.cpl,
+                             borderColor: 'rgba(255, 159, 64, 1)', // Orange
+                             backgroundColor: 'rgba(255, 159, 64, 0.2)', // Light Orange
+                             fill: true,
+                             hidden: true,
+                             tension: 0.3,
+                             pointRadius: 5,
+                             pointHoverRadius: 8,
+                             pointBackgroundColor: 'rgba(255, 159, 64, 1)',
+                             pointHoverBackgroundColor: 'rgba(255, 159, 64, 1)',
+                           },
+                           {
+                             label: 'Profit',
+                             data: chartData.profit,
+                             borderColor: 'rgba(255, 206, 86, 1)', // Yellow
+                             backgroundColor: 'rgba(255, 206, 86, 0.2)', // Light Yellow
+                             fill: true,
+                             tension: 0.3,
+                             pointRadius: 5,
+                             pointHoverRadius: 8,
+                             pointBackgroundColor: 'rgba(255, 206, 86, 1)',
+                             pointHoverBackgroundColor: 'rgba(255, 206, 86, 1)',
+                           },
+                           {
+                             label: 'Margin',
+                             data: chartData.margin,
+                             borderColor: 'rgba(153, 102, 255, 1)', // Purple
+                             backgroundColor: 'rgba(153, 102, 255, 0.2)', // Light Purple
+                             fill: true,
+                             hidden: true,
+                             tension: 0.3,
+                             pointRadius: 5,
+                             pointHoverRadius: 8,
+                             pointBackgroundColor: 'rgba(153, 102, 255, 1)',
+                             pointHoverBackgroundColor: 'rgba(153, 102, 255, 1)',
+                           },
+                         ],
+                       }}
+                       options={{
+                         responsive: true,
+                         maintainAspectRatio: false, // Allow the chart to take the full height of its container
+                         scales: {
+                           x: {
+                           //   ticks: {
+                           //     padding: 30, // Increase padding between labels and the axis
+                           //     color: (context) => {
+                           //       // Dynamically set color for x-axis labels
+                           //       const label = chartData.dates[context.index];
+                           //       return getColorForValue(label); // Add your custom color logic here
+                           //     },
+                           //   },
+                             grid: {
+                               color: theme === "dark" ? '#444' : '#e0e0e0', // Adjust gridline color based on theme
+                             },
+                           },
+                           y: {
+                             beginAtZero: true, // Ensure the y-axis starts at zero
+                             ticks: {
+                               callback: function (value) {
+                                 return value.toFixed(2); // Format y-axis values to 2 decimals
+                               },
+                               color: theme === "dark" ? '#e0e0e0':'#050505', // Axis label color based on theme
+                             },
+                             grid: {
+                               color: theme === "dark" ? '#444' : '#e0e0e0', // Adjust gridline color based on theme
+                             },
+                           },
+                         },
+                         plugins: {
+                           legend: {
+                             labels: {
+                               color: theme === "dark" ? '#faf7f7' : '#050505', // Legend text color
+                             },
+                           },
+                           tooltip: {
+                             mode: 'index', // Ensure all datasets at this x-axis point are shown
+                             intersect: true, // Show tooltip only when hovering directly over a point
+                             callbacks: {
+                               label: function (tooltipItem) {
+                                 const index = tooltipItem.dataIndex;
+                                 const dataset = tooltipItem.dataset;
+                                 const value = dataset.data[index];
+                                 const datasetLabel = dataset.label || '';
+                     
+                                 // Return label with value and date
+                                 return `${datasetLabel}: ${value} (Date: ${chartData.dates[index]})`;
+                               },
+                             },
+                             displayColors: true, // Enable color box for each dataset
+                             boxWidth: 15, // Adjust the width of the color box
+                             boxHeight: 15, // Adjust the height of the color box
+                           },
+                         },
+                       }}
+                       height={350} // Set the height of the chart
+                     />
+                     
+                   )}
+               </Col>
+            )}
             <Col style={{ display: 'flex', width: '100%', marginLeft: '2%' }}>
                 {/* Top 5 Dates with RPC */}
                 <div style={{ width: '20%' }}>
@@ -1497,7 +1652,7 @@ export default function CampaignAndAccount({ params }) {
                 </div>
             </Col>
             <Col style={{display:'flex', justifyContent:'space-between', marginTop: '10px'}}>
-                <Col>
+                <Col style={{display:'flex', justifyContent:"space-between", alignItems:'center'}}>
                     <Input
                         type="text"
                         placeholder="Search table..."
@@ -1511,6 +1666,16 @@ export default function CampaignAndAccount({ params }) {
                         style={{ height: "30px", marginLeft: "10px", backgroundColor: '#C7F39A', border: 'none' }} 
                         onClick={handleReload}  // Call refresh function when clicked
                     />
+                    {/* <p style={{marginLeft:"10px"}}>{comment}</p> */}
+                    {comment && (
+                        <EditOutlined 
+                            onClick={() => setIsModalVisibles(true)} 
+                            style={{ marginLeft: '15px', color: 'blue', cursor: 'pointer' }} 
+                        />
+                    )}
+                    <div style={{width:'100%'}}>
+                        <h3 style={{textAlign:'center'}}>{decodedString}</h3>
+                    </div>
                 </Col>
                 <Select
                     placeholder="Select a range"
@@ -1661,6 +1826,50 @@ export default function CampaignAndAccount({ params }) {
                 </div>
             )}
             </Col>
+            <Modal
+                             title={
+                                    decodedString
+                            }
+                            visible={isModalVisibles}
+                            onOk={handleOks} // Default Ok button functionality
+                            onCancel={handleCancels} // Default Cancel button functionality
+                            footer={[
+                                <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+                                    <div style={{display:'flex', flexDirection:"column"}}>
+                                        <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                            Last Edited Time:
+                                        </span>
+                                        <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                            {editUserANdTime ? editUserANdTime?.editedTime : ""}
+                                        </span>
+
+                                    </div>
+                                    <div>
+                                    <Button
+                                        key="delete"
+                                        type="danger"
+                                        onClick={handleDelete}
+                                        style={{ marginRight: 'auto', border: "1px solid black" }} // Push Delete button to the far left
+                                    >
+                                        Delete
+                                    </Button>
+                                    <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
+                                        Cancel
+                                    </Button>
+                                    <Button key="ok" type="primary" onClick={handleOks} style={{marginLeft:"4px"}}>
+                                        Ok
+                                    </Button>
+                                    </div>
+                                </div>
+                            ]}
+                        >
+                            <Input.TextArea
+                                placeholder="Enter your comments here"
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                                style={{color: theme === "dark" ? "white" : "black"}}
+                            />
+                        </Modal>
         </Row>
     )
 }

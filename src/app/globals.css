@@ -988,3 +988,145 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
   background-color: #C7F39A !important; /* your highlight color */
   color: #000 !important;              /* text color on top */
 }
+
+
+.sticky-notes-container {
+  display: flex;
+  height: 100%;
+}
+
+.notes-sidebar {
+  width: 280px;
+  background: white;
+  padding: 15px;
+  border-right: 1px solid #ccc;
+  display: flex;
+  flex-direction: column;
+}
+
+.notes-list {
+  overflow-y: auto;
+  margin-top: 10px;
+  flex: 1;
+}
+
+.note-preview {
+  background: #fff6c1;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+}
+
+.search-bar {
+  padding: 6px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  width: 100%;
+}
+
+.add-note-btn {
+  background: orange;
+  color: white;
+  border: none;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.notes-display {
+  flex: 1;
+  position: relative;
+}
+
+.sticky-note {
+  width: 200px;
+  min-height: 160px;
+  padding: 10px;
+  background: #FFD966;
+  border-radius: 10px;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+}
+
+.note-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.timestamp {
+  font-size: 12px;
+  color: #555;
+}
+
+.note-image {
+  margin-top: 5px;
+  max-height: 100px;
+  width: 100%;
+  object-fit: cover;
+}
+
+.close-btn, .delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.delete-btn {
+  margin-top: 5px;
+  color: red;
+}
+
+
+/* Dark mode */
+
+
+/* .sticky-notes-container {
+  display: flex;
+  height: auto;
+  background: none;  
+  max-height: 500px;
+  overflow: auto; 
+} */
+
+.notes-sidebar {
+  width: 280px;
+  background: white; /* Make sure it's white */
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+/* Ensuring floating notes are visible */
+.notes-display {
+  flex: 1;
+  position: relative;
+  padding: 10px;
+  overflow: hidden; /* Prevents excess black background */
+}
+
+.note-editable {
+  direction: ltr !important;
+  unicode-bidi: normal !important;
+  text-align: left !important;
+  writing-mode: horizontal-tb !important;
+  /* Also override any parent forcing RTL */
+  * {
+    direction: ltr !important;
+  }
+}
+
+.toolbar-btn{
+  background-color: transparent;
+  border: none;
+}
