@@ -1666,7 +1666,8 @@ export default function CampaignAndAccount({ params }) {
                         placeholder="Search table..."
                         value={searchText}
                         onChange={(e) => setSearchText(e.target.value)}
-                        style={{ width: "200px", padding: "3px" }}
+                        className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                        style={{ width: "200px", padding: "3px",color: theme === 'dark' ? 'white' : '#555' }}
                     />
                     <Button 
                         type="default" 
@@ -1848,6 +1849,7 @@ export default function CampaignAndAccount({ params }) {
                              title={
                                     decodedString
                             }
+                            className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             visible={isModalVisibles}
                             onOk={handleOks} // Default Ok button functionality
                             onCancel={handleCancels} // Default Cancel button functionality
@@ -1874,7 +1876,7 @@ export default function CampaignAndAccount({ params }) {
                                     <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
                                         Cancel
                                     </Button>
-                                    <Button key="ok" type="primary" onClick={handleOks} style={{marginLeft:"4px"}}>
+                                    <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#C7F39A"}}>
                                         Ok
                                     </Button>
                                     </div>

@@ -197,13 +197,13 @@ const Appbar = ({ children, usersDataForLogin }) => {
         };
     }, []);
     const menuItems = [
-        getItem('Dashboard', '/Dashboard', <HomeOutlined />),
-        usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Reports', '/Reports', <DatabaseOutlined />),
-        usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Creatives', '/Creatives', <PieChartOutlined />),
-        usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Campaigns', '/Campaigns', <DesktopOutlined />),
+        getItem('Dashboard', '/Dashboard', <HomeOutlined className={pathname === '/Dashboard' && 'black-icon'}/>),
+        usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Reports', '/Reports', <DatabaseOutlined  className={pathname === '/Reports' && 'black-icon'}/>),
+        usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Creatives', '/Creatives', <PieChartOutlined  className={pathname === '/Creatives' && 'black-icon'}/>),
+        usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Campaigns', '/Campaigns', <DesktopOutlined  className={pathname === '/Campaigns' && 'black-icon'}/>),
         // getItem('Users', '/Users', <ContainerOutlined />),
-        usersDataForLogin[0]?.role === 'Admin' && getItem('NewUser', '/NewUser', <UserOutlined />),
-        usersDataForLogin[0]?.role === 'Admin' && getItem('Activities', '/Activities', <LaptopOutlined />),
+        usersDataForLogin[0]?.role === 'Admin' && getItem('NewUser', '/NewUser', <UserOutlined  className={pathname === '/NewUser' && 'black-icon'}/>),
+        usersDataForLogin[0]?.role === 'Admin' && getItem('Activities', '/Activities', <LaptopOutlined  className={pathname === '/Activities' && 'black-icon'}/>),
     ].filter(Boolean);
 
     const toggleCollapsed = () => {
@@ -245,7 +245,7 @@ const Appbar = ({ children, usersDataForLogin }) => {
                     <div style={{ marginTop: '1.6rem', position: "absolute", left: "auto", right: "20px", zIndex: "999 !important", }}>
                         <Button
                             type="primary"
-                            icon={collapsed ? <DoubleRightOutlined /> : <DoubleLeftOutlined />}
+                            icon={collapsed ? <DoubleRightOutlined className='black-icon'/> : <DoubleLeftOutlined className='black-icon' />}
                             onClick={toggleCollapsed}
                             style={{
                                 borderRadius: '50%',
@@ -329,7 +329,7 @@ const Appbar = ({ children, usersDataForLogin }) => {
                         />
                     )}
                     {menuItems.map(item => (
-                        <Menu.Item key={item.key} icon={item.icon} style={{ borderRadius: '8px', margin: '5px 0', color: darkMode ? '#fff' : '#000', fontWeight: "500", fontSize: "16px" }}>
+                        <Menu.Item key={item.key} icon={item.icon}  style={{ borderRadius: '8px', margin: '5px 0', color: darkMode ? 'green' : '#000', fontWeight: "500", fontSize: "16px" }}>
                             {item.label}
                         </Menu.Item>
                     ))}

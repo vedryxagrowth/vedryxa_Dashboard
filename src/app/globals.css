@@ -1130,3 +1130,100 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
   background-color: transparent;
   border: none;
 }
+
+body.dark-mode .black-icon.anticon svg {
+  color: #000000 !important;
+}
+body.dark-mode .black-icon-info.anticon svg {
+  color: #C7F39A !important;
+}
+body.dark-mode .black-icon-active.anticon svg {
+  color: green !important;
+}
+body.dark-mode .black-icon-pause.anticon svg {
+  color: orange !important;
+}
+body.dark-mode .black-icon-active-1.anticon svg {
+  color: green !important;
+}
+
+body.dark-mode .black-icon-pause-1.anticon svg {
+  color: red !important;
+}
+.custom-input-dark::placeholder {
+  color: #ccc;
+}
+.custom-input-light::placeholder {
+  color: #888;
+}
+/* Green text for active tab */
+.custom-tabs.dark-mode-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #C7F39A !important;
+}
+
+.custom-tabs.light-mode-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #52c41a !important;
+}
+/* Theme-based text for inactive tabs */
+.custom-tabs.dark-mode-tabs .ant-tabs-tab-btn {
+  color: white;
+}
+
+.custom-tabs.light-mode-tabs .ant-tabs-tab-btn {
+  color: black;
+}
+
+/* Ink bar */
+.custom-tabs.dark-mode-tabs .ant-tabs-ink-bar {
+  background-color: #C7F39A !important;
+}
+.custom-tabs.light-mode-tabs .ant-tabs-ink-bar {
+  background-color: #52c41a !important;
+}
+.custom-tabs.dark-mode-tabs .ant-tabs-nav::before {
+  border-bottom: 1px solid transparent !important;
+}
+
+/* Light theme tab bar (optional, for clarity) */
+/* .custom-tabs.light-mode-tabs .ant-tabs-nav::before {
+  border-bottom: 1px solid #d9d9d9; 
+} */
+
+/* Optional: Smooth transitions */
+.custom-tabs .ant-tabs-tab,
+.custom-tabs .ant-tabs-tab-btn,
+.custom-tabs .ant-tabs-tab-active,
+.custom-tabs .ant-tabs-ink-bar {
+  transition: all 0.3s ease;
+}
+
+.dark-theme-modal .ant-modal-header {
+  background-color: #333 !important;
+  border-bottom: 1px solid #333 !important;
+}
+
+.dark-theme-modal .ant-modal-title {
+  color: #ffffff !important;
+}
+
+.dark-theme-modal .ant-modal-content {
+  background-color: #333 !important;
+  color: white !important;
+}
+
+/* Optional: Style textarea to match dark mode */
+.dark-theme-modal textarea {
+  background-color: #2a2a2a !important;
+  color: white !important;
+  border: 1px solid #444 !important;
+}
+.dark-theme-modal textarea {
+  background-color: #2a2a2a !important;
+  color: white !important;
+  border: 1px solid #444 !important;
+}
+
+.dark-theme-modal textarea::placeholder {
+  color: #ccc !important;
+  opacity: 1 !important;
+}
