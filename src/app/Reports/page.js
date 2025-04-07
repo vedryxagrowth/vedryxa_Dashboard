@@ -3229,9 +3229,11 @@ const MyTablePage = () => {
             
         },
         date: {
-            headerName: 'Date', field: 'date', sort: 'asc', sortable: true,
+            headerName: 'Date', field: 'date', 
+            // sort: 'asc', 
+            sortable: true,
             filter: "agDateColumnFilter",
-            sort: "asc",
+            // sort: "asc",
             minWidth: 110,
             filterParams: {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
@@ -4484,9 +4486,9 @@ const MyTablePage = () => {
                         {/* Right Section: Status Icon */}
                         <span style={{ marginLeft: '10px', flexShrink: 0 }}>
                             {account.status === "Active" ? (
-                                <CheckCircleFilled style={{ color: 'green', fontSize: '15px' }} />
+                                <CheckCircleFilled style={{ color: 'green', fontSize: '15px' }} className='black-icon-active-1' />
                             ) : (
-                                <CloseCircleFilled style={{ color: 'red', fontSize: '15px' }} />
+                                <CloseCircleFilled style={{ color: 'red', fontSize: '15px' }}  className='black-icon-pause-1' />
                             )}
                         </span>
                     </div>
@@ -4543,14 +4545,14 @@ const MyTablePage = () => {
         <StickyBox offsetTop={64} offsetBottom={20} style={{ zIndex: 1, padding: '0px', margin: '0px', paddingLeft: '12px' }}>
             <Tabs
                 activeKey={activeTab}
-                onChange={(key) => handleCarouselChange(key)}
+                onChange={handleCarouselChange}
                 items={items.map((item) => ({
                     key: item.key,
                     label: item.label,
                 }))}
-                className="custom-tabs" // Apply custom CSS class
+                className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
                 style={{
-                    backgroundColor: '#f0f2f5',
+                    backgroundColor:  'transparent',
                     padding: '0',
                     marginBottom: '0',
                 }}
@@ -4680,7 +4682,8 @@ const MyTablePage = () => {
                                 onChange={handleChangeNewInputValue}
                                 onBlur={handleBlur}
                                 onPressEnter={handleChangeInput}
-                                style={{ width: '225px', borderRadius: '5px', height:'30px' }}
+                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                style={{ width: '225px', borderRadius: '5px', height:'30px', backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
                                 />
                             </Col>
                             <Col>
@@ -4691,7 +4694,7 @@ const MyTablePage = () => {
                                     color: 'black',
                                     height:'30px'
                                 }}
-                                icon={<SearchOutlined />}
+                                icon={<SearchOutlined  className="black-icon"/>}
                                 onClick={handleChangeInput}
                                 />
                             </Col>
@@ -4705,7 +4708,7 @@ const MyTablePage = () => {
                                         color: 'black',
                                         height:'30px'
                                     }}
-                                    icon={<ReloadOutlined />}
+                                    icon={<ReloadOutlined  className="black-icon" />}
                                     onClick={onClickRefresh}
                                     />
                                 </Tooltip>

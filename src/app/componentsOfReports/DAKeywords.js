@@ -453,13 +453,13 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
                                     if (status === 'PAUSED') {
                                         return (
                                             <Tooltip title={tooltipContent}>
-                                                <PauseCircleOutlined style={{ color: 'orange', fontSize: '18px' }} />
+                                                <PauseCircleOutlined style={{ color: 'orange', fontSize: '18px' }}  className='black-icon-pause' />
                                             </Tooltip>
                                         );
                                     } else if (status === 'ACTIVE') {
                                         return (
                                             <Tooltip title={tooltipContent}>
-                                                <CheckCircleOutlined style={{ color: 'green', fontSize: '18px' }} />
+                                                <CheckCircleOutlined style={{ color: 'green', fontSize: '18px' }} className='black-icon-active' />
                                             </Tooltip>
                                         );
                                     } else {
@@ -510,6 +510,7 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
                         <Modal
                             title={firstColumnValue}
                             visible={isModalVisibles}
+                            className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             onOk={handleOks} // Default Ok button functionality
                             onCancel={handleCancels} // Default Cancel button functionality
                             footer={[
@@ -535,7 +536,7 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
                                     <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
                                         Cancel
                                     </Button>
-                                    <Button key="ok" type="primary" onClick={handleOks} style={{marginLeft:"4px"}}>
+                                    <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#C7F39A"}}>
                                         Ok
                                     </Button>
                                     </div>
@@ -936,7 +937,7 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
                             </Col> */}
                             <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                 <Tooltip title="Export to CSV">
-                                    <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef3, "Keywords")} />
+                                    <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={() => onBtExport(gridRef3, "Keywords")} />
                                 </Tooltip>
                             </Col>
                         </Row>

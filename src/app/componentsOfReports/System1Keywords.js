@@ -487,7 +487,7 @@ const System1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePra
                             </Col> */}
                             <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                 <Tooltip title="Export to CSV">
-                                    <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef4, "Domain")} />
+                                    <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={() => onBtExport(gridRef4, "Domain")} />
                                 </Tooltip>
                             </Col>
                         </Row>

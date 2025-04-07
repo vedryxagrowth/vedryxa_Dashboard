@@ -322,19 +322,19 @@ const RevenuePartnerDashboard = () => {
                 key: item.key,
                 label: item.label,
                 }))}
-                className="custom-tabs" // Apply custom CSS class
+                className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
                 style={{
-                backgroundColor: '#f0f2f5',
-                padding: '0',       
-                marginBottom: '0',  
+                    backgroundColor:  'transparent',
+                    padding: '0',
+                    marginBottom: '0',
                 }}
                 tabBarStyle={{
-                fontSize: '12px',      
-                padding: '0',          
-                height: '30px',        
-                lineHeight: '30px',    
-                marginBottom: '-1px',  
-                borderBottom: 'none',  
+                    fontSize: '12px',
+                    padding: '0',
+                    height: '30px',
+                    lineHeight: '30px',
+                    marginBottom: '-1px',
+                    borderBottom: 'none',
                 }}
             />
         </StickyBox>
@@ -2598,19 +2598,19 @@ const Dashboard = () => {
                 key: item.key,
                 label: item.label,
                 }))}
-                className="custom-tabs" // Apply custom CSS class
+                className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
                 style={{
-                backgroundColor: '#f0f2f5',
-                padding: '0',       
-                marginBottom: '0',  
+                    backgroundColor:  'transparent',
+                    padding: '0',
+                    marginBottom: '0',
                 }}
                 tabBarStyle={{
-                fontSize: '12px',      
-                padding: '0',          
-                height: '30px',        
-                lineHeight: '30px',    
-                marginBottom: '-1px',  
-                borderBottom: 'none',  
+                    fontSize: '12px',
+                    padding: '0',
+                    height: '30px',
+                    lineHeight: '30px',
+                    marginBottom: '-1px',
+                    borderBottom: 'none',
                 }}
             />
         </StickyBox>
@@ -2625,19 +2625,19 @@ const Dashboard = () => {
                     key: item.key,
                     label: item.label,
                     }))}
-                    className="custom-tabs" // Apply custom CSS class
+                    className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
                     style={{
-                    backgroundColor: '#f0f2f5',
-                    padding: '0',       
-                    marginBottom: '0',  
+                        backgroundColor:  'transparent',
+                        padding: '0',
+                        marginBottom: '0',
                     }}
                     tabBarStyle={{
-                    fontSize: '12px',      
-                    padding: '0',          
-                    height: '30px',        
-                    lineHeight: '30px',    
-                    marginBottom: '-1px',  
-                    borderBottom: 'none',  
+                        fontSize: '12px',
+                        padding: '0',
+                        height: '30px',
+                        lineHeight: '30px',
+                        marginBottom: '-1px',
+                        borderBottom: 'none',
                     }}
                 />
             </StickyBox>
@@ -2652,9 +2652,9 @@ const Dashboard = () => {
                     key: item.key,
                     label: item.label,
                 }))}
-                className="custom-tabs"
+                className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
                 style={{
-                    backgroundColor: '#f0f2f5',
+                    backgroundColor:  'transparent',
                     padding: '0',
                     marginBottom: '0',
                 }}
@@ -2679,9 +2679,9 @@ const Dashboard = () => {
                     key: item.key,
                     label: item.label,
                 }))}
-                className="custom-tabs"
+                className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
                 style={{
-                    backgroundColor: '#f0f2f5',
+                    backgroundColor:  'transparent',
                     padding: '0',
                     marginBottom: '0',
                 }}
@@ -3245,7 +3245,7 @@ const Dashboard = () => {
                             <Col>
                                 <Button 
                                     type="default" 
-                                    icon={<ReloadOutlined />} 
+                                    icon={<ReloadOutlined className='black-icon' />} 
                                     style={{ float: "right", marginLeft: "10px", backgroundColor: '#C7F39A' }} 
                                     onClick={refreshUsers}  // Call refresh function when clicked
                                 >
