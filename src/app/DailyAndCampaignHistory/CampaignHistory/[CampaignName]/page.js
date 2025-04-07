@@ -1667,7 +1667,7 @@ export default function CampaignAndAccount({ params }) {
                         value={searchText}
                         onChange={(e) => setSearchText(e.target.value)}
                         className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                        style={{ width: "200px", padding: "3px",color: theme === 'dark' ? 'white' : '#555' }}
+                        style={{ width: "200px", padding: "3px",backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
                     />
                     <Button 
                         type="default" 
