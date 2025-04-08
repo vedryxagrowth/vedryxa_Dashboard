@@ -89,7 +89,7 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
             normalizedCampaign.endsWith(normalizedInput)
         );
     }
-    ), [dailyData, inputValue]);
+    ), [dailyData, inputValue,theme]);
 
     useEffect(()=>{
         setDailyFixedFooter(

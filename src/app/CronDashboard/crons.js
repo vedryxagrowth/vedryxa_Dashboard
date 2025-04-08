@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Collapse, Select, Button, notification } from 'antd';
 import axios from 'axios';
-
+import { useTokenContext } from '../components/parent';
 const { Panel } = Collapse;
 const { Option } = Select;
 
@@ -26,6 +26,7 @@ const daysOptions = [
 ];
 
 const RequestComponent = ({ network, adAccounts }) => {
+    const { theme } = useTokenContext();
     const [selectedPath, setSelectedPath] = useState(domainMapping[network]?.[0]);
     const [selectedDays, setSelectedDays] = useState(daysOptions[0].value);
     const [loading, setLoading] = useState(false);
@@ -60,15 +61,17 @@ const RequestComponent = ({ network, adAccounts }) => {
     };
 
     return (
-        <Collapse accordion>
-            <Panel header={<div style={{ textAlign: 'left' }}>{network}</div>} key={network}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Collapse className={`custom-collapse ${theme === 'dark' ? 'dark-mode-collapse' : 'light-mode-collapse'}`} accordion>
+            <Panel header={<div style={{ textAlign: 'left', color: theme === "dark" ? "white" : "black", }}>{network}</div>} key={network}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor:theme==="dark"? "#333":"white" }}>
                     <div style={{ marginBottom: '10px' }}>
                         <span>Select Path: </span>
                         <Select 
                             defaultValue={selectedPath}
                             style={{ width: 200 }} 
                             onChange={(value) => setSelectedPath(value)}
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
                         >
                             {domainMapping[network]?.map((path, idx) => (
                                 <Option key={idx} value={path}>
@@ -84,6 +87,8 @@ const RequestComponent = ({ network, adAccounts }) => {
                             defaultValue={selectedDays}
                             style={{ width: 150 }} 
                             onChange={(value) => setSelectedDays(value)}
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
                         >
                             {daysOptions.map((option) => (
                                 <Option key={option.value} value={option.value}>
@@ -97,7 +102,8 @@ const RequestComponent = ({ network, adAccounts }) => {
                     <p style={{ margin: '0 10px' }}>{url}</p>
 
                     <Button 
-                        type="primary" 
+                        // type="primary" 
+                        style={{ backgroundColor: "#C7F39A", color: "black" }}
                         loading={loading} 
                         onClick={handleSubmit}
                     >

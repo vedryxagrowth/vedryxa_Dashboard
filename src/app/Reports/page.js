@@ -4749,6 +4749,7 @@ const MyTablePage = () => {
                     getMainMenuItems={getMainMenuItems}
                     toggleStatus={checked}
                     handleChangeToggle={handleChangeToggle}
+                    theme={theme}
                     />
                 </Tabs.TabPane>
 

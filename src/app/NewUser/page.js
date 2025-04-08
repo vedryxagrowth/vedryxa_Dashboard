@@ -136,6 +136,20 @@ const UsersTable = () => {
                     key: item.key,
                     label: item.label,
                 }))}
+                className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
+                style={{
+                    backgroundColor:  'transparent',
+                    padding: '0',
+                    marginBottom: '0',
+                }}
+                tabBarStyle={{
+                    fontSize: '12px',
+                    padding: '0',
+                    height: '30px',
+                    lineHeight: '30px',
+                    // marginBottom: '-1px',
+                    borderBottom: 'none',
+                }}
             />
         </div>
     );
@@ -394,6 +408,7 @@ const UsersTable = () => {
                     <Col flex="1 1 auto">
                         <Switch
                             checked={record.Status === 'Active'}
+                            style={{backgroundColor: record.Status === 'Active' && "#c0f788"}}
                             onChange={(checked) => handleNetworkStatusChange(record.revenuePartner, checked)}
                         />
                     </Col>
@@ -596,6 +611,7 @@ const UsersTable = () => {
                     <Col flex="1 1 auto">
                         <Switch
                             checked={record.status === 'Active'}
+                            style={{backgroundColor: record.status === 'Active' && "#c0f788"}}
                             onChange={(checked) => handleStatusChange(record.accountNumber, checked)}
                         />
                     </Col>
@@ -659,14 +675,17 @@ const UsersTable = () => {
                                 style={{ width: 256 }}
                                 mode="inline"
                                 defaultSelectedKeys={['2']}
+                                className={`custom-dropdown-menu ${theme === 'dark' ? 'dark-menu' : ''}`}
                                 >
                                 {menuItems.map(item => (
-                                    <SubMenu key={item.key} title={<span className='columns-submenu'>{item.label} <DownOutlined size={10}/></span>} className="custom-submenu">
-                                    {item.children && item.children.map(child => (
+                                    <SubMenu  key={item.key} title={<span>{item.label} <DownOutlined size={10}/></span>}>
+                                    <div style={{maxHeight:"200px", overflow:'auto'}}>
+                                        {item.children && item.children.map(child => (
                                         <Menu.Item key={child.key}>
                                         {child.label}
                                         </Menu.Item>
                                     ))}
+                                    </div>
                                     </SubMenu>
                                 ))}
                                 </Menu>
@@ -699,8 +718,8 @@ const UsersTable = () => {
             key: 'action',
             render: (text, record) => (
                 <Space size="middle">
-                    <Button type="primary" onClick={() => handleEdit(record)}>Edit</Button>
-                    <Button type="dashed" onClick={() => handleDelete(record)}>Remove Access</Button>
+                    <Button style={{backgroundColor:'#C7F39A', color:'black'}} onClick={() => handleEdit(record)}>Edit</Button>
+                    <Button style={{backgroundColor: "transparent"}} onClick={() => handleDelete(record)}>Remove Access</Button>
                 </Space>
             ),
         },
@@ -731,6 +750,7 @@ const UsersTable = () => {
                                     onClick={() => {}}
                                     style={{ width: 256, maxHeight: 300, overflowY: 'auto' }}
                                     mode="inline"
+                                    className={`custom-dropdown-menu ${theme === 'dark' ? 'dark-menu' : ''}`}
                                 >
                                     {newDomains.map(item => (
                                         <SubMenu
@@ -797,6 +817,7 @@ const UsersTable = () => {
                                     onClick={() => {}}
                                     style={{ width: 256, maxHeight: 300, overflowY: 'auto' }}
                                     mode="inline"
+                                    className={`custom-dropdown-menu ${theme === 'dark' ? 'dark-menu' : ''}`}
                                 >
                                     {newSource.map(item => (
                                         <SubMenu
@@ -867,6 +888,7 @@ const UsersTable = () => {
                                 onClick={() => {}}
                                 style={{ width: 256, maxHeight: 300, overflowY: 'auto'  }}
                                 mode="inline"
+                                className={`custom-dropdown-menu ${theme === 'dark' ? 'dark-menu' : ''}`}
                                 >
                                 {newChannels.map(item => (
                                     <SubMenu
@@ -926,6 +948,7 @@ const UsersTable = () => {
                                     onClick={() => {}}
                                     style={{ width: 256, maxHeight: 300, overflowY: 'auto' }}
                                     mode="inline"
+                                    className={`custom-dropdown-menu ${theme === 'dark' ? 'dark-menu' : ''}`}
                                 >
                                     {newBusinessData.map(item => (
                                         <SubMenu
@@ -977,7 +1000,7 @@ const UsersTable = () => {
             width: 150,
             render: (text, record) => (
                 <Space size="middle">
-                    <Button type="primary" onClick={()=>handleEditUrlBuilder(record)}>Edit</Button>
+                    <Button style={{backgroundColor:'#C7F39A', color:'black'}} onClick={()=>handleEditUrlBuilder(record)}>Edit</Button>
                     {/* <Button type="dashed" onClick={() => handleDelete(record)}>Remove Access</Button> */}
                     <EditOutlined style={{ fontSize: '20px', cursor: 'pointer'}} onClick={()=>onClickOpenUrlBuilder(record)}  />
                 </Space>
@@ -1376,21 +1399,15 @@ const UsersTable = () => {
                                         <span style={{ color: "#B4B4B4", display: 'block' }}>Search</span>
                                         <div style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
                                                 <>
-                                                    <Button  style={{color: theme === "dark" ? "#333": "#fff"}} icon={<SearchOutlined  style={{color: theme === "dark" ? "#fff": "#333"}} />} />
+                                                    <Button  style={{backgroundColor: theme === "dark" ? "#555": "#fff"}} icon={<SearchOutlined  style={{color: theme === "dark" ? "#fff": "#333"}} />} />
                                                     <Input
                                                         placeholder="Search here"
                                                         autoFocus
                                                         value={searchInput}
                                                         onChange={handleSearchChange}
-                                                        onBlur={handleBlur}
-                                                        style={{
-                                                            width: '100%',
-                                                            borderRadius: '5px',
-                                                            marginLeft: '8px',
-                                                            backgroundColor: theme === 'dark' ? '#333' : '#ffffff',  // Dark theme: dark background, Light theme: white background
-                                                            color: theme === 'dark' ? '#ffffff' : '#333',            // Dark theme: white text, Light theme: dark text
-                                                            borderColor: theme === 'dark' ? '#444444' : '#d9d9d9'       // Optional: adjust border color as well
-                                                        }}
+                                                        onBlur={handleBlur} 
+                                                        className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                                        style={{ width: '100%', borderRadius: '5px', marginLeft: '8px', backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555',borderColor: theme === 'dark' ? '#444444' : '#d9d9d9'  }}
                                                     />
                                                 </>
                                         </div>
@@ -1436,12 +1453,12 @@ const UsersTable = () => {
                             <Col xs={24} md={5}>
                                 <Button 
                                     type="default" 
-                                    icon={<ReloadOutlined />} 
+                                    icon={<ReloadOutlined className="black-icon"/>} 
                                     style={{ float: "right", marginLeft: "10px", backgroundColor: '#C7F39A' }} 
                                     onClick={refreshUsers}  // Call refresh function when clicked
                                 >
                                 </Button>
-                                <Button style={{ float: "right", border: 'none', backgroundColor: '#C7F39A' }} onClick={() => setDrawerVisible(true)}>
+                                <Button style={{ float: "right", border: 'none', backgroundColor: '#C7F39A', color:'black' }} onClick={() => setDrawerVisible(true)}>
                                     Create User
                                 </Button>
                             </Col>
@@ -1453,7 +1470,7 @@ const UsersTable = () => {
                         </div>   
                     ) : usersData.length > 0 ? (
                         <Table
-                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                            className={`custom-dark-table ${theme === 'dark' ? 'dark-mode-pagination' : 'light-mode-pagination'}`}
                             dataSource={filteredData.map((item, index) => ({ ...item, key: index }))}
                             columns={columns}
                             pagination={{ pageSize: paginationSize }}
@@ -1486,21 +1503,15 @@ const UsersTable = () => {
                                     <Col xs={24} sm={12} md={8}>
                                         <span style={{ color: "#B4B4B4", display: 'block' }}>Search</span>
                                         <div style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
-                                            <Button  style={{color: theme === "dark" ? "#333": "#fff"}} icon={<SearchOutlined  style={{color: theme === "dark" ? "#fff": "#333"}} />} onClick={handleSearchClick1} />
+                                            <Button  style={{backgroundColor: theme === "dark" ? "#555": "#fff"}} icon={<SearchOutlined  style={{color: theme === "dark" ? "#fff": "#333"}} />} onClick={handleSearchClick1} />
                                             <Input
                                                 placeholder="Search here"
                                                 autoFocus={isSearchingAccount}  // Only autofocus when searching
                                                 value={newSearchInput}
                                                 onChange={handleaccountSearchChange}
-                                                onBlur={handleBlur1}
-                                                style={{
-                                                    width: '100%',
-                                                    borderRadius: '5px',
-                                                    marginLeft: '8px',
-                                                    backgroundColor: theme === 'dark' ? '#333' : '#ffffff',  // Dark theme: dark background, Light theme: white background
-                                                    color: theme === 'dark' ? '#ffffff' : '#333',            // Dark theme: white text, Light theme: dark text
-                                                    borderColor: theme === 'dark' ? '#444444' : '#d9d9d9'       // Optional: adjust border color as well
-                                                }} 
+                                                onBlur={handleBlur1} 
+                                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                                style={{ width: '100%', borderRadius: '5px', marginLeft: '8px', backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555',borderColor: theme === 'dark' ? '#444444' : '#d9d9d9'  }} 
                                             />
                                         </div>
                                     </Col>
@@ -1544,12 +1555,12 @@ const UsersTable = () => {
                             <Col xs={24} md={5}>
                                 <Button 
                                     type="default" 
-                                    icon={<ReloadOutlined />} 
+                                    icon={<ReloadOutlined className="black-icon"/>} 
                                     style={{ float: "right", marginLeft: "10px", backgroundColor: '#C7F39A' }} 
                                     onClick={refreshAccounts}  // Call refresh function when clicked
                                 >
                                 </Button>
-                                <Button style={{ float: "right", border: 'none', backgroundColor: '#C7F39A' }} onClick={shownnewaccountdrawar}>
+                                <Button style={{ float: "right", border: 'none', backgroundColor: '#C7F39A', color: "black" }} onClick={shownnewaccountdrawar}>
                                     Add New Account
                                 </Button>
                             </Col>
@@ -1561,7 +1572,7 @@ const UsersTable = () => {
                         </div> 
                     ) : AccountsData.length > 0 ? (
                         <Table
-                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                            className={`custom-dark-table ${theme === 'dark' ? 'dark-mode-pagination' : 'light-mode-pagination'}`}
                             // dataSource={newSearchInput ? accFilteredData.map((item, index) => ({ ...item, key: index })) : AccountsData.map((item, index) => ({ ...item, key: index }))}
                             dataSource={accFilteredData.map((item, index) => ({ ...item, key: index }))}
                             columns={Accountscolumn}
@@ -1588,21 +1599,15 @@ const UsersTable = () => {
                                     <Col xs={24} sm={12} md={8}>
                                         <span style={{ color: "#B4B4B4", display: 'block' }}>Search</span>
                                         <div style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
-                                            <Button  style={{color: theme === "dark" ? "#333": "#fff"}} icon={<SearchOutlined  style={{color: theme === "dark" ? "#fff": "#333"}} />} onClick={handleSearchNetwork} />
+                                            <Button  style={{backgroundColor: theme === "dark" ? "#555": "#fff", borderColor: ""}} icon={<SearchOutlined  style={{color: theme === "dark" ? "#fff": "#333"}} />} onClick={handleSearchNetwork} />
                                             <Input
                                                 placeholder="Search here"
                                                 autoFocus={isSearchingNetwork}  // Only autofocus when searching
                                                 value={netSearchInput}
                                                 onChange={handleNetworkSearchChange}
-                                                onBlur={handleBlur2}
-                                                style={{
-                                                    width: '100%',
-                                                    borderRadius: '5px',
-                                                    marginLeft: '8px',
-                                                    backgroundColor: theme === 'dark' ? '#333' : '#ffffff',  // Dark theme: dark background, Light theme: white background
-                                                    color: theme === 'dark' ? '#ffffff' : '#333',            // Dark theme: white text, Light theme: dark text
-                                                    borderColor: theme === 'dark' ? '#444444' : '#d9d9d9'       // Optional: adjust border color as well
-                                                }} 
+                                                onBlur={handleBlur2} 
+                                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                                style={{ width: '100%', borderRadius: '5px', marginLeft: '8px', backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555',borderColor: theme === 'dark' ? '#444444' : '#d9d9d9'  }} 
                                             />
                                         </div>
                                     </Col>
@@ -1646,7 +1651,7 @@ const UsersTable = () => {
                             <Col xs={24} md={5}>
                                 <Button 
                                     type="default" 
-                                    icon={<ReloadOutlined />} 
+                                    icon={<ReloadOutlined className="black-icon"/>} 
                                     style={{ float: "right", marginLeft: "10px", backgroundColor: '#C7F39A' }} 
                                     onClick={refreshNetworks}  // Call refresh function when clicked
                                 >
@@ -1660,7 +1665,7 @@ const UsersTable = () => {
                         </div> 
                     ) : networksData.length > 0 ? ( 
                         <Table
-                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                            className={`custom-dark-table ${theme === 'dark' ? 'dark-mode-pagination' : 'light-mode-pagination'}`}
                             // dataSource={netSearchInput ? networkFilteredData.map((item, index) => ({ ...item, key: item.key, id: index })) : networksData.map((item, index) => ({ ...item, key: item.key, id: index }))}
                             dataSource={networkFilteredData.map((item, index) => ({ ...item, key: item.key || index, id: index }))}
                             columns={networksColumn}
@@ -1688,19 +1693,13 @@ const UsersTable = () => {
                                     <Col xs={24} sm={12} md={8}>
                                         <span style={{ color: "#B4B4B4", display: 'block' }}>Search</span>
                                         <div style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
-                                            <Button  style={{color: theme === "dark" ? "#333": "#fff"}} icon={<SearchOutlined  style={{color: theme === "dark" ? "#fff": "#333"}} />} onClick={handleSearchClick1} />
+                                            <Button  style={{backgroundColor: theme === "dark" ? "#555": "#fff"}} icon={<SearchOutlined  style={{color: theme === "dark" ? "#fff": "#333"}} />} onClick={handleSearchClick1} />
                                             <Input
                                                 placeholder="Search here"
                                                 autoFocus={isSearchingAccount}  // Only autofocus when searching
-                                                value={newSearchInput}
-                                                style={{
-                                                    width: '100%',
-                                                    borderRadius: '5px',
-                                                    marginLeft: '8px',
-                                                    backgroundColor: theme === 'dark' ? '#333' : '#ffffff',  // Dark theme: dark background, Light theme: white background
-                                                    color: theme === 'dark' ? '#ffffff' : '#333',            // Dark theme: white text, Light theme: dark text
-                                                    borderColor: theme === 'dark' ? '#444444' : '#d9d9d9'       // Optional: adjust border color as well
-                                                }} 
+                                                value={newSearchInput} 
+                                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                                style={{ width: '100%', borderRadius: '5px', marginLeft: '8px', backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555',borderColor: theme === 'dark' ? '#444444' : '#d9d9d9'  }} 
                                             />
                                         </div>
                                     </Col>
@@ -1723,12 +1722,12 @@ const UsersTable = () => {
                             <Col xs={24} md={8}>
                                 <Button 
                                     type="default" 
-                                    icon={<ReloadOutlined />} 
+                                    icon={<ReloadOutlined className="black-icon"/>} 
                                     style={{ float: "right", marginLeft: "10px", backgroundColor: '#C7F39A' }} 
                                     onClick={refreshUrlBuilder}  // Call refresh function when clicked
                                 >
                                 </Button>
-                                <Button type="primary" style={{ float: "right", marginLeft: "5%" }}>
+                                <Button  style={{ float: "right", marginLeft: "5%", backgroundColor:'#C7F39A', color:'black' }}>
                                     Add New URL Builder
                                 </Button>
                             </Col>
@@ -1740,7 +1739,7 @@ const UsersTable = () => {
                         </div> 
                     ) : urlBuilderData.length > 0 ? (
                         <Table
-                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                            className={`custom-dark-table ${theme === 'dark' ? 'dark-mode-pagination' : 'light-mode-pagination'}`}
                             dataSource={urlBuilderData}
                             columns={urlbuilder}
                             pagination={{ pageSize: paginationSize }}
@@ -1770,7 +1769,7 @@ const UsersTable = () => {
                 </div>
                 {/* Add the RequestComponent for each network */}
                 <div>
-                    <Card title="Ad Account Details" size="small">
+                    <Card title="Ad Account Details" size="small"  className={theme === 'dark' ? 'dark-theme' : 'light-theme'}>
                         <div className='account-details-container'>
                             <div className='user-account-container'>
                                 {userdetails?.adAccounts ? (

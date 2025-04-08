@@ -11,6 +11,24 @@
       "static/chunks/main-app.js",
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
+    ],
+    "/NewUser/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/NewUser/page.css",
+      "static/chunks/app/NewUser/page.js"
+    ],
+    "/LiveHistory/LiveCampaignHistory/[CampaignName]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/LiveHistory/LiveCampaignHistory/[CampaignName]/page.css",
+      "static/chunks/app/LiveHistory/LiveCampaignHistory/[CampaignName]/page.js"
+    ],
+    "/Activities/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/Activities/page.css",
+      "static/chunks/app/Activities/page.js"
     ]
   }
 }

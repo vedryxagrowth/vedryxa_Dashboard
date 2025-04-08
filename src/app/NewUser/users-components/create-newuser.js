@@ -131,6 +131,7 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
             open={visible} // Change visible to open
             onClose={onClose}
             closeIcon={<CloseOutlined />}
+            style={{backgroundColor: theme === 'dark' ? '#333' : '#fff'}}
         >
             <Form
                 form={form}
