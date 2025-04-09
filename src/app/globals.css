@@ -1150,6 +1150,10 @@ body.dark-mode .black-icon-active-1.anticon svg {
 body.dark-mode .black-icon-pause-1.anticon svg {
   color: red !important;
 }
+
+body.dark-mode .black-icon-comment.anticon svg {
+  color: #f5582c !important;
+}
 .custom-input-dark::placeholder {
   color: #ccc;
 }
@@ -1227,3 +1231,252 @@ body.dark-mode .black-icon-pause-1.anticon svg {
   color: #ccc !important;
   opacity: 1 !important;
 }
+
+.custom-dark-table.dark-mode-pagination .ant-table-thead > tr > th {
+  background-color: #4e5f3f !important; /* Light green */
+  color: white !important;
+  font-weight: 600;
+  border-bottom: 1px solid #4e5f3f; /* optional green-ish border */
+}
+.custom-dark-table.light-mode-pagination .ant-table-thead > tr > th {
+  background-color: #edffd9 !important; /* Light green */
+  color: black !important;
+  font-weight: 600;
+  border-bottom: 1px solid black; /* optional green-ish border */
+}
+.custom-dark-table.dark-mode-pagination .ant-pagination {
+  color: white;
+}
+
+.custom-dark-table.dark-mode-pagination .ant-pagination-item {
+  background-color: #2a2a2a;
+  border: 1px solid #444;
+  color: white;
+}
+
+.custom-dark-table.dark-mode-pagination .ant-pagination-item a {
+  color: white;
+}
+
+.custom-dark-table.dark-mode-pagination .ant-pagination-item-active {
+  background-color: #C7F39A;
+  border-color: #C7F39A;
+}
+
+.custom-dark-table.dark-mode-pagination .ant-pagination-item-active a {
+  color: black;
+}
+
+.custom-dark-table.dark-mode-pagination .ant-pagination-prev,
+.custom-dark-table.dark-mode-pagination .ant-pagination-next {
+  color: white;
+}
+
+
+.custom-dark-table.dark-mode-pagination .ant-pagination-prev button,
+.custom-dark-table.dark-mode-pagination .ant-pagination-next button {
+  color: white;
+  background-color: #2a2a2a;
+  border: 1px solid #444;
+}
+.custom-dark-table.dark-mode-pagination .ant-pagination-item-ellipsis {
+  color: white !important;
+}
+.custom-dark-table.light-mode-pagination .ant-pagination-item-ellipsis {
+  color: black !important;
+}
+.custom-dark-table.dark-mode-pagination .ant-pagination-item:hover {
+  border-color: #C7F39A;
+  color: #C7F39A;
+}
+
+.custom-dark-table.light-mode-pagination .ant-pagination-item-active {
+  /* background-color: #C7F39A; */
+  border-color: #C7F39A;
+}
+
+.custom-dark-table.light-mode-pagination .ant-pagination-item:hover {
+  border-color: #C7F39A;
+  color: #C7F39A;
+}
+
+.custom-dark-table.light-mode-pagination .ant-pagination-item-active a {
+  color: #423937;
+}
+
+
+.custom-collapse.dark-mode-collapse .ant-collapse-content-box {
+  background-color: #333;
+  color: white;
+}
+
+/* Light Theme */
+.custom-collapse.light-mode-collapse .ant-collapse-content-box {
+  background-color: #ffffff;
+  color: black;
+}
+
+
+.custom-dropdown-menu.dark-menu {
+  background-color: #333 !important;
+  color: white !important;
+}
+
+/* Menu Items */
+.custom-dropdown-menu.dark-menu .ant-menu-item {
+  background-color: #333 !important;
+  color: white !important;
+}
+
+/* Hovered or selected Menu Items */
+.custom-dropdown-menu.dark-menu .ant-menu-item:hover,
+.custom-dropdown-menu.dark-menu .ant-menu-item-selected {
+  background-color: #2b2b2b !important;
+  color: white !important;
+}
+
+/* SubMenu title */
+.custom-dropdown-menu.dark-menu .ant-menu-submenu-title {
+  background-color: #333 !important;
+  color: white !important;
+}
+
+/* SubMenu popup panel (when expanded) */
+.custom-dropdown-menu.dark-menu .ant-menu-submenu-popup {
+  background-color: #333 !important;
+  color: white !important;
+}
+
+/* Scrollbar (same as Select) */
+.custom-dropdown-menu.dark-menu ::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-dropdown-menu.dark-menu ::-webkit-scrollbar-track {
+  background-color: #333;
+}
+
+.custom-dropdown-menu.dark-menu ::-webkit-scrollbar-thumb {
+  background-color: #d3d3d3;
+  border-radius: 10px;
+}
+
+.custom-dropdown-menu.dark-menu {
+  scrollbar-color: #d3d3d3 #333;
+  scrollbar-width: thin;
+}
+
+.add-account-container{
+  width:'100%';
+  padding-left:"5px"
+}
+.add-account-container-input{
+  display: flex;
+  margin-bottom: 5px;
+  /* width:'150%'; */
+  /* align-items: center;
+  justify-content: center;
+  padding: 0%;
+  margin: 0%; */
+}
+.form-dark .ant-form-item-label > label {
+  color: white !important;
+}
+
+/* Optional: Light mode label styling */
+.form-light .ant-form-item-label > label {
+  color: black;
+}
+.custom-select-dark .ant-select-selection-placeholder {
+  color: white !important;
+  opacity: 0.8;
+}
+
+.custom-confirm-dark .ant-modal-content,
+.custom-confirm-light .ant-modal-content {
+  border-radius: 8px;
+}
+
+/* ✅ OK Button - consistent in both themes */
+.custom-confirm-dark .ant-btn-primary,
+.custom-confirm-light .ant-btn-primary {
+  background-color: #C7F39A !important;
+  border-color: #C7F39A !important;
+  color: black !important;
+  font-weight: 600;
+}
+
+/* ✅ OK Button - hover */
+.custom-confirm-dark .ant-btn-primary:hover,
+.custom-confirm-light .ant-btn-primary:hover,
+.custom-confirm-dark .ant-btn-primary:focus,
+.custom-confirm-light .ant-btn-primary:focus {
+  background-color: #C7F39A !important;
+  border-color: #C7F39A !important;
+  color: black !important;
+}
+
+/* 🌓 Optional: Cancel Button - dark theme only */
+.custom-confirm-dark .ant-btn-default {
+  color: white !important;
+  border-color: white !important;
+  background-color: transparent !important;
+}
+
+.custom-confirm-dark .ant-btn-default:hover {
+  color: #C7F39A !important;
+  border-color: #C7F39A !important;
+}
+
+/* 🌓 Dark theme modal background + text */
+.custom-confirm-dark .ant-modal-content {
+  background-color: #1e1e1e !important;
+  color: white !important;
+}
+
+.custom-confirm-dark .ant-modal-confirm-title {
+  color: white !important;
+  font-weight: 600;
+}
+
+.custom-confirm-dark .ant-modal-confirm-content {
+  color: #ccc !important;
+}
+
+.dark-mode input:-webkit-autofill {
+  background-color: #555 !important;
+  -webkit-box-shadow: 0 0 0 1000px #555 inset !important;
+  -webkit-text-fill-color: white !important;
+  color: white !important;
+  border: 1px solid #888 !important; /* override blue border */
+  caret-color: white;
+}
+
+/* ☀️ Autofill fix for light theme */
+.light-mode input:-webkit-autofill,
+.light-mode input:-webkit-autofill:hover,
+.light-mode input:-webkit-autofill:focus,
+.light-mode input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0px 1000px white inset !important;
+  box-shadow: 0 0 0px 1000px white inset !important;
+  background-color: white !important;
+  -webkit-text-fill-color: black !important;
+  color: black !important;
+  border: 1px solid #d9d9d9 !important;
+  caret-color: black;
+  transition: background-color 9999s ease-out, color 9999s ease-out;
+}
+
+/* Also fix Ant Design focus style */
+.light-mode .ant-input:focus {
+  border-color: #d9d9d9 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Optional: Force neutral border even after autofill focus */
+.light-mode .ant-input {
+  border: 1px solid #d9d9d9 !important;
+  transition: none !important;
+}
+

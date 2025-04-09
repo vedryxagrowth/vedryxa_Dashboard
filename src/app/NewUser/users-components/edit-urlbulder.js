@@ -258,6 +258,7 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
         Modal.confirm({
             title: 'Confirmation',
             content: 'Are you sure you want to submit?',
+            className: theme === 'dark' ? 'custom-confirm-dark' : 'custom-confirm-light',
             onOk: async() => {
                 try {
                     console.log(objects, "businessData");
@@ -293,12 +294,14 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
             open={visible} // Change visible to open
             onClose={onClose1}
             closeIcon={<CloseOutlined />}
+            style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
         >
             <Form
                 layout="vertical"
                 onFinish={submitForm}
                 initialValues={initialValues}
                 key={initialValues?.Network} 
+                className={theme === 'dark' ? 'form-dark' : 'form-light'}
             >
                 <Form.Item
                     label="Network"
@@ -310,7 +313,7 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
                         },
                     ]}
                 >
-                    <Input  disabled  style={{backgroundColor:'transparent', color: theme === "dark" ? 'white' : "black"}}/>
+                    <Input  disabled  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
                 </Form.Item>
                 
                 {editeddata?.Source && (
@@ -324,89 +327,122 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
                         },
                     ]}
                 >
-                    <div className='editeddata-source-fields'>
-                        <div style={{ flex: 1, textAlign: "center" }}>ID</div>
-                        <div style={{ flex: 2, textAlign: "center" }}>Name</div>
-                        <div style={{ flex: 2, textAlign: "center" }}>Code</div>
-                        <div style={{ flex: 2, textAlign: "center" }}>Campaign ID</div>
-                        <div style={{ flex: 2, textAlign: "center" }}>Adset ID</div>
-                        <div style={{ flex: 2, textAlign: "center" }}>Action</div>
+                    {/* Header Row */}
+                    <div className="editeddata-source-fields" style={{ display: 'flex', marginBottom: '8px' }}>
+                        <div style={{ flex: 1, textAlign: 'center',color: theme === "dark" ? 'white' : "black" }}>ID</div>
+                        <div style={{ flex: 2, textAlign: 'center',color: theme === "dark" ? 'white' : "black" }}>Name</div>
+                        <div style={{ flex: 2, textAlign: 'center',color: theme === "dark" ? 'white' : "black" }}>Code</div>
+                        <div style={{ flex: 2, textAlign: 'center',color: theme === "dark" ? 'white' : "black" }}>Campaign ID</div>
+                        <div style={{ flex: 2, textAlign: 'center',color: theme === "dark" ? 'white' : "black" }}>Adset ID</div>
+                        <div style={{ flex: 2, textAlign: 'center',color: theme === "dark" ? 'white' : "black" }}>Action</div>
                     </div>
 
-                    {/* Campaign rows */}
+                    {/* Campaign Rows */}
                     {campaigns.map((campaign, index) => (
                         <div
-                        key={index}
-                        className='campaigns-container'
+                            key={index}
+                            className="campaigns-container"
+                            style={{ display: 'flex', marginBottom: '10px' }}
                         >
-                            <div style={{ flex: 1, textAlign: "center" }}>
+                            <div style={{ flex: 1, textAlign: 'center' }}>
                                 <input
-                                type="text"
-                                value={campaign.id}
-                                readOnly
-                                className='campaigns-container-input'
+                                    type="text"
+                                    value={campaign.id}
+                                    readOnly
+                                    className="campaigns-container-input"
+                                    style={{ width: '90%', textAlign: 'center',height:'25px', backgroundColor:theme === 'dark' ? '#555' : "white", color: theme === "dark" ? 'white' : "black" }}
                                 />
                             </div>
-                            <div style={{ flex: 2, textAlign: "center" }}>
+
+                            <div style={{ flex: 2, textAlign: 'center' }}>
                                 <input
-                                type="text"
-                                value={campaign.name}
-                                onChange={(e) => updateField(index, "name", e.target.value)}
-                                style={{ width: "90%", textAlign: "center" }}
+                                    type="text"
+                                    value={campaign.name}
+                                    onChange={(e) => updateField(index, 'name', e.target.value)}
+                                    style={{ width: '90%', textAlign: 'center',height:'25px', backgroundColor:theme === 'dark' ? '#555' : "white", color: theme === "dark" ? 'white' : "black" }}
                                 />
                             </div>
-                            <div style={{ flex: 2, textAlign: "center" }}>
+
+                            <div style={{ flex: 2, textAlign: 'center' }}>
                                 <input
-                                type="text"
-                                value={campaign.code}
-                                onChange={(e) => updateField(index, "code", e.target.value)}
-                                style={{ width: "90%", textAlign: "center" }}
+                                    type="text"
+                                    value={campaign.code}
+                                    onChange={(e) => updateField(index, 'code', e.target.value)}
+                                    style={{ width: '90%', textAlign: 'center',height:'25px', backgroundColor:theme === 'dark' ? '#555' : "white", color: theme === "dark" ? 'white' : "black" }}
                                 />
                             </div>
-                            <div style={{ flex: 2, textAlign: "center" }}>
+
+                            <div style={{ flex: 2, textAlign: 'center' }}>
                                 <input
-                                type="text"
-                                value={campaign.campaignId}
-                                onChange={(e) => updateField(index, "campaignId", e.target.value)}
-                                style={{ width: "90%", textAlign: "center" }}
+                                    type="text"
+                                    value={campaign.campaignId}
+                                    onChange={(e) => updateField(index, 'campaignId', e.target.value)}
+                                    style={{ width: '90%', textAlign: 'center',height:'25px', backgroundColor:theme === 'dark' ? '#555' : "white", color: theme === "dark" ? 'white' : "black" }}
                                 />
                             </div>
-                            <div style={{ flex: 2, textAlign: "center" }}>
+
+                            <div style={{ flex: 2, textAlign: 'center' }}>
                                 <input
-                                type="text"
-                                value={campaign.AdsetId}
-                                onChange={(e) => updateField(index, "AdsetId", e.target.value)}
-                                style={{ width: "90%", textAlign: "center" }}
+                                    type="text"
+                                    value={campaign.AdsetId}
+                                    onChange={(e) => updateField(index, 'AdsetId', e.target.value)}
+                                    style={{ width: '90%', textAlign: 'center',height:'25px', backgroundColor:theme === 'dark' ? '#555' : "white", color: theme === "dark" ? 'white' : "black" }}
                                 />
                             </div>
-                            <div className='delete-button-container'>
+
+                            <div
+                                className="delete-button-container"
+                                style={{
+                                    flex: 2,
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                }}
+                            >
                                 {/* Delete button for all rows */}
                                 <Button
-                                type="danger"
-                                icon={<DeleteOutlined />}
-                                onClick={() => showDeleteModal(index)}
+                                    type="danger"
+                                    icon={<DeleteOutlined className={theme === "dark" ? "delete-icon-dark" : "delete-icon-light"} />}
+                                    onClick={() => showDeleteModal(index)}
                                 />
+
                                 {/* Add button only for the last row */}
                                 {index === campaigns.length - 1 && (
                                     <Button
-                                        type="primary"
-                                        icon={<PlusOutlined />}
-                                        onClick={addNewCampaign}
-                                        style={{ marginRight: "5px" }}
+                                    icon={<PlusOutlined className="black-icon" />}
+                                    onClick={addNewCampaign}
+                                    style={{
+                                        backgroundColor: '#C7F39A',
+                                        color: 'black',
+                                        fontWeight: 600,
+                                    }}
                                     />
                                 )}
                             </div>
                         </div>
                     ))}
 
+
                     {/* Delete Confirmation Modal */}
                     <Modal
                         title="Delete Confirmation"
+                        className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                         visible={modalVisible}
                         onOk={deleteCampaign}
                         onCancel={cancelDelete1}
                         okText="OK"
                         cancelText="Cancel"
+                        footer={[
+                            <div>
+                                <Button key="cancel" onClick={cancelDelete1} style={{marginLeft:"4px"}}>
+                                    Cancel
+                                </Button>
+                                <Button key="ok" onClick={deleteCampaign} style={{marginLeft:"4px", backgroundColor:"#C7F39A"}}>
+                                    Ok
+                                </Button>
+                            </div>
+                        ]}
                     >
                         <p>Are you sure you want to delete this campaign?</p>
                     </Modal>
@@ -423,80 +459,112 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
                         },
                     ]}
                 >
-                    <div className='editeddata-source-fields'>
-                        <div style={{ flex: 1, textAlign: "center" }}>ID</div>
-                        <div style={{ flex: 2, textAlign: "center" }}>Name</div>
-                        <div style={{ flex: 2, textAlign: "center" }}>Source</div>
-                        <div style={{ flex: 2, textAlign: "center" }}>Value</div>
-                        <div style={{ flex: 2, textAlign: "center" }}>Action</div>
+                    {/* Header Row */}
+                    <div className="editeddata-source-fields" style={{ display: 'flex', marginBottom: '8px' }}>
+                        <div style={{ flex: 1, textAlign: 'center',color: theme === "dark" ? 'white' : "black" }}>ID</div>
+                        <div style={{ flex: 2, textAlign: 'center',color: theme === "dark" ? 'white' : "black" }}>Name</div>
+                        <div style={{ flex: 2, textAlign: 'center',color: theme === "dark" ? 'white' : "black" }}>Source</div>
+                        <div style={{ flex: 2, textAlign: 'center',color: theme === "dark" ? 'white' : "black" }}>Value</div>
+                        <div style={{ flex: 1, textAlign: 'center',color: theme === "dark" ? 'white' : "black" }}>Action</div>
                     </div>
 
-                    {/* List of channels */}
+                    {/* List of Channels */}
                     {channelList.map((channel, index) => (
                         <div
-                        key={index}
-                        className='campaigns-container'
+                            key={index}
+                            className="campaigns-container"
+                            style={{ display: 'flex', marginBottom: '10px' }}
                         >
-                            <div style={{ flex: 1, textAlign: "center" }}>
+                            <div style={{ flex: 1, textAlign: 'center' }}>
                                 <input
-                                type="text"
-                                value={channel.id}
-                                readOnly
-                                className='campaigns-container-input'
+                                    type="text"
+                                    value={channel.id}
+                                    readOnly
+                                    className="campaigns-container-input"
+                                    style={{ width: '90%', textAlign: 'center',height:'25px', backgroundColor:theme === 'dark' ? '#555' : "white", color: theme === "dark" ? 'white' : "black" }}
                                 />
                             </div>
-                            <div style={{ flex: 2, textAlign: "center" }}>
+
+                            <div style={{ flex: 2, textAlign: 'center' }}>
                                 <input
-                                type="text"
-                                value={channel.name}
-                                onChange={(e) => updateChannelField(index, "name", e.target.value)}
-                                style={{ width: "90%", textAlign: "center" }}
+                                    type="text"
+                                    value={channel.name}
+                                    onChange={(e) => updateChannelField(index, 'name', e.target.value)}
+                                    style={{ width: '90%', textAlign: 'center',height:'25px', backgroundColor:theme === 'dark' ? '#555' : "white", color: theme === "dark" ? 'white' : "black" }}
                                 />
                             </div>
-                            <div style={{ flex: 2, textAlign: "center" }}>
+
+                            <div style={{ flex: 2, textAlign: 'center' }}>
                                 <input
-                                type="text"
-                                value={channel.source}
-                                onChange={(e) => updateChannelField(index, "source", e.target.value)}
-                                style={{ width: "90%", textAlign: "center" }}
+                                    type="text"
+                                    value={channel.source}
+                                    onChange={(e) => updateChannelField(index, 'source', e.target.value)}
+                                    style={{ width: '90%', textAlign: 'center',height:'25px', backgroundColor:theme === 'dark' ? '#555' : "white", color: theme === "dark" ? 'white' : "black" }}
                                 />
                             </div>
-                            <div style={{ flex: 2, textAlign: "center" }}>
+
+                            <div style={{ flex: 2, textAlign: 'center' }}>
                                 <input
-                                type="text"
-                                value={channel.value}
-                                onChange={(e) => updateChannelField(index, "value", e.target.value)}
-                                style={{ width: "90%", textAlign: "center" }}
+                                    type="text"
+                                    value={channel.value}
+                                    onChange={(e) => updateChannelField(index, 'value', e.target.value)}
+                                    style={{ width: '90%', textAlign: 'center',height:'25px', backgroundColor:theme === 'dark' ? '#555' : "white", color: theme === "dark" ? 'white' : "black" }}
                                 />
                             </div>
-                            <div className='delete-button-container'>
+
+                            <div
+                                className="delete-button-container"
+                                style={{
+                                    flex: 1,
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                }}
+                            >
                                 {/* Delete button for all rows */}
-                                <Button
-                                type="danger"
-                                icon={<DeleteOutlined />}
-                                onClick={() => openChannelDeleteModal(index)}
-                                />
+                                    <Button
+                                        type="danger"
+                                        icon={<DeleteOutlined className={theme === "dark" ? "delete-icon-dark" : "delete-icon-light"}/>}
+                                        onClick={() => openChannelDeleteModal(index)}
+                                    />
+
                                 {/* Add button only for the last row */}
                                 {index === channelList.length - 1 && (
-                                <Button
-                                    type="primary"
-                                    icon={<PlusOutlined />}
-                                    onClick={addNewChannel}
-                                    style={{ marginRight: "5px" }}
-                                />
+                                    <Button
+                                        icon={<PlusOutlined className="black-icon" />}
+                                        onClick={addNewChannel}
+                                        style={{
+                                            backgroundColor: '#C7F39A',
+                                            color: 'black',
+                                            fontWeight: 600,
+                                        }}
+                                    />
                                 )}
                             </div>
                         </div>
                     ))}
 
+
                     {/* Delete Confirmation Modal */}
                     <Modal
                         title="Delete Confirmation"
+                        className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                         visible={isChannelModalOpen}
                         onOk={confirmChannelDeletion}
                         onCancel={cancelChannelDeletion}
                         okText="OK"
                         cancelText="Cancel"
+                        footer={[
+                            <div>
+                                <Button key="cancel" onClick={cancelChannelDeletion} style={{marginLeft:"4px"}}>
+                                    Cancel
+                                </Button>
+                                <Button key="ok" onClick={confirmChannelDeletion} style={{marginLeft:"4px", backgroundColor:"#C7F39A"}}>
+                                    Ok
+                                </Button>
+                            </div>
+                        ]}
                     >
                         <p>Are you sure you want to delete this channel?</p>
                     </Modal>
@@ -513,91 +581,122 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
                         },
                     ]}
                 >
-                    <div className='editeddata-source-fields'>
-                        <div style={{ flex: 1, textAlign: "center" }}>ID</div>
-                        <div style={{ flex: 2, textAlign: "center" }}>Name</div>
-                        <div style={{ flex: 1, textAlign: "center" }}>Code</div>
-                        <div style={{ flex: 1, textAlign: "center" }}>Account</div>
-                        <div style={{ flex: 3, textAlign: "center" }}>URL</div>
-                        <div style={{ flex: 1, textAlign: "center" }}>Action</div>
+                    {/* Header Row */}
+                    <div className="editeddata-source-fields" style={{ display: 'flex', marginBottom: '8px' }}>
+                        <div style={{ flex: 1, textAlign: 'center',color: theme === "dark" ? 'white' : "black" }}>ID</div>
+                        <div style={{ flex: 2, textAlign: 'center',color: theme === "dark" ? 'white' : "black" }}>Name</div>
+                        <div style={{ flex: 1, textAlign: 'center',color: theme === "dark" ? 'white' : "black" }}>Code</div>
+                        <div style={{ flex: 1, textAlign: 'center',color: theme === "dark" ? 'white' : "black" }}>Account</div>
+                        <div style={{ flex: 3, textAlign: 'center',color: theme === "dark" ? 'white' : "black" }}>URL</div>
+                        <div style={{ flex: 1, textAlign: 'center',color: theme === "dark" ? 'white' : "black" }}>Action</div>
                     </div>
 
-                    {/* List of objects */}
+                    {/* Data Rows */}
                     {dataList.map((item, index) => (
                         <div
-                        key={index}
-                        className='campaigns-container'
+                            key={index}
+                            className="campaigns-container"
+                            style={{ display: 'flex', marginBottom: '10px' }}
                         >
-                            <div style={{ flex: 1, textAlign: "center" }}>
+                            <div style={{ flex: 1, textAlign: 'center' }}>
                                 <input
-                                type="text"
-                                value={item.id}
-                                readOnly
-                                campaigns-container-input
+                                    type="text"
+                                    value={item.id}
+                                    readOnly
+                                    className="campaigns-container-input"
+                                    style={{ width: '90%', textAlign: 'center',height:'25px', backgroundColor:theme === 'dark' ? '#555' : "white", color: theme === "dark" ? 'white' : "black" }}
                                 />
                             </div>
-                            <div style={{ flex: 2, textAlign: "center" }}>
+
+                            <div style={{ flex: 2, textAlign: 'center' }}>
                                 <input
-                                type="text"
-                                value={item.name}
-                                onChange={(e) => updateInputValue(index, "name", e.target.value)}
-                                style={{ width: "90%", textAlign: "center" }}
+                                    type="text"
+                                    value={item.name}
+                                    onChange={(e) => updateInputValue(index, 'name', e.target.value)}
+                                    style={{ width: '90%', textAlign: 'center',height:'25px', backgroundColor:theme === 'dark' ? '#555' : "white", color: theme === "dark" ? 'white' : "black" }}
                                 />
                             </div>
-                            <div style={{ flex: 1, textAlign: "center" }}>
+
+                            <div style={{ flex: 1, textAlign: 'center' }}>
                                 <input
-                                type="text"
-                                value={item.code}
-                                onChange={(e) => updateInputValue(index, "code", e.target.value)}
-                                style={{ width: "90%", textAlign: "center" }}
+                                    type="text"
+                                    value={item.code}
+                                    onChange={(e) => updateInputValue(index, 'code', e.target.value)}
+                                    style={{ width: '90%', textAlign: 'center',height:'25px', backgroundColor:theme === 'dark' ? '#555' : "white", color: theme === "dark" ? 'white' : "black" }}
                                 />
                             </div>
-                            <div style={{ flex: 1, textAlign: "center" }}>
+
+                            <div style={{ flex: 1, textAlign: 'center' }}>
                                 <input
-                                type="text"
-                                value={item.account}
-                                onChange={(e) => updateInputValue(index, "account", e.target.value)}
-                                style={{ width: "90%", textAlign: "center" }}
+                                    type="text"
+                                    value={item.account}
+                                    onChange={(e) => updateInputValue(index, 'account', e.target.value)}
+                                    style={{ width: '90%', textAlign: 'center',height:'25px', backgroundColor:theme === 'dark' ? '#555' : "white", color: theme === "dark" ? 'white' : "black" }}
                                 />
                             </div>
-                            <div style={{ flex: 3, textAlign: "center" }}>
+
+                            <div style={{ flex: 3, textAlign: 'center' }}>
                                 <input
-                                type="text"
-                                value={item.url}
-                                onChange={(e) => updateInputValue(index, "url", e.target.value)}
-                                style={{ width: "90%" }}
+                                    type="text"
+                                    value={item.url}
+                                    onChange={(e) => updateInputValue(index, 'url', e.target.value)}
+                                    style={{ width: '90%',height:'25px', backgroundColor:theme === 'dark' ? '#555' : "white", color: theme === "dark" ? 'white' : "black" }}
                                 />
                             </div>
-                            <div className='delete-button-container'>
-                                {/* Delete button for all rows */}
+
+                            <div
+                                className="delete-button-container"
+                                style={{
+                                    flex: 1,
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                }}
+                            >
+                            {/* Delete button for all rows */}
                                 <Button
-                                type="danger"
-                                style={{marginRight:'5px'}}
-                                icon={<DeleteOutlined  style={{fontSize:'15px'}}/>}
-                                onClick={() => openDeleteModal(index)}
+                                    type="danger"
+                                    icon={<DeleteOutlined style={{ fontSize: '15px' }} className={theme === "dark" ? "delete-icon-dark" : "delete-icon-light"}/>}
+                                    onClick={() => openDeleteModal(index)}
                                 />
+
                                 {/* Add button only for the last row */}
                                 {index === dataList.length - 1 && (
-                                <Button
-                                    type="primary"
-                                    
-                                    icon={<PlusOutlined style={{fontSize:'15px'}}/>}
+                                    <Button
+                                    icon={<PlusOutlined style={{ fontSize: '15px' }} className="black-icon" />}
                                     onClick={addNewRow}
-                                    style={{ marginRight: "5px" }}
-                                />
+                                    style={{
+                                        backgroundColor: '#C7F39A',
+                                        color: 'black',
+                                        fontWeight: 600,
+                                    }}
+                                    />
                                 )}
                             </div>
                         </div>
                     ))}
 
+
                     {/* Delete Confirmation Modal */}
                     <Modal
                         title="Delete Confirmation"
+                        className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                         visible={isModalOpen}
                         onOk={confirmDelete}
                         onCancel={cancelDelete}
                         okText="OK"
                         cancelText="Cancel"
+                        footer={[
+                            <div>
+                                <Button key="cancel" onClick={cancelDelete} style={{marginLeft:"4px"}}>
+                                    Cancel
+                                </Button>
+                                <Button key="ok" onClick={confirmDelete} style={{marginLeft:"4px", backgroundColor:"#C7F39A", color:'black'}}>
+                                    Ok
+                                </Button>
+                            </div>
+                        ]}
                     >
                         <p>Are you sure you want to delete this object?</p>
                     </Modal>
@@ -614,91 +713,104 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
                         },
                     ]}
                 >
-                    <div className='editeddata-source-fields'>
-                        <div style={{ flex: 1, textAlign: "center" }}>ID</div>
-                        <div style={{ flex: 2, textAlign: "center" }}>Name</div>
-                        <div style={{ flex: 2, textAlign: "center" }}>Code</div>
-                        <div style={{ flex: 2, textAlign: "center" }}>Account</div>
-                        <div style={{ flex: 3, textAlign: "center" }}>URL</div>
-                        <div style={{ flex: 2, textAlign: "center" }}>Action</div>
+                   {/* Header */}
+                    <div className="editeddata-source-fields" style={{ display: 'flex' }}>
+                        <div style={{ flex: 1, textAlign: 'center',color: theme === "dark" ? 'white' : "black" }}>ID</div>
+                        <div style={{ flex: 2, textAlign: 'center',color: theme === "dark" ? 'white' : "black" }}>Name</div>
+                        <div style={{ flex: 2, textAlign: 'center',color: theme === "dark" ? 'white' : "black" }}>Code</div>
+                        <div style={{ flex: 2, textAlign: 'center',color: theme === "dark" ? 'white' : "black" }}>Account</div>
+                        <div style={{ flex: 3, textAlign: 'center',color: theme === "dark" ? 'white' : "black" }}>URL</div>
+                        <div style={{ flex: 2, textAlign: 'center',color: theme === "dark" ? 'white' : "black" }}>Action</div>
                     </div>
 
                     {/* List of objects */}
                     {objects.map((obj, index) => (
                         <div
-                        key={index}
-                        className='campaigns-container'
+                            key={index}
+                            className="campaigns-container"
+                            style={{ display: 'flex', marginTop: '8px' }}
                         >
-                            <div style={{ flex: 1, textAlign: "center" }}>
+                            <div style={{ flex: 1, textAlign: 'center' }}>
                                 <input
-                                type="text"
-                                value={obj.id}
-                                readOnly
-                                className='campaigns-container-input'
+                                    type="text"
+                                    value={obj.id}
+                                    readOnly
+                                    className="campaigns-container-input"
+                                    style={{ width: '90%', textAlign: 'center',height:'25px', backgroundColor:theme === 'dark' ? '#555' : "white", color: theme === "dark" ? 'white' : "black" }}
                                 />
                             </div>
-                            <div style={{ flex: 2, textAlign: "center" }}>
+                            <div style={{ flex: 2, textAlign: 'center' }}>
                                 <input
-                                type="text"
-                                value={obj.name}
-                                onChange={(e) => handleInputChange(index, "name", e.target.value)}
-                                style={{ width: "90%", textAlign: "center" }}
+                                    type="text"
+                                    value={obj.name}
+                                    onChange={(e) => handleInputChange(index, 'name', e.target.value)}
+                                    style={{ width: '90%', textAlign: 'center',height:'25px', backgroundColor:theme === 'dark' ? '#555' : "white", color: theme === "dark" ? 'white' : "black" }}
                                 />
                             </div>
-                            <div style={{ flex: 2, textAlign: "center" }}>
+                            <div style={{ flex: 2, textAlign: 'center' }}>
                                 <input
-                                type="text"
-                                value={obj.code}
-                                onChange={(e) => handleInputChange(index, "code", e.target.value)}
-                                style={{ width: "90%", textAlign: "center" }}
+                                    type="text"
+                                    value={obj.code}
+                                    onChange={(e) => handleInputChange(index, 'code', e.target.value)}
+                                    style={{ width: '90%', textAlign: 'center',height:'25px', backgroundColor:theme === 'dark' ? '#555' : "white", color: theme === "dark" ? 'white' : "black" }}
                                 />
                             </div>
-                            <div style={{ flex: 2, textAlign: "center" }}>
+                            <div style={{ flex: 2, textAlign: 'center' }}>
                                 <input
-                                type="text"
-                                value={obj.account}
-                                onChange={(e) => handleInputChange(index, "account", e.target.value)}
-                                style={{ width: "90%", textAlign: "center" }}
+                                    type="text"
+                                    value={obj.account}
+                                    onChange={(e) => handleInputChange(index, 'account', e.target.value)}
+                                    style={{ width: '90%', textAlign: 'center',height:'25px', backgroundColor:theme === 'dark' ? '#555' : "white", color: theme === "dark" ? 'white' : "black" }}
                                 />
                             </div>
-                            <div style={{ flex: 3, textAlign: "center" }}>
+                            <div style={{ flex: 3, textAlign: 'center' }}>
                                 <input
-                                type="text"
-                                value={obj.url}
-                                onChange={(e) => handleInputChange(index, "url", e.target.value)}
-                                style={{ width: "90%" }}
+                                    type="text"
+                                    value={obj.url}
+                                    onChange={(e) => handleInputChange(index, 'url', e.target.value)}
+                                    style={{ width: '90%',height:'25px', backgroundColor:theme === 'dark' ? '#555' : "white", color: theme === "dark" ? 'white' : "black" }}
                                 />
                             </div>
-                            <div className='delete-button-container'>
-                                {/* Add button only for the last object */}
-                                {/* Delete button for all objects, including the last */}
+                            <div
+                                className="delete-button-container"
+                                style={{ flex: 2, textAlign: 'center', display: 'flex', justifyContent: 'center', gap: '5px' }}
+                            >
                                 <Button
-                                type="danger"
-                                icon={<DeleteOutlined />}
-                                onClick={() => handleDeleteClick(index)}
-                                >
-                                </Button>
-                                {index === objects.length - 1 && (
-                                <Button
-                                    type="primary"
-                                    icon={<PlusOutlined />}
-                                    onClick={handleAddObject}
-                                    style={{ marginRight: "5px" }}
-                                >
-                                </Button>
-                                )}
+                                    type="danger"
+                                    icon={<DeleteOutlined className={theme === "dark" ? "delete-icon-dark" : "delete-icon-light"}/>}
+                                    onClick={() => handleDeleteClick(index)}
+                                />
+                                    {index === objects.length - 1 && (
+                                        <Button
+                                        style={{backgroundColor:"#C7F39A", color:'black', fontWeight:'600', marginRight: "5px"}}
+                                        icon={<PlusOutlined className='black-icon'/>}
+                                        onClick={handleAddObject}
+                                        />
+                                    )}
                             </div>
                         </div>
                     ))}
 
+
                     {/* Delete Confirmation Modal */}
                     <Modal
                         title="Delete Confirmation"
+                        className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                         visible={isModalVisible}
                         onOk={handleConfirmDelete}
                         onCancel={handleCancelDelete}
                         okText="OK"
                         cancelText="Cancel"
+                        footer={[
+                            <div>
+                                <Button key="cancel" onClick={handleCancelDelete} style={{marginLeft:"4px"}}>
+                                    Cancel
+                                </Button>
+                                <Button key="ok" onClick={handleConfirmDelete} style={{marginLeft:"4px", backgroundColor:"#C7F39A"}}>
+                                    Ok
+                                </Button>
+                            </div>
+                        ]}
                     >
                         <p>Are you sure you want to delete this object?</p>
                     </Modal>
@@ -706,7 +818,7 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
                 )}
 
                 <Form.Item>
-                    <Button type="primary" htmlType="submit">
+                    <Button style={{backgroundColor:"#C7F39A", color:'black', fontWeight:'600'}} htmlType="submit">
                         Submit
                     </Button>
                 </Form.Item>

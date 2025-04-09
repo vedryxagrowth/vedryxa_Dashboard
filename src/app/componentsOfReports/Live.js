@@ -58,6 +58,7 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
+    const getRowStyleTheme = theme === 'dark' ? { backgroundColor: '#1e1e1f', color: '#ffffff' } : { backgroundColor: '#ffffff', color: '#000000' };
     const [rowData, setRowData] = useState([]);
 
     const [liveFixedFooter, setLiveFixedFooter] = useState([]);
@@ -103,7 +104,7 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
             normalizedCampaign.endsWith(normalizedInput)
         );
     }
-    ) : [], [rowData, inputValue]);
+    ) : [], [rowData, inputValue, theme]);
 
     useEffect(()=>{
         setLiveFixedFooter([
@@ -528,7 +529,7 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                                     <EditOutlined onClick={handleEditClick} style={{ marginLeft: '10px', color: 'blue', cursor: 'pointer' }} />
                                 </div>
                             )}>
-                                <MessageOutlined className='Message' style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
+                                <MessageOutlined className= {theme === "dark" ? "black-icon-comment" : 'Message'} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
                                 <Tooltip title={tooltipText}></Tooltip>
                             </Tooltip>
                         )}
@@ -1051,6 +1052,7 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
     
     //     setSelectedCells(selected);
     // };
+
     
     const onCellKeyDown = (params) => {
         if (params.event.ctrlKey && params.event.key === "c") {
@@ -1193,6 +1195,7 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                                         suppressCellSelection={true}
                                         getRowStyle={(params) => {
                                             if (params.node.rowPinned) {
+                                                
                                                 return {
                                                     fontWeight: "bold",
                                                     backgroundColor: theme === "dark" ? "#1a1918" : "#fff", // Dark mode or light mode
