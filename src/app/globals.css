@@ -848,12 +848,36 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
   background-color: #333 !important;
   color: #fff !important;
 }
+.dark-theme .ant-table,
+.dark-theme .ant-table-container,
+.dark-theme .ant-table-content {
+  background-color: #333 !important;
+  color: #fff !important;
+}
+
+/* Table Header */
+.dark-theme .ant-table-thead > tr > th {
+  background-color: #4A5D3A !important; /* Your green shade */
+  color: white !important;
+  border-color: #444;
+}
+
+/* Table Body Rows */
+.dark-theme .ant-table-tbody > tr > td {
+  background-color: #2b2b2b !important;
+  color: white !important;
+  border-color: #444;
+}
+
+/* Row hover effect */
+.dark-theme .ant-table-tbody > tr:hover > td {
+  background-color: #3a3a3a !important;
+}
 .notifiview{
   position: absolute;
     background-color: white;
     z-index: 99999999;
     padding: 10px 16px;
-    /* border: solid 1px lightslategray; */
     left: auto;
     right: 60px;
     top: 73px;
@@ -1129,6 +1153,13 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 .toolbar-btn{
   background-color: transparent;
   border: none;
+}
+
+body.dark-mode .delete-icon-light.anticon svg {
+  color: #000000 !important;
+}
+body.dark-mode .delete-icon-dark.anticon svg {
+  color: white !important;
 }
 
 body.dark-mode .black-icon.anticon svg {
