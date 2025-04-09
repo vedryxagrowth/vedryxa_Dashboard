@@ -614,7 +614,7 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
                         },
                     ]}
                 >
-                    <div className='editeddata-source-fields'>
+                    <div className='editeddata-source-fields' style={{display:'flex'}}>
                         <div style={{ flex: 1, textAlign: "center" }}>ID</div>
                         <div style={{ flex: 2, textAlign: "center" }}>Name</div>
                         <div style={{ flex: 2, textAlign: "center" }}>Code</div>
@@ -628,6 +628,7 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
                         <div
                         key={index}
                         className='campaigns-container'
+                        style={{display:'flex'}}
                         >
                             <div style={{ flex: 1, textAlign: "center" }}>
                                 <input
