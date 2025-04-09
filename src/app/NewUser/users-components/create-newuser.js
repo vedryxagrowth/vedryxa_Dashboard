@@ -77,6 +77,7 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
         Modal.confirm({
             title: 'Confirmation',
             content: 'Are you sure you want to create new user?',
+            className: theme === 'dark' ? 'custom-confirm-dark' : 'custom-confirm-light',
             onOk: async() => {
                 try {
                     let data = {};

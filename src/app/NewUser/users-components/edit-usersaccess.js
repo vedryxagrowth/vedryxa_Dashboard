@@ -90,6 +90,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
         Modal.confirm({
             title: 'Confirm',
             content: 'Are you sure you want to delete this Network?',
+            className: theme === 'dark' ? 'custom-confirm-dark' : 'custom-confirm-light',
             onOk: () => {
                 try {
                     const updatedAccounts = additionalAccounts.filter((_, accountIndex) => accountIndex !== index);
@@ -113,6 +114,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
         Modal.confirm({
             title: 'Confirm',
             content: 'Are you sure you want to delete this Network?',
+            className: theme === 'dark' ? 'custom-confirm-dark' : 'custom-confirm-light',
             onOk: () => {
                 try {
                     const updatedFormAccounts = formAccounts.filter((_, accountIndex) => accountIndex !== index);
@@ -162,6 +164,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
         Modal.confirm({
             title: 'Confirm',
             content: 'Are you sure you want to delete this Account?',
+            className: theme === 'dark' ? 'custom-confirm-dark' : 'custom-confirm-light',
             onOk: () => {
                 try {
                     const updatedAccounts = [...additionalAccounts];
@@ -228,6 +231,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
         Modal.confirm({
             title: 'Confirmation',
             content: 'Are you sure you want to submit?',
+            className: theme === 'dark' ? 'custom-confirm-dark' : 'custom-confirm-light',
             onOk: async() => {
                 try {
                     // const allAccounts = [
@@ -563,7 +567,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                     <Button type="dashed" style={{  border: 'none', backgroundColor: '#C7F39A', color:'black', fontWeight:'600' }} onClick={handleAddAccount} icon={<span style={{ color: theme === 'dark' ? 'white' : 'black' }}> {/* Wrap icon in a span */}
                         <PlusOutlined className="black-icon"/>
                         </span>}>
-                        Add Account
+                        Add Project
                     </Button>
                 </Form.Item>
                 

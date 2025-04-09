@@ -4,6 +4,7 @@ import { Table, Card, Tooltip } from "antd";
 import { useTokenContext } from "../components/parent";
 
 const UserTable = () => {
+  const { theme } = useTokenContext();
   const { apiClient } = useTokenContext();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -177,6 +178,7 @@ const UserTable = () => {
 
   return (
     <Table
+      className={`custom-dark-table ${theme === 'dark' ? 'dark-mode-pagination' : 'light-mode-pagination'}`}
       columns={columns}
       dataSource={groupedData.map((item) => ({
         ...item,
@@ -198,6 +200,7 @@ const UserTable = () => {
 
                 return (
                   <Card
+                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                     key={activity._id}
                     bordered={true}
                     style={{ width: 300, minWidth: 300 }}
@@ -224,7 +227,7 @@ const UserTable = () => {
                         }
                       >
                         <strong>IP Address:</strong>{" "}
-                        <span style={{backgroundColor:"yellow"}}>{activity.ip || "Unknown"}</span>
+                        <span style={{backgroundColor: theme === "dark" ? "#06B6D4" : "yellow"}}>{activity.ip || "Unknown"}</span>
                       </Tooltip>
                     </p>
                     <p>
@@ -235,7 +238,7 @@ const UserTable = () => {
                       {activity.location?.zip || "Unknown"})
                     </p>
                     <p>
-                      <strong style={{backgroundColor:"yellow"}}>Device:</strong> {activity.device?.type || "Unknown"}
+                      <strong style={{backgroundColor:theme === "dark" ? "#127a78" : "yellow"}}>Device:</strong> {activity.device?.type || "Unknown"}
                     </p>
                     <p>
                       <strong>User Agent:</strong>{" "}
