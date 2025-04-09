@@ -878,7 +878,6 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
     background-color: white;
     z-index: 99999999;
     padding: 10px 16px;
-    /* border: solid 1px lightslategray; */
     left: auto;
     right: 60px;
     top: 73px;
