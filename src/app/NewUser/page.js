@@ -224,23 +224,26 @@ const UsersTable = () => {
                 Modal.confirm({
                     title: 'Confirm',
                     content: 'Are you sure you want to remove access?',
+                    className: theme === 'dark' ? 'custom-confirm-dark' : 'custom-confirm-light',
+                    okText: 'OK',
+                    cancelText: 'Cancel',
                     onOk: async () => {
-                        try {
-                            const response = await apiClient.delete(url);
-                            if (response.status === 200) {
-                                message.success(`${values.userName} User access removed successfully`);
-                                refreshUsers();
-                            } else {
-                                console.error('Failed to delete user');
-                            }
-                        } catch (error) {
-                            console.error('Error:', error);
+                      try {
+                        const response = await apiClient.delete(url);
+                        if (response.status === 200) {
+                          message.success(`${values.userName} User access removed successfully`);
+                          refreshUsers();
+                        } else {
+                          console.error('Failed to delete user');
                         }
+                      } catch (error) {
+                        console.error('Error:', error);
+                      }
                     },
                     onCancel: () => {
-                        console.log('Cancel');
+                      console.log('Cancel');
                     },
-                });
+                  });
             } else {
                 console.error('Email address is missing');
             }
@@ -1592,7 +1595,7 @@ const UsersTable = () => {
                     )}
                 </div>
                 <div>
-                    <Card title="All Networks" size="small">
+                    <Card title="All Networks" size="small" className={theme === 'dark' ? 'dark-theme' : 'light-theme'}>
                         <Row align={"bottom"} gutter={[16, 16]}>
                             <Col xs={24} md={16}>
                                 <Row gutter={[16, 16]}>

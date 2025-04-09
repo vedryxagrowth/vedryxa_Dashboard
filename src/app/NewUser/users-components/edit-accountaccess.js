@@ -138,6 +138,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
         onClose={onClose}
         width="60%"
         closeIcon={<CloseOutlined />}
+        style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
       >
         <Form
           form={form}
@@ -147,6 +148,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
           initialValues={{
             ...editeddata,
           }}
+          className={theme === 'dark' ? 'form-dark' : 'form-light'}
         >
           <Form.Item
             label="Spend Partner"
@@ -168,27 +170,27 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
             name="accountNumber"
             rules={[{ required: true, message: "Please input the Spend Account ID!" }]}
           >
-            <Input   disabled  style={{backgroundColor:'transparent', color: theme === "dark" ? 'white' : "black"}}/>
+            <Input   disabled  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
           </Form.Item>
 
           <Form.Item label="Account Name" name="accountName">
-            <Input style={{backgroundColor:'transparent', color: theme === "dark" ? 'white' : "black"}}/>
+            <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
           </Form.Item>
 
           <Form.Item label="Pixel ID" name="pixelID">
-            <Input style={{backgroundColor:'transparent', color: theme === "dark" ? 'white' : "black"}}/>
+            <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
           </Form.Item>
 
           <Form.Item label="Page ID" name="pageID">
-            <Input style={{backgroundColor:'transparent', color: theme === "dark" ? 'white' : "black"}}/>
+            <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
           </Form.Item>
 
           <Form.Item label="Page Name" name="pageName">
-            <Input style={{backgroundColor:'transparent', color: theme === "dark" ? 'white' : "black"}}/>
+            <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
           </Form.Item>
 
           <Form.Item label="Agency Name" name="AgencyName">
-            <Input style={{backgroundColor:'transparent', color: theme === "dark" ? 'white' : "black"}}/>
+            <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
           </Form.Item>
 
           <Form.Item
@@ -196,7 +198,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
             name="BMName"
             rules={[{ required: true, message: "Please select a BM Name!" }]}
           >
-            <Select placeholder="Select BM Name"   disabled  style={{backgroundColor:'transparent', color: theme === "dark" ? 'white' : "black"}} dropdownClassName={theme === 'dark' && "custom-dropdown"}>
+            <Select placeholder="Select BM Name"   disabled  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}} dropdownClassName={theme === 'dark' && "custom-dropdown"}>
               <Option value="Winkleads Search">Winkleads Search</Option>
               <Option value="MODO LEO BM X1">MODO LEO BM X1</Option>
             </Select>
@@ -259,15 +261,15 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
           </Form.Item>
 
           <Form.Item label="Media Buyer" name="MediaBuyerName">
-            <Input style={{backgroundColor:'transparent', color: theme === "dark" ? 'white' : "black"}}/>
+            <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
           </Form.Item>
 
           <Form.Item label="Holder" name="Holder">
-            <Input style={{backgroundColor:'transparent', color: theme === "dark" ? 'white' : "black"}}/>
+            <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" onClick={showModal}>
+            <Button  style={{  border: 'none', backgroundColor: '#C7F39A', color:'black', fontWeight:'600' }} onClick={showModal}>
               Submit
             </Button>
           </Form.Item>

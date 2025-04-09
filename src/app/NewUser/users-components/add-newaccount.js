@@ -199,8 +199,9 @@ const Newaddaccounts = ({ visible, onClose }) => {
                 onClose={onClose}
                 width="60%"
                 closeIcon={<CloseOutlined />}
+                style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
             >
-                <Form form={form} onFinish={onFinish} layout="vertical" style={{ width: "80%" }} initialValues={{ status: status, spendPartner: spendPartner, revenuePartner: revenuePartner, BMName: BMName, timeZone: timeZone }} >
+                <Form form={form} onFinish={onFinish} layout="vertical" style={{ width: "80%" }} initialValues={{ status: status, spendPartner: spendPartner, revenuePartner: revenuePartner, BMName: BMName, timeZone: timeZone }} className={theme === 'dark' ? 'form-dark' : 'form-light'}>
                     <Form.Item label="Spend Partner" name="spendPartner" value={spendPartner}>
                         <Select placeholder="Select a status" 
                             defaultValue="Facebook" onChange={onChangeSpendPartner}
@@ -210,25 +211,25 @@ const Newaddaccounts = ({ visible, onClose }) => {
                         </Select>
                     </Form.Item>
                     <Form.Item label="Spend Account ID" name="accountNumber" rules={[{ required: true, message: 'Please input the Spend Account ID!' }]}>
-                        <Input value={accountNumber} onChange={onChangeAccountNumber} style={{color: theme === "dark" ? 'white' : "black"}}/>
+                        <Input  value={accountNumber} onChange={onChangeAccountNumber} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
                     </Form.Item>
                     <Form.Item label="Spend Account Name" name="accountName" rules={[{ required: true, message: 'Please input the Spend Account ID!' }]}>
-                        <Input value={accountName} onChange={onChangeAccountName} style={{color: theme === "dark" ? 'white' : "black"}}/>
+                        <Input value={accountName} onChange={onChangeAccountName} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
                     </Form.Item>
                     <Form.Item label="Pixel ID" name="pixelID">
-                        <Input value={pixelId} onChange={onChangePixelId}  style={{color: theme === "dark" ? 'white' : "black"}}/>
+                        <Input value={pixelId} onChange={onChangePixelId}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
                     </Form.Item>
                     <Form.Item label="Page ID" name="pageID">
-                        <Input value={pageId} onChange={onChangePagelId}  style={{color: theme === "dark" ? 'white' : "black"}}/>
+                        <Input value={pageId} onChange={onChangePagelId}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
                     </Form.Item>
                     <Form.Item label="Page Name" name="pageName">
-                        <Input value={pageName} onChange={onChangePageName}  style={{color: theme === "dark" ? 'white' : "black"}}/>
+                        <Input value={pageName} onChange={onChangePageName}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
                     </Form.Item>
                     <Form.Item label="Agency Name" name="AgencyName">
-                        <Input value={AgencyName} onChange={onChangeAgencyName}  style={{color: theme === "dark" ? 'white' : "black"}}/>
+                        <Input value={AgencyName} onChange={onChangeAgencyName}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
                     </Form.Item>
                     <Form.Item label="BM Name" name="BMName">
-                        <div ref={containerRef} className='form-item-bmname'>
+                        <div ref={containerRef} className='form-item-bmname' style={{display:'flex'}}>
                             <Select
                                 placeholder="Select or add a value"
                                 value={BMName}
@@ -247,14 +248,15 @@ const Newaddaccounts = ({ visible, onClose }) => {
                                     </Option>
                                 ))}
                             </Select>
-                            <Button style={{backgroundColor:'#C7F39A', width:'24px'}} onClick={() => setIsModalOpen(true)}>
-                                <PlusOutlined />
+                            <Button style={{backgroundColor:'#C7F39A', width:'24px', marginLeft:'5px'}} onClick={() => setIsModalOpen(true)}>
+                                <PlusOutlined  className="black-icon"/>
                             </Button>
                         </div>
 
                         {/* Modal for adding new value */}
                         <Modal
                             title="Add New Value"
+                            className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             visible={isModalOpen}
                             onOk={handleAddNewValue}
                             onCancel={() => setIsModalOpen(false)}
@@ -279,7 +281,7 @@ const Newaddaccounts = ({ visible, onClose }) => {
                     </Form.Item>
                     { !(newOptions.includes(BMName)) && 
                     <Form.Item label="BM ID" name="BMId" rules={[{ required: true, message: 'Please input the BM ID!' }]}>
-                        <Input style={{color: theme === "dark" ? 'white' : "black"}}/>
+                        <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
                     </Form.Item>
                     }
 
@@ -334,10 +336,10 @@ const Newaddaccounts = ({ visible, onClose }) => {
                         />
                     </Form.Item>
                     <Form.Item label="MediaBuyerName" name="MediaBuyerName" rules={[{ required: true, message: 'Please input the Media Buyer Name ID!' }]}>
-                        <Input style={{color: theme === "dark" ? 'white' : "black"}}/>
+                        <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
                     </Form.Item>
                     <Form.Item label="Holder" name="Holder" rules={[{ required: true, message: 'Please input the Holder Name ID!' }]}>
-                        <Input style={{color: theme === "dark" ? 'white' : "black"}}/>
+                        <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
                     </Form.Item>
                     <Form.Item>
                         <Button type="primary" onClick={showModal}>Submit</Button>
