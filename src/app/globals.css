@@ -1511,3 +1511,26 @@ body.dark-mode .black-icon-comment.anticon svg {
   transition: none !important;
 }
 
+.dark-theme .ant-modal-header {
+  background-color: #1e1e1e; /* or match your modal body */
+  border-bottom: 1px solid #333;
+}
+
+.dark-theme .ant-modal-title {
+  color: white;
+}
+
+.dark-theme input::placeholder,
+.dark-theme .ant-input::placeholder {
+  color: white !important;
+  opacity: 1;
+}
+
+.dark-theme .ant-input {
+  background-color: #444;
+  color: white;
+  border: 1px solid #666;
+}
+
+
+

@@ -1226,6 +1226,17 @@ export default function CampaignAndAccount({ params }) {
         functionCall();
     };
 
+    const sendNewCommentToAPI = async (logData) => {
+        try {
+            const response = await apiClient.post('/Comments', {
+                commentsdatas: logData,
+            });
+            // console.log('Response from server:', response.data);
+        } catch (error) {
+            console.error('Error sending data to server:', error);
+        }
+    };
+
     const sendEditedCommentToAPI = async () => {
         try {
             console.log("comment:")
@@ -1245,6 +1256,7 @@ export default function CampaignAndAccount({ params }) {
         }
     };
 
+     
     const handleOks = async () => {
         try {
             const logData = {
@@ -1256,8 +1268,20 @@ export default function CampaignAndAccount({ params }) {
                 adsetid: adsetid
             };
 
-            // if (relatedComment) {
+            
+            // Check if comment already exists
+            const relatedComment = campaignComments.find(
+                (cmt) => cmt.campaignname === decodedString && cmt.Account === accountNumber
+            );
+
+            if (relatedComment) {
                 await sendEditedCommentToAPI(logData);
+            } else {
+                await sendNewCommentToAPI(logData);
+            }
+
+            // if (relatedComment) {
+            //     await sendEditedCommentToAPI(logData);
             //     refreshComments(account);
             //     message.success("Comment updated successfully!");
             // } else {
@@ -1272,8 +1296,7 @@ export default function CampaignAndAccount({ params }) {
             // setCampaignComments(updatedComments);
 
             // changeRRefrst();
-            
-            //Update local state immediately
+            // ✅ Update local state immediately
             const updatedComments = [...campaignComments];
             const index = updatedComments.findIndex(c => c.campaignname === decodedString && c.Account === accountNumber);
             if (index !== -1) {
@@ -1291,7 +1314,7 @@ export default function CampaignAndAccount({ params }) {
                 });
             }
             setCampaignComments(updatedComments);
-            setComment(comment); // refresh comment display
+            setComment(comment); 
             message.success("Comment saved!");
             setIsModalVisibles(false);
         } catch (error) {
@@ -1605,12 +1628,21 @@ export default function CampaignAndAccount({ params }) {
                         onClick={handleReload}  // Call refresh function when clicked
                     />
                     {/* <p style={{marginLeft:"10px"}}>{comment}</p> */}
-                    {comment && (
+                    {/* {comment && (
                         <EditOutlined 
                             onClick={() => setIsModalVisibles(true)} 
                             style={{ marginLeft: '15px', color: 'black', cursor: 'pointer' }} 
                         />
-                    )}
+                    )} */}
+                    <EditOutlined 
+                        onClick={() => setIsModalVisibles(true)} 
+                        style={{ 
+                            marginLeft: '15px', 
+                            color: comment ? 'blue' : 'gray', 
+                            cursor: 'pointer' 
+                        }} 
+                        title={comment ? 'Edit Comment' : 'Add Comment'}
+                    />
                     <div style={{ width: '100%' }}>
                         <Tooltip
                             title={copied ? 'Copied!' : 'Click to copy'}
@@ -1624,6 +1656,23 @@ export default function CampaignAndAccount({ params }) {
                             </h3>
                         </Tooltip>
                     </div>
+                    {comment && (
+                        <Tooltip title={comment}>
+                            <p
+                            style={{
+                                marginLeft: '5px',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                maxWidth: '300px',
+                                cursor: 'pointer',
+                                marginBottom: '5px',
+                            }}
+                            >
+                            ({comment})
+                            </p>
+                        </Tooltip>
+                    )}
                 </Col>
                 <Select
                     placeholder="Select a range"

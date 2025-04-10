@@ -1589,6 +1589,17 @@ const MnetLiveCampaignHistory = ({ params }) => {
         mainFunctionCall();
     };
 
+    const sendNewCommentToAPI = async (logData) => {
+        try {
+            const response = await apiClient.post('/Comments', {
+                commentsdatas: logData,
+            });
+            // console.log('Response from server:', response.data);
+        } catch (error) {
+            console.error('Error sending data to server:', error);
+        }
+    };
+
     const sendEditedCommentToAPI = async () => {
         try {
             console.log("comment:")
@@ -1619,8 +1630,20 @@ const MnetLiveCampaignHistory = ({ params }) => {
                 adsetid: adsetid
             };
 
-            // if (relatedComment) {
+            
+            // Check if comment already exists
+            const relatedComment = campaignComments.find(
+                (cmt) => cmt.campaignname === decodedString && cmt.Account === accountNumber
+            );
+
+            if (relatedComment) {
                 await sendEditedCommentToAPI(logData);
+            } else {
+                await sendNewCommentToAPI(logData);
+            }
+
+            // if (relatedComment) {
+            //     await sendEditedCommentToAPI(logData);
             //     refreshComments(account);
             //     message.success("Comment updated successfully!");
             // } else {
@@ -2019,12 +2042,21 @@ const MnetLiveCampaignHistory = ({ params }) => {
                         onClick={handleReload}  // Call refresh function when clicked
                     />
                     {/* <p style={{marginLeft:"10px"}}>{comment}</p> */}
-                    {comment && (
+                    {/* {comment && (
                         <EditOutlined 
                             onClick={() => setIsModalVisibles(true)} 
                             style={{ marginLeft: '15px', color: 'black', cursor: 'pointer' }} 
                         />
-                    )}
+                    )} */}
+                    <EditOutlined 
+                        onClick={() => setIsModalVisibles(true)} 
+                        style={{ 
+                            marginLeft: '15px', 
+                            color: comment ? 'blue' : 'gray', 
+                            cursor: 'pointer' 
+                        }} 
+                        title={comment ? 'Edit Comment' : 'Add Comment'}
+                    />
                     <div style={{ width: '100%' }}>
                         <Tooltip
                             title={copied ? 'Copied!' : 'Click to copy'}
@@ -2038,6 +2070,23 @@ const MnetLiveCampaignHistory = ({ params }) => {
                             </h3>
                         </Tooltip>
                     </div>
+                    {comment && (
+                        <Tooltip title={comment}>
+                            <p
+                            style={{
+                                marginLeft: '5px',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                maxWidth: '300px',
+                                cursor: 'pointer',
+                                marginBottom: '5px',
+                            }}
+                            >
+                            ({comment})
+                            </p>
+                        </Tooltip>
+                    )}
                 </Col>
                 <Select
                     placeholder="Select a range"
