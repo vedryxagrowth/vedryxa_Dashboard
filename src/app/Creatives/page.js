@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { useTokenContext } from "../components/parent";
 import React, { useState, useEffect } from 'react';
 import { Upload, Modal, Input, Button, Row, Col, Select, message, notification, Badge } from 'antd';
-import { EditOutlined, UploadOutlined, PlusOutlined, SearchOutlined, CheckCircleFilled, CloseCircleFilled, ReloadOutlined, EyeOutlined, DeleteOutlined, CopyOutlined} from '@ant-design/icons';
+import { ArrowLeftOutlined, EditOutlined, UploadOutlined, PlusOutlined, SearchOutlined, CheckCircleFilled, CloseCircleFilled, ReloadOutlined, EyeOutlined, DeleteOutlined, CopyOutlined} from '@ant-design/icons';
 import Image from 'next/image';
 import dynamic from "next/dynamic";
 import { DatePicker, Space, ConfigProvider, Flex, Spin, Skeleton, Tooltip } from 'antd';
@@ -64,15 +64,164 @@ const ImageUploadPage = () => {
 
     const [uploadFileList, setUploadFileList] = useState([]);
 
-
+    const [currentFolder, setCurrentFolder] = useState(""); // current path in S3 ("" for root)
+    const [clipboardFile, setClipboardFile] = useState([]); // holds copied file object
+    const [contextMenu, setContextMenu] = useState({
+        visible: false,
+        x: 0,
+        y: 0,
+        targetKey: null, // <-- key of the folder clicked (optional if needed for delete)
+    });
+      
+    // const [newFolderModal, setNewFolderModal] = useState(false);
+    const [newFolderModal, setNewFolderModal] = useState({
+        visible: false,
+        name: "",
+        mode: "create", // "create" or "rename"
+        folderToRename: null, // holds folder object if renaming
+    });
+      
+    const [newFolderName, setNewFolderName] = useState("");
+    const [deleteFolderModal, setDeleteFolderModal] = useState({
+        visible: false,
+        folder: null,
+    });
+      
     const { userdetails } = useTokenContext();
+    const { theme } = useTokenContext();
     const router = useRouter();
-    // **Fetch user images when the component mounts**
+
+    const uploadPrefix = `${selectedKey}/${selectedAccountNumber}/`;
+
     useEffect(() => {
-        if (userdetails?.userName) {
+        const handleKeyDown = async (e) => {
+            const isInputFocused = document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA';
+
+            // Don't handle paste if user is typing in a text input
+            if (isInputFocused) return;
+    
+            // Copy file
+            // if (e.ctrlKey && e.key === 'c') {
+            //     const selected = selectedImages?.[0];
+            //     if (selected) {
+            //         setClipboardFile(selected);
+            //         message.success("File copied to clipboard");
+            //     }
+            // }
+           
+            if (e.ctrlKey && e.key === 'c') {
+                const selected = selectedImages;
+                if (selected?.length > 0) {
+                    setClipboardFile(selected);  // Set all selected files
+                    // message.success(`${selected.length} file(s) copied to clipboard`);
+                }
+            }
+
+    
+            // Paste file
+            // if (e.ctrlKey && e.key === 'v' && clipboardFile) {
+            //     try {
+            //         const proxyUrl = `https://prodapis.adsgoat.in/proxy?url=${encodeURIComponent(clipboardFile.url)}`;
+            //         const res = await fetch(proxyUrl);
+            //         const blob = await res.blob();
+    
+            //         const name = clipboardFile.name;
+            //         const dotIndex = name.lastIndexOf(".");
+            //         const baseName = name.substring(0, dotIndex);
+            //         const extension = name.substring(dotIndex);
+    
+            //         const cloneNumber = getCloneNumber(`${currentFolder}${baseName}${extension}`);
+            //         const newFilename = `${baseName}(${cloneNumber})${extension}`;
+            //         const fullKey = `${userdetails.userName}/${currentFolder}${newFilename}`;
+    
+            //         const formData = new FormData();
+            //         formData.append("file", new File([blob], newFilename, { type: blob.type }));
+            //         formData.append("filename", `${currentFolder}${newFilename}`);
+    
+            //         const uploadRes = await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
+            //             headers: {
+            //                 Authorization: localStorage.getItem("token"),
+            //                 username: userdetails.userName,
+            //             },
+            //         });
+    
+            //         notification.success({ message: "Pasted", description: `${newFilename} copied successfully` });
+            //         fetchUserImages(); // refresh UI
+            //     } catch (err) {
+            //         console.error(err);
+            //         message.error("Paste failed");
+            //     }
+            // }
+
+            // Paste files
+            if (e.ctrlKey && e.key === 'v' && clipboardFile?.length > 0) {
+                for (const file of clipboardFile) {
+                    try {
+                        const proxyUrl = `https://prodapis.adsgoat.in/proxy?url=${encodeURIComponent(file.url)}`;
+                        const res = await fetch(proxyUrl);
+                        const blob = await res.blob();
+
+                        const name = file.name;
+                        const dotIndex = name.lastIndexOf(".");
+                        const baseName = name.substring(0, dotIndex);
+                        const extension = name.substring(dotIndex);
+                        const cloneNumber = getCloneNumber(`${currentFolder}${baseName}${extension}`);
+                        const newFilename = `${baseName}(${cloneNumber})${extension}`;
+                        const fullKey = `${userdetails.userName}/${currentFolder}${newFilename}`;
+
+                        const formData = new FormData();
+                        formData.append("file", new File([blob], newFilename, { type: blob.type }));
+                        // formData.append("filename", `${currentFolder}${newFilename}`);
+                        formData.append("filename", `${uploadPrefix}${currentFolder}${newFilename}`);
+
+                        await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
+                            headers: {
+                                Authorization: localStorage.getItem("token"),
+                                username: userdetails.userName,
+                            },
+                        });
+
+                    } catch (err) {
+                        console.error("Paste failed for", file.name, err);
+                    }
+                }
+
+                // notification.success({
+                //     message: `Pasted ${clipboardFile.length} file(s)`,
+                //     description: "Files pasted successfully",
+                // });
+
+                fetchUserImages();
+            }
+
+        };
+    
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [clipboardFile, currentFolder, selectedImages]);
+
+    useEffect(() => {
+        const handleClick = () => {
+          setContextMenu({ visible: false });
+        };
+      
+        window.addEventListener("click", handleClick);
+        return () => window.removeEventListener("click", handleClick);
+    }, []);
+      
+    
+    // // **Fetch user images when the component mounts**
+    // useEffect(() => {
+    //     if (userdetails?.userName) {
+    //         fetchUserImages();
+    //     }
+    // }, [userdetails?.userName, currentFolder]);
+
+    useEffect(() => {
+        if (userdetails?.userName && selectedKey && selectedAccountNumber) {
             fetchUserImages();
         }
-    }, [userdetails?.userName]);
+    }, [userdetails?.userName, selectedKey, selectedAccountNumber, currentFolder]);    
 
     useEffect(() => {
         if (userdetails?.adAccounts && Object.keys(userdetails.adAccounts).length > 0) {
@@ -81,14 +230,19 @@ const ImageUploadPage = () => {
                 label: key
             }));
             setOptions(adAccountOptions);
-            // Auto-select the first project key
+             // Set default project/account if not already selected
             if (!selectedKey) {
-                const firstKey = adAccountOptions[0].value;
-                setSelectedKey(firstKey);
+                const defaultProject = Object.keys(userdetails.adAccounts)[0];
+                const defaultAccount = userdetails.adAccounts[defaultProject]?.[0]?.accountNumber;
+
+                if (defaultProject && defaultAccount) {
+                    setSelectedKey(defaultProject);
+                    setSelectedAccountNumber(defaultAccount);
+                    setSelectedValue(defaultAccount);
+                }
             }
         } else {
             setOptions([]);  // Clear options if no accounts exist
-            setSelectedKey(null);
         }
     }, [userdetails]);  // Add userdetails as dependency
     
@@ -101,54 +255,160 @@ const ImageUploadPage = () => {
                 status: account.status // Store status for conditional rendering
             }));
             setValueOptions(accounts);
-            // Auto-select the first account
-            if (accounts.length > 0 && !selectedValue) {
-                setSelectedValue(accounts[0].value);
-            }
         } else {
             setValueOptions([]);
-            setSelectedValue(null);
         }
     }, [selectedKey, userdetails]);
 
+    // const fetchUserImages = async () => {
+    //     if (!userdetails?.userName) {
+    //         console.error("User name is missing");
+    //         return;
+    //     }
+    //     setLoading(true);
+    //     const fullPath = `${uploadPrefix}${currentFolder}`;
+
+    //     try {
+    //         const response = await axios.get("https://prodapis.adsgoat.in/getUserFiles", {
+    //             headers: { 
+    //                 "username": userdetails.userName,
+    //                 // folder: currentFolder,
+    //                 // "x-folder": currentFolder, // pass it to backend
+    //                 "x-folder": fullPath,
+    //                 Authorization: localStorage.getItem("token"),
+    //              },
+    //         });
+
+    //         if (response.data.images && Array.isArray(response.data.images)) {
+    //             const imagesWithFileNames = response.data.images
+    //             .filter(file => {
+    //                 const key = file.key;
+    //                 // const relativePath = key.replace(`${userdetails.userName}/${currentFolder}`, '');
+    //                 // return relativePath !== '' && !relativePath.includes('/') || key.endsWith('/');
+                   
+        
+    //                 // return (relativePath !== '' && !relativePath.includes('/')) || key.endsWith('/');
+    //                  // If the key is exactly the folder (current directory), skip
+    //                 if (key === fullPath) return false;
+    //                 const relativePath = key.replace(fullPath, ''); 
+
+    //                 // Only include immediate children: no `/` in relative path (except folders ending in `/`)
+    //                 return !relativePath.includes('/') || key.endsWith('/');
+
+    //                 // Allow direct children (no deeper nesting)
+    //                 // const isDirectChild = !relativePath.includes('/') || key.endsWith('/');
+    //                 // return isDirectChild;
+    //             })
+    //             .map(file => {
+    //                 const isFolder = file.key.endsWith('/');
+    //                 const lastModified = file.LastModified ? moment(file.LastModified).format("YYYY-MM-DD HH:mm") : null;
+    //                 return {
+    //                     uid: file.key,
+    //                     // name: file.filename || file.key.split('/').pop(), // 🔹 Use filename from API or default text
+    //                     name: file.key.split('/').filter(Boolean).pop(), // Folder/file name only
+    //                     status: 'done',
+    //                     url: isFolder ? null : `https://sudheer-fbimages.s3.amazonaws.com/${file.key}`,
+    //                     isFolder,
+    //                     // uploadDate: moment(file.uploadDate).format("YYYY-MM-DD"), // Assuming `uploadDate` is sent with the file 
+    //                     createdDate: file.createdDate || lastModified,    
+    //                     modifiedDate: file.modifiedDate || lastModified, 
+    //                 }
+    //                 // uid: file.key,
+    //                 // name: file.filename || file.key.split('/').pop(), // 🔹 Use filename from API or default text
+    //                 // status: 'done',
+    //                 // url: `https://files.s3.amazonaws.com/${file.key}`,
+    //                 // uploadDate: moment(file.uploadDate).format("YYYY-MM-DD"), // Assuming `uploadDate` is sent with the file
+    //             });
+                
+    //             // setImages(imagesWithFileNames);
+    //             // setFilteredImages(imagesWithFileNames);
+
+    //             // 🔥 Filter out the folder itself to avoid showing again when opened
+    //             const filtered = imagesWithFileNames.filter(item => item.uid !== `${userdetails.userName}/${currentFolder}`);
+
+    //             // const filtered = imagesWithFileNames.filter(item => {
+    //             //     const isTopLevelGhost = item.isFolder && item.uid === `${userdetails.userName}/${currentFolder}`;
+    //             //     return !isTopLevelGhost;
+    //             // });
+                  
+                  
+    //             setImages(filtered);
+    //             setFilteredImages(filtered);
+    //         }
+    //     } catch (error) {
+    //         console.error("Error fetching images:", error.response ? error.response.data : error.message);
+    //     } finally{
+    //         setLoading(false);
+    //     }
+    // };
+
     const fetchUserImages = async () => {
-        if (!userdetails?.userName) {
-            console.error("User name is missing");
+        if (!userdetails?.userName || !selectedKey || !selectedAccountNumber) {
+            console.error("Missing user/project/account info");
             return;
         }
+    
         setLoading(true);
+    
+        // const uploadPrefix = `${selectedKey}/${selectedAccountNumber}/${userdetails.userName}/`;
+        const fullPath = `${uploadPrefix}${currentFolder || ""}`; // currentFolder can be "" or "folder/"
+    
         try {
             const response = await axios.get("https://prodapis.adsgoat.in/getUserFiles", {
-                headers: { 
-                    "username": userdetails.userName,
+                headers: {
+                    username: userdetails.userName,
+                    "x-folder": fullPath,
                     Authorization: localStorage.getItem("token"),
-                 },
+                },
             });
-
-            if (response.data.images && Array.isArray(response.data.images)) {
-                const imagesWithFileNames = response.data.images.map(file => ({
-                    uid: file.key,
-                    name: file.filename || file.key.split('/').pop(), // 🔹 Use filename from API or default text
-                    status: 'done',
-                    url: `https://sudheer-fbimages.s3.amazonaws.com/${file.key}`,
-                    uploadDate: moment(file.uploadDate).format("YYYY-MM-DD"), // Assuming `uploadDate` is sent with the file
-                }));
     
-                setImages(imagesWithFileNames);
-                setFilteredImages(imagesWithFileNames);
+            if (Array.isArray(response.data.images)) {
+                const filteredItems = response.data.images
+                    .filter(file => {
+                        const key = file.key;
+    
+                        if (key === fullPath) return false;
+    
+                        const relativePath = key.replace(fullPath, '');
+                        // return !relativePath.includes('/') || key.endsWith('/');
+
+                        const isImmediateChild = relativePath !== '' && !relativePath.includes('/');
+                        return isImmediateChild || (key.endsWith('/') && !relativePath.slice(0, -1).includes('/'));
+                    })
+                    .map(file => {
+                        const isFolder = file.key.endsWith('/');
+                        const lastModified = file.LastModified
+                            ? moment(file.LastModified).format("YYYY-MM-DD HH:mm")
+                            : null;
+    
+                        return {
+                            uid: file.key,
+                            name: file.key.split('/').filter(Boolean).pop(),
+                            status: 'done',
+                            url: isFolder ? null : `https://sudheer-fbimages.s3.amazonaws.com/${file.key}`,
+                            isFolder,
+                            createdDate: file.createdDate || lastModified,
+                            modifiedDate: file.modifiedDate || lastModified,
+                            uploadDate: file.uploadDate || moment(file.modifiedDate || file.createdDate || lastModified).format("YYYY-MM-DD"),
+                        };
+                    });
+    
+                setImages(filteredItems);
+                setFilteredImages(filteredItems);
             }
         } catch (error) {
-            console.error("Error fetching images:", error.response ? error.response.data : error.message);
-        } finally{
+            console.error("Error fetching images:", error.response?.data || error.message);
+        } finally {
             setLoading(false);
         }
     };
+    
     // Prevent rendering until userdetails is available
     if (!userdetails) {
         return <Spin size="large" style={{ display: "flex", justifyContent: "center", marginTop: "20px" }} />;
     }
     // Redirect non-admin users
-    if (userdetails?.role === "Revenue_Partner") {
+    if (userdetails?.role !== "Admin") {
         router.push("/Dashboard");
         return null;
     }
@@ -311,12 +571,21 @@ const ImageUploadPage = () => {
             message.error("Please enter a valid URL.");
             return;
         }
+
+        // FULL RESET: avoid ghost upload from clipboard/paste
+        setClipboardFile(null);
+        setPreviewFile(null);
+        setEditedFile(null);
+        setPendingFiles([]);
+        setUploadingIndex(0);
+        setUploadFileList([]);
+        setFileInputName("");
     
         try {
             setLoading(true);
             let finalUrl = urlInput.trim();
     
-            // ✅ Handle base64 Data URLs
+            //Handle base64 Data URLs
             if (finalUrl.startsWith("data:")) {
                 const matches = finalUrl.match(/^data:(.+);base64,(.+)$/);
                 if (!matches) throw new Error("Invalid data URL format.");
@@ -388,7 +657,7 @@ const ImageUploadPage = () => {
             setUrlInput("");
             setIsModalVisible(true);
         } catch (error) {
-            console.error("❌ Upload Error:", error);
+            console.error("Upload Error:", error);
             message.error(error.message || "Failed to fetch or decode the file.");
         } finally {
             setLoading(false);
@@ -585,7 +854,10 @@ const ImageUploadPage = () => {
             const formData = new FormData();
             formData.append("file", clonedFile);
             formData.append("uploadDate", uploadDate);
-            formData.append("filename", clonedFileName);
+            // formData.append("filename", clonedFileName);
+            // formData.append("filename", `${currentFolder}${clonedFileName}`);
+            formData.append("filename", `${uploadPrefix}${currentFolder}${clonedFileName}`);
+            formData.append("folder", currentFolder); // include the folder for backend
     
             const uploadResponse = await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
                 headers: {
@@ -657,16 +929,12 @@ const ImageUploadPage = () => {
         // 🔹 Proxy the image URL
         const proxyUrl = `https://prodapis.adsgoat.in/proxy?url=${encodeURIComponent(image.url)}`;
 
-        console.log("📌 Editing Image URL:", proxyUrl); // ✅ Debugging step
+        console.log("Editing Image URL:", proxyUrl); // ✅ Debugging step
     
-        // ✅ Set selected image for editing
+        // Set selected image for editing
         // setSelectedImage(image);
         setSelectedImage({ ...image, url: proxyUrl });
-        
-        // ✅ Open the editor
         setIsEditorVisible(true);
-        
-        // ✅ Close the upload confirmation modal (optional)
         setIsModalVisible(false);
     };
     
@@ -696,7 +964,10 @@ const ImageUploadPage = () => {
         const formData = new FormData();
         formData.append("file", fileToUpload);
         formData.append("uploadDate", uploadDate);
-        formData.append("filename", filename);
+        // formData.append("filename", filename);
+        // formData.append("filename", `${currentFolder}${fileInputName.trim()}.${extension}`);
+        formData.append("filename", `${uploadPrefix}${currentFolder}${fileInputName.trim()}.${extension}`);
+        formData.append("folder", currentFolder); // pass the current folder as a separate field
     
         try {
             const response = await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
@@ -825,6 +1096,9 @@ const ImageUploadPage = () => {
         setSelectedKey(key);
         setSelectedValue(null); // Reset the selected account
         setValueOptions([]); // Reset the account list before updating
+        setSelectedAccountNumber(""); // Clear selected account number
+        setImages([]);       // Clear image view
+        setFilteredImages([]);
     };
     
     const handleValueChange = (value) => {
@@ -944,43 +1218,118 @@ const ImageUploadPage = () => {
         setIsDeleteModalOpen(true);
     };
 
-    const handleInlineRename = async (image) => {
-        if (!inlineName.trim()) {
-          message.error("Filename cannot be empty");
-          return;
-        }
+    // const handleInlineRename = async (image) => {
+    //     if (!inlineName.trim()) {
+    //       message.error("Filename cannot be empty");
+    //       return;
+    //     }
       
-        const oldKey = image.uid;  // Make sure uid matches S3 key exactly
-        const fileExtension = image.name.substring(image.name.lastIndexOf('.'));
-        const newKey = `${userdetails.userName}/${inlineName.trim()}${fileExtension}`;
+    //     const oldKey = image.uid;  // Make sure uid matches S3 key exactly
+    //     const fileExtension = image.name.substring(image.name.lastIndexOf('.'));
+    //     // const newKey = `${userdetails.userName}/${inlineName.trim()}${fileExtension}`;
+    //     const newKey = `${userdetails.userName}/${currentFolder}${inlineName.trim()}${fileExtension}`;
       
-        try {
-          await axios.post(
-            "https://prodapis.adsgoat.in/renameUserFile",
-            {
-              key: oldKey,        // Current S3 Key
-              newFilename: newKey // New S3 Key with username/ prefix
-            },
-            {
-              headers: {
-                Authorization: localStorage.getItem("token"),
-                username: userdetails?.userName,
-              },
-            }
-          );
+    //     try {
+    //       await axios.post(
+    //         "https://prodapis.adsgoat.in/renameUserFile",
+    //         {
+    //           key: oldKey,        // Current S3 Key
+    //           newFilename: newKey // New S3 Key with username/ prefix
+    //         },
+    //         {
+    //           headers: {
+    //             Authorization: localStorage.getItem("token"),
+    //             username: userdetails?.userName,
+    //           },
+    //         }
+    //       );
       
-          message.success("File renamed successfully!");
-          fetchUserImages();
-          setEditingUid(null);
-          setInlineName("");
-        } catch (error) {
-          console.error("Rename Error:", error.response ? error.response.data : error.message);
-          message.error("Failed to rename file. " + error.message);
-        }
-      };
+    //       message.success("File renamed successfully!");
+    //       fetchUserImages();
+    //       setEditingUid(null);
+    //       setInlineName("");
+    //     } catch (error) {
+    //       console.error("Rename Error:", error.response ? error.response.data : error.message);
+    //       message.error("Failed to rename file. " + error.message);
+    //     }
+    //   };
       
 
    // Handle delete after confirmation
+   
+    const handleInlineRename = async (image) => {
+        if (!inlineName.trim()) {
+            message.error("Name cannot be empty");
+            return;
+        }
+
+        const isFolder = image.isFolder;
+        const oldKey = image.uid;
+        // const extension = image.name.includes('.') ? image.name.substring(image.name.lastIndexOf('.')) : '';
+        // const newName = inlineName.trim();
+
+        // const newKey = isFolder 
+        //     ? `${userdetails.userName}/${currentFolder}${newName}/` 
+        //     : `${userdetails.userName}/${currentFolder}${newName}${extension}`;
+
+        // //Safeguard: Prevent rename if newKey is the same as oldKey
+        // if (newKey === oldKey) {
+        //     setEditingUid(null);
+        //     setInlineName("");
+        //     return;
+        // }
+
+        // Extract base path: everything before the filename
+        const lastSlashIndex = oldKey.lastIndexOf('/');
+        const basePath = oldKey.substring(0, lastSlashIndex + 1); // keep trailing slash
+
+        // For files, extract extension
+        const extension = image.name.includes('.') ? image.name.substring(image.name.lastIndexOf('.')) : '';
+        const newName = inlineName.trim();
+        const newKey = isFolder 
+            ? `${basePath}${newName}/`
+            : `${basePath}${newName}${extension}`;
+
+        // Prevent rename if nothing changed
+        if (newKey === oldKey) {
+            setEditingUid(null);
+            setInlineName("");
+            return;
+        }
+
+        try {
+            if (isFolder) {
+                await axios.post("https://prodapis.adsgoat.in/renameFolder", {
+                    oldFolderKey: oldKey,
+                    newFolderKey: newKey
+                }, {
+                    headers: {
+                        Authorization: localStorage.getItem("token"),
+                        username: userdetails?.userName,
+                    },
+                });
+            } else {
+                await axios.post("https://prodapis.adsgoat.in/renameUserFile", {
+                    key: oldKey,
+                    newFilename: newKey
+                }, {
+                    headers: {
+                        Authorization: localStorage.getItem("token"),
+                        username: userdetails?.userName,
+                    },
+                });
+            }
+
+            // message.success(`${isFolder ? "Folder" : "File"} renamed successfully!`);
+            fetchUserImages();
+            setEditingUid(null);
+            setInlineName("");
+        } catch (error) {
+            console.error("Rename Error:", error.response ? error.response.data : error.message);
+            message.error(`Failed to rename ${isFolder ? "folder" : "file"}.`);
+        }
+    };
+
    const handleConfirmDelete = async () => {
         if (!imageToDelete || !userdetails?.userName) return;
         try {
@@ -1023,10 +1372,31 @@ const ImageUploadPage = () => {
         const baseName = name.split('/').pop(); // get filename from path
         return baseName.substring(0, baseName.lastIndexOf('.')) || baseName;
     };
+
+    const handleFolderClick = (folderName) => {
+        const newPath = `${currentFolder}${folderName}/`;
+        setCurrentFolder(newPath);
+    };
     
 
     return (
-        <div style={{ padding: '20px' }}>
+        <div 
+            style={{ padding: '20px', minHeight: '100vh', position: 'relative' }}
+            onContextMenu={(e) => {
+                e.preventDefault();
+            
+                // Optional: prevent opening when clicking on file thumbnails or toolbars
+                const blockedTags = ['IMG', 'VIDEO', 'BUTTON', 'INPUT', 'SPAN', 'SVG', 'PATH'];
+                if (blockedTags.includes(e.target.tagName)) return;
+            
+                setContextMenu({
+                    visible: true,
+                    x: e.clientX,
+                    y: e.clientY,
+                    // folderToDelete: image, // store the clicked folder
+                });
+            }}
+        >
             <CreateCampaign 
                 visible={cdrawerVisible} 
                 accountis={selectedAccountNumber} 
@@ -1042,6 +1412,7 @@ const ImageUploadPage = () => {
             <Row justify="start" align="middle" gutter={[16, 16]}>
                 <Col span={3}>
                         <Select
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             showSearch
                             placeholder="Select Projects"
                             style={{ width: '100%' }}
@@ -1061,6 +1432,7 @@ const ImageUploadPage = () => {
                 </Col>
                 <Col span={4}>
                     <Select
+                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                         showSearch
                         placeholder="Select Accounts"
                         style={{ width: '100%' }}
@@ -1139,6 +1511,7 @@ const ImageUploadPage = () => {
                 </Col>
                 <Col span={3}>
                     <Input
+                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                         placeholder="Search by filename..."
                         suffix={<SearchOutlined />}
                         value={searchQuery}
@@ -1146,7 +1519,7 @@ const ImageUploadPage = () => {
                     />                       
                 </Col>
                 <Col>
-                    <Button onClick={showDrawer} icon={<PlusOutlined />} style={{ display: 'flex', border:'none', justifyContent: 'center', maxWidth: '160px', backgroundColor: '#C7F39A' }}>
+                    <Button onClick={showDrawer} className={theme === 'dark' ? 'dark-theme' : 'light-theme'} icon={<PlusOutlined className="black-icon" />} style={{ display: 'flex', border:'none', justifyContent: 'center', maxWidth: '160px', backgroundColor: '#C7F39A', color: theme === 'dark' ? 'black' : undefined  }}>
                         Create Campaign
                         {selectedImages.length > 0 && (
                             <Badge
@@ -1167,11 +1540,12 @@ const ImageUploadPage = () => {
                         )}
                     </Button>                   
                 </Col>                
-                <Button style={{backgroundColor: '#C7F39A', border:'none'}} onClick={fetchUserImages} icon={<ReloadOutlined />} />                  
+                <Button style={{backgroundColor: '#C7F39A', border:'none'}} onClick={fetchUserImages} icon={<ReloadOutlined className="black-icon" />} />                  
             </Row>
             {/* URL Input for Image */}
             <div style={{ display: 'flex', marginBottom: '20px', marginTop: '10px' }}>
                 <Input
+                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                     placeholder="Enter Image URL"
                     value={urlInput}
                     onChange={(e) => setUrlInput(e.target.value)}
@@ -1179,9 +1553,9 @@ const ImageUploadPage = () => {
                 />
 
                 <Button 
-                    style={{ backgroundColor: '#C7F39A', border: 'none' }} 
+                    style={{ backgroundColor: '#C7F39A', border: 'none', color: theme === 'dark' ? 'black' : undefined  }} 
                     onClick={handleUploadURL} // 🔹 Calls the function
-                    icon={<UploadOutlined />}
+                    icon={<UploadOutlined className="black-icon" />}
                 >
                     Upload from URL
                 </Button>
@@ -1199,32 +1573,153 @@ const ImageUploadPage = () => {
                     <Button style={{marginLeft: '10px', border:'none'}} icon={<UploadOutlined />}>Select Files</Button>
                 </Upload>
             </div>
-            <div style={{ 
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', // 🔹 Dynamically fills available space
-                gap: '10px',
-                marginTop: '20px',}}
+            {currentFolder && (
+            <Button type="link" icon={<ArrowLeftOutlined style={{color: theme === 'dark' ? '#C7F39A' : 'black'}}/>} onClick={() => {
+                const segments = currentFolder.split('/').filter(Boolean);
+                const newPath = segments.slice(0, -1).join('/') + (segments.length > 1 ? '/' : '');
+                setCurrentFolder(newPath);
+            }}>
+            </Button>
+            )}
+            <div 
+                style={{ 
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', // 🔹 Dynamically fills available space
+                    gap: '10px',
+                    marginTop: '20px',
+                    border: '2px solid #C7F39A',
+                    padding: '10px',
+                    width:'100%'
+                }}
             >
                 {filteredImages.map((image) => {
                     const isSelected = selectedImages.some((img) => img.uid === image.uid);
                     const isEditing = editingUid === image.uid;
-                    const isVideo = image.url.match(/\.(mp4|mov)$/i);
+                    const isVideo = image.url?.match(/\.(mp4|mov)$/i);
                     return (
                         <div>
                             <div 
                                 key={image.uid} 
+                                draggable // allow drag for all
+                                onDragStart={(e) => {
+                                  e.dataTransfer.setData("drag-item-key", image.uid);
+                                  e.dataTransfer.setData("drag-item-name", image.name);
+                                }}
+                                onContextMenu={(e) => {
+                                    if (!image.isFolder) return; // only for folders
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setContextMenu({
+                                      visible: true,
+                                      x: e.clientX,
+                                      y: e.clientY,
+                                      folderToDelete: image,
+                                    });
+                                }}
                                 style={{
                                     position: 'relative', 
+                                    marginLeft: '0px',
                                     width: '150px', 
                                     height: '150px', 
                                     cursor: 'pointer',
                                     borderRadius: '8px',
-                                    overflow: 'hidden'
+                                    overflow: 'hidden',
+                                    padding: '0px'
                                 }}
                                 onMouseEnter={() => setHoveredImage(image.uid)}
                                 onMouseLeave={() => setHoveredImage(null)}
                                 onClick={() => handleImageSelect(image)}
                             >
+                                {image.isFolder ? (
+                                    <div
+                                        style={{
+                                            height: '100%',
+                                            backgroundColor: 'transparent',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            flexDirection: 'column',
+                                            border: '2px dashed transparent',
+                                        }}
+                                        onClick={(e) => {
+                                            e.stopPropagation(); // prevent selection logic
+                                            handleFolderClick(image.name);
+                                        }}
+                                        onDragOver={(e) => e.preventDefault()} // 🔹 Allow drop
+                                        onDrop={async (e) => {
+                                          e.preventDefault();
+                                          const sourceKey = e.dataTransfer.getData("drag-item-key");
+                                          const sourceName = e.dataTransfer.getData("drag-item-name");
+
+                                          if (!sourceKey || !sourceName || sourceKey === image.uid) return; // pre
+                                    
+                                        //   const isSelfDrop = sourceKey === image.uid;
+                                        //   if (!sourceKey || isSelfDrop) return;
+                                    
+                                        //   const targetKey = `${userdetails.userName}/${currentFolder}${image.name}/`;
+                                        //   const destinationKey = sourceKey.endsWith("/")
+                                        //   ? `${targetKey}${sourceName}/`
+                                        //   : `${targetKey}${sourceName}`;
+
+                                        const targetKey = `${uploadPrefix}${currentFolder}${image.name}/`;
+                                        // const destinationKey = sourceKey.endsWith("/")
+                                        // ? `${targetKey}` // drop folder directly into target folder
+                                        // : `${targetKey}${sourceName}`; // drop file into target folder
+                                        const destinationKey = `${targetKey}${sourceName}${sourceKey.endsWith("/") ? '/' : ''}`;
+                                    
+                                    
+                                          try {
+                                            await axios.post("https://prodapis.adsgoat.in/moveFileOrFolder", {
+                                                sourceKey,
+                                            //   destinationKey: `${targetKey}${sourceKey.endsWith('/') ? '' : sourceName}`, // handle folders & files
+                                                destinationKey
+                                            }, {
+                                              headers: {
+                                                Authorization: localStorage.getItem("token"),
+                                                username: userdetails.userName,
+                                              }
+                                            });
+                                    
+                                            // message.success(`Moved to "${image.name}"`);
+                                            fetchUserImages();
+                                            // setTimeout(() => fetchUserImages(), 500);
+                                          } catch (err) {
+                                            console.error("Move error:", err);
+                                            message.error("Failed to move file/folder.");
+                                          }
+                                        }}
+                                    >
+                                        <img
+                                            src="https://img.icons8.com/fluency/48/folder-invoices.png"
+                                            alt="Folder"
+                                            style={{ width: '40px', height: '40px', marginBottom: '8px' }}
+                                        />
+                                        <div style={{ fontSize: '14px', fontWeight: 500 }}>{image.name}</div>
+                                        <div style={{fontSize:'10px'}}>Created: {moment(image.createdDate).format("YYYY-MM-DD HH:mm")}</div>
+                                        <div style={{fontSize:'10px'}}>Modified: {moment(image.modifiedDate).format("YYYY-MM-DD HH:mm")}</div>
+                                    </div>
+                                    ) : (
+                                    <>
+                                        {image.url?.match(/\.(mp4|mov)$/i) ? (
+                                        <video
+                                            src={image.url}
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                            autoPlay
+                                            loop
+                                            muted
+                                            playsInline
+                                            onLoadedData={(e) => e.target.play().catch(() => console.log("Autoplay blocked"))}
+                                        />
+                                        ) : (
+                                        <img
+                                            src={image.url}
+                                            alt="Uploaded"
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                        />
+                                        )}
+                                    </>
+                                )}
+
                                 {/* Checkmark Badge for Selected Images */}
                                 {isSelected && (
                                     <div style={{
@@ -1247,7 +1742,7 @@ const ImageUploadPage = () => {
                                     </div>
                                 )}
 
-                                {image.url.match(/\.(mp4|mov)$/i) ? (
+                                {image.url?.match(/\.(mp4|mov)$/i) ? (
                                     <video 
                                         src={image.url} 
                                         style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
@@ -1266,7 +1761,7 @@ const ImageUploadPage = () => {
                                 )}
                                 
                                 {/* View & Delete Icons (Show Only on Hover) */}
-                                {hoveredImage === image.uid && (
+                                {!image.isFolder && hoveredImage === image.uid && (
                                     <div 
                                         style={{
                                             position: 'absolute',
@@ -1306,7 +1801,7 @@ const ImageUploadPage = () => {
                                             e.stopPropagation();
                                             handleEditFile(image);
                                             }}
-                                            disabled={image.url.match(/\.(mp4|mov)$/i)} // 🔹 Disable for videos
+                                            disabled={image.url?.match(/\.(mp4|mov)$/i)} // 🔹 Disable for videos
                                             style={{
                                                 position: 'absolute',
                                                 top: '8px',
@@ -1314,8 +1809,8 @@ const ImageUploadPage = () => {
                                                 color: 'white',
                                                 backgroundColor: 'rgba(0, 0, 0, 0.7)',
                                                 border: 'none',
-                                                cursor: image.url.match(/\.(mp4|mov)$/i) ? "not-allowed" : "pointer", // Show disabled cursor for videos
-                                                opacity: image.url.match(/\.(mp4|mov)$/i) ? 0.5 : 1 // Reduce opacity for disabled button
+                                                cursor: image.url?.match(/\.(mp4|mov)$/i) ? "not-allowed" : "pointer", // Show disabled cursor for videos
+                                                opacity: image.url?.match(/\.(mp4|mov)$/i) ? 0.5 : 1 // Reduce opacity for disabled button
                                             }}
                                         />
                                         {/* Delete Icon */}
@@ -1336,76 +1831,78 @@ const ImageUploadPage = () => {
                                     </div>   
                                 )}
                             </div>
-                             {/* Inline Rename and Clone Operations Below Image */}
-                            <div
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    marginTop: '5px',
-                                }}
-                            >
+                            {/* Inline Rename and Clone Operations Below Image */}
+                            {!image.isFolder && (
+                                 <div
+                                 style={{
+                                     display: 'flex',
+                                     alignItems: 'center',
+                                     justifyContent: 'center',
+                                     marginTop: '5px',
+                                 }}
+                             >
                                 {isEditing ? (
-                                    <>
-                                    <Input
-                                        size="small"
-                                        style={{ width: '110px' }}
-                                        value={inlineName}
-                                        onChange={(e) => setInlineName(e.target.value)}
-                                        autoFocus
-                                    />
-                                    <CheckCircleFilled
-                                        style={{ color: 'green', marginLeft: '5px', cursor: 'pointer' }}
-                                        onClick={() => handleInlineRename(image)}
-                                    />
-                                    <CloseCircleFilled
-                                        style={{ color: 'red', marginLeft: '5px', cursor: 'pointer' }}
-                                        onClick={() => setEditingUid(null)}
-                                    />
-                                    </>
+                                     <>
+                                     <Input
+                                         size="small"
+                                         style={{ width: '110px' }}
+                                         value={inlineName}
+                                         onChange={(e) => setInlineName(e.target.value)}
+                                         autoFocus
+                                     />
+                                     <CheckCircleFilled
+                                         style={{ color: 'green', marginLeft: '5px', cursor: 'pointer' }}
+                                         onClick={() => handleInlineRename(image)}
+                                     />
+                                     <CloseCircleFilled
+                                         style={{ color: 'red', marginLeft: '5px', cursor: 'pointer' }}
+                                         onClick={() => setEditingUid(null)}
+                                     />
+                                     </>
                                 ) : (
-                                    <>
-                                    <Tooltip title={extractDisplayName(image.name)}>
-                                        <div
-                                            style={{
-                                            maxWidth: '100%',
-                                            overflow: 'hidden',
-                                            whiteSpace: 'nowrap',
-                                            textOverflow: 'ellipsis',
-                                            fontWeight: '300',
-                                            fontSize: '14px',
-                                            textAlign: 'center',
-                                            // marginTop: '8px',
-                                            cursor: 'default',
-                                            }}
-                                        >
-                                            {extractDisplayName(image.name)}
-                                        </div>
-                                    </Tooltip>
-                                    <EditOutlined
-                                        style={{ cursor: 'pointer', color: 'gray', marginLeft: '5px' }}
-                                        onClick={() => {
-                                        setEditingUid(image.uid);
-                                        setInlineName(extractDisplayName(image.name));
-                                        }}
-                                    />
-                                    <Button
-                                        type="text"
-                                        shape="circle"
-                                        icon={<CopyOutlined />}
-                                        onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleCloneFile(image);
-                                        }}
-                                        style={{
-                                        color: 'grey',
-                                        border: 'none',
-                                        marginLeft: '5px',
-                                        }}
-                                    />
-                                    </>
-                                )}
-                            </div>
+                                     <>
+                                     <Tooltip title={extractDisplayName(image.name)}>
+                                         <div
+                                             style={{
+                                             maxWidth: '100%',
+                                             overflow: 'hidden',
+                                             whiteSpace: 'nowrap',
+                                             textOverflow: 'ellipsis',
+                                             fontWeight: '300',
+                                             fontSize: '14px',
+                                             textAlign: 'center',
+                                             // marginTop: '8px',
+                                             cursor: 'default',
+                                             }}
+                                         >
+                                             {extractDisplayName(image.name)}
+                                         </div>
+                                     </Tooltip>
+                                     <EditOutlined
+                                         style={{ cursor: 'pointer', color: 'gray', marginLeft: '5px' }}
+                                         onClick={() => {
+                                         setEditingUid(image.uid);
+                                         setInlineName(extractDisplayName(image.name));
+                                         }}
+                                     />
+                                     <Button
+                                         type="text"
+                                         shape="circle"
+                                         icon={<CopyOutlined />}
+                                         onClick={(e) => {
+                                         e.stopPropagation();
+                                         handleCloneFile(image);
+                                         }}
+                                         style={{
+                                         color: 'grey',
+                                         border: 'none',
+                                         marginLeft: '5px',
+                                         }}
+                                     />
+                                     </>
+                                 )}
+                                </div>
+                            )}
                         </div>  
                     );
                 })}
@@ -1433,7 +1930,7 @@ const ImageUploadPage = () => {
                 destroyOnClose={true} // 🔹 Ensures video stops playing when closed
             >
                 {viewedImage && viewedImage.url ? (
-                    viewedImage.url.match(/\.(mp4|mov)$/i) ? (
+                    viewedImage.url?.match(/\.(mp4|mov)$/i) ? (
                         <video 
                             key={viewedImage.url} // 🔹 Ensures re-render when a new file is viewed
                             controls 
@@ -1530,6 +2027,205 @@ const ImageUploadPage = () => {
                     onSaveEditedImage={(fileId, editedImage) => handleSaveEditedImage(fileId, editedImage)}
                 />
             )}
+
+            {contextMenu.visible && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        top: contextMenu.y,
+                        left: contextMenu.x,
+                        background: 'white',
+                        boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
+                        zIndex: 9999,
+                        borderRadius: '6px',
+                        padding: '4px 0',
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        minWidth: '140px',
+                        backgroundColor: theme === 'dark' ? 'black' : 'white'
+                    }}
+                    onMouseLeave={() => setContextMenu({ visible: false })}
+                >
+                    {/* New Folder Option */}
+                    <div
+                        style={{
+                            padding: '8px 12px',
+                            borderBottom: '1px solid #eee',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                        }}
+                        // onClick={() => {
+                        // setNewFolderModal({ visible: true, name: '' });
+                        // setContextMenu({ visible: false });
+                        // }}
+                        onClick={() => {
+                            setNewFolderModal({ 
+                              visible: true, 
+                              name: '', 
+                              mode: 'create',     // 🔥 ADD THIS
+                              folderToRename: null // 🔥 CLEAR THIS TOO
+                            });
+                            setContextMenu({ visible: false });
+                        }}
+                    >
+                        <span style={{ color: '#8b5cf6' }}>➕</span> New Folder
+                    </div>
+
+                    {/* Delete Folder Option (only when right-clicked on a folder) */}
+                    {contextMenu.folderToDelete && (
+                        <div
+                            style={{
+                                padding: '8px 12px',
+                                color: 'red',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                            }}
+                            onClick={() => {
+                                setDeleteFolderModal({
+                                visible: true,
+                                folder: contextMenu.folderToDelete,
+                                });
+                                setContextMenu({ visible: false });
+                            }}
+                        >
+                        🗑️ Delete Folder
+                        </div>    
+                    )}
+
+                    {/* 🔹 Add Rename Option */}
+                    <div
+                        style={{
+                            padding: '8px 12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                        }}
+                        onClick={() => {
+                            setNewFolderModal({
+                            visible: true,
+                            name: contextMenu.folderToDelete?.name || "",
+                            mode: "rename",
+                            folderToRename: contextMenu.folderToDelete,
+                            });
+                            setContextMenu({ visible: false });
+                        }}
+                    >
+                        ✏️ Rename Folder
+                    </div>
+
+                </div>
+            )}
+
+            {/* New Folder Modal */}
+            <Modal
+                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                title={newFolderModal.mode === "rename" ? "Rename Folder" : "Create New Folder"}
+                open={newFolderModal.visible}
+                onOk={async () => {
+                    const { name, mode, folderToRename } = newFolderModal;
+
+                    if (!name.trim()) {
+                    message.error("Folder name is required!");
+                    return;
+                    }
+
+                    if (mode === "create") {
+                        // const folderKey = `${userdetails.userName}/${currentFolder}${name}/`;
+                        const folderKey = `${uploadPrefix}${currentFolder}${name}/`;
+                        await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", new FormData(), {
+                          headers: {
+                            Authorization: localStorage.getItem("token"),
+                            username: userdetails.userName,
+                            "x-folder": folderKey,
+                            "x-action": "create-folder", // 🔥 Add explicit signal
+                          },
+                        });
+                        message.success("Folder created");
+                    }
+                      
+
+                    if (mode === "rename") {
+                    const oldKey = folderToRename?.uid;
+                    if (!oldKey) return;
+
+                    const segments = oldKey.split('/');
+                    segments[segments.length - 2] = name; // rename segment
+                    const newKey = segments.slice(0, -1).join('/') + '/';
+
+                    await axios.post("https://prodapis.adsgoat.in/renameFolder", {
+                        oldFolderKey: oldKey,
+                        newFolderKey: newKey,
+                    }, {
+                        headers: {
+                        Authorization: localStorage.getItem("token"),
+                        username: userdetails.userName,
+                        },
+                    });
+
+                    message.success("Folder renamed");
+                    }
+
+                    setNewFolderModal({ visible: false, name: '', mode: 'create', folderToRename: null });
+                    fetchUserImages();
+                }}
+                onCancel={() =>
+                    setNewFolderModal({ visible: false, name: '', mode: 'create', folderToRename: null })
+                }
+                >
+                <Input
+                    placeholder="Enter folder name"
+                    value={newFolderModal.name}
+                    onChange={(e) =>
+                    setNewFolderModal((prev) => ({ ...prev, name: e.target.value }))
+                    }
+                />
+            </Modal>
+
+
+            {/* Delete Folder Modal */}
+            <Modal
+                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                title="Delete Folder"
+                open={deleteFolderModal.visible}
+                onOk={async () => {
+                const folderKey = deleteFolderModal.folder?.uid;
+                if (!folderKey) return;
+
+                await axios.delete("https://prodapis.adsgoat.in/deleteFolder", {
+                    headers: {
+                    Authorization: localStorage.getItem("token"),
+                    username: userdetails.userName,
+                    "x-folder": folderKey,
+                    },
+                });
+
+                setDeleteFolderModal({ visible: false, folder: null });
+                fetchUserImages();
+                }}
+                onCancel={() => setDeleteFolderModal({ visible: false, folder: null })}
+                okButtonProps={{ danger: true }}
+                okText="Delete"
+            >
+                Are you sure you want to delete folder <b>"{deleteFolderModal.folder?.name}"</b>?
+            </Modal>
+
+
+
+
+
+            {/* {currentFolder && (
+            <Button type="link" onClick={() => {
+                const segments = currentFolder.split('/').filter(Boolean);
+                const newPath = segments.slice(0, -1).join('/') + (segments.length > 1 ? '/' : '');
+                setCurrentFolder(newPath);
+            }}>
+                ⬅️ Back
+            </Button>
+            )} */}
+
+
         </div>
     );
 };

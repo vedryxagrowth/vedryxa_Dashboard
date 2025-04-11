@@ -1576,33 +1576,26 @@ body.dark-mode .black-icon-comment.anticon svg {
   transition: none !important;
 }
 
-.dark-theme .ant-select-selection-placeholder {
-  color: white !important; /* Light grey for visibility */
+.dark-theme .ant-modal-header {
+  background-color: #1e1e1e; /* or match your modal body */
+  border-bottom: 1px solid #333;
 }
 
-.dark-theme-modal .ant-modal-header {
-  background-color: #1e1e1e !important;
-  /* border-bottom: 1px solid #333 !important; */
+.dark-theme .ant-modal-title {
+  color: white;
 }
 
-.dark-theme-modal .ant-modal-title {
+.dark-theme input::placeholder,
+.dark-theme .ant-input::placeholder {
   color: white !important;
+  opacity: 1;
 }
 
-.dark-theme-modal .ant-modal-content {
-  background-color: #1e1e1e !important;
-  color: white !important;
+.dark-theme .ant-input {
+  background-color: #444;
+  color: white;
+  border: 1px solid #666;
 }
 
-/* Optional: Input and textarea styling */
-.dark-theme-modal .ant-input,
-.dark-theme-modal .ant-input:focus,
-.dark-theme-modal textarea {
-  background-color: #2a2a2a !important;
-  color: white !important;
-  border: 1px solid #444 !important;
-}
 
-.dark-theme-modal textarea::placeholder {
-  color: #ccc !important;
-}
+

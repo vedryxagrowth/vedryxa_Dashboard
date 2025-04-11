@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "app\\NewUser\\page.js -> ../CronDashboard/crons": {
     "id": "app\\NewUser\\page.js -> ../CronDashboard/crons",
     "files": [
@@ -39,6 +40,28 @@
     "id": "app\\NewUser\\page.js -> ./users-components/edit-usersaccess",
     "files": [
       "static/chunks/_app-pages-browser_src_app_NewUser_users-components_edit-usersaccess_js.js"
+=======
+  "app\\Campaigns\\camp-components\\Fabricanvas.js -> react-filerobot-image-editor": {
+    "id": "app\\Campaigns\\camp-components\\Fabricanvas.js -> react-filerobot-image-editor",
+    "files": []
+  },
+  "app\\Creatives\\components\\text.js -> ../../Campaigns/camp-components/Fabricanvas": {
+    "id": "app\\Creatives\\components\\text.js -> ../../Campaigns/camp-components/Fabricanvas",
+    "files": [
+      "static/chunks/_app-pages-browser_src_app_Campaigns_camp-components_Fabricanvas_js.js"
+    ]
+  },
+  "app\\Creatives\\page.js -> ../Campaigns/camp-components/Fabricanvas": {
+    "id": "app\\Creatives\\page.js -> ../Campaigns/camp-components/Fabricanvas",
+    "files": [
+      "static/chunks/_app-pages-browser_src_app_Campaigns_camp-components_Fabricanvas_js.js"
+    ]
+  },
+  "app\\Creatives\\page.js -> ./components/text": {
+    "id": "app\\Creatives\\page.js -> ./components/text",
+    "files": [
+      "static/chunks/_app-pages-browser_src_app_Creatives_components_text_js.js"
+>>>>>>> DevUi
     ]
   },
   "app\\Reports\\page.js -> ../componentsOfReports/AgencyAndBMName": {
