@@ -1475,6 +1475,7 @@ const UsersTable = () => {
                         <Table
                             className={`custom-dark-table ${theme === 'dark' ? 'dark-mode-pagination' : 'light-mode-pagination'}`}
                             dataSource={filteredData.map((item, index) => ({ ...item, key: index }))}
+                            // style={{backgroundColor: theme === 'dark' ? '#333' : '#fff', }}
                             columns={columns}
                             pagination={{ pageSize: paginationSize }}
                             scroll={{ y: 'calc(80vh - 200px)' }}

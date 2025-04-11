@@ -1232,53 +1232,82 @@ body.dark-mode .black-icon-comment.anticon svg {
   transition: all 0.3s ease;
 }
 
-.dark-theme-modal .ant-modal-header {
-  background-color: #333 !important;
-  border-bottom: 1px solid #333 !important;
-}
-
-.dark-theme-modal .ant-modal-title {
-  color: #ffffff !important;
-}
-
-.dark-theme-modal .ant-modal-content {
-  background-color: #333 !important;
+.dark-theme .ant-card {
+  background-color: green !important;
   color: white !important;
 }
 
-/* Optional: Style textarea to match dark mode */
-.dark-theme-modal textarea {
-  background-color: #2a2a2a !important;
+/* Table wrapper */
+.dark-theme .ant-table {
+  background-color: green !important;
   color: white !important;
-  border: 1px solid #444 !important;
-}
-.dark-theme-modal textarea {
-  background-color: #2a2a2a !important;
-  color: white !important;
-  border: 1px solid #444 !important;
 }
 
-.dark-theme-modal textarea::placeholder {
-  color: #ccc !important;
-  opacity: 1 !important;
+/* Header row */
+.dark-theme .ant-table-thead > tr > th {
+  background-color: green !important; /* greenish header */
+  color: white !important;
+  border-color: green;
 }
 
+/* Table body rows */
+.dark-theme .ant-table-tbody > tr > td {
+  background-color: green!important;
+  color: white !important;
+  border-color: green;
+}
+
+/* Hovered row */
+.dark-theme .ant-table-tbody > tr:hover > td {
+  background-color: green !important;
+}
+
+/* ========== TABLE HEADERS ========== */
 .custom-dark-table.dark-mode-pagination .ant-table-thead > tr > th {
-  background-color: #4e5f3f !important; /* Light green */
+  background-color: #4e5f3f !important; /* Olive green for dark mode */
   color: white !important;
   font-weight: 600;
-  border-bottom: 1px solid #4e5f3f; /* optional green-ish border */
+  border-bottom: 1px solid #4e5f3f;
 }
+
 .custom-dark-table.light-mode-pagination .ant-table-thead > tr > th {
-  background-color: #edffd9 !important; /* Light green */
+  background-color: #edffd9 !important; /* Light green for light mode */
   color: black !important;
   font-weight: 600;
-  border-bottom: 1px solid black; /* optional green-ish border */
+  border-bottom: 1px solid #ccc;
 }
+
+/* ========== TABLE BODY ========== */
+.custom-dark-table.dark-mode-pagination .ant-table-tbody > tr > td {
+  background-color: #2a2a2a !important;
+  color: white !important;
+  border-color: #444 !important;
+}
+
+.custom-dark-table.dark-mode-pagination .ant-table-tbody > tr:hover > td {
+  background-color: #3a3a3a !important;
+}
+
+.custom-dark-table.light-mode-pagination .ant-table-tbody > tr > td {
+  background-color: white !important;
+  color: black !important;
+  border-color: #ddd !important;
+}
+
+.custom-dark-table.light-mode-pagination .ant-table-tbody > tr:hover > td {
+  background-color: #f5f5f5 !important;
+}
+
+/* ========== PAGINATION BASE ========== */
 .custom-dark-table.dark-mode-pagination .ant-pagination {
   color: white;
 }
 
+.custom-dark-table.light-mode-pagination .ant-pagination {
+  color: black;
+}
+
+/* ========== PAGINATION ITEMS ========== */
 .custom-dark-table.dark-mode-pagination .ant-pagination-item {
   background-color: #2a2a2a;
   border: 1px solid #444;
@@ -1298,32 +1327,44 @@ body.dark-mode .black-icon-comment.anticon svg {
   color: black;
 }
 
-.custom-dark-table.dark-mode-pagination .ant-pagination-prev,
-.custom-dark-table.dark-mode-pagination .ant-pagination-next {
-  color: white;
-}
-
-
-.custom-dark-table.dark-mode-pagination .ant-pagination-prev button,
-.custom-dark-table.dark-mode-pagination .ant-pagination-next button {
-  color: white;
-  background-color: #2a2a2a;
-  border: 1px solid #444;
-}
-.custom-dark-table.dark-mode-pagination .ant-pagination-item-ellipsis {
-  color: white !important;
-}
-.custom-dark-table.light-mode-pagination .ant-pagination-item-ellipsis {
-  color: black !important;
-}
 .custom-dark-table.dark-mode-pagination .ant-pagination-item:hover {
   border-color: #C7F39A;
   color: #C7F39A;
 }
 
+.custom-dark-table.dark-mode-pagination .ant-table-tbody > tr > td {
+  background-color: #2a2a2a !important;  /* dark background */
+  color: white !important;              /* white text */
+  border-color: #444 !important;
+}
+
+/* Optional: zebra striping */
+.custom-dark-table.dark-mode-pagination .ant-table-tbody > tr:nth-child(even) > td {
+  background-color: #2f2f2f !important;
+}
+
+.custom-dark-table.dark-mode-pagination .ant-table-tbody > tr:hover > td {
+  background-color: #3a3a3a !important; /* on hover */
+}
+
+/* Light Mode Pagination */
+.custom-dark-table.light-mode-pagination .ant-pagination-item {
+  background-color: white;
+  border: 1px solid #ccc;
+  color: black;
+}
+
+.custom-dark-table.light-mode-pagination .ant-pagination-item a {
+  color: black;
+}
+
 .custom-dark-table.light-mode-pagination .ant-pagination-item-active {
-  /* background-color: #C7F39A; */
+  background-color: #C7F39A;
   border-color: #C7F39A;
+}
+
+.custom-dark-table.light-mode-pagination .ant-pagination-item-active a {
+  color: #423937; /* Slightly darker text */
 }
 
 .custom-dark-table.light-mode-pagination .ant-pagination-item:hover {
@@ -1331,8 +1372,32 @@ body.dark-mode .black-icon-comment.anticon svg {
   color: #C7F39A;
 }
 
-.custom-dark-table.light-mode-pagination .ant-pagination-item-active a {
-  color: #423937;
+/* ========== ARROWS AND ELLIPSIS ========== */
+.custom-dark-table.dark-mode-pagination .ant-pagination-prev,
+.custom-dark-table.dark-mode-pagination .ant-pagination-next {
+  color: white;
+}
+
+.custom-dark-table.dark-mode-pagination .ant-pagination-prev button,
+.custom-dark-table.dark-mode-pagination .ant-pagination-next button {
+  color: white;
+  background-color: #2a2a2a;
+  border: 1px solid #444;
+}
+
+.custom-dark-table.light-mode-pagination .ant-pagination-prev button,
+.custom-dark-table.light-mode-pagination .ant-pagination-next button {
+  color: black;
+  background-color: white;
+  border: 1px solid #ccc;
+}
+
+.custom-dark-table.dark-mode-pagination .ant-pagination-item-ellipsis {
+  color: white !important;
+}
+
+.custom-dark-table.light-mode-pagination .ant-pagination-item-ellipsis {
+  color: black !important;
 }
 
 
@@ -1511,3 +1576,33 @@ body.dark-mode .black-icon-comment.anticon svg {
   transition: none !important;
 }
 
+.dark-theme .ant-select-selection-placeholder {
+  color: white !important; /* Light grey for visibility */
+}
+
+.dark-theme-modal .ant-modal-header {
+  background-color: #1e1e1e !important;
+  /* border-bottom: 1px solid #333 !important; */
+}
+
+.dark-theme-modal .ant-modal-title {
+  color: white !important;
+}
+
+.dark-theme-modal .ant-modal-content {
+  background-color: #1e1e1e !important;
+  color: white !important;
+}
+
+/* Optional: Input and textarea styling */
+.dark-theme-modal .ant-input,
+.dark-theme-modal .ant-input:focus,
+.dark-theme-modal textarea {
+  background-color: #2a2a2a !important;
+  color: white !important;
+  border: 1px solid #444 !important;
+}
+
+.dark-theme-modal textarea::placeholder {
+  color: #ccc !important;
+}
