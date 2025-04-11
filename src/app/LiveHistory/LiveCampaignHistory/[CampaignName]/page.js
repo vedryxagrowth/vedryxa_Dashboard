@@ -2037,7 +2037,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                     />
                     <Button 
                         type="default" 
-                        icon={<ReloadOutlined />} 
+                        icon={<ReloadOutlined  className='black-icon'/>} 
                         style={{ height: "30px", marginLeft: "10px", backgroundColor: '#C7F39A', border: 'none' }} 
                         onClick={handleReload}  // Call refresh function when clicked
                     />
@@ -2093,6 +2093,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                     value={selectedValue}
                     onChange={handleChange}
                     style={{ width: "200px" }}
+                    dropdownClassName={theme === 'dark' && "custom-dropdown"}
                     allowClear
                 >
                     {dateOptions.map((option, index) => (

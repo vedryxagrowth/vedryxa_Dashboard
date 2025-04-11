@@ -691,6 +691,7 @@ const RevenuePartnerDashboard = () => {
                             }}
                         >
                             <Select {...sharedProps} {...selectProps} 
+                                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                 dropdownClassName={theme === 'dark' && 'custom-dropdown'}/>
                         </Space>
                     </Col>
@@ -725,6 +726,7 @@ const RevenuePartnerDashboard = () => {
                             onChange={onChangeTime}
                             value={timeZone}
                             options={timezones.map((item) => ({ value: item, label: item }))}
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             dropdownClassName={theme === 'dark' && 'custom-dropdown'}
                         />
                     </Col>

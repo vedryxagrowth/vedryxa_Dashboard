@@ -722,7 +722,7 @@ const UsersTable = () => {
             render: (text, record) => (
                 <Space size="middle">
                     <Button style={{backgroundColor:'#C7F39A', color:'black'}} onClick={() => handleEdit(record)}>Edit</Button>
-                    <Button style={{backgroundColor: "transparent"}} onClick={() => handleDelete(record)}>Remove Access</Button>
+                    <Button style={{backgroundColor: "transparent", color: theme === "dark" ? "white" : "black"}} onClick={() => handleDelete(record)}>Remove Access</Button>
                 </Space>
             ),
         },
