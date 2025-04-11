@@ -1599,3 +1599,65 @@ body.dark-mode .black-icon-comment.anticon svg {
 
 
 
+.dark-mode-pagination .ant-select-dropdown {
+  background-color: #1e1e1e !important;  /* Dark background */
+  color: white !important;
+}
+
+/* Style dropdown items */
+.dark-mode-pagination .ant-select-item {
+  background-color: #1e1e1e !important;
+  color: white !important;
+}
+
+/* Active or hovered item */
+.dark-mode-pagination .ant-select-item-option-active,
+.dark-mode-pagination .ant-select-item-option-selected {
+  background-color: #333 !important;
+  color: #C7F39A !important; /* Optional highlight text color */
+}
+
+/* Search input inside dropdown (if any) */
+.dark-mode-pagination .ant-select-dropdown .ant-select-item-option-content {
+  color: white !important;
+}
+
+.dark-theme .ant-select-selection-placeholder {
+  color: white !important;
+  opacity: 0.8; /* Optional for softer white */
+}
+
+/* Also handle focused state */
+.dark-theme .ant-select-focused .ant-select-selection-placeholder {
+  color: white !important;
+}
+
+/* Dark theme modal header background and title text */
+.dark-theme-modal .ant-modal-header {
+  background-color: #1e1e1e !important;
+  /* border-bottom: 1px solid #333 !important; */
+}
+
+/* ant modal title color */
+.dark-theme-modal .ant-modal-title {
+  color: white !important;
+}
+
+/* Modal content background */
+.dark-theme-modal .ant-modal-content {
+  background-color: #1e1e1e !important;
+  color: white !important;
+}
+
+/* TextArea inside modal */
+.dark-theme-modal .ant-modal-content textarea {
+  background-color: #2a2a2a !important;
+  color: white !important;
+  border: 1px solid #444 !important;
+}
+
+/* Placeholder inside textarea */
+.dark-theme-modal .ant-modal-content textarea::placeholder {
+  color: #ccc !important;
+  opacity: 1;
+}
