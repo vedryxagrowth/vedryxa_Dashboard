@@ -12,67 +12,17 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-<<<<<<< HEAD
-    "/Reports/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/Reports/page.css",
-      "static/chunks/app/Reports/page.js"
-    ],
     "/NewUser/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/css/app/NewUser/page.css",
       "static/chunks/app/NewUser/page.js"
     ],
-    "/Dashboard/page": [
+    "/Activities/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/Dashboard/page.css",
-      "static/chunks/app/Dashboard/page.js"
-    ],
-=======
->>>>>>> DevUi
-    "/LiveHistory/LiveCampaignHistory/[CampaignName]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/LiveHistory/LiveCampaignHistory/[CampaignName]/page.css",
-      "static/chunks/app/LiveHistory/LiveCampaignHistory/[CampaignName]/page.js"
-    ],
-<<<<<<< HEAD
-=======
-    "/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page.css",
-      "static/chunks/app/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page.js"
-    ],
->>>>>>> DevUi
-    "/AllCampaigns/CampaignHistory/[CampaignName]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/AllCampaigns/CampaignHistory/[CampaignName]/page.css",
-      "static/chunks/app/AllCampaigns/CampaignHistory/[CampaignName]/page.js"
-    ],
-<<<<<<< HEAD
-    "/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page.css",
-      "static/chunks/app/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page.js"
-=======
-    "/Creatives/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/Creatives/page.css",
-      "static/chunks/app/Creatives/page.js"
-    ],
-    "/Dashboard/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/Dashboard/page.css",
-      "static/chunks/app/Dashboard/page.js"
->>>>>>> DevUi
+      "static/css/app/Activities/page.css",
+      "static/chunks/app/Activities/page.js"
     ]
   }
 }
