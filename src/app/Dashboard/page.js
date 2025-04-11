@@ -690,7 +690,8 @@ const RevenuePartnerDashboard = () => {
                                 width: '100%',
                             }}
                         >
-                            <Select {...sharedProps} {...selectProps} />
+                            <Select {...sharedProps} {...selectProps} 
+                dropdownClassName={theme === 'dark' && 'custom-dropdown'}/>
                         </Space>
                     </Col>
                     <Col xs={16} sm={16} md={10} lg={8}>
@@ -724,10 +725,11 @@ const RevenuePartnerDashboard = () => {
                             onChange={onChangeTime}
                             value={timeZone}
                             options={timezones.map((item) => ({ value: item, label: item }))}
+                            dropdownClassName={theme === 'dark' && 'custom-dropdown'}
                         />
                     </Col>
                     <Col xs={12} sm={12} md={2}>
-                        <Button onClick={onClickSubmit} style={{backgroundColor: '#C7F39A',}}>
+                        <Button onClick={onClickSubmit} style={{backgroundColor: '#C7F39A', color:"black", fontWeight:'600'}}>
                             Submit
                         </Button>
                     </Col>

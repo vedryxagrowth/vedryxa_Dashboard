@@ -485,7 +485,7 @@ const Tonic1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePrat
                                     <EditOutlined onClick={handleEditClick} style={{ marginLeft: '10px', color: 'blue', cursor: 'pointer' }} />
                                 </div>
                             )}>
-                                <MessageOutlined className='Message' style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
+                                <MessageOutlined  className= {theme === "dark" ? "black-icon-comment" : 'Message'} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
                                 <Tooltip title={tooltipText}></Tooltip>
                             </Tooltip>
                         ) : (
@@ -624,7 +624,9 @@ const Tonic1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePrat
                             actions: '...',
                             adid: "",
                             adname: "",
-                            keyword: eachData.keyword
+                            keyword: eachData.keyword,
+                            from:'',
+                            profitloss: "",
                             // compaignid: eachData.campaign_id,
                         }
                     )
