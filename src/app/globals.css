@@ -1638,6 +1638,7 @@ body.dark-mode .black-icon-comment.anticon svg {
   /* border-bottom: 1px solid #333 !important; */
 }
 
+/* ant modal title color */
 .dark-theme-modal .ant-modal-title {
   color: white !important;
 }
