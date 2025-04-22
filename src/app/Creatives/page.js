@@ -25,7 +25,8 @@ const { Option } = Select;
 const FabricCanvas = dynamic(() => import("../Campaigns/camp-components/Fabricanvas"), { ssr: false });
 const CreateCampaign = dynamic(() => import("./components/text"), { ssr: false });
 
-const ImageUploadPage = () => {
+const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
+    // console.log("Selected Files Data:", selectedFilesData);
     const [images, setImages] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
@@ -451,7 +452,7 @@ const ImageUploadPage = () => {
         return <Spin size="large" style={{ display: "flex", justifyContent: "center", marginTop: "20px" }} />;
     }
     // Redirect non-admin users
-    if (userdetails?.role !== "Admin") {
+    if (userdetails?.role === "Revenue_Partner") {
         router.push("/Dashboard");
         return null;
     }
@@ -982,6 +983,21 @@ const ImageUploadPage = () => {
     //     setDrawerVisible(true);
     // };
 
+    const onSubmitData = () =>{
+        const selected = selectedImagesRef.current;
+    
+        if (!selected || selected.length === 0) {
+            message.warning("Please select at least one file to create a campaign.");
+            return;
+        }
+
+        console.log("Selected files for campaign:", selected);
+    
+        selectedFilesData(checkboxSelected); // force state update
+        setCheckboxSelected([]);
+        setDrawerVisible(true);
+    }
+
     const showDrawer = () => {
         const selected = selectedImagesRef.current;
     
@@ -989,6 +1005,8 @@ const ImageUploadPage = () => {
             message.warning("Please select at least one file to create a campaign.");
             return;
         }
+
+        console.log("Selected files for campaign:", selected);
     
         setSelectedImages([...selected]); // force state update
         setDrawerVisible(true);
@@ -1338,6 +1356,29 @@ const ImageUploadPage = () => {
                     </ConfigProvider>                       
                 </Col>
                 <Col>
+                        {fromCampaigns === true ? (
+                            
+                            <Button onClick={onSubmitData} className={theme === 'dark' ? 'dark-theme' : 'light-theme'} style={{ display: 'flex', border:'none', justifyContent: 'center', maxWidth: '160px', backgroundColor: '#C7F39A', color: theme === 'dark' ? 'black' : undefined  }}>
+                                Submit
+                                {checkboxSelected.length > 0 && (
+                                    <Badge
+                                        style={{ 
+                                            color: 'red', 
+                                            position: 'absolute', // 🔹 Keeps it from affecting button width
+                                            top: '-5px', 
+                                            right: '-5px', 
+                                            fontSize: '12px', 
+                                            padding: '2px 6px', 
+                                            borderRadius: '50%' // 🔹 Makes it circular }}
+                                        }}
+                                        className="Badge"
+                                        variant="destructive"
+                                    >
+                                        {checkboxSelected.length}
+                                    </Badge>
+                                )}
+                            </Button>  
+                        ) : 
                     <Button onClick={showDrawer} className={theme === 'dark' ? 'dark-theme' : 'light-theme'} icon={<PlusOutlined className="black-icon" />} style={{ display: 'flex', border:'none', justifyContent: 'center', maxWidth: '160px', backgroundColor: '#C7F39A', color: theme === 'dark' ? 'black' : undefined  }}>
                         New Campaign
                         {checkboxSelected.length > 0 && (
@@ -1357,7 +1398,8 @@ const ImageUploadPage = () => {
                                 {checkboxSelected.length}
                             </Badge>
                         )}
-                    </Button>                   
+                    </Button>    
+                    }               
                 </Col>                
             </Row>
             {/* URL Input for Image */}
