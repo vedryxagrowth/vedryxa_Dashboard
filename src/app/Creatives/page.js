@@ -6,7 +6,7 @@ import { Upload, Modal, Input, Button, Row, Col, Select, message, notification, 
 import { CopyOutlined, FileAddOutlined, ArrowLeftOutlined, EditOutlined, UploadOutlined, PlusOutlined, SearchOutlined, CheckCircleFilled, CloseCircleFilled, ReloadOutlined, EyeOutlined, DeleteOutlined} from '@ant-design/icons';
 import Image from 'next/image';
 import dynamic from "next/dynamic";
-import { DatePicker, Space, ConfigProvider, Flex, Spin, Skeleton, Tooltip } from 'antd';
+import { DatePicker, Space, ConfigProvider, Flex, Spin, Skeleton, Tooltip, Checkbox } from 'antd';
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import moment from "moment"; // Import moment for date manipulation
@@ -25,7 +25,8 @@ const { Option } = Select;
 const FabricCanvas = dynamic(() => import("../Campaigns/camp-components/Fabricanvas"), { ssr: false });
 const CreateCampaign = dynamic(() => import("./components/text"), { ssr: false });
 
-const ImageUploadPage = () => {
+const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
+    // console.log("Selected Files Data:", selectedFilesData);
     const [images, setImages] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
@@ -66,6 +67,11 @@ const ImageUploadPage = () => {
     const [multiRenameMap, setMultiRenameMap] = useState({});
     const [draggableUid, setDraggableUid] = useState(null);
     const [clickTimeout, setClickTimeout] = useState(null);
+
+    const [checkboxSelected, setCheckboxSelected] = useState([]);
+
+    const selectoRef = useRef(null);
+    
 
     // Track the current file index from pendingFiless
     const [currentFileIndex, setCurrentFileIndex] = useState(0);
@@ -109,6 +115,23 @@ const ImageUploadPage = () => {
     useEffect(() => {
         selectedImagesRef.current = selectedImages;
     }, [selectedImages]);
+
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+          const grid = document.getElementById("file-grid");
+          if (!grid?.contains(e.target)) {
+            setSelectedImages([]);
+            selectedImagesRef.current = [];
+      
+            // ✅ Proper way to clear Selecto selection
+            selectoRef.current?.setSelectedTargets([]);
+          }
+        };
+      
+        window.addEventListener("click", handleClickOutside);
+        return () => window.removeEventListener("click", handleClickOutside);
+    }, []);
+      
       
     useEffect(() => {
         const handleKeyDown = async (e) => {
@@ -429,7 +452,7 @@ const ImageUploadPage = () => {
         return <Spin size="large" style={{ display: "flex", justifyContent: "center", marginTop: "20px" }} />;
     }
     // Redirect non-admin users
-    if (userdetails?.role !== "Admin") {
+    if (userdetails?.role === "Revenue_Partner") {
         router.push("/Dashboard");
         return null;
     }
@@ -912,21 +935,32 @@ const ImageUploadPage = () => {
         return "unknown"; // Fallback if the format is unsupported
     };
 
-    const handleImageSelect = (image) => {
-        if (image.isFolder) return; // folder opens on click only
+    const handleImageSelect = (image, e) => {
+        if (!image || image.isFolder) return;
     
-        setSelectedImages(prevSelected => {
-            const exists = prevSelected.some(img => img.uid === image.uid);
-            const newSelected = exists
-                ? prevSelected.filter(img => img.uid !== image.uid)
-                : [...prevSelected, image];
+        const isCtrlOrMeta = e?.ctrlKey || e?.metaKey;
+        const isShift = e?.shiftKey;
     
-            selectedImagesRef.current = newSelected; // ✅ keep ref updated
-            return newSelected;
+        setSelectedImages((prev) => {
+            const isSelected = prev.some((img) => img.uid === image.uid);
+    
+            if (isCtrlOrMeta || isShift) {
+                return isSelected
+                    ? prev.filter((img) => img.uid !== image.uid)
+                    : [...prev, image];
+            }
+    
+            if (isSelected && prev.length === 1) {
+                return []; // Deselect
+            }
+    
+            return [image]; // Single select
         });
-    };
     
-
+        selectedImagesRef.current = selectedImages;
+    };
+      
+    
     // const handleImageSelect = (image) => {
     //     if (image.isFolder) return;
     //     const fileType = getFileType(image.url);
@@ -949,6 +983,21 @@ const ImageUploadPage = () => {
     //     setDrawerVisible(true);
     // };
 
+    const onSubmitData = () =>{
+        const selected = selectedImagesRef.current;
+    
+        if (!selected || selected.length === 0) {
+            message.warning("Please select at least one file to create a campaign.");
+            return;
+        }
+
+        console.log("Selected files for campaign:", selected);
+    
+        selectedFilesData(checkboxSelected); // force state update
+        setCheckboxSelected([]);
+        setDrawerVisible(true);
+    }
+
     const showDrawer = () => {
         const selected = selectedImagesRef.current;
     
@@ -956,6 +1005,8 @@ const ImageUploadPage = () => {
             message.warning("Please select at least one file to create a campaign.");
             return;
         }
+
+        console.log("Selected files for campaign:", selected);
     
         setSelectedImages([...selected]); // force state update
         setDrawerVisible(true);
@@ -970,6 +1021,7 @@ const ImageUploadPage = () => {
     const onCloseDrawer = () => {
         setDrawerVisible(false);
         setSelectedImages([]);
+        setCheckboxSelected([]);
         selectedImagesRef.current = [];
     };    
 
@@ -998,54 +1050,55 @@ const ImageUploadPage = () => {
 
     const handleMultiRename = async () => {
         if (!Array.isArray(editingUid)) return;
-      
+    
         for (let uid of editingUid) {
-          const oldItem = images.find(img => img.uid === uid);
-          const newName = multiRenameMap[uid]?.trim();
-      
-          if (!newName || newName === extractDisplayName(oldItem.name)) continue;
-      
-          const isFolder = oldItem.isFolder;
-          const lastSlashIndex = oldItem.uid.lastIndexOf('/');
-          const basePath = oldItem.uid.substring(0, lastSlashIndex + 1); // with trailing slash
-      
-          const extension = oldItem.name.includes('.') ? oldItem.name.substring(oldItem.name.lastIndexOf('.')) : '';
-          const newKey = isFolder
-            ? `${basePath}${newName}/`
-            : `${basePath}${newName}${extension}`;
-      
-          try {
-            if (isFolder) {
-              await axios.post("https://prodapis.adsgoat.in/renameFolder", {
-                oldFolderKey: oldItem.uid,
-                newFolderKey: newKey,
-              }, {
-                headers: {
-                  Authorization: localStorage.getItem("token"),
-                  username: userdetails?.userName,
-                },
-              });
-            } else {
-              await axios.post("https://prodapis.adsgoat.in/renameUserFile", {
-                key: oldItem.uid,
-                newFilename: newKey,
-              }, {
-                headers: {
-                  Authorization: localStorage.getItem("token"),
-                  username: userdetails?.userName,
-                },
-              });
+            const oldItem = images.find(img => img.uid === uid);
+            const newName = multiRenameMap[uid]?.trim();
+    
+            if (!newName || newName === extractDisplayName(oldItem.name)) continue;
+    
+            const isFolder = oldItem.isFolder;
+            const lastSlashIndex = oldItem.uid.lastIndexOf('/');
+            const basePath = oldItem.uid.substring(0, lastSlashIndex + 1); // with trailing slash
+    
+            const extension = isFolder ? '' : oldItem.name.includes('.') ? oldItem.name.substring(oldItem.name.lastIndexOf('.')) : '';
+            const newKey = isFolder
+                ? `${basePath}${newName}/`
+                : `${basePath}${newName}${extension}`;
+    
+            try {
+                if (isFolder) {
+                    await axios.post("https://prodapis.adsgoat.in/renameFolder", {
+                        oldFolderKey: oldItem.uid,
+                        newFolderKey: newKey,
+                    }, {
+                        headers: {
+                            Authorization: localStorage.getItem("token"),
+                            username: userdetails?.userName,
+                        },
+                    });
+                } else {
+                    await axios.post("https://prodapis.adsgoat.in/renameUserFile", {
+                        key: oldItem.uid,
+                        newFilename: newKey,
+                    }, {
+                        headers: {
+                            Authorization: localStorage.getItem("token"),
+                            username: userdetails?.userName,
+                        },
+                    });
+                }
+            } catch (err) {
+                console.error("Rename failed:", err);
             }
-          } catch (err) {
-            console.error("Rename failed:", err);
-          }
         }
-      
+    
         message.success("Items renamed");
         setEditingUid(null);
         setMultiRenameMap({});
         fetchUserImages();
-      };
+    };
+    
            
 
     const handleInlineRename = async (image) => {
@@ -1195,7 +1248,8 @@ const ImageUploadPage = () => {
                 onClose={onCloseDrawer} 
                 // changeRRefrst={changeRRefrst} 
                 network={selectedKey} 
-                imageFiles={selectedImages} 
+                // imageFiles={selectedImages} 
+                imageFiles={checkboxSelected}
                 onDeleteFile={handleDeleteFile} 
                 selectedAccountNumber={selectedAccountNumber}
             />
@@ -1302,9 +1356,32 @@ const ImageUploadPage = () => {
                     </ConfigProvider>                       
                 </Col>
                 <Col>
+                        {fromCampaigns === true ? (
+                            
+                            <Button onClick={onSubmitData} className={theme === 'dark' ? 'dark-theme' : 'light-theme'} style={{ display: 'flex', border:'none', justifyContent: 'center', maxWidth: '160px', backgroundColor: '#C7F39A', color: theme === 'dark' ? 'black' : undefined  }}>
+                                Submit
+                                {checkboxSelected.length > 0 && (
+                                    <Badge
+                                        style={{ 
+                                            color: 'red', 
+                                            position: 'absolute', // 🔹 Keeps it from affecting button width
+                                            top: '-5px', 
+                                            right: '-5px', 
+                                            fontSize: '12px', 
+                                            padding: '2px 6px', 
+                                            borderRadius: '50%' // 🔹 Makes it circular }}
+                                        }}
+                                        className="Badge"
+                                        variant="destructive"
+                                    >
+                                        {checkboxSelected.length}
+                                    </Badge>
+                                )}
+                            </Button>  
+                        ) : 
                     <Button onClick={showDrawer} className={theme === 'dark' ? 'dark-theme' : 'light-theme'} icon={<PlusOutlined className="black-icon" />} style={{ display: 'flex', border:'none', justifyContent: 'center', maxWidth: '160px', backgroundColor: '#C7F39A', color: theme === 'dark' ? 'black' : undefined  }}>
                         New Campaign
-                        {selectedImages.length > 0 && (
+                        {checkboxSelected.length > 0 && (
                             <Badge
                                 style={{ 
                                     color: 'red', 
@@ -1318,10 +1395,11 @@ const ImageUploadPage = () => {
                                 className="Badge"
                                 variant="destructive"
                             >
-                                {selectedImages.length}
+                                {checkboxSelected.length}
                             </Badge>
                         )}
-                    </Button>                   
+                    </Button>    
+                    }               
                 </Col>                
             </Row>
             {/* URL Input for Image */}
@@ -1440,7 +1518,7 @@ const ImageUploadPage = () => {
                     const isVideo = image.url?.match(/\.(mp4|mov)$/i);
 
                     return (
-                        <div key={image.uid}>
+                        <div key={`${image.uid}-${isSelected}`}>
                             <div
                                 className="selectable"
                                 data-uid={image.uid}
@@ -1490,12 +1568,44 @@ const ImageUploadPage = () => {
                                 }}
                                 onMouseEnter={() => setHoveredImage(image.uid)}
                                 onMouseLeave={() => setHoveredImage(null)}
-                                onClick={() => handleImageSelect(image)}
+                                onClick={(e) => handleImageSelect(image, e)}
                                 // onClick={(e) => {
                                 //     if (image.isFolder) return; // clicking folder still opens it, not select
                                 //     handleImageSelect(image);
                                 // }}
                             >
+                                {!image.isFolder && (
+                                    <Checkbox
+                                        checked={checkboxSelected.some((img) => img.uid === image.uid)}
+                                        onChange={(e) => {
+                                            e.stopPropagation();
+                                            const fileWithType = { ...image, type: getFileType(image.url) };
+                                            setCheckboxSelected((prev) => {
+                                                if (e.target.checked) {
+                                                    const updated = [...prev, fileWithType];
+                                                    selectedImagesRef.current = updated;
+                                                    return updated;
+                                                } else {
+                                                    const updated = prev.filter((img) => img.uid !== image.uid);
+                                                    selectedImagesRef.current = updated;
+                                                    return updated;
+                                                }
+                                            });
+                                            if (!e.target.checked) {
+                                                setSelectedImages((prev) =>
+                                                  prev.filter((img) => img.uid !== image.uid)
+                                                );
+                                            }
+                                        }}
+                                        style={{
+                                        position: 'absolute',
+                                        top: 5,
+                                        left: 5,
+                                        zIndex: 10,
+                                        }}
+                                    />
+                                )}
+
                             {image.isFolder ? (
                                 <div
                                     onMouseEnter={() => setHoveredImage(image.uid)}
@@ -1517,24 +1627,34 @@ const ImageUploadPage = () => {
                                     //     selectedImagesRef.current = [];
                                     //     handleFolderClick(image.name);
                                     // }}
-                                    onClick={() => {
-                                        if (!image.isFolder) {
-                                          // Single-click select
-                                          const exists = selectedImages.some((img) => img.uid === image.uid);
-                                          const updated = exists
-                                            ? selectedImages.filter((img) => img.uid !== image.uid)
-                                            : [...selectedImages, image];
+                                    // onClick={() => {
+                                    //     if (!image.isFolder) {
+                                    //       // Single-click select
+                                    //       const exists = selectedImages.some((img) => img.uid === image.uid);
+                                    //       const updated = exists
+                                    //         ? selectedImages.filter((img) => img.uid !== image.uid)
+                                    //         : [...selectedImages, image];
                                     
-                                          setSelectedImages(updated);
-                                          selectedImagesRef.current = updated;
+                                    //       setSelectedImages(updated);
+                                    //       selectedImagesRef.current = updated;
+                                    //     } else {
+                                    //       // Folder open on click
+                                    //       setSelectedImages([]);
+                                    //       selectedImagesRef.current = [];
+                                    //       handleFolderClick(image.name);
+                                    //     }
+                                    // }} 
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (image.isFolder) {
+                                            setSelectedImages([]);
+                                            selectedImagesRef.current = [];
+                                            handleFolderClick(image.name);
                                         } else {
-                                          // Folder open on click
-                                          setSelectedImages([]);
-                                          selectedImagesRef.current = [];
-                                          handleFolderClick(image.name);
+                                            handleImageSelect(image);
                                         }
-                                      }}                                      
-                                      
+                                    }}
+                                     
                                     onDragOver={(e) => e.preventDefault()}
                                     onDrop={async (e) => {
                                         e.preventDefault();
@@ -1629,24 +1749,24 @@ const ImageUploadPage = () => {
                                 )
                             )}
 
-                            {isSelected && (
+                            {isSelected && !checkboxSelected.some(img => img.uid === image.uid) && (
                                 <div
-                                style={{
-                                    position: 'absolute',
-                                    top: '8px',
-                                    right: '8px',
-                                    width: '24px',
-                                    height: '24px',
-                                    backgroundColor: 'blue',
-                                    color: 'white',
-                                    borderRadius: '50%',
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    fontSize: '16px',
-                                    fontWeight: 'bold',
-                                    zIndex: 10,
-                                }}
+                                    style={{
+                                        position: 'absolute',
+                                        top: '8px',
+                                        right: '8px',
+                                        width: '24px',
+                                        height: '24px',
+                                        backgroundColor: 'blue',
+                                        color: 'white',
+                                        borderRadius: '50%',
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        fontSize: '16px',
+                                        fontWeight: 'bold',
+                                        zIndex: 10,
+                                    }}
                                 >
                                 ✓
                                 </div>
@@ -1848,376 +1968,402 @@ const ImageUploadPage = () => {
             )}
 
             {contextMenu.visible && (
-            <div
-                className="custom-context-menu"
-                ref={menuRef}
-                style={{
-                position: 'fixed',
-                top: (contextMenu.y + menuHeight > window.innerHeight
-                    ? contextMenu.y - menuHeight
-                    : contextMenu.y),
-                left: contextMenu.x,
-                background: theme === 'dark' ? '#000' : '#fff',
-                boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
-                zIndex: 9999,
-                borderRadius: '6px',
-                padding: '4px 0',
-                fontWeight: 500,
-                cursor: 'pointer',
-                minWidth: '160px'
-                }}
-                onMouseLeave={() => setContextMenu({ ...contextMenu, visible: false })}
-            >
-                {/* Right-click on blank space */}
-                {!contextMenu.target && (
-                    <>
-                        <div
-                            style={{ padding: '8px 12px' }}
-                            onClick={() => {
-                                setNewFolderModal({ visible: true, name: '', mode: 'create', folderToRename: null });
-                                setContextMenu({ ...contextMenu, visible: false });
-                            }}
-                        >
-                            ➕ New Folder
-                        </div>
+                <div
+                    className="custom-context-menu"
+                    ref={menuRef}
+                    style={{
+                    position: 'fixed',
+                    top: (contextMenu.y + menuHeight > window.innerHeight
+                        ? contextMenu.y - menuHeight
+                        : contextMenu.y),
+                    left: contextMenu.x,
+                    background: theme === 'dark' ? '#000' : '#fff',
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
+                    zIndex: 9999,
+                    borderRadius: '6px',
+                    padding: '4px 0',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    minWidth: '160px'
+                    }}
+                    onMouseLeave={() => setContextMenu({ ...contextMenu, visible: false })}
+                >
+                    {/* Right-click on blank space */}
+                    {!contextMenu.target && (
+                        <>
+                            <div
+                                style={{ padding: '8px 12px' }}
+                                onClick={() => {
+                                    setNewFolderModal({ visible: true, name: '', mode: 'create', folderToRename: null });
+                                    setContextMenu({ ...contextMenu, visible: false });
+                                }}
+                            >
+                                ➕ New Folder
+                            </div>
 
-                        {clipboardFile?.length > 0 && (
-                        <div
-                            style={{ padding: '8px 12px' }}
-                            onClick={async () => {
-                            try {
-                                await Promise.all(
-                                clipboardFile.map(async (file) => {
-                                    const sourceKey = file.uid;
-                                    const name = file.name;
-                                    let destinationKey = `${uploadPrefix}${currentFolder}${name}${file.isFolder ? '/' : ''}`;
+                            {clipboardFile?.length > 0 && (
+                            <div
+                                style={{ padding: '8px 12px' }}
+                                onClick={async () => {
+                                try {
+                                    await Promise.all(
+                                    clipboardFile.map(async (file) => {
+                                        const sourceKey = file.uid;
+                                        const name = file.name;
+                                        let destinationKey = `${uploadPrefix}${currentFolder}${name}${file.isFolder ? '/' : ''}`;
 
-                                    if (file.action === "copy") {
-                                    if (file.isFolder) {
-                                        // 📁 Copy folder
-                                        await axios.post("https://prodapis.adsgoat.in/copyFolder", {
-                                        sourceKey, destinationKey,
+                                        if (file.action === "copy") {
+                                        if (file.isFolder) {
+                                            // 📁 Copy folder
+                                            await axios.post("https://prodapis.adsgoat.in/copyFolder", {
+                                            sourceKey, destinationKey,
+                                            }, {
+                                            headers: {
+                                                Authorization: localStorage.getItem("token"),
+                                                username: userdetails.userName,
+                                            }
+                                            });
+                                        } else {
+                                            // 📄 Copy file
+                                            const cloneNumber = getCloneNumber(name);
+                                            const dotIndex = name.lastIndexOf(".");
+                                            const base = name.substring(0, dotIndex);
+                                            const ext = name.substring(dotIndex);
+                                            const newName = `${base}(${cloneNumber})${ext}`;
+                                            destinationKey = `${uploadPrefix}${currentFolder}${newName}`;
+
+                                            const proxyUrl = `https://prodapis.adsgoat.in/proxy?url=${encodeURIComponent(file.url)}`;
+                                            const res = await fetch(proxyUrl);
+                                            const blob = await res.blob();
+
+                                            const formData = new FormData();
+                                            formData.append("file", new File([blob], newName, { type: blob.type }));
+                                            formData.append("filename", destinationKey);
+                                            formData.append("folder", currentFolder);
+
+                                            await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
+                                            headers: {
+                                                Authorization: localStorage.getItem("token"),
+                                                username: userdetails.userName,
+                                            }
+                                            });
+                                        }
+                                        }
+
+                                        if (file.action === "cut") {
+                                        // ✂️ Move file or folder
+                                        await axios.post("https://prodapis.adsgoat.in/moveFileOrFolder", {
+                                            sourceKey,
+                                            destinationKey,
                                         }, {
-                                        headers: {
+                                            headers: {
                                             Authorization: localStorage.getItem("token"),
                                             username: userdetails.userName,
-                                        }
+                                            }
                                         });
-                                    } else {
-                                        // 📄 Copy file
-                                        const cloneNumber = getCloneNumber(name);
-                                        const dotIndex = name.lastIndexOf(".");
-                                        const base = name.substring(0, dotIndex);
-                                        const ext = name.substring(dotIndex);
-                                        const newName = `${base}(${cloneNumber})${ext}`;
-                                        destinationKey = `${uploadPrefix}${currentFolder}${newName}`;
-
-                                        const proxyUrl = `https://prodapis.adsgoat.in/proxy?url=${encodeURIComponent(file.url)}`;
-                                        const res = await fetch(proxyUrl);
-                                        const blob = await res.blob();
-
-                                        const formData = new FormData();
-                                        formData.append("file", new File([blob], newName, { type: blob.type }));
-                                        formData.append("filename", destinationKey);
-                                        formData.append("folder", currentFolder);
-
-                                        await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
-                                        headers: {
-                                            Authorization: localStorage.getItem("token"),
-                                            username: userdetails.userName,
                                         }
-                                        });
-                                    }
-                                    }
+                                    })
+                                    );
+                                    setSelectedImages([]);
+                                    fetchUserImages();
+                                    setClipboardFile(null);
+                                    setContextMenu({ ...contextMenu, visible: false });
+                                    message.success(`Pasted ${clipboardFile.length} item(s)`);
+                                } catch (err) {
+                                    console.error("Paste error:", err);
+                                    message.error("Failed to paste some items.");
+                                }
+                                }}
+                            >
+                                📄 Paste
+                            </div>
+                            )}
+                        </>
+                    )}
 
-                                    if (file.action === "cut") {
-                                    // ✂️ Move file or folder
-                                    await axios.post("https://prodapis.adsgoat.in/moveFileOrFolder", {
-                                        sourceKey,
-                                        destinationKey,
-                                    }, {
-                                        headers: {
+                    {/* Right-click on Trash item */}
+                    {isTrashView && (contextMenu.selectedList?.length > 0 || contextMenu.target) && (
+                        <>
+                            <div style={{ padding: '8px 12px', fontWeight: 'bold' }}>
+                            {contextMenu.selectedList?.length > 0
+                                ? `${contextMenu.selectedList.length} selected`
+                                : contextMenu.target?.name}
+                            </div>
+
+                            {/* Delete Permanently */}
+                            <div
+                            style={{ padding: '8px 12px', color: 'red' }}
+                            onClick={async () => {
+                                const items = contextMenu.selectedList?.length > 0 ? contextMenu.selectedList : [contextMenu.target];
+                                try {
+                                await Promise.all(items.map(item =>
+                                    axios.delete("https://prodapis.adsgoat.in/permanentlyDelete", {
+                                    headers: {
                                         Authorization: localStorage.getItem("token"),
                                         username: userdetails.userName,
-                                        }
-                                    });
-                                    }
-                                })
-                                );
-
+                                        "x-file": item.uid,
+                                    },
+                                    })
+                                ));
+                                setSelectedImages([]);
+                                message.success("Deleted permanently");
                                 fetchUserImages();
-                                setClipboardFile(null);
+                                } catch (err) {
+                                console.error("Permanent delete failed", err);
+                                message.error("Failed to delete permanently.");
+                                }
                                 setContextMenu({ ...contextMenu, visible: false });
-                                message.success(`Pasted ${clipboardFile.length} item(s)`);
+                            }}
+                            >
+                                ❌ Delete Permanently
+                            </div>
+
+                            {/* Restore */}
+                            <div
+                            style={{ padding: '8px 12px' }}
+                            onClick={async () => {
+                                const items = contextMenu.selectedList?.length > 0 ? contextMenu.selectedList : [contextMenu.target];
+                                try {
+                                await Promise.all(items.map(async (item) => {
+                                    const trashKey = item.uid;
+                                    const match = trashKey.match(/Trashfiles\/(?:[^/]+\/)?(.+)/);
+                                    const relativePath = match?.[1];
+                                    if (!relativePath) throw new Error("Invalid original path");
+
+                                    const originalKey = `${selectedKey}/${selectedAccountNumber}/${relativePath}`;
+                                    await axios.post("https://prodapis.adsgoat.in/restoreFileOrFolder", {
+                                    trashKey,
+                                    originalKey,
+                                    }, {
+                                    headers: {
+                                        Authorization: localStorage.getItem("token"),
+                                        username: userdetails.userName,
+                                    },
+                                    });
+                                }));
+                                setSelectedImages([]);
+                                message.success("Restored successfully");
+                                fetchUserImages();
+                                } catch (err) {
+                                console.error("Restore failed", err);
+                                message.error("Failed to restore some items.");
+                                }
+
+                                setContextMenu({ ...contextMenu, visible: false });
+                            }}
+                            >
+                                🔁 Restore
+                            </div>
+                        </>
+                    )}
+
+                    {/* MULTI SELECT context (not in Trash) */}
+                    {!isTrashView && contextMenu.selectedList?.length > 1 && (
+                    <>
+                        <div style={{ padding: '8px 12px', fontWeight: 'bold' }}>
+                        {contextMenu.selectedList.length} selected
+                        </div>
+
+                        <div style={{ padding: '8px 12px' }} onClick={() => {
+                        setClipboardFile(contextMenu.selectedList.map(item => ({
+                            ...item,
+                            action: 'copy',
+                            isFolder: item.isFolder
+                        })));
+                        setSelectedImages([]);
+                        selectedImagesRef.current = [];
+                        message.success("Items copied");
+                        setContextMenu({ ...contextMenu, visible: false });
+                        }}>
+                        <CopyOutlined style={{ marginRight: 8 }} />
+                            Copy
+                        </div>
+
+                        <div style={{ padding: '8px 12px' }} onClick={() => {
+                        setClipboardFile(contextMenu.selectedList.map(item => ({
+                            ...item,
+                            action: 'cut',
+                            isFolder: item.isFolder
+                        })));
+                        setFilteredImages(prev =>
+                            prev.filter(item => !contextMenu.selectedList.some(sel => sel.uid === item.uid))
+                        );
+                        setSelectedImages([]);
+                        selectedImagesRef.current = [];
+                        message.success("Items cut");
+                        setContextMenu({ ...contextMenu, visible: false });
+                        }}>
+                            ✂️ Cut
+                        </div>
+
+                        <div style={{ padding: '8px 12px', color: 'red' }} onClick={async () => {
+                            try {
+                                await Promise.all(
+                                    contextMenu.selectedList.map(item => {
+                                      const isFolder = item.isFolder;
+                                      if (isFolder) {
+                                        return axios.delete("https://prodapis.adsgoat.in/deleteFolder", {
+                                          headers: {
+                                            Authorization: localStorage.getItem("token"),
+                                            username: userdetails.userName,
+                                            "x-folder": item.uid,
+                                          },
+                                        });
+                                      } else {
+                                        return axios.delete("https://prodapis.adsgoat.in/deleteUserFiles", {
+                                          headers: {
+                                            Authorization: localStorage.getItem("token"),
+                                            username: userdetails.userName,
+                                            "file-key": item.uid,
+                                          },
+                                        });
+                                      }
+                                    })
+                                ); 
+                                setSelectedImages([]);
+                                message.success("Selected items moved to bin");
+                                fetchUserImages();
+                                setContextMenu({ ...contextMenu, visible: false });
                             } catch (err) {
-                                console.error("Paste error:", err);
-                                message.error("Failed to paste some items.");
+                                console.error("Bulk delete failed:", err);
+                                message.error("Failed to move some items to bin.");
                             }
                             }}
                         >
-                            📄 Paste
-                        </div>
-                        )}
-                    </>
-                )}
-
-                {/* Right-click on Trash item */}
-                {isTrashView && (contextMenu.selectedList?.length > 0 || contextMenu.target) && (
-                    <>
-                        <div style={{ padding: '8px 12px', fontWeight: 'bold' }}>
-                        {contextMenu.selectedList?.length > 0
-                            ? `${contextMenu.selectedList.length} selected`
-                            : contextMenu.target?.name}
+                            🗑️ Move to Bin
                         </div>
 
-                        {/* Delete Permanently */}
-                        <div
-                        style={{ padding: '8px 12px', color: 'red' }}
-                        onClick={async () => {
-                            const items = contextMenu.selectedList?.length > 0 ? contextMenu.selectedList : [contextMenu.target];
-                            try {
-                            await Promise.all(items.map(item =>
-                                axios.delete("https://prodapis.adsgoat.in/permanentlyDelete", {
-                                headers: {
-                                    Authorization: localStorage.getItem("token"),
-                                    username: userdetails.userName,
-                                    "x-file": item.uid,
-                                },
-                                })
-                            ));
-                            message.success("Deleted permanently");
-                            fetchUserImages();
-                            } catch (err) {
-                            console.error("Permanent delete failed", err);
-                            message.error("Failed to delete permanently.");
-                            }
-                            setContextMenu({ ...contextMenu, visible: false });
-                        }}
+                        <div                             
+                            style={{ padding: '8px 12px' }} 
+                            onClick={() => {
+                                const firstName = contextMenu.selectedList[0]?.name.split('.')[0] || 'Renamed';
+                                setInlineName(firstName);
+                                setEditingUid(contextMenu.selectedList.map(f => f.uid)); // multi rename mode
+                                setSelectedImages([]);
+                                selectedImagesRef.current = [];
+                                setContextMenu({ ...contextMenu, visible: false });
+                            }}
                         >
-                        ❌ Delete Permanently
-                        </div>
-
-                        {/* Restore */}
-                        <div
-                        style={{ padding: '8px 12px' }}
-                        onClick={async () => {
-                            const items = contextMenu.selectedList?.length > 0 ? contextMenu.selectedList : [contextMenu.target];
-                            try {
-                            await Promise.all(items.map(async (item) => {
-                                const trashKey = item.uid;
-                                const match = trashKey.match(/Trashfiles\/(?:[^/]+\/)?(.+)/);
-                                const relativePath = match?.[1];
-                                if (!relativePath) throw new Error("Invalid original path");
-
-                                const originalKey = `${selectedKey}/${selectedAccountNumber}/${relativePath}`;
-                                await axios.post("https://prodapis.adsgoat.in/restoreFileOrFolder", {
-                                trashKey,
-                                originalKey,
-                                }, {
-                                headers: {
-                                    Authorization: localStorage.getItem("token"),
-                                    username: userdetails.userName,
-                                },
-                                });
-                            }));
-
-                            message.success("Restored successfully");
-                            fetchUserImages();
-                            } catch (err) {
-                            console.error("Restore failed", err);
-                            message.error("Failed to restore some items.");
-                            }
-
-                            setContextMenu({ ...contextMenu, visible: false });
-                        }}
-                        >
-                        🔁 Restore
-                        </div>
-                    </>
-                )}
-
-                {/* MULTI SELECT context (not in Trash) */}
-                {!isTrashView && contextMenu.selectedList?.length > 1 && (
-                <>
-                    <div style={{ padding: '8px 12px', fontWeight: 'bold' }}>
-                    {contextMenu.selectedList.length} selected
-                    </div>
-
-                    <div style={{ padding: '8px 12px' }} onClick={() => {
-                    setClipboardFile(contextMenu.selectedList.map(item => ({
-                        ...item,
-                        action: 'copy',
-                        isFolder: item.isFolder
-                    })));
-                    setSelectedImages([]);
-                    selectedImagesRef.current = [];
-                    message.success("Items copied");
-                    setContextMenu({ ...contextMenu, visible: false });
-                    }}>
-                    <CopyOutlined style={{ marginRight: 8 }} />
-                    Copy
-                    </div>
-
-                    <div style={{ padding: '8px 12px' }} onClick={() => {
-                    setClipboardFile(contextMenu.selectedList.map(item => ({
-                        ...item,
-                        action: 'cut',
-                        isFolder: item.isFolder
-                    })));
-                    setFilteredImages(prev =>
-                        prev.filter(item => !contextMenu.selectedList.some(sel => sel.uid === item.uid))
-                    );
-                    setSelectedImages([]);
-                    selectedImagesRef.current = [];
-                    message.success("Items cut");
-                    setContextMenu({ ...contextMenu, visible: false });
-                    }}>
-                    ✂️ Cut
-                    </div>
-
-                    <div style={{ padding: '8px 12px', color: 'red' }} onClick={async () => {
-                        try {
-                            await Promise.all(
-                            contextMenu.selectedList.map(item =>
-                                axios.delete("https://prodapis.adsgoat.in/deleteUserFiles", {
-                                headers: {
-                                    Authorization: localStorage.getItem("token"),
-                                    username: userdetails.userName,
-                                    "file-key": item.uid,
-                                },
-                                })
-                            )
-                            );
-                            message.success("Selected items moved to bin");
-                            fetchUserImages();
-                            setContextMenu({ ...contextMenu, visible: false });
-                        } catch (err) {
-                            console.error("Bulk delete failed:", err);
-                            message.error("Failed to move some items to bin.");
-                        }
-                        }}
-                    >
-                        🗑️ Move to Bin
-                    </div>
-
-                    <div style={{ padding: '8px 12px' }} onClick={() => {
-                        const firstName = contextMenu.selectedList[0]?.name.split('.')[0] || 'Renamed';
-                        setInlineName(firstName);
-                        setEditingUid(contextMenu.selectedList.map(f => f.uid)); // multi rename mode
-                        setSelectedImages([]);
-                        selectedImagesRef.current = [];
-                        setContextMenu({ ...contextMenu, visible: false });
-                    }}>
-                    ✏️ Rename All
-                    </div>
-
-                </>
-                )}
-
-                {/* SINGLE SELECT fallback (file or folder) */}
-                {!isTrashView && !contextMenu.selectedList?.length && contextMenu.target && (
-                <>
-                    <div style={{ padding: '8px 12px', fontWeight: 'bold' }}>{contextMenu.target.name}</div>
-
-                    {contextMenu.isFolder ? (
-                    <>
-                        <div style={{ padding: '8px 12px' }} onClick={() => {
-                        handleFolderClick(contextMenu.target.name);
-                        setContextMenu({ ...contextMenu, visible: false });
-                        }}>📂 Open</div>
-
-                        <div style={{ padding: '8px 12px' }} onClick={() => {
-                        setNewFolderModal({
-                            visible: true,
-                            name: contextMenu.target.name,
-                            mode: "rename",
-                            folderToRename: contextMenu.target,
-                        });
-                        setContextMenu({ ...contextMenu, visible: false });
-                        }}>
-                            <MdDriveFileRenameOutline style={{ fontSize: '16px', marginRight:'8px' }} />
-                            Rename
-                        </div>
-
-                        <div style={{ padding: '8px 12px' }} onClick={() => {
-                        setClipboardFile([{ ...contextMenu.target, action: "copy", isFolder: true }]);
-                        message.success("Folder copied");
-                        setContextMenu({ ...contextMenu, visible: false });
-                        }}>
-                        <CopyOutlined style={{ marginRight: 8 }} />
-                        Copy
-                        </div>
-
-                        <div style={{ padding: '8px 12px' }} onClick={() => {
-                        setClipboardFile([{ ...contextMenu.target, action: "cut", isFolder: true }]);
-                        setFilteredImages(prev => prev.filter(f => f.uid !== contextMenu.target.uid));
-                        message.success("Folder cut");
-                        setContextMenu({ ...contextMenu, visible: false });
-                        }}>
-                        ✂️ Cut
-                        </div>
-
-                        <div style={{ padding: '8px 12px', color: 'red' }} onClick={() => {
-                        setDeleteFolderModal({ visible: true, folder: contextMenu.target });
-                        setContextMenu({ ...contextMenu, visible: false });
-                        }}>🗑️ Move to Bin</div>
-                    </>
-                    ) : (
-                    <>
-                        <div style={{ padding: '8px 12px' }} onClick={() => {
-                        handleEditFile(contextMenu.target);
-                        setContextMenu({ ...contextMenu, visible: false });
-                        }}>
-                        {/* <EditOutlined style={{ marginRight: 8 }} /> */}
-                        <MdEdit style={{ fontSize: '16px', marginRight:'8px'  }} />
-                        Edit
-                        </div>
-
-                        <div style={{ padding: '8px 12px' }} onClick={() => {
-                        setEditingUid(contextMenu.target.uid);
-                        setInlineName(extractDisplayName(contextMenu.target.name));
-                        setContextMenu({ ...contextMenu, visible: false });
-                        }}>
-                            <MdDriveFileRenameOutline style={{ fontSize: '16px', marginRight:'8px' }} />
-                            Rename
-                        </div>
-
-                        <div style={{ padding: '8px 12px' }} onClick={() => {
-                        handleCloneFile(contextMenu.target);
-                        setContextMenu({ ...contextMenu, visible: false });
-                        }}>
-                        {/* <FileAddOutlined style={{ marginRight: 8 }} /> */}
-                        <HiOutlineDuplicate style={{ fontSize: '16px', marginRight:'8px'  }} />
-                        Duplicate
-                        </div>
-
-                        <div style={{ padding: '8px 12px', color: 'red' }} onClick={() => {
-                        showDeleteModal(contextMenu.target);
-                        setContextMenu({ ...contextMenu, visible: false });
-                        }}>🗑️ Move to Bin</div>
-
-                        <div style={{ padding: '8px 12px' }} onClick={() => {
-                        setClipboardFile([{ ...contextMenu.target, action: "copy", isFolder: false }]);
-                        message.success("File copied");
-                        setContextMenu({ ...contextMenu, visible: false });
-                        }}>
-                        <CopyOutlined style={{ marginRight: 8 }} />
-                        Copy
-                        </div>
-
-                        <div style={{ padding: '8px 12px' }} onClick={() => {
-                        setClipboardFile([{ ...contextMenu.target, action: "cut", isFolder: false }]);
-                        setFilteredImages(prev => prev.filter(f => f.uid !== contextMenu.target.uid));
-                        message.success("File cut");
-                        setContextMenu({ ...contextMenu, visible: false });
-                        }}>
-                        ✂️ Cut
+                            ✏️ Rename All
                         </div>
                     </>
                     )}
-                </>
-                )}
-            </div>
+
+                    {/* SINGLE SELECT fallback (file or folder) */}
+                    {!isTrashView && !contextMenu.selectedList?.length && contextMenu.target && (
+                    <>
+                        <div style={{ padding: '8px 12px', fontWeight: 'bold' }}>{contextMenu.target.name}</div>
+
+                        {contextMenu.isFolder ? (
+                        <>
+                            <div style={{ padding: '8px 12px' }} onClick={() => {
+                            handleFolderClick(contextMenu.target.name);
+                            setSelectedImages([]);
+                            setContextMenu({ ...contextMenu, visible: false });
+                            }}>📂 Open</div>
+
+                            <div style={{ padding: '8px 12px' }} onClick={() => {
+                            setNewFolderModal({
+                                visible: true,
+                                name: contextMenu.target.name,
+                                mode: "rename",
+                                folderToRename: contextMenu.target,
+                            });
+                            setSelectedImages([]);
+                            setContextMenu({ ...contextMenu, visible: false });
+                            }}>
+                                <MdDriveFileRenameOutline style={{ fontSize: '16px', marginRight:'8px' }} />
+                                Rename
+                            </div>
+
+                            <div style={{ padding: '8px 12px' }} onClick={() => {
+                            setClipboardFile([{ ...contextMenu.target, action: "copy", isFolder: true }]);
+                            setSelectedImages([]);
+                            message.success("Folder copied");
+                            setContextMenu({ ...contextMenu, visible: false });
+                            }}>
+                            <CopyOutlined style={{ marginRight: 8 }} />
+                                Copy
+                            </div>
+
+                            <div style={{ padding: '8px 12px' }} onClick={() => {
+                            setClipboardFile([{ ...contextMenu.target, action: "cut", isFolder: true }]);
+                            setFilteredImages(prev => prev.filter(f => f.uid !== contextMenu.target.uid));
+                            setSelectedImages([]);
+                            message.success("Folder cut");
+                            setContextMenu({ ...contextMenu, visible: false });
+                            }}>
+                                ✂️ Cut
+                            </div>
+
+                            <div style={{ padding: '8px 12px', color: 'red' }} onClick={() => {
+                            setDeleteFolderModal({ visible: true, folder: contextMenu.target });
+                            setSelectedImages([]);
+                            setContextMenu({ ...contextMenu, visible: false });
+                            }}>🗑️ Move to Bin</div>
+                        </>
+                        ) : (
+                        <>
+                            <div style={{ padding: '8px 12px' }} onClick={() => {
+                            handleEditFile(contextMenu.target);
+                            setSelectedImages([]);
+                            setContextMenu({ ...contextMenu, visible: false });
+                            }}>
+                            {/* <EditOutlined style={{ marginRight: 8 }} /> */}
+                            <MdEdit style={{ fontSize: '16px', marginRight:'8px'  }} />
+                                Edit
+                            </div>
+
+                            <div style={{ padding: '8px 12px' }} onClick={() => {
+                            setEditingUid(contextMenu.target.uid);
+                            setInlineName(extractDisplayName(contextMenu.target.name));
+                            setSelectedImages([]);
+                            setContextMenu({ ...contextMenu, visible: false });
+                            }}>
+                                <MdDriveFileRenameOutline style={{ fontSize: '16px', marginRight:'8px' }} />
+                                Rename
+                            </div>
+
+                            <div style={{ padding: '8px 12px' }} onClick={() => {
+                            handleCloneFile(contextMenu.target);
+                            setSelectedImages([]);
+                            setContextMenu({ ...contextMenu, visible: false });
+                            }}>
+                            {/* <FileAddOutlined style={{ marginRight: 8 }} /> */}
+                            <HiOutlineDuplicate style={{ fontSize: '16px', marginRight:'8px'  }} />
+                                Duplicate
+                            </div>
+
+                            <div style={{ padding: '8px 12px', color: 'red' }} onClick={() => {
+                            showDeleteModal(contextMenu.target);
+                            setSelectedImages([]);
+                            setContextMenu({ ...contextMenu, visible: false });
+                            }}>🗑️ Move to Bin</div>
+
+                            <div style={{ padding: '8px 12px' }} onClick={() => {
+                            setClipboardFile([{ ...contextMenu.target, action: "copy", isFolder: false }]);
+                            setSelectedImages([]);
+                            message.success("File copied");
+                            setContextMenu({ ...contextMenu, visible: false });
+                            }}>
+                            <CopyOutlined style={{ marginRight: 8 }} />
+                                Copy
+                            </div>
+
+                            <div style={{ padding: '8px 12px' }} onClick={() => {
+                            setClipboardFile([{ ...contextMenu.target, action: "cut", isFolder: false }]);
+                            setFilteredImages(prev => prev.filter(f => f.uid !== contextMenu.target.uid));
+                            setSelectedImages([]);
+                            message.success("File cut");
+                            setContextMenu({ ...contextMenu, visible: false });
+                            }}>
+                                ✂️ Cut
+                            </div>
+                        </>
+                        )}
+                    </>
+                    )}
+                </div>
             )}
 
             <Modal
@@ -2434,27 +2580,36 @@ const ImageUploadPage = () => {
 
             <Selecto
                 container="#file-grid"
+                ref={selectoRef}
                 selectableTargets={[".selectable"]}
                 hitRate={100}
-                selectByClick={true}
+                selectByClick={false}
                 selectFromInside={false}
                 toggleContinueSelect={["shift"]}
                 continueSelect={true}
                 ratio={0}
                 onSelectEnd={(e) => {
-                    const selected = e.selected.map(el => {
-                      const uid = el.getAttribute("data-uid");
-                      const isFolder = el.getAttribute("data-is-folder") === "true";
-                      return isFolder ? null : filteredImages.find(item => item.uid === uid);
-                    }).filter(Boolean);
+                    const selectedFromDrag = e.selected
+                        .map((el) => {
+                            const uid = el.getAttribute("data-uid");
+                            const isFolder = el.getAttribute("data-is-folder") === "true";
+                            // if (!uid || isFolder) return null;
+                            return filteredImages.find((img) => img.uid === uid);
+                        })
+                        .filter(Boolean);
                 
-                    const unique = [
-                      ...new Map([...selectedImagesRef.current, ...selected].map(item => [item.uid, item])).values()
-                    ];
-                
-                    setSelectedImages(unique);
-                    selectedImagesRef.current = unique;
+                    // 🔁 Merge with existing selectedImages (avoid duplicates)
+                    setSelectedImages(prev => {
+                        const merged = [...prev, ...selectedFromDrag];
+                        const unique = merged.filter(
+                            (item, index, self) => index === self.findIndex(t => t.uid === item.uid)
+                        );
+                        selectedImagesRef.current = unique;
+                        return unique;
+                    });
                 }}
+                dragContainer={window}
+                style={{ pointerEvents: 'none' }}  // ✅ Prevent Selecto layer from blocking clicks                                            
             />
 
         </div>

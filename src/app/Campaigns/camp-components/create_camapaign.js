@@ -15,6 +15,7 @@ import TonicUrlBuilder from './urlbuilder/tonic';
 import System1UrlBuilder from './urlbuilder/system1';
 import DActiveUrlBuilder from './urlbuilder/dactive';
 import CreativesDrawer from './creativesDrawer';
+import ImageUploadPage from '../../Creatives/page';
 
 const FabricCanvas = dynamic(() => import('./Fabricanvas'), { ssr: false });
 
@@ -2607,10 +2608,11 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                     open={openCreativesDrawer}
                     onClose={() => setOpenCreativesDrawer(false)}
                 >
-                    <CreativesDrawer
+                    {/* <CreativesDrawer
                         selectedFilesData={selectedFilesData}
                         
-                    />
+                    /> */}
+                    <ImageUploadPage selectedFilesData={selectedFilesData} fromCampaigns={true} />
                 </Drawer>
             )}
         </Drawer>
