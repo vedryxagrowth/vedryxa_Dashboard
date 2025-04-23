@@ -4446,10 +4446,16 @@ const MyTablePage = () => {
     };
 
     const functionCallForAllCampaignsData = async () => {
-        const fetchData = await apiClient.get(
-            `/AllCampaigns?accountNumber=${account}&timezone=${time}&network=${newtworkCollections[revenuePratner]}&campaignName=${inputValue}`
-        );
-        setAllProfitLossArray(fetchData?.data);
+        try{
+            const fetchData = await apiClient.get(
+                `/AllCampaigns?accountNumber=${account}&timezone=${time}&network=${newtworkCollections[revenuePratner]}&campaignName=${inputValue}`
+            );
+            setAllProfitLossArray(fetchData?.data);
+        }
+        catch(err){
+            setAllProfitLossArray([]);
+        }
+        
     }
 
     // const functionCallForUserColumnStructure = async () => {
