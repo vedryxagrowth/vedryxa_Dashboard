@@ -78,6 +78,8 @@ const MyTablePage = () => {
     const columnStructure = [
         "actions",
         "date",
+        "from",
+        "profitloss",
         "spend",
         "revenue",
         "profit",
@@ -154,6 +156,11 @@ const MyTablePage = () => {
 
     const [checked, setChecked] = useState(false);
 
+    const [allProfitLossArray, setAllProfitLossArray] = useState([]);
+    const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
+    const [mainData, setColumnStructure] = useState([]);
+    const mainDataRef = useRef(mainData);
+
     const handleChangeToggle = () => {
         setChecked((prev) => !prev);
     };
@@ -165,8 +172,9 @@ const MyTablePage = () => {
         }
     };
 
-    const handleChangeInput = () => {
-        setInputValue(newInputValue.trim());
+    const handleChangeInput = (e) => {
+        // setInputValue(newInputValue.trim());
+        setInputValue(e.target.value);
         // gridRef.current.api.onFilterChanged(); // Trigger AG-Grid to reapply filters
     };
 
@@ -1110,6 +1118,14 @@ const MyTablePage = () => {
         return startDate1.isSame(yesterday1, 'day') && endDate1.isSame(yesterday1, 'day');
     };
 
+    const campaignMap = useMemo(() => {
+        const map = new Map();
+        Camapignlevelstatus.forEach((item) => {
+          map.set(item.name, item.start);
+        });
+        return map;
+    }, [Camapignlevelstatus]);
+
     const columnDefsObjectOfAdID = {
         campaignname: {
             headerName: 'CampaignName',
@@ -1170,6 +1186,55 @@ const MyTablePage = () => {
             // },
             // suppressMenu: true,    // Suppress the column menu
             
+        },
+        from:{
+            headerName: 'From',
+            field: 'from',
+            valueGetter: (params) => {
+              if (params.node.group) {
+                const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
+                const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
+                // const {  start } = campaignStatus;
+                // console.log(params.node.groupData?.campaignname, "groupData");
+                // console.log(params.node.key, "start");
+                return campaignStatus?.start || 'Unknown';
+              }
+              return '';
+            },
+            cellClassRules: {
+              'hide-leaf-cell': (params) => !params.node.group,
+            },
+            minWidth: 110,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+        },
+        profitloss:{
+              headerName: 'P/L',
+              minWidth: 110,
+              field: 'profitloss',
+              valueGetter: (params) => {
+                if (params.node.group) {
+                  const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
+                  const campaignData = allProfitLossArray?.items?.filter(obj => obj.campaign_name === campaignName);
+                  const revenue = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.estimated_revenue) || 0), 0);
+                  const spend = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.spend) || 0), 0);
+                  // const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
+                  // const {  start } = campaignStatus;
+                  // console.log(params.node.groupData?.campaignname, "groupData");
+                  // console.log(params.node.key, "start");
+                  // return campaignStatus?.start || 'Unknown';
+                  return (revenue - spend) ? (revenue - spend).toFixed(2) : "" || "";
+                }
+                return '';
+              },
+              cellClassRules: {
+                'hide-leaf-cell': (params) => !params.node.group,
+              },
+              cellStyle: { fontWeight: 'bold' },
+              suppressMenu: true,
+              menuTabs: [],
+              headerClass: 'hide-menu', // Add a custom class
         },
         actions: {
             headerName: 'Actions',
@@ -1843,6 +1908,55 @@ const MyTablePage = () => {
             // hide: true,
             
         },
+        from:{
+            headerName: 'From',
+            field: 'from',
+            valueGetter: (params) => {
+              if (params.node.group) {
+                const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
+                const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
+                // const {  start } = campaignStatus;
+                // console.log(params.node.groupData?.campaignname, "groupData");
+                // console.log(params.node.key, "start");
+                return campaignStatus?.start || 'Unknown';
+              }
+              return '';
+            },
+            cellClassRules: {
+              'hide-leaf-cell': (params) => !params.node.group,
+            },
+            minWidth: 110,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+        },
+        profitloss:{
+            headerName: 'P/L',
+            field: 'profitloss',
+            minWidth: 110,
+            valueGetter: (params) => {
+              if (params.node.group) {
+                const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
+                const campaignData = allProfitLossArray?.items?.filter(obj => obj.campaign_name === campaignName);
+                const revenue = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.estimated_revenue) || 0), 0);
+                const spend = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.spend) || 0), 0);
+                // const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
+                // const {  start } = campaignStatus;
+                // console.log(params.node.groupData?.campaignname, "groupData");
+                // console.log(params.node.key, "start");
+                // return campaignStatus?.start || 'Unknown';
+                return (revenue - spend) ? (revenue - spend).toFixed(2) : "" || "";
+              }
+              return '';
+            },
+            cellClassRules: {
+              'hide-leaf-cell': (params) => !params.node.group,
+            },
+            cellStyle: { fontWeight: 'bold' },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+        },
         adsetname: {
             headerName: 'AdsetName', field: 'adsetname',
             // resizeble: true,
@@ -2274,6 +2388,54 @@ const MyTablePage = () => {
             // suppressMenu: true,    // Suppress the column menu
             
         },
+        from: {
+            headerName: 'From',
+            field: 'from',
+            minWidth: 110,
+            valueGetter: (params) => {
+              if (params.node.group) {
+                const campaignName =
+                  params.node.groupData?.campaignname || params.node.key;
+                return campaignMap.get(campaignName) || 'Unknown';
+              }
+              return '';
+            },
+            cellClassRules: {
+              'hide-leaf-cell': (params) => !params.node.group,
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+        },
+        profitloss:{
+              headerName: 'P/L',
+              field: 'profitloss',
+              valueGetter: (params) => {
+                if (params.node.group) {
+                  const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
+                  const campaignData = allProfitLossArray?.items?.filter(obj => obj.campaign_name === campaignName);
+                  const revenue = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.estimated_revenue) || 0), 0);
+                  const spend = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.spend) || 0), 0);
+                  console.log(revenue, "revenue");
+                  console.log(spend, "spend");
+                  // const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
+                  // const {  start } = campaignStatus;
+                  // console.log(params.node.groupData?.campaignname, "groupData");
+                  // console.log(params.node.key, "start");
+                  // return campaignStatus?.start || 'Unknown';
+                  return (revenue - spend) ? (revenue - spend).toFixed(2) : ""  || "";
+                }
+                return '';
+              },
+              minWidth: 110,
+              cellClassRules: {
+                'hide-leaf-cell': (params) => !params.node.group,
+              },
+              cellStyle: { fontWeight: 'bold' },
+              suppressMenu: true,
+              menuTabs: [],
+              headerClass: 'hide-menu', // Add a custom class
+          },
         date: {
             headerName: 'Date',
             field: 'date',
@@ -2831,6 +2993,55 @@ const MyTablePage = () => {
             // suppressMenu: true,    // Suppress the column menu
             
         },
+        from:{
+            headerName: 'From',
+            field: 'from',
+            minWidth: 110,
+            valueGetter: (params) => {
+              if (params.node.group) {
+                const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
+                const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
+                // const {  start } = campaignStatus;
+                // console.log(params.node.groupData?.campaignname, "groupData");
+                // console.log(params.node.key, "start");
+                return campaignStatus?.start || 'Unknown';
+              }
+              return '';
+            },
+            cellClassRules: {
+              'hide-leaf-cell': (params) => !params.node.group,
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+        },
+        profitloss:{
+            headerName: 'P/L',
+            field: 'profitloss',
+            minWidth: 110,
+            valueGetter: (params) => {
+              if (params.node.group) {
+                const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
+                const campaignData = allProfitLossArray?.items?.filter(obj => obj.campaign_name === campaignName);
+                const revenue = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.estimated_revenue) || 0), 0);
+                const spend = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.spend) || 0), 0);
+                // const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
+                // const {  start } = campaignStatus;
+                // console.log(params.node.groupData?.campaignname, "groupData");
+                // console.log(params.node.key, "start");
+                // return campaignStatus?.start || 'Unknown';
+                return (revenue - spend) ? (revenue - spend).toFixed(2) : "" || "";
+              }
+              return '';
+            },
+            cellClassRules: {
+              'hide-leaf-cell': (params) => !params.node.group,
+            },
+            cellStyle: { fontWeight: 'bold' },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+        },
         date: {
             headerName: 'Date', field: 'date', minWidth: 110, sortable: true,
             filter: "agDateColumnFilter",
@@ -3228,10 +3439,63 @@ const MyTablePage = () => {
             // suppressMenu: true,    // Suppress the column menu
             
         },
+        from:{
+            headerName: 'From',
+            field: 'from',
+            minWidth: 110,
+            valueGetter: (params) => {
+              if (params.node.group) {
+                const campaignName =  params.node.key;
+                const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
+                // const {  start } = campaignStatus;
+                // console.log(params.node.groupData?.campaignname, "groupData");
+                // console.log(params.node.key, "start");
+                // console.log(campaignStatus?.start);
+                // console.log(campaignStatus, "campaignStatus");
+                return campaignStatus?.start || 'Unknown';
+              }
+              return '';
+            },
+            cellClassRules: {
+              'hide-leaf-cell': (params) => !params.node.group,
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+        },
+        profitloss:{
+            headerName: 'P/L',
+            field: 'profitloss',
+            minWidth: 110,
+            valueGetter: (params) => {
+              if (params.node.group) {
+                const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
+                const campaignData = allProfitLossArray?.items?.filter(obj => obj.campaign_name === campaignName);
+                const revenue = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.estimated_revenue) || 0), 0);
+                const spend = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.spend) || 0), 0);
+                // const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
+                // const {  start } = campaignStatus;
+                // console.log(params.node.groupData?.campaignname, "groupData");
+                // console.log(params.node.key, "start");
+                // return campaignStatus?.start || 'Unknown';
+                return (revenue - spend) ? (revenue - spend).toFixed(2) : "" || "";
+              }
+              return '';
+            },
+            cellClassRules: {
+              'hide-leaf-cell': (params) => !params.node.group,
+            },
+            cellStyle: { fontWeight: 'bold' },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+        },
         date: {
-            headerName: 'Date', field: 'date', sort: 'asc', sortable: true,
+            headerName: 'Date', field: 'date', 
+            // sort: 'asc', 
+            sortable: true,
             filter: "agDateColumnFilter",
-            sort: "asc",
+            // sort: "asc",
             minWidth: 110,
             filterParams: {
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
@@ -3667,6 +3931,55 @@ const MyTablePage = () => {
             // suppressMenu: true,    // Suppress the column menu
             
         },
+        from:{
+            headerName: 'From',
+            field: 'from',
+            minWidth: 110,
+            valueGetter: (params) => {
+              if (params.node.group) {
+                const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
+                const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
+                // const {  start } = campaignStatus;
+                // console.log(params.node.groupData?.campaignname, "groupData");
+                // console.log(params.node.key, "start");
+                return campaignStatus?.start || 'Unknown';
+              }
+              return '';
+            },
+            cellClassRules: {
+              'hide-leaf-cell': (params) => !params.node.group,
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+        },
+        profitloss:{
+            headerName: 'P/L',
+            field: 'profitloss',
+            minWidth: 110,
+            valueGetter: (params) => {
+              if (params.node.group) {
+                const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
+                const campaignData = allProfitLossArray?.items?.filter(obj => obj.campaign_name === campaignName);
+                const revenue = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.estimated_revenue) || 0), 0);
+                const spend = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.spend) || 0), 0);
+                // const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
+                // const {  start } = campaignStatus;
+                // console.log(params.node.groupData?.campaignname, "groupData");
+                // console.log(params.node.key, "start");
+                // return campaignStatus?.start || 'Unknown';
+                return (revenue - spend) ? (revenue - spend).toFixed(2) : "" || "";
+              }
+              return '';
+            },
+            cellClassRules: {
+              'hide-leaf-cell': (params) => !params.node.group,
+            },
+            cellStyle: { fontWeight: 'bold' },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+        },
         date: {
             headerName: 'Date', field: 'date', minWidth: 120, sortable: true,
             sort: "asc",
@@ -4031,6 +4344,35 @@ const MyTablePage = () => {
 
     var token = localStorage.getItem("token")
 
+    useEffect(() => {
+        // console.log(mainData);
+        // console.log(mainData.length);
+        // console.log(Camapignlevelstatus);
+        if(mainData?.length > 0 && Camapignlevelstatus.length > 0){
+            setColumnDefs(getColumnDefs(mainData));
+            columnDefs1.current = getColumnDefs2(mainData);
+            columnDefs2.current = getColumnDefs2(mainData);
+            columnDefs3.current = getColumnDefs3(mainData);
+            columnDefs4.current = getColumnDefs4(mainData);
+        
+            // Ensure that 'adid' is included in the column structure
+            let updatedColumnStructure = mainData;
+            if (!updatedColumnStructure.includes('adid')) {
+                updatedColumnStructure = [...updatedColumnStructure, 'adid'];
+            }
+            if (!updatedColumnStructure.includes('adname')) {
+                updatedColumnStructure = [...updatedColumnStructure, 'adname'];
+            }
+            // Now update the colDefs for the adid grid
+            const newColumnDefs = getColumnDefsObjectOfAdID(updatedColumnStructure);
+            const newColumnDailyDefs = getColumnDefsObjectOfDailyAdID(updatedColumnStructure);
+            setColDefs(newColumnDefs);
+            setColDailyDefs(newColumnDailyDefs);
+            console.log('Updated columnDefsOfAdID:', newColumnDefs);
+            setColumnStructureStatus(true);
+        }
+    }, [mainData, Camapignlevelstatus]);
+
 
     const updatingColumnsStructure = async (updateDataArray) => {
         console.log(updateDataArray);
@@ -4038,6 +4380,8 @@ const MyTablePage = () => {
             {
                 updateDataArray
             });
+        // console.log(response.data);
+        mainDataRef.current = updateDataArray;
         setColumnDefs(getColumnDefs(updateDataArray));
         columnDefs1.current = (getColumnDefs1(updateDataArray));
         columnDefs2.current = (getColumnDefs2(updateDataArray));
@@ -4047,6 +4391,14 @@ const MyTablePage = () => {
         setColDailyDefs(getColumnDefsObjectOfDailyAdID(updateDataArray));
         columnDefsOfAdID.current = (getColumnDefsObjectOfAdID(updateDataArray));
         columnDefsOfDailyAdID.current = (getColumnDefsObjectOfDailyAdID(updateDataArray));
+        // const data = mainData;
+        setColumnStructure(mainDataRef.current);
+        // setTimeout(() => {
+        //     console.log("data", mainDataRef.current);
+        //     setColumnStructure(mainDataRef.current);
+        // }
+        // , 1000);
+        
         
     };
 
@@ -4057,6 +4409,8 @@ const MyTablePage = () => {
         try {
           const fetchData = await apiClient.get(`/api/singleUserData?email=${userdetails.email}`);
           const mainData = fetchData.data;
+          setColumnStructure(mainData?.columnStructure);
+          mainDataRef.current = mainData;
           // Use the existing API column structure for other grid columns
           setColumnDefs(getColumnDefs(mainData.columnStructure));
           columnDefs1.current = getColumnDefs2(mainData.columnStructure);
@@ -4090,6 +4444,13 @@ const MyTablePage = () => {
           }
         }
     };
+
+    const functionCallForAllCampaignsData = async () => {
+        const fetchData = await apiClient.get(
+            `/AllCampaigns?accountNumber=${account}&timezone=${time}&network=${newtworkCollections[revenuePratner]}&campaignName=${inputValue}`
+        );
+        setAllProfitLossArray(fetchData?.data);
+    }
 
     // const functionCallForUserColumnStructure = async () => {
     //     try{
@@ -4149,9 +4510,10 @@ const MyTablePage = () => {
     },[campaignsStatus, commentsStatus, columnStructureStatus]);
 
     const functionCall = async (account) => {
-        await functionCallForUserColumnStructure();
+        await functionCallForAllCampaignsData();
         await functionCallForCampaigns(account);
         await functionCallForCommnets(account);
+        await functionCallForUserColumnStructure();
     };
     
     // ✅ Calls `functionCall` when page loads
@@ -4277,7 +4639,6 @@ const MyTablePage = () => {
     };
 
     const [campaignComments, setCampaignComments] = useState([]);
-    const [Camapignlevelstatus, setCamapignlevelstatus] = useState([]);
     const fetchCampaignComments = async () => {
         try {
 
@@ -4363,8 +4724,10 @@ const MyTablePage = () => {
         , 100);
     };
 
-    const onClickRefresh = () => {
+    const onClickRefresh = async () => {
         console.log(activeTab);
+        await functionCallForAllCampaignsData();
+
         refreshComponent(activeTab);
         // refreshGrid(gridRef);  // Refresh gridRef
         // refreshGrid1(gridRef1); // Refresh gridRef1
@@ -4484,9 +4847,9 @@ const MyTablePage = () => {
                         {/* Right Section: Status Icon */}
                         <span style={{ marginLeft: '10px', flexShrink: 0 }}>
                             {account.status === "Active" ? (
-                                <CheckCircleFilled style={{ color: 'green', fontSize: '15px' }} />
+                                <CheckCircleFilled style={{ color: 'green', fontSize: '15px' }} className='black-icon-active-1' />
                             ) : (
-                                <CloseCircleFilled style={{ color: 'red', fontSize: '15px' }} />
+                                <CloseCircleFilled style={{ color: 'red', fontSize: '15px' }}  className='black-icon-pause-1' />
                             )}
                         </span>
                     </div>
@@ -4543,14 +4906,14 @@ const MyTablePage = () => {
         <StickyBox offsetTop={64} offsetBottom={20} style={{ zIndex: 1, padding: '0px', margin: '0px', paddingLeft: '12px' }}>
             <Tabs
                 activeKey={activeTab}
-                onChange={(key) => handleCarouselChange(key)}
+                onChange={handleCarouselChange}
                 items={items.map((item) => ({
                     key: item.key,
                     label: item.label,
                 }))}
-                className="custom-tabs" // Apply custom CSS class
+                className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
                 style={{
-                    backgroundColor: '#f0f2f5',
+                    backgroundColor:  'transparent',
                     padding: '0',
                     marginBottom: '0',
                 }}
@@ -4572,7 +4935,7 @@ const MyTablePage = () => {
             {/* className='select-container' */}
             <Space direction="vertical" style={{ width: '100%', padding: "1%" }}>
                 <Row gutter={[16, 16]}>
-                    <Col xs={24} sm={12} md={4}>
+                    <Col xs={24} sm={12} md={6} lg={5} xl={4} xxl={3}>
                         <Select
                             showSearch
                             className='select-element'
@@ -4594,7 +4957,7 @@ const MyTablePage = () => {
                         />
                     </Col>
 
-                    <Col xs={24} sm={12} md={4} style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}>
+                    <Col xs={24} sm={12} md={8} lg={6} xl={5} xxl={4} style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}>
                         <Select
                             showSearch
                             onChange={handleChange1} // Handle value selection
@@ -4641,13 +5004,14 @@ const MyTablePage = () => {
                         </ConfigProvider>
                     </Col>
 
-                    <Col xs={24} sm={12} md={3}>
+                    <Col xs={24} sm={12} md={3} lg={3} xl={2}>
                         <Select
                             showSearch
                             onChange={onChangeTime}
                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             placeholder="Select Timezone"
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                            style={{width: '100%'}}
                             optionFilterProp="label"
                             value={time}
                             options={timezones.map((item) => ({
@@ -4675,11 +5039,12 @@ const MyTablePage = () => {
                             <Col>
                                 <Input
                                 placeholder="Search here"
-                                value={newInputValue}
-                                onChange={handleChangeNewInputValue}
+                                value={inputValue}
+                                onChange={handleChangeInput}
                                 onBlur={handleBlur}
-                                onPressEnter={handleChangeInput}
-                                style={{ width: '225px', borderRadius: '5px', height:'30px' }}
+                                // onPressEnter={handleChangeInput}
+                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                style={{ width: '225px', borderRadius: '5px', height:'30px', backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
                                 />
                             </Col>
                             <Col>
@@ -4690,8 +5055,8 @@ const MyTablePage = () => {
                                     color: 'black',
                                     height:'30px'
                                 }}
-                                icon={<SearchOutlined />}
-                                onClick={handleChangeInput}
+                                icon={<SearchOutlined  className="black-icon"/>}
+                                // onClick={handleChangeInput}
                                 />
                             </Col>
                             <Col>
@@ -4704,7 +5069,7 @@ const MyTablePage = () => {
                                         color: 'black',
                                         height:'30px'
                                     }}
-                                    icon={<ReloadOutlined />}
+                                    icon={<ReloadOutlined  className="black-icon" />}
                                     onClick={onClickRefresh}
                                     />
                                 </Tooltip>
@@ -4726,6 +5091,7 @@ const MyTablePage = () => {
 
                 <Tabs activeKey={activeTab} onChange={handleTabChange} renderTabBar={() => <></>}>
                 <Tabs.TabPane key="1">
+                {Camapignlevelstatus.length > 0 && (
                     <LiveReports 
                     startDate={newStartDate} 
                     endDate={newendDate} 
@@ -4745,7 +5111,9 @@ const MyTablePage = () => {
                     getMainMenuItems={getMainMenuItems}
                     toggleStatus={checked}
                     handleChangeToggle={handleChangeToggle}
+                    theme={theme}
                     />
+                )}
                 </Tabs.TabPane>
 
                 <Tabs.TabPane key="2">
@@ -4781,6 +5149,7 @@ const MyTablePage = () => {
                     inputValue={inputValue} 
                     newAccountName={newAccountName} 
                     columnDefs={columnDefs2} 
+                    fetchData={allProfitLossArray}
                     campaignComments={campaignComments} 
                     Camapignlevelstatus={Camapignlevelstatus} 
                     changeRRefrst={resetColumnStructure} 

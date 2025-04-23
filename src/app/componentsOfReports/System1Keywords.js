@@ -462,20 +462,20 @@ const System1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePra
                     </div>
                 ) : system1KeywordData?.length > 0 ? (
                     <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
-                        <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap' }}>
+                        <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d" }}>
                             <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
                                 <Space align="center" className='daily-contaier'>
-                                    <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600' }}>Domain</Text>
+                                    <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600', color: theme === "dark" && "white" }}>Domain</Text>
                                 </Space>
                             </Col>
                             <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                <Text style={{ fontWeight: '600' }}>Acc: {newaccount}</Text>
+                                <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Acc: {newaccount}</Text>
                             </Col>
                             <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                <Text style={{ fontWeight: '600' }}>AccName: {newAccountName}</Text>
+                                <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>AccName: {newAccountName}</Text>
                             </Col>
                             <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                <Text style={{ fontWeight: '600' }}>Timezone: {timezone.current}</Text>
+                                <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Timezone: {timezone.current}</Text>
                             </Col>
                             {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                 <Text style={{ fontWeight: '600' }}>
@@ -487,7 +487,7 @@ const System1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePra
                             </Col> */}
                             <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                 <Tooltip title="Export to CSV">
-                                    <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef4, "Domain")} />
+                                    <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={() => onBtExport(gridRef4, "Domain")} />
                                 </Tooltip>
                             </Col>
                         </Row>

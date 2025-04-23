@@ -523,13 +523,13 @@ const MnetDailyAdReport = ({startDate, endDate, newaccount, newtime, newRevenueP
                                     if (status === 'PAUSED') {
                                         return (
                                             <Tooltip title={tooltipContent}>
-                                                <PauseCircleOutlined style={{ color: 'orange', fontSize: '18px' }} />
+                                                <PauseCircleOutlined style={{ color: 'orange', fontSize: '18px' }}  className='black-icon-pause' />
                                             </Tooltip>
                                         );
                                     } else if (status === 'ACTIVE') {
                                         return (
                                             <Tooltip title={tooltipContent}>
-                                                <CheckCircleOutlined style={{ color: 'green', fontSize: '18px' }} />
+                                                <CheckCircleOutlined style={{ color: 'green', fontSize: '18px' }} className='black-icon-active' />
                                             </Tooltip>
                                         );
                                     } else {
@@ -557,7 +557,7 @@ const MnetDailyAdReport = ({startDate, endDate, newaccount, newtime, newRevenueP
                                     <EditOutlined onClick={handleEditClick} style={{ marginLeft: '10px', color: 'blue', cursor: 'pointer' }} />
                                 </div>
                             )}>
-                                <MessageOutlined className='Message' style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
+                                <MessageOutlined  className= {theme === "dark" ? "black-icon-comment" : 'Message'} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
                                 <Tooltip title={tooltipText}></Tooltip>
                             </Tooltip>
                         ) : (
@@ -586,6 +586,7 @@ const MnetDailyAdReport = ({startDate, endDate, newaccount, newtime, newRevenueP
                         <Modal
                             title={firstColumnValue}
                             visible={isModalVisibles}
+                            className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             onOk={handleOks} // Default Ok button functionality
                             onCancel={handleCancels} // Default Cancel button functionality
                             footer={[
@@ -611,7 +612,7 @@ const MnetDailyAdReport = ({startDate, endDate, newaccount, newtime, newRevenueP
                                     <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
                                         Cancel
                                     </Button>
-                                    <Button key="ok" type="primary" onClick={handleOks} style={{marginLeft:"4px"}}>
+                                    <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#C7F39A"}}>
                                         Ok
                                     </Button>
                                     </div>
@@ -717,7 +718,9 @@ const MnetDailyAdReport = ({startDate, endDate, newaccount, newtime, newRevenueP
                             adsetid: eachData.adset_id,
                             adid: eachData.ad_id,
                             timezone: 'UTC',
-                            actions: '...'
+                            actions: '...',
+                            from:"",
+                            profitloss: "",
                             // compaignid: eachData.campaign_id,
                         }
                     )
@@ -1006,21 +1009,21 @@ const MnetDailyAdReport = ({startDate, endDate, newaccount, newtime, newRevenueP
                             }
                             )?.length > 0 ? (
                                 <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
-                                    <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap' }}>
+                                    <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d" }}>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
                                             <Space align="center" className='daily-contaier'>
                                                 <div className="blinking-circle"></div>
-                                                <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600' }}>Daily</Text>
+                                                <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600', color: theme === "dark" && "white" }}>Daily</Text>
                                             </Space>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600' }}>Acc: {newaccount}</Text>
+                                            <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Acc: {newaccount}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600' }}>AccName: {newAccountName}</Text>
+                                            <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>AccName: {newAccountName}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600' }}>Timezone: {timezone.current}</Text>
+                                            <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Timezone: {timezone.current}</Text>
                                         </Col>
                                         {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ fontWeight: '600' }}>
@@ -1052,7 +1055,7 @@ const MnetDailyAdReport = ({startDate, endDate, newaccount, newtime, newRevenueP
                                         </Col> */}
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                             <Tooltip title="Export to CSV">
-                                                <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef1, "Daily")} />
+                                                <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={() => onBtExport(gridRef1, "Daily")} />
                                             </Tooltip>
                                         </Col>
                                     </Row>

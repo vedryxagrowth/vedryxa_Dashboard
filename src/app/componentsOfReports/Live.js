@@ -58,6 +58,7 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
+    const getRowStyleTheme = theme === 'dark' ? { backgroundColor: '#1e1e1f', color: '#ffffff' } : { backgroundColor: '#ffffff', color: '#000000' };
     const [rowData, setRowData] = useState([]);
 
     const [liveFixedFooter, setLiveFixedFooter] = useState([]);
@@ -103,7 +104,7 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
             normalizedCampaign.endsWith(normalizedInput)
         );
     }
-    ) : [], [rowData, inputValue]);
+    ) : [], [rowData, inputValue, theme]);
 
     useEffect(()=>{
         setLiveFixedFooter([
@@ -494,13 +495,13 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                                     if (status === 'PAUSED') {
                                         return (
                                             <Tooltip title={tooltipContent}>
-                                                <PauseCircleOutlined style={{ color: 'orange', fontSize: '18px' }} />
+                                                <PauseCircleOutlined style={{ color: 'orange', fontSize: '18px' }}  className='black-icon-pause' />
                                             </Tooltip>
                                         );
                                     } else if (status === 'ACTIVE') {
                                         return (
                                             <Tooltip title={tooltipContent}>
-                                                <CheckCircleOutlined style={{ color: 'green', fontSize: '18px' }} />
+                                                <CheckCircleOutlined style={{ color: 'green', fontSize: '18px' }} className='black-icon-active' />
                                             </Tooltip>
                                         );
                                     } else {
@@ -528,7 +529,7 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                                     <EditOutlined onClick={handleEditClick} style={{ marginLeft: '10px', color: 'blue', cursor: 'pointer' }} />
                                 </div>
                             )}>
-                                <MessageOutlined className='Message' style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
+                                <MessageOutlined className= {theme === "dark" ? "black-icon-comment" : 'Message'} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
                                 <Tooltip title={tooltipText}></Tooltip>
                             </Tooltip>
                         )}
@@ -551,8 +552,9 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                         </span>
                         <Modal
                              title={
-                                    firstColumnValue
+                                firstColumnValue
                             }
+                            className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             visible={isModalVisibles}
                             onOk={handleOks} // Default Ok button functionality
                             onCancel={handleCancels} // Default Cancel button functionality
@@ -579,7 +581,7 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                                     <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
                                         Cancel
                                     </Button>
-                                    <Button key="ok" type="primary" onClick={handleOks} style={{marginLeft:"4px"}}>
+                                    <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#C7F39A"}}>
                                         Ok
                                     </Button>
                                     </div>
@@ -706,7 +708,9 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                             comment: relatedComment ? relatedComment.comment : null,
                             adid: "",
                             adname: "",
-                            actions: '...'
+                            actions: '...',
+                            from: "",
+                            profitloss: "",
                         }
                     )
                 })
@@ -1050,6 +1054,7 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
     
     //     setSelectedCells(selected);
     // };
+
     
     const onCellKeyDown = (params) => {
         if (params.event.ctrlKey && params.event.key === "c") {
@@ -1096,24 +1101,24 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                             )?.length > 0 ? (
                                 <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
 
-                                    <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap' }}>
+                                    <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d" }}>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
                                             <Space align="center">
                                                 <div className="blinking-circle-1"></div>
-                                                <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600' }}>Live</Text>
+                                                <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600', color: theme === "dark" && "white" }}>Live</Text>
                                             </Space>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600' }}>Acc: {newaccount}</Text>
+                                            <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Acc: {newaccount}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600' }}>AccName: {newAccountName}</Text>
+                                            <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>AccName: {newAccountName}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600' }}>Timezone: {timezone.current}</Text>
+                                            <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Timezone: {timezone.current}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600' }}>F/N Hour: {maxHour.current}:00 / {maxNetworkHour.current}:00</Text>
+                                            <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>F/N Hour: {maxHour.current}:00 / {maxNetworkHour.current}:00</Text>
                                         </Col>
                                         {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ fontWeight: '600' }}>
@@ -1138,7 +1143,7 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                                                 </>
                                             }
                                             >
-                                                <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color:"#C7F39A" }} />
+                                                <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color:"#C7F39A" }} className="black-icon-info"/>
                                             </Tooltip>
                                         </Col>
                                         {/* <Col>
@@ -1151,7 +1156,7 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                                         </Col> */}
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                             <Tooltip title="Export to CSV">
-                                                <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={onBtExport1} />
+                                                <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={onBtExport1} />
                                             </Tooltip>
                                         </Col>
                                     </Row>
@@ -1192,6 +1197,7 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                                         suppressCellSelection={true}
                                         getRowStyle={(params) => {
                                             if (params.node.rowPinned) {
+                                                
                                                 return {
                                                     fontWeight: "bold",
                                                     backgroundColor: theme === "dark" ? "#1a1918" : "#fff", // Dark mode or light mode

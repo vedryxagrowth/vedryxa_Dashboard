@@ -21,7 +21,7 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
 
     var token = localStorage.getItem("token");
 
-    const availableNetworks = ["FB_Mnet", "FB_MnetBing", "FB_Enki", "FB_Tonic", "FB_System1", "FB_Bodies", "FB_Bodies1", "FB_Rsoc", "FB_DomainActive"].filter(network => !selectedNetworks.includes(network));
+    const availableNetworks = ["FB_Mnet", "FB_MnetBing", "FB_Enki", "FB_Tonic1", "FB_System1", "FB_Bodies", "FB_Bodies1", "FB_Rsoc", "FB_DomainActive"].filter(network => !selectedNetworks.includes(network));
     const handleAddAccount = () => {
         if(availableNetworks.length > 0){
             setAdditionalAccounts([...additionalAccounts, { network: '', inputs: [''] }]);
@@ -77,6 +77,7 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
         Modal.confirm({
             title: 'Confirmation',
             content: 'Are you sure you want to create new user?',
+            className: theme === 'dark' ? 'custom-confirm-dark' : 'custom-confirm-light',
             onOk: async() => {
                 try {
                     let data = {};
@@ -127,15 +128,17 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
     return (
         <Drawer
             title="Create a new user"
-            width="50%"
+            width="40%"
             open={visible} // Change visible to open
             onClose={onClose}
             closeIcon={<CloseOutlined />}
+            style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
         >
             <Form
                 form={form}
                 layout="vertical"
                 onFinish={submitForm}
+                className={theme === 'dark' ? 'form-dark' : 'form-light'}
             >
                 <Form.Item
                     label="UserName"
@@ -147,7 +150,7 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
                         },
                     ]}
                 >
-                    <Input />
+                    <Input placeholder='Enter User Name' className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
                 </Form.Item>
 
                 <Form.Item
@@ -160,7 +163,7 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
                         },
                     ]}
                 >
-                    <Input />
+                    <Input placeholder='Enter User Email' className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
                 </Form.Item>
 
                 <Form.Item
@@ -174,6 +177,8 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
                     ]}
                 >
                     <Select 
+                        placeholder="Select a role"
+                        className={theme === 'dark' ? 'custom-select-dark' : ''}
                         style={{
                             backgroundColor: theme === 'dark' && '#333', // Background color
                             color: theme === 'dark' && '#fff',
@@ -193,13 +198,15 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
                         <div>
                         {additionalAccounts.map((account, accountIndex) => (
                                 <div key={accountIndex}>
-                                    <div className='add-accounts'>
+                                    <div className='add-accounts' style={{display: 'flex', width:"100%"}}>
                                         <Select
                                             placeholder="Select a network"
                                             className='add-accounts-select-network'
                                             style={{
                                                 backgroundColor: theme === 'dark' && '#333', // Background color
                                                 color: theme === 'dark' && '#fff',
+                                                width: '160px',
+                                                paddingRight: '8px',
                                             }}
                                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                             value={account.network}
@@ -211,20 +218,22 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
                                                 </Select.Option>
                                             ))}
                                         </Select>
-                                        <div className='add-account-container'>
+                                        <div className='add-account-container' style={{width:'100%', padding:'0px', margin:'0px'}}>
                                             {account.inputs.map((input, inputIndex) => (
                                                 <div key={inputIndex} className='add-account-container-input'>
                                                     <Input
                                                         value={input}
                                                         onChange={(e) => handleInputChange(accountIndex, inputIndex, e.target.value)}
-                                                        placeholder="Enter ad input"
-                                                        style={{ width: '100%', marginRight: '8px' }}
+                                                        placeholder="Enter Account ID"
+                                                        style={{ width: '100%', marginRight: '8px', height: '32px',backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
+                                                        className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} 
                                                     />
                                                     {account.inputs.length === 1 && inputIndex === 0 && (
                                                         <Button
-                                                            style={{ marginTop: '8px', marginBottom: '8px' }}
+                                                            style={{  marginBottom: '8px', backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
                                                             type="default"
                                                             onClick={() => handleRemoveAccount(accountIndex)}
+
                                                         >
                                                             Remove
                                                         </Button>
@@ -248,14 +257,14 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
                                 </div>
                             ))}
                         </div>
-                        <Button type="dashed" onClick={handleAddAccount} icon={<PlusOutlined />}>
-                            Add Account
+                        <Button type="dashed" style={{  border: 'none', backgroundColor: '#C7F39A', color:'black', fontWeight:'600' }} onClick={handleAddAccount} icon={<PlusOutlined className="black-icon"/>}>
+                            Add Project
                         </Button>
                     </div>
                 </Form.Item>
 
                 <Form.Item>
-                    <Button type="primary" htmlType="submit">
+                    <Button style={{  border: 'none', backgroundColor: '#C7F39A', color:'black', fontWeight:'600' }} htmlType="submit">
                         Submit
                     </Button>
                 </Form.Item>

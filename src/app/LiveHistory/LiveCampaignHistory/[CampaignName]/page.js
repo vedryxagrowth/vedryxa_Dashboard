@@ -12,7 +12,7 @@ import { useTokenContext } from '../../../components/parent'
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
 import { color } from 'chart.js/helpers';
-import { Spin, Row, Col, Select, Input, Button, Modal, message, Switch } from 'antd';
+import { Spin, Row, Col, Select, Input, Button, Modal, message, Switch,Tooltip } from 'antd';
 import { ReloadOutlined, EditOutlined, BarChartOutlined } from '@ant-design/icons';
 import debounce from 'lodash.debounce';
 
@@ -89,6 +89,15 @@ const MnetLiveCampaignHistory = ({ params }) => {
     const [decode, setDebounc] = useState("");
 
     const [chartData, setChartData] = useState({ dates: [], sortedData: [], sortedMarginData: [], rpcDate: [], hoursDate: [], hours: [], spend: [], revenue: [], profit: [], margin: [] });
+
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText(decodedString).then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1500); // Reset after 1.5 seconds
+        });
+    };
 
     const timeZoneToDisplay = useRef();
 
@@ -1580,6 +1589,17 @@ const MnetLiveCampaignHistory = ({ params }) => {
         mainFunctionCall();
     };
 
+    const sendNewCommentToAPI = async (logData) => {
+        try {
+            const response = await apiClient.post('/Comments', {
+                commentsdatas: logData,
+            });
+            // console.log('Response from server:', response.data);
+        } catch (error) {
+            console.error('Error sending data to server:', error);
+        }
+    };
+
     const sendEditedCommentToAPI = async () => {
         try {
             console.log("comment:")
@@ -1610,8 +1630,20 @@ const MnetLiveCampaignHistory = ({ params }) => {
                 adsetid: adsetid
             };
 
-            // if (relatedComment) {
+            
+            // Check if comment already exists
+            const relatedComment = campaignComments.find(
+                (cmt) => cmt.campaignname === decodedString && cmt.Account === accountNumber
+            );
+
+            if (relatedComment) {
                 await sendEditedCommentToAPI(logData);
+            } else {
+                await sendNewCommentToAPI(logData);
+            }
+
+            // if (relatedComment) {
+            //     await sendEditedCommentToAPI(logData);
             //     refreshComments(account);
             //     message.success("Comment updated successfully!");
             // } else {
@@ -2000,30 +2032,68 @@ const MnetLiveCampaignHistory = ({ params }) => {
                         placeholder="Search table..."
                         value={searchText}
                         onChange={(e) => setSearchText(e.target.value)}
-                        style={{ width: "200px", padding: "3px" }}
+                        className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                        style={{ width: "200px", padding: "3px", backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
                     />
                     <Button 
                         type="default" 
-                        icon={<ReloadOutlined />} 
+                        icon={<ReloadOutlined  className='black-icon'/>} 
                         style={{ height: "30px", marginLeft: "10px", backgroundColor: '#C7F39A', border: 'none' }} 
                         onClick={handleReload}  // Call refresh function when clicked
                     />
                     {/* <p style={{marginLeft:"10px"}}>{comment}</p> */}
-                    {comment && (
+                    {/* {comment && (
                         <EditOutlined 
                             onClick={() => setIsModalVisibles(true)} 
                             style={{ marginLeft: '15px', color: 'black', cursor: 'pointer' }} 
                         />
-                    )}
+                    )} */}
+                    <EditOutlined 
+                        onClick={() => setIsModalVisibles(true)} 
+                        style={{ 
+                            marginLeft: '15px', 
+                            color: comment ? 'blue' : 'gray', 
+                            cursor: 'pointer' 
+                        }} 
+                        title={comment ? 'Edit Comment' : 'Add Comment'}
+                    />
                     <div style={{ width: '100%' }}>
-                        <h3 style={{ textAlign: 'center', marginLeft:'20px' }}>{decodedString}</h3>
+                        <Tooltip
+                            title={copied ? 'Copied!' : 'Click to copy'}
+                            // color={copied ? 'green' : undefined}
+                        >
+                            <h3
+                            style={{ textAlign: 'center', cursor: 'pointer' }}
+                            onClick={handleCopy}
+                            >
+                            {decodedString}
+                            </h3>
+                        </Tooltip>
                     </div>
+                    {comment && (
+                        <Tooltip title={comment}>
+                            <p
+                            style={{
+                                marginLeft: '5px',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                maxWidth: '300px',
+                                cursor: 'pointer',
+                                marginBottom: '5px',
+                            }}
+                            >
+                            ({comment})
+                            </p>
+                        </Tooltip>
+                    )}
                 </Col>
                 <Select
                     placeholder="Select a range"
                     value={selectedValue}
                     onChange={handleChange}
                     style={{ width: "200px" }}
+                    dropdownClassName={theme === 'dark' && "custom-dropdown"}
                     allowClear
                 >
                     {dateOptions.map((option, index) => (
@@ -2169,6 +2239,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                              title={
                                     decodedString
                             }
+                            className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             visible={isModalVisibles}
                             onOk={handleOks} // Default Ok button functionality
                             onCancel={handleCancels} // Default Cancel button functionality
@@ -2195,7 +2266,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                                     <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
                                         Cancel
                                     </Button>
-                                    <Button key="ok" type="primary" onClick={handleOks} style={{marginLeft:"4px"}}>
+                                    <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#C7F39A"}}>
                                         Ok
                                     </Button>
                                     </div>
@@ -2207,6 +2278,8 @@ const MnetLiveCampaignHistory = ({ params }) => {
                                 value={comment}
                                 onChange={(e) => setComment(e.target.value)}
                                 style={{color: theme === "dark" ? "white" : "black"}}
+                                backgroundColor= {theme === "dark" ? "#1e1e1e" : "white"}   // background color
+                                borderColor={ theme === "dark" ? "#555" : "#d9d9d9" }
                             />
                         </Modal>
         </Row>

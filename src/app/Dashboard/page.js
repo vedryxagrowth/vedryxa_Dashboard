@@ -322,19 +322,19 @@ const RevenuePartnerDashboard = () => {
                 key: item.key,
                 label: item.label,
                 }))}
-                className="custom-tabs" // Apply custom CSS class
+                className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
                 style={{
-                backgroundColor: '#f0f2f5',
-                padding: '0',       
-                marginBottom: '0',  
+                    backgroundColor:  'transparent',
+                    padding: '0',
+                    marginBottom: '0',
                 }}
                 tabBarStyle={{
-                fontSize: '12px',      
-                padding: '0',          
-                height: '30px',        
-                lineHeight: '30px',    
-                marginBottom: '-1px',  
-                borderBottom: 'none',  
+                    fontSize: '12px',
+                    padding: '0',
+                    height: '30px',
+                    lineHeight: '30px',
+                    marginBottom: '-1px',
+                    borderBottom: 'none',
                 }}
             />
         </StickyBox>
@@ -690,7 +690,9 @@ const RevenuePartnerDashboard = () => {
                                 width: '100%',
                             }}
                         >
-                            <Select {...sharedProps} {...selectProps} />
+                            <Select {...sharedProps} {...selectProps} 
+                                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                dropdownClassName={theme === 'dark' && 'custom-dropdown'}/>
                         </Space>
                     </Col>
                     <Col xs={16} sm={16} md={10} lg={8}>
@@ -724,10 +726,12 @@ const RevenuePartnerDashboard = () => {
                             onChange={onChangeTime}
                             value={timeZone}
                             options={timezones.map((item) => ({ value: item, label: item }))}
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                            dropdownClassName={theme === 'dark' && 'custom-dropdown'}
                         />
                     </Col>
                     <Col xs={12} sm={12} md={2}>
-                        <Button onClick={onClickSubmit} style={{backgroundColor: '#C7F39A',}}>
+                        <Button onClick={onClickSubmit} style={{backgroundColor: '#C7F39A', color:"black", fontWeight:'600'}}>
                             Submit
                         </Button>
                     </Col>
@@ -2598,19 +2602,19 @@ const Dashboard = () => {
                 key: item.key,
                 label: item.label,
                 }))}
-                className="custom-tabs" // Apply custom CSS class
+                className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
                 style={{
-                backgroundColor: '#f0f2f5',
-                padding: '0',       
-                marginBottom: '0',  
+                    backgroundColor:  'transparent',
+                    padding: '0',
+                    marginBottom: '0',
                 }}
                 tabBarStyle={{
-                fontSize: '12px',      
-                padding: '0',          
-                height: '30px',        
-                lineHeight: '30px',    
-                marginBottom: '-1px',  
-                borderBottom: 'none',  
+                    fontSize: '12px',
+                    padding: '0',
+                    height: '30px',
+                    lineHeight: '30px',
+                    marginBottom: '-1px',
+                    borderBottom: 'none',
                 }}
             />
         </StickyBox>
@@ -2625,19 +2629,19 @@ const Dashboard = () => {
                     key: item.key,
                     label: item.label,
                     }))}
-                    className="custom-tabs" // Apply custom CSS class
+                    className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
                     style={{
-                    backgroundColor: '#f0f2f5',
-                    padding: '0',       
-                    marginBottom: '0',  
+                        backgroundColor:  'transparent',
+                        padding: '0',
+                        marginBottom: '0',
                     }}
                     tabBarStyle={{
-                    fontSize: '12px',      
-                    padding: '0',          
-                    height: '30px',        
-                    lineHeight: '30px',    
-                    marginBottom: '-1px',  
-                    borderBottom: 'none',  
+                        fontSize: '12px',
+                        padding: '0',
+                        height: '30px',
+                        lineHeight: '30px',
+                        marginBottom: '-1px',
+                        borderBottom: 'none',
                     }}
                 />
             </StickyBox>
@@ -2652,9 +2656,9 @@ const Dashboard = () => {
                     key: item.key,
                     label: item.label,
                 }))}
-                className="custom-tabs"
+                className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
                 style={{
-                    backgroundColor: '#f0f2f5',
+                    backgroundColor:  'transparent',
                     padding: '0',
                     marginBottom: '0',
                 }}
@@ -2679,9 +2683,9 @@ const Dashboard = () => {
                     key: item.key,
                     label: item.label,
                 }))}
-                className="custom-tabs"
+                className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
                 style={{
-                    backgroundColor: '#f0f2f5',
+                    backgroundColor:  'transparent',
                     padding: '0',
                     marginBottom: '0',
                 }}
@@ -3245,7 +3249,7 @@ const Dashboard = () => {
                             <Col>
                                 <Button 
                                     type="default" 
-                                    icon={<ReloadOutlined />} 
+                                    icon={<ReloadOutlined className='black-icon' />} 
                                     style={{ float: "right", marginLeft: "10px", backgroundColor: '#C7F39A' }} 
                                     onClick={refreshUsers}  // Call refresh function when clicked
                                 >
@@ -3700,7 +3704,7 @@ const Dashboard = () => {
                                                     },
                                                     },
                                                     grid: {
-                                                    color: darkMode ? '#444' : '#e0e0e0',
+                                                    color: theme === "dark" ? '#444' : '#e0e0e0',
                                                     },
                                                 },
                                                 y: {
@@ -3709,17 +3713,17 @@ const Dashboard = () => {
                                                     callback: function (value) {
                                                         return value.toFixed(2);
                                                     },
-                                                    color: darkMode ? '#fff' : '#000',
+                                                    color: theme === "dark" ? '#fff' : '#000',
                                                     },
                                                     grid: {
-                                                    color: darkMode ? '#444' : '#e0e0e0',
+                                                    color: theme === "dark" ? '#444' : '#e0e0e0',
                                                     },
                                                 },
                                                 },
                                                 plugins: {
                                                 legend: {
                                                     labels: {
-                                                    color: darkMode ? '#fff' : '#000',
+                                                    color: theme === "dark" ? '#fff' : '#000',
                                                     },
                                                 },
                                                 tooltip: {
@@ -3858,7 +3862,7 @@ const Dashboard = () => {
                                                     },
                                                     },
                                                     grid: {
-                                                    color: darkMode ? '#444' : '#e0e0e0',
+                                                    color: theme === "dark" ? '#444' : '#e0e0e0',
                                                     },
                                                 },
                                                 y: {
@@ -3867,17 +3871,17 @@ const Dashboard = () => {
                                                     callback: function (value) {
                                                         return value.toFixed(2);
                                                     },
-                                                    color: darkMode ? '#fff' : '#000',
+                                                    color: theme === "dark" ? '#fff' : '#000',
                                                     },
                                                     grid: {
-                                                    color: darkMode ? '#444' : '#e0e0e0',
+                                                    color: theme === "dark" ? '#444' : '#e0e0e0',
                                                     },
                                                 },
                                                 },
                                                 plugins: {
                                                 legend: {
                                                     labels: {
-                                                    color: darkMode ? '#fff' : '#000',
+                                                    color: theme === "dark" ? '#fff' : '#000',
                                                     },
                                                 },
                                                 tooltip: {

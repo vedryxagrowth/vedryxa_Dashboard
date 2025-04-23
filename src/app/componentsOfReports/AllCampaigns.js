@@ -53,7 +53,7 @@ const selectTimezone = {
 };
 
 
-const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle}) => {
+const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, fetchData, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle}) => {
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -96,6 +96,65 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
         );
     }
     ), [campaignData, inputValue]);
+
+    useEffect(() => {
+        
+        setFixedFooter([
+            {
+                campaignName: 'Total',
+                actions: '',
+                spend: memorizedCampaignsData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0).toFixed(2),
+                revenue: memorizedCampaignsData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0).toFixed(2),
+                profit: memorizedCampaignsData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0).toFixed(2),
+                margin: (
+                    (memorizedCampaignsData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) /
+                        memorizedCampaignsData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0)) *
+                    100
+                ).toFixed(2),
+                rpc: (
+                    memorizedCampaignsData.reduce((acc, curr) => acc + parseFloat(curr.rpc || 0), 0) /
+                    memorizedCampaignsData.length
+                ).toFixed(2),
+                cpl: (
+                    memorizedCampaignsData.reduce((acc, curr) => acc + parseFloat(curr.cpl || 0), 0) /
+                    memorizedCampaignsData.length
+                ).toFixed(2),
+                ncpl: (
+                    memorizedCampaignsData.reduce((acc, curr) => acc + parseFloat(curr.ncpl || 0), 0) /
+                    memorizedCampaignsData.length
+                ).toFixed(2),
+                fbleads: memorizedCampaignsData.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0),
+                conversions: memorizedCampaignsData.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0),
+                fmargin: (
+                    (memorizedCampaignsData.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) /
+                        memorizedCampaignsData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) *
+                    100
+                ).toFixed(2),
+                roi: (
+                    ((memorizedCampaignsData.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) -
+                        memorizedCampaignsData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) /
+                        memorizedCampaignsData.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) *
+                    100
+                ).toFixed(2),
+                cpc: (
+                    memorizedCampaignsData.reduce((acc, curr) => acc + parseFloat(curr?.cpc || 0), 0) /
+                    memorizedCampaignsData.length
+                ).toFixed(2),
+                fbclicks: memorizedCampaignsData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0),
+                cpclinkclicks: (
+                    memorizedCampaignsData.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks || 0), 0) /
+                    memorizedCampaignsData.length
+                ).toFixed(2),
+                fblinkclicks: memorizedCampaignsData.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0),
+                impressions: memorizedCampaignsData.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0),
+                ctr: (
+                    (memorizedCampaignsData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) /
+                        memorizedCampaignsData.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0)) *
+                    100
+                ).toFixed(2),
+            },
+        ]);
+    }, [memorizedCampaignsData]);
 
     const onBtExport = (gridRef, text) => {
         const Details = {
@@ -440,13 +499,13 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                                     if (status === 'PAUSED') {
                                         return (
                                             <Tooltip title={tooltipContent}>
-                                                <PauseCircleOutlined style={{ color: 'orange', fontSize: '18px' }} />
+                                                <PauseCircleOutlined style={{ color: 'orange', fontSize: '18px' }}   className='black-icon-pause' />
                                             </Tooltip>
                                         );
                                     } else if (status === 'ACTIVE') {
                                         return (
                                             <Tooltip title={tooltipContent}>
-                                                <CheckCircleOutlined style={{ color: 'green', fontSize: '18px' }} />
+                                                <CheckCircleOutlined style={{ color: 'green', fontSize: '18px' }} className='black-icon-active' />
                                             </Tooltip>
                                         );
                                     } else {
@@ -474,7 +533,7 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                                     <EditOutlined onClick={handleEditClick} style={{ marginLeft: '10px', color: 'blue', cursor: 'pointer' }} />
                                 </div>
                             )}>
-                                <MessageOutlined className='Message' style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
+                                <MessageOutlined  className= {theme === "dark" ? "black-icon-comment" : 'Message'} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
                                 <Tooltip title={tooltipText}></Tooltip>
                             </Tooltip>
                         ) : (
@@ -497,6 +556,7 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                         <Modal
                             title={firstColumnValue}
                             visible={isModalVisible}
+                            className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             onOk={handleOk} // Default Ok button functionality
                             onCancel={handleCancel} // Default Cancel button functionality
                             footer={[
@@ -522,7 +582,7 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                                     <Button key="cancel" onClick={handleCancel} style={{marginLeft:"4px"}}>
                                         Cancel
                                     </Button>
-                                    <Button key="ok" type="primary" onClick={handleOk} style={{marginLeft:"4px"}}>
+                                    <Button key="ok" onClick={handleOk} style={{marginLeft:"4px", backgroundColor:"#C7F39A"}}>
                                         Ok
                                     </Button>
                                     </div>
@@ -669,16 +729,16 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
     //     }
     // }
 
-    const functionCall3 = async () => {
+    const functionCall3 = async (fetchData) => {
         try {
             setLoading2(true);
             setCampaignData([]);
     
-            const fetchData = await apiClient.get(
-                `/AllCampaigns?accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}&campaignName=${inputValue}`
-            );
+            // const fetchData = await apiClient.get(
+            //     `/AllCampaigns?accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}&campaignName=${inputValue}`
+            // );
     
-            const mainData = fetchData.data.items || [];
+            const mainData = fetchData.items || [];
     
             if (mainData.length > 0) {
                 timezone.current = mainData[0].accountTimezone;
@@ -740,6 +800,8 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                     actions: '...',
                     adid: "",
                     adname: "",
+                    from:"",
+                    profitloss: "",
                 };
             });
     
@@ -1029,17 +1091,17 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
         return originalElement;
     };
 
-    const handleReFetchData = () => {
-        functionCall3();
+    const handleReFetchData = (fetchData) => {
+        functionCall3(fetchData);
         setApiStatus(false);
     }
 
     useEffect(() => {
         if (refreshpage === "Refresh3") {
-            handleReFetchData();
+            handleReFetchData(fetchData);
         }
     }
-    , [refreshpage]);
+    , [refreshpage, fetchData]);
 
     // useEffect(() => {
     //     if(inputValue){
@@ -1060,8 +1122,8 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
     }, [inputValue]);
       
     useEffect(() => {
-        functionCall3();
-    }, [pageSize, inputValue]);
+        functionCall3(fetchData);
+    }, [inputValue, fetchData]);
 
 
     return(
@@ -1091,21 +1153,21 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                                 );
                             })?.length > 0 ? (
                                 <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
-                                    <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap' }}>
+                                    <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d" }}>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
                                             <Space align="center" className='daily-container' style={{ width: '150px' }}>
                                                 <div class="blinking-circle-3"></div>
-                                                <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600', width: '100px' }}>Campaigns</Text>
+                                                <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600', width: '100px', color: theme === "dark" && "white" }}>Campaigns</Text>
                                             </Space>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600' }}>Acc: {newaccount}</Text>
+                                            <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Acc: {newaccount}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600' }}>AccName: {newAccountName}</Text>
+                                            <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>AccName: {newAccountName}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600' }}>Timezone: {timezone.current}</Text>
+                                            <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Timezone: {timezone.current}</Text>
                                         </Col>
                                         {/* <Col>
                                             <Tooltip 
@@ -1117,7 +1179,7 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                                         </Col> */}
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                             <Tooltip title="Export to CSV">
-                                                <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined />} onClick={() => onBtExport(gridRef2, "AllCampaigns")} />
+                                                <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={() => onBtExport(gridRef2, "AllCampaigns")} />
                                             </Tooltip>
                                         </Col>
                                     </Row>
