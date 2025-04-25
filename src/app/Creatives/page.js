@@ -175,7 +175,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                         try {
                             if (file.action === 'copy') {
                                 if (file.isFolder) {
-                                    await axios.post("http://localhost:8000/copyFolder", {
+                                    await axios.post("https://prodapis.adsgoat.in/copyFolder", {
                                         sourceKey,
                                         destinationKey: finalKey
                                     }, {
@@ -185,7 +185,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                                         }
                                     });
                                 } else {
-                                    const proxyUrl = `http://localhost:8000/proxy?url=${encodeURIComponent(file.url)}`;
+                                    const proxyUrl = `https://prodapis.adsgoat.in/proxy?url=${encodeURIComponent(file.url)}`;
                                     const res = await fetch(proxyUrl);
                                     const blob = await res.blob();
                                     const fileName = finalKey.split('/').pop();
@@ -194,7 +194,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                                     formData.append("filename", finalKey);
                                     formData.append("folder", currentFolder);
 
-                                    await axios.post("http://localhost:8000/uploadUserFiles", formData, {
+                                    await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
                                         headers: {
                                             Authorization: localStorage.getItem("token"),
                                             username: userdetails.userName,
@@ -207,7 +207,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                                     return;
                                 }
 
-                                await axios.post("http://localhost:8000/moveFileOrFolder", {
+                                await axios.post("https://prodapis.adsgoat.in/moveFileOrFolder", {
                                     sourceKey,
                                     destinationKey: finalKey
                                 }, {
@@ -268,7 +268,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                 formData.append("folder", currentFolder);
     
                 try {
-                    await axios.post("http://localhost:8000/uploadUserFiles", formData, {
+                    await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
                         headers: {
                             Authorization: localStorage.getItem("token"),
                             username: userdetails.userName,
@@ -378,14 +378,14 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
     
         try {
             const response = isTrashView
-            ? await axios.get("http://localhost:8000/getTrashFiles", {
+            ? await axios.get("https://prodapis.adsgoat.in/getTrashFiles", {
                 headers: {
                     username: userdetails.userName,
                     "x-folder": trashPath,
                     Authorization: localStorage.getItem("token"),
                 },
             })
-            : await axios.get("http://localhost:8000/getUserFiles", {
+            : await axios.get("https://prodapis.adsgoat.in/getUserFiles", {
                 headers: {
                     username: userdetails.userName,
                     "x-folder": normalPath,
@@ -507,7 +507,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
             }
     
             // Use backend proxy
-            const proxyUrl = `http://localhost:8000/proxy?url=${encodeURIComponent(finalUrl)}`;
+            const proxyUrl = `https://prodapis.adsgoat.in/proxy?url=${encodeURIComponent(finalUrl)}`;
             const response = await fetch(proxyUrl);
     
             if (!response.ok) {
@@ -668,7 +668,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
         try {
 
             // 🔹 Use proxy to fetch the image and bypass CORS restrictions
-            const proxyUrl = `http://localhost:8000/proxy?url=${encodeURIComponent(image.url)}`;
+            const proxyUrl = `https://prodapis.adsgoat.in/proxy?url=${encodeURIComponent(image.url)}`;
             console.log("Cloning using Proxy:", proxyUrl);
 
             const response = await fetch(proxyUrl);
@@ -696,7 +696,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
             formData.append("filename", `${uploadPrefix}${currentFolder}${clonedFileName}`);
             formData.append("folder", currentFolder); // include the folder for backend
     
-            const uploadResponse = await axios.post("http://localhost:8000/uploadUserFiles", formData, {
+            const uploadResponse = await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
                 headers: {
                     Authorization: localStorage.getItem("token"),
                     "username": userdetails?.userName,
@@ -739,7 +739,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
         }
 
         // 🔹 Proxy the image URL
-        const proxyUrl = `http://localhost:8000/proxy?url=${encodeURIComponent(image.url)}`;
+        const proxyUrl = `https://prodapis.adsgoat.in/proxy?url=${encodeURIComponent(image.url)}`;
 
         console.log("Editing Image URL:", proxyUrl); 
     
@@ -782,7 +782,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
         formData.append("folder", currentFolder); // pass the current folder as a separate field
     
         try {
-            const response = await axios.post("http://localhost:8000/uploadUserFiles", formData, {
+            const response = await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
                 headers: {
                     Authorization: localStorage.getItem("token"),
                     "username": userdetails?.userName,
@@ -1053,7 +1053,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
     
             try {
                 if (isFolder) {
-                    await axios.post("http://localhost:8000/renameFolder", {
+                    await axios.post("https://prodapis.adsgoat.in/renameFolder", {
                         oldFolderKey: oldItem.uid,
                         newFolderKey: newKey,
                     }, {
@@ -1063,7 +1063,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                         },
                     });
                 } else {
-                    await axios.post("http://localhost:8000/renameUserFile", {
+                    await axios.post("https://prodapis.adsgoat.in/renameUserFile", {
                         key: oldItem.uid,
                         newFilename: newKey,
                     }, {
@@ -1113,7 +1113,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
       
           try {
             if (isFolder) {
-              await axios.post("http://localhost:8000/renameFolder", {
+              await axios.post("https://prodapis.adsgoat.in/renameFolder", {
                 oldFolderKey: oldKey,
                 newFolderKey: newKey,
               }, {
@@ -1123,7 +1123,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                 },
               });
             } else {
-              await axios.post("http://localhost:8000/renameUserFile", {
+              await axios.post("https://prodapis.adsgoat.in/renameUserFile", {
                 key: oldKey,
                 newFilename: newKey,
               }, {
@@ -1147,7 +1147,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
     const handleConfirmDelete = async () => {
         if (!imageToDelete || !userdetails?.userName) return;
         try {
-            const response = await axios.delete("http://localhost:8000/deleteUserFiles", {
+            const response = await axios.delete("https://prodapis.adsgoat.in/deleteUserFiles", {
                 headers: { 
                     "username": userdetails.userName,
                     Authorization: localStorage.getItem("token"),
@@ -1635,7 +1635,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                                         const targetKey = `${uploadPrefix}${currentFolder}${image.name}/`;
                                         const destinationKey = `${targetKey}${sourceName}${sourceKey.endsWith("/") ? '/' : ''}`;
                                       
-                                        await axios.post("http://localhost:8000/moveFileOrFolder", {
+                                        await axios.post("https://prodapis.adsgoat.in/moveFileOrFolder", {
                                           sourceKey,
                                           destinationKey,
                                         }, {
@@ -1996,7 +1996,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                                         if (file.action === "copy") {
                                         if (file.isFolder) {
                                             // 📁 Copy folder
-                                            await axios.post("http://localhost:8000/copyFolder", {
+                                            await axios.post("https://prodapis.adsgoat.in/copyFolder", {
                                             sourceKey, destinationKey,
                                             }, {
                                             headers: {
@@ -2013,7 +2013,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                                             const newName = `${base}(${cloneNumber})${ext}`;
                                             destinationKey = `${uploadPrefix}${currentFolder}${newName}`;
 
-                                            const proxyUrl = `http://localhost:8000/proxy?url=${encodeURIComponent(file.url)}`;
+                                            const proxyUrl = `https://prodapis.adsgoat.in/proxy?url=${encodeURIComponent(file.url)}`;
                                             const res = await fetch(proxyUrl);
                                             const blob = await res.blob();
 
@@ -2022,7 +2022,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                                             formData.append("filename", destinationKey);
                                             formData.append("folder", currentFolder);
 
-                                            await axios.post("http://localhost:8000/uploadUserFiles", formData, {
+                                            await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
                                             headers: {
                                                 Authorization: localStorage.getItem("token"),
                                                 username: userdetails.userName,
@@ -2033,7 +2033,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
 
                                         if (file.action === "cut") {
                                         // ✂️ Move file or folder
-                                        await axios.post("http://localhost:8000/moveFileOrFolder", {
+                                        await axios.post("https://prodapis.adsgoat.in/moveFileOrFolder", {
                                             sourceKey,
                                             destinationKey,
                                         }, {
@@ -2049,7 +2049,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                                     fetchUserImages();
                                     setClipboardFile(null);
                                     setContextMenu({ ...contextMenu, visible: false });
-                                    message.success(`Pasted ${clipboardFile.length} item(s)`);
+                                    // message.success(`Pasted ${clipboardFile.length} item(s)`);
                                 } catch (err) {
                                     console.error("Paste error:", err);
                                     message.error("Failed to paste some items.");
@@ -2078,7 +2078,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                                 const items = contextMenu.selectedList?.length > 0 ? contextMenu.selectedList : [contextMenu.target];
                                 try {
                                 await Promise.all(items.map(item =>
-                                    axios.delete("http://localhost:8000/permanentlyDelete", {
+                                    axios.delete("https://prodapis.adsgoat.in/permanentlyDelete", {
                                     headers: {
                                         Authorization: localStorage.getItem("token"),
                                         username: userdetails.userName,
@@ -2087,7 +2087,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                                     })
                                 ));
                                 setSelectedImages([]);
-                                message.success("Deleted permanently");
+                                // message.success("Deleted permanently");
                                 fetchUserImages();
                                 } catch (err) {
                                 console.error("Permanent delete failed", err);
@@ -2112,7 +2112,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                                     if (!relativePath) throw new Error("Invalid original path");
 
                                     const originalKey = `${selectedKey}/${selectedAccountNumber}/${relativePath}`;
-                                    await axios.post("http://localhost:8000/restoreFileOrFolder", {
+                                    await axios.post("https://prodapis.adsgoat.in/restoreFileOrFolder", {
                                     trashKey,
                                     originalKey,
                                     }, {
@@ -2123,7 +2123,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                                     });
                                 }));
                                 setSelectedImages([]);
-                                message.success("Restored successfully");
+                                // message.success("Restored successfully");
                                 fetchUserImages();
                                 } catch (err) {
                                 console.error("Restore failed", err);
@@ -2153,7 +2153,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                             })));
                             setSelectedImages([]);
                             selectedImagesRef.current = [];
-                            message.success("Items copied");
+                            // message.success("Items copied");
                             setContextMenu({ ...contextMenu, visible: false });
                             }}>
                             <CopyOutlined style={{ marginRight: 8 }} />
@@ -2171,7 +2171,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                             );
                             setSelectedImages([]);
                             selectedImagesRef.current = [];
-                            message.success("Items cut");
+                            // message.success("Items cut");
                             setContextMenu({ ...contextMenu, visible: false });
                             }}>
                                 ✂️ Cut
@@ -2183,7 +2183,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                                         contextMenu.selectedList.map(item => {
                                         const isFolder = item.isFolder;
                                         if (isFolder) {
-                                            return axios.delete("http://localhost:8000/deleteFolder", {
+                                            return axios.delete("https://prodapis.adsgoat.in/deleteFolder", {
                                             headers: {
                                                 Authorization: localStorage.getItem("token"),
                                                 username: userdetails.userName,
@@ -2191,7 +2191,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                                             },
                                             });
                                         } else {
-                                            return axios.delete("http://localhost:8000/deleteUserFiles", {
+                                            return axios.delete("https://prodapis.adsgoat.in/deleteUserFiles", {
                                             headers: {
                                                 Authorization: localStorage.getItem("token"),
                                                 username: userdetails.userName,
@@ -2202,7 +2202,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                                         })
                                     ); 
                                     setSelectedImages([]);
-                                    message.success("Selected items moved to bin");
+                                    // message.success("Selected items moved to bin");
                                     fetchUserImages();
                                     setContextMenu({ ...contextMenu, visible: false });
                                 } catch (err) {
@@ -2260,7 +2260,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                             <div style={{ padding: '8px 12px' }} onClick={() => {
                             setClipboardFile([{ ...contextMenu.target, action: "copy", isFolder: true }]);
                             setSelectedImages([]);
-                            message.success("Folder copied");
+                            // message.success("Folder copied");
                             setContextMenu({ ...contextMenu, visible: false });
                             }}>
                             <CopyOutlined style={{ marginRight: 8 }} />
@@ -2271,7 +2271,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                             setClipboardFile([{ ...contextMenu.target, action: "cut", isFolder: true }]);
                             setFilteredImages(prev => prev.filter(f => f.uid !== contextMenu.target.uid));
                             setSelectedImages([]);
-                            message.success("Folder cut");
+                            // message.success("Folder cut");
                             setContextMenu({ ...contextMenu, visible: false });
                             }}>
                                 ✂️ Cut
@@ -2324,7 +2324,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                             <div style={{ padding: '8px 12px' }} onClick={() => {
                             setClipboardFile([{ ...contextMenu.target, action: "copy", isFolder: false }]);
                             setSelectedImages([]);
-                            message.success("File copied");
+                            // message.success("File copied");
                             setContextMenu({ ...contextMenu, visible: false });
                             }}>
                             <CopyOutlined style={{ marginRight: 8 }} />
@@ -2335,7 +2335,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                             setClipboardFile([{ ...contextMenu.target, action: "cut", isFolder: false }]);
                             setFilteredImages(prev => prev.filter(f => f.uid !== contextMenu.target.uid));
                             setSelectedImages([]);
-                            message.success("File cut");
+                            // message.success("File cut");
                             setContextMenu({ ...contextMenu, visible: false });
                             }}>
                                 ✂️ Cut
@@ -2362,7 +2362,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                 const folderExists = images.some(img => img.uid === baseKey && img.isFolder);
 
                 const createFolder = async (key) => {
-                await axios.post("http://localhost:8000/uploadUserFiles", new FormData(), {
+                await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", new FormData(), {
                     headers: {
                     Authorization: localStorage.getItem("token"),
                     username: userdetails.userName,
@@ -2376,7 +2376,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                 };
 
                 const replaceFolder = async () => {
-                await axios.delete("http://localhost:8000/deleteFolder", {
+                await axios.delete("https://prodapis.adsgoat.in/deleteFolder", {
                     headers: {
                     Authorization: localStorage.getItem("token"),
                     username: userdetails.userName,
@@ -2420,7 +2420,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                 segments[segments.length - 2] = name;
                 const newKey = segments.slice(0, -1).join('/') + '/';
 
-                await axios.post("http://localhost:8000/renameFolder", {
+                await axios.post("https://prodapis.adsgoat.in/renameFolder", {
                     oldFolderKey: oldKey,
                     newFolderKey: newKey,
                 }, {
@@ -2458,7 +2458,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                 const folderExists = images.some(img => img.uid === baseKey && img.isFolder);
 
                 const createFolder = async (key) => {
-                    await axios.post("http://localhost:8000/uploadUserFiles", new FormData(), {
+                    await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", new FormData(), {
                     headers: {
                         Authorization: localStorage.getItem("token"),
                         username: userdetails.userName,
@@ -2472,7 +2472,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                 };
 
                 const replaceFolder = async () => {
-                    await axios.delete("http://localhost:8000/deleteFolder", {
+                    await axios.delete("https://prodapis.adsgoat.in/deleteFolder", {
                     headers: {
                         Authorization: localStorage.getItem("token"),
                         username: userdetails.userName,
@@ -2514,7 +2514,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                     segments[segments.length - 2] = name;
                     const newKey = segments.slice(0, -1).join('/') + '/';
 
-                    await axios.post("http://localhost:8000/renameFolder", {
+                    await axios.post("https://prodapis.adsgoat.in/renameFolder", {
                     oldFolderKey: oldKey,
                     newFolderKey: newKey,
                     }, {
@@ -2541,7 +2541,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                 const folderKey = deleteFolderModal.folder?.uid;
                 if (!folderKey) return;
 
-                await axios.delete("http://localhost:8000/deleteFolder", {
+                await axios.delete("https://prodapis.adsgoat.in/deleteFolder", {
                     headers: {
                     Authorization: localStorage.getItem("token"),
                     username: userdetails.userName,
