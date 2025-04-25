@@ -175,7 +175,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                         try {
                             if (file.action === 'copy') {
                                 if (file.isFolder) {
-                                    await axios.post("https://prodapis.adsgoat.in/copyFolder", {
+                                    await axios.post("http://localhost:8000/copyFolder", {
                                         sourceKey,
                                         destinationKey: finalKey
                                     }, {
@@ -185,7 +185,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                                         }
                                     });
                                 } else {
-                                    const proxyUrl = `https://prodapis.adsgoat.in/proxy?url=${encodeURIComponent(file.url)}`;
+                                    const proxyUrl = `http://localhost:8000/proxy?url=${encodeURIComponent(file.url)}`;
                                     const res = await fetch(proxyUrl);
                                     const blob = await res.blob();
                                     const fileName = finalKey.split('/').pop();
@@ -194,7 +194,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                                     formData.append("filename", finalKey);
                                     formData.append("folder", currentFolder);
 
-                                    await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
+                                    await axios.post("http://localhost:8000/uploadUserFiles", formData, {
                                         headers: {
                                             Authorization: localStorage.getItem("token"),
                                             username: userdetails.userName,
@@ -207,7 +207,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                                     return;
                                 }
 
-                                await axios.post("https://prodapis.adsgoat.in/moveFileOrFolder", {
+                                await axios.post("http://localhost:8000/moveFileOrFolder", {
                                     sourceKey,
                                     destinationKey: finalKey
                                 }, {
@@ -268,7 +268,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                 formData.append("folder", currentFolder);
     
                 try {
-                    await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
+                    await axios.post("http://localhost:8000/uploadUserFiles", formData, {
                         headers: {
                             Authorization: localStorage.getItem("token"),
                             username: userdetails.userName,
@@ -377,23 +377,15 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
         const trashPath = `${selectedKey}/${selectedAccountNumber}`; // <-- no trailing slash for Trash API    
     
         try {
-            // const response = await axios.get("https://prodapis.adsgoat.in/getUserFiles", {
-            //     headers: {
-            //         username: userdetails.userName,
-            //         "x-folder": fullPath,
-            //         Authorization: localStorage.getItem("token"),
-            //     },
-            // });
-
             const response = isTrashView
-            ? await axios.get("https://prodapis.adsgoat.in/getTrashFiles", {
+            ? await axios.get("http://localhost:8000/getTrashFiles", {
                 headers: {
                     username: userdetails.userName,
                     "x-folder": trashPath,
                     Authorization: localStorage.getItem("token"),
                 },
             })
-            : await axios.get("https://prodapis.adsgoat.in/getUserFiles", {
+            : await axios.get("http://localhost:8000/getUserFiles", {
                 headers: {
                     username: userdetails.userName,
                     "x-folder": normalPath,
@@ -405,19 +397,11 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                 const filteredItems = response.data.images
                     .filter(file => {
                         const key = file.key;
-    
-                    //     if (key === fullPath) return false;
-    
-                    //     const relativePath = key.replace(fullPath, '');
-                    //     // return !relativePath.includes('/') || key.endsWith('/');
+                        if (key === (isTrashView ? trashPath : normalPath)) return false;
 
-                    //     const isImmediateChild = relativePath !== '' && !relativePath.includes('/');
-                    //     return isImmediateChild || (key.endsWith('/') && !relativePath.slice(0, -1).includes('/'));
-                     if (key === (isTrashView ? trashPath : normalPath)) return false;
-
-                    const relativePath = key.replace(isTrashView ? `${trashPath}/Trashfiles/` : normalPath, '');
-                    const isImmediateChild = relativePath !== '' && !relativePath.includes('/');
-                    return isImmediateChild || (key.endsWith('/') && !relativePath.slice(0, -1).includes('/'));
+                        const relativePath = key.replace(isTrashView ? `${trashPath}/Trashfiles/` : normalPath, '');
+                        const isImmediateChild = relativePath !== '' && !relativePath.includes('/');
+                        return isImmediateChild || (key.endsWith('/') && !relativePath.slice(0, -1).includes('/'));
                     })
                     .map(file => {
                         const isFolder = file.key.endsWith('/');
@@ -523,7 +507,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
             }
     
             // Use backend proxy
-            const proxyUrl = `https://prodapis.adsgoat.in/proxy?url=${encodeURIComponent(finalUrl)}`;
+            const proxyUrl = `http://localhost:8000/proxy?url=${encodeURIComponent(finalUrl)}`;
             const response = await fetch(proxyUrl);
     
             if (!response.ok) {
@@ -684,7 +668,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
         try {
 
             // 🔹 Use proxy to fetch the image and bypass CORS restrictions
-            const proxyUrl = `https://prodapis.adsgoat.in/proxy?url=${encodeURIComponent(image.url)}`;
+            const proxyUrl = `http://localhost:8000/proxy?url=${encodeURIComponent(image.url)}`;
             console.log("Cloning using Proxy:", proxyUrl);
 
             const response = await fetch(proxyUrl);
@@ -712,7 +696,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
             formData.append("filename", `${uploadPrefix}${currentFolder}${clonedFileName}`);
             formData.append("folder", currentFolder); // include the folder for backend
     
-            const uploadResponse = await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
+            const uploadResponse = await axios.post("http://localhost:8000/uploadUserFiles", formData, {
                 headers: {
                     Authorization: localStorage.getItem("token"),
                     "username": userdetails?.userName,
@@ -755,7 +739,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
         }
 
         // 🔹 Proxy the image URL
-        const proxyUrl = `https://prodapis.adsgoat.in/proxy?url=${encodeURIComponent(image.url)}`;
+        const proxyUrl = `http://localhost:8000/proxy?url=${encodeURIComponent(image.url)}`;
 
         console.log("Editing Image URL:", proxyUrl); 
     
@@ -798,7 +782,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
         formData.append("folder", currentFolder); // pass the current folder as a separate field
     
         try {
-            const response = await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
+            const response = await axios.post("http://localhost:8000/uploadUserFiles", formData, {
                 headers: {
                     Authorization: localStorage.getItem("token"),
                     "username": userdetails?.userName,
@@ -984,14 +968,14 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
     // };
 
     const onSubmitData = () =>{
-        const selected = selectedImagesRef.current;
+        // const selected = selectedImagesRef.current;
     
-        if (!selected || selected.length === 0) {
-            message.warning("Please select at least one file to create a campaign.");
-            return;
-        }
+        // if (!selected || selected.length === 0) {
+        //     message.warning("Please select at least one file to create a campaign.");
+        //     return;
+        // }
 
-        console.log("Selected files for campaign:", selected);
+        // console.log("Selected files for campaign:", selected);
     
         selectedFilesData(checkboxSelected); // force state update
         setCheckboxSelected([]);
@@ -999,16 +983,17 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
     }
 
     const showDrawer = () => {
-        const selected = selectedImagesRef.current;
+        // const selected = selectedImagesRef.current;
     
-        if (!selected || selected.length === 0) {
-            message.warning("Please select at least one file to create a campaign.");
-            return;
-        }
+        // if (!selected || selected.length === 0) {
+        //     message.warning("Please select at least one file to create a campaign.");
+        //     return;
+        // }
 
-        console.log("Selected files for campaign:", selected);
+        // console.log("Selected files for campaign:", selected);
     
-        setSelectedImages([...selected]); // force state update
+        // setSelectedImages([...selected]); // force state update
+        setSelectedImages(checkboxSelected);
         setDrawerVisible(true);
     };
     
@@ -1068,7 +1053,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
     
             try {
                 if (isFolder) {
-                    await axios.post("https://prodapis.adsgoat.in/renameFolder", {
+                    await axios.post("http://localhost:8000/renameFolder", {
                         oldFolderKey: oldItem.uid,
                         newFolderKey: newKey,
                     }, {
@@ -1078,7 +1063,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                         },
                     });
                 } else {
-                    await axios.post("https://prodapis.adsgoat.in/renameUserFile", {
+                    await axios.post("http://localhost:8000/renameUserFile", {
                         key: oldItem.uid,
                         newFilename: newKey,
                     }, {
@@ -1099,8 +1084,6 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
         fetchUserImages();
     };
     
-           
-
     const handleInlineRename = async (image) => {
         if (!inlineName.trim()) {
           message.error("Name cannot be empty");
@@ -1130,7 +1113,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
       
           try {
             if (isFolder) {
-              await axios.post("https://prodapis.adsgoat.in/renameFolder", {
+              await axios.post("http://localhost:8000/renameFolder", {
                 oldFolderKey: oldKey,
                 newFolderKey: newKey,
               }, {
@@ -1140,7 +1123,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                 },
               });
             } else {
-              await axios.post("https://prodapis.adsgoat.in/renameUserFile", {
+              await axios.post("http://localhost:8000/renameUserFile", {
                 key: oldKey,
                 newFilename: newKey,
               }, {
@@ -1164,7 +1147,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
     const handleConfirmDelete = async () => {
         if (!imageToDelete || !userdetails?.userName) return;
         try {
-            const response = await axios.delete("https://prodapis.adsgoat.in/deleteUserFiles", {
+            const response = await axios.delete("http://localhost:8000/deleteUserFiles", {
                 headers: { 
                     "username": userdetails.userName,
                     Authorization: localStorage.getItem("token"),
@@ -1254,7 +1237,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                 selectedAccountNumber={selectedAccountNumber}
             />
 
-            <h1 style={{fontSize:'20px'}}>Creative Library</h1>
+            <h1 style={{fontSize:'20px', color: theme === 'dark' ? '#ffffff' : '#384551'}}>Creative Library</h1>
             <Row justify="start" align="middle" gutter={[16, 16]}>
                 <Col span={3}>
                         <Select
@@ -1406,22 +1389,21 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
             <div style={{ display: 'flex', justifyContent:'space-between', marginBottom: '20px', marginTop: '10px' }}>
                 <Col>
                     <Input
-                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                        className={theme === 'dark' ? 'custom-input-dark' : ''}
                         placeholder="Image URL"
                         value={urlInput}
                         onChange={(e) => setUrlInput(e.target.value)}
                         onKeyDown={(e) => {
                             if(e.key === "Enter") handleUploadURL();
                         }}
-                        style={{ width: '180px', marginRight: '10px', border: 'none' }}
+                        style={{ 
+                            width: '180px',
+                            marginRight: '10px', 
+                            border: 'none',
+                            // backgroundColor: theme === 'dark' ? '#2c2c2c' : undefined,
+                            // color: theme === 'dark' ? '#fff' : undefined
+                        }}
                     />
-                    {/* <Button 
-                        style={{ backgroundColor: '#C7F39A', border: 'none', color: theme === 'dark' ? 'black' : undefined  }} 
-                        onClick={handleUploadURL} // 🔹 Calls the function
-                        icon={<UploadOutlined className="black-icon" />}
-                    >
-                        Upload From URL
-                    </Button> */}
                     <Upload
                         key={uploadKey}
                         fileList={uploadFileList} // Controlled file list
@@ -1432,21 +1414,31 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                         // accept=".png,.jpg,.jpeg,.mp4,.mov"
                         accept="image/*, video/*" 
                     >
-                        <Button style={{marginLeft: '10px', border:'none'}} icon={<UploadOutlined />}>Upload</Button>
+                        <Button 
+                            style={{
+                                marginLeft: '10px', 
+                                border:'none',
+                                backgroundColor: theme === 'dark' ? '#2c2c2c' : undefined,
+                                color: theme === 'dark' ? '#fff' : undefined
+                            }} 
+                            icon={<UploadOutlined style={{ color: theme === 'dark' ? '#fff' : undefined }} />}
+                        >
+                            Upload
+                        </Button>
                     </Upload>
                 </Col>
                 <Col style={{display:'flex'}}>
                     <Input
                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                        placeholder="Search by filename"
+                        placeholder="search....."
                         suffix={<SearchOutlined />}
                         value={searchQuery}
                         onChange={handleSearch} // Call function on user input
-                        style={{width:'170px'}}
+                        style={{width:'170px', border:'none'}}
                     />   
                     <Button style={{backgroundColor: '#C7F39A', border:'none', marginLeft:'5px'}} onClick={fetchUserImages} icon={<ReloadOutlined className="black-icon" />} /> 
                     <Button
-                        icon={<DeleteOutlined />}
+                        icon={<DeleteOutlined className="black-icon" />}
                         onClick={() => setIsTrashView(prev => !prev)}
                         style={{
                             backgroundColor: isTrashView ? 'red' : '#C7F39A',
@@ -1556,8 +1548,8 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                                     backgroundColor:
                                     hoveredImage === image.uid
                                         ? theme === 'dark'
-                                        ? 'transparent'
-                                        : '#E6FFEA'
+                                        ? '#C7F39A'
+                                        : '#C7F39A'
                                         : 'transparent',
                                     display: 'flex',
                                     flexDirection: 'column',
@@ -1576,6 +1568,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                             >
                                 {!image.isFolder && (
                                     <Checkbox
+                                        className="custom-checkbox"
                                         checked={checkboxSelected.some((img) => img.uid === image.uid)}
                                         onChange={(e) => {
                                             e.stopPropagation();
@@ -1620,30 +1613,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                                         position: 'relative',
                                         cursor: 'pointer',
                                     }}
-                                    // onClick={(e) => {
-                                    //     e.stopPropagation();
-                                    //     // 🧹 Clear selection when clicking a folder
-                                    //     setSelectedImages([]);
-                                    //     selectedImagesRef.current = [];
-                                    //     handleFolderClick(image.name);
-                                    // }}
-                                    // onClick={() => {
-                                    //     if (!image.isFolder) {
-                                    //       // Single-click select
-                                    //       const exists = selectedImages.some((img) => img.uid === image.uid);
-                                    //       const updated = exists
-                                    //         ? selectedImages.filter((img) => img.uid !== image.uid)
-                                    //         : [...selectedImages, image];
                                     
-                                    //       setSelectedImages(updated);
-                                    //       selectedImagesRef.current = updated;
-                                    //     } else {
-                                    //       // Folder open on click
-                                    //       setSelectedImages([]);
-                                    //       selectedImagesRef.current = [];
-                                    //       handleFolderClick(image.name);
-                                    //     }
-                                    // }} 
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         if (image.isFolder) {
@@ -1665,7 +1635,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                                         const targetKey = `${uploadPrefix}${currentFolder}${image.name}/`;
                                         const destinationKey = `${targetKey}${sourceName}${sourceKey.endsWith("/") ? '/' : ''}`;
                                       
-                                        await axios.post("https://prodapis.adsgoat.in/moveFileOrFolder", {
+                                        await axios.post("http://localhost:8000/moveFileOrFolder", {
                                           sourceKey,
                                           destinationKey,
                                         }, {
@@ -1689,26 +1659,29 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                                         transition: 'transform 0.2s ease-in-out',
                                     }}
                                 />
-                                <div 
-                                    style={{  
-                                        fontSize: '14px',
-                                        fontWeight: 500,
-                                        textAlign: 'center',
-                                        whiteSpace: 'nowrap',
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                        width: '100%', 
-                                        // color: '#000',
-                                        color: theme === 'dark' ? '#fff' : '#000',
-                                        maxWidth: '130px',
-                                    }}
-                                >
-                                    {image.name}
-                                </div>
+                                {/* <Tooltip title={image.name}> */}
+                                    <div 
+                                        style={{  
+                                            fontSize: '14px',
+                                            fontWeight: 500,
+                                            textAlign: 'center',
+                                            whiteSpace: 'nowrap',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            width: '100%', 
+                                            // color: '#000',
+                                            color: theme === 'dark' ? '#fff' : '#000',
+                                            maxWidth: '130px',
+                                        }}
+                                    >
+                                        {image.name}
+                                    </div>
+                                {/* </Tooltip> */}
                                 {/* Show hover tooltip only if this folder is hovered */}
                                 {hoveredImage === image.uid && (
                                     <div
                                         style={{
+                                            maxWidth: '250px',
                                             position: 'absolute',
                                             bottom: '100%',
                                             marginBottom: '6px',
@@ -1718,14 +1691,22 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                                             border: '1px solid #ccc',
                                             padding: '6px 10px',
                                             fontSize: '11px',
-                                            whiteSpace: 'nowrap',
+                                            // whiteSpace: 'nowrap',
                                             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
                                             borderRadius: '4px',
                                             zIndex: 10,
+                                            // overflow: 'hidden',
+                                            // textOverflow: 'ellipsis',
                                         }}
                                     >
                                         <div>Created: {moment(image.createdDate).format("YYYY-MM-DD HH:mm")}</div>
                                         <div>Modified: {moment(image.modifiedDate).format("YYYY-MM-DD HH:mm")}</div>
+                                        <div  style={{
+                                                wordBreak: 'break-word',
+                                                whiteSpace: 'normal',
+                                                overflowWrap: 'anywhere',
+                                                marginTop: '4px'
+                                                }}>{image.name}</div>
                                     </div>
                                 )}
                                 </div>
@@ -1757,8 +1738,8 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                                         right: '8px',
                                         width: '24px',
                                         height: '24px',
-                                        backgroundColor: 'blue',
-                                        color: 'white',
+                                        backgroundColor: '#C7F39A',
+                                        color: 'black',
                                         borderRadius: '50%',
                                         display: 'flex',
                                         justifyContent: 'center',
@@ -1805,7 +1786,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                             )}
                             </div>
 
-                        {!image.isFolder && (
+                            {!image.isFolder && (
                             <div
                                 style={{
                                 marginTop: '6px',
@@ -2015,7 +1996,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                                         if (file.action === "copy") {
                                         if (file.isFolder) {
                                             // 📁 Copy folder
-                                            await axios.post("https://prodapis.adsgoat.in/copyFolder", {
+                                            await axios.post("http://localhost:8000/copyFolder", {
                                             sourceKey, destinationKey,
                                             }, {
                                             headers: {
@@ -2032,7 +2013,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                                             const newName = `${base}(${cloneNumber})${ext}`;
                                             destinationKey = `${uploadPrefix}${currentFolder}${newName}`;
 
-                                            const proxyUrl = `https://prodapis.adsgoat.in/proxy?url=${encodeURIComponent(file.url)}`;
+                                            const proxyUrl = `http://localhost:8000/proxy?url=${encodeURIComponent(file.url)}`;
                                             const res = await fetch(proxyUrl);
                                             const blob = await res.blob();
 
@@ -2041,7 +2022,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                                             formData.append("filename", destinationKey);
                                             formData.append("folder", currentFolder);
 
-                                            await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
+                                            await axios.post("http://localhost:8000/uploadUserFiles", formData, {
                                             headers: {
                                                 Authorization: localStorage.getItem("token"),
                                                 username: userdetails.userName,
@@ -2052,7 +2033,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
 
                                         if (file.action === "cut") {
                                         // ✂️ Move file or folder
-                                        await axios.post("https://prodapis.adsgoat.in/moveFileOrFolder", {
+                                        await axios.post("http://localhost:8000/moveFileOrFolder", {
                                             sourceKey,
                                             destinationKey,
                                         }, {
@@ -2097,7 +2078,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                                 const items = contextMenu.selectedList?.length > 0 ? contextMenu.selectedList : [contextMenu.target];
                                 try {
                                 await Promise.all(items.map(item =>
-                                    axios.delete("https://prodapis.adsgoat.in/permanentlyDelete", {
+                                    axios.delete("http://localhost:8000/permanentlyDelete", {
                                     headers: {
                                         Authorization: localStorage.getItem("token"),
                                         username: userdetails.userName,
@@ -2131,7 +2112,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                                     if (!relativePath) throw new Error("Invalid original path");
 
                                     const originalKey = `${selectedKey}/${selectedAccountNumber}/${relativePath}`;
-                                    await axios.post("https://prodapis.adsgoat.in/restoreFileOrFolder", {
+                                    await axios.post("http://localhost:8000/restoreFileOrFolder", {
                                     trashKey,
                                     originalKey,
                                     }, {
@@ -2159,100 +2140,100 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
 
                     {/* MULTI SELECT context (not in Trash) */}
                     {!isTrashView && contextMenu.selectedList?.length > 1 && (
-                    <>
-                        <div style={{ padding: '8px 12px', fontWeight: 'bold' }}>
-                        {contextMenu.selectedList.length} selected
-                        </div>
+                        <>
+                            <div style={{ padding: '8px 12px', fontWeight: 'bold' }}>
+                            {contextMenu.selectedList.length} selected
+                            </div>
 
-                        <div style={{ padding: '8px 12px' }} onClick={() => {
-                        setClipboardFile(contextMenu.selectedList.map(item => ({
-                            ...item,
-                            action: 'copy',
-                            isFolder: item.isFolder
-                        })));
-                        setSelectedImages([]);
-                        selectedImagesRef.current = [];
-                        message.success("Items copied");
-                        setContextMenu({ ...contextMenu, visible: false });
-                        }}>
-                        <CopyOutlined style={{ marginRight: 8 }} />
-                            Copy
-                        </div>
+                            <div style={{ padding: '8px 12px' }} onClick={() => {
+                            setClipboardFile(contextMenu.selectedList.map(item => ({
+                                ...item,
+                                action: 'copy',
+                                isFolder: item.isFolder
+                            })));
+                            setSelectedImages([]);
+                            selectedImagesRef.current = [];
+                            message.success("Items copied");
+                            setContextMenu({ ...contextMenu, visible: false });
+                            }}>
+                            <CopyOutlined style={{ marginRight: 8 }} />
+                                Copy
+                            </div>
 
-                        <div style={{ padding: '8px 12px' }} onClick={() => {
-                        setClipboardFile(contextMenu.selectedList.map(item => ({
-                            ...item,
-                            action: 'cut',
-                            isFolder: item.isFolder
-                        })));
-                        setFilteredImages(prev =>
-                            prev.filter(item => !contextMenu.selectedList.some(sel => sel.uid === item.uid))
-                        );
-                        setSelectedImages([]);
-                        selectedImagesRef.current = [];
-                        message.success("Items cut");
-                        setContextMenu({ ...contextMenu, visible: false });
-                        }}>
-                            ✂️ Cut
-                        </div>
+                            <div style={{ padding: '8px 12px' }} onClick={() => {
+                            setClipboardFile(contextMenu.selectedList.map(item => ({
+                                ...item,
+                                action: 'cut',
+                                isFolder: item.isFolder
+                            })));
+                            setFilteredImages(prev =>
+                                prev.filter(item => !contextMenu.selectedList.some(sel => sel.uid === item.uid))
+                            );
+                            setSelectedImages([]);
+                            selectedImagesRef.current = [];
+                            message.success("Items cut");
+                            setContextMenu({ ...contextMenu, visible: false });
+                            }}>
+                                ✂️ Cut
+                            </div>
 
-                        <div style={{ padding: '8px 12px', color: 'red' }} onClick={async () => {
-                            try {
-                                await Promise.all(
-                                    contextMenu.selectedList.map(item => {
-                                      const isFolder = item.isFolder;
-                                      if (isFolder) {
-                                        return axios.delete("https://prodapis.adsgoat.in/deleteFolder", {
-                                          headers: {
-                                            Authorization: localStorage.getItem("token"),
-                                            username: userdetails.userName,
-                                            "x-folder": item.uid,
-                                          },
-                                        });
-                                      } else {
-                                        return axios.delete("https://prodapis.adsgoat.in/deleteUserFiles", {
-                                          headers: {
-                                            Authorization: localStorage.getItem("token"),
-                                            username: userdetails.userName,
-                                            "file-key": item.uid,
-                                          },
-                                        });
-                                      }
-                                    })
-                                ); 
-                                setSelectedImages([]);
-                                message.success("Selected items moved to bin");
-                                fetchUserImages();
-                                setContextMenu({ ...contextMenu, visible: false });
-                            } catch (err) {
-                                console.error("Bulk delete failed:", err);
-                                message.error("Failed to move some items to bin.");
-                            }
-                            }}
-                        >
-                            🗑️ Move to Bin
-                        </div>
+                            <div style={{ padding: '8px 12px', color: 'red' }} onClick={async () => {
+                                try {
+                                    await Promise.all(
+                                        contextMenu.selectedList.map(item => {
+                                        const isFolder = item.isFolder;
+                                        if (isFolder) {
+                                            return axios.delete("http://localhost:8000/deleteFolder", {
+                                            headers: {
+                                                Authorization: localStorage.getItem("token"),
+                                                username: userdetails.userName,
+                                                "x-folder": item.uid,
+                                            },
+                                            });
+                                        } else {
+                                            return axios.delete("http://localhost:8000/deleteUserFiles", {
+                                            headers: {
+                                                Authorization: localStorage.getItem("token"),
+                                                username: userdetails.userName,
+                                                "file-key": item.uid,
+                                            },
+                                            });
+                                        }
+                                        })
+                                    ); 
+                                    setSelectedImages([]);
+                                    message.success("Selected items moved to bin");
+                                    fetchUserImages();
+                                    setContextMenu({ ...contextMenu, visible: false });
+                                } catch (err) {
+                                    console.error("Bulk delete failed:", err);
+                                    message.error("Failed to move some items to bin.");
+                                }
+                                }}
+                            >
+                                🗑️ Move to Bin
+                            </div>
 
-                        <div                             
-                            style={{ padding: '8px 12px' }} 
-                            onClick={() => {
-                                const firstName = contextMenu.selectedList[0]?.name.split('.')[0] || 'Renamed';
-                                setInlineName(firstName);
-                                setEditingUid(contextMenu.selectedList.map(f => f.uid)); // multi rename mode
-                                setSelectedImages([]);
-                                selectedImagesRef.current = [];
-                                setContextMenu({ ...contextMenu, visible: false });
-                            }}
-                        >
-                            ✏️ Rename All
-                        </div>
-                    </>
+                            <div                             
+                                style={{ padding: '8px 12px' }} 
+                                onClick={() => {
+                                    const firstName = contextMenu.selectedList[0]?.name.split('.')[0] || 'Renamed';
+                                    setInlineName(firstName);
+                                    setEditingUid(contextMenu.selectedList.map(f => f.uid)); // multi rename mode
+                                    setSelectedImages([]);
+                                    selectedImagesRef.current = [];
+                                    setContextMenu({ ...contextMenu, visible: false });
+                                }}
+                            >
+                                ✏️ Rename All
+                            </div>
+                        </>
                     )}
 
                     {/* SINGLE SELECT fallback (file or folder) */}
                     {!isTrashView && !contextMenu.selectedList?.length && contextMenu.target && (
                     <>
-                        <div style={{ padding: '8px 12px', fontWeight: 'bold' }}>{contextMenu.target.name}</div>
+                        {/* <div style={{ padding: '8px 12px', fontWeight: 'bold' }}>{contextMenu.target.name}</div> */}
 
                         {contextMenu.isFolder ? (
                         <>
@@ -2381,7 +2362,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                 const folderExists = images.some(img => img.uid === baseKey && img.isFolder);
 
                 const createFolder = async (key) => {
-                await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", new FormData(), {
+                await axios.post("http://localhost:8000/uploadUserFiles", new FormData(), {
                     headers: {
                     Authorization: localStorage.getItem("token"),
                     username: userdetails.userName,
@@ -2395,7 +2376,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                 };
 
                 const replaceFolder = async () => {
-                await axios.delete("https://prodapis.adsgoat.in/deleteFolder", {
+                await axios.delete("http://localhost:8000/deleteFolder", {
                     headers: {
                     Authorization: localStorage.getItem("token"),
                     username: userdetails.userName,
@@ -2439,7 +2420,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                 segments[segments.length - 2] = name;
                 const newKey = segments.slice(0, -1).join('/') + '/';
 
-                await axios.post("https://prodapis.adsgoat.in/renameFolder", {
+                await axios.post("http://localhost:8000/renameFolder", {
                     oldFolderKey: oldKey,
                     newFolderKey: newKey,
                 }, {
@@ -2477,7 +2458,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                 const folderExists = images.some(img => img.uid === baseKey && img.isFolder);
 
                 const createFolder = async (key) => {
-                    await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", new FormData(), {
+                    await axios.post("http://localhost:8000/uploadUserFiles", new FormData(), {
                     headers: {
                         Authorization: localStorage.getItem("token"),
                         username: userdetails.userName,
@@ -2491,7 +2472,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                 };
 
                 const replaceFolder = async () => {
-                    await axios.delete("https://prodapis.adsgoat.in/deleteFolder", {
+                    await axios.delete("http://localhost:8000/deleteFolder", {
                     headers: {
                         Authorization: localStorage.getItem("token"),
                         username: userdetails.userName,
@@ -2533,7 +2514,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                     segments[segments.length - 2] = name;
                     const newKey = segments.slice(0, -1).join('/') + '/';
 
-                    await axios.post("https://prodapis.adsgoat.in/renameFolder", {
+                    await axios.post("http://localhost:8000/renameFolder", {
                     oldFolderKey: oldKey,
                     newFolderKey: newKey,
                     }, {
@@ -2560,7 +2541,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                 const folderKey = deleteFolderModal.folder?.uid;
                 if (!folderKey) return;
 
-                await axios.delete("https://prodapis.adsgoat.in/deleteFolder", {
+                await axios.delete("http://localhost:8000/deleteFolder", {
                     headers: {
                     Authorization: localStorage.getItem("token"),
                     username: userdetails.userName,
@@ -2580,9 +2561,10 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
 
             <Selecto
                 container="#file-grid"
+                className="selecto-area"
                 ref={selectoRef}
                 selectableTargets={[".selectable"]}
-                hitRate={100}
+                hitRate={0}
                 selectByClick={false}
                 selectFromInside={false}
                 toggleContinueSelect={["shift"]}
@@ -2598,7 +2580,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                         })
                         .filter(Boolean);
                 
-                    // 🔁 Merge with existing selectedImages (avoid duplicates)
+                    // Merge with existing selectedImages (avoid duplicates)
                     setSelectedImages(prev => {
                         const merged = [...prev, ...selectedFromDrag];
                         const unique = merged.filter(
@@ -2609,9 +2591,8 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
                     });
                 }}
                 dragContainer={window}
-                style={{ pointerEvents: 'none' }}  // ✅ Prevent Selecto layer from blocking clicks                                            
+                style={{ pointerEvents: 'none' }}  // Prevent Selecto layer from blocking clicks                                            
             />
-
         </div>
     );
 };

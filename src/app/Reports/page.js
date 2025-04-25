@@ -1197,7 +1197,7 @@ const MyTablePage = () => {
                 // const {  start } = campaignStatus;
                 // console.log(params.node.groupData?.campaignname, "groupData");
                 // console.log(params.node.key, "start");
-                return campaignStatus?.start || 'Unknown';
+                return moment(campaignStatus?.start, "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
               }
               return '';
             },
@@ -1918,7 +1918,7 @@ const MyTablePage = () => {
                 // const {  start } = campaignStatus;
                 // console.log(params.node.groupData?.campaignname, "groupData");
                 // console.log(params.node.key, "start");
-                return campaignStatus?.start || 'Unknown';
+                return moment(campaignStatus?.start, "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
               }
               return '';
             },
@@ -2396,7 +2396,7 @@ const MyTablePage = () => {
               if (params.node.group) {
                 const campaignName =
                   params.node.groupData?.campaignname || params.node.key;
-                return campaignMap.get(campaignName) || 'Unknown';
+                return moment(campaignMap.get(campaignName), "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
               }
               return '';
             },
@@ -3004,7 +3004,7 @@ const MyTablePage = () => {
                 // const {  start } = campaignStatus;
                 // console.log(params.node.groupData?.campaignname, "groupData");
                 // console.log(params.node.key, "start");
-                return campaignStatus?.start || 'Unknown';
+                return moment(campaignStatus?.start, "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
               }
               return '';
             },
@@ -3452,7 +3452,7 @@ const MyTablePage = () => {
                 // console.log(params.node.key, "start");
                 // console.log(campaignStatus?.start);
                 // console.log(campaignStatus, "campaignStatus");
-                return campaignStatus?.start || 'Unknown';
+                return moment(campaignStatus?.start, "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
               }
               return '';
             },
@@ -3942,7 +3942,7 @@ const MyTablePage = () => {
                 // const {  start } = campaignStatus;
                 // console.log(params.node.groupData?.campaignname, "groupData");
                 // console.log(params.node.key, "start");
-                return campaignStatus?.start || 'Unknown';
+                return moment(campaignStatus?.start, "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
               }
               return '';
             },
