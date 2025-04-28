@@ -1,16 +1,22 @@
 {
   "pages": {
-    "/Creatives/page": [
+    "/NewUser/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/Creatives/page.css",
-      "static/chunks/app/Creatives/page.js"
+      "static/css/app/NewUser/page.css",
+      "static/chunks/app/NewUser/page.js"
     ],
     "/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
+    ],
+    "/Creatives/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/Creatives/page.css",
+      "static/chunks/app/Creatives/page.js"
     ]
   }
 }
