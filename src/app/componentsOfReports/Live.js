@@ -522,7 +522,7 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                                 }
                             })()}
                         </div>
-                        {relatedComment && (
+                        {/* {relatedComment && (
                             <Tooltip title={(
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
                                     <span>{relatedComment || 'No comment available'}</span>
@@ -531,6 +531,22 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                             )}>
                                 <MessageOutlined className= {theme === "dark" ? "black-icon-comment" : 'Message'} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
                                 <Tooltip title={tooltipText}></Tooltip>
+                            </Tooltip>
+                        )} */}
+                        {relatedComment && (
+                            <Tooltip
+                                title={relatedComment || 'No comment available'}
+                            >
+                                <MessageOutlined
+                                    className={theme === "dark" ? "black-icon-comment" : 'Message'}
+                                    style={{
+                                        cursor: 'pointer',
+                                        marginLeft: '10px',
+                                        marginRight: '10px',
+                                        color: 'blue'
+                                    }}
+                                    onClick={handleEditClick} // Open modal directly on click
+                                />
                             </Tooltip>
                         )}
                         {!relatedComment && (
@@ -565,7 +581,7 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                                             Last Edited Time:
                                         </span>
                                         <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
-                                            {editUserANdTime ? editUserANdTime?.editedTime : ""}
+                                            {editUserANdTime ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A") : ""}
                                         </span>
 
                                     </div>
