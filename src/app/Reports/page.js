@@ -206,11 +206,11 @@ const MyTablePage = () => {
     };
 
     const accountsForAccess = adAccounts[revenuePratner];
-    console.log(accountsForAccess, "accounts Access");
+    // console.log(accountsForAccess, "accounts Access");
 
     const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
 
-    console.log(accountsAccess, "accounts Access");
+    // console.log(accountsAccess, "accounts Access");
 
     const [networksData, setNetworksData] = useState(accountsAccess);
 
@@ -1282,7 +1282,7 @@ const MyTablePage = () => {
                             onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
                         }
                         if(getCampaignActualSpend.status === 200){
-                            console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                            // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
                             setCampaignActualSpend(getCampaignActualSpend.data);
                         }
                         else {
@@ -1783,7 +1783,7 @@ const MyTablePage = () => {
                             onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
                         }
                         if(getCampaignActualSpend.status === 200){
-                            console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                            // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
                             setCampaignActualSpend(getCampaignActualSpend.data);
                         }
                         else {
@@ -1806,7 +1806,7 @@ const MyTablePage = () => {
                         budget: changeBudget * 100,
                         status: campaignStatus
                     };
-                    console.log(object);
+                    // console.log(object);
                     const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
                     const responseData = requestResponse.data;
                     // console.log(responseData, "response");
@@ -2173,17 +2173,1062 @@ const MyTablePage = () => {
         timezone: { headerName: 'TimeZone', field: 'timezone', sortable: true, hide: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
     };
 
-    const columnDefsObject = {
+    // const columnDefsObjectOfAdIDCampaignLevel = {
+    //     campaignname: {
+    //         headerName: 'CampaignName',
+    //         field: 'campaignname',
+    //         resizable: true,
+    //         sortable: true,
+    //         width: 500,
+    //         hide: true,
+    //         // rowGroup: true,
+    //         // rowGroupIndex: 0, // Level 0
+    //         // pinned: 'left',
+    //         // enableRowGroup: true,
+    //         // onClick: (event) => {
+    //         //     const url = `/history/${event}-${account}-${time}`;
+    //         //     window.open(url, '_blank', 'noopener,noreferrer');
+    //         // },
+    //         // cellRenderer: campaignNameRenderer,
+    //     },
+    //     adsetname: {
+    //         headerName: 'AdsetName', field: 'adsetname',
+    //         // resizeble: true,
+    //         sortable: true,
+    //         width: 350,
+    //         rowGroup: true, 
+    //         rowGroupIndex: 0, // Level 1
+    //         hide: true,
+    //         filter: 'agSetColumnFilter',
+    //         filterParams: {
+    //             comparator: (a, b) => a.localeCompare(b),
+    //             suppressAndOrCondition: true,
+    //         }, 
+    //         // showRowGroup: 'adsetname'
+    //     },
+    //     adname: {
+    //         headerName: 'AdName', field: 'adname',
+    //         // resizeble: true,
+    //         sortable: true,
+    //         width: 300,
+    //         rowGroup: true, 
+    //         rowGroupIndex: 1, // Level 2
+    //         hide: true,
+    //         filter: 'agSetColumnFilter',
+    //         filterParams: {
+    //             comparator: (a, b) => a.localeCompare(b),
+    //             suppressAndOrCondition: true,
+    //         }, 
+    //         showRowGroup: 'adname',
+    //     },
+    //     adid: {
+    //         headerName: 'AdID',
+    //         field: 'adid',
+    //         sortable: true,
+    //         minWidth: 200,
+    //         filter: 'agSetColumnFilter',
+    //         // filterParams: {
+    //         //     comparator: (a, b) => a.localeCompare(b),
+    //         //     suppressAndOrCondition: true,
+    //         // },
+    //         // suppressMenu: true,    // Suppress the column menu
+            
+    //     },
+    //     from:{
+    //         headerName: 'From',
+    //         field: 'from',
+    //         valueGetter: (params) => {
+    //           if (params.node.group) {
+    //             const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
+    //             const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
+    //             // const {  start } = campaignStatus;
+    //             // console.log(params.node.groupData?.campaignname, "groupData");
+    //             // console.log(params.node.key, "start");
+    //             return moment(campaignStatus?.start, "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
+    //           }
+    //           return '';
+    //         },
+    //         cellClassRules: {
+    //           'hide-leaf-cell': (params) => !params.node.group,
+    //         },
+    //         minWidth: 110,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu', // Add a custom class
+    //     },
+    //     profitloss:{
+    //           headerName: 'P/L',
+    //           minWidth: 110,
+    //           field: 'profitloss',
+    //           valueGetter: (params) => {
+    //             if (params.node.group) {
+    //               const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
+    //               const campaignData = allProfitLossArray?.items?.filter(obj => obj.campaign_name === campaignName);
+    //               const revenue = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.estimated_revenue) || 0), 0);
+    //               const spend = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.spend) || 0), 0);
+    //               // const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
+    //               // const {  start } = campaignStatus;
+    //               // console.log(params.node.groupData?.campaignname, "groupData");
+    //               // console.log(params.node.key, "start");
+    //               // return campaignStatus?.start || 'Unknown';
+    //               return (revenue - spend) ? (revenue - spend).toFixed(2) : "" || "";
+    //             }
+    //             return '';
+    //           },
+    //           cellClassRules: {
+    //             'hide-leaf-cell': (params) => !params.node.group,
+    //           },
+    //           cellStyle: { fontWeight: 'bold' },
+    //           suppressMenu: true,
+    //           menuTabs: [],
+    //           headerClass: 'hide-menu', // Add a custom class
+    //     },
+    //     actions: {
+    //         headerName: 'Actions',
+    //         field: 'actions',
+    //         minWidth: 90,
+    //         // sortable: true,
+    //         // filter: true,
+    //         sortable: false,    // Ensure sorting is disabled
+    //         filter: false,      // Ensure filtering is disabled
+    //         enableSorting: false,  // Disable sorting at the column level
+    //         enableFilter: false,
+    //         suppressMenu: true,    // Suppress the column menu
+    //         menuTabs: [],
+    //         hide: !isYesterday(),
+    //         cellRenderer: (params) => {
+    //             const [isModalVisible, setIsModalVisible] = useState(false);
+    //             const [groupedData, setGroupedData] = useState([]);
+    //             const [newgroupedData, setNewGroupedData] = useState([]);
+    //             const [changeBudget, onChangeBudget] = useState();
+    //             const [campaignStatus, setCampaignStatus] = useState(true);
+    //             const [campaignActualSpend, setCampaignActualSpend] = useState({});
+
+    //             const onChangeSpendAndStatus = async () => {
+    //                 if (params?.node?.rowPinned === 'bottom') {
+    //                     return ""; // Return empty string to remove "..."
+    //                 }
+    //                 if (params?.node?.footer) {
+    //                     return ""; // Prevent modal from opening for group footer rows
+    //                 }
+    //                 const allLeafChildren = params.node?.allLeafChildren || [];
+
+    //                 // Fetch all the rows under the current group
+    //                 const groupedData = allLeafChildren.map(node => node.data) || [];
+    //                 // console.log(groupedData, "groupedData");
+    //                 setNewGroupedData(groupedData);
+    //                 const campaignId = groupedData[0]?.campaignid;
+
+    //                 // Only show the modal if there is data (groupedData length is greater than 0)
+    //                 if (groupedData.length > 0) {
+    //                     const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
+    //                     const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
+    //                     if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
+    //                         setGroupedData(getCampaignResponse.data);
+    //                         setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
+    //                         onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
+    //                     }
+    //                     if(getCampaignActualSpend.status === 200){
+    //                         console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+    //                         setCampaignActualSpend(getCampaignActualSpend.data);
+    //                     }
+    //                     else {
+    //                         setGroupedData(groupedData);
+    //                     }
+    //                     // Set the grouped data for the modal
+    //                     setIsModalVisible(true); // Show the modal for non-footer rows
+    //                 }
+    //             };
+
+    //             const handleOk = async () => {
+    //                 setIsModalVisible(false); // Close the modal
+    //                 const object = {
+    //                     campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname : groupedData[0]?.campaignname,
+    //                     adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
+    //                     campaignid: !Array.isArray(groupedData) ? groupedData?.campaignid : groupedData[0]?.campaignid,
+    //                     usercommit: userdetails?.email,
+    //                     accountNumber: newaccount,
+    //                     budget: changeBudget * 100,
+    //                     status: campaignStatus
+    //                 };
+    //                 // console.log(object);
+    //                 const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
+    //                 const responseData = requestResponse.data;
+    //                 // console.log(responseData, "response");
+    //                 message.success("Budget and Status Updated");
+    //                 changeRRefrst();
+    //             };
+
+    //             const handleCancel = () => {
+    //                 setIsModalVisible(false);
+    //                 // console.log(changeBudget); // Close the modal
+    //             };
+
+    //             const getTotalSpend = (data) => {
+    //                 if (!data || data.length === 0) return 0;
+    //                 const total = data.reduce((total, item) => {
+    //                     return total + (parseFloat(item?.spend) || 0);
+    //                 }, 0);
+    //                 return Math.round(total * 100) / 100; // Round to 2 decimal places
+    //             };
+
+    //             const onChangeBudgetValue = event => {
+    //                 onChangeBudget(event.target.value)
+    //             }
+
+    //             const onChangeCampaignStatus = async () => {
+    //                 const apiEndpoint = campaignStatus
+    //                     ? '/campaignStatusPause/' // Pause campaign
+    //                     : '/campaignStatusActive/'; // Activate campaign
+                
+    //                 try {
+    //                     const response = await apiClient.post(apiEndpoint, 
+    //                         { campaignId: groupedData[0]?.campaignid }
+    //                     );
+    //                     if (response.status === 200) {
+    //                         message.success(`Campaign ${groupedData[0]?.campaignid} status updated to ${campaignStatus ? 'Paused' : 'Active'}`);
+    //                         setCampaignStatus((prev) => !prev); // Toggle the status
+    //                     } else {
+    //                         message.error('Failed to update campaign status.');
+    //                     }
+    //                 } catch (error) {
+    //                     console.error('Error updating campaign status:', error);
+    //                     message.error('Error updating campaign status.');
+    //                 }
+    //             };
+
+    //             return (
+    //                 <div>
+    //                     <div onClick={onChangeSpendAndStatus}>
+    //                         <span>{params.value || "..."}</span> 
+    //                     </div>
+    //                     {isModalVisible && (
+    //                         <Modal
+    //                             title={groupedData?.length > 0 && groupedData?.length !== 1 ? groupedData[0]?.campaignname : groupedData?.campaignname}
+    //                             visible={isModalVisible}
+    //                             onOk={handleOk}
+    //                             onCancel={handleCancel}
+    //                             width={600}  
+    //                             style={{ padding: '20px' }} 
+    //                             okButtonProps={{ style: { backgroundColor: '#C7F39A', borderColor: '#C7F39A' } }} 
+    //                         >
+    //                             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                    
+    //                                 <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+    //                                     <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
+    //                                     <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#C7F39A"}} onChange={onChangeCampaignStatus} />
+    //                                 </div>
+    //                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
+    //                                     <Typography.Text strong style={{ marginBottom: '10px' }}>Budget: <span style={{fontWeight:'normal'}}>{campaignActualSpend.daily_budget ? "Daily" : campaignActualSpend.lifetime_budget ? "Lifetime" : "Adset"}</span></Typography.Text>
+    //                                     <Input placeholder="Enter your value here" defaultValue={campaignActualSpend.daily_budget ? parseFloat(campaignActualSpend.daily_budget)/100 : campaignActualSpend.lifetime_budget ? parseFloat(campaignActualSpend.lifetime_budget)/100 : (groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData))} onChange={onChangeBudgetValue} />
+    //                                 </div>
+    //                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
+    //                                     <Typography.Text strong>Campaign ID:</Typography.Text>
+    //                                     <p>{campaignActualSpend?.id}</p>
+    //                                 </div>
+    //                             </div>
+    //                         </Modal>
+    //                     )}
+    //                 </div>
+    //             );
+    //         },
+    //     },
+    //     date: {
+    //         headerName: 'Date',
+    //         field: 'date',
+    //         minWidth: 110,
+    //         sortable: true,
+    //         sort: "asc",
+    //         filter: "agDateColumnFilter",
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu', // Add a custom class
+    //         filterParams: {
+    //             comparator: (filterLocalDateAtMidnight, cellValue) => {
+    //                 const dateAsString = cellValue;
+    //                 if (dateAsString == null) return -1;
+    //                 const dateParts = dateAsString.split("/");
+    //                 const cellDate = new Date(
+    //                     Number(dateParts[2]),
+    //                     Number(dateParts[1]) - 1,
+    //                     Number(dateParts[0])
+    //                 );
+
+    //                 if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
+    //                     return 0;
+    //                 }
+
+    //                 if (cellDate < filterLocalDateAtMidnight) {
+    //                     return -1;
+    //                 }
+
+    //                 if (cellDate > filterLocalDateAtMidnight) {
+    //                     return 1;
+    //                 }
+    //                 return 0;
+    //             },
+    //         },
+    //     },
+    //     'fb-hour': {
+    //         headerName: 'F-H',
+    //         field: 'fb-hour',
+    //         width: 85,
+    //         sortable: true,
+    //         filter: "agNumberColumnFilter",
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu' // Add a custom class
+            
+    //     },
+    //     'mnet-hour': {
+    //         headerName: 'N-H',
+    //         field: 'mnet-hour',
+    //         minWidth: 95,
+    //         sortable: true,
+    //         filter: "agNumberColumnFilter",
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu' // Add a custom class
+            
+    //     },
+    //     spend: {
+    //         headerName: 'Spend',
+    //         field: 'spend',
+    //         minWidth: 105,
+    //         aggFunc: liveSpender,
+    //         sortable: true,
+    //         filter: "agTextColumnFilter", // Keep filter active
+    //         valueFormatter: currencyFormatter,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu', // Add a custom class
+    //         headerTooltip: "Total amount spent",
+    //     },       
+    //     revenue: {
+    //         headerName: 'Revenue',
+    //         field: 'revenue',
+    //         minWidth: 105,
+    //         aggFunc: liveSpender,
+    //         sortable: true,
+    //         filter: "agNumberColumnFilter",
+    //         valueFormatter: currencyFormatter,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu' // Add a custom class
+            
+    //     },
+    //     profit: {
+    //         headerName: 'Profit',
+    //         field: 'profit',
+    //         minWidth: 105,
+    //         sortable: true,
+    //         aggFunc: liveSpender,
+    //         cellClassRules: {
+    //             'font-red': p => p.value < 0
+    //         },
+    //         filter: "agNumberColumnFilter",
+    //         valueFormatter: currencyFormatter,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu', // Add a custom class
+    //         headerTooltip: "Profit = Revenue - Spend",
+            
+    //     },
+    //     margin: {
+    //         headerName: 'Margin',
+    //         field: 'margin',
+    //         minWidth: 100,
+    //         valueGetter: getMargin,
+    //         sortable: true,
+    //         filter: "agTextColumnFilter",
+    //         comparator: (valueA, valueB) => {
+    //             // Handle sorting based on the computed margin value
+    //             if (valueA == null) return -1;
+    //             if (valueB == null) return 1;
+    //             return valueA - valueB;
+    //         },
+    //         valueFormatter: (params) => `${params.value}%`,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu', // Add a custom class
+    //         headerTooltip: "Margin = (Profit / Revenue) * 100",
+            
+    //     },
+    //     fbleads: {
+    //         headerName: 'FBLeads',
+    //         field: 'fbleads',
+    //         minWidth: 105,
+    //         aggFunc: newSpender,
+    //         sortable: true,
+    //         filter: "agNumberColumnFilter",
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu' // Add a custom class
+            
+    //     },
+    //     conversions: {
+    //         headerName: 'Conv',
+    //         field: 'conversions',
+    //         minWidth: 85,
+    //         aggFunc: newSpender,
+    //         sortable: true,
+    //         filter: "agNumberColumnFilter",
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu', // Add a custom class
+            
+    //         headerTooltip: "Conversions",
+            
+    //     },
+    //     cpc: {
+    //         headerName: 'CPC',
+    //         field: 'cpc',
+    //         aggFunc: cpcSpender,
+    //         minWidth: 80,
+    //         sortable: true,
+    //         filter: "agNumberColumnFilter",
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu', // Add a custom class
+    //         headerTooltip: "CPC = Spend / FBClicks",
+            
+    //     },
+    //     cpclinkclicks: {
+    //         headerName: 'CPC_LC',
+    //         field: 'cpclinkclicks',
+    //         // aggFunc: cpcSpender,
+    //         valueGetter:getCpcLc,
+    //         minWidth: 80,
+    //         sortable: true,
+    //         filter: "agNumberColumnFilter",
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu', // Add a custom class
+    //         headerTooltip: "cpclinkclicks = Spend / FBLinkClicks",
+            
+    //     },
+    //     fbclicks: {
+    //         headerName: 'FBClicks',
+    //         field: 'fbclicks',
+    //         minWidth: 110,
+    //         aggFunc: newSpender,
+    //         sortable: true,
+    //         filter: "agNumberColumnFilter",
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu' // Add a custom class
+            
+    //     },
+    //     fblinkclicks: {
+    //         headerName: 'FB_LC',
+    //         field: 'fblinkclicks',
+    //         headerTooltip:'fblinkclicks',
+    //         minWidth: 110,
+    //         aggFunc: newSpender,
+    //         sortable: true,
+    //         filter: "agNumberColumnFilter",
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu' // Add a custom class
+            
+    //     },
+    //     impressions: {
+    //         headerName: 'IMP',
+    //         field: 'impressions',
+    //         minWidth: 80,
+    //         aggFunc: newSpender,
+    //         sortable: true,
+    //         filter: "agNumberColumnFilter",
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu', // Add a custom class
+    //         headerTooltip: "Impressions",
+    //     },
+    //     ctr: {
+    //         headerName: 'CTR',
+    //         field: 'ctr',
+    //         valueGetter: getCtr,
+    //         minWidth: 100,
+    //         sortable: true,
+    //         filter: "agTextColumnFilter",
+    //         comparator: (valueA, valueB) => {
+    //             // Handle sorting based on the computed margin value
+    //             if (valueA == null) return -1;
+    //             if (valueB == null) return 1;
+    //             return valueA - valueB;
+    //         },
+    //         valueFormatter: (params) => `${params.value}%`,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu' // Add a custom class
+            
+    //     },
+    //     rpc: {
+    //         headerName: 'RPC',
+    //         field: 'rpc',
+    //         minWidth: 80,
+    //         valueGetter: getRpc,
+    //         sortable: true,
+    //         filter: "agNumberColumnFilter",
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu', // Add a custom class
+    //         headerTooltip: "RPC = Revenue / Conversions",
+    //         cellStyle: { fontWeight: 'bold' }
+    //     },
+    //     cpl: {
+    //         headerName: 'CPL',
+    //         field: 'cpl',
+    //         minWidth: 80,
+    //         valueGetter: getCpl,
+    //         sortable: true,
+    //         filter: "agNumberColumnFilter",
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu', // Add a custom class
+    //         headerTooltip: "CPL = Spend / FBLeads",
+            
+    //     },
+    //     ncpl: {
+    //         headerName: 'NCPL',
+    //         field: 'ncpl',
+    //         minWidth: 90,
+    //         valueGetter: getNcpl,
+    //         sortable: true,
+    //         filter: "agNumberColumnFilter",
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu', // Add a custom class
+    //         headerTooltip: "NCPL = Spend / Conversions",
+            
+    //     },
+    //     fmargin: {
+    //         headerName: 'FMargin',
+    //         field: 'fmargin',
+    //         minWidth: 120,
+    //         valueGetter: getFmargin,
+    //         sortable: true,
+    //         filter: "agTextColumnFilter",
+    //         comparator: (valueA, valueB) => {
+    //             // Handle sorting based on the computed margin value
+    //             if (valueA == null) return -1;
+    //             if (valueB == null) return 1;
+    //             return valueA - valueB;
+    //         },
+    //         valueFormatter: (params) => `${params.value}%`,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu', // Add a custom class
+    //         headerTooltip: "FMargin = (Profit / Spend) * 100",
+            
+    //     },
+    //     roi: {
+    //         headerName: 'ROI',
+    //         field: 'roi',
+    //         minWidth: 100,
+    //         valueGetter: getROI,
+    //         filter: "agNumberColumnFilter",
+    //         comparator: (valueA, valueB) => {
+    //             // Handle sorting based on the computed margin value
+    //             if (valueA == null) return -1;
+    //             if (valueB == null) return 1;
+    //             return valueA - valueB;
+    //         },
+    //         valueFormatter: (params) => `${params.value}%`,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu', // Add a custom class
+    //         headerTooltip: "ROI = ((Revenue - Spend) / Spend) * 100",
+            
+    //     },
+    //     adsetid: {
+    //         headerName: 'AdsetId',
+    //         field: 'adsetid',
+    //         sortable: true,
+    //         filter: "agTextColumnFilter",
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu' 
+    //     },
+    //     campaignid: {
+    //         headerName: 'CampaignId',
+    //         field: 'campaignid',
+    //         sortable: true,
+    //         filter: "agTextColumnFilter",
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu' 
+    //     },
+    //     timezone: {
+    //         headerName: 'TimeZone',
+    //         field: 'timezone',
+    //         filter: "agTextColumnFilter",
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu' 
+    //     },
+    // };
+
+    // const columnDefsObjectOfDailyAdIDAdsetLevel = {
+    //     campaignname: {
+    //         headerName: 'CampaignName',
+    //         field: 'campaignname',
+    //         resizable: true,
+    //         sortable: true,
+    //         width: 500,
+    //         hide: true,
+    //         // rowGroup: true,
+    //         // rowGroupIndex: 0, // Level 0
+    //         // pinned: 'left',
+    //         // enableRowGroup: true,
+    //         // onClick: (event) => {
+    //         //     const url = `/history/${event}-${account}-${time}`;
+    //         //     window.open(url, '_blank', 'noopener,noreferrer');
+    //         // },
+    //         // cellRenderer: campaignNameRenderer,
+    //     },
+    //     actions: {
+    //         headerName: 'Actions',
+    //         field: 'actions',
+    //         minWidth: 90,
+    //         sortable: false,    // Ensure sorting is disabled
+    //         filter: false,      // Ensure filtering is disabled
+    //         enableSorting: false,  // Disable sorting at the column level
+    //         enableFilter: false,
+    //         hide: false,
+    //         suppressMenu: true,
+    //         hide: !isYesterday(),
+    //         cellRenderer: (params) => {
+    //             const [isModalVisible, setIsModalVisible] = useState(false);
+    //             const [newgroupedData, setNewGroupedData] = useState([]);
+    //             const [groupedData, setGroupedData] = useState([]);
+    //             const [changeBudget, onChangeBudget] = useState();
+    //             const [campaignStatus, setCampaignStatus] = useState(true);
+    //             const [campaignActualSpend, setCampaignActualSpend] = useState({});
+
+    //             const onChangeSpendAndStatus = async () => {
+    //                 // Check if it's a group footer row (for groupIncludeFooter)
+    //                 if (params?.node?.footer) {
+    //                     // console.log("This is a groupIncludeFooter row. Modal will not open.");
+    //                     return; // Prevent modal from opening for group footer rows
+    //                 }
+
+    //                 // Ensure allLeafChildren exists and is an array before proceeding
+    //                 const allLeafChildren = params.node?.allLeafChildren || [];
+    //                 setNewGroupedData(groupedData);
+    //                 // Fetch all the rows under the current group
+    //                 const groupedData = allLeafChildren.map(node => node.data) || [];
+    //                 const campaignId = groupedData[0]?.campaignid;
+
+    //                 // Only show the modal if there is data (groupedData length is greater than 0)
+    //                 if (groupedData.length > 0) {
+    //                     const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
+    //                     const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
+    //                     if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
+    //                         setGroupedData(getCampaignResponse.data);
+    //                         setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
+    //                         onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
+    //                     }
+    //                     if(getCampaignActualSpend.status === 200){
+    //                         console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+    //                         setCampaignActualSpend(getCampaignActualSpend.data);
+    //                     }
+    //                     else {
+    //                         setGroupedData(groupedData);
+    //                         // console.log("dailyadd");
+    //                     }
+    //                     // Set the grouped data for the modal
+    //                     setIsModalVisible(true); // Show the modal for non-footer rows
+    //                 }
+    //             };
+
+    //             const handleOk = async () => {
+    //                 setIsModalVisible(false); // Close the modal
+    //                 const object = {
+    //                     campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname : groupedData[0]?.campaignname,
+    //                     adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
+    //                     campaignid: !Array.isArray(groupedData) ? groupedData?.campaignid : groupedData[0]?.campaignid,
+    //                     usercommit: userdetails?.email,
+    //                     accountNumber: newaccount,
+    //                     budget: changeBudget * 100,
+    //                     status: campaignStatus
+    //                 };
+    //                 console.log(object);
+    //                 const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
+    //                 const responseData = requestResponse.data;
+    //                 // console.log(responseData, "response");
+    //                 message.success("Budget and Status Updated");
+    //                 changeRRefrst();
+    //             };
+
+    //             const handleCancel = () => {
+    //                 setIsModalVisible(false);
+    //                 // console.log(changeBudget); // Close the modal
+    //             };
+
+    //             const getTotalSpend = (data) => {
+    //                 if (!data || data.length === 0) return 0;
+    //                 const total = data.reduce((total, item) => {
+    //                     return total + (parseFloat(item?.spend) || 0);
+    //                 }, 0);
+    //                 return Math.round(total * 100) / 100; // Round to 2 decimal places
+    //             };
+
+    //             const onChangeBudgetValue = event => {
+    //                 onChangeBudget(event.target.value)
+    //             }
+    //             const onChangeCampaignStatus = async () => {
+    //                 const apiEndpoint = campaignStatus
+    //                     ? 'https://prodapis.adsgoat.in/campaignStatusPause/' // Pause campaign
+    //                     : 'https://prodapis.adsgoat.in/campaignStatusActive/'; // Activate campaign
+                
+    //                 try {
+    //                     const response = await axios.post(apiEndpoint, 
+    //                         { campaignId: groupedData[0]?.campaignid }, 
+    //                         { headers: { Authorization: token } }
+    //                     );
+    //                     if (response.status === 200) {
+    //                         message.success(`Campaign ${groupedData[0]?.campaignid} status updated to ${campaignStatus ? 'Paused' : 'Active'}`);
+    //                         setCampaignStatus((prev) => !prev); // Toggle the status
+    //                     } else {
+    //                         message.error('Failed to update campaign status.');
+    //                     }
+    //                 } catch (error) {
+    //                     console.error('Error updating campaign status:', error);
+    //                     message.error('Error updating campaign status.');
+    //                 }
+    //             };
+
+    //             return (
+    //                 <div>
+    //                     <div onClick={onChangeSpendAndStatus}>
+    //                         <span>{params.value || "..."}</span> {/* Fallback to '...' if status is not available */}
+    //                     </div>
+    //                     {/* Modal should only be shown for non-footer rows and when groupedData length is greater than 0 */}
+    //                     {isModalVisible && (
+    //                         <Modal
+    //                             title={groupedData?.length > 0 && groupedData?.length !== 0 ? groupedData[0]?.campaignname : groupedData?.campaignname}
+    //                             visible={isModalVisible}
+    //                             onOk={handleOk}
+    //                             onCancel={handleCancel}
+    //                             width={600}  // Set a custom width for the modal
+    //                             style={{ padding: '20px' }}  // Adjust body padding
+    //                             okButtonProps={{ style: { backgroundColor: '#C7F39A', borderColor: '#C7F39A' } }} 
+    //                         >
+    //                             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    //                                 <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+    //                                     <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
+    //                                     <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#C7F39A"}} onChange={onChangeCampaignStatus} />
+    //                                 </div>
+
+    //                                 {/* Input Field */}
+    //                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
+    //                                     <Typography.Text strong style={{ marginBottom: '10px' }}>Budget: <span style={{fontWeight:'normal'}}>{campaignActualSpend.daily_budget ? "Daily" : campaignActualSpend.lifetime_budget ? "Lifetime" : "Adset"}</span></Typography.Text>
+    //                                     <Input placeholder="Enter your value here" defaultValue={campaignActualSpend.daily_budget ? parseFloat(campaignActualSpend.daily_budget)/100 : campaignActualSpend.lifetime_budget ? parseFloat(campaignActualSpend.lifetime_budget)/100 : (groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData))} onChange={onChangeBudgetValue} />
+    //                                 </div>
+
+    //                                 {/* Campaign ID */}
+    //                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
+    //                                     <Typography.Text strong>Campaign ID:</Typography.Text>
+    //                                     <p>{campaignActualSpend?.id}</p>
+    //                                 </div>
+    //                             </div>
+    //                         </Modal>
+    //                     )}
+    //                 </div>
+    //             );
+    //         },
+    //         filterParams: { filterEnabled: false },
+
+    //     },
+    //     adid: {
+    //         headerName: 'AdID',
+    //         field: 'adid',
+    //         sortable: true,
+    //         minWidth: 350,
+    //         filter: 'agSetColumnFilter',
+    //         // filterParams: {
+    //         //     comparator: (a, b) => a.localeCompare(b),
+    //         //     suppressAndOrCondition: true,
+    //         // },
+    //         // suppressMenu: true,    // Suppress the column menu
+    //         // hide: true,
+            
+    //     },
+    //     from:{
+    //         headerName: 'From',
+    //         field: 'from',
+    //         valueGetter: (params) => {
+    //           if (params.node.group) {
+    //             const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
+    //             const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
+    //             // const {  start } = campaignStatus;
+    //             // console.log(params.node.groupData?.campaignname, "groupData");
+    //             // console.log(params.node.key, "start");
+    //             return moment(campaignStatus?.start, "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
+    //           }
+    //           return '';
+    //         },
+    //         cellClassRules: {
+    //           'hide-leaf-cell': (params) => !params.node.group,
+    //         },
+    //         minWidth: 110,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu', // Add a custom class
+    //     },
+    //     profitloss:{
+    //         headerName: 'P/L',
+    //         field: 'profitloss',
+    //         minWidth: 110,
+    //         valueGetter: (params) => {
+    //           if (params.node.group) {
+    //             const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
+    //             const campaignData = allProfitLossArray?.items?.filter(obj => obj.campaign_name === campaignName);
+    //             const revenue = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.estimated_revenue) || 0), 0);
+    //             const spend = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.spend) || 0), 0);
+    //             // const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
+    //             // const {  start } = campaignStatus;
+    //             // console.log(params.node.groupData?.campaignname, "groupData");
+    //             // console.log(params.node.key, "start");
+    //             // return campaignStatus?.start || 'Unknown';
+    //             return (revenue - spend) ? (revenue - spend).toFixed(2) : "" || "";
+    //           }
+    //           return '';
+    //         },
+    //         cellClassRules: {
+    //           'hide-leaf-cell': (params) => !params.node.group,
+    //         },
+    //         cellStyle: { fontWeight: 'bold' },
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu', // Add a custom class
+    //     },
+    //     adsetname: {
+    //         headerName: 'AdsetName', field: 'adsetname',
+    //         // resizeble: true,
+    //         sortable: true,
+    //         width: 350,
+    //         rowGroup: true, 
+    //         rowGroupIndex: 0, // Level 1
+    //         hide: true,
+    //         filter: 'agSetColumnFilter',
+    //         filterParams: {
+    //             comparator: (a, b) => a.localeCompare(b),
+    //             suppressAndOrCondition: true,
+    //         }, 
+    //     },
+    //     adname: {
+    //         headerName: 'AdName', field: 'adname',
+    //         // resizeble: true,
+    //         sortable: true,
+    //         width: 300,
+    //         rowGroup: true, 
+    //         rowGroupIndex: 1, // Level 2
+    //         hide: true,
+    //         filter: 'agSetColumnFilter',
+    //         filterParams: {
+    //             comparator: (a, b) => a.localeCompare(b),
+    //             suppressAndOrCondition: true,
+    //         }, 
+    //     },
+    //     date: {
+    //         headerName: 'Date', field: 'date', minWidth: 110, sortable: true,
+    //         filter: "agDateColumnFilter",
+    //         sort: "asc",
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu', // Add a custom class
+    //         filterParams: {
+    //             comparator: (filterLocalDateAtMidnight, cellValue) => {
+    //                 const dateAsString = cellValue;
+    //                 if (dateAsString == null) return -1;
+    //                 const dateParts = dateAsString.split("/");
+    //                 const cellDate = new Date(
+    //                     Number(dateParts[2]),
+    //                     Number(dateParts[1]) - 1,
+    //                     Number(dateParts[0])
+    //                 );
+
+    //                 if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
+    //                     return 0;
+    //                 }
+
+    //                 if (cellDate < filterLocalDateAtMidnight) {
+    //                     return -1;
+    //                 }
+
+    //                 if (cellDate > filterLocalDateAtMidnight) {
+    //                     return 1;
+    //                 }
+    //                 return 0;
+    //             }
+    //         },
+    //     },
+    //     'fb-hour': { headerName: 'F-H', field: 'fb-hour', minWidth: 85, sortable: true, hide: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+    //     'mnet-hour': { headerName: 'M-H', field: 'mnet-hour', minWidth: 95, sortable: true, hide: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+    //     spend: {
+    //         headerName: 'Spend',
+    //         field: 'spend',
+    //         minWidth: 105,
+    //         aggFunc: liveSpender,
+    //         sortable: true,
+    //         filter: "agNumberColumnFilter",
+    //         valueFormatter: currencyFormatter, // Format display as currency
+    //         comparator: numberComparator,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu', // Add a custom class
+    //     },
+    //     revenue: {
+    //         headerName: 'Revenue',
+    //         field: 'revenue',
+    //         minWidth: 105,
+    //         aggFunc: liveSpender,
+    //         sortable: true,
+    //         filter: "agNumberColumnFilter",
+    //         valueFormatter: currencyFormatter,
+    //         comparator: numberComparator,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu', // Add a custom class
+    //     },
+    //     profit: {
+    //         headerName: 'Profit',
+    //         field: 'profit',
+    //         minWidth: 105,
+    //         aggFunc: liveSpender,
+    //         sortable: true,
+    //         cellClassRules: {
+    //             'font-red': p => p.value < 0 // Conditional formatting for negative profit
+    //         },
+    //         filter: "agNumberColumnFilter",
+    //         valueFormatter: currencyFormatter,
+    //         comparator: numberComparator,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu', // Add a custom class
+    //         headerTooltip: 'Profit = Revenue - Spend',
+    //     },
+    //     margin: {
+    //         headerName: 'Margin', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: '(Profit/Revenue)*100', filter: 'agNumberColumnFilter',
+    //         minWidth: 100,
+    //         comparator: (valueA, valueB) => {
+    //             // Handle sorting based on the computed margin value
+    //             if (valueA == null) return -1;
+    //             if (valueB == null) return 1;
+    //             return valueA - valueB;
+    //         },
+    //         valueFormatter: (params) => `${params.value}%`,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu', // Add a custom class
+
+    //     },
+    //     fbleads: { headerName: 'FBLeads', field: 'fbleads', minWidth: 105, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+    //     conversions: { headerName: 'Conv', field: 'conversions', headerTooltip: "Conversions", minWidth: 85, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+    //     cpc: {
+    //         headerName: 'CPC', field: 'cpc',
+    //         minWidth: 80,
+    //         aggFunc: (params) => {
+    //             const sum = params.values.reduce((sum, value) => sum + parseFloat(value), 0);
+    //             return sum / params.values.length;
+    //         },
+    //         valueFormatter: params => params.value !== undefined ? Math.round(params.value * 100) / 100 : '',
+    //         sortable: true, filter: 'agNumberColumnFilter',
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu', // Add a custom class
+    //         headerTooltip: "CPC = Spend / FBClicks",
+
+    //     },
+    //     cpclinkclicks: {
+    //         headerName: 'CPC_LC',
+    //         field: 'cpclinkclicks',
+    //         // aggFunc: cpcSpender,
+    //         valueGetter:getCpcLc,
+    //         minWidth: 80,
+    //         sortable: true,
+    //         filter: "agNumberColumnFilter",
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu', // Add a custom class
+    //         headerTooltip: "cpclinkclicks = Spend / FBLinkClicks",
+            
+    //     },
+    //     fbclicks: { headerName: 'FBClicks', field: 'fbclicks', minWidth: 110, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+    //     fblinkclicks: { headerName: 'FB_LC', field: 'fblinkclicks', headerTooltip:'fblinkclicks', minWidth: 110, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+    //     impressions: { headerName: 'IMP', field: 'impressions', headerTooltip:"Impressions", minWidth: 80, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+    //     ctr: {
+    //         headerName: 'CTR', field: 'ctr', valueGetter: getCtr, sortable: true,
+    //         minWidth: 100,
+    //         comparator: (valueA, valueB) => {
+    //             // Handle sorting based on the computed margin value
+    //             if (valueA == null) return -1;
+    //             if (valueB == null) return 1;
+    //             return valueA - valueB;
+    //         },
+    //         valueFormatter: (params) => `${params.value}%`,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu', // Add a custom class
+    //         headerTooltip: "CTR = (FBClicks / Impressions) * 100",
+    //     },
+    //     rpc: {
+    //         headerName: 'RPC', field: 'rpc', valueGetter: getRpc, sortable: true, filter: 'agNumberColumnFilter',
+    //         minWidth: 80,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu', // Add a custom class
+    //         headerTooltip: "RPC = Revenue / Conversions",
+    //         cellStyle: { fontWeight: 'bold' }
+    //     },
+    //     cpl: { headerName: 'CPL', field: 'cpl', minWidth:80, valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "CPL = Spend / FBLeads" },
+    //     ncpl: { headerName: 'NCPL', field: 'ncpl', minWidth:90, valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "NCPL = Spend / Conversions" },
+    //     fmargin: {
+    //         headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: true,
+    //         minWidth: 120,
+    //         comparator: (valueA, valueB) => {
+    //             // Handle sorting based on the computed margin value
+    //             if (valueA == null) return -1;
+    //             if (valueB == null) return 1;
+    //             return valueA - valueB;
+    //         },
+    //         valueFormatter: (params) => `${params.value}%`,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu', // Add a custom class
+    //         headerTooltip: "FMargin = (Profit / Spend) * 100",
+    //     },
+    //     roi: {
+    //         headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: '(Profit/Spend)*100', filter: true,
+    //         comparator: (valueA, valueB) => {
+    //             // Handle sorting based on the computed margin value
+    //             if (valueA == null) return -1;
+    //             if (valueB == null) return 1;
+    //             return valueA - valueB;
+    //         },
+    //         minWidth: 100,
+    //         valueFormatter: (params) => `${params.value}%`,
+    //         suppressMenu: true,
+    //         menuTabs: [],
+    //         headerClass: 'hide-menu', // Add a custom class
+    //         headerTooltip: "ROI = (Revenue - Spend) / Spend",
+    //     },
+    //     adsetid: { headerName: 'AdsetId', field: 'adsetid', sortable: true, filter: "agTextColumnFilter", hide: false, suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+    //     campaignid: { headerName: 'CampaignId', field: 'campaignid', sortable: true, filter: "agTextColumnFilter",  suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+    //     timezone: { headerName: 'TimeZone', field: 'timezone', sortable: true, hide: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+    // };
+
+
+    const columnDefsObjectAdsetLevel = {
         campaignname: {
             headerName: 'CampaignName',
             field: 'campaignname',
             resizable: true,
             sortable: true,
-            width: 500,
             hide: true,
-            rowGroup: true,
-            enableRowGroup: true,
-            pinned: 'left',
+            
         },
         actions: {
             headerName: 'Actions',
@@ -2232,7 +3277,7 @@ const MyTablePage = () => {
                             onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
                         }
                         if(getCampaignActualSpend.status === 200){
-                            console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                            // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
                             setCampaignActualSpend(getCampaignActualSpend.data);
                         }
                         else {
@@ -2307,7 +3352,7 @@ const MyTablePage = () => {
                         message.error('Error updating campaign status.');
                     }
                 };
-                console.log()
+                // console.log()
 
                 return (
                     <div>
@@ -2356,6 +3401,11 @@ const MyTablePage = () => {
                 suppressAndOrCondition: true,
             },
             suppressMenu: true,    // Suppress the column menu
+            width: 500,
+            hide: true,
+            rowGroup: true,
+            enableRowGroup: true,
+            pinned: 'left',
             
         },
         adname: {
@@ -2416,8 +3466,8 @@ const MyTablePage = () => {
                   const campaignData = allProfitLossArray?.items?.filter(obj => obj.campaign_name === campaignName);
                   const revenue = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.estimated_revenue) || 0), 0);
                   const spend = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.spend) || 0), 0);
-                  console.log(revenue, "revenue");
-                  console.log(spend, "spend");
+                //   console.log(revenue, "revenue");
+                //   console.log(spend, "spend");
                   // const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
                   // const {  start } = campaignStatus;
                   // console.log(params.node.groupData?.campaignname, "groupData");
@@ -2778,6 +3828,2126 @@ const MyTablePage = () => {
         },
     };
 
+    const columnDefsObjectAdLevel = {
+        campaignname: {
+            headerName: 'CampaignName',
+            field: 'campaignname',
+            resizable: true,
+            sortable: true,
+            hide: true,
+            
+        },
+        actions: {
+            headerName: 'Actions',
+            field: 'actions',
+            minWidth: 90,
+            // sortable: true,
+            // filter: true,
+            sortable: false,    // Ensure sorting is disabled
+            filter: false,      // Ensure filtering is disabled
+            enableSorting: false,  // Disable sorting at the column level
+            enableFilter: false,
+            suppressMenu: true,    // Suppress the column menu
+            menuTabs: [],
+            hide: !isYesterday(),
+            cellRenderer: (params) => {
+                const [isModalVisible, setIsModalVisible] = useState(false);
+                const [groupedData, setGroupedData] = useState([]);
+                const [newgroupedData, setNewGroupedData] = useState([]);
+                const [changeBudget, onChangeBudget] = useState();
+                const [campaignStatus, setCampaignStatus] = useState(true);
+                const [campaignActualSpend, setCampaignActualSpend] = useState({});
+
+                const onChangeSpendAndStatus = async () => {
+                    if (params?.node?.rowPinned === 'bottom') {
+                        return ""; // Return empty string to remove "..."
+                    }
+                    if (params?.node?.footer) {
+                        return ""; // Prevent modal from opening for group footer rows
+                    }
+                    const allLeafChildren = params.node?.allLeafChildren || [];
+
+                    // Fetch all the rows under the current group
+                    const groupedData = allLeafChildren.map(node => node.data) || [];
+                    setNewGroupedData(groupedData);
+                    const campaignId = groupedData[0]?.campaignid;
+                    // console.log(groupedData, "groupedData");
+
+                    // Only show the modal if there is data (groupedData length is greater than 0)
+                    if (groupedData.length > 0) {
+                        const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
+                        const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
+                        if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
+                            
+                            setGroupedData(getCampaignResponse.data);
+                            setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
+                            onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
+                        }
+                        if(getCampaignActualSpend.status === 200){
+                            // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                            setCampaignActualSpend(getCampaignActualSpend.data);
+                        }
+                        else {
+                            setGroupedData(groupedData);
+                        }
+                        // Set the grouped data for the modal
+                        setIsModalVisible(true); // Show the modal for non-footer rows
+                    }
+                    // if(groupedData.length > 0) {
+                        
+                    //     const getCampaignActualSpend = await apiClient.get(`http://localhost:8000/get/ActualCampaginSpend?campaignId=${campaignId}`);
+                    //     if (getCampaignActualSpend.status === 200){
+                    //         setCampaignActualSpend(getCampaignActualSpend.data);
+                    //     }
+                    // }
+                };
+
+                const handleOk = async () => {
+                    setIsModalVisible(false); // Close the modal
+                    const object = {
+                        campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname : groupedData[0]?.campaignname,
+                        adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
+                        campaignid: !Array.isArray(groupedData) ? groupedData?.campaignid : groupedData[0]?.campaignid,
+                        usercommit: userdetails?.email,
+                        accountNumber: newaccount,
+                        budget: changeBudget * 100,
+                        status: campaignStatus
+                    };
+                    // console.log(object);
+                    const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
+                    const responseData = requestResponse.data;
+                    // console.log(responseData, "response");
+                    message.success("Budget and Status Updated");
+                    changeRRefrst();
+                };
+
+                const handleCancel = () => {
+                    setIsModalVisible(false);
+                    // console.log(changeBudget); // Close the modal
+                };
+
+                const getTotalSpend = (data) => {
+                    if (!data || data.length === 0) return 0;
+                    const total = data.reduce((total, item) => {
+                        return total + (parseFloat(item?.spend) || 0);
+                    }, 0);
+                    // console.log(total, "total");
+                    return Math.round(total * 100) / 100; // Round to 2 decimal places
+                };
+
+                const onChangeBudgetValue = event => {
+                    onChangeBudget(event.target.value)
+                }
+
+                const onChangeCampaignStatus = async () => {
+                    const apiEndpoint = campaignStatus
+                        ? '/campaignStatusPause/' // Pause campaign
+                        : '/campaignStatusActive/'; // Activate campaign
+                
+                    try {
+                        const response = await apiClient.post(apiEndpoint, 
+                            { campaignId: groupedData[0]?.campaignid }
+                        );
+                        if (response.status === 200) {
+                            message.success(`Campaign ${groupedData[0]?.campaignid} status updated to ${campaignStatus ? 'Paused' : 'Active'}`);
+                            setCampaignStatus((prev) => !prev); // Toggle the status
+                        } else {
+                            message.error('Failed to update campaign status.');
+                        }
+                    } catch (error) {
+                        console.error('Error updating campaign status:', error);
+                        message.error('Error updating campaign status.');
+                    }
+                };
+                // console.log()
+
+                return (
+                    <div>
+                        <div onClick={onChangeSpendAndStatus}>
+                            <span>{params.value || "..."}</span> 
+                        </div>
+                        {isModalVisible && (
+                            <Modal
+                                title={groupedData?.length > 0 && groupedData?.length !== 1 ? groupedData[0]?.campaignname : groupedData?.campaignname}
+                                visible={isModalVisible}
+                                onOk={handleOk}
+                                onCancel={handleCancel}
+                                width={600}  
+                                style={{ padding: '20px' }}
+                                okButtonProps={{ style: { backgroundColor: '#C7F39A', borderColor: '#C7F39A' } }} 
+                            >
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                    
+                                    <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                                        <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
+                                        <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#C7F39A"}} onChange={onChangeCampaignStatus} />
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <Typography.Text strong style={{ marginBottom: '10px' }}>Budget: <span style={{fontWeight:'normal'}}>{campaignActualSpend.daily_budget ? "Daily" : campaignActualSpend.lifetime_budget ? "Lifetime" : "Adset"}</span></Typography.Text>
+                                        <Input placeholder="Enter your value here" defaultValue={campaignActualSpend.daily_budget ? parseFloat(campaignActualSpend.daily_budget)/100 : campaignActualSpend.lifetime_budget ? parseFloat(campaignActualSpend.lifetime_budget)/100 : (groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData))} onChange={onChangeBudgetValue} />
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <Typography.Text strong>Campaign ID:</Typography.Text>
+                                        <p>{campaignActualSpend?.id}</p>
+                                    </div>
+                                </div>
+                            </Modal>
+                        )}
+                    </div>
+                );
+            },
+        },
+        adsetname: {
+            headerName: 'AdsetName',
+            field: 'adsetname',
+            sortable: true,
+            minWidth: 450,
+            filter: 'agSetColumnFilter',
+            filterParams: {
+                comparator: (a, b) => a.localeCompare(b),
+                suppressAndOrCondition: true,
+            },
+            suppressMenu: true,    // Suppress the column menu
+            hide: true,
+            
+        },
+        adname: {
+            headerName: 'AdName', field: 'adname',
+            // resizeble: true,
+            // sortable: true,
+            // width: 300,
+            // rowGroup: true, 
+            // rowGroupIndex: 1, // Level 2
+            // hide: true,
+            // filter: 'agSetColumnFilter',
+            // filterParams: {
+            //     comparator: (a, b) => a.localeCompare(b),
+            //     suppressAndOrCondition: true,
+            // }, 
+            // showRowGroup: 'adname',
+            width: 500,
+            hide: true,
+            rowGroup: true,
+            enableRowGroup: true,
+            pinned: 'left',
+        },
+        adid: {
+            headerName: 'AdID',
+            field: 'adid',
+            // sortable: true,
+            // minWidth: 200,
+            // filter: 'agSetColumnFilter',
+            // hide: true,
+            filterParams: {
+                comparator: (a, b) => a.localeCompare(b),
+                suppressAndOrCondition: true,
+            },
+            // suppressMenu: true,    // Suppress the column menu
+            
+        },
+        from: {
+            headerName: 'From',
+            field: 'from',
+            minWidth: 110,
+            valueGetter: (params) => {
+              if (params.node.group) {
+                const campaignName =
+                  params.node.groupData?.campaignname || params.node.key;
+                return moment(campaignMap.get(campaignName), "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
+              }
+              return '';
+            },
+            cellClassRules: {
+              'hide-leaf-cell': (params) => !params.node.group,
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+        },
+        profitloss:{
+              headerName: 'P/L',
+              field: 'profitloss',
+              valueGetter: (params) => {
+                if (params.node.group) {
+                  const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
+                  const campaignData = allProfitLossArray?.items?.filter(obj => obj.campaign_name === campaignName);
+                  const revenue = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.estimated_revenue) || 0), 0);
+                  const spend = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.spend) || 0), 0);
+                //   console.log(revenue, "revenue");
+                //   console.log(spend, "spend");
+                  // const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
+                  // const {  start } = campaignStatus;
+                  // console.log(params.node.groupData?.campaignname, "groupData");
+                  // console.log(params.node.key, "start");
+                  // return campaignStatus?.start || 'Unknown';
+                  return (revenue - spend) ? (revenue - spend).toFixed(2) : ""  || "";
+                }
+                return '';
+              },
+              minWidth: 110,
+              cellClassRules: {
+                'hide-leaf-cell': (params) => !params.node.group,
+              },
+              cellStyle: { fontWeight: 'bold' },
+              suppressMenu: true,
+              menuTabs: [],
+              headerClass: 'hide-menu', // Add a custom class
+          },
+        date: {
+            headerName: 'Date',
+            field: 'date',
+            minWidth: 110,
+            sortable: true,
+            sort: "asc",
+            filter: "agDateColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            filterParams: {
+                comparator: (filterLocalDateAtMidnight, cellValue) => {
+                    const dateAsString = cellValue;
+                    if (dateAsString == null) return -1;
+                    const dateParts = dateAsString.split("/");
+                    const cellDate = new Date(
+                        Number(dateParts[2]),
+                        Number(dateParts[1]) - 1,
+                        Number(dateParts[0])
+                    );
+
+                    if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
+                        return 0;
+                    }
+
+                    if (cellDate < filterLocalDateAtMidnight) {
+                        return -1;
+                    }
+
+                    if (cellDate > filterLocalDateAtMidnight) {
+                        return 1;
+                    }
+                    return 0;
+                },
+            },
+        },
+        'fb-hour': {
+            headerName: 'F-H',
+            field: 'fb-hour',
+            width: 85,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+            
+        },
+        'mnet-hour': {
+            headerName: 'N-H',
+            field: 'mnet-hour',
+            minWidth: 95,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+            
+        },
+        spend: {
+            headerName: 'Spend',
+            field: 'spend',
+            minWidth: 105,
+            aggFunc: liveSpender,
+            sortable: true,
+            filter: "agTextColumnFilter", // Keep filter active
+            valueFormatter: currencyFormatter,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "Total amount spent",
+        },       
+        revenue: {
+            headerName: 'Revenue',
+            field: 'revenue',
+            minWidth: 105,
+            aggFunc: liveSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            valueFormatter: currencyFormatter,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+            
+        },
+        profit: {
+            headerName: 'Profit',
+            field: 'profit',
+            minWidth: 105,
+            sortable: true,
+            aggFunc: liveSpender,
+            cellClassRules: {
+                'font-red': p => p.value < 0
+            },
+            filter: "agNumberColumnFilter",
+            valueFormatter: currencyFormatter,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "Profit = Revenue - Spend",
+            
+        },
+        margin: {
+            headerName: 'Margin',
+            field: 'margin',
+            minWidth: 100,
+            valueGetter: getMargin,
+            sortable: true,
+            filter: "agTextColumnFilter",
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "Margin = (Profit / Revenue) * 100",
+            
+        },
+        fbleads: {
+            headerName: 'FBLeads',
+            field: 'fbleads',
+            minWidth: 105,
+            aggFunc: newSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+            
+        },
+        conversions: {
+            headerName: 'Conv',
+            field: 'conversions',
+            minWidth: 85,
+            aggFunc: newSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            
+            headerTooltip: "Conversions",
+            
+        },
+        cpc: {
+            headerName: 'CPC',
+            field: 'cpc',
+            // valueGetter: (params) => {
+            //     if (params.node.group && params.node.aggData) {
+            //         return sanitizeNumericValue(params.node.aggData["cpc"]) || 0;
+            //     }
+            //     return sanitizeNumericValue(params.data?.cpc);
+            // },
+            aggFunc: cpcSpender,
+            minWidth: 80,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "CPC = Spend / FBClicks",
+            
+        },
+        cpclinkclicks: {
+            headerName: 'CPC_LC',
+            field: 'cpclinkclicks',
+            // aggFunc: cpcSpender,
+            valueGetter:getCpcLc,
+            minWidth: 80,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "cpclinkclicks = Spend / FBLinkClicks",
+            
+        },
+        fbclicks: {
+            headerName: 'FBClicks',
+            field: 'fbclicks',
+            minWidth: 110,
+            aggFunc: newSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+            
+        },
+        fblinkclicks: {
+            headerName: 'FB_LC',
+            field: 'fblinkclicks', 
+            headerTooltip:'fblinkclicks',
+            minWidth: 110,
+            aggFunc: newSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+            
+        },
+        impressions: {
+            headerName: 'IMP',
+            field: 'impressions',
+            minWidth: 100,
+            aggFunc: newSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "Impressions",
+        },
+        ctr: {
+            headerName: 'CTR',
+            field: 'ctr',
+            valueGetter: getCtr,
+            minWidth: 100,
+            sortable: true,
+            filter: "agTextColumnFilter",
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+            
+        },
+        rpc: {
+            headerName: 'RPC',
+            field: 'rpc',
+            minWidth: 80,
+            valueGetter: getRpc,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "RPC = Revenue / Conversions",
+            cellStyle: { fontWeight: 'bold' } // Make text bold
+        },
+        cpl: {
+            headerName: 'CPL',
+            field: 'cpl',
+            minWidth: 80,
+            valueGetter: getCpl,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "CPL = Spend / FBLeads",
+            
+        },
+        ncpl: {
+            headerName: 'NCPL',
+            field: 'ncpl',
+            minWidth: 90,
+            valueGetter: getNcpl,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "NCPL = Spend / Conversions",
+            
+        },
+        fmargin: {
+            headerName: 'FMargin',
+            field: 'fmargin',
+            minWidth: 120,
+            valueGetter: getFmargin,
+            sortable: true,
+            filter: "agTextColumnFilter",
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "FMargin = (Profit / Spend) * 100",
+            
+        },
+        roi: {
+            headerName: 'ROI',
+            field: 'roi',
+            minWidth: 100,
+            valueGetter: getROI,
+            filter: "agNumberColumnFilter",
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "ROI = ((Revenue - Spend) / Spend) * 100",
+            
+        },
+        adsetid: {
+            headerName: 'AdsetId',
+            field: 'adsetid',
+            sortable: true,
+            filter: "agTextColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' 
+        },
+        campaignid: {
+            headerName: 'CampaignId',
+            field: 'campaignid',
+            sortable: true,
+            filter: "agTextColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' 
+        },
+        timezone: {
+            headerName: 'TimeZone',
+            field: 'timezone',
+            filter: "agTextColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' 
+        },
+    };
+
+    const columnDefsObject = {
+        campaignname: {
+            headerName: 'CampaignName',
+            field: 'campaignname',
+            resizable: true,
+            sortable: true,
+            width: 500,
+            hide: true,
+            rowGroup: true,
+            enableRowGroup: true,
+            pinned: 'left',
+        },
+        actions: {
+            headerName: 'Actions',
+            field: 'actions',
+            minWidth: 90,
+            // sortable: true,
+            // filter: true,
+            sortable: false,    // Ensure sorting is disabled
+            filter: false,      // Ensure filtering is disabled
+            enableSorting: false,  // Disable sorting at the column level
+            enableFilter: false,
+            suppressMenu: true,    // Suppress the column menu
+            menuTabs: [],
+            hide: !isYesterday(),
+            cellRenderer: (params) => {
+                const [isModalVisible, setIsModalVisible] = useState(false);
+                const [groupedData, setGroupedData] = useState([]);
+                const [newgroupedData, setNewGroupedData] = useState([]);
+                const [changeBudget, onChangeBudget] = useState();
+                const [campaignStatus, setCampaignStatus] = useState(true);
+                const [campaignActualSpend, setCampaignActualSpend] = useState({});
+
+                const onChangeSpendAndStatus = async () => {
+                    if (params?.node?.rowPinned === 'bottom') {
+                        return ""; // Return empty string to remove "..."
+                    }
+                    if (params?.node?.footer) {
+                        return ""; // Prevent modal from opening for group footer rows
+                    }
+                    const allLeafChildren = params.node?.allLeafChildren || [];
+
+                    // Fetch all the rows under the current group
+                    const groupedData = allLeafChildren.map(node => node.data) || [];
+                    setNewGroupedData(groupedData);
+                    const campaignId = groupedData[0]?.campaignid;
+                    // console.log(groupedData, "groupedData");
+
+                    // Only show the modal if there is data (groupedData length is greater than 0)
+                    if (groupedData.length > 0) {
+                        const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
+                        const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
+                        if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
+                            
+                            setGroupedData(getCampaignResponse.data);
+                            setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
+                            onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
+                        }
+                        if(getCampaignActualSpend.status === 200){
+                            // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                            setCampaignActualSpend(getCampaignActualSpend.data);
+                        }
+                        else {
+                            setGroupedData(groupedData);
+                        }
+                        // Set the grouped data for the modal
+                        setIsModalVisible(true); // Show the modal for non-footer rows
+                    }
+                    // if(groupedData.length > 0) {
+                        
+                    //     const getCampaignActualSpend = await apiClient.get(`http://localhost:8000/get/ActualCampaginSpend?campaignId=${campaignId}`);
+                    //     if (getCampaignActualSpend.status === 200){
+                    //         setCampaignActualSpend(getCampaignActualSpend.data);
+                    //     }
+                    // }
+                };
+
+                const handleOk = async () => {
+                    setIsModalVisible(false); // Close the modal
+                    const object = {
+                        campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname : groupedData[0]?.campaignname,
+                        adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
+                        campaignid: !Array.isArray(groupedData) ? groupedData?.campaignid : groupedData[0]?.campaignid,
+                        usercommit: userdetails?.email,
+                        accountNumber: newaccount,
+                        budget: changeBudget * 100,
+                        status: campaignStatus
+                    };
+                    // console.log(object);
+                    const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
+                    const responseData = requestResponse.data;
+                    // console.log(responseData, "response");
+                    message.success("Budget and Status Updated");
+                    changeRRefrst();
+                };
+
+                const handleCancel = () => {
+                    setIsModalVisible(false);
+                    // console.log(changeBudget); // Close the modal
+                };
+
+                const getTotalSpend = (data) => {
+                    if (!data || data.length === 0) return 0;
+                    const total = data.reduce((total, item) => {
+                        return total + (parseFloat(item?.spend) || 0);
+                    }, 0);
+                    // console.log(total, "total");
+                    return Math.round(total * 100) / 100; // Round to 2 decimal places
+                };
+
+                const onChangeBudgetValue = event => {
+                    onChangeBudget(event.target.value)
+                }
+
+                const onChangeCampaignStatus = async () => {
+                    const apiEndpoint = campaignStatus
+                        ? '/campaignStatusPause/' // Pause campaign
+                        : '/campaignStatusActive/'; // Activate campaign
+                
+                    try {
+                        const response = await apiClient.post(apiEndpoint, 
+                            { campaignId: groupedData[0]?.campaignid }
+                        );
+                        if (response.status === 200) {
+                            message.success(`Campaign ${groupedData[0]?.campaignid} status updated to ${campaignStatus ? 'Paused' : 'Active'}`);
+                            setCampaignStatus((prev) => !prev); // Toggle the status
+                        } else {
+                            message.error('Failed to update campaign status.');
+                        }
+                    } catch (error) {
+                        console.error('Error updating campaign status:', error);
+                        message.error('Error updating campaign status.');
+                    }
+                };
+                // console.log()
+
+                return (
+                    <div>
+                        <div onClick={onChangeSpendAndStatus}>
+                            <span>{params.value || "..."}</span> 
+                        </div>
+                        {isModalVisible && (
+                            <Modal
+                                title={groupedData?.length > 0 && groupedData?.length !== 1 ? groupedData[0]?.campaignname : groupedData?.campaignname}
+                                visible={isModalVisible}
+                                onOk={handleOk}
+                                onCancel={handleCancel}
+                                width={600}  
+                                style={{ padding: '20px' }}
+                                okButtonProps={{ style: { backgroundColor: '#C7F39A', borderColor: '#C7F39A' } }} 
+                            >
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                    
+                                    <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                                        <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
+                                        <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#C7F39A"}} onChange={onChangeCampaignStatus} />
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <Typography.Text strong style={{ marginBottom: '10px' }}>Budget: <span style={{fontWeight:'normal'}}>{campaignActualSpend.daily_budget ? "Daily" : campaignActualSpend.lifetime_budget ? "Lifetime" : "Adset"}</span></Typography.Text>
+                                        <Input placeholder="Enter your value here" defaultValue={campaignActualSpend.daily_budget ? parseFloat(campaignActualSpend.daily_budget)/100 : campaignActualSpend.lifetime_budget ? parseFloat(campaignActualSpend.lifetime_budget)/100 : (groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData))} onChange={onChangeBudgetValue} />
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <Typography.Text strong>Campaign ID:</Typography.Text>
+                                        <p>{campaignActualSpend?.id}</p>
+                                    </div>
+                                </div>
+                            </Modal>
+                        )}
+                    </div>
+                );
+            },
+        },
+        adsetname: {
+            headerName: 'AdsetName',
+            field: 'adsetname',
+            sortable: true,
+            minWidth: 450,
+            filter: 'agSetColumnFilter',
+            filterParams: {
+                comparator: (a, b) => a.localeCompare(b),
+                suppressAndOrCondition: true,
+            },
+            suppressMenu: true,    // Suppress the column menu
+            
+        },
+        adname: {
+            headerName: 'AdName', field: 'adname',
+            // resizeble: true,
+            // sortable: true,
+            // width: 300,
+            // rowGroup: true, 
+            // rowGroupIndex: 1, // Level 2
+            // hide: true,
+            // filter: 'agSetColumnFilter',
+            // filterParams: {
+            //     comparator: (a, b) => a.localeCompare(b),
+            //     suppressAndOrCondition: true,
+            // }, 
+            // showRowGroup: 'adname',
+            hide: true,
+        },
+        adid: {
+            headerName: 'AdID',
+            field: 'adid',
+            // sortable: true,
+            // minWidth: 200,
+            // filter: 'agSetColumnFilter',
+            hide: true,
+            // filterParams: {
+            //     comparator: (a, b) => a.localeCompare(b),
+            //     suppressAndOrCondition: true,
+            // },
+            // suppressMenu: true,    // Suppress the column menu
+            
+        },
+        from: {
+            headerName: 'From',
+            field: 'from',
+            minWidth: 110,
+            valueGetter: (params) => {
+              if (params.node.group) {
+                const campaignName =
+                  params.node.groupData?.campaignname || params.node.key;
+                return moment(campaignMap.get(campaignName), "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
+              }
+              return '';
+            },
+            cellClassRules: {
+              'hide-leaf-cell': (params) => !params.node.group,
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+        },
+        profitloss:{
+              headerName: 'P/L',
+              field: 'profitloss',
+              valueGetter: (params) => {
+                if (params.node.group) {
+                  const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
+                  const campaignData = allProfitLossArray?.items?.filter(obj => obj.campaign_name === campaignName);
+                  const revenue = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.estimated_revenue) || 0), 0);
+                  const spend = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.spend) || 0), 0);
+                //   console.log(revenue, "revenue");
+                //   console.log(spend, "spend");
+                  // const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
+                  // const {  start } = campaignStatus;
+                  // console.log(params.node.groupData?.campaignname, "groupData");
+                  // console.log(params.node.key, "start");
+                  // return campaignStatus?.start || 'Unknown';
+                  return (revenue - spend) ? (revenue - spend).toFixed(2) : ""  || "";
+                }
+                return '';
+              },
+              minWidth: 110,
+              cellClassRules: {
+                'hide-leaf-cell': (params) => !params.node.group,
+              },
+              cellStyle: { fontWeight: 'bold' },
+              suppressMenu: true,
+              menuTabs: [],
+              headerClass: 'hide-menu', // Add a custom class
+          },
+        date: {
+            headerName: 'Date',
+            field: 'date',
+            minWidth: 110,
+            sortable: true,
+            sort: "asc",
+            filter: "agDateColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            filterParams: {
+                comparator: (filterLocalDateAtMidnight, cellValue) => {
+                    const dateAsString = cellValue;
+                    if (dateAsString == null) return -1;
+                    const dateParts = dateAsString.split("/");
+                    const cellDate = new Date(
+                        Number(dateParts[2]),
+                        Number(dateParts[1]) - 1,
+                        Number(dateParts[0])
+                    );
+
+                    if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
+                        return 0;
+                    }
+
+                    if (cellDate < filterLocalDateAtMidnight) {
+                        return -1;
+                    }
+
+                    if (cellDate > filterLocalDateAtMidnight) {
+                        return 1;
+                    }
+                    return 0;
+                },
+            },
+        },
+        'fb-hour': {
+            headerName: 'F-H',
+            field: 'fb-hour',
+            width: 85,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+            
+        },
+        'mnet-hour': {
+            headerName: 'N-H',
+            field: 'mnet-hour',
+            minWidth: 95,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+            
+        },
+        spend: {
+            headerName: 'Spend',
+            field: 'spend',
+            minWidth: 105,
+            aggFunc: liveSpender,
+            sortable: true,
+            filter: "agTextColumnFilter", // Keep filter active
+            valueFormatter: currencyFormatter,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "Total amount spent",
+        },       
+        revenue: {
+            headerName: 'Revenue',
+            field: 'revenue',
+            minWidth: 105,
+            aggFunc: liveSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            valueFormatter: currencyFormatter,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+            
+        },
+        profit: {
+            headerName: 'Profit',
+            field: 'profit',
+            minWidth: 105,
+            sortable: true,
+            aggFunc: liveSpender,
+            cellClassRules: {
+                'font-red': p => p.value < 0
+            },
+            filter: "agNumberColumnFilter",
+            valueFormatter: currencyFormatter,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "Profit = Revenue - Spend",
+            
+        },
+        margin: {
+            headerName: 'Margin',
+            field: 'margin',
+            minWidth: 100,
+            valueGetter: getMargin,
+            sortable: true,
+            filter: "agTextColumnFilter",
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "Margin = (Profit / Revenue) * 100",
+            
+        },
+        fbleads: {
+            headerName: 'FBLeads',
+            field: 'fbleads',
+            minWidth: 105,
+            aggFunc: newSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+            
+        },
+        conversions: {
+            headerName: 'Conv',
+            field: 'conversions',
+            minWidth: 85,
+            aggFunc: newSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            
+            headerTooltip: "Conversions",
+            
+        },
+        cpc: {
+            headerName: 'CPC',
+            field: 'cpc',
+            // valueGetter: (params) => {
+            //     if (params.node.group && params.node.aggData) {
+            //         return sanitizeNumericValue(params.node.aggData["cpc"]) || 0;
+            //     }
+            //     return sanitizeNumericValue(params.data?.cpc);
+            // },
+            aggFunc: cpcSpender,
+            minWidth: 80,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "CPC = Spend / FBClicks",
+            
+        },
+        cpclinkclicks: {
+            headerName: 'CPC_LC',
+            field: 'cpclinkclicks',
+            // aggFunc: cpcSpender,
+            valueGetter:getCpcLc,
+            minWidth: 80,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "cpclinkclicks = Spend / FBLinkClicks",
+            
+        },
+        fbclicks: {
+            headerName: 'FBClicks',
+            field: 'fbclicks',
+            minWidth: 110,
+            aggFunc: newSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+            
+        },
+        fblinkclicks: {
+            headerName: 'FB_LC',
+            field: 'fblinkclicks', 
+            headerTooltip:'fblinkclicks',
+            minWidth: 110,
+            aggFunc: newSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+            
+        },
+        impressions: {
+            headerName: 'IMP',
+            field: 'impressions',
+            minWidth: 100,
+            aggFunc: newSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "Impressions",
+        },
+        ctr: {
+            headerName: 'CTR',
+            field: 'ctr',
+            valueGetter: getCtr,
+            minWidth: 100,
+            sortable: true,
+            filter: "agTextColumnFilter",
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+            
+        },
+        rpc: {
+            headerName: 'RPC',
+            field: 'rpc',
+            minWidth: 80,
+            valueGetter: getRpc,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "RPC = Revenue / Conversions",
+            cellStyle: { fontWeight: 'bold' } // Make text bold
+        },
+        cpl: {
+            headerName: 'CPL',
+            field: 'cpl',
+            minWidth: 80,
+            valueGetter: getCpl,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "CPL = Spend / FBLeads",
+            
+        },
+        ncpl: {
+            headerName: 'NCPL',
+            field: 'ncpl',
+            minWidth: 90,
+            valueGetter: getNcpl,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "NCPL = Spend / Conversions",
+            
+        },
+        fmargin: {
+            headerName: 'FMargin',
+            field: 'fmargin',
+            minWidth: 120,
+            valueGetter: getFmargin,
+            sortable: true,
+            filter: "agTextColumnFilter",
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "FMargin = (Profit / Spend) * 100",
+            
+        },
+        roi: {
+            headerName: 'ROI',
+            field: 'roi',
+            minWidth: 100,
+            valueGetter: getROI,
+            filter: "agNumberColumnFilter",
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "ROI = ((Revenue - Spend) / Spend) * 100",
+            
+        },
+        adsetid: {
+            headerName: 'AdsetId',
+            field: 'adsetid',
+            sortable: true,
+            filter: "agTextColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' 
+        },
+        campaignid: {
+            headerName: 'CampaignId',
+            field: 'campaignid',
+            sortable: true,
+            filter: "agTextColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' 
+        },
+        timezone: {
+            headerName: 'TimeZone',
+            field: 'timezone',
+            filter: "agTextColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' 
+        },
+    };
+
+    const columnDefsObjectAdsetLevelDaily = {
+        campaignname: {
+            headerName: 'CampaignName',
+            field: 'campaignname',
+            resizable: true,
+            sortable: true,
+            hide: true,
+            
+            // onClick: (event) => {
+            //     const url = `/history/${event}-${account}-${time}`;
+            //     window.open(url, '_blank', 'noopener,noreferrer');
+            // },
+            // cellRenderer: campaignNameRenderer,
+        },
+        actions: {
+            headerName: 'Actions',
+            field: 'actions',
+            minWidth: 90,
+            sortable: false,    // Ensure sorting is disabled
+            filter: false,      // Ensure filtering is disabled
+            enableSorting: false,  // Disable sorting at the column level
+            enableFilter: false,
+            hide: false,
+            suppressMenu: true,
+            hide: !isYesterday(),
+            cellRenderer: (params) => {
+                const [isModalVisible, setIsModalVisible] = useState(false);
+                const [newgroupedData, setNewGroupedData] = useState([]);
+                const [groupedData, setGroupedData] = useState([]);
+                const [changeBudget, onChangeBudget] = useState();
+                const [campaignStatus, setCampaignStatus] = useState(true);
+                const [campaignActualSpend, setCampaignActualSpend] = useState({});
+
+                const onChangeSpendAndStatus = async () => {
+                    // Check if it's a group footer row (for groupIncludeFooter)
+                    if (params?.node?.footer) {
+                        // console.log("This is a groupIncludeFooter row. Modal will not open.");
+                        return; // Prevent modal from opening for group footer rows
+                    }
+
+                    // Ensure allLeafChildren exists and is an array before proceeding
+                    const allLeafChildren = params.node?.allLeafChildren || [];
+                    setNewGroupedData(groupedData);
+
+                    // Fetch all the rows under the current group
+                    const groupedData = allLeafChildren.map(node => node.data) || [];
+                    const campaignId = groupedData[0]?.campaignid;
+
+                    // Only show the modal if there is data (groupedData length is greater than 0)
+                    if (groupedData.length > 0) {
+                        const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
+                        const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
+                        if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
+                            setGroupedData(getCampaignResponse.data);
+                            setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
+                            onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
+                        }
+                        if(getCampaignActualSpend.status === 200){
+                            // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                            setCampaignActualSpend(getCampaignActualSpend.data);
+                        }
+
+                        else {
+                            setGroupedData(groupedData);
+                            // console.log("dailyadd");
+                        }
+                        // Set the grouped data for the modal
+                        setIsModalVisible(true); // Show the modal for non-footer rows
+                    }
+                };
+
+                const handleOk = async () => {
+                    setIsModalVisible(false); // Close the modal
+                    const object = {
+                        campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname : groupedData[0]?.campaignname,
+                        adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
+                        campaignid: !Array.isArray(groupedData) ? groupedData?.campaignid : groupedData[0]?.campaignid,
+                        usercommit: userdetails?.email,
+                        accountNumber: newaccount,
+                        budget: changeBudget * 100,
+                        status: campaignStatus
+                    };
+                    // console.log(object);
+                    const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
+                    const responseData = requestResponse.data;
+                    // console.log(responseData, "response");
+                    message.success("Budget and Status Updated");
+                    changeRRefrst();
+                };
+
+                const handleCancel = () => {
+                    setIsModalVisible(false);
+                    // console.log(changeBudget); // Close the modal
+                };
+
+                const getTotalSpend = (data) => {
+                    if (!data || data.length === 0) return 0;
+                    const total = data.reduce((total, item) => {
+                        return total + (parseFloat(item?.spend) || 0);
+                    }, 0);
+                    return Math.round(total * 100) / 100; // Round to 2 decimal places
+                };
+
+                const onChangeBudgetValue = event => {
+                    onChangeBudget(event.target.value)
+                }
+                const onChangeCampaignStatus = async () => {
+                    const apiEndpoint = campaignStatus
+                        ? 'https://prodapis.adsgoat.in/campaignStatusPause/' // Pause campaign
+                        : 'https://prodapis.adsgoat.in/campaignStatusActive/'; // Activate campaign
+                
+                    try {
+                        const response = await axios.post(apiEndpoint, 
+                            { campaignId: groupedData[0]?.campaignid }, 
+                            { headers: { Authorization: token } }
+                        );
+                        if (response.status === 200) {
+                            message.success(`Campaign ${groupedData[0]?.campaignid} status updated to ${campaignStatus ? 'Paused' : 'Active'}`);
+                            setCampaignStatus((prev) => !prev); // Toggle the status
+                        } else {
+                            message.error('Failed to update campaign status.');
+                        }
+                    } catch (error) {
+                        console.error('Error updating campaign status:', error);
+                        message.error('Error updating campaign status.');
+                    }
+                };
+
+                return (
+                    <div>
+                        <div onClick={onChangeSpendAndStatus}>
+                            <span>{params.value || "..."}</span> {/* Fallback to '...' if status is not available */}
+                        </div>
+                        {/* Modal should only be shown for non-footer rows and when groupedData length is greater than 0 */}
+                        {isModalVisible && (
+                            <Modal
+                                title={groupedData?.length > 0 && groupedData?.length !== 0 ? groupedData[0]?.campaignname : groupedData?.campaignname}
+                                visible={isModalVisible}
+                                onOk={handleOk}
+                                onCancel={handleCancel}
+                                width={600}  // Set a custom width for the modal
+                                style={{ padding: '20px' }}  // Adjust body padding
+                                okButtonProps={{ style: { backgroundColor: '#C7F39A', borderColor: '#C7F39A' } }} 
+                            >
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                                        <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
+                                        <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#C7F39A"}} onChange={onChangeCampaignStatus} />
+                                    </div>
+
+                                    {/* Input Field */}
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <Typography.Text strong style={{ marginBottom: '10px' }}>Budget: <span style={{fontWeight:'normal'}}>{campaignActualSpend.daily_budget ? "Daily" : campaignActualSpend.lifetime_budget ? "Lifetime" : "Adset"}</span></Typography.Text>
+                                        <Input placeholder="Enter your value here" defaultValue={campaignActualSpend.daily_budget ? parseFloat(campaignActualSpend.daily_budget)/100 : campaignActualSpend.lifetime_budget ? parseFloat(campaignActualSpend.lifetime_budget)/100 : (groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData))} onChange={onChangeBudgetValue} />
+                                    </div>
+
+                                    {/* Campaign ID */}
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <Typography.Text strong>Campaign ID:</Typography.Text>
+                                        <p>{campaignActualSpend?.id}</p>
+                                    </div>
+                                </div>
+                            </Modal>
+                        )}
+                    </div>
+                );
+            },
+            filterParams: { filterEnabled: false },
+
+        },
+
+        adsetname: {
+            headerName: 'AdsetName', field: 'adsetname',
+            // resizeble: true,
+            sortable: true,
+            minWidth: 450,
+            filter: 'agSetColumnFilter',
+            filterParams: {
+                comparator: (a, b) => a.localeCompare(b),
+                suppressAndOrCondition: true,
+            }, 
+            width: 500,
+            hide: true,
+            rowGroup: true,
+            pinned: 'left',
+            enableRowGroup: true,
+        },
+        adname: {
+            headerName: 'AdName', field: 'adname',
+            // resizeble: true,
+            // sortable: true,
+            // width: 300,
+            // rowGroup: true, 
+            // rowGroupIndex: 1, // Level 2
+            // hide: true,
+            // filter: 'agSetColumnFilter',
+            // filterParams: {
+            //     comparator: (a, b) => a.localeCompare(b),
+            //     suppressAndOrCondition: true,
+            // }, 
+            // showRowGroup: 'adname',
+            hide: true,
+        },
+        adid: {
+            headerName: 'AdID',
+            field: 'adid',
+            // sortable: true,
+            // minWidth: 200,
+            // filter: 'agSetColumnFilter',
+            hide: true,
+            // filterParams: {
+            //     comparator: (a, b) => a.localeCompare(b),
+            //     suppressAndOrCondition: true,
+            // },
+            // suppressMenu: true,    // Suppress the column menu
+            
+        },
+        from:{
+            headerName: 'From',
+            field: 'from',
+            minWidth: 110,
+            valueGetter: (params) => {
+              if (params.node.group) {
+                const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
+                const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
+                // const {  start } = campaignStatus;
+                // console.log(params.node.groupData?.campaignname, "groupData");
+                // console.log(params.node.key, "start");
+                return moment(campaignStatus?.start, "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
+              }
+              return '';
+            },
+            cellClassRules: {
+              'hide-leaf-cell': (params) => !params.node.group,
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+        },
+        profitloss:{
+            headerName: 'P/L',
+            field: 'profitloss',
+            minWidth: 110,
+            valueGetter: (params) => {
+              if (params.node.group) {
+                const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
+                const campaignData = allProfitLossArray?.items?.filter(obj => obj.campaign_name === campaignName);
+                const revenue = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.estimated_revenue) || 0), 0);
+                const spend = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.spend) || 0), 0);
+                // const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
+                // const {  start } = campaignStatus;
+                // console.log(params.node.groupData?.campaignname, "groupData");
+                // console.log(params.node.key, "start");
+                // return campaignStatus?.start || 'Unknown';
+                return (revenue - spend) ? (revenue - spend).toFixed(2) : "" || "";
+              }
+              return '';
+            },
+            cellClassRules: {
+              'hide-leaf-cell': (params) => !params.node.group,
+            },
+            cellStyle: { fontWeight: 'bold' },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+        },
+        date: {
+            headerName: 'Date', field: 'date', minWidth: 110, sortable: true,
+            filter: "agDateColumnFilter",
+            sort: "asc",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            filterParams: {
+                comparator: (filterLocalDateAtMidnight, cellValue) => {
+                    const dateAsString = cellValue;
+                    if (dateAsString == null) return -1;
+                    const dateParts = dateAsString.split("/");
+                    const cellDate = new Date(
+                        Number(dateParts[2]),
+                        Number(dateParts[1]) - 1,
+                        Number(dateParts[0])
+                    );
+
+                    if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
+                        return 0;
+                    }
+
+                    if (cellDate < filterLocalDateAtMidnight) {
+                        return -1;
+                    }
+
+                    if (cellDate > filterLocalDateAtMidnight) {
+                        return 1;
+                    }
+                    return 0;
+                }
+            },
+        },
+        'fb-hour': { headerName: 'F-H', field: 'fb-hour', minWidth: 85, sortable: true, hide: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        'mnet-hour': { headerName: 'M-H', field: 'mnet-hour', minWidth: 95, sortable: true, hide: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        spend: {
+            headerName: 'Spend',
+            field: 'spend',
+            minWidth: 105,
+            aggFunc: liveSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            valueFormatter: currencyFormatter, // Format display as currency
+            comparator: numberComparator,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+        },
+        revenue: {
+            headerName: 'Revenue',
+            field: 'revenue',
+            minWidth: 105,
+            aggFunc: liveSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            valueFormatter: currencyFormatter,
+            comparator: numberComparator,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+        },
+        profit: {
+            headerName: 'Profit',
+            field: 'profit',
+            minWidth: 105,
+            aggFunc: liveSpender,
+            sortable: true,
+            cellClassRules: {
+                'font-red': p => p.value < 0 // Conditional formatting for negative profit
+            },
+            filter: "agNumberColumnFilter",
+            valueFormatter: currencyFormatter,
+            comparator: numberComparator,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: 'Profit = Revenue - Spend',
+        },
+        margin: {
+            headerName: 'Margin', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: '(Profit/Revenue)*100', filter: 'agNumberColumnFilter',
+            minWidth: 100,
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+
+        },
+        fbleads: { headerName: 'FBLeads', field: 'fbleads', minWidth: 105, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        conversions: { headerName: 'Conv', field: 'conversions', headerTooltip: "Conversions", minWidth: 85, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        cpc: {
+            headerName: 'CPC', field: 'cpc',
+            minWidth: 80,
+            aggFunc: (params) => {
+                const sum = params.values.reduce((sum, value) => sum + parseFloat(value), 0);
+                return sum / params.values.length;
+            },
+            valueFormatter: params => params.value !== undefined ? Math.round(params.value * 100) / 100 : '',
+            sortable: true, filter: 'agNumberColumnFilter',
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "CPC = Spend / FBClicks",
+
+        },
+        cpclinkclicks: {
+            headerName: 'CPC_LC',
+            field: 'cpclinkclicks',
+            // aggFunc: cpcSpender,
+            valueGetter:getCpcLc,
+            minWidth: 80,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "cpclinkclicks = Spend / FBLinkClicks",
+            
+        },
+        fblinkclicks: { headerName: 'FB_LC', field: 'fblinkclicks', headerTooltip:'fblinkclicks', minWidth: 110, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        fbclicks: { headerName: 'FBClicks', field: 'fbclicks', minWidth: 110, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        impressions: { headerName: 'IMP', field: 'impressions', headerTooltip:"Impressions", minWidth: 100, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        ctr: {
+            headerName: 'CTR', field: 'ctr', valueGetter: getCtr, sortable: true,
+            minWidth: 100,
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "CTR = (FBClicks / Impressions) * 100",
+        },
+        rpc: {
+            headerName: 'RPC', field: 'rpc', valueGetter: getRpc, sortable: true, filter: 'agNumberColumnFilter',
+            minWidth: 80,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "RPC = Revenue / Conversions",
+            cellStyle: { fontWeight: 'bold' } // Make text bold
+        },
+        cpl: { headerName: 'CPL', field: 'cpl', minWidth:80, valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "CPL = Spend / FBLeads" },
+        ncpl: { headerName: 'NCPL', field: 'ncpl', minWidth:90, valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "NCPL = Spend / Conversions" },
+        fmargin: {
+            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: true,
+            minWidth: 120,
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "FMargin = (Profit / Spend) * 100",
+        },
+        roi: {
+            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: '(Profit/Spend)*100', filter: true,
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            minWidth: 100,
+            valueFormatter: (params) => `${params.value}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "ROI = (Revenue - Spend) / Spend",
+        },
+        adsetid: { headerName: 'AdsetId', field: 'adsetid', sortable: true, filter: "agTextColumnFilter", hide: false, suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        campaignid: { headerName: 'CampaignId', field: 'campaignid', sortable: true, filter: "agTextColumnFilter",  suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', hide: true },
+        timezone: { headerName: 'TimeZone', field: 'timezone', sortable: true, hide: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+    };
+
+    const columnDefsObjectAdLevelDaily = {
+        campaignname: {
+            headerName: 'CampaignName',
+            field: 'campaignname',
+            resizable: true,
+            sortable: true,
+            hide: true,
+            // onClick: (event) => {
+            //     const url = `/history/${event}-${account}-${time}`;
+            //     window.open(url, '_blank', 'noopener,noreferrer');
+            // },
+            // cellRenderer: campaignNameRenderer,
+        },
+        actions: {
+            headerName: 'Actions',
+            field: 'actions',
+            minWidth: 90,
+            sortable: false,    // Ensure sorting is disabled
+            filter: false,      // Ensure filtering is disabled
+            enableSorting: false,  // Disable sorting at the column level
+            enableFilter: false,
+            hide: false,
+            suppressMenu: true,
+            hide: !isYesterday(),
+            cellRenderer: (params) => {
+                const [isModalVisible, setIsModalVisible] = useState(false);
+                const [newgroupedData, setNewGroupedData] = useState([]);
+                const [groupedData, setGroupedData] = useState([]);
+                const [changeBudget, onChangeBudget] = useState();
+                const [campaignStatus, setCampaignStatus] = useState(true);
+                const [campaignActualSpend, setCampaignActualSpend] = useState({});
+
+                const onChangeSpendAndStatus = async () => {
+                    // Check if it's a group footer row (for groupIncludeFooter)
+                    if (params?.node?.footer) {
+                        // console.log("This is a groupIncludeFooter row. Modal will not open.");
+                        return; // Prevent modal from opening for group footer rows
+                    }
+
+                    // Ensure allLeafChildren exists and is an array before proceeding
+                    const allLeafChildren = params.node?.allLeafChildren || [];
+                    setNewGroupedData(groupedData);
+
+                    // Fetch all the rows under the current group
+                    const groupedData = allLeafChildren.map(node => node.data) || [];
+                    const campaignId = groupedData[0]?.campaignid;
+
+                    // Only show the modal if there is data (groupedData length is greater than 0)
+                    if (groupedData.length > 0) {
+                        const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
+                        const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
+                        if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
+                            setGroupedData(getCampaignResponse.data);
+                            setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
+                            onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
+                        }
+                        if(getCampaignActualSpend.status === 200){
+                            // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                            setCampaignActualSpend(getCampaignActualSpend.data);
+                        }
+
+                        else {
+                            setGroupedData(groupedData);
+                            // console.log("dailyadd");
+                        }
+                        // Set the grouped data for the modal
+                        setIsModalVisible(true); // Show the modal for non-footer rows
+                    }
+                };
+
+                const handleOk = async () => {
+                    setIsModalVisible(false); // Close the modal
+                    const object = {
+                        campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname : groupedData[0]?.campaignname,
+                        adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
+                        campaignid: !Array.isArray(groupedData) ? groupedData?.campaignid : groupedData[0]?.campaignid,
+                        usercommit: userdetails?.email,
+                        accountNumber: newaccount,
+                        budget: changeBudget * 100,
+                        status: campaignStatus
+                    };
+                    // console.log(object);
+                    const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
+                    const responseData = requestResponse.data;
+                    // console.log(responseData, "response");
+                    message.success("Budget and Status Updated");
+                    changeRRefrst();
+                };
+
+                const handleCancel = () => {
+                    setIsModalVisible(false);
+                    // console.log(changeBudget); // Close the modal
+                };
+
+                const getTotalSpend = (data) => {
+                    if (!data || data.length === 0) return 0;
+                    const total = data.reduce((total, item) => {
+                        return total + (parseFloat(item?.spend) || 0);
+                    }, 0);
+                    return Math.round(total * 100) / 100; // Round to 2 decimal places
+                };
+
+                const onChangeBudgetValue = event => {
+                    onChangeBudget(event.target.value)
+                }
+                const onChangeCampaignStatus = async () => {
+                    const apiEndpoint = campaignStatus
+                        ? 'https://prodapis.adsgoat.in/campaignStatusPause/' // Pause campaign
+                        : 'https://prodapis.adsgoat.in/campaignStatusActive/'; // Activate campaign
+                
+                    try {
+                        const response = await axios.post(apiEndpoint, 
+                            { campaignId: groupedData[0]?.campaignid }, 
+                            { headers: { Authorization: token } }
+                        );
+                        if (response.status === 200) {
+                            message.success(`Campaign ${groupedData[0]?.campaignid} status updated to ${campaignStatus ? 'Paused' : 'Active'}`);
+                            setCampaignStatus((prev) => !prev); // Toggle the status
+                        } else {
+                            message.error('Failed to update campaign status.');
+                        }
+                    } catch (error) {
+                        console.error('Error updating campaign status:', error);
+                        message.error('Error updating campaign status.');
+                    }
+                };
+
+                return (
+                    <div>
+                        <div onClick={onChangeSpendAndStatus}>
+                            <span>{params.value || "..."}</span> {/* Fallback to '...' if status is not available */}
+                        </div>
+                        {/* Modal should only be shown for non-footer rows and when groupedData length is greater than 0 */}
+                        {isModalVisible && (
+                            <Modal
+                                title={groupedData?.length > 0 && groupedData?.length !== 0 ? groupedData[0]?.campaignname : groupedData?.campaignname}
+                                visible={isModalVisible}
+                                onOk={handleOk}
+                                onCancel={handleCancel}
+                                width={600}  // Set a custom width for the modal
+                                style={{ padding: '20px' }}  // Adjust body padding
+                                okButtonProps={{ style: { backgroundColor: '#C7F39A', borderColor: '#C7F39A' } }} 
+                            >
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                                        <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
+                                        <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#C7F39A"}} onChange={onChangeCampaignStatus} />
+                                    </div>
+
+                                    {/* Input Field */}
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <Typography.Text strong style={{ marginBottom: '10px' }}>Budget: <span style={{fontWeight:'normal'}}>{campaignActualSpend.daily_budget ? "Daily" : campaignActualSpend.lifetime_budget ? "Lifetime" : "Adset"}</span></Typography.Text>
+                                        <Input placeholder="Enter your value here" defaultValue={campaignActualSpend.daily_budget ? parseFloat(campaignActualSpend.daily_budget)/100 : campaignActualSpend.lifetime_budget ? parseFloat(campaignActualSpend.lifetime_budget)/100 : (groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData))} onChange={onChangeBudgetValue} />
+                                    </div>
+
+                                    {/* Campaign ID */}
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <Typography.Text strong>Campaign ID:</Typography.Text>
+                                        <p>{campaignActualSpend?.id}</p>
+                                    </div>
+                                </div>
+                            </Modal>
+                        )}
+                    </div>
+                );
+            },
+            filterParams: { filterEnabled: false },
+
+        },
+
+        adsetname: {
+            headerName: 'AdsetName', field: 'adsetname',
+            // resizeble: true,
+            sortable: true,
+            minWidth: 450,
+            filter: 'agSetColumnFilter',
+            filterParams: {
+                comparator: (a, b) => a.localeCompare(b),
+                suppressAndOrCondition: true,
+            }, 
+            hide: true,
+        },
+        adname: {
+            headerName: 'AdName', field: 'adname',
+            resizeble: true,
+            sortable: true,
+            // width: 300,
+            // rowGroup: true, 
+            // rowGroupIndex: 1, // Level 2
+            // hide: true,
+            // filter: 'agSetColumnFilter',
+            filterParams: {
+                comparator: (a, b) => a.localeCompare(b),
+                suppressAndOrCondition: true,
+            }, 
+            // showRowGroup: 'adname',
+            // hide: true,
+            width: 500,
+            hide: true,
+            rowGroup: true,
+            pinned: 'left',
+            enableRowGroup: true,
+        },
+        adid: {
+            headerName: 'AdID',
+            field: 'adid',
+            // sortable: true,
+            // minWidth: 200,
+            // filter: 'agSetColumnFilter',
+            hide: true,
+            // filterParams: {
+            //     comparator: (a, b) => a.localeCompare(b),
+            //     suppressAndOrCondition: true,
+            // },
+            // suppressMenu: true,    // Suppress the column menu
+            
+        },
+        from:{
+            headerName: 'From',
+            field: 'from',
+            minWidth: 110,
+            valueGetter: (params) => {
+              if (params.node.group) {
+                const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
+                const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
+                // const {  start } = campaignStatus;
+                // console.log(params.node.groupData?.campaignname, "groupData");
+                // console.log(params.node.key, "start");
+                return moment(campaignStatus?.start, "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
+              }
+              return '';
+            },
+            cellClassRules: {
+              'hide-leaf-cell': (params) => !params.node.group,
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+        },
+        profitloss:{
+            headerName: 'P/L',
+            field: 'profitloss',
+            minWidth: 110,
+            valueGetter: (params) => {
+              if (params.node.group) {
+                const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
+                const campaignData = allProfitLossArray?.items?.filter(obj => obj.campaign_name === campaignName);
+                const revenue = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.estimated_revenue) || 0), 0);
+                const spend = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.spend) || 0), 0);
+                // const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
+                // const {  start } = campaignStatus;
+                // console.log(params.node.groupData?.campaignname, "groupData");
+                // console.log(params.node.key, "start");
+                // return campaignStatus?.start || 'Unknown';
+                return (revenue - spend) ? (revenue - spend).toFixed(2) : "" || "";
+              }
+              return '';
+            },
+            cellClassRules: {
+              'hide-leaf-cell': (params) => !params.node.group,
+            },
+            cellStyle: { fontWeight: 'bold' },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+        },
+        date: {
+            headerName: 'Date', field: 'date', minWidth: 110, sortable: true,
+            filter: "agDateColumnFilter",
+            sort: "asc",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            filterParams: {
+                comparator: (filterLocalDateAtMidnight, cellValue) => {
+                    const dateAsString = cellValue;
+                    if (dateAsString == null) return -1;
+                    const dateParts = dateAsString.split("/");
+                    const cellDate = new Date(
+                        Number(dateParts[2]),
+                        Number(dateParts[1]) - 1,
+                        Number(dateParts[0])
+                    );
+
+                    if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
+                        return 0;
+                    }
+
+                    if (cellDate < filterLocalDateAtMidnight) {
+                        return -1;
+                    }
+
+                    if (cellDate > filterLocalDateAtMidnight) {
+                        return 1;
+                    }
+                    return 0;
+                }
+            },
+        },
+        'fb-hour': { headerName: 'F-H', field: 'fb-hour', minWidth: 85, sortable: true, hide: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        'mnet-hour': { headerName: 'M-H', field: 'mnet-hour', minWidth: 95, sortable: true, hide: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        spend: {
+            headerName: 'Spend',
+            field: 'spend',
+            minWidth: 105,
+            aggFunc: liveSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            valueFormatter: currencyFormatter, // Format display as currency
+            comparator: numberComparator,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+        },
+        revenue: {
+            headerName: 'Revenue',
+            field: 'revenue',
+            minWidth: 105,
+            aggFunc: liveSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            valueFormatter: currencyFormatter,
+            comparator: numberComparator,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+        },
+        profit: {
+            headerName: 'Profit',
+            field: 'profit',
+            minWidth: 105,
+            aggFunc: liveSpender,
+            sortable: true,
+            cellClassRules: {
+                'font-red': p => p.value < 0 // Conditional formatting for negative profit
+            },
+            filter: "agNumberColumnFilter",
+            valueFormatter: currencyFormatter,
+            comparator: numberComparator,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: 'Profit = Revenue - Spend',
+        },
+        margin: {
+            headerName: 'Margin', field: 'margin', valueGetter: getMargin, sortable: true, headerTooltip: '(Profit/Revenue)*100', filter: 'agNumberColumnFilter',
+            minWidth: 100,
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+
+        },
+        fbleads: { headerName: 'FBLeads', field: 'fbleads', minWidth: 105, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        conversions: { headerName: 'Conv', field: 'conversions', headerTooltip: "Conversions", minWidth: 85, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        cpc: {
+            headerName: 'CPC', field: 'cpc',
+            minWidth: 80,
+            aggFunc: (params) => {
+                const sum = params.values.reduce((sum, value) => sum + parseFloat(value), 0);
+                return sum / params.values.length;
+            },
+            valueFormatter: params => params.value !== undefined ? Math.round(params.value * 100) / 100 : '',
+            sortable: true, filter: 'agNumberColumnFilter',
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "CPC = Spend / FBClicks",
+
+        },
+        cpclinkclicks: {
+            headerName: 'CPC_LC',
+            field: 'cpclinkclicks',
+            // aggFunc: cpcSpender,
+            valueGetter:getCpcLc,
+            minWidth: 80,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "cpclinkclicks = Spend / FBLinkClicks",
+            
+        },
+        fblinkclicks: { headerName: 'FB_LC', field: 'fblinkclicks', headerTooltip:'fblinkclicks', minWidth: 110, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        fbclicks: { headerName: 'FBClicks', field: 'fbclicks', minWidth: 110, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        impressions: { headerName: 'IMP', field: 'impressions', headerTooltip:"Impressions", minWidth: 100, aggFunc: newSpender, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+        ctr: {
+            headerName: 'CTR', field: 'ctr', valueGetter: getCtr, sortable: true,
+            minWidth: 100,
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "CTR = (FBClicks / Impressions) * 100",
+        },
+        rpc: {
+            headerName: 'RPC', field: 'rpc', valueGetter: getRpc, sortable: true, filter: 'agNumberColumnFilter',
+            minWidth: 80,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "RPC = Revenue / Conversions",
+            cellStyle: { fontWeight: 'bold' } // Make text bold
+        },
+        cpl: { headerName: 'CPL', field: 'cpl', minWidth:80, valueGetter: getCpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "CPL = Spend / FBLeads" },
+        ncpl: { headerName: 'NCPL', field: 'ncpl', minWidth:90, valueGetter: getNcpl, sortable: true, filter: 'agNumberColumnFilter', suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', headerTooltip: "NCPL = Spend / Conversions" },
+        fmargin: {
+            headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin, sortable: true, filter: true,
+            minWidth: 120,
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "FMargin = (Profit / Spend) * 100",
+        },
+        roi: {
+            headerName: 'ROI', field: 'roi', valueGetter: getROI, sortable: true, headerTooltip: '(Profit/Spend)*100', filter: true,
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            minWidth: 100,
+            valueFormatter: (params) => `${params.value}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "ROI = (Revenue - Spend) / Spend",
+        },
+        adsetid: { headerName: 'AdsetId', field: 'adsetid', sortable: true, filter: "agTextColumnFilter", hide: false, suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', hide: true },
+        campaignid: { headerName: 'CampaignId', field: 'campaignid', sortable: true, filter: "agTextColumnFilter",  suppressMenu: true, menuTabs: [], headerClass: 'hide-menu', hide: true },
+        timezone: { headerName: 'TimeZone', field: 'timezone', sortable: true, hide: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
+    };
+
     const columnDefsObject1 = {
         campaignname: {
             headerName: 'CampaignName',
@@ -2839,7 +6009,7 @@ const MyTablePage = () => {
                             onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
                         }
                         if(getCampaignActualSpend.status === 200){
-                            console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                            // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
                             setCampaignActualSpend(getCampaignActualSpend.data);
                         }
 
@@ -2863,7 +6033,7 @@ const MyTablePage = () => {
                         budget: changeBudget * 100,
                         status: campaignStatus
                     };
-                    console.log(object);
+                    // console.log(object);
                     const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
                     const responseData = requestResponse.data;
                     // console.log(responseData, "response");
@@ -3289,7 +6459,7 @@ const MyTablePage = () => {
                             onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
                         }
                         if(getCampaignActualSpend.status === 200){
-                            console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                            // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
                             setCampaignActualSpend(getCampaignActualSpend.data);
                         }
                         else {
@@ -3788,7 +6958,7 @@ const MyTablePage = () => {
                             onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
                         }
                         if(getCampaignActualSpend.status === 200){
-                            console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                            // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
                             setCampaignActualSpend(getCampaignActualSpend.data);
                         }
                         else {
@@ -4314,6 +7484,24 @@ const MyTablePage = () => {
         return order?.map(colKey => columnDefsObject2[colKey]).filter(item => item);
     };
 
+    const getColumnDefsAdsetLevel = (order) => {
+        return order?.map(colKey => columnDefsObjectAdsetLevel[colKey]).filter(item => item);
+    };
+
+    const getColumnDefsAdLevel = (order) => {
+        return order?.map(colKey => columnDefsObjectAdLevel[colKey]).filter(item => item);
+    };
+
+    const getColumnDefsAdsetLevelDaily = (order) => {
+        return order?.map(colKey => columnDefsObjectAdsetLevelDaily[colKey]).filter(item => item);
+    };
+
+    const getColumnDefsAdLevelDaily = (order) => {
+        return order?.map(colKey => columnDefsObjectAdLevelDaily[colKey]).filter(item => item);
+    };
+
+    
+
     const getColumnDefs3 = (order) => {
         // console.log(order);
         const orderItems = order?.map(colKey => columnDefsObject3[colKey]);
@@ -4338,6 +7526,14 @@ const MyTablePage = () => {
 
     const columnDefs4 = useRef();
 
+    const columnDefsAdsetLevel = useRef();
+
+    const columnDefsAdLevel = useRef();
+
+    const columnDefsAdsetLevelDaily = useRef();
+
+    const columnDefsAdLevelDaily = useRef();
+
     const columnDefsOfAdID = useRef();
 
     const columnDefsOfDailyAdID = useRef();
@@ -4354,7 +7550,10 @@ const MyTablePage = () => {
             columnDefs2.current = getColumnDefs2(mainData);
             columnDefs3.current = getColumnDefs3(mainData);
             columnDefs4.current = getColumnDefs4(mainData);
-        
+            columnDefsAdsetLevel.current = getColumnDefsAdsetLevel(mainData);
+            columnDefsAdLevel.current = getColumnDefsAdLevel(mainData);
+            columnDefsAdsetLevelDaily.current = (getColumnDefsAdsetLevelDaily(mainData));
+            columnDefsAdLevelDaily.current = (getColumnDefsAdLevelDaily(mainData));
             // Ensure that 'adid' is included in the column structure
             let updatedColumnStructure = mainData;
             if (!updatedColumnStructure.includes('adid')) {
@@ -4368,14 +7567,14 @@ const MyTablePage = () => {
             const newColumnDailyDefs = getColumnDefsObjectOfDailyAdID(updatedColumnStructure);
             setColDefs(newColumnDefs);
             setColDailyDefs(newColumnDailyDefs);
-            console.log('Updated columnDefsOfAdID:', newColumnDefs);
+            // console.log('Updated columnDefsOfAdID:', newColumnDefs);
             setColumnStructureStatus(true);
         }
     }, [mainData, Camapignlevelstatus]);
 
 
     const updatingColumnsStructure = async (updateDataArray) => {
-        console.log(updateDataArray);
+        // console.log(updateDataArray);
         const response = await apiClient.put(`/api/updateUserData?email=${userdetails.email}`,
             {
                 updateDataArray
@@ -4387,6 +7586,10 @@ const MyTablePage = () => {
         columnDefs2.current = (getColumnDefs2(updateDataArray));
         columnDefs3.current = (getColumnDefs3(updateDataArray));
         columnDefs4.current = (getColumnDefs4(updateDataArray));
+        columnDefsAdsetLevel.current = (getColumnDefsAdsetLevel(updateDataArray));
+        columnDefsAdLevel.current = (getColumnDefsAdLevel(updateDataArray));
+        columnDefsAdsetLevelDaily.current = (getColumnDefsAdsetLevelDaily(updateDataArray));
+        columnDefsAdLevelDaily.current = (getColumnDefsAdLevelDaily(updateDataArray));
         setColDefs(getColumnDefsObjectOfAdID(updateDataArray));
         setColDailyDefs(getColumnDefsObjectOfDailyAdID(updateDataArray));
         columnDefsOfAdID.current = (getColumnDefsObjectOfAdID(updateDataArray));
@@ -4417,7 +7620,10 @@ const MyTablePage = () => {
           columnDefs2.current = getColumnDefs2(mainData.columnStructure);
           columnDefs3.current = getColumnDefs3(mainData.columnStructure);
           columnDefs4.current = getColumnDefs4(mainData.columnStructure);
-      
+          columnDefsAdsetLevel.current = (getColumnDefsAdsetLevel(mainData.columnStructure));
+          columnDefsAdLevel.current = (getColumnDefsAdLevel(mainData.columnStructure));
+          columnDefsAdsetLevelDaily.current = (getColumnDefsAdsetLevelDaily(mainData.columnStructure));
+          columnDefsAdLevelDaily.current = (getColumnDefsAdLevelDaily(mainData.columnStructure));
           // Ensure that 'adid' is included in the column structure
           let updatedColumnStructure = mainData.columnStructure;
           if (!updatedColumnStructure.includes('adid')) {
@@ -4431,7 +7637,7 @@ const MyTablePage = () => {
           const newColumnDailyDefs = getColumnDefsObjectOfDailyAdID(updatedColumnStructure);
           setColDefs(newColumnDefs);
           setColDailyDefs(newColumnDailyDefs);
-          console.log('Updated columnDefsOfAdID:', newColumnDefs);
+        //   console.log('Updated columnDefsOfAdID:', newColumnDefs);
           setColumnStructureStatus(true);
         } catch (error) {
           if (error.response?.status === 500 && retryCount < MAX_RETRIES) {
@@ -4561,7 +7767,7 @@ const MyTablePage = () => {
             account,
             accountName
         };
-        console.log(storedData, "storedData");
+        // console.log(storedData, "storedData");
         localStorage.setItem("storedData", JSON.stringify(storedData));
         setCampaignsStatus(false);
         setCommentsStatus(false);
@@ -4668,7 +7874,7 @@ const MyTablePage = () => {
 
     const handleColumnMove = (params, gridId) => {
         const columnState = params.api.getColumnState();
-        console.log('Column moved in grid:', gridId);
+        // console.log('Column moved in grid:', gridId);
         const fieldOrder = columnState.map(col => col.colId);
         const newFieldOrder = fieldOrder.filter(item => item !== 'ag-Grid-AutoColumn-campaignname' && item !== 'ag-Grid-AutoColumn' && columnStructure.includes(item));
         localStorage.setItem('columnState', JSON.stringify(newFieldOrder));
@@ -4731,7 +7937,7 @@ const MyTablePage = () => {
     };
 
     const onClickRefresh = async () => {
-        console.log(activeTab);
+        // console.log(activeTab);
         await functionCallForAllCampaignsData();
 
         refreshComponent(activeTab);
@@ -4904,7 +8110,7 @@ const MyTablePage = () => {
         
     };
     const handleTabChange = (key) => {
-        console.log("Switched to Tab:", key); // Debugging log
+        // console.log("Switched to Tab:", key); // Debugging log
         setActiveTab(key);
     };
 
@@ -5107,6 +8313,8 @@ const MyTablePage = () => {
                     inputValue={inputValue} 
                     newAccountName={newAccountName} 
                     columnDefs={columnDefs} 
+                    columnDefs1={columnDefsAdsetLevel.current}
+                    columnDefs2={columnDefsAdLevel.current}
                     campaignComments={campaignComments} 
                     Camapignlevelstatus={Camapignlevelstatus} 
                     changeRRefrst={resetColumnStructure} 
@@ -5131,7 +8339,9 @@ const MyTablePage = () => {
                     newRevenuePratner={newRevenuePratner} 
                     inputValue={inputValue} 
                     newAccountName={newAccountName} 
-                    columnDefs={columnDefs1} 
+                    columnDefs={columnDefs1}
+                    columnDefs1={columnDefsAdsetLevelDaily}
+                    columnDefs2={columnDefsAdLevelDaily}
                     campaignComments={campaignComments} 
                     Camapignlevelstatus={Camapignlevelstatus} 
                     changeRRefrst={resetColumnStructure} 

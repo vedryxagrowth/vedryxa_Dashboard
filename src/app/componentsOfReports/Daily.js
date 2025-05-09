@@ -5,15 +5,21 @@ import { Audio } from 'react-loader-spinner';
 import moment from 'moment-timezone';
 import React from 'react';
 import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch} from 'antd';
-import {  DownloadOutlined,  SmileOutlined, CopyOutlined,  EditOutlined,  MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import {  DownloadOutlined,  SmileOutlined, CopyOutlined,  EditOutlined,  MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, CloseOutlined, FolderOutlined, AppstoreOutlined, FileSearchOutlined } from '@ant-design/icons';
 import { Tooltip} from 'antd';
-import { Space } from 'antd';
+import { Space, Tabs } from 'antd';
+import StickyBox from 'react-sticky-box';
 import 'antd/dist/reset.css';
 import '../globals.css';
 import 'ag-grid-enterprise';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { useTokenContext } from '../components/parent';
+
+const CampaignLevelReports = React.lazy(() => import('./CampaignLevelDaily'));
+const AdsetLevelReports = React.lazy(() => import('./AdsetLevelDaily'));
+const AdLevelReports = React.lazy(() => import('./AdLevelDaily'));
+
 const contentStyle = {
     margin: "10px",
     // height: '800px',
@@ -53,7 +59,7 @@ const selectTimezone = {
 };
 
 
-const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle}) => {
+const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle}) => {
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -78,8 +84,21 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
     const oneTimeFetch = useRef(true);
 
     const [apiStatus, setApiStatus ]= useState(false);
+    const [activeTab, setActiveTab] = useState(localStorage.getItem("DailyActiveTab") && localStorage.getItem("DailyActiveTab") !== "undefined" && localStorage.getItem("DailyActiveTab") !== "null" ? localStorage.getItem("DailyActiveTab") : "1");
+
+    const [selectedCampaigns, setSelectedCampaigns] = useState([]);
+
+    const [selectedAdsets, setSelectedAdsets] = useState([]);
+
+    const [selectedAds, setSelectedAds] = useState([]);
+
+    const [removeSelectedCampaigns, setRemoveSelectedCampaigns] = useState("");
+
+    const [removeSelectedAdsets, setRemoveSelectedAdsets] = useState("");
 
     const memorizedColumnDef1 = useMemo(()=> columnDefs.current, [columnDefs.current]);
+    // const memorizedColumnDef1 = useMemo(()=> columnDefs.current, [columnDefs.current]);
+    // const memorizedColumnDef1 = useMemo(()=> columnDefs.current, [columnDefs.current]);
     const memorizedDailyData = useMemo(()=> dailyData?.filter((each) => {
         const normalizedCampaign = each.campaignname.trim().toLowerCase();
         const normalizedInput = inputValue.trim().toLowerCase();
@@ -149,6 +168,48 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
         }
         updateDetails();
     };
+
+    const showCampaignLevel = (data) => {
+        setSelectedCampaigns(data);
+        console.log(data, "CampaignLeveldata");
+    }
+
+    
+
+    const showAdsetLevel = (data) => {
+        setSelectedAdsets(data);
+        console.log(data, "AdsetLeveldata");
+    }
+
+    const onClickRemoveSelectedCampaigns = () => {
+        setSelectedCampaigns([]);
+        // removeSelectedCampaigns();
+        setRemoveSelectedCampaigns("");
+        setTimeout(() => {
+            setRemoveSelectedCampaigns("Remove");
+        }
+        , 100);
+    }
+
+    const onClickRemoveSelectedAdsets = () => {
+        setSelectedAdsets([]);
+        // removeSelectedCampaigns();
+        setRemoveSelectedAdsets("");
+        setTimeout(() => {
+            setRemoveSelectedAdsets("Remove");
+        }
+        , 100);
+    }
+
+    const onClickRemoveSelectedAds = () => {
+        // setSelectedAds([]);
+        // // removeSelectedCampaigns();
+        // setRemoveSelectedAdsets("");
+        // setTimeout(() => {
+        //     setRemoveSelectedAdsets("Remove");
+        // }
+        // , 100);
+    }
 
     const autoGroupColumnDef = {
         headerName: 'CampaignName',
@@ -461,7 +522,7 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                             // pinned={getPinStatusForCampaign(campaignName)}
                             pinned={pinned}
                         />
-                        <div style={{ marginLeft: '10px' }}>
+                        <div style={{ marginLeft: '2px' }}>
                             {(() => {
                                 // Find the matching campaign in the Camapignlevelstatus array
                                 const campaignStatus = Camapignlevelstatus.find(statusObj => statusObj.name === campaignName);
@@ -523,14 +584,15 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                                 />
                             </Tooltip>
                         ) : (
-                            <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
+                            <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '8px', marginRight: '10px' }} />
                         )}
                         <Tooltip title={tooltipText}>
                             <CopyOutlined
                                 onClick={copyToClipboard}
-                                style={{ cursor: 'pointer', marginLeft: '8px', color: "#1e1e1f", marginRight: '10px' }}
+                                style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '10px' }}
                             />
                         </Tooltip>
+                        <Tooltip title={valueWithCount}>
                         <span
                             onClick={() => {
                                 const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
@@ -539,6 +601,7 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                         >
                             {valueWithCount}
                         </span>
+                        </Tooltip>
                         <Modal
                             title={firstColumnValue}
                             visible={isModalVisibles}
@@ -935,11 +998,14 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
     }
 
     useEffect(() => {
-        if(oneTimeFetch.current){
-            functionCall2();
-            oneTimeFetch.current = false;
+        if(newRevenuePratner !== "FB_Mnet"){
+            if(oneTimeFetch.current){
+                functionCall2();
+                oneTimeFetch.current = false;
+            }
         }
-    }, [oneTimeFetch.current]);
+            
+    }, [oneTimeFetch.current, newRevenuePratner]);
 
     useEffect(() => {
         if (refreshpage === "Refresh2") {
@@ -957,9 +1023,209 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
             }, 200);
         }
     }, [memorizedDailyData]);
+
+    const handleTabChange = (key) => {
+        console.log("Switched to Tab:", key); // Debugging log
+        setActiveTab(key);
+    };
+
+    const items = [
+        { key: '1', label: 'Campaigns', content: 'Content for Campaign data' },
+        { key: '2', label: 'Adset', content: 'Content for Adset data' },
+        { key: '3', label: 'Ad', content: 'Content for Ad data' }
+    ];
+
+    const carouselItems = useMemo(() => {
+        return [
+          {
+            key: '1',
+            label: (
+              <div className="fb-tab">
+                <FolderOutlined className="fb-icon" />
+                <span className="fb-tab-label">Campaigns</span>
+                {selectedCampaigns.length > 0 && (
+                  <button className={`fb-clear-btn ${theme === "dark" ? "dark-theme-tabs" : "light-theme-tabs"}`} onClick={(e) => {
+                    e.stopPropagation();
+                    onClickRemoveSelectedCampaigns();
+                  }}>
+                    {selectedCampaigns.length} <CloseOutlined />
+                  </button>
+                )}
+              </div>
+            ),
+            content: <div>{`Content for Campaign data (${selectedCampaigns.length} selected)`}</div>,
+          },
+          {
+            key: '2',
+            label: (
+              <div className="fb-tab">
+                <AppstoreOutlined className="fb-icon" />
+                <span className="fb-tab-label">Ad sets</span>
+                {selectedAdsets.length > 0 && (
+                  <button className={`fb-clear-btn ${theme === "dark" ? "dark-theme-tabs" : "light-theme-tabs"}`} onClick={(e) => {
+                    e.stopPropagation();
+                    onClickRemoveSelectedAdsets();
+                  }}>
+                    {selectedAdsets.length} <CloseOutlined />
+                  </button>
+                )}
+              </div>
+            ),
+            content: <div>{`Content for Adset data (${selectedAdsets.length} selected)`}</div>,
+          },
+          {
+            key: '3',
+            label: (
+              <div className="fb-tab">
+                <FileSearchOutlined className="fb-icon" />
+                <span className="fb-tab-label">Ads</span>
+                {selectedAds.length > 0 && (
+                  <button className={`fb-clear-btn ${theme === "dark" ? "dark-theme-tabs" : "light-theme-tabs"}`} onClick={(e) => {
+                    e.stopPropagation();
+                    onClickRemoveSelectedAds();
+                  }}>
+                    {selectedAds.length} <CloseOutlined />
+                  </button>
+                )}
+              </div>
+            ),
+            content: <div>{`Content for Ad data (${selectedAds.length} selected)`}</div>,
+          },
+        ];
+      }, [
+        selectedCampaigns,
+        selectedAdsets,
+        selectedAds,
+        onClickRemoveSelectedCampaigns,
+        onClickRemoveSelectedAdsets,
+        onClickRemoveSelectedAds,
+      ]);
+      
+      
+
+    const handleCarouselChange = (index) => {
+        setActiveTab(index);
+        // console.log(index);
+        // console.log(parseInt(index)-1);
+        // carouselRef.current.goTo(parseInt(index))
+        localStorage.setItem("DailyActiveTab", index);
+        
+    };
+
+    const renderCarouselNav = () => (
+        <StickyBox
+          offsetTop={64}
+          offsetBottom={20}
+          style={{ zIndex: 1, paddingLeft: '10px', paddingTop: '8px' }}
+        >
+          <Tabs
+            activeKey={activeTab}
+            onChange={handleCarouselChange}
+            items={carouselItems}
+            className={`fb-tabs ${theme === 'dark' ? 'dark-theme-tabs' : 'light-theme-tabs'}`}
+            tabBarStyle={{
+              borderBottom: 'none',
+              marginBottom: '0px',
+              padding: '0',
+            }}
+          />
+        </StickyBox>
+      );
+      
+    // console.log(selectedCampaigns, "selectedCampaigns");
+      
     
     return(
-                    <div style={{ height: "100%", marginBottom: '20px' }}>
+        <div>
+            {newRevenuePratner === "FB_Mnet" ? (
+                <div>
+                    <div>
+                        {renderCarouselNav()}
+                    </div>
+                    <Tabs activeKey={activeTab} onChange={handleTabChange} renderTabBar={() => <></>}>
+                        <Tabs.TabPane key="1">
+                            <CampaignLevelReports
+                                startDate={startDate} 
+                                endDate={endDate} 
+                                newaccount={newaccount} 
+                                newtime={newtime} 
+                                newRevenuePratner={newRevenuePratner} 
+                                inputValue={inputValue} 
+                                newAccountName={newAccountName} 
+                                columnDefs={columnDefs} 
+                                campaignComments={campaignComments} 
+                                Camapignlevelstatus={Camapignlevelstatus} 
+                                changeRRefrst={changeRRefrst} 
+                                debouncedHandleColumnMove={debouncedHandleColumnMove} 
+                                userdetails={userdetails} 
+                                refreshComments={refreshComments}
+                                refreshpage={refreshpage}
+                                getMainMenuItems={getMainMenuItems}
+                                toggleStatus={toggleStatus}
+                                handleChangeToggle={handleChangeToggle}
+                                theme={theme}
+                                tabStatus={"Live"}
+                                showCampaignLevel={showCampaignLevel}
+                                removeSelectedCampaigns={removeSelectedCampaigns}
+                            />
+                        </Tabs.TabPane>
+                        <Tabs.TabPane key="2">
+                            <AdsetLevelReports
+                                startDate={startDate} 
+                                endDate={endDate} 
+                                newaccount={newaccount} 
+                                newtime={newtime} 
+                                newRevenuePratner={newRevenuePratner} 
+                                inputValue={inputValue} 
+                                newAccountName={newAccountName} 
+                                columnDefs={columnDefs1} 
+                                campaignComments={campaignComments} 
+                                Camapignlevelstatus={Camapignlevelstatus} 
+                                changeRRefrst={changeRRefrst} 
+                                debouncedHandleColumnMove={debouncedHandleColumnMove} 
+                                userdetails={userdetails} 
+                                refreshComments={refreshComments}
+                                refreshpage={refreshpage}
+                                getMainMenuItems={getMainMenuItems}
+                                toggleStatus={toggleStatus}
+                                handleChangeToggle={handleChangeToggle}
+                                theme={theme}
+                                tabStatus={"Live"}
+                                showAdsetLevel={showAdsetLevel}
+                                removeSelectedAdsets={removeSelectedAdsets}
+                                selectedCampaigns={selectedCampaigns}
+                            />
+                        </Tabs.TabPane>
+                        <Tabs.TabPane key="3">
+                            <AdLevelReports
+                                startDate={startDate} 
+                                endDate={endDate} 
+                                newaccount={newaccount} 
+                                newtime={newtime} 
+                                newRevenuePratner={newRevenuePratner} 
+                                inputValue={inputValue} 
+                                newAccountName={newAccountName} 
+                                columnDefs={columnDefs2} 
+                                campaignComments={campaignComments} 
+                                Camapignlevelstatus={Camapignlevelstatus} 
+                                changeRRefrst={changeRRefrst} 
+                                debouncedHandleColumnMove={debouncedHandleColumnMove} 
+                                userdetails={userdetails} 
+                                refreshComments={refreshComments}
+                                refreshpage={refreshpage}
+                                getMainMenuItems={getMainMenuItems}
+                                toggleStatus={toggleStatus}
+                                handleChangeToggle={handleChangeToggle}
+                                theme={theme}
+                                tabStatus={"Live"}
+                                selectedCampaigns={selectedCampaigns}
+                                selectedAdsets={selectedAdsets}
+                            />
+                        </Tabs.TabPane>
+                    </Tabs>
+                </div>
+            ) :
+                (<div style={{ height: "100%", marginBottom: '20px' }}>
                         <div style={contentStyle}>
                             {isLoading1 === true ? 
                             (
@@ -1170,7 +1436,9 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                                 />)}
                             </div>}
                         </div>
-                    </div> 
+                </div> )
+            }
+        </div>
     );
 };
 

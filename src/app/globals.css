@@ -1808,3 +1808,188 @@ body.dark-mode .black-icon-comment.anticon svg {
 
 
 
+/* ---------------------------------- */
+/* 🌞 LIGHT THEME (default behavior) */
+/* ---------------------------------- */
+.light-theme-tabs .ant-tabs-nav {
+  background: transparent;
+  border-bottom: none;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+  gap: 8px;
+}
+
+.light-theme-tabs .ant-tabs-tab {
+  background-color: #e4e6eb;
+  border-radius: 10px;
+  padding: 0px 0px 0px 12px;
+  margin: 0;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  height: 32px;
+  font-size: 14px;
+  font-weight: 500;
+  width: 170px;
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+.light-theme-tabs .ant-tabs-tab-active {
+  background-color: #fff;
+  box-shadow: 0px 2px 4px rgba(0,0,0,0.08);
+  color: #52c41a !important;
+  font-weight: bold;
+}
+
+.light-theme-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #52c41a !important;
+}
+
+.light-theme-tabs .ant-tabs-ink-bar {
+  background-color: transparent !important;
+}
+
+.light-theme-tabs .ant-tabs-tab-active .fb-icon {
+  color: #52c41a !important;
+}
+
+.light-theme-tabs .ant-tabs-tab:hover {
+  background-color: #d3d3d3;
+}
+
+.light-theme-tabs .ant-tabs-tab-active:hover {
+  background-color: #fff !important; /* match active background */
+}
+
+.light-theme-tabs .ant-tabs-tab:not(.ant-tabs-tab-active):hover .ant-tabs-tab-btn {
+  color: black !important;
+}
+
+/* ---------------------------------- */
+/* 🌙 DARK THEME OVERRIDES */
+/* ---------------------------------- */
+.dark-theme-tabs .ant-tabs-nav {
+  background: transparent;
+  border-bottom: none;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+  gap: 8px;
+}
+
+.dark-theme-tabs .ant-tabs-tab {
+  background-color: #3a3b3c; /* Facebook dark gray */
+  border-radius: 10px;
+  padding: 0px 0px 0px 12px;
+  margin: 0;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  height: 32px;
+  font-size: 14px;
+  font-weight: 500;
+  width: 170px;
+  justify-content: space-between;
+  overflow: hidden;
+  color: #ddd;
+}
+
+.dark-theme-tabs .ant-tabs-tab-active {
+  background-color: #242526;
+  box-shadow: 0px 2px 4px rgba(0,0,0,0.4);
+  color: #52c41a !important;
+  font-weight: bold;
+}
+
+.dark-theme-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #ddd !important;
+}
+
+.dark-theme-tabs .ant-tabs-tab-active .fb-icon {
+  color: #52c41a !important;
+}
+
+.dark-theme-tabs .ant-tabs-tab:hover {
+  background-color: #4e4f50;
+}
+
+.dark-theme-tabs .fb-icon {
+  color: #b0b3b8;
+}
+
+.dark-theme-tabs .ant-tabs-ink-bar {
+  background-color: transparent !important;
+}
+
+.dark-theme-tabs .ant-tabs-nav,
+.dark-theme-tabs .ant-tabs-content-holder,
+.dark-theme-tabs .ant-tabs-nav-wrap {
+  border-bottom: none !important;
+}
+
+.dark-theme-tabs .ant-tabs-nav::before {
+  border-bottom: none !important;
+}
+
+.dark-theme-tabs .ant-tabs-tab-active:hover {
+  background-color: #242526 !important; /* match active background */
+}
+
+.dark-theme-tabs .ant-tabs-tab:hover .ant-tabs-tab-btn {
+  color: #fff !important; /* Dark theme hover color */
+}
+
+/* ---------------------------------- */
+/* Shared between themes */
+/* ---------------------------------- */
+.fb-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  flex-shrink: 1;
+}
+
+.fb-tab-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: inherit;
+}
+
+.fb-icon {
+  font-size: 16px;
+  transition: color 0.3s ease;
+}
+
+.fb-clear-btn.light-theme-tabs {
+  padding: 2px 6px;
+  font-size: 10px;
+  background-color: #52c41a;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.fb-clear-btn.dark-theme-tabs {
+  padding: 2px 6px;
+  font-size: 10px;
+  background-color: gray;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
