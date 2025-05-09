@@ -538,10 +538,10 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                         </Tooltip>
                         <Tooltip title={valueWithCount}>
                             <span
-                                onClick={() => {
-                                    const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
-                                    window.open(url, '_blank', 'noopener,noreferrer');
-                                }}
+                                // onClick={() => {
+                                //     const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                                //     window.open(url, '_blank', 'noopener,noreferrer');
+                                // }}
                             >
                                 {valueWithCount}
                             </span>

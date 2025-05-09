@@ -563,10 +563,10 @@ const AdLevelReports = ({startDate, endDate, newaccount, newtime, newRevenuePrat
                         </Tooltip>
                         <Tooltip title={valueWithCount}>
                             <span
-                                onClick={() => {
-                                    const url = `/LiveHistory/LiveCampaignHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
-                                    window.open(url, '_blank', 'noopener,noreferrer');
-                                }}
+                                // onClick={() => {
+                                //     const url = `/LiveHistory/LiveCampaignHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                                //     window.open(url, '_blank', 'noopener,noreferrer');
+                                // }}
                             >
                                 {valueWithCount}
                             </span>
