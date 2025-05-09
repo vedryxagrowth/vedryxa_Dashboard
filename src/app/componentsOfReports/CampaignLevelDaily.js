@@ -626,7 +626,6 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
             let totalImpressions = 0;
             let totalConversions = 0;
             const specifiedTimeZone = selectTimezone[newtime];
-            // console.log(mainData[0], "one");
             const totalRow = mainData && mainData.length > 0 ?
                 mainData.map((eachData) => {
                     const Revenue = eachData.estimated_revenue !== undefined ? (eachData.estimated_revenue) : 0;
