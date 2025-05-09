@@ -665,8 +665,10 @@ const AdsetLevelReports = ({startDate, endDate, newaccount, newtime, newRevenueP
             : [];
             const collectionName = newRevenuePratner === "FB_DomainActive" ? "Facebook_DActive_Names" : newtworkCollections[newRevenuePratner];
             // const fetchData = await apiClient.get(`/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${collectionName}`);
-            const fetchData = await apiClient.post(`http://localhost:8000/AdsetLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=${tabStatus}&network=Facebook_Mnet`, { campaignids: campaigns });
-            const mainData = fetchData.data;
+            const fetchData = await apiClient.post(`/AdsetLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=${tabStatus}&network=Facebook_Mnet`, { campaignids: campaigns });
+            // const mainData = fetchData.data;
+            const mainData1 = fetchData.data;
+            const mainData = mainData1.filter(obj => !(obj.ad_clicks > 0));
             // const mainData =  tabStatus === "Live" ? mainData1.filter(obj => !("ad_clicks" in obj)) : mainData;
             // console.log(mainData1, "mainData1");
             console.log(mainData, "mainData");

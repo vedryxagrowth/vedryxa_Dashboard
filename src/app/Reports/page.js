@@ -206,11 +206,11 @@ const MyTablePage = () => {
     };
 
     const accountsForAccess = adAccounts[revenuePratner];
-    console.log(accountsForAccess, "accounts Access");
+    // console.log(accountsForAccess, "accounts Access");
 
     const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
 
-    console.log(accountsAccess, "accounts Access");
+    // console.log(accountsAccess, "accounts Access");
 
     const [networksData, setNetworksData] = useState(accountsAccess);
 
@@ -1282,7 +1282,7 @@ const MyTablePage = () => {
                             onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
                         }
                         if(getCampaignActualSpend.status === 200){
-                            console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                            // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
                             setCampaignActualSpend(getCampaignActualSpend.data);
                         }
                         else {
@@ -1783,7 +1783,7 @@ const MyTablePage = () => {
                             onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
                         }
                         if(getCampaignActualSpend.status === 200){
-                            console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                            // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
                             setCampaignActualSpend(getCampaignActualSpend.data);
                         }
                         else {
@@ -1806,7 +1806,7 @@ const MyTablePage = () => {
                         budget: changeBudget * 100,
                         status: campaignStatus
                     };
-                    console.log(object);
+                    // console.log(object);
                     const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
                     const responseData = requestResponse.data;
                     // console.log(responseData, "response");
@@ -3277,7 +3277,7 @@ const MyTablePage = () => {
                             onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
                         }
                         if(getCampaignActualSpend.status === 200){
-                            console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                            // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
                             setCampaignActualSpend(getCampaignActualSpend.data);
                         }
                         else {
@@ -3352,7 +3352,7 @@ const MyTablePage = () => {
                         message.error('Error updating campaign status.');
                     }
                 };
-                console.log()
+                // console.log()
 
                 return (
                     <div>
@@ -3466,8 +3466,8 @@ const MyTablePage = () => {
                   const campaignData = allProfitLossArray?.items?.filter(obj => obj.campaign_name === campaignName);
                   const revenue = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.estimated_revenue) || 0), 0);
                   const spend = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.spend) || 0), 0);
-                  console.log(revenue, "revenue");
-                  console.log(spend, "spend");
+                //   console.log(revenue, "revenue");
+                //   console.log(spend, "spend");
                   // const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
                   // const {  start } = campaignStatus;
                   // console.log(params.node.groupData?.campaignname, "groupData");
@@ -3884,7 +3884,7 @@ const MyTablePage = () => {
                             onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
                         }
                         if(getCampaignActualSpend.status === 200){
-                            console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                            // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
                             setCampaignActualSpend(getCampaignActualSpend.data);
                         }
                         else {
@@ -3931,7 +3931,7 @@ const MyTablePage = () => {
                     const total = data.reduce((total, item) => {
                         return total + (parseFloat(item?.spend) || 0);
                     }, 0);
-                    console.log(total, "total");
+                    // console.log(total, "total");
                     return Math.round(total * 100) / 100; // Round to 2 decimal places
                 };
 
@@ -3959,7 +3959,7 @@ const MyTablePage = () => {
                         message.error('Error updating campaign status.');
                     }
                 };
-                console.log()
+                // console.log()
 
                 return (
                     <div>
@@ -4073,8 +4073,8 @@ const MyTablePage = () => {
                   const campaignData = allProfitLossArray?.items?.filter(obj => obj.campaign_name === campaignName);
                   const revenue = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.estimated_revenue) || 0), 0);
                   const spend = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.spend) || 0), 0);
-                  console.log(revenue, "revenue");
-                  console.log(spend, "spend");
+                //   console.log(revenue, "revenue");
+                //   console.log(spend, "spend");
                   // const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
                   // const {  start } = campaignStatus;
                   // console.log(params.node.groupData?.campaignname, "groupData");
@@ -4494,7 +4494,7 @@ const MyTablePage = () => {
                             onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
                         }
                         if(getCampaignActualSpend.status === 200){
-                            console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                            // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
                             setCampaignActualSpend(getCampaignActualSpend.data);
                         }
                         else {
@@ -4541,7 +4541,7 @@ const MyTablePage = () => {
                     const total = data.reduce((total, item) => {
                         return total + (parseFloat(item?.spend) || 0);
                     }, 0);
-                    console.log(total, "total");
+                    // console.log(total, "total");
                     return Math.round(total * 100) / 100; // Round to 2 decimal places
                 };
 
@@ -4569,7 +4569,7 @@ const MyTablePage = () => {
                         message.error('Error updating campaign status.');
                     }
                 };
-                console.log()
+                // console.log()
 
                 return (
                     <div>
@@ -4678,8 +4678,8 @@ const MyTablePage = () => {
                   const campaignData = allProfitLossArray?.items?.filter(obj => obj.campaign_name === campaignName);
                   const revenue = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.estimated_revenue) || 0), 0);
                   const spend = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.spend) || 0), 0);
-                  console.log(revenue, "revenue");
-                  console.log(spend, "spend");
+                //   console.log(revenue, "revenue");
+                //   console.log(spend, "spend");
                   // const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
                   // const {  start } = campaignStatus;
                   // console.log(params.node.groupData?.campaignname, "groupData");
@@ -5098,7 +5098,7 @@ const MyTablePage = () => {
                             onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
                         }
                         if(getCampaignActualSpend.status === 200){
-                            console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                            // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
                             setCampaignActualSpend(getCampaignActualSpend.data);
                         }
 
@@ -5122,7 +5122,7 @@ const MyTablePage = () => {
                         budget: changeBudget * 100,
                         status: campaignStatus
                     };
-                    console.log(object);
+                    // console.log(object);
                     const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
                     const responseData = requestResponse.data;
                     // console.log(responseData, "response");
@@ -5551,7 +5551,7 @@ const MyTablePage = () => {
                             onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
                         }
                         if(getCampaignActualSpend.status === 200){
-                            console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                            // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
                             setCampaignActualSpend(getCampaignActualSpend.data);
                         }
 
@@ -5575,7 +5575,7 @@ const MyTablePage = () => {
                         budget: changeBudget * 100,
                         status: campaignStatus
                     };
-                    console.log(object);
+                    // console.log(object);
                     const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
                     const responseData = requestResponse.data;
                     // console.log(responseData, "response");
@@ -6009,7 +6009,7 @@ const MyTablePage = () => {
                             onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
                         }
                         if(getCampaignActualSpend.status === 200){
-                            console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                            // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
                             setCampaignActualSpend(getCampaignActualSpend.data);
                         }
 
@@ -6033,7 +6033,7 @@ const MyTablePage = () => {
                         budget: changeBudget * 100,
                         status: campaignStatus
                     };
-                    console.log(object);
+                    // console.log(object);
                     const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
                     const responseData = requestResponse.data;
                     // console.log(responseData, "response");
@@ -6459,7 +6459,7 @@ const MyTablePage = () => {
                             onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
                         }
                         if(getCampaignActualSpend.status === 200){
-                            console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                            // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
                             setCampaignActualSpend(getCampaignActualSpend.data);
                         }
                         else {
@@ -6958,7 +6958,7 @@ const MyTablePage = () => {
                             onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
                         }
                         if(getCampaignActualSpend.status === 200){
-                            console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                            // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
                             setCampaignActualSpend(getCampaignActualSpend.data);
                         }
                         else {
@@ -7567,14 +7567,14 @@ const MyTablePage = () => {
             const newColumnDailyDefs = getColumnDefsObjectOfDailyAdID(updatedColumnStructure);
             setColDefs(newColumnDefs);
             setColDailyDefs(newColumnDailyDefs);
-            console.log('Updated columnDefsOfAdID:', newColumnDefs);
+            // console.log('Updated columnDefsOfAdID:', newColumnDefs);
             setColumnStructureStatus(true);
         }
     }, [mainData, Camapignlevelstatus]);
 
 
     const updatingColumnsStructure = async (updateDataArray) => {
-        console.log(updateDataArray);
+        // console.log(updateDataArray);
         const response = await apiClient.put(`/api/updateUserData?email=${userdetails.email}`,
             {
                 updateDataArray
@@ -7637,7 +7637,7 @@ const MyTablePage = () => {
           const newColumnDailyDefs = getColumnDefsObjectOfDailyAdID(updatedColumnStructure);
           setColDefs(newColumnDefs);
           setColDailyDefs(newColumnDailyDefs);
-          console.log('Updated columnDefsOfAdID:', newColumnDefs);
+        //   console.log('Updated columnDefsOfAdID:', newColumnDefs);
           setColumnStructureStatus(true);
         } catch (error) {
           if (error.response?.status === 500 && retryCount < MAX_RETRIES) {
@@ -7767,7 +7767,7 @@ const MyTablePage = () => {
             account,
             accountName
         };
-        console.log(storedData, "storedData");
+        // console.log(storedData, "storedData");
         localStorage.setItem("storedData", JSON.stringify(storedData));
         setCampaignsStatus(false);
         setCommentsStatus(false);
@@ -7874,7 +7874,7 @@ const MyTablePage = () => {
 
     const handleColumnMove = (params, gridId) => {
         const columnState = params.api.getColumnState();
-        console.log('Column moved in grid:', gridId);
+        // console.log('Column moved in grid:', gridId);
         const fieldOrder = columnState.map(col => col.colId);
         const newFieldOrder = fieldOrder.filter(item => item !== 'ag-Grid-AutoColumn-campaignname' && item !== 'ag-Grid-AutoColumn' && columnStructure.includes(item));
         localStorage.setItem('columnState', JSON.stringify(newFieldOrder));
@@ -7937,7 +7937,7 @@ const MyTablePage = () => {
     };
 
     const onClickRefresh = async () => {
-        console.log(activeTab);
+        // console.log(activeTab);
         await functionCallForAllCampaignsData();
 
         refreshComponent(activeTab);
@@ -8110,7 +8110,7 @@ const MyTablePage = () => {
         
     };
     const handleTabChange = (key) => {
-        console.log("Switched to Tab:", key); // Debugging log
+        // console.log("Switched to Tab:", key); // Debugging log
         setActiveTab(key);
     };
 

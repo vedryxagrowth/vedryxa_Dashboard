@@ -663,10 +663,10 @@ const CampaignLevelReports = ({startDate, endDate, newaccount, newtime, newReven
             setLoading(true);
             const collectionName = newRevenuePratner === "FB_DomainActive" ? "Facebook_DActive_Names" : newtworkCollections[newRevenuePratner];
             // const fetchData = await apiClient.get(`/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${collectionName}`);
-            const fetchData = await apiClient.get(`http://localhost:8000/CampaignLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=${tabStatus}&network=Facebook_Mnet`);
-            const mainData = fetchData.data;
-            // const mainData =  tabStatus === "Live" ? mainData1.filter(obj => !("ad_clicks" in obj)) : mainData;
-            // console.log(mainData1, "mainData1");
+            const fetchData = await apiClient.get(`/CampaignLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=${tabStatus}&network=Facebook_Mnet`);
+            const mainData1 = fetchData.data;
+            const mainData = mainData1.filter(obj => !(obj.ad_clicks > 0));
+            console.log(mainData1, "mainData1");
             console.log(mainData, "mainData");
             const specifiedTimeZone = selectTimezone[newtime];
             const filteredData = mainData && mainData.length > 0 ?
