@@ -20,6 +20,9 @@ const MnetUrlBuilder = ({ defaultValues, onReturnMessage, showSubmitButton }) =>
   const [errorMessage, setErrorMessage] = useState('');
   const [NetworkData, setNetworkData] = useState([]);
   const { apiClient } = useTokenContext();
+  const [copyText, setCopyText] = useState('Copy');
+  const [pixelId, setPixelId] = useState('PixelId');
+  const pixelIds = ['PixelId', 'None'];
 
 
   // const MnetDomains = [
@@ -211,29 +214,42 @@ const MnetUrlBuilder = ({ defaultValues, onReturnMessage, showSubmitButton }) =>
     getUrlBuilderData();
   }, []);
 
+  const onChangePixelId = (value) => {
+    setPixelId(value);
+  }
+
   // Function to add a new item
 
   const onClickClear = () => {
     setDomain(null)
-    setSource(null);
+    setSource("FB");
     setChannel(null);
     setGeo('');
     setMembetId('');
     setKeyWords('');
     setErrorMessage('');
+    setPixelId('PixelId');
   }
   console.log(showSubmitButton);
 
   const onClickSubmit = () => {
 
-    if (keywords && channel && domain && source) {
+    if (keywords && channel && domain && source && pixelId) {
       // const formattedKeywords = keywords.replace(/\s+/g, '+'); praveen 
       const formattedKeywords = keywords.trimEnd().replace(/\s+/g, '+'); //s
 
       const campaign_id = NetworkData?.Source?.find(item => item.code === source).campaignId;
       const adset_id = NetworkData?.Source?.find(item => item.code === source).AdsetId;
       const ad_id = NetworkData?.Source?.find(item => item.code === source).AdId;
-      let url = domain;
+      let url;
+      
+      if(pixelId === 'PixelId'){
+        url = domain;
+      }
+      else{
+        const newDomain = domain.split("&trkfb");
+        url = newDomain[0] ;
+      }
 
       url = url
         .replace("keywords_replace", formattedKeywords)
@@ -250,12 +266,20 @@ const MnetUrlBuilder = ({ defaultValues, onReturnMessage, showSubmitButton }) =>
 
   const onClickGet = () => {
 
-    if (keywords && channel && domain && source) {
+    if (keywords && channel && domain && source && pixelId) {
       const formattedKeywords = keywords.trimEnd().replace(/\s+/g, '+');
       const campaign_id = NetworkData?.Source?.find(item => item.code === source).campaignId;
       const adset_id = NetworkData?.Source?.find(item => item.code === source).AdsetId;
       const ad_id = NetworkData?.Source?.find(item => item.code === source).AdId;
-      let url = domain;
+      let url;
+      
+      if(pixelId === 'PixelId'){
+        url = domain;
+      }
+      else{
+        const newDomain = domain.split("&trkfb");
+        url = newDomain[0] ;
+      }
 
       url = url
         .replace("keywords_replace", formattedKeywords)
@@ -339,6 +363,21 @@ const MnetUrlBuilder = ({ defaultValues, onReturnMessage, showSubmitButton }) =>
                 value: item.value,
                 label: item.name,
               }))}
+            style={{ width: '100%' }}
+          />
+        </Col>
+        <Col style={{ display: 'flex', flexDirection: 'column', marginBottom:'5px' }} xs={11} sm={5} lg={4}>
+          <label><span style={{ color: 'red', paddingRight: '2px', paddingTop: '2px' }}>*</span>PixelId</label>
+          <Select
+            showSearch
+            placeholder="pixelId"
+            value={pixelId}
+            required
+            onChange={onChangePixelId}
+            options={pixelIds.map((item) => ({
+              label: item,
+              value: item
+            }))}
             style={{ width: '100%' }}
           />
         </Col>

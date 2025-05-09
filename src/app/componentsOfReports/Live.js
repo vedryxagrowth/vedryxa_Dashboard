@@ -4,16 +4,21 @@ import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
 import React from 'react';
 import moment from 'moment-timezone';
-import {  Input, Button, Row, Col, Typography, Result, Modal, message, Switch } from 'antd';
-import {  InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import {  Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Tabs } from 'antd';
+import {  InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, CloseOutlined, FolderOutlined, AppstoreOutlined, FileSearchOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import { Space } from 'antd';
+import StickyBox from 'react-sticky-box';
 import 'antd/dist/reset.css';
 import '../globals.css';
 import 'ag-grid-enterprise';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { useTokenContext } from '../components/parent';
+
+const CampaignLevelReports = React.lazy(() => import('./CampaignLevel'));
+const AdsetLevelReports = React.lazy(() => import('./AdsetLevel'));
+const AdLevelReports = React.lazy(() => import('./AdLevel'));
 const contentStyle = {
     margin: "10px",
     // height: '800px',
@@ -53,7 +58,7 @@ const selectTimezone = {
     DST: 'DSTDate'
 };
 
-const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle }) => {
+const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle }) => {
     console.log(columnDefs, "columnDefs");
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
@@ -72,6 +77,7 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
 
     const [selectedCells, setSelectedCells] = useState([]); // Store selected cell positions
     const [firstSelectedCell, setFirstSelectedCell] = useState(null); // Store the first selected cell
+    const [activeTab, setActiveTab] = useState(localStorage.getItem("LiveActiveTab") && localStorage.getItem("LiveActiveTab") !== "undefined" && localStorage.getItem("LiveActiveTab") !== "null" ? localStorage.getItem("LiveActiveTab") : "1");
 
     const timezone = useRef();
 
@@ -93,8 +99,20 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
     const newRowData = useRef();
 
     const oneTimeFetch = useRef(true);
+    
+    const [selectedCampaigns, setSelectedCampaigns] = useState([]);
+
+    const [selectedAdsets, setSelectedAdsets] = useState([]);
+
+    const [selectedAds, setSelectedAds] = useState([]);
+
+    const [removeSelectedCampaigns, setRemoveSelectedCampaigns] = useState("");
+
+    const [removeSelectedAdsets, setRemoveSelectedAdsets] = useState("");
 
     const memorizedColumnDef = useMemo(() => columnDefs, [columnDefs]);
+    const memorizedColumnDef1 = useMemo(() => columnDefs1, [columnDefs2]);
+    const memorizedColumnDef2 = useMemo(() => columnDefs1, [columnDefs2]);
     const memorizedRowData = useMemo(() => rowData ? rowData?.filter((each) => {
         const normalizedCampaign = each.campaignname.trim().toLowerCase();
         const normalizedInput = inputValue.trim().toLowerCase();
@@ -160,6 +178,48 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
         updateDetails();
 
     };
+
+    const showCampaignLevel = (data) => {
+        setSelectedCampaigns(data);
+        console.log(data, "CampaignLeveldata");
+    }
+
+    
+
+    const showAdsetLevel = (data) => {
+        setSelectedAdsets(data);
+        console.log(data, "AdsetLeveldata");
+    }
+
+    const onClickRemoveSelectedCampaigns = () => {
+        setSelectedCampaigns([]);
+        // removeSelectedCampaigns();
+        setRemoveSelectedCampaigns("");
+        setTimeout(() => {
+            setRemoveSelectedCampaigns("Remove");
+        }
+        , 100);
+    }
+
+    const onClickRemoveSelectedAdsets = () => {
+        setSelectedAdsets([]);
+        // removeSelectedCampaigns();
+        setRemoveSelectedAdsets("");
+        setTimeout(() => {
+            setRemoveSelectedAdsets("Remove");
+        }
+        , 100);
+    }
+
+    const onClickRemoveSelectedAds = () => {
+        // setSelectedAds([]);
+        // // removeSelectedCampaigns();
+        // setRemoveSelectedAdsets("");
+        // setTimeout(() => {
+        //     setRemoveSelectedAdsets("Remove");
+        // }
+        // , 100);
+    }
 
     const autoGroupColumnDefLive = {
         headerName: 'CampaignName',
@@ -476,7 +536,7 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                             adsetid={adsetid}
                             pinned={pinned}
                         />
-                        <div style={{ marginLeft: '10px' }}>
+                        <div style={{ marginLeft: '2px' }}>
                             {(() => {
                                 // Find the matching campaign in the Camapignlevelstatus array
                                 const campaignStatus = Camapignlevelstatus.find(statusObj => statusObj.name === campaignName);
@@ -550,22 +610,24 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                             </Tooltip>
                         )}
                         {!relatedComment && (
-                            <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
+                            <EditOutlined onClick={handleEditClick} style={{ cursor: 'pointer', marginLeft: '8px', marginRight: '10px' }} />
                         )}
                         <Tooltip title={tooltipText}>
                             <CopyOutlined
                                 onClick={copyToClipboard}
-                                style={{ cursor: 'pointer', marginLeft: '8px', color: "#1e1e1f", marginRight: '10px' }}
+                                style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '10px' }}
                             />
                         </Tooltip>
-                        <span
-                            onClick={() => {
-                                const url = `/LiveHistory/LiveCampaignHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
-                                window.open(url, '_blank', 'noopener,noreferrer');
-                            }}
-                        >
-                            {valueWithCount}
-                        </span>
+                        <Tooltip title={valueWithCount}>
+                            <span
+                                onClick={() => {
+                                    const url = `/LiveHistory/LiveCampaignHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                                    window.open(url, '_blank', 'noopener,noreferrer');
+                                }}
+                            >
+                                {valueWithCount}
+                            </span>
+                        </Tooltip>
                         <Modal
                              title={
                                 firstColumnValue
@@ -1020,11 +1082,13 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
         setApiStatus(false);
     }
     useEffect(() => {
-        if(oneTimeFetch.current){
-            functionCall1();
-            oneTimeFetch.current = false;
+        if(newRevenuePratner !== "FB_Mnet"){
+            if(oneTimeFetch.current){
+                functionCall1();
+                oneTimeFetch.current = false;
+            }
         }
-    }, [oneTimeFetch.current]);
+    }, [oneTimeFetch.current, newRevenuePratner]);
 
     useEffect(() => {
         if (refreshpage === "Refresh1") {
@@ -1087,230 +1151,654 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
             params.api.copySelectedRangeToClipboard(); // ✅ Restore AG Grid blinking effect
         }
     };
-    
-    return(
-                    <div style={{ height: "100%", marginBottom: '20px',overflow: "visible" }}>
-                        <div style={contentStyle}>
-                            {isLoading === true ? (
-                                <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>
-                                    <div className="ag-grid-Loader">
-                                        <Audio
-                                            height="80"
-                                            width="80"
-                                            radius="9"
-                                            color="green"
-                                            ariaLabel="loading"
-                                            wrapperStyle
-                                            wrapperClass
-                                        />
-                                    </div>
-                                </div>
-                            ) : rowData?.filter((each) => {
-                                const normalizedCampaign = each.campaignname.trim().toLowerCase();
-                                const normalizedInput = inputValue.trim().toLowerCase();
-                                return (
-                                    normalizedCampaign.startsWith(normalizedInput) ||
-                                    normalizedCampaign.includes(normalizedInput) ||
-                                    normalizedCampaign.endsWith(normalizedInput)
-                                );
-                            }
-                            )?.length > 0 ? (
-                                <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
 
-                                    <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d" }}>
-                                        <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
-                                            <Space align="center">
-                                                <div className="blinking-circle-1"></div>
-                                                <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600', color: theme === "dark" && "white" }}>Live</Text>
-                                            </Space>
-                                        </Col>
-                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Acc: {newaccount}</Text>
-                                        </Col>
-                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>AccName: {newAccountName}</Text>
-                                        </Col>
-                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Timezone: {timezone.current}</Text>
-                                        </Col>
-                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>F/N Hour: {maxHour.current}:00 / {maxNetworkHour.current}:00</Text>
-                                        </Col>
-                                        {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600' }}>
-                                                Cron/Acc status: {cronStatus.current} /{' '}
-                                                <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
-                                                    {accountStatus.current}
-                                                </span>
-                                            </Text>
-                                        </Col> */}
-                                        <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
-                                            <Tooltip
-                                            title={
-                                                <>
-                                                    <div>FbAcc Status: {`${fbCron.current}`}</div>
-                                                    <div>RevAcc Status: {`${revenueCron.current}`}</div>
-                                                    <Text style={{ fontWeight: '600', color: "white" }}>
-                                                        Cron/Acc status: {cronStatus.current} /{' '}
-                                                        <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
-                                                            {accountStatus.current}
-                                                        </span>
-                                                    </Text>
-                                                </>
-                                            }
-                                            >
-                                                <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color:"#C7F39A" }} className="black-icon-info"/>
-                                            </Tooltip>
-                                        </Col>
-                                        {/* <Col>
-                                            <Tooltip 
-                                                title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
-                                                mouseEnterDelay={0} // Tooltip appears after 1 second
-                                            >
-                                                <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#C7F39A" }}/>
-                                            </Tooltip>
-                                        </Col> */}
-                                        <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
-                                            <Tooltip title="Export to CSV">
-                                                <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={onBtExport1} />
-                                            </Tooltip>
-                                        </Col>
-                                    </Row>
+    const handleTabChange = (key) => {
+        console.log("Switched to Tab:", key); // Debugging log
+        setActiveTab(key);
+    };
 
-                                    <AgGridReact
-                                        ref={gridRef}
-                                        rowData={memorizedRowData}
-                                        rowSelection='multiple'
-                                        columnDefs={memorizedColumnDef}
-                                        defaultColDef={{ ...defaultColDef, suppressMenu: true }}
-                                        onCellClicked={onCellClickedLive}
-                                        pagination={true}
-                                        paginationPageSize={100}
-                                        paginationPageSizeSelector={[20, 40, 60, 80, 100]}
-                                        suppressAggFuncInHeader={true}
-                                        getMainMenuItems={getMainMenuItems}
-    
-                                        // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
-                                        // onCellKeyDown={onCellKeyDown}
-                                        // domLayout="normal"
-                                        // groupIncludeTotalFooter={rowData.length > 0 ? true : false}
-                                        // groupIncludeFooter={rowData.length > 0 ? true : false}
-                                        autoGroupColumnDef={autoGroupColumnDefLive}
-                                        onGridReady={(params) => onGridReady(params, 'grid1', gridRef)}
-                                        gridOptions={{
-                                            ...gridOptions,
-                                            ensureDomOrder: false,
-                                            suppressRowClickSelection: true,
-                                            suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                            enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                            groupSelectsChildren: true, // ✅ Ensures child rows are selected properly
-                                        }}
-                                        frameworkComponents={{ GroupCellRenderer }}
-                                        groupDisplayType='multipleColumns'
-                                        // rowGroupPanelShow='always'
-                                        // onFilterChanged={onFilterChanged} // Use the custom filter handler
-                                        pinnedBottomRowData={liveFixedFooter}
-                                        suppressCellSelection={true}
-                                        getRowStyle={(params) => {
-                                            if (params.node.rowPinned) {
-                                                
-                                                return {
-                                                    fontWeight: "bold",
-                                                    backgroundColor: theme === "dark" ? "#1a1918" : "#fff", // Dark mode or light mode
-                                                    color: theme === "dark" ? "#fff" : "#000",
-                                                };
-                                            }
-                                            return null; // Keep other row styles unchanged
-                                        }}
-                                        getCellStyle={(params) => {
-                                            const isSelected = selectedCells.some(
-                                                (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
-                                            );
-                                    
-                                            // ✅ Ensure first cell inside a group is highlighted
-                                            const isFirstSelected = firstSelectedCell &&
-                                                firstSelectedCell.rowIndex === params.node.rowIndex &&
-                                                firstSelectedCell.colId === params.column.getId();
-                                    
-                                            return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
-                                        }}
-                                        onFilterChanged={(params) => {
-                                            const api = params.api;
-                                            const filteredData = [];
-                                            // api.forEachNodeAfterFilterAndSort((node) => {
-                                            //     if (!node.rowPinned) {
-                                            //         filteredData.push(node.data);
-                                            //     }
-                                            // });
-                                            const normalizedInput = inputValue.trim().toLowerCase();
+    const items = [
+        { key: '1', label: 'Campaigns', content: 'Content for Campaign data' },
+        { key: '2', label: 'Adset', content: 'Content for Adset data' },
+        { key: '3', label: 'Ad', content: 'Content for Ad data' }
+    ];
 
-                                            api.forEachNodeAfterFilterAndSort((node) => {
-                                                if (node.data && node.data.campaignname) {
-                                                    const normalizedCampaign = node.data.campaignname.trim().toLowerCase();
-                                        
-                                                    // Apply search and filter conditions
-                                                    if (
-                                                        normalizedCampaign.startsWith(normalizedInput) ||
-                                                        normalizedCampaign.includes(normalizedInput) ||
-                                                        normalizedCampaign.endsWith(normalizedInput)
-                                                    ) {
-                                                        filteredData.push(node.data);
-                                                    }
-                                                }
-                                            });
+    const handleCarouselChange = (index) => {
+        setActiveTab(index);
+        // console.log(index);
+        // console.log(parseInt(index)-1);
+        // carouselRef.current.goTo(parseInt(index))
+        localStorage.setItem("LiveActiveTab", index);
+        
+    };
 
-                                            const updatedFooter = [
-                                                {
-                                                    // [`${newtime}Date`]: 'Totals',
-                                                    campaignName: 'Total',
-                                                    actions: "",
-                                                    spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
-                                                    revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
-                                                    profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
-                                                    margin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
-                                                    rpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / filteredData.length).toFixed(2)),
-                                                    cpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / filteredData.length).toFixed(2)),
-                                                    ncpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.ncpl), 0) / filteredData.length).toFixed(2)),
-                                                    fbleads: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbleads), 0).toFixed(2)),
-                                                    conversions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
-                                                    fmargin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
-                                                    roi: parseFloat(((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) - filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0)) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
-                                                    cpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpc), 0) / filteredData.length).toFixed(2)),
-                                                    cpclinkclicks: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks), 0) / filteredData.length).toFixed(2)),
-                                                    fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
-                                                    fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
-                                                    impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
-                                                    ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2))
-                                                },
-                                            ];
+    const carouselItems = useMemo(() => {
+        return [
+          {
+            key: '1',
+            label: (
+              <div className="fb-tab">
+                <FolderOutlined className="fb-icon" />
+                <span className="fb-tab-label">Campaigns</span>
+                {selectedCampaigns.length > 0 && (
+                  <button className={`fb-clear-btn ${theme === "dark" ? "dark-theme-tabs" : "light-theme-tabs"}`} onClick={(e) => {
+                    e.stopPropagation();
+                    onClickRemoveSelectedCampaigns();
+                  }}>
+                    {selectedCampaigns.length} <CloseOutlined />
+                  </button>
+                )}
+              </div>
+            ),
+            content: <div>{`Content for Campaign data (${selectedCampaigns.length} selected)`}</div>,
+          },
+          {
+            key: '2',
+            label: (
+              <div className="fb-tab">
+                <AppstoreOutlined className="fb-icon" />
+                <span className="fb-tab-label">Ad sets</span>
+                {selectedAdsets.length > 0 && (
+                  <button className={`fb-clear-btn ${theme === "dark" ? "dark-theme-tabs" : "light-theme-tabs"}`} onClick={(e) => {
+                    e.stopPropagation();
+                    onClickRemoveSelectedAdsets();
+                  }}>
+                    {selectedAdsets.length} <CloseOutlined />
+                  </button>
+                )}
+              </div>
+            ),
+            content: <div>{`Content for Adset data (${selectedAdsets.length} selected)`}</div>,
+          },
+          {
+            key: '3',
+            label: (
+              <div className="fb-tab">
+                <FileSearchOutlined className="fb-icon" />
+                <span className="fb-tab-label">Ads</span>
+                {selectedAds.length > 0 && (
+                  <button className={`fb-clear-btn ${theme === "dark" ? "dark-theme-tabs" : "light-theme-tabs"}`} onClick={(e) => {
+                    e.stopPropagation();
+                    onClickRemoveSelectedAds();
+                  }}>
+                    {selectedAds.length} <CloseOutlined />
+                  </button>
+                )}
+              </div>
+            ),
+            content: <div>{`Content for Ad data (${selectedAds.length} selected)`}</div>,
+          },
+        ];
+      }, [
+        selectedCampaigns,
+        selectedAdsets,
+        selectedAds,
+        onClickRemoveSelectedCampaigns,
+        onClickRemoveSelectedAdsets,
+        onClickRemoveSelectedAds,
+    ]);
 
-                                            setLiveFixedFooter(updatedFooter);
-                                        }}
-                                    />
-
-                                </div>
-                            ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
-                                {apiStatus === true ? 
-                                <Result
-                                className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                                // icon={<SmileOutlined />}
-                                title={`API failed to fetch the data. Please click retry button to fetch the data`}
-                            extra={<Button type="primary" onClick={handleReFetchData}>Retry</Button>}
-                            /> : (startDate !== endDate ? <Result
-                                    className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                                    icon={<SmileOutlined />}
-                                    title={`No LiveData for ${newaccount} from ${startDate} to ${endDate}`}
-                                // extra={<Button type="primary">Next</Button>}
-                                /> : <Result
-                                    className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                                    icon={<SmileOutlined />}
-                                    title={`No LiveData for ${newaccount} to ${startDate}`}
-                                // extra={<Button type="primary">Next</Button>}
-                                />)}
-                            </div>}
-                        </div>
-                    </div>
+    const renderCarouselNav = () => (
+        <StickyBox
+          offsetTop={64}
+          offsetBottom={20}
+          style={{ zIndex: 1, paddingLeft: '10px', paddingTop: '8px' }}
+        >
+          <Tabs
+            activeKey={activeTab}
+            onChange={handleCarouselChange}
+            items={carouselItems}
+            className={`fb-tabs ${theme === 'dark' ? 'dark-theme-tabs' : 'light-theme-tabs'}`}
+            tabBarStyle={{
+              borderBottom: 'none',
+              marginBottom: '0px',
+              padding: '0',
+            }}
+          />
+        </StickyBox>
     );
+
+
+    
+    // return(
+    //                 <div style={{ height: "100%", marginBottom: '20px',overflow: "visible" }}>
+    //                     <div style={contentStyle}>
+    //                         {isLoading === true ? (
+    //                             <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>
+    //                                 <div className="ag-grid-Loader">
+    //                                     <Audio
+    //                                         height="80"
+    //                                         width="80"
+    //                                         radius="9"
+    //                                         color="green"
+    //                                         ariaLabel="loading"
+    //                                         wrapperStyle
+    //                                         wrapperClass
+    //                                     />
+    //                                 </div>
+    //                             </div>
+    //                         ) : rowData?.filter((each) => {
+    //                             const normalizedCampaign = each.campaignname.trim().toLowerCase();
+    //                             const normalizedInput = inputValue.trim().toLowerCase();
+    //                             return (
+    //                                 normalizedCampaign.startsWith(normalizedInput) ||
+    //                                 normalizedCampaign.includes(normalizedInput) ||
+    //                                 normalizedCampaign.endsWith(normalizedInput)
+    //                             );
+    //                         }
+    //                         )?.length > 0 ? (
+    //                             <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
+
+    //                                 <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d" }}>
+    //                                     <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
+    //                                         <Space align="center">
+    //                                             <div className="blinking-circle-1"></div>
+    //                                             <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600', color: theme === "dark" && "white" }}>Live</Text>
+    //                                         </Space>
+    //                                     </Col>
+    //                                     <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+    //                                         <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Acc: {newaccount}</Text>
+    //                                     </Col>
+    //                                     <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+    //                                         <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>AccName: {newAccountName}</Text>
+    //                                     </Col>
+    //                                     <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+    //                                         <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Timezone: {timezone.current}</Text>
+    //                                     </Col>
+    //                                     <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+    //                                         <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>F/N Hour: {maxHour.current}:00 / {maxNetworkHour.current}:00</Text>
+    //                                     </Col>
+    //                                     {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+    //                                         <Text style={{ fontWeight: '600' }}>
+    //                                             Cron/Acc status: {cronStatus.current} /{' '}
+    //                                             <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
+    //                                                 {accountStatus.current}
+    //                                             </span>
+    //                                         </Text>
+    //                                     </Col> */}
+    //                                     <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
+    //                                         <Tooltip
+    //                                         title={
+    //                                             <>
+    //                                                 <div>FbAcc Status: {`${fbCron.current}`}</div>
+    //                                                 <div>RevAcc Status: {`${revenueCron.current}`}</div>
+    //                                                 <Text style={{ fontWeight: '600', color: "white" }}>
+    //                                                     Cron/Acc status: {cronStatus.current} /{' '}
+    //                                                     <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
+    //                                                         {accountStatus.current}
+    //                                                     </span>
+    //                                                 </Text>
+    //                                             </>
+    //                                         }
+    //                                         >
+    //                                             <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color:"#C7F39A" }} className="black-icon-info"/>
+    //                                         </Tooltip>
+    //                                     </Col>
+    //                                     {/* <Col>
+    //                                         <Tooltip 
+    //                                             title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
+    //                                             mouseEnterDelay={0} // Tooltip appears after 1 second
+    //                                         >
+    //                                             <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#C7F39A" }}/>
+    //                                         </Tooltip>
+    //                                     </Col> */}
+    //                                     <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
+    //                                         <Tooltip title="Export to CSV">
+    //                                             <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={onBtExport1} />
+    //                                         </Tooltip>
+    //                                     </Col>
+    //                                 </Row>
+
+    //                                 <AgGridReact
+    //                                     ref={gridRef}
+    //                                     rowData={memorizedRowData}
+    //                                     rowSelection='multiple'
+    //                                     columnDefs={memorizedColumnDef}
+    //                                     defaultColDef={{ ...defaultColDef, suppressMenu: true }}
+    //                                     onCellClicked={onCellClickedLive}
+    //                                     pagination={true}
+    //                                     paginationPageSize={100}
+    //                                     paginationPageSizeSelector={[20, 40, 60, 80, 100]}
+    //                                     suppressAggFuncInHeader={true}
+    //                                     getMainMenuItems={getMainMenuItems}
+    
+    //                                     // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
+    //                                     // onCellKeyDown={onCellKeyDown}
+    //                                     // domLayout="normal"
+    //                                     // groupIncludeTotalFooter={rowData.length > 0 ? true : false}
+    //                                     // groupIncludeFooter={rowData.length > 0 ? true : false}
+    //                                     autoGroupColumnDef={autoGroupColumnDefLive}
+    //                                     onGridReady={(params) => onGridReady(params, 'grid1', gridRef)}
+    //                                     gridOptions={{
+    //                                         ...gridOptions,
+    //                                         ensureDomOrder: false,
+    //                                         suppressRowClickSelection: true,
+    //                                         suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+    //                                         enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+    //                                         groupSelectsChildren: true, // ✅ Ensures child rows are selected properly
+    //                                     }}
+    //                                     frameworkComponents={{ GroupCellRenderer }}
+    //                                     groupDisplayType='multipleColumns'
+    //                                     // rowGroupPanelShow='always'
+    //                                     // onFilterChanged={onFilterChanged} // Use the custom filter handler
+    //                                     pinnedBottomRowData={liveFixedFooter}
+    //                                     suppressCellSelection={true}
+    //                                     getRowStyle={(params) => {
+    //                                         if (params.node.rowPinned) {
+                                                
+    //                                             return {
+    //                                                 fontWeight: "bold",
+    //                                                 backgroundColor: theme === "dark" ? "#1a1918" : "#fff", // Dark mode or light mode
+    //                                                 color: theme === "dark" ? "#fff" : "#000",
+    //                                             };
+    //                                         }
+    //                                         return null; // Keep other row styles unchanged
+    //                                     }}
+    //                                     getCellStyle={(params) => {
+    //                                         const isSelected = selectedCells.some(
+    //                                             (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
+    //                                         );
+                                    
+    //                                         // ✅ Ensure first cell inside a group is highlighted
+    //                                         const isFirstSelected = firstSelectedCell &&
+    //                                             firstSelectedCell.rowIndex === params.node.rowIndex &&
+    //                                             firstSelectedCell.colId === params.column.getId();
+                                    
+    //                                         return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
+    //                                     }}
+    //                                     onFilterChanged={(params) => {
+    //                                         const api = params.api;
+    //                                         const filteredData = [];
+    //                                         // api.forEachNodeAfterFilterAndSort((node) => {
+    //                                         //     if (!node.rowPinned) {
+    //                                         //         filteredData.push(node.data);
+    //                                         //     }
+    //                                         // });
+    //                                         const normalizedInput = inputValue.trim().toLowerCase();
+
+    //                                         api.forEachNodeAfterFilterAndSort((node) => {
+    //                                             if (node.data && node.data.campaignname) {
+    //                                                 const normalizedCampaign = node.data.campaignname.trim().toLowerCase();
+                                        
+    //                                                 // Apply search and filter conditions
+    //                                                 if (
+    //                                                     normalizedCampaign.startsWith(normalizedInput) ||
+    //                                                     normalizedCampaign.includes(normalizedInput) ||
+    //                                                     normalizedCampaign.endsWith(normalizedInput)
+    //                                                 ) {
+    //                                                     filteredData.push(node.data);
+    //                                                 }
+    //                                             }
+    //                                         });
+
+    //                                         const updatedFooter = [
+    //                                             {
+    //                                                 // [`${newtime}Date`]: 'Totals',
+    //                                                 campaignName: 'Total',
+    //                                                 actions: "",
+    //                                                 spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
+    //                                                 revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
+    //                                                 profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
+    //                                                 margin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
+    //                                                 rpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / filteredData.length).toFixed(2)),
+    //                                                 cpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / filteredData.length).toFixed(2)),
+    //                                                 ncpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.ncpl), 0) / filteredData.length).toFixed(2)),
+    //                                                 fbleads: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbleads), 0).toFixed(2)),
+    //                                                 conversions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
+    //                                                 fmargin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+    //                                                 roi: parseFloat(((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) - filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0)) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+    //                                                 cpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpc), 0) / filteredData.length).toFixed(2)),
+    //                                                 cpclinkclicks: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks), 0) / filteredData.length).toFixed(2)),
+    //                                                 fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
+    //                                                 fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
+    //                                                 impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
+    //                                                 ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2))
+    //                                             },
+    //                                         ];
+
+    //                                         setLiveFixedFooter(updatedFooter);
+    //                                     }}
+    //                                 />
+
+    //                             </div>
+    //                         ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
+    //                             {apiStatus === true ? 
+    //                             <Result
+    //                             className={theme === 'dark' ? 'dark-result' : 'light-result'}
+    //                             // icon={<SmileOutlined />}
+    //                             title={`API failed to fetch the data. Please click retry button to fetch the data`}
+    //                         extra={<Button type="primary" onClick={handleReFetchData}>Retry</Button>}
+    //                         /> : (startDate !== endDate ? <Result
+    //                                 className={theme === 'dark' ? 'dark-result' : 'light-result'}
+    //                                 icon={<SmileOutlined />}
+    //                                 title={`No LiveData for ${newaccount} from ${startDate} to ${endDate}`}
+    //                             // extra={<Button type="primary">Next</Button>}
+    //                             /> : <Result
+    //                                 className={theme === 'dark' ? 'dark-result' : 'light-result'}
+    //                                 icon={<SmileOutlined />}
+    //                                 title={`No LiveData for ${newaccount} to ${startDate}`}
+    //                             // extra={<Button type="primary">Next</Button>}
+    //                             />)}
+    //                         </div>}
+    //                     </div>
+    //                 </div>
+    // );
+
+    return (
+        <div>
+            {newRevenuePratner === "FB_Mnet" ? (
+                <div>
+                    <div>
+                        {renderCarouselNav()}
+                    </div>
+                    <Tabs activeKey={activeTab} onChange={handleTabChange} renderTabBar={() => <></>}>
+                        <Tabs.TabPane key="1">
+                            <CampaignLevelReports
+                                startDate={startDate} 
+                                endDate={endDate} 
+                                newaccount={newaccount} 
+                                newtime={newtime} 
+                                newRevenuePratner={newRevenuePratner} 
+                                inputValue={inputValue} 
+                                newAccountName={newAccountName} 
+                                columnDefs={columnDefs} 
+                                campaignComments={campaignComments} 
+                                Camapignlevelstatus={Camapignlevelstatus} 
+                                changeRRefrst={changeRRefrst} 
+                                debouncedHandleColumnMove={debouncedHandleColumnMove} 
+                                userdetails={userdetails} 
+                                refreshComments={refreshComments}
+                                refreshpage={refreshpage}
+                                getMainMenuItems={getMainMenuItems}
+                                toggleStatus={toggleStatus}
+                                handleChangeToggle={handleChangeToggle}
+                                theme={theme}
+                                tabStatus={"Live"}
+                                showCampaignLevel={showCampaignLevel}
+                                removeSelectedCampaigns={removeSelectedCampaigns}
+                            />
+                        </Tabs.TabPane>
+                        <Tabs.TabPane key="2">
+                            <AdsetLevelReports
+                                startDate={startDate} 
+                                endDate={endDate} 
+                                newaccount={newaccount} 
+                                newtime={newtime} 
+                                newRevenuePratner={newRevenuePratner} 
+                                inputValue={inputValue} 
+                                newAccountName={newAccountName} 
+                                columnDefs={columnDefs1} 
+                                campaignComments={campaignComments} 
+                                Camapignlevelstatus={Camapignlevelstatus} 
+                                changeRRefrst={changeRRefrst} 
+                                debouncedHandleColumnMove={debouncedHandleColumnMove} 
+                                userdetails={userdetails} 
+                                refreshComments={refreshComments}
+                                refreshpage={refreshpage}
+                                getMainMenuItems={getMainMenuItems}
+                                toggleStatus={toggleStatus}
+                                handleChangeToggle={handleChangeToggle}
+                                theme={theme}
+                                tabStatus={"Live"}
+                                showAdsetLevel={showAdsetLevel}
+                                removeSelectedAdsets={removeSelectedAdsets}
+                                selectedCampaigns={selectedCampaigns}
+                            />
+                        </Tabs.TabPane>
+                        <Tabs.TabPane key="3">
+                            <AdLevelReports
+                                startDate={startDate} 
+                                endDate={endDate} 
+                                newaccount={newaccount} 
+                                newtime={newtime} 
+                                newRevenuePratner={newRevenuePratner} 
+                                inputValue={inputValue} 
+                                newAccountName={newAccountName} 
+                                columnDefs={columnDefs2} 
+                                campaignComments={campaignComments} 
+                                Camapignlevelstatus={Camapignlevelstatus} 
+                                changeRRefrst={changeRRefrst} 
+                                debouncedHandleColumnMove={debouncedHandleColumnMove} 
+                                userdetails={userdetails} 
+                                refreshComments={refreshComments}
+                                refreshpage={refreshpage}
+                                getMainMenuItems={getMainMenuItems}
+                                toggleStatus={toggleStatus}
+                                handleChangeToggle={handleChangeToggle}
+                                theme={theme}
+                                tabStatus={"Live"}
+                                selectedCampaigns={selectedCampaigns}
+                                selectedAdsets={selectedAdsets}
+                            />
+                        </Tabs.TabPane>
+                    </Tabs>
+                </div>
+            ) : (
+                <div style={{ height: "100%", marginBottom: '20px',overflow: "visible" }}>
+                    <div style={contentStyle}>
+                        {isLoading === true ? (
+                            <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>
+                                <div className="ag-grid-Loader">
+                                    <Audio
+                                        height="80"
+                                        width="80"
+                                        radius="9"
+                                        color="green"
+                                        ariaLabel="loading"
+                                        wrapperStyle
+                                        wrapperClass
+                                    />
+                                </div>
+                            </div>
+                        ) : rowData?.filter((each) => {
+                            const normalizedCampaign = each.campaignname.trim().toLowerCase();
+                            const normalizedInput = inputValue.trim().toLowerCase();
+                            return (
+                                normalizedCampaign.startsWith(normalizedInput) ||
+                                normalizedCampaign.includes(normalizedInput) ||
+                                normalizedCampaign.endsWith(normalizedInput)
+                            );
+                        }
+                        )?.length > 0 ? (
+                            <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
+
+                                <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d" }}>
+                                    <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
+                                        <Space align="center">
+                                            <div className="blinking-circle-1"></div>
+                                            <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600', color: theme === "dark" && "white" }}>Live</Text>
+                                        </Space>
+                                    </Col>
+                                    <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                        <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Acc: {newaccount}</Text>
+                                    </Col>
+                                    <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                        <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>AccName: {newAccountName}</Text>
+                                    </Col>
+                                    <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                        <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Timezone: {timezone.current}</Text>
+                                    </Col>
+                                    <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                        <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>F/N Hour: {maxHour.current}:00 / {maxNetworkHour.current}:00</Text>
+                                    </Col>
+                                    {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+                                        <Text style={{ fontWeight: '600' }}>
+                                            Cron/Acc status: {cronStatus.current} /{' '}
+                                            <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
+                                                {accountStatus.current}
+                                            </span>
+                                        </Text>
+                                    </Col> */}
+                                    <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
+                                        <Tooltip
+                                        title={
+                                            <>
+                                                <div>FbAcc Status: {`${fbCron.current}`}</div>
+                                                <div>RevAcc Status: {`${revenueCron.current}`}</div>
+                                                <Text style={{ fontWeight: '600', color: "white" }}>
+                                                    Cron/Acc status: {cronStatus.current} /{' '}
+                                                    <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
+                                                        {accountStatus.current}
+                                                    </span>
+                                                </Text>
+                                            </>
+                                        }
+                                        >
+                                            <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color:"#C7F39A" }} className="black-icon-info"/>
+                                        </Tooltip>
+                                    </Col>
+                                    {/* <Col>
+                                        <Tooltip 
+                                            title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
+                                            mouseEnterDelay={0} // Tooltip appears after 1 second
+                                        >
+                                            <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#C7F39A" }}/>
+                                        </Tooltip>
+                                    </Col> */}
+                                    <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
+                                        <Tooltip title="Export to CSV">
+                                            <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={onBtExport1} />
+                                        </Tooltip>
+                                    </Col>
+                                </Row>
+
+                                <AgGridReact
+                                    ref={gridRef}
+                                    rowData={memorizedRowData}
+                                    rowSelection='multiple'
+                                    columnDefs={memorizedColumnDef}
+                                    defaultColDef={{ ...defaultColDef, suppressMenu: true }}
+                                    onCellClicked={onCellClickedLive}
+                                    pagination={true}
+                                    paginationPageSize={100}
+                                    paginationPageSizeSelector={[20, 40, 60, 80, 100]}
+                                    suppressAggFuncInHeader={true}
+                                    getMainMenuItems={getMainMenuItems}
+
+                                    // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
+                                    // onCellKeyDown={onCellKeyDown}
+                                    // domLayout="normal"
+                                    // groupIncludeTotalFooter={rowData.length > 0 ? true : false}
+                                    // groupIncludeFooter={rowData.length > 0 ? true : false}
+                                    autoGroupColumnDef={autoGroupColumnDefLive}
+                                    onGridReady={(params) => onGridReady(params, 'grid1', gridRef)}
+                                    gridOptions={{
+                                        ...gridOptions,
+                                        ensureDomOrder: false,
+                                        suppressRowClickSelection: true,
+                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                        groupSelectsChildren: true, // ✅ Ensures child rows are selected properly
+                                    }}
+                                    frameworkComponents={{ GroupCellRenderer }}
+                                    groupDisplayType='multipleColumns'
+                                    // rowGroupPanelShow='always'
+                                    // onFilterChanged={onFilterChanged} // Use the custom filter handler
+                                    pinnedBottomRowData={liveFixedFooter}
+                                    suppressCellSelection={true}
+                                    getRowStyle={(params) => {
+                                        if (params.node.rowPinned) {
+                                            
+                                            return {
+                                                fontWeight: "bold",
+                                                backgroundColor: theme === "dark" ? "#1a1918" : "#fff", // Dark mode or light mode
+                                                color: theme === "dark" ? "#fff" : "#000",
+                                            };
+                                        }
+                                        return null; // Keep other row styles unchanged
+                                    }}
+                                    getCellStyle={(params) => {
+                                        const isSelected = selectedCells.some(
+                                            (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
+                                        );
+                                
+                                        // ✅ Ensure first cell inside a group is highlighted
+                                        const isFirstSelected = firstSelectedCell &&
+                                            firstSelectedCell.rowIndex === params.node.rowIndex &&
+                                            firstSelectedCell.colId === params.column.getId();
+                                
+                                        return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
+                                    }}
+                                    onFilterChanged={(params) => {
+                                        const api = params.api;
+                                        const filteredData = [];
+                                        // api.forEachNodeAfterFilterAndSort((node) => {
+                                        //     if (!node.rowPinned) {
+                                        //         filteredData.push(node.data);
+                                        //     }
+                                        // });
+                                        const normalizedInput = inputValue.trim().toLowerCase();
+
+                                        api.forEachNodeAfterFilterAndSort((node) => {
+                                            if (node.data && node.data.campaignname) {
+                                                const normalizedCampaign = node.data.campaignname.trim().toLowerCase();
+                                    
+                                                // Apply search and filter conditions
+                                                if (
+                                                    normalizedCampaign.startsWith(normalizedInput) ||
+                                                    normalizedCampaign.includes(normalizedInput) ||
+                                                    normalizedCampaign.endsWith(normalizedInput)
+                                                ) {
+                                                    filteredData.push(node.data);
+                                                }
+                                            }
+                                        });
+
+                                        const updatedFooter = [
+                                            {
+                                                // [`${newtime}Date`]: 'Totals',
+                                                campaignName: 'Total',
+                                                actions: "",
+                                                spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
+                                                revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
+                                                profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
+                                                margin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
+                                                rpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / filteredData.length).toFixed(2)),
+                                                cpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / filteredData.length).toFixed(2)),
+                                                ncpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.ncpl), 0) / filteredData.length).toFixed(2)),
+                                                fbleads: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbleads), 0).toFixed(2)),
+                                                conversions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
+                                                fmargin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+                                                roi: parseFloat(((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) - filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0)) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+                                                cpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpc), 0) / filteredData.length).toFixed(2)),
+                                                cpclinkclicks: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks), 0) / filteredData.length).toFixed(2)),
+                                                fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
+                                                fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
+                                                impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
+                                                ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2))
+                                            },
+                                        ];
+
+                                        setLiveFixedFooter(updatedFooter);
+                                    }}
+                                />
+
+                            </div>
+                        ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
+                            {apiStatus === true ? 
+                            <Result
+                            className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                            // icon={<SmileOutlined />}
+                            title={`API failed to fetch the data. Please click retry button to fetch the data`}
+                        extra={<Button type="primary" onClick={handleReFetchData}>Retry</Button>}
+                        /> : (startDate !== endDate ? <Result
+                                className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                icon={<SmileOutlined />}
+                                title={`No LiveData for ${newaccount} from ${startDate} to ${endDate}`}
+                            // extra={<Button type="primary">Next</Button>}
+                            /> : <Result
+                                className={theme === 'dark' ? 'dark-result' : 'light-result'}
+                                icon={<SmileOutlined />}
+                                title={`No LiveData for ${newaccount} to ${startDate}`}
+                            // extra={<Button type="primary">Next</Button>}
+                            />)}
+                        </div>}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+
 };
 
 export default LiveReports;
