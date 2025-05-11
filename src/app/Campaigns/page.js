@@ -444,7 +444,7 @@ const App = () => {
 
                     try {
                         const fbResponse = await axios.post(
-                            `https://graph.facebook.com/v20.0/${record.campaignid}`,
+                            `https://graph.facebook.com/v22.0/${record.campaignid}`,
                             null,
                             {
                                 params: {
@@ -539,7 +539,7 @@ const App = () => {
                         if (record.campaignid) {
                             try {
                                 const fbResponse = await axios.post(
-                                    `https://graph.facebook.com/v20.0/${record.campaignid}`,
+                                    `https://graph.facebook.com/v22.0/${record.campaignid}`,
                                     null,
                                     {
                                         params: {
