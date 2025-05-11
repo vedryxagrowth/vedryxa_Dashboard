@@ -69,8 +69,8 @@ const positionOptions = {
     { key: "feed", label: "Facebook Feed" },
     { key: "marketplace", label: "Facebook Marketplace" },
     { key: "video_feeds", label: "Facebook Video Feeds" },
-    { key: "instream_video", label: "Facebook In-Stream Videos" },
-    { key: "reels", label: "Facebook Reels" }, // ✅ renamed from facebook_reels
+    // { key: "instream_video", label: "Facebook In-Stream Videos" },
+    // { key: "reels", label: "Facebook Reels" }, // ✅ renamed from facebook_reels
     { key: "profile_feed", label: "Facebook Profile Feed" },
     { key: "search", label: "Facebook Search" },
     { key: "story", label: "Facebook Stories" }, // ✅ renamed from story_fb
@@ -82,7 +82,7 @@ const positionOptions = {
     { key: "stream", label: "Instagram Stream" },
     { key: "story", label: "Instagram Stories" }, // ✅ renamed from story_in
     { key: "explore", label: "Instagram Explore" },
-    { key: "reels", label: "Instagram Reels" },
+    // { key: "reels", label: "Instagram Reels" },
     { key: "profile_feed", label: "Instagram Profile Feed" } // ✅ renamed from profile_feed_in
     // ❌ Removed: explore_home, ig_search, profile_reels
   ],
