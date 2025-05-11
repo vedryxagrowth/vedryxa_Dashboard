@@ -90,7 +90,7 @@ const positionOptions = {
   messenger: [
     { key: "messenger_home", label: "Messenger Home" },
     { key: "story", label: "Messenger Stories" }, // ✅ renamed from story_ms
-    { key: "sponsored_messages", label: "Messenger Sponsored Messages" }
+    // { key: "sponsored_messages", label: "Messenger Sponsored Messages" }
     // ❌ Removed: messenger_inbox
   ],
 
