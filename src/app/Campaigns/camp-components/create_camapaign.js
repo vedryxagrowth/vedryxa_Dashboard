@@ -28,43 +28,6 @@ const publisherOptions = [
     { label: 'Messenger', value: 'messenger' },
     { label: 'Audience Network', value: 'audience_network' }
 ];
-const positionOptions = {
-    facebook: [
-        { key: "feed", label: "Facebook Feed" },
-        { key: "marketplace", label: "Facebook Marketplace" },
-        { key: "video_feeds", label: "Facebook Video Feeds" },
-        { key: "instream_video", label: "Facebook In-Stream Videos" },
-        { key: "facebook_reels", label: "Facebook Reels" },
-        { key: "profile_feed", label: "Facebook Profile Feed" },
-        { key: "search", label: "Facebook Search" },
-        { key: "story_fb", label: "Facebook Stories" },
-        { key: "right_column", label: "Facebook Right Column" },
-        { key: "instant_articles", label: "Facebook Instant Articles" },
-        { key: "business_explore", label: "Facebook Business Explore" } // Added Business Explore
-    ],
-    instagram: [
-        { key: "stream", label: "Instagram Stream" },
-        { key: "story_in", label: "Instagram Stories" },
-        { key: "explore", label: "Instagram Explore" },
-        { key: "explore_home", label: "Instagram Explore Home" },
-        { key: "reels", label: "Instagram Reels" },
-        { key: "profile_feed_in", label: "Instagram Profile Feed" },
-        { key: "ig_search", label: "Instagram Search" },
-        { key: "profile_reels", label: "Instagram Profile Reels" }
-    ],
-    messenger: [
-        { key: "messenger_home", label: "Messenger Home" },
-        { key: "story_ms", label: "Messenger Stories" },
-        { key: "sponsored_messages", label: "Messenger Sponsored Messages" },
-        { key: "messenger_inbox", label: "Messenger Inbox" }
-    ],
-    audience_network: [
-        { key: "classic", label: "Audience Network Classic" },
-        { key: "rewarded_video", label: "Audience Network Rewarded Video" },
-        { key: "in_stream", label: "Audience Network In-Stream Video" }
-    ]
-};
-
 // const positionOptions = {
 //     facebook: [
 //         { key: "feed", label: "Facebook Feed" },
@@ -75,12 +38,13 @@ const positionOptions = {
 //         { key: "profile_feed", label: "Facebook Profile Feed" },
 //         { key: "search", label: "Facebook Search" },
 //         { key: "story_fb", label: "Facebook Stories" },
-//         { key: "right_column", label: "Facebook Right Column" }, // Added
-//         { key: "instant_articles", label: "Facebook Instant Articles" } // Added
+//         { key: "right_column", label: "Facebook Right Column" },
+//         { key: "instant_articles", label: "Facebook Instant Articles" },
+//         { key: "business_explore", label: "Facebook Business Explore" } // Added Business Explore
 //     ],
 //     instagram: [
 //         { key: "stream", label: "Instagram Stream" },
-//         { key: "story_in", label: "Instagram Story" },
+//         { key: "story_in", label: "Instagram Stories" },
 //         { key: "explore", label: "Instagram Explore" },
 //         { key: "explore_home", label: "Instagram Explore Home" },
 //         { key: "reels", label: "Instagram Reels" },
@@ -90,16 +54,55 @@ const positionOptions = {
 //     ],
 //     messenger: [
 //         { key: "messenger_home", label: "Messenger Home" },
-//         { key: "story_ms", label: "Messenger Story" },
+//         { key: "story_ms", label: "Messenger Stories" },
 //         { key: "sponsored_messages", label: "Messenger Sponsored Messages" },
-//         { key: "messenger_inbox", label: "Messenger Inbox" } // Added
+//         { key: "messenger_inbox", label: "Messenger Inbox" }
 //     ],
 //     audience_network: [
 //         { key: "classic", label: "Audience Network Classic" },
 //         { key: "rewarded_video", label: "Audience Network Rewarded Video" },
-//         { key: "in_stream", label: "Audience Network In-Stream Video" } // Added
+//         { key: "in_stream", label: "Audience Network In-Stream Video" }
 //     ]
 // };
+const positionOptions = {
+  facebook: [
+    { key: "feed", label: "Facebook Feed" },
+    { key: "marketplace", label: "Facebook Marketplace" },
+    { key: "video_feeds", label: "Facebook Video Feeds" },
+    { key: "instream_video", label: "Facebook In-Stream Videos" },
+    { key: "reels", label: "Facebook Reels" }, // ✅ renamed from facebook_reels
+    { key: "profile_feed", label: "Facebook Profile Feed" },
+    { key: "search", label: "Facebook Search" },
+    { key: "story", label: "Facebook Stories" }, // ✅ renamed from story_fb
+    { key: "right_hand_column", label: "Facebook Right Column" }, // ✅ renamed from right_column
+    { key: "instant_article", label: "Facebook Instant Articles" } // ✅ renamed from instant_articles
+  ],
+
+  instagram: [
+    { key: "stream", label: "Instagram Stream" },
+    { key: "story", label: "Instagram Stories" }, // ✅ renamed from story_in
+    { key: "explore", label: "Instagram Explore" },
+    { key: "reels", label: "Instagram Reels" },
+    { key: "profile_feed", label: "Instagram Profile Feed" } // ✅ renamed from profile_feed_in
+    // ❌ Removed: explore_home, ig_search, profile_reels
+  ],
+
+  messenger: [
+    { key: "messenger_home", label: "Messenger Home" },
+    { key: "story", label: "Messenger Stories" }, // ✅ renamed from story_ms
+    { key: "sponsored_messages", label: "Messenger Sponsored Messages" }
+    // ❌ Removed: messenger_inbox
+  ],
+
+  audience_network: [
+    { key: "classic", label: "Audience Network Classic" },
+    { key: "rewarded_video", label: "Audience Network Rewarded Video" },
+    { key: "instream_video", label: "Audience Network In-Stream Video" } // ✅ renamed from in_stream
+  ]
+};
+
+
+
 
 const localesdata = [
     {
