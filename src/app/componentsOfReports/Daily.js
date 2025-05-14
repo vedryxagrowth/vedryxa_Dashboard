@@ -211,6 +211,11 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
         // , 100);
     }
 
+    const moveToNextTab = (data) => {
+        setActiveTab(data);
+        localStorage.setItem("DailyActiveTab", data);
+    }
+
     const autoGroupColumnDef = {
         headerName: 'CampaignName',
         minWidth: 450,
@@ -1167,6 +1172,7 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                                 tabStatus={"Live"}
                                 showCampaignLevel={showCampaignLevel}
                                 removeSelectedCampaigns={removeSelectedCampaigns}
+                                moveToNextTab={moveToNextTab}
                             />
                         </Tabs.TabPane>
                         <Tabs.TabPane key="2">
@@ -1194,6 +1200,7 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                                 showAdsetLevel={showAdsetLevel}
                                 removeSelectedAdsets={removeSelectedAdsets}
                                 selectedCampaigns={selectedCampaigns}
+                                moveToNextTab={moveToNextTab}
                             />
                         </Tabs.TabPane>
                         <Tabs.TabPane key="3">

@@ -8089,8 +8089,8 @@ const MyTablePage = () => {
         ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
         ...(newRevenuePratner === "FB_System1" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : []),
         ...(newRevenuePratner === "FB_Tonic1" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
-        ...(newRevenuePratner === "FB_Mnet" ? [{ key: '6', label: 'Ad-Live', content: 'Content for Domain data' }] : []),
-        ...(newRevenuePratner === "FB_Mnet" ? [{ key: '7', label: 'Ad-Daily', content: 'Content for Domain data' }] : []),
+        // ...(newRevenuePratner === "FB_Mnet" ? [{ key: '6', label: 'Ad-Live', content: 'Content for Domain data' }] : []),
+        // ...(newRevenuePratner === "FB_Mnet" ? [{ key: '7', label: 'Ad-Daily', content: 'Content for Domain data' }] : []),
         // ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '6', label: 'Names-Live', content: 'Content for Names Live data' }] : []),
         // ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '7', label: 'Names-Daily', content: 'Content for Names Daily data' }] : []),
     ];
@@ -8486,7 +8486,7 @@ const MyTablePage = () => {
                     </Tabs.TabPane>
                 )}
 
-                {newRevenuePratner === "FB_Mnet" && (
+                {/* {newRevenuePratner === "FB_Mnet" && (
                     <Tabs.TabPane key="6">
                         <MnetLiveAdReports 
                             startDate={newStartDate} 
@@ -8535,7 +8535,7 @@ const MyTablePage = () => {
                         handleChangeToggle={handleChangeToggle}
                         />
                     </Tabs.TabPane>
-                )}
+                )} */}
                 </Tabs>
 
             </div>

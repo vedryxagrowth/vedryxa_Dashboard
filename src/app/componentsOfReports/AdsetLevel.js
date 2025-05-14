@@ -4,7 +4,7 @@ import { Audio } from 'react-loader-spinner';
 import React from 'react';
 import moment from 'moment-timezone';
 import {  Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Tabs, Checkbox } from 'antd';
-import {  InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import {  InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import { Space } from 'antd';
 import StickyBox from 'react-sticky-box';
@@ -53,7 +53,7 @@ const selectTimezone = {
     DST: 'DSTDate'
 };
 
-const AdsetLevelReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, showAdsetLevel, removeSelectedAdsets, selectedCampaigns}) => {
+const AdsetLevelReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, showAdsetLevel, removeSelectedAdsets, selectedCampaigns, moveToNextTab}) => {
     console.log(columnDefs, "columnDefs");
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
@@ -562,12 +562,37 @@ const AdsetLevelReports = ({startDate, endDate, newaccount, newtime, newRevenueP
                                 style={{ cursor: 'pointer', marginLeft: '2px', color: "#1e1e1f", marginRight: '10px' }}
                             />
                         </Tooltip>
+                        <LinkOutlined 
+                            onClick={() => {
+                                const url = `/LiveHistory/LiveAdsetHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                                window.open(url, '_blank', 'noopener,noreferrer');
+                            }}
+                            style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '5px' }}
+                        />
                         <Tooltip title={valueWithCount}>
                             <span
                                 onClick={() => {
-                                    const url = `/LiveHistory/LiveAdsetHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
-                                    window.open(url, '_blank', 'noopener,noreferrer');
+                                    const rowData = params.node.group
+                                    ? params.node.childrenAfterGroup?.[0]?.data
+                                    : params.node.data;
+
+                                    const rowNode = params.api.getRowNode(params.node.id);
+
+                                    // Clear existing selections (for single-select mode)
+                                    params.api.deselectAll();
+
+                                    // Set this row as selected
+                                    if (rowNode) {
+                                        rowNode.setSelected(true);
+                                    }
+
+
+                                    showAdsetLevel([rowData]);
+                                    moveToNextTab("3");
+
+                                    // console.log("Clicked row data:", [rowData]);
                                 }}
+                                style={{ cursor: 'pointer' }}
                             >
                                 {valueWithCount}
                             </span>

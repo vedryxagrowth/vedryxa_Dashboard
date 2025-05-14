@@ -25,7 +25,7 @@ const { Option } = Select;
 const FabricCanvas = dynamic(() => import("../Campaigns/camp-components/Fabricanvas"), { ssr: false });
 const CreateCampaign = dynamic(() => import("./components/text"), { ssr: false });
 
-const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
+const ImageUploadPage = ({selectedFilesData, fromCampaigns, network, Account_Number}) => {
     // console.log("Selected Files Data:", selectedFilesData);
     const [images, setImages] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -325,27 +325,38 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns}) => {
     }, [isTrashView,userdetails?.userName, selectedKey, selectedAccountNumber, currentFolder]);    
 
     useEffect(() => {
-        if (userdetails?.adAccounts && Object.keys(userdetails.adAccounts).length > 0) {
+        if(network && userdetails?.adAccounts && Object.keys(userdetails.adAccounts).length > 0){
             const adAccountOptions = Object.keys(userdetails.adAccounts).map(key => ({
                 value: key,
                 label: key
             }));
             setOptions(adAccountOptions);
-             // Set default project/account if not already selected
-            if (!selectedKey) {
-                const defaultProject = Object.keys(userdetails.adAccounts)[0];
-                const defaultAccount = userdetails.adAccounts[defaultProject]?.[0]?.accountNumber;
-
-                if (defaultProject && defaultAccount) {
-                    setSelectedKey(defaultProject);
-                    setSelectedAccountNumber(defaultAccount);
-                    setSelectedValue(defaultAccount);
+            setSelectedKey(network);
+            setSelectedAccountNumber(Account_Number);
+            setSelectedValue(Account_Number);
+        }else{
+            if (userdetails?.adAccounts && Object.keys(userdetails.adAccounts).length > 0) {
+                const adAccountOptions = Object.keys(userdetails.adAccounts).map(key => ({
+                    value: key,
+                    label: key
+                }));
+                setOptions(adAccountOptions);
+                 // Set default project/account if not already selected
+                if (!selectedKey) {
+                    const defaultProject = Object.keys(userdetails.adAccounts)[0];
+                    const defaultAccount = userdetails.adAccounts[defaultProject]?.[0]?.accountNumber;
+    
+                    if (defaultProject && defaultAccount) {
+                        setSelectedKey(defaultProject);
+                        setSelectedAccountNumber(defaultAccount);
+                        setSelectedValue(defaultAccount);
+                    }
                 }
+            } else {
+                setOptions([]);  // Clear options if no accounts exist
             }
-        } else {
-            setOptions([]);  // Clear options if no accounts exist
         }
-    }, [userdetails]);  // Add userdetails as dependency
+    }, [userdetails, network]);  // Add userdetails as dependency
     
     useEffect(() => {
         if (selectedKey && userdetails?.adAccounts?.[selectedKey]?.length > 0) {

@@ -1,7 +1,4 @@
 {
-  "/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page": "app/DailyAndCampaignHistory/CampaignHistory/[CampaignName]/page.js",
-  "/DailyAndCampaignHistory/AdsetHistory/[AdsetName]/page": "app/DailyAndCampaignHistory/AdsetHistory/[AdsetName]/page.js",
-  "/LiveHistory/LiveCampaignHistory/[CampaignName]/page": "app/LiveHistory/LiveCampaignHistory/[CampaignName]/page.js",
-  "/LiveHistory/LiveAdsetHistory/[AdsetName]/page": "app/LiveHistory/LiveAdsetHistory/[AdsetName]/page.js",
+  "/Campaigns/page": "app/Campaigns/page.js",
   "/Reports/page": "app/Reports/page.js"
 }

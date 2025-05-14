@@ -825,6 +825,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     formData,
                                     { headers: { 'Content-Type': 'multipart/form-data' } }
                                 );
+                                
         
                                 if (fbResponse.status === 200) {
                                     onSuccess("ok", response);
@@ -879,16 +880,17 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                     } else {
                         if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
                             const formData = new FormData();
-                            const fileId = file.name;
+                            const uniqueId = uuidv4(); // Generate a unique ID for the file
+                            const fileId = `${uniqueId}_${file.name}`;
                             const editedImage = editedImages[fileId];
                             const uploadFile = editedImage ? await fetch(editedImage).then(res => res.blob()) : null;
         
                             console.log(file.originFileObj.name);
         
                             if (uploadFile) {
-                                formData.append("file", uploadFile, `blob/${file.name}`);
+                                formData.append("file", uploadFile, `blob/${uniqueId}_${file.name}`);
                             } else {
-                                formData.append("file", file.originFileObj, `blob/${file.originFileObj.name}`);
+                                formData.append("file", file.originFileObj, `blob/${uniqueId}_${file.originFileObj.name}`);
                             }
         
                             // console.log(formData);
@@ -920,6 +922,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     formData,
                                     { headers: { 'Content-Type': 'multipart/form-data' } }
                                 );
+
+                                // console.log("Facebook API response:", fbResponse.data);
         
                                 if (response.status === 200 && fbResponse.status === 200) {
                                     onSuccess("ok", response);
@@ -2615,7 +2619,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                         selectedFilesData={selectedFilesData}
                         
                     /> */}
-                    <ImageUploadPage selectedFilesData={selectedFilesData} fromCampaigns={true} />
+                    <ImageUploadPage selectedFilesData={selectedFilesData} fromCampaigns={true} network={network} Account_Number={accountis} />
                 </Drawer>
             )}
         </Drawer>

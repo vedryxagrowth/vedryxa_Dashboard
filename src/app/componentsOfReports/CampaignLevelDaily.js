@@ -5,7 +5,7 @@ import { Audio } from 'react-loader-spinner';
 import moment from 'moment-timezone';
 import React from 'react';
 import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch} from 'antd';
-import {  DownloadOutlined,  SmileOutlined, CopyOutlined,  EditOutlined,  MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import {  DownloadOutlined,  SmileOutlined, CopyOutlined,  EditOutlined,  MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined } from '@ant-design/icons';
 import { Tooltip} from 'antd';
 import { Space } from 'antd';
 import 'antd/dist/reset.css';
@@ -58,7 +58,7 @@ const selectTimezone = {
 };
 
 
-const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, showCampaignLevel, removeSelectedCampaigns}) => {
+const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, showCampaignLevel, removeSelectedCampaigns, moveToNextTab}) => {
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -551,12 +551,40 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                                 style={{ cursor: 'pointer', marginLeft: '2px', color: "#1e1e1f", marginRight: '10px' }}
                             />
                         </Tooltip>
+                        <LinkOutlined 
+                            onClick={() => {
+                                const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                                window.open(url, '_blank', 'noopener,noreferrer');
+                            }}
+                            style={{marginRight:'5px', color: "#1e1e1f", cursor: 'pointer'}}
+                        />
                         <Tooltip title={valueWithCount}>
                             <span
                                 onClick={() => {
-                                    const url = `/DailyAndCampaignHistory/CampaignHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
-                                    window.open(url, '_blank', 'noopener,noreferrer');
+                                // Get the rowData — for group rows or leaf rows
+                                const rowData = params.node.group
+                                    ? params.node.childrenAfterGroup?.[0]?.data
+                                    : params.node.data;
+
+                                // Get the corresponding row node from AG Grid
+                                const rowNode = params.api.getRowNode(params.node.id);
+
+                                // Clear existing selections (for single-select mode)
+                                params.api.deselectAll();
+
+                                // Set this row as selected
+                                if (rowNode) {
+                                    rowNode.setSelected(true);
+                                }
+
+                                // Your existing logic
+                                showCampaignLevel([rowData]);
+                                moveToNextTab("2");
+
+                                // Optional debug log
+                                // console.log("Clicked row data:", rowData);
                                 }}
+                                style={{ cursor: 'pointer' }}
                             >
                                 {valueWithCount}
                             </span>
