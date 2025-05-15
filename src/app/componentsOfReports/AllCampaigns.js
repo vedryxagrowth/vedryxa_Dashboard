@@ -49,7 +49,8 @@ const selectTimezone = {
     MST: 'MSTDate',
     CDT: 'CDTDate',
     AST: 'ASTDate',
-    DST: 'DSTDate'
+    DST: 'DSTDate',
+    CEST: 'CESTDate'
 };
 
 

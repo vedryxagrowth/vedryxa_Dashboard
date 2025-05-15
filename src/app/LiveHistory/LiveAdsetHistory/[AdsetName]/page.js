@@ -1274,7 +1274,8 @@ const MnetLiveAdsetHistory = ({params}) => {
         'MST',
         'CDT',
         'AST',
-        'DST'
+        'DST',
+        'CEST'
     ];
 
     const defaultColDef = useMemo(()=>({

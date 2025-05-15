@@ -36,7 +36,8 @@ const newtworkCollections = {
     "FB_Bodies": "Facebook_Bodies",
     "FB_Bodies1": "Facebook_Bodies1",
     "Newsbreak_DA": "Newsbreak_DomainActive",
-    "FB_Tonic1": "Facebook_Tonic1"
+    "FB_Tonic1": "Facebook_Tonic1",
+    "FB_Sedo": "Facebook_Sedo"
 }
 const selectTimezone = {
     UTC: 'UTCDate',
@@ -50,7 +51,8 @@ const selectTimezone = {
     MST: 'MSTDate',
     CDT: 'CDTDate',
     AST: 'ASTDate',
-    DST: 'DSTDate'
+    DST: 'DSTDate',
+    CEST: 'CESTDate'
 };
 
 const AdsetLevelReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, showAdsetLevel, removeSelectedAdsets, selectedCampaigns}) => {

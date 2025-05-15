@@ -1497,7 +1497,8 @@ const MnetLiveCampaignHistory = ({ params }) => {
         'MST',
         'CDT',
         'AST',
-        'DST'
+        'DST',
+        'CEST'
     ];
 
 

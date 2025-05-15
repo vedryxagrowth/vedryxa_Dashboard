@@ -28,6 +28,7 @@ const revenuePartnerNames = {
     "ENKI":"FB_Enki",
     "System1":"FB_System1",
     "Domain_Active":"Newsbreak_DA",
+    "Sedo":"FB_Sedo"
 };
 
 const newtworkCollections = {
@@ -41,7 +42,8 @@ const newtworkCollections = {
     "FB_Bodies": "Facebook_Bodies",
     "FB_Bodies1": "Facebook_Bodies1",
     "Newsbreak_DA": "Newsbreak_DomainActive",
-    "FB_Tonic1": "Facebook_Tonic1"
+    "FB_Tonic1": "Facebook_Tonic1",
+    "FB_Sedo": "Facebook_Sedo"
 }
 
 import { DatePicker, Space, ConfigProvider, Flex, Spin, Skeleton } from 'antd';
