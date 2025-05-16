@@ -1042,7 +1042,8 @@ const App = () => {
                                 presets={rangePresets}
                                 onChange={handleChange}
                                 disabledDate={disabledDate}
-                                defaultValue={[dayjs().subtract(1, 'day'), dayjs().subtract(1, 'day')]}
+                                // defaultValue={[dayjs().subtract(1, 'day'), dayjs().subtract(1, 'day')]}
+                                defaultValue={[dayjs(), dayjs()]}
                                 format="YYYY-MM-DD"
                                 style={{ width: '100%' }}
                             />

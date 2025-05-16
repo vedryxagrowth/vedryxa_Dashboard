@@ -1751,6 +1751,15 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 onChange={onChangeCampaignLevelDailyBudget}
                                                 readOnly={adsetLevelDailyBudget !== 0 ? true : false}
                                                 step="0.01"
+                                                style={{
+                                                    backgroundColor: adsetLevelDailyBudget !== 0 ? '#f0f0f0' : 'transparent',
+                                                    borderRadius: '6px',
+                                                    borderColor: adsetLevelDailyBudget !== 0 ? 'transparent' : undefined,
+                                                    fontSize: '14px',
+                                                    color: '#333',
+                                                    width: '200px',
+                                                    boxSizing: 'border-box'
+                                                }}
                                             />
                                         </Tooltip>
                                     </Form.Item> {/*pk*/}
@@ -1919,6 +1928,15 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 onChange={onChangeAdsetLevelDailyBudget}
                                                 readOnly={campaignLevelDailyBudget !== 0} // This will keep the field readonly
                                                 step="0.01"
+                                                style={{
+                                                    backgroundColor: campaignLevelDailyBudget !== 0 ? '#f0f0f0' : 'transparent',
+                                                    borderRadius: '6px',
+                                                    borderColor: campaignLevelDailyBudget !== 0 ? 'transparent' : undefined,
+                                                    fontSize: '14px',
+                                                    color: '#333',
+                                                    width: '200px',
+                                                    boxSizing: 'border-box'
+                                                }}
                                             />
                                         </Tooltip>
                                     </Form.Item>

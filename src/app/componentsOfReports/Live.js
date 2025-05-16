@@ -35,13 +35,15 @@ const newtworkCollections = {
     "FB_MnetBing": "Facebook_MnetBing",
     "FB_Enki": "Facebook_Enki",
     "FB_System1": 'Facebook_System1',
+    "FB_Sedo": "Facebook_Sedo",
     "FB_Rsoc": 'Facebook_Rsoc',
     "FB_Tonic": 'Facebook_Tonic',
     "FB_DomainActive": "Facebook_DActive_Names",
     "FB_Bodies": "Facebook_Bodies",
     "FB_Bodies1": "Facebook_Bodies1",
     "Newsbreak_DA": "Newsbreak_DomainActive",
-    "FB_Tonic1": "Facebook_Tonic1"
+    "FB_Tonic1": "Facebook_Tonic1",
+    "FB_Sedo": "Facebook_Sedo"
 }
 const selectTimezone = {
     UTC: 'UTCDate',
@@ -55,11 +57,13 @@ const selectTimezone = {
     MST: 'MSTDate',
     CDT: 'CDTDate',
     AST: 'ASTDate',
-    DST: 'DSTDate'
+    DST: 'DSTDate',
+    CEST: 'CESTDate'
 };
 
 const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle }) => {
     console.log(columnDefs, "columnDefs");
+    console.log("hello world");
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
