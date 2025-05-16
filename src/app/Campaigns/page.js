@@ -66,7 +66,7 @@ const App = () => {
     const [error, setError] = useState(false);
     const { theme } = useTokenContext();
     const [isOpen, setIsOpen] = useState(false); // State to track if dropdown is open
-    const yesterday = dayjs().subtract(1, 'day').format('YYYY-MM-DD');
+    const yesterday = dayjs().subtract(0, 'day').format('YYYY-MM-DD');
     const [startDate, setStartDate] = useState(yesterday);
     const [endDate, setEndDate] = useState(yesterday);
 

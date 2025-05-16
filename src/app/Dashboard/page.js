@@ -105,7 +105,8 @@ const timezones = [
     'MST',
     'CDT',
     'AST',
-    'DST'
+    'DST',
+    'CEST'
 ];
 
 const rangePresets = [
