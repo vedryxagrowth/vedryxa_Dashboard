@@ -181,6 +181,7 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
 
     const showCampaignLevel = (data) => {
         setSelectedCampaigns(data);
+        setSelectedAdsets([]);
         console.log(data, "CampaignLeveldata");
     }
 
@@ -1549,6 +1550,7 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                                 showAdsetLevel={showAdsetLevel}
                                 removeSelectedAdsets={removeSelectedAdsets}
                                 selectedCampaigns={selectedCampaigns}
+                                selectedAdsets={selectedAdsets}
                                 moveToNextTab={moveToNextTab}
                             />
                         </Tabs.TabPane>

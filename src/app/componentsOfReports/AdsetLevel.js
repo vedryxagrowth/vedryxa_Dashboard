@@ -53,7 +53,7 @@ const selectTimezone = {
     DST: 'DSTDate'
 };
 
-const AdsetLevelReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, showAdsetLevel, removeSelectedAdsets, selectedCampaigns, moveToNextTab}) => {
+const AdsetLevelReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedAdsets, showAdsetLevel, removeSelectedAdsets, selectedCampaigns, moveToNextTab}) => {
     console.log(columnDefs, "columnDefs");
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
@@ -1192,6 +1192,25 @@ const AdsetLevelReports = ({startDate, endDate, newaccount, newtime, newRevenueP
         showAdsetLevel(uniqueByAdsetId(selectedData));
     };
 
+    const restoreSelection = () => {
+        const selectedRow = selectedAdsets[0];
+        console.log("Selected Row:", selectedRow); // Debugging log
+        console.log(selectedAdsets, "selectedAdsets"); // Debugging log
+
+        if (selectedRow) {
+        // Make sure getRowId is set up to use adset_id
+            const rowNode = gridRef.current.api.getRowNode(selectedRow.adset_id);
+
+            // Clear previous selection
+            gridRef.current.api.deselectAll();
+
+        // Select the specific row
+            if (rowNode) {
+                rowNode.setSelected(true);
+            }
+        }
+    };
+
     useEffect(() => {
         if(removeSelectedAdsets === "Remove"){
             if (gridRef.current) {
@@ -1200,6 +1219,12 @@ const AdsetLevelReports = ({startDate, endDate, newaccount, newtime, newRevenueP
             }
         }
     }, [removeSelectedAdsets]); 
+
+    // useEffect(() => {
+    //     if (gridRef.current?.api) {
+    //       restoreSelection();
+    //     }
+    //   }, [rowData]);
 
 
     

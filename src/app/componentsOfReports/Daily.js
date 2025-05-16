@@ -171,6 +171,7 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
 
     const showCampaignLevel = (data) => {
         setSelectedCampaigns(data);
+        setSelectedAdsets([]);
         console.log(data, "CampaignLeveldata");
     }
 
@@ -1200,6 +1201,7 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                                 showAdsetLevel={showAdsetLevel}
                                 removeSelectedAdsets={removeSelectedAdsets}
                                 selectedCampaigns={selectedCampaigns}
+                                selectedAdsets={selectedAdsets}
                                 moveToNextTab={moveToNextTab}
                             />
                         </Tabs.TabPane>

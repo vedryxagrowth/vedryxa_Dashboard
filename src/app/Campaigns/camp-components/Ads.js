@@ -31,7 +31,8 @@ import {
   message,
   theme,
   Select,
-  Tooltip
+  Tooltip,
+  Switch
 } from "antd";
 import axios from "axios";
 import moment from "moment-timezone";
@@ -151,6 +152,42 @@ export default function Createads({ selectedRow, network }) {
     setData(updatedData);
   };
 
+  const updateAdStatus = async (ad_id, status, access_token) => {
+    try {
+      const res = await axios.post(
+        `https://graph.facebook.com/v22.0/${ad_id}`,
+        new URLSearchParams({ status, access_token })
+      );
+      console.log("Ad Response:", res.data);
+    } catch (err) {
+      console.error("Ad Error:", err.response?.data || err.message);
+    }
+  };
+
+  const onToggleStatus = async (record, checked) => {
+    console.log(record, "record")
+    console.log(checked, "checked")
+    console.log(record.Addid, "Adid");
+    console.log(selectedRow?.camapaignlevel?.access_token, "access_token");
+    const response = await axios.post(
+      `https://www.testapi.adsgoat.in/api/adlevel`,  
+      {
+        status: checked ? "ACTIVE" : "PAUSED",
+        id:selectedRow.identifier,
+        ad_id: record.Addid
+      }, {
+        headers: {
+          Authorization: token,
+        }
+      }
+    );
+    if(response.status === 200){
+      rerenders();
+    };
+    // updateAdStatus(record.Addid, checked ? "ACTIVE" : "PAUSED", selectedRow?.camapaignlevel?.access_token)
+
+  }
+
   const columns = [
     {
       title: 'AddName',
@@ -178,9 +215,30 @@ export default function Createads({ selectedRow, network }) {
       ),
     },
     {
-      title: 'Status',
+      title: 'Approval_Status',
       dataIndex: 'status',
-      key: 'status',
+      // key: 'status',
+      render: (text, record) => (
+        <span>{record.status ? record.status : "Pending"}</span>
+      ),
+    },
+    {
+      title: 'Status',
+      dataIndex: 'Ad_Status',
+      render: (text, record) => (
+        <Switch
+            checked={record.Ad_Status === 'ACTIVE'}
+            onChange={(checked) => onToggleStatus(record, checked)}
+            checkedChildren="ACTIVE"
+            unCheckedChildren="PAUSED"
+            disabled={
+              !(
+                selectedRow?.fbstatus === 'Live' &&
+                selectedRow?.campaignlevel?.Status === 'ACTIVE'
+              )
+            }
+        />
+      )
     },
     {
       title: 'Action',

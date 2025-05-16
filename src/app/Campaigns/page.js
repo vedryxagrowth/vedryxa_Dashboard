@@ -1,7 +1,7 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import { Table, Tag, Button, Col, Card, Drawer, Dropdown, Flex, Input, Row, Select, Spin, Menu, Space, Modal, message, Switch, Tooltip, ConfigProvider } from 'antd';
-import { EditOutlined, EyeOutlined, SearchOutlined, CloseOutlined, SwapRightOutlined, PlusOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, ExclamationCircleFilled, ReloadOutlined, LinkOutlined } from "@ant-design/icons";
+import { EditOutlined, EyeOutlined, SearchOutlined, CloseOutlined, SwapRightOutlined, PlusOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, ExclamationCircleFilled, ReloadOutlined, LinkOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import CreateCampaignDrawer from './camp-components/create_camapaign';
 import ViewDrawer from './camp-components/view-campaign';
 // import EditOnlyCampaignDrawer from './camp-components/EditCamp';
@@ -229,7 +229,7 @@ const App = () => {
 
     //         // Filter campaigns based on selected value && accountNumber !== 'All'
     //         const filteredCampaignData = accountNumber
-    //             ? allCampaigns.filter(campaign => campaign.Account_Number === accountNumber)
+    //             ? allCampaigns.filter(campaign => cam/api/getpaign.Account_Number === accountNumber)
     //             : allCampaigns.filter(campaign => userdetails?.adAccounts[selectedKey]?.includes(campaign.Account_Number));
 
     //         setcreatecamselectedacc(accountNumber)
@@ -867,12 +867,31 @@ const App = () => {
             dataIndex: 'Action',
             align: "center",
             render: (_, record) => {
-                // console.log('Record in Action column:', record);
+                console.log('Record in Action column:', record);
+                console.log(campaignData, "campaigns data");
                 // console.log('fbstatus:', record.fbstatus);
+
+                const errorDisplay = (campaign, adset, ad) => {
+                    if (campaign) {
+                        return "Campaign Level Error: \n" + campaign;
+                    } else if (adset) {
+                        return "Adset Level Error: \n" + adset;
+                    } else if (ad) {
+                        return "Ad Level Error: \n" + ad;
+                    }
+                    return null;
+                };
 
                 if (record.Approval === 'Approved') {
                     return (
-                        <Button icon={<EyeOutlined />} onClick={() => handleViewClick(record)}></Button>
+                        <div style={{display:'flex', alignItems:'center', justifyContent:'center'}}>
+                            <Button icon={<EyeOutlined />} onClick={() => handleViewClick(record)}></Button>
+                            {(record.adlevel_error || record.campaignlevel_error || record.adsetlevel_error) && (
+                                <Tooltip title={errorDisplay(record.campaignlevel_error,record.adsetlevel_error,record.adlevel_error)}>
+                                    <InfoCircleOutlined style={{marginLeft:'10px', color:"red", fontSize:'15px'}}/>
+                                </Tooltip>
+                            ) }
+                        </div>
                     )
                 } 
                 // if (record.fbstatus === 'Live'){

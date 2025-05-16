@@ -1202,6 +1202,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                         Description: values.Description,
                         Caption: values.Caption,
                         Website_URL: values.Website_URL,
+                        
                         // urlParameters: values.urlParameters
                     };
                 } else if (media.videoid) {
@@ -1266,7 +1267,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                         position: values.positions,
                         device_platforms: values.device_platforms,
                     }),
-                    buying_type: "AUCTION"
+                    buying_type: "AUCTION",
                 },
                 addlevel: addLevelData
             };

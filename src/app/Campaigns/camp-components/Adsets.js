@@ -31,7 +31,8 @@ import {
   theme,
   Select,
   Spin,
-  Tooltip
+  Tooltip,
+  Switch
 } from "antd";
 import axios from "axios";
 import moment from "moment-timezone";
@@ -253,6 +254,43 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
     );
   };
 
+  const updateAdSetStatus = async (adset_id, status, access_token) => {
+    try {
+      const res = await axios.post(
+        `https://graph.facebook.com/v22.0/${adset_id}`,
+        new URLSearchParams({ status, access_token })
+      );
+      console.log("Ad Set Response:", res.data);
+    } catch (err) {
+      console.error("Ad Set Error:", err.response?.data || err.message);
+    }
+  };
+
+  const onToggleStatus = async(record, checked) => {
+    console.log(record, "record")
+    console.log(checked, "checked")
+    console.log(record.Adsetid, "Adsetid");
+    console.log(selectedRow.access_token, "access_token");
+    console.log(selectedRow);
+
+    const response = await axios.post(
+      `https://www.testapi.adsgoat.in/api/adsetlevel`,  
+      {
+        status: checked ? "ACTIVE" : "PAUSED",
+        id:selectedRow.identifier,
+        adset_id: record.Adsetid
+      }, {
+        headers: {
+          Authorization: token,
+        }
+      }
+    );
+    if(response.status === 200){
+      rerender();
+    };
+      
+    // updateAdSetStatus(record.Adsetid, checked ? "ACTIVE" : "PAUSED", selectedRow.access_token)
+  }
 
   // console.log(selectedRow)
   const data = [campaignDetails]
@@ -319,6 +357,20 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
+      render: (text, record) => (
+        <Switch
+            checked={record?.Status === 'ACTIVE' }
+            onChange={(checked) => onToggleStatus(record, checked)}
+            checkedChildren="ACTIVE"
+            unCheckedChildren="PAUSED"
+            disabled={
+              !(
+                selectedRow?.fbstatus === 'Live' &&
+                selectedRow?.campaignlevel?.Status === 'ACTIVE'
+              )
+            }
+        />
+      )
     },
     {
       title: 'Action',
