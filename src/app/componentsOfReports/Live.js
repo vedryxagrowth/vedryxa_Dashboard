@@ -185,6 +185,7 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
 
     const showCampaignLevel = (data) => {
         setSelectedCampaigns(data);
+        setSelectedAdsets([]);
         console.log(data, "CampaignLeveldata");
     }
 
@@ -223,6 +224,11 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
         //     setRemoveSelectedAdsets("Remove");
         // }
         // , 100);
+    }
+
+    const moveToNextTab = (data) => {
+        setActiveTab(data);
+        localStorage.setItem("DailyActiveTab", data);
     }
 
     const autoGroupColumnDefLive = {
@@ -1520,6 +1526,7 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                                 tabStatus={"Live"}
                                 showCampaignLevel={showCampaignLevel}
                                 removeSelectedCampaigns={removeSelectedCampaigns}
+                                moveToNextTab={moveToNextTab}
                             />
                         </Tabs.TabPane>
                         <Tabs.TabPane key="2">
@@ -1547,6 +1554,8 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                                 showAdsetLevel={showAdsetLevel}
                                 removeSelectedAdsets={removeSelectedAdsets}
                                 selectedCampaigns={selectedCampaigns}
+                                selectedAdsets={selectedAdsets}
+                                moveToNextTab={moveToNextTab}
                             />
                         </Tabs.TabPane>
                         <Tabs.TabPane key="3">
