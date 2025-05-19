@@ -690,7 +690,7 @@ const CampaignLevelReports = ({startDate, endDate, newaccount, newtime, newReven
             setLoading(true);
             const collectionName = newRevenuePratner === "FB_DomainActive" ? "Facebook_DActive_Names" : newtworkCollections[newRevenuePratner];
             // const fetchData = await apiClient.get(`/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${collectionName}`);
-            const fetchData = await apiClient.get(`/CampaignLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=${tabStatus}&network=Facebook_Mnet`);
+            const fetchData = await apiClient.get(`/CampaignLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=${tabStatus}&network=${collectionName}`);
             const mainData1 = fetchData.data;
             const mainData = mainData1.filter(obj => !(obj.ad_clicks > 0));
             console.log(mainData1, "mainData1");
@@ -1065,8 +1065,9 @@ const CampaignLevelReports = ({startDate, endDate, newaccount, newtime, newReven
     }, [oneTimeFetch.current]);
 
     useEffect(() => {
-        if (refreshpage === "Refresh1") {
+        if (refreshpage === "Refresh11") {
             handleReFetchData();
+            showCampaignLevel([]);
         }
     }
     , [refreshpage]);

@@ -56,7 +56,7 @@ const selectTimezone = {
 };
 
 const AdLevelReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedCampaigns, selectedAdsets }) => {
-    console.log(columnDefs, "columnDefs");
+    // console.log(columnDefs, "columnDefs");
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -669,7 +669,7 @@ const AdLevelReports = ({startDate, endDate, newaccount, newtime, newRevenuePrat
             : [];
             const collectionName = newRevenuePratner === "FB_DomainActive" ? "Facebook_DActive_Names" : newtworkCollections[newRevenuePratner];
             // const fetchData = await apiClient.get(`/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${collectionName}`);
-            const fetchData = await apiClient.post(`/AdLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=${tabStatus}&network=Facebook_Mnet_AD`, { adsetids : adsets, campaignids : campaigns });
+            const fetchData = await apiClient.post(`/AdLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=${tabStatus}&network=${`${collectionName}_AD`}`, { adsetids : adsets, campaignids : campaigns });
             const mainData1 = fetchData.data;
             const mainData =  tabStatus === "Live" ? mainData1.filter(obj => !("ad_clicks" in obj)) : mainData;
             // console.log(mainData1, "mainData1");
@@ -1044,8 +1044,9 @@ const AdLevelReports = ({startDate, endDate, newaccount, newtime, newRevenuePrat
     }, [selectedAdsets, selectedCampaigns]);
 
     useEffect(() => {
-        if (refreshpage === "Refresh1") {
+        if (refreshpage === "Refresh13") {
             handleReFetchData();
+            
         }
     }
     , [refreshpage]);

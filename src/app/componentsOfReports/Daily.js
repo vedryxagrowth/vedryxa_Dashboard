@@ -1005,22 +1005,22 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
         setApiStatus(false);
     }
 
-    useEffect(() => {
-        if(newRevenuePratner !== "FB_Mnet"){
-            if(oneTimeFetch.current){
-                functionCall2();
-                oneTimeFetch.current = false;
-            }
-        }
+    // useEffect(() => {
+    //     if(newRevenuePratner !== "FB_Mnet"){
+    //         if(oneTimeFetch.current){
+    //             functionCall2();
+    //             oneTimeFetch.current = false;
+    //         }
+    //     }
             
-    }, [oneTimeFetch.current, newRevenuePratner]);
+    // }, [oneTimeFetch.current, newRevenuePratner]);
 
-    useEffect(() => {
-        if (refreshpage === "Refresh2") {
-            handleReFetchData();
-        }
-    }
-    , [refreshpage]);
+    // useEffect(() => {
+    //     if (refreshpage === "Refresh2") {
+    //         handleReFetchData();
+    //     }
+    // }
+    // , [refreshpage]);
 
     useEffect(() => {
         if (gridRef1.current && gridRef1.current.api) {
@@ -1145,8 +1145,6 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
     
     return(
         <div>
-            {newRevenuePratner === "FB_Mnet" ? (
-                <div>
                     <div>
                         {renderCarouselNav()}
                     </div>
@@ -1167,7 +1165,7 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                                 debouncedHandleColumnMove={debouncedHandleColumnMove} 
                                 userdetails={userdetails} 
                                 refreshComments={refreshComments}
-                                refreshpage={refreshpage}
+                                refreshpage={`${refreshpage}${activeTab}`}
                                 getMainMenuItems={getMainMenuItems}
                                 toggleStatus={toggleStatus}
                                 handleChangeToggle={handleChangeToggle}
@@ -1194,7 +1192,7 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                                 debouncedHandleColumnMove={debouncedHandleColumnMove} 
                                 userdetails={userdetails} 
                                 refreshComments={refreshComments}
-                                refreshpage={refreshpage}
+                                refreshpage={`${refreshpage}${activeTab}`}
                                 getMainMenuItems={getMainMenuItems}
                                 toggleStatus={toggleStatus}
                                 handleChangeToggle={handleChangeToggle}
@@ -1223,7 +1221,7 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                                 debouncedHandleColumnMove={debouncedHandleColumnMove} 
                                 userdetails={userdetails} 
                                 refreshComments={refreshComments}
-                                refreshpage={refreshpage}
+                                refreshpage={`${refreshpage}${activeTab}`}
                                 getMainMenuItems={getMainMenuItems}
                                 toggleStatus={toggleStatus}
                                 handleChangeToggle={handleChangeToggle}
@@ -1235,221 +1233,312 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                         </Tabs.TabPane>
                     </Tabs>
                 </div>
-            ) :
-                (<div style={{ height: "100%", marginBottom: '20px' }}>
-                        <div style={contentStyle}>
-                            {isLoading1 === true ? 
-                            (
-                                <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>
-                                    <div className="ag-grid-Loader">
-                                        <Audio
-                                            height="80"
-                                            width="80"
-                                            radius="9"
-                                            color="green"
-                                            ariaLabel="loading"
-                                            wrapperStyle
-                                            wrapperClass
-                                        />
-                                    </div>
-                                </div>
-                            ) : dailyData?.filter((each) => {
-                                const normalizedCampaign = each.campaignname.trim().toLowerCase();
-                                const normalizedInput = inputValue.trim().toLowerCase();
-                                return (
-                                    normalizedCampaign.startsWith(normalizedInput) ||
-                                    normalizedCampaign.includes(normalizedInput) ||
-                                    normalizedCampaign.endsWith(normalizedInput)
-                                );
-                            }
-                            )?.length > 0 ? (
-                                <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
-                                    <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d", }}>
-                                        <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
-                                            <Space align="center" className='daily-contaier'>
-                                                <div className="blinking-circle"></div>
-                                                <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600', color: theme === "dark" && "white" }}>Daily</Text>
-                                            </Space>
-                                        </Col>
-                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Acc: {newaccount}</Text>
-                                        </Col>
-                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>AccName: {newAccountName}</Text>
-                                        </Col>
-                                        <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Timezone: {timezone.current}</Text>
-                                        </Col>
-                                        {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600' }}>
-                                                Cron/Acc status: {cronStatus.current} /{' '}
-                                                <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
-                                                    {accountStatus.current}
-                                                </span>
-                                            </Text>
-                                        </Col>
-                                        <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
-                                            <Tooltip
-                                            title={
-                                                <>
-                                                <div>FbAcc Status: {`${fbCron.current}`}</div>
-                                                <div>RevAcc Status: {`${revenueCron.current}`}</div>
-                                                </>
-                                            }
-                                            >
-                                                <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px' }} />
-                                            </Tooltip>
-                                        </Col> */}
-                                        {/* <Col>
-                                            <Tooltip 
-                                                title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
-                                                mouseEnterDelay={0} // Tooltip appears after 1 second
-                                            >
-                                                <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#C7F39A" }}/>
-                                            </Tooltip>
-                                        </Col> */}
-                                        <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
-                                            <Tooltip title="Export to CSV">
-                                                <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={() => onBtExport(gridRef1, "Daily")} />
-                                            </Tooltip>
-                                        </Col>
-                                    </Row>
-                                    <AgGridReact
-                                        ref={gridRef1}
-                                        rowData={memorizedDailyData}
-                                        columnDefs={memorizedColumnDef1}
-                                        onCellClicked={onCellClicked}
-                                        pagination={true}
-                                        paginationPageSize={100}
-                                        paginationPageSizeSelector={[20, 40, 60, 80, 100]}
-                                        groupDisplayType='multipleColumns'
-                                        suppressAggFuncInHeader={true}
-                                        groupSuppressBlankHeader={true}
-                                        defaultColDef={defaultColDef}
-                                        // groupIncludeFooter={true}
-                                        // groupIncludeTotalFooter={true}
-                                        autoGroupColumnDef={autoGroupColumnDef}
-                                        onGridReady={(params) => {
-                                            gridRef1.current = params.api; // Store grid API
-                                            restoreGridState(gridRef1.current); // Restore state when grid is ready
-                                            onGridReady(params, 'grid2', gridRef1);
-                                            if (params.columnApi) {
-                                                params.columnApi.autoSizeAllColumns();
-                                            }
-                                        }}
-                                        gridOptions={{
-                                            ...gridOptions1,
-                                            ensureDomOrder: false,
-                                            suppressRowClickSelection: true,
-                                            suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                            enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                        }}
-                                        getMainMenuItems={getMainMenuItems}
-                                        pinnedBottomRowData={dailyFixedFooter}
+        // <div>
+        //     {newRevenuePratner === "FB_Mnet" ? (
+        //         <div>
+        //             <div>
+        //                 {renderCarouselNav()}
+        //             </div>
+        //             <Tabs activeKey={activeTab} onChange={handleTabChange} renderTabBar={() => <></>}>
+        //                 <Tabs.TabPane key="1">
+        //                     <CampaignLevelReports
+        //                         startDate={startDate} 
+        //                         endDate={endDate} 
+        //                         newaccount={newaccount} 
+        //                         newtime={newtime} 
+        //                         newRevenuePratner={newRevenuePratner} 
+        //                         inputValue={inputValue} 
+        //                         newAccountName={newAccountName} 
+        //                         columnDefs={columnDefs} 
+        //                         campaignComments={campaignComments} 
+        //                         Camapignlevelstatus={Camapignlevelstatus} 
+        //                         changeRRefrst={changeRRefrst} 
+        //                         debouncedHandleColumnMove={debouncedHandleColumnMove} 
+        //                         userdetails={userdetails} 
+        //                         refreshComments={refreshComments}
+        //                         refreshpage={refreshpage}
+        //                         getMainMenuItems={getMainMenuItems}
+        //                         toggleStatus={toggleStatus}
+        //                         handleChangeToggle={handleChangeToggle}
+        //                         theme={theme}
+        //                         tabStatus={"Live"}
+        //                         showCampaignLevel={showCampaignLevel}
+        //                         removeSelectedCampaigns={removeSelectedCampaigns}
+        //                         moveToNextTab={moveToNextTab}
+        //                     />
+        //                 </Tabs.TabPane>
+        //                 <Tabs.TabPane key="2">
+        //                     <AdsetLevelReports
+        //                         startDate={startDate} 
+        //                         endDate={endDate} 
+        //                         newaccount={newaccount} 
+        //                         newtime={newtime} 
+        //                         newRevenuePratner={newRevenuePratner} 
+        //                         inputValue={inputValue} 
+        //                         newAccountName={newAccountName} 
+        //                         columnDefs={columnDefs1} 
+        //                         campaignComments={campaignComments} 
+        //                         Camapignlevelstatus={Camapignlevelstatus} 
+        //                         changeRRefrst={changeRRefrst} 
+        //                         debouncedHandleColumnMove={debouncedHandleColumnMove} 
+        //                         userdetails={userdetails} 
+        //                         refreshComments={refreshComments}
+        //                         refreshpage={refreshpage}
+        //                         getMainMenuItems={getMainMenuItems}
+        //                         toggleStatus={toggleStatus}
+        //                         handleChangeToggle={handleChangeToggle}
+        //                         theme={theme}
+        //                         tabStatus={"Live"}
+        //                         showAdsetLevel={showAdsetLevel}
+        //                         removeSelectedAdsets={removeSelectedAdsets}
+        //                         selectedCampaigns={selectedCampaigns}
+        //                         selectedAdsets={selectedAdsets}
+        //                         moveToNextTab={moveToNextTab}
+        //                     />
+        //                 </Tabs.TabPane>
+        //                 <Tabs.TabPane key="3">
+        //                     <AdLevelReports
+        //                         startDate={startDate} 
+        //                         endDate={endDate} 
+        //                         newaccount={newaccount} 
+        //                         newtime={newtime} 
+        //                         newRevenuePratner={newRevenuePratner} 
+        //                         inputValue={inputValue} 
+        //                         newAccountName={newAccountName} 
+        //                         columnDefs={columnDefs2} 
+        //                         campaignComments={campaignComments} 
+        //                         Camapignlevelstatus={Camapignlevelstatus} 
+        //                         changeRRefrst={changeRRefrst} 
+        //                         debouncedHandleColumnMove={debouncedHandleColumnMove} 
+        //                         userdetails={userdetails} 
+        //                         refreshComments={refreshComments}
+        //                         refreshpage={refreshpage}
+        //                         getMainMenuItems={getMainMenuItems}
+        //                         toggleStatus={toggleStatus}
+        //                         handleChangeToggle={handleChangeToggle}
+        //                         theme={theme}
+        //                         tabStatus={"Live"}
+        //                         selectedCampaigns={selectedCampaigns}
+        //                         selectedAdsets={selectedAdsets}
+        //                     />
+        //                 </Tabs.TabPane>
+        //             </Tabs>
+        //         </div>
+        //     ) :
+        //         (<div style={{ height: "100%", marginBottom: '20px' }}>
+        //                 <div style={contentStyle}>
+        //                     {isLoading1 === true ? 
+        //                     (
+        //                         <div className="loader-container ag-container" style={{ backgroundColor: theme === "dark" ? "#333" : "white" }}>
+        //                             <div className="ag-grid-Loader">
+        //                                 <Audio
+        //                                     height="80"
+        //                                     width="80"
+        //                                     radius="9"
+        //                                     color="green"
+        //                                     ariaLabel="loading"
+        //                                     wrapperStyle
+        //                                     wrapperClass
+        //                                 />
+        //                             </div>
+        //                         </div>
+        //                     ) : dailyData?.filter((each) => {
+        //                         const normalizedCampaign = each.campaignname.trim().toLowerCase();
+        //                         const normalizedInput = inputValue.trim().toLowerCase();
+        //                         return (
+        //                             normalizedCampaign.startsWith(normalizedInput) ||
+        //                             normalizedCampaign.includes(normalizedInput) ||
+        //                             normalizedCampaign.endsWith(normalizedInput)
+        //                         );
+        //                     }
+        //                     )?.length > 0 ? (
+        //                         <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
+        //                             <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d", }}>
+        //                                 <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
+        //                                     <Space align="center" className='daily-contaier'>
+        //                                         <div className="blinking-circle"></div>
+        //                                         <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600', color: theme === "dark" && "white" }}>Daily</Text>
+        //                                     </Space>
+        //                                 </Col>
+        //                                 <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+        //                                     <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Acc: {newaccount}</Text>
+        //                                 </Col>
+        //                                 <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+        //                                     <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>AccName: {newAccountName}</Text>
+        //                                 </Col>
+        //                                 <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+        //                                     <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Timezone: {timezone.current}</Text>
+        //                                 </Col>
+        //                                 {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
+        //                                     <Text style={{ fontWeight: '600' }}>
+        //                                         Cron/Acc status: {cronStatus.current} /{' '}
+        //                                         <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
+        //                                             {accountStatus.current}
+        //                                         </span>
+        //                                     </Text>
+        //                                 </Col>
+        //                                 <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
+        //                                     <Tooltip
+        //                                     title={
+        //                                         <>
+        //                                         <div>FbAcc Status: {`${fbCron.current}`}</div>
+        //                                         <div>RevAcc Status: {`${revenueCron.current}`}</div>
+        //                                         </>
+        //                                     }
+        //                                     >
+        //                                         <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px' }} />
+        //                                     </Tooltip>
+        //                                 </Col> */}
+        //                                 {/* <Col>
+        //                                     <Tooltip 
+        //                                         title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
+        //                                         mouseEnterDelay={0} // Tooltip appears after 1 second
+        //                                     >
+        //                                         <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#C7F39A" }}/>
+        //                                     </Tooltip>
+        //                                 </Col> */}
+        //                                 <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
+        //                                     <Tooltip title="Export to CSV">
+        //                                         <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={() => onBtExport(gridRef1, "Daily")} />
+        //                                     </Tooltip>
+        //                                 </Col>
+        //                             </Row>
+        //                             <AgGridReact
+        //                                 ref={gridRef1}
+        //                                 rowData={memorizedDailyData}
+        //                                 columnDefs={memorizedColumnDef1}
+        //                                 onCellClicked={onCellClicked}
+        //                                 pagination={true}
+        //                                 paginationPageSize={100}
+        //                                 paginationPageSizeSelector={[20, 40, 60, 80, 100]}
+        //                                 groupDisplayType='multipleColumns'
+        //                                 suppressAggFuncInHeader={true}
+        //                                 groupSuppressBlankHeader={true}
+        //                                 defaultColDef={defaultColDef}
+        //                                 // groupIncludeFooter={true}
+        //                                 // groupIncludeTotalFooter={true}
+        //                                 autoGroupColumnDef={autoGroupColumnDef}
+        //                                 onGridReady={(params) => {
+        //                                     gridRef1.current = params.api; // Store grid API
+        //                                     restoreGridState(gridRef1.current); // Restore state when grid is ready
+        //                                     onGridReady(params, 'grid2', gridRef1);
+        //                                     if (params.columnApi) {
+        //                                         params.columnApi.autoSizeAllColumns();
+        //                                     }
+        //                                 }}
+        //                                 gridOptions={{
+        //                                     ...gridOptions1,
+        //                                     ensureDomOrder: false,
+        //                                     suppressRowClickSelection: true,
+        //                                     suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+        //                                     enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+        //                                 }}
+        //                                 getMainMenuItems={getMainMenuItems}
+        //                                 pinnedBottomRowData={dailyFixedFooter}
     
-                                        // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
-                                        onCellKeyDown={onCellKeyDown}
-                                        getRowStyle={params => {
-                                            if (params.node.rowPinned) {
-                                                return {
-                                                    fontWeight: 'bold',
-                                                    backgroundColor: theme === "dark" ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
-                                                    color: theme === "dark" ? '#fff' : '#000',           // Text color should contrast with the background
-                                                };
-                                            }
+        //                                 // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
+        //                                 onCellKeyDown={onCellKeyDown}
+        //                                 getRowStyle={params => {
+        //                                     if (params.node.rowPinned) {
+        //                                         return {
+        //                                             fontWeight: 'bold',
+        //                                             backgroundColor: theme === "dark" ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
+        //                                             color: theme === "dark" ? '#fff' : '#000',           // Text color should contrast with the background
+        //                                         };
+        //                                     }
 
-                                            return null;
-                                        }}
-                                        getCellStyle={(params) => {
-                                            const isSelected = selectedCells.some(
-                                                (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
-                                            );
+        //                                     return null;
+        //                                 }}
+        //                                 getCellStyle={(params) => {
+        //                                     const isSelected = selectedCells.some(
+        //                                         (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
+        //                                     );
                                     
-                                            // ✅ Ensure first cell inside a group is highlighted
-                                            const isFirstSelected = firstSelectedCell &&
-                                                firstSelectedCell.rowIndex === params.node.rowIndex &&
-                                                firstSelectedCell.colId === params.column.getId();
+        //                                     // ✅ Ensure first cell inside a group is highlighted
+        //                                     const isFirstSelected = firstSelectedCell &&
+        //                                         firstSelectedCell.rowIndex === params.node.rowIndex &&
+        //                                         firstSelectedCell.colId === params.column.getId();
                                     
-                                            return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
-                                        }}
-                                        onFilterChanged={(params) => {
-                                            const api = params.api;
-                                            const filteredData = [];
-                                            // api.forEachNodeAfterFilterAndSort((node) => {
-                                            //     if (!node.rowPinned) {
-                                            //         filteredData.push(node.data);
-                                            //     }
-                                            // });
-                                            const normalizedInput = inputValue.trim().toLowerCase();
+        //                                     return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
+        //                                 }}
+        //                                 onFilterChanged={(params) => {
+        //                                     const api = params.api;
+        //                                     const filteredData = [];
+        //                                     // api.forEachNodeAfterFilterAndSort((node) => {
+        //                                     //     if (!node.rowPinned) {
+        //                                     //         filteredData.push(node.data);
+        //                                     //     }
+        //                                     // });
+        //                                     const normalizedInput = inputValue.trim().toLowerCase();
 
-                                            api.forEachNodeAfterFilterAndSort((node) => {
-                                                // Check if node.data exists and has a valid campaignname
-                                                if (node.data && node.data.campaignname) {
-                                                    const normalizedCampaign = node.data.campaignname.trim().toLowerCase();
+        //                                     api.forEachNodeAfterFilterAndSort((node) => {
+        //                                         // Check if node.data exists and has a valid campaignname
+        //                                         if (node.data && node.data.campaignname) {
+        //                                             const normalizedCampaign = node.data.campaignname.trim().toLowerCase();
                                         
-                                                    // Apply both search and AG-Grid filters
-                                                    if (
-                                                        normalizedCampaign.startsWith(normalizedInput) ||
-                                                        normalizedCampaign.includes(normalizedInput) ||
-                                                        normalizedCampaign.endsWith(normalizedInput)
-                                                    ) {
-                                                        filteredData.push(node.data);
-                                                    }
-                                                }
-                                            });
+        //                                             // Apply both search and AG-Grid filters
+        //                                             if (
+        //                                                 normalizedCampaign.startsWith(normalizedInput) ||
+        //                                                 normalizedCampaign.includes(normalizedInput) ||
+        //                                                 normalizedCampaign.endsWith(normalizedInput)
+        //                                             ) {
+        //                                                 filteredData.push(node.data);
+        //                                             }
+        //                                         }
+        //                                     });
 
-                                            const updatedFooter = [
-                                                {
-                                                    // [`${newtime}Date`]: 'Totals',
-                                                    campaignName: 'Total',
-                                                    spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
-                                                    revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
-                                                    profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
-                                                    margin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
-                                                    rpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / filteredData.length).toFixed(2)),
-                                                    cpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / filteredData.length).toFixed(2)),
-                                                    ncpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.ncpl), 0) / filteredData.length).toFixed(2)),
-                                                    fbleads: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbleads), 0).toFixed(2)),
-                                                    conversions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
-                                                    fmargin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
-                                                    roi: parseFloat(((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) - filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0)) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
-                                                    cpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpc), 0) / filteredData.length).toFixed(2)),
-                                                    cpclinkclicks: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks), 0) / filteredData.length).toFixed(2)),
-                                                    fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
-                                                    fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
-                                                    impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
-                                                    ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2))
-                                                },
-                                            ];
+        //                                     const updatedFooter = [
+        //                                         {
+        //                                             // [`${newtime}Date`]: 'Totals',
+        //                                             campaignName: 'Total',
+        //                                             spend: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
+        //                                             revenue: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
+        //                                             profit: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
+        //                                             margin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
+        //                                             rpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / filteredData.length).toFixed(2)),
+        //                                             cpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / filteredData.length).toFixed(2)),
+        //                                             ncpl: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.ncpl), 0) / filteredData.length).toFixed(2)),
+        //                                             fbleads: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbleads), 0).toFixed(2)),
+        //                                             conversions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
+        //                                             fmargin: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+        //                                             roi: parseFloat(((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) - filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0)) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0) * 100).toFixed(2)),
+        //                                             cpc: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpc), 0) / filteredData.length).toFixed(2)),
+        //                                             cpclinkclicks: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks), 0) / filteredData.length).toFixed(2)),
+        //                                             fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
+        //                                             fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
+        //                                             impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
+        //                                             ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2))
+        //                                         },
+        //                                     ];
 
-                                            setDailyFixedFooter(updatedFooter);
-                                        }}
-                                    />
-                                </div>
-                            ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
-                                {apiStatus === true ? 
-                                <Result
-                                className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                                // icon={<SmileOutlined />}
-                                title={`API failed to fetch the data. Please click retry button to fetch the data`}
-                                extra={<Button type="primary" onClick={handleReFetchData}>Retry</Button>}
-                            /> : 
-                                (startDate !== endDate ? <Result
-                                    className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                                    icon={<SmileOutlined />}
-                                    title={`No DailyData for ${newaccount} from ${startDate} to ${endDate}`}
-                                // extra={<Button type="primary">Next</Button>}
-                                /> : <Result
-                                    className={theme === 'dark' ? 'dark-result' : 'light-result'}
-                                    icon={<SmileOutlined />}
-                                    title={`No DailyData for ${newaccount} to ${startDate}`}
-                                // extra={<Button type="primary">Next</Button>}
-                                />)}
-                            </div>}
-                        </div>
-                </div> )
-            }
-        </div>
+        //                                     setDailyFixedFooter(updatedFooter);
+        //                                 }}
+        //                             />
+        //                         </div>
+        //                     ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
+        //                         {apiStatus === true ? 
+        //                         <Result
+        //                         className={theme === 'dark' ? 'dark-result' : 'light-result'}
+        //                         // icon={<SmileOutlined />}
+        //                         title={`API failed to fetch the data. Please click retry button to fetch the data`}
+        //                         extra={<Button type="primary" onClick={handleReFetchData}>Retry</Button>}
+        //                     /> : 
+        //                         (startDate !== endDate ? <Result
+        //                             className={theme === 'dark' ? 'dark-result' : 'light-result'}
+        //                             icon={<SmileOutlined />}
+        //                             title={`No DailyData for ${newaccount} from ${startDate} to ${endDate}`}
+        //                         // extra={<Button type="primary">Next</Button>}
+        //                         /> : <Result
+        //                             className={theme === 'dark' ? 'dark-result' : 'light-result'}
+        //                             icon={<SmileOutlined />}
+        //                             title={`No DailyData for ${newaccount} to ${startDate}`}
+        //                         // extra={<Button type="primary">Next</Button>}
+        //                         />)}
+        //                     </div>}
+        //                 </div>
+        //         </div> )
+        //     }
+        // </div>
     );
 };
 

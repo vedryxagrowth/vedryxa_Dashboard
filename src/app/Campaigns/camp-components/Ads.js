@@ -62,6 +62,7 @@ export default function Createads({ selectedRow, network }) {
   const [refrst, setRefrst] = useState(false);
   const [visibleNewAdset, setVisibleNewAdset] = useState(false);
   const [visibleDuplicateAdd, setVisibleDuplicateAdd] = useState(false);
+  const [ovrallcampdetal, setovrallcampdetal] = useState({});
 
 
   // console.log(selectedRow, "selectedRow")
@@ -75,6 +76,7 @@ export default function Createads({ selectedRow, network }) {
         });
 
         console.log(response?.data);
+        setovrallcampdetal(response?.data[0])
         setData(response?.data[0]?.addlevel)
       } catch (error) {
         console.error("Error fetching the campaign details:", error);
@@ -233,8 +235,8 @@ export default function Createads({ selectedRow, network }) {
             unCheckedChildren="PAUSED"
             disabled={
               !(
-                selectedRow?.fbstatus === 'Live' &&
-                selectedRow?.campaignlevel?.Status === 'ACTIVE'
+                ovrallcampdetal?.fbstatus === 'Live' &&
+                ovrallcampdetal?.camapaignlevel?.Status === 'ACTIVE'
               )
             }
         />

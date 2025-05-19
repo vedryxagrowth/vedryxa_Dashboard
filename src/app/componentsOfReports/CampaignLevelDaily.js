@@ -642,8 +642,9 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
         try {
             setLoading1(true);
             const api = newRevenuePratner === "FB_DomainActive" ? "Daily/CampaignName" : "Daily";
+            const collectionName = newRevenuePratner === "FB_DomainActive" ? "Facebook_DActive_Names" : newtworkCollections[newRevenuePratner];
             // const fetchData = await apiClient.get(`/${api}?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`);
-            const fetchData = await apiClient.get(`/CampaignLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=Daily&network=Facebook_Mnet`);
+            const fetchData = await apiClient.get(`/CampaignLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=Daily&network=${collectionName}`);
             const mainData = fetchData.data;
             timezone.current = mainData.length > 0  ? mainData[0].accountTimezone : "";
             let totalSpend = 0;
@@ -994,8 +995,9 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
     }, [oneTimeFetch.current]);
 
     useEffect(() => {
-        if (refreshpage === "Refresh2") {
+        if (refreshpage === "Refresh21") {
             handleReFetchData();
+            showCampaignLevel([]);
         }
     }
     , [refreshpage]);
