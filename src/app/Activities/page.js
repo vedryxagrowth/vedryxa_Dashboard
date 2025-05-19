@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Table, Card, Tooltip } from "antd";
+import { Table, Card, Tooltip, Skeleton } from "antd";
 import { useTokenContext } from "../components/parent";
 
 const UserTable = () => {
@@ -176,7 +176,11 @@ const UserTable = () => {
   // Sort grouped data by the most recent timestamp (descending)
   groupedData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-  return (
+  return loading ? (
+    <div style={{ padding: 24 }}>
+      <Skeleton active paragraph={{ rows: 10 }} />
+    </div>
+  ) :  (
     <Table
       className={`custom-dark-table ${theme === 'dark' ? 'dark-mode-pagination' : 'light-mode-pagination'}`}
       columns={columns}
@@ -251,7 +255,7 @@ const UserTable = () => {
         ),
       }}
       scroll={{ x: 1200, y: 500 }} // Enable scrolling
-      loading={loading}
+      // loading={loading}
     />
   );
 };
