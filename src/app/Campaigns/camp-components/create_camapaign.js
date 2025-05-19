@@ -482,6 +482,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     const [form] = Form.useForm();
     const formRef = useRef(null);
     const [isFormComplete, setIsFormComplete] = useState(false);
+    const [submitErrors, setSubmitErrors] = useState([]);
+
     const [accountNumber, setAccountNumber] = useState(accountis);
     const [imagehash, setimagehash] = useState('')
     const { data: session } = useSession();
@@ -2116,21 +2118,21 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                                                 {/* <PaperClipOutlined style={{ marginRight: 8 }} /> */}
                                                                 {/* <Tooltip title={file.name}> */}
                                                                 {file.type?.startsWith("image/") && (
-                                                                <img
-                                                                    src={
-                                                                    file.originFileObj
-                                                                        ? URL.createObjectURL(file.originFileObj)
-                                                                        : file.url
-                                                                    }
-                                                                    alt="preview"
-                                                                    style={{
-                                                                    width: 40,
-                                                                    height: 40,
-                                                                    objectFit: "cover",
-                                                                    borderRadius: 4,
-                                                                    marginLeft: 8,
-                                                                    }}
-                                                                />
+                                                                    <img
+                                                                        src={
+                                                                        file.originFileObj
+                                                                            ? URL.createObjectURL(file.originFileObj)
+                                                                            : file.url
+                                                                        }
+                                                                        alt="preview"
+                                                                        style={{
+                                                                        width: 40,
+                                                                        height: 40,
+                                                                        objectFit: "cover",
+                                                                        borderRadius: 4,
+                                                                        marginLeft: 8,
+                                                                        }}
+                                                                    />
                                                                 )}
                                                                 <span
                                                                     style={{
@@ -2426,8 +2428,6 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                                                     )
                                                                     // null
                                                                     }
-
-                                                                    
                                                                 </div>
 
                                                                 <div className="title">
@@ -2456,17 +2456,19 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                                             <div className="ad-desc" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
                                                                 {primaryText}
                                                             </div>
-                                                            <div className="ad-image" style={{ width: '350px', height: '200px' }}>
+                                                            <div className="ad-image" style={{ width: '350px', height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                                     {file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") ? (
                                                                         <img
                                                                             src={file?.url}
                                                                             alt="ad content"
-                                                                            style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                            // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                                                                         />
                                                                     ) : file?.url?.endsWith('.mp4') ? (
                                                                         <video
                                                                         controls
-                                                                        style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                        // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                        style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                                                                         >
                                                                             <source src={file?.url} />
                                                                             Your browser does not support the video tag.
@@ -2477,13 +2479,15 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                                                         <img
                                                                             src={editedImages[file?.name] ? editedImages[file?.name]:  file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url} // Use edited image if available
                                                                             alt="ad content"
-                                                                            style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                            // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                                                                         />
                                                                     ) : 
                                                                     (
                                                                         <video
                                                                             controls
-                                                                            style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                            // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                                                                         >
                                                                             <source src={file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url} />
                                                                             Your browser does not support the video tag.
@@ -2592,13 +2596,49 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
 
                         </Panel>
                     </Collapse>
-                    <Form.Item label=" ">
+                    {/* <Form.Item label=" ">
                         {isFormComplete && (
                             <Button type="primary" htmlType="submit" style={{ background: '#21c55d', minWidth: '200px' }}>
                                 Submit
                             </Button>
                         )}
+                    </Form.Item> */}
+                    <Form.Item label=" ">
+                        {isFormComplete && (
+                            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+                            <Button
+                                type="primary"
+                                style={{ background: '#21c55d', minWidth: '200px' }}
+                                onClick={async () => {
+                                    try {
+                                    const values = await form.validateFields();
+                                    setSubmitErrors([]);
+                                    setIsModalVisible(true); // proceed if valid
+                                    } catch (err) {
+                                    const allErrors = err?.errorFields?.map((field) => ({
+                                        name: field.name?.[0],       // e.g., 'Account_Number'
+                                        message: field.errors?.[0],  // e.g., 'Please select an option!'
+                                    }));
+                                    setSubmitErrors(allErrors);
+                                    }
+                                }}
+                            >
+                                Submit
+                            </Button>
+
+                            {submitErrors.length > 0 && (
+                                <div style={{ color: "red", marginTop: 8 }}>
+                                    {submitErrors.map((err, index) => (
+                                    <div key={index}>
+                                        <strong>{err.name}:</strong> {err.message}
+                                    </div>
+                                    ))}
+                                </div>
+                            )}
+                            </div>
+                        )}
                     </Form.Item>
+
                     {isImgEditorShown && currentFile && (
                             <FabricCanvas
                                 fileId={currentFile.name} // Pass a unique identifier

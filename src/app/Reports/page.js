@@ -6,7 +6,7 @@ import React from 'react';
 import axios from 'axios';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
-import { Carousel, Input, Button, Row, Col, Typography, Modal, message, ConfigProvider, Switch, Flex, Spin, Tabs } from 'antd';
+import { Carousel, Input, Button, Row, Col, Typography, Modal, message, ConfigProvider, Switch, Flex, Spin, Tabs, Skeleton } from 'antd';
 import {   SearchOutlined, ReloadOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
 import { Tooltip, Popover } from 'antd';
 import StickyBox from 'react-sticky-box';
@@ -61,9 +61,12 @@ const MyTablePage = () => {
     const { apiClient } = useTokenContext();
     if (!userdetails?.adAccounts) {
         return <div style={{ width: '100%', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <Flex align="center" gap="middle">
+            {/* <Flex align="center" gap="middle">
                 <Spin size="large" />
-            </Flex>
+            </Flex> */}
+            <div style={{ padding: '24px' }}>
+                <Skeleton active paragraph={{ rows: 20 }} />
+            </div>
         </div>;
     }
     if (userdetails?.role === "Revenue_Partner") {
@@ -8295,9 +8298,12 @@ const MyTablePage = () => {
             {!moveForward ? 
             (
                 <div style={{ width: '100%', height: '200px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                    <Flex align="center" gap="middle">
+                    {/* <Flex align="center" gap="middle">
                         <Spin size="large" />
-                    </Flex>
+                    </Flex> */}
+                    <div style={{ padding: '24px' }}>
+                        <Skeleton active paragraph={{ rows: 20 }} />
+                    </div>
                 </div>
             ) : 
             (

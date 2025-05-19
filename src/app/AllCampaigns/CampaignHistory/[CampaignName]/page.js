@@ -11,7 +11,7 @@ import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { useTokenContext } from '../../../components/parent'
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
-import { Spin, Row, Col, Select, Input, Button, Modal, message, Switch, Tooltip  } from 'antd';
+import { Spin, Row, Col, Select, Input, Button, Modal, message, Switch, Tooltip, Skeleton  } from 'antd';
 import { ReloadOutlined, EditOutlined } from '@ant-design/icons';
 Chart.register(...registerables);
 import debounce from 'lodash.debounce';
@@ -1401,7 +1401,12 @@ export default function CampaignAndAccount({ params }) {
             {/* <h1>{params.campaignAndAccount}hi</h1> */}
             {isGraphVisible && ( 
                 <Col style={{ display: 'flex', height: '400px', width: "99%", marginBottom: '10px' }}> {/* Container with fixed height */}
-                    {chartData.dates.length === 0 ? (<div style={{width:'100%', height:'100%', display:'flex', justifyContent:'center', alignItems:'center'}}><Spin size="large" /></div>):
+                    {chartData.dates.length === 0 ? (<div style={{width:'100%', height:'100%', display:'flex', justifyContent:'center', alignItems:'center'}}>
+                        {/* <Spin size="large" /> */}
+                        <div style={{ padding: '24px' }}>
+                            <Skeleton active paragraph={{ rows: 20 }} />
+                        </div>
+                        </div>):
                         (
                         <Line
                             data={{

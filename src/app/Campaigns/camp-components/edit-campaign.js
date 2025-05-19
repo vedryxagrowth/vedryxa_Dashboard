@@ -1,6 +1,6 @@
 "use client"
 import React from 'react';
-import { Drawer, Button, DatePicker, Space, Form, Input, Select, Collapse, Upload, Steps, Modal, message, Spin } from 'antd';
+import { Drawer, Button, DatePicker, Space, Form, Input, Select, Collapse, Upload, Steps, Modal, message, Spin, Skeleton } from 'antd';
 import { PlusOutlined, UploadOutlined, ShareAltOutlined, CommentOutlined, LikeOutlined, MoreOutlined, CloseOutlined, GlobalOutlined } from '@ant-design/icons';
 import moment from 'moment-timezone';
 import { useState, useRef } from 'react';
@@ -951,7 +951,10 @@ const EditCampaignDrawer = ({ rowData, visible, onClose }) => {
                 </Form>
             ) : (
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-                    <Spin size="large" />
+                    {/* <Spin size="large" /> */}
+                    <div style={{ padding: '24px' }}>
+                        <Skeleton active paragraph={{ rows: 20 }} />
+                    </div>
                 </div>
             )}
         </Drawer>

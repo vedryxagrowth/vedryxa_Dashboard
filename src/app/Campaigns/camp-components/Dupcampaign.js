@@ -1,6 +1,6 @@
 "use client"
 import React from 'react';
-import { Drawer, Button, DatePicker, Space, Form, Input, Select, Collapse, Upload, Steps, Modal, message, Spin, Badge, Tooltip } from 'antd';
+import { Drawer, Button, DatePicker, Space, Form, Input, Select, Collapse, Upload, Steps, Modal, message, Spin, Badge, Tooltip, Skeleton } from 'antd';
 import { PlusOutlined, UploadOutlined, ShareAltOutlined, CommentOutlined, LikeOutlined, MoreOutlined, CloseOutlined, GlobalOutlined, EditOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import moment from 'moment-timezone';
 import { useState, useRef, useEffect } from 'react';
@@ -2659,17 +2659,19 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                             <div className="ad-desc" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
                                                                 {primaryText}
                                                             </div>
-                                                            <div className="ad-image" style={{ width: '350px', height: '200px' }}>
+                                                            <div className="ad-image" style={{ width: '350px', height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                                     {file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') ? (
                                                                         <img
                                                                             src={file?.url}
                                                                             alt="ad content"
-                                                                            style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                            // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                                                                         />
                                                                     ) : file?.url?.endsWith('.mp4') ? (
                                                                         <video
                                                                         controls
-                                                                        style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                        // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                        style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                                                                         >
                                                                             <source src={file?.url} />
                                                                             Your browser does not support the video tag.
@@ -2680,13 +2682,15 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                                         <img
                                                                             src={editedImages[file?.name] ? editedImages[file?.name]:  file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url} // Use edited image if available
                                                                             alt="ad content"
-                                                                            style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                            // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                                                                         />
                                                                     ) : 
                                                                     (
                                                                         <video
                                                                             controls
-                                                                            style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                            // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                                                                         >
                                                                             <source src={file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url} />
                                                                             Your browser does not support the video tag.
@@ -2818,7 +2822,10 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                 </Spin>
             ) : (
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-                    <Spin size="large" />
+                    {/* <Spin size="large" /> */}
+                    <div style={{ padding: '24px' }}>
+                        <Skeleton active paragraph={{ rows: 20 }} />
+                    </div>
                 </div>
             )}
         </Drawer>

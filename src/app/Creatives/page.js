@@ -444,7 +444,12 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns, network, Account_Num
     
     // Prevent rendering until userdetails is available
     if (!userdetails) {
-        return <Spin size="large" style={{ display: "flex", justifyContent: "center", marginTop: "20px" }} />;
+        // return <Spin size="large" style={{ display: "flex", justifyContent: "center", marginTop: "20px" }} />;
+        return (
+            <div style={{ padding: '24px' }}>
+                <Skeleton active paragraph={{ rows: 20 }} />
+            </div>
+        );
     }
     // Redirect non-admin users
     if (userdetails?.role === "Revenue_Partner") {
@@ -1500,7 +1505,10 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns, network, Account_Num
 
             {loading ? (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}>
-                <Spin size="large" tip="Loading files..." />
+                {/* <Spin size="large" tip="Loading files..." /> */}
+                <div style={{ padding: '24px' }}>
+                    <Skeleton active paragraph={{ rows: 20 }} />
+                </div>
             </div>
             ) : (<div 
                 id="file-grid"

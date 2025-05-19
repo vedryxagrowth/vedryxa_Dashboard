@@ -1,7 +1,7 @@
 
 "use client";
 import React, { useState, useEffect } from "react";
-import { Drawer, Button, Collapse, Form, Input, Select, message, Spin } from "antd";
+import { Drawer, Button, Collapse, Form, Input, Select, message, Spin, Skeleton } from "antd";
 import axios from "axios";
 
 const { Panel } = Collapse;
@@ -249,7 +249,10 @@ const EditCampaignDrawer1 = ({ rowData, visible, onClose, changeRRefrst}) => {
                         height: "100%",
                     }}
                 >
-                    <Spin size="large" />
+                    {/* <Spin size="large" /> */}
+                    <div style={{ padding: '24px' }}>
+                        <Skeleton active paragraph={{ rows: 10 }} />
+                    </div>
                 </div>
             )}
         </Drawer>

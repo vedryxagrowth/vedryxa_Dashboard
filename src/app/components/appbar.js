@@ -13,7 +13,7 @@ import {
     UserOutlined,
     LaptopOutlined
 } from '@ant-design/icons';
-import { Layout, Menu, Button, theme, message, Spin } from 'antd';
+import { Layout, Menu, Button, theme, message, Spin, Skeleton } from 'antd';
 import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { SessionProvider, useSession, signOut } from 'next-auth/react';
@@ -343,7 +343,10 @@ const Appbar = ({ children, usersDataForLogin }) => {
                 <LayoutWrapper usersDataForLogin={usersDataForLogin} onComplete={handleMoveForward} style={{position:'absolute'}}/>
                 {!moveForward &&
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                    <Spin size="large" />
+                    {/* <Spin size="large" /> */}
+                    <div style={{ padding: '24px' }}>
+                        <Skeleton active paragraph={{ rows: 20 }} />
+                    </div>
                 </div>}
                 
                 {moveForward && (
