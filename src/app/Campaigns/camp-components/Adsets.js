@@ -36,7 +36,7 @@ import {
 } from "antd";
 import axios from "axios";
 import moment from "moment-timezone";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 
 import Createadsets from "./Createadsets";
 import Createads from "./Ads";
@@ -60,7 +60,7 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
   const [twoor, settwoor] = useState(false)
   const [loading, setLoading] = useState(false);  // Add loading state
 
-
+  console.log(ovrallcampdetal, "ovrallcampdetal")
 
   const rerender = () => {
     settwoor((els) => !els)
@@ -294,7 +294,102 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
 
   // console.log(selectedRow)
   const data = [campaignDetails]
-  const columns = [
+  // const columns = [
+  //   {
+  //     title: 'AdsetName',
+  //     dataIndex: 'AdsetName',
+  //     key: 'AdsetName',
+  //     render: (text, record) => (
+  //       <span
+  //         style={{ cursor: 'pointer' }}
+  //         onClick={() => handleadsetsClick(record)}
+  //       >
+  //         {text}
+  //       </span>
+  //     ),
+  //   },
+  //   {
+  //     title: 'Account_Number',
+  //     dataIndex: 'Account_Number',
+  //     key: 'Account_Number',
+  //     render: (text, record) => (
+  //       <span>{ovrallcampdetal.Account_Number}</span>
+  //     ),
+  //   },
+  //   {
+  //     title: "Daily Amount",
+  //     dataIndex: "Daily_amount",
+  //     width: "5%",
+  //     render: (Daily_amount, record) => (
+  //       <>
+  //         {loading ? (
+  //           <Spin />
+  //         ) : (
+  //           record?.Daily_amount !== undefined && (
+  //             <EditableField
+  //               value={record.Daily_amount / 100}
+  //               record={record}
+  //               dataIndex="Daily_amount"
+  //               updateTableRow={updateTablebudget}
+  //             />
+  //           )
+  //         )}
+  //       </>
+  //     ),
+  //   },
+  //   {
+  //     title: "Error",
+  //     dataIndex: "error",
+  //     width: "10%",
+  //     render: (text, record) => (
+  //       <>
+  //         {record?.error ? (
+  //           <Tooltip title={record.error} placement="top" color="red">
+  //             <span style={{ color: 'red', cursor: 'pointer' }}>Error</span>
+  //           </Tooltip>
+  //         ) : (
+  //           <span>No Error</span>
+  //         )}
+  //       </>
+  //     ),
+  //   },
+  //   {
+  //     title: 'Status',
+  //     dataIndex: 'status',
+  //     key: 'status',
+  //     render: (text, record) => (
+  //       <Switch
+  //           checked={record?.Status === 'ACTIVE' }
+  //           onChange={(checked) => onToggleStatus(record, checked)}
+  //           checkedChildren="ACTIVE"
+  //           unCheckedChildren="PAUSED"
+  //           disabled={
+  //             !(
+  //               ovrallcampdetal?.fbstatus === 'Live' &&
+  //               ovrallcampdetal?.campaignlevel?.Status === 'ACTIVE'
+  //             )
+  //           }
+  //       />
+  //     )
+  //   },
+  //   {
+  //     title: 'Action',
+  //     key: 'action',
+  //     render: (_, record) => (
+  //       <div style={{ display: 'flex', gap: '10px' }}>
+  //         <Button onClick={() => handleadsetsEdit(record)} icon={<EditOutlined />}>
+  //           Edit
+  //         </Button>
+  //         <Button onClick={() => handleadsetsView(record)} icon={<EyeOutlined />}>
+  //           View
+  //         </Button>
+  //       </div>
+
+  //     ),
+  //   }
+  // ];
+  
+  const columns = useMemo(() => [
     {
       title: 'AdsetName',
       dataIndex: 'AdsetName',
@@ -359,16 +454,16 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
       key: 'status',
       render: (text, record) => (
         <Switch
-            checked={record?.Status === 'ACTIVE' }
-            onChange={(checked) => onToggleStatus(record, checked)}
-            checkedChildren="ACTIVE"
-            unCheckedChildren="PAUSED"
-            disabled={
-              !(
-                selectedRow?.fbstatus === 'Live' &&
-                selectedRow?.campaignlevel?.Status === 'ACTIVE'
-              )
-            }
+          checked={record?.Status === 'ACTIVE'}
+          onChange={(checked) => onToggleStatus(record, checked)}
+          checkedChildren="ACTIVE"
+          unCheckedChildren="PAUSED"
+          disabled={
+            !(
+              ovrallcampdetal?.fbstatus === 'Live' &&
+              ovrallcampdetal?.camapaignlevel?.Status === 'ACTIVE'
+            )
+          }
         />
       )
     },
@@ -384,10 +479,18 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
             View
           </Button>
         </div>
-
       ),
     }
-  ];
+  ], [
+    handleadsetsClick,
+    handleadsetsEdit,
+    handleadsetsView,
+    ovrallcampdetal,
+    loading,
+    updateTablebudget,
+    onToggleStatus
+  ]);
+
   return (
     <>
       {/* <h1>{selectedRow?.campaignName}</h1> */}

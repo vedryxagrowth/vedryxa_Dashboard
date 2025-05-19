@@ -636,8 +636,9 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
             : [];
             // console.log(campaigns, "campaigns");
             const api = newRevenuePratner === "FB_DomainActive" ? "Daily/CampaignName" : "Daily";
+            const collectionName = newRevenuePratner === "FB_DomainActive" ? "Facebook_DActive_Names" : newtworkCollections[newRevenuePratner];
             // const fetchData = await apiClient.get(`/${api}?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`);
-            const fetchData = await apiClient.post(`/AdsetLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=Daily&network=Facebook_Mnet`, { campaignids: campaigns });
+            const fetchData = await apiClient.post(`/AdsetLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=Daily&network=${collectionName}`, { campaignids: campaigns });
             const mainData = fetchData.data;
             timezone.current = mainData.length > 0  ? mainData[0].accountTimezone : "";
             let totalSpend = 0;
@@ -996,8 +997,9 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
 
 
     useEffect(() => {
-        if (refreshpage === "Refresh2") {
+        if (refreshpage === "Refresh22") {
             handleReFetchData();
+            showAdsetLevel([]);
         }
     }
     , [refreshpage]);
