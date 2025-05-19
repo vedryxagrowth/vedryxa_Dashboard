@@ -7939,6 +7939,11 @@ const MyTablePage = () => {
             setRefreshContent("Refresh"+activeTab);
         }
         , 100);
+        setTimeout(() => {
+            setRefreshContent("");
+        }
+        , 500);
+
     };
 
     const onClickRefresh = async () => {
