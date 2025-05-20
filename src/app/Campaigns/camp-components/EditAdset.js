@@ -912,7 +912,7 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
                   rules={[{ required: true, message: "Please select an option!" }]}
                   style={{ flex: "1 1 20%" }}
                 >
-                  <Select mode="multiple" placeholder="Select Publishers" options={publisherOptions?.map(option => ({ label: option.label, value: option.value }))} />
+                  <Select mode="multiple" placeholder="Select Platforms" options={publisherOptions?.map(option => ({ label: option.label, value: option.value }))} />
                 </Form.Item>
 
                 <Form.Item

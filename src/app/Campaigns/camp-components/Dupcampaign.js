@@ -2186,7 +2186,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
 
                                                 <Select
                                                     mode="multiple"
-                                                    placeholder="Select Publishers"
+                                                    placeholder="Select Platforms"
                                                     onChange={handlePublisherChange}
                                                     value={selectedPublishers}
                                                     style={{ width: 300 }}

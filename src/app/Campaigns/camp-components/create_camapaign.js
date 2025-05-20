@@ -1300,7 +1300,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
 
     };
 
-
+    console.log("test:");
 
     const handleChange = (info) => {
         const newFiles = info.fileList.map(file => ({
@@ -1941,7 +1941,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         >
                                             <Select
                                                 mode="multiple"
-                                                placeholder="Select Publishers"
+                                                placeholder="Select Platforms"
                                                 onChange={handlePublisherChange}
                                                 value={selectedPublishers}
                                             >
