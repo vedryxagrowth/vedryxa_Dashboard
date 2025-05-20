@@ -67,14 +67,14 @@
       "static/chunks/8651-00f225d9069c511d.js",
       "static/chunks/6630-f16b15c137a331af.js",
       "static/chunks/1652-a61e5c2e9ccf881d.js",
-      "static/chunks/6736.e9ca8dd33ad46fb9.js"
+      "static/chunks/6736.f60ba3cb9ac41ea1.js"
     ]
   },
   "app\\NewUser\\page.js -> ../CronDashboard/crons": {
     "id": 16771,
     "files": [
       "static/chunks/7317.0e1fcba8d0590805.js",
-      "static/chunks/6771.358c8d14fb9a906e.js"
+      "static/chunks/6771.7eb0c802f502de31.js"
     ]
   },
   "app\\NewUser\\page.js -> ./users-components/add-newaccount": {
@@ -116,7 +116,7 @@
     "id": 39976,
     "files": [
       "static/chunks/7254-3177457cb5926c0d.js",
-      "static/chunks/9976.ca50069dff60ef57.js"
+      "static/chunks/9976.19df98942d26c597.js"
     ]
   },
   "app\\Reports\\page.js -> ../componentsOfReports/AgencyAndBMName": {
