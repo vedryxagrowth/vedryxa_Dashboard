@@ -16,6 +16,7 @@ import System1UrlBuilder from './urlbuilder/system1';
 import DActiveUrlBuilder from './urlbuilder/dactive';
 import CreativesDrawer from './creativesDrawer';
 import ImageUploadPage from '../../Creatives/page';
+import { NodeNextRequest } from 'next/dist/server/base-http/node';
 
 const FabricCanvas = dynamic(() => import('./Fabricanvas'), { ssr: false });
 
@@ -822,6 +823,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     formData,
                                     { headers: { 'Content-Type': 'multipart/form-data' } }
                                 );
+                                
         
                                 if (fbResponse.status === 200) {
                                     onSuccess("ok", response);
@@ -876,16 +878,17 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                     } else {
                         if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
                             const formData = new FormData();
-                            const fileId = file.name;
+                            const uniqueId = uuidv4(); // Generate a unique ID for the file
+                            const fileId = `${uniqueId}_${file.name}`;
                             const editedImage = editedImages[fileId];
                             const uploadFile = editedImage ? await fetch(editedImage).then(res => res.blob()) : null;
         
                             console.log(file.originFileObj.name);
         
                             if (uploadFile) {
-                                formData.append("file", uploadFile, `blob/${file.name}`);
+                                formData.append("file", uploadFile, `blob/${uniqueId}_${file.name}`);
                             } else {
-                                formData.append("file", file.originFileObj, `blob/${file.originFileObj.name}`);
+                                formData.append("file", file.originFileObj, `blob/${uniqueId}_${file.originFileObj.name}`);
                             }
         
                             // console.log(formData);
@@ -917,6 +920,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     formData,
                                     { headers: { 'Content-Type': 'multipart/form-data' } }
                                 );
+
+                                // console.log("Facebook API response:", fbResponse.data);
         
                                 if (response.status === 200 && fbResponse.status === 200) {
                                     onSuccess("ok", response);
@@ -1195,6 +1200,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                         Description: values.Description,
                         Caption: values.Caption,
                         Website_URL: values.Website_URL,
+                        
                         // urlParameters: values.urlParameters
                     };
                 } else if (media.videoid) {
@@ -1259,7 +1265,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                         position: values.positions,
                         device_platforms: values.device_platforms,
                     }),
-                    buying_type: "AUCTION"
+                    buying_type: "AUCTION",
                 },
                 addlevel: addLevelData
             };
@@ -1332,8 +1338,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         Min_Age: "18",
         Max_Age: "65",
         Gender: "0",
-        positions: ["feed"],
-        publisher_platforms: ["facebook"],
+        positions: [],
+        publisher_platforms: [],
         Account_Number: accountis == "All" ? '' : accountis,
         Language: [6],
         Website_URL: websiteURL,
@@ -1576,6 +1582,15 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             onChange={onChangeCampaignLevelDailyBudget}
                                             readOnly={adsetLevelDailyBudget !== 0 ? true : false}
                                             step="0.01"
+                                            style={{
+                                                backgroundColor: adsetLevelDailyBudget !== 0 ? '#f0f0f0' : 'transparent',
+                                                borderRadius: '6px',
+                                                borderColor: adsetLevelDailyBudget !== 0 ? 'transparent' : undefined,
+                                                fontSize: '14px',
+                                                color: '#333',
+                                                width: '200px',
+                                                boxSizing: 'border-box'
+                                            }}
                                         />
                                     </Tooltip>
                                 </Form.Item> {/*pk*/}
@@ -1741,6 +1756,15 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             onChange={onChangeAdsetLevelDailyBudget}
                                             readOnly={campaignLevelDailyBudget !== 0} // This will keep the field readonly
                                             step="0.01"
+                                            style={{
+                                                backgroundColor: campaignLevelDailyBudget !== 0 ? '#f0f0f0' : 'transparent',
+                                                borderRadius: '6px',
+                                                borderColor: campaignLevelDailyBudget !== 0 ? 'transparent' : undefined,
+                                                fontSize: '14px',
+                                                color: '#333',
+                                                width: '200px',
+                                                boxSizing: 'border-box'
+                                            }}
                                         />
                                     </Tooltip>
                                 </Form.Item>
@@ -2012,63 +2036,63 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                                 <div>
                                                     {/* Upload UI */}
                                                     <div style={{ display: selectedOption === "upload" ? "block" : "none" }}>
-                                                    <Upload
-                                                        beforeUpload={() => false}
-                                                        onChange={(info) => {
-                                                        const newFiles = info.fileList.map((file) => ({
-                                                            ...file,
-                                                            uid: file.uid || `-${Date.now()}`,
-                                                            source: "media",
-                                                            thumbUrl:
-                                                            file.thumbUrl ||
-                                                            (file.originFileObj
-                                                                ? URL.createObjectURL(file.originFileObj)
-                                                                : undefined),
-                                                        }));
+                                                        <Upload
+                                                            beforeUpload={() => false}
+                                                            onChange={(info) => {
+                                                            const newFiles = info.fileList.map((file) => ({
+                                                                ...file,
+                                                                uid: file.uid || `-${Date.now()}`,
+                                                                source: "media",
+                                                                thumbUrl:
+                                                                file.thumbUrl ||
+                                                                (file.originFileObj
+                                                                    ? URL.createObjectURL(file.originFileObj)
+                                                                    : undefined),
+                                                            }));
 
-                                                        setSelectedFiles((prev) => {
-                                                            const existingUids = new Set(prev.map((f) => f.uid));
-                                                            const filteredNewFiles = newFiles.filter((f) => !existingUids.has(f.uid));
-                                                            const updated = [...prev, ...filteredNewFiles];
-                                                            form.setFieldsValue({ MediaContent: updated });
-                                                            form.validateFields(["MediaContent"]);
-                                                            return updated;
-                                                        });
+                                                            setSelectedFiles((prev) => {
+                                                                const existingUids = new Set(prev.map((f) => f.uid));
+                                                                const filteredNewFiles = newFiles.filter((f) => !existingUids.has(f.uid));
+                                                                const updated = [...prev, ...filteredNewFiles];
+                                                                form.setFieldsValue({ MediaContent: updated });
+                                                                form.validateFields(["MediaContent"]);
+                                                                return updated;
+                                                            });
 
-                                                        setSelectedFilesFromMedia((prev) => {
-                                                            const existingUids = new Set(prev.map((f) => f.uid));
-                                                            const filteredNewFiles = newFiles.filter((f) => !existingUids.has(f.uid));
-                                                            const updated = [...prev, ...filteredNewFiles];
-                                                            form.setFieldsValue({ MediaContent: updated });
-                                                            form.validateFields(["MediaContent"]);
-                                                            return updated;
-                                                        });
-                                                        }}
-                                                        onRemove={(fileToRemove) => {
-                                                        setSelectedFilesFromMedia((prev) => {
-                                                            const updated = prev.filter((file) => file.uid !== fileToRemove.uid);
-                                                            form.setFieldsValue({ MediaContent: updated });
-                                                            form.validateFields(["MediaContent"]);
-                                                            return updated;
-                                                        });
+                                                            setSelectedFilesFromMedia((prev) => {
+                                                                const existingUids = new Set(prev.map((f) => f.uid));
+                                                                const filteredNewFiles = newFiles.filter((f) => !existingUids.has(f.uid));
+                                                                const updated = [...prev, ...filteredNewFiles];
+                                                                form.setFieldsValue({ MediaContent: updated });
+                                                                form.validateFields(["MediaContent"]);
+                                                                return updated;
+                                                            });
+                                                            }}
+                                                            onRemove={(fileToRemove) => {
+                                                            setSelectedFilesFromMedia((prev) => {
+                                                                const updated = prev.filter((file) => file.uid !== fileToRemove.uid);
+                                                                form.setFieldsValue({ MediaContent: updated });
+                                                                form.validateFields(["MediaContent"]);
+                                                                return updated;
+                                                            });
 
-                                                        setSelectedFiles((prev) => {
-                                                            const updated = prev.filter((file) => file.uid !== fileToRemove.uid);
-                                                            form.setFieldsValue({ MediaContent: updated });
-                                                            form.validateFields(["MediaContent"]);
-                                                            return updated;
-                                                        });
+                                                            setSelectedFiles((prev) => {
+                                                                const updated = prev.filter((file) => file.uid !== fileToRemove.uid);
+                                                                form.setFieldsValue({ MediaContent: updated });
+                                                                form.validateFields(["MediaContent"]);
+                                                                return updated;
+                                                            });
 
-                                                        return true;
-                                                        }}
-                                                        multiple
-                                                        maxCount={10}
-                                                        fileList={selectedFilesFromMedia}
-                                                        listType="picture"
-                                                        accept="image/*, video/*"
-                                                    >
-                                                        <Button icon={<UploadOutlined />}>Select Files</Button>
-                                                    </Upload>
+                                                            return true;
+                                                            }}
+                                                            multiple
+                                                            maxCount={10}
+                                                            fileList={selectedFilesFromMedia}
+                                                            listType="picture"
+                                                            accept="image/*, video/*"
+                                                        >
+                                                            <Button icon={<UploadOutlined />}>Select Files</Button>
+                                                        </Upload>
                                                     </div>
 
                                                     {/* Creative Library UI */}
@@ -2612,7 +2636,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                         selectedFilesData={selectedFilesData}
                         
                     /> */}
-                    <ImageUploadPage selectedFilesData={selectedFilesData} fromCampaigns={true} />
+                    <ImageUploadPage selectedFilesData={selectedFilesData} fromCampaigns={true} network={network} Account_Number={accountis} />
                 </Drawer>
             )}
         </Drawer>
