@@ -12,7 +12,7 @@ import { useTokenContext } from '../../../components/parent'
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
 import { color } from 'chart.js/helpers';
-import { Spin, Row, Col, Select, Input, Button, Modal, message, Switch,Tooltip } from 'antd';
+import { Spin, Row, Col, Select, Input, Button, Modal, message, Switch,Tooltip, Skeleton } from 'antd';
 import { ReloadOutlined, EditOutlined, BarChartOutlined } from '@ant-design/icons';
 import debounce from 'lodash.debounce';
 
@@ -1766,7 +1766,12 @@ const MnetLiveCampaignHistory = ({ params }) => {
             </Col>
             {isGraphVisible && (
                 <Col style={{ height: '400px', marginBottom: '10px' }}> {/* Container with fixed height */}
-                {chartData.dates.length === 0 ? (<div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><Spin size="large" /></div>) : (
+                {chartData.dates.length === 0 ? (<div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    {/* <Spin size="large" /> */}
+                    <div style={{ padding: '24px' }}>
+                        <Skeleton active paragraph={{ rows: 20 }} />
+                    </div>
+                    </div>) : (
                     <Line
                     data={{
                       labels: chartData.dates, // X-axis labels (dates)

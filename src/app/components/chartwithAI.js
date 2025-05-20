@@ -1,7 +1,7 @@
 "use client";
 import axios from "axios";
 import { useState, useEffect, useRef } from 'react';
-import { Button, Card, Input, Typography, List, Avatar, Upload, Modal, message as antdMessage, Flex, Spin, Select, Tooltip } from 'antd';
+import { Button, Card, Input, Typography, List, Avatar, Upload, Modal, message as antdMessage, Flex, Spin, Select, Tooltip, Skeleton } from 'antd';
 import { MessageOutlined, SendOutlined, CloseOutlined, RobotOutlined, PaperClipOutlined, LoadingOutlined, PictureFilled, CopyFilled, OpenAIFilled } from '@ant-design/icons';
 import { useTokenContext } from './parent';
 import Draggable from "react-draggable";
@@ -568,9 +568,12 @@ export default function ChatWithAI() {
                                             )}
                                             />
                                         ) : <div style={{display:'flex', justifyContent:"center"}}>
-                                                <Flex align="center" gap="middle">
+                                                {/* <Flex align="center" gap="middle">
                                                     <Spin indicator={<LoadingOutlined spin />} />
-                                                </Flex>
+                                                </Flex> */}
+                                                <div style={{ padding: '24px' }}>
+                                                    <Skeleton active paragraph={{ rows: 10 }} />
+                                                </div>
                                             </div>}
                                         </div>
                                     );

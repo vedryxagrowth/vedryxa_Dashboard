@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { Table, Tag, Button, Col, Card, Drawer, Dropdown, Flex, Input, Row, Select, Spin, Menu, Space, Modal, message, Switch, Tooltip, ConfigProvider } from 'antd';
+import { Table, Tag, Button, Col, Card, Drawer, Dropdown, Flex, Input, Row, Select, Spin, Menu, Space, Modal, message, Switch, Tooltip, ConfigProvider, Skeleton } from 'antd';
 import { EditOutlined, EyeOutlined, SearchOutlined, CloseOutlined, SwapRightOutlined, PlusOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, ExclamationCircleFilled, ReloadOutlined, LinkOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import CreateCampaignDrawer from './camp-components/create_camapaign';
 import ViewDrawer from './camp-components/view-campaign';
@@ -27,11 +27,12 @@ const App = () => {
 
     if (!userdetails?.adAccounts) {
         return <div style={{ width: '100%', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <Flex align="center" gap="middle">
-                {/* <Spin size="small" />
-                <Spin /> */}
+            {/* <Flex align="center" gap="middle">
                 <Spin size="large" />
-            </Flex>
+            </Flex> */}
+            <div style={{ padding: '24px' }}>
+                <Skeleton active paragraph={{ rows: 20 }} />
+            </div>
         </div>;
     }
     if(userdetails?.role === "Revenue_Partner"){

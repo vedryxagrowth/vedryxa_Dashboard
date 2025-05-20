@@ -12,7 +12,7 @@ import 'ag-grid-community/styles/ag-theme-alpine.css';
 import {useTokenContext} from '../../../components/parent'
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
-import { Spin, Row, Col, Select, Input, Button } from 'antd';
+import { Spin, Row, Col, Select, Input, Button, Skeleton } from 'antd';
 import { ReloadOutlined } from '@ant-design/icons';
 Chart.register(...registerables);
 import debounce from 'lodash.debounce';
@@ -1167,7 +1167,12 @@ export default function AdsetNameAndAccount({params}){
                     
             </Col>
             <Col style={{ height: '400px', marginBottom: '10px' }}> {/* Container with fixed height */}
-              {chartData.dates.length === 0 ? (<div style={{width:'100%', height:'100%', display:'flex', justifyContent:'center', alignItems:'center'}}><Spin size="large" /></div>):
+              {chartData.dates.length === 0 ? (<div style={{width:'100%', height:'100%', display:'flex', justifyContent:'center', alignItems:'center'}}>
+                {/* <Spin size="large" /> */}
+                <div style={{ padding: '24px' }}>
+                    <Skeleton active paragraph={{ rows: 20 }} />
+                </div>
+                </div>):
                 (
                     <Line
                     data={{

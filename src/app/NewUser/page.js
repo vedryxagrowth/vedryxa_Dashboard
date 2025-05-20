@@ -1,6 +1,6 @@
 "use client"
 import React, { useEffect, useState, useRef } from 'react';
-import { Table, Button, Col, Card, Input, Row, Select, Result, Spin, Space, Modal, message, Menu, Switch, Tooltip, Tabs, Flex } from 'antd';
+import { Table, Button, Col, Card, Input, Row, Select, Result, Spin, Space, Modal, message, Menu, Switch, Tooltip, Tabs, Flex, Skeleton } from 'antd';
 import { ReloadOutlined, SearchOutlined, DownOutlined, EditOutlined, EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
 import { Carousel } from 'react-responsive-carousel';
 import { redirect } from 'next/navigation';
@@ -39,9 +39,12 @@ const UsersTable = () => {
     const { userdetails } = useTokenContext();
     if (!userdetails?.adAccounts) {
         return <div style={{ width: '100%', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <Flex align="center" gap="middle">
+            <div style={{ padding: '24px' }}>
+                <Skeleton active paragraph={{ rows: 10 }} />
+            </div>
+            {/* <Flex align="center" gap="middle">
                 <Spin size="large" />
-            </Flex>
+            </Flex> */}
         </div>;
     }
 
@@ -1468,9 +1471,12 @@ const UsersTable = () => {
                         </Row>
                     </Card>
                     {loading1 ? (
-                        <div style={{display:'flex', justifyContent:'center', alignItems:'center', minHeight: 'calc(80vh - 100px)'}}>
-                            <Spin />
-                        </div>   
+                        <div style={{ padding: '24px' }}>
+                            <Skeleton active paragraph={{ rows: 10 }} />
+                        </div>
+                        // <div style={{display:'flex', justifyContent:'center', alignItems:'center', minHeight: 'calc(80vh - 100px)'}}>
+                        //     <Spin />
+                        // </div>   
                     ) : usersData.length > 0 ? (
                         <Table
                             className={`custom-dark-table ${theme === 'dark' ? 'dark-mode-pagination' : 'light-mode-pagination'}`}
@@ -1571,9 +1577,12 @@ const UsersTable = () => {
                         </Row>
                     </Card>
                     {(loading2) ? (
-                        <div style={{display:'flex', justifyContent:'center', alignItems:'center', minHeight: 'calc(80vh - 100px)'}}>
-                            <Spin />
-                        </div> 
+                        <div style={{ padding: '24px' }}>
+                            <Skeleton active paragraph={{ rows: 10 }} />
+                        </div>
+                        // <div style={{display:'flex', justifyContent:'center', alignItems:'center', minHeight: 'calc(80vh - 100px)'}}>
+                        //     <Spin />
+                        // </div> 
                     ) : AccountsData.length > 0 ? (
                         <Table
                             className={`custom-dark-table ${theme === 'dark' ? 'dark-mode-pagination' : 'light-mode-pagination'}`}
@@ -1664,9 +1673,12 @@ const UsersTable = () => {
                         </Row>
                     </Card>
                     {(loading3) ? (
-                        <div style={{display:'flex', justifyContent:'center', alignItems:'center', minHeight: 'calc(80vh - 100px)'}}>
-                            <Spin />
-                        </div> 
+                        <div style={{ padding: '24px' }}>
+                            <Skeleton active paragraph={{ rows: 10 }} />
+                        </div>
+                        // <div style={{display:'flex', justifyContent:'center', alignItems:'center', minHeight: 'calc(80vh - 100px)'}}>
+                        //     <Spin />
+                        // </div> 
                     ) : networksData.length > 0 ? ( 
                         <Table
                             className={`custom-dark-table ${theme === 'dark' ? 'dark-mode-pagination' : 'light-mode-pagination'}`}
@@ -1738,9 +1750,12 @@ const UsersTable = () => {
                         </Row>
                     </Card>
                     {(loading4) ? (
-                        <div style={{display:'flex', justifyContent:'center', alignItems:'center', minHeight: 'calc(80vh - 100px)'}}>
-                            <Spin />
-                        </div> 
+                        <div style={{ padding: '24px' }}>
+                            <Skeleton active paragraph={{ rows: 10 }} />
+                        </div>
+                        // <div style={{display:'flex', justifyContent:'center', alignItems:'center', minHeight: 'calc(80vh - 100px)'}}>
+                        //     <Spin />
+                        // </div> 
                     ) : urlBuilderData.length > 0 ? (
                         <Table
                             className={`custom-dark-table ${theme === 'dark' ? 'dark-mode-pagination' : 'light-mode-pagination'}`}
