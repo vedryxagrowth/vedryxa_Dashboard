@@ -7997,7 +7997,6 @@ const MyTablePage = () => {
         accountNumberFromDashboard ? accountNumberFromDashboard?.replace(/\+/g, " ") : (storedData ? storedData?.account : typeof networksData[0] === 'string' ? networksData[0] : networksData[0].accountNumber)
     ); // Track selected value
 
-    // Handle dropdown open/close state
     const handleDropdownVisibleChange = (open) => {
         setIsOpen(open); // Set dropdown open state
         setAccountNumberToPass(null);
