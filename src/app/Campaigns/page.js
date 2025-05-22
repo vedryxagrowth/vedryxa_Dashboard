@@ -895,11 +895,13 @@ const App = () => {
                         </div>
                     )
                 } 
-                // if (record.fbstatus === 'Live'){
-                //     return (
-                //         <Button icon={<EditOutlined />} onClick={() => handleEditOnlyClick(record)}></Button> 
-                //     )
-                // }
+                console.log('Record Status:', record?.fbstatus);
+                if (record?.fbstatus === 'Live'){
+                    console.log('Record in Action column:', record);
+                    return (
+                        <Button icon={<EditOutlined />} onClick={() => handleEditOnlyClick(record)}></Button> 
+                    )
+                }
 
                 return (
                     <Space size="middle">

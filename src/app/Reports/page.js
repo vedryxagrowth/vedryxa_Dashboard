@@ -32,7 +32,8 @@ const newtworkCollections = {
     "FB_Bodies1": "Facebook_Bodies1",
     "Newsbreak_DA": "Newsbreak_DomainActive",
     "FB_Tonic1": "Facebook_Tonic1",
-    "FB_Sedo": "Facebook_Sedo"
+    "FB_Sedo": "Facebook_Sedo",
+    "FB_Inmobi": "Facebook_Inmobi",
 }
 
 const LiveReports = React.lazy(() => import('../componentsOfReports/Live'));
@@ -8315,7 +8316,7 @@ const MyTablePage = () => {
 
                 <Tabs activeKey={activeTab} onChange={handleTabChange} renderTabBar={() => <></>}>
                 <Tabs.TabPane key="1">
-                {Camapignlevelstatus.length > 0 && (
+                {/* {Camapignlevelstatus.length > 0 && ( */}
                     <LiveReports 
                     startDate={newStartDate} 
                     endDate={newendDate} 
@@ -8339,7 +8340,7 @@ const MyTablePage = () => {
                     handleChangeToggle={handleChangeToggle}
                     theme={theme}
                     />
-                )}
+                {/* )} */}
                 </Tabs.TabPane>
 
                 <Tabs.TabPane key="2">

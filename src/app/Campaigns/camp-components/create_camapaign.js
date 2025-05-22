@@ -38,31 +38,31 @@ const positionOptions = {
         { key: "facebook_reels", label: "Facebook Reels" },
         { key: "profile_feed", label: "Facebook Profile Feed" },
         { key: "search", label: "Facebook Search" },
-        { key: "story_fb", label: "Facebook Stories" },
-        { key: "right_column", label: "Facebook Right Column" },
-        { key: "instant_articles", label: "Facebook Instant Articles" },
-        { key: "business_explore", label: "Facebook Business Explore" } // Added Business Explore
+        { key: "story", label: "Facebook Stories" },
+        { key: "right_hand_column", label: "Facebook Right Column" },
+        { key: "instant_article", label: "Facebook Instant Articles" },
+        { key: "biz_disco_feed", label: "Facebook Business Explore" } // Added Business Explore
     ],
     instagram: [
         { key: "stream", label: "Instagram Stream" },
-        { key: "story_in", label: "Instagram Stories" },
+        { key: "story", label: "Instagram Stories" },
         { key: "explore", label: "Instagram Explore" },
         { key: "explore_home", label: "Instagram Explore Home" },
         { key: "reels", label: "Instagram Reels" },
-        { key: "profile_feed_in", label: "Instagram Profile Feed" },
+        { key: "profile_feed", label: "Instagram Profile Feed" },
         { key: "ig_search", label: "Instagram Search" },
         { key: "profile_reels", label: "Instagram Profile Reels" }
     ],
     messenger: [
         { key: "messenger_home", label: "Messenger Home" },
-        { key: "story_ms", label: "Messenger Stories" },
+        { key: "story", label: "Messenger Stories" },
         { key: "sponsored_messages", label: "Messenger Sponsored Messages" },
-        { key: "messenger_inbox", label: "Messenger Inbox" }
+        // { key: "messenger_inbox", label: "Messenger Inbox" }
     ],
     audience_network: [
         { key: "classic", label: "Audience Network Classic" },
         { key: "rewarded_video", label: "Audience Network Rewarded Video" },
-        { key: "in_stream", label: "Audience Network In-Stream Video" }
+        { key: "instream_video", label: "Audience Network In-Stream Video" }
     ]
 };
 
@@ -2610,29 +2610,40 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 type="primary"
                                 style={{ background: '#21c55d', minWidth: '200px' }}
                                 onClick={async () => {
-                                    try {
-                                    const values = await form.validateFields();
+                                try {
+                                    const values = await form.validateFields(); // Validates all form fields
+
+                                    // Clear existing validation errors
                                     setSubmitErrors([]);
-                                    setIsModalVisible(true); // proceed if valid
-                                    } catch (err) {
+
+                                    // Optionally trigger your existing logic
+                                    onFinish(values); // If you want to reuse your existing logic
+
+                                    // Show confirmation modal
+                                    setIsModalVisible(true);
+
+                                    // Save values if needed
+                                    setFormValues(values);
+                                } catch (err) {
                                     const allErrors = err?.errorFields?.map((field) => ({
-                                        name: field.name?.[0],       // e.g., 'Account_Number'
-                                        message: field.errors?.[0],  // e.g., 'Please select an option!'
+                                    name: field.name?.[0],       // field name
+                                    message: field.errors?.[0],  // validation message
                                     }));
                                     setSubmitErrors(allErrors);
-                                    }
+                                }
                                 }}
                             >
                                 Submit
                             </Button>
 
+                            {/* Show validation messages beside button */}
                             {submitErrors.length > 0 && (
                                 <div style={{ color: "red", marginTop: 8 }}>
-                                    {submitErrors.map((err, index) => (
+                                {submitErrors.map((err, index) => (
                                     <div key={index}>
-                                        <strong>{err.name}:</strong> {err.message}
+                                    <strong>{err.name}:</strong> {err.message}
                                     </div>
-                                    ))}
+                                ))}
                                 </div>
                             )}
                             </div>
