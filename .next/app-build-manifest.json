@@ -1,22 +1,16 @@
 {
   "pages": {
-    "/DailyAndCampaignHistory/AdsetHistory/[AdsetName]/page": [
+    "/Reports/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/DailyAndCampaignHistory/AdsetHistory/[AdsetName]/page.css",
-      "static/chunks/app/DailyAndCampaignHistory/AdsetHistory/[AdsetName]/page.js"
+      "static/css/app/Reports/page.css",
+      "static/chunks/app/Reports/page.js"
     ],
     "/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
-    ],
-    "/Reports/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/Reports/page.css",
-      "static/chunks/app/Reports/page.js"
     ],
     "/_not-found/page": [
       "static/chunks/webpack.js",

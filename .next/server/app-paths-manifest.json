@@ -1,5 +1,4 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
-  "/Reports/page": "app/Reports/page.js",
-  "/DailyAndCampaignHistory/AdsetHistory/[AdsetName]/page": "app/DailyAndCampaignHistory/AdsetHistory/[AdsetName]/page.js"
+  "/Reports/page": "app/Reports/page.js"
 }
