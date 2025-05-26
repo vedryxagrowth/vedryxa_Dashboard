@@ -41,8 +41,7 @@ const newtworkCollections = {
     "FB_Bodies1": "Facebook_Bodies1",
     "Newsbreak_DA": "Newsbreak_DomainActive",
     "FB_Tonic1": "Facebook_Tonic1",
-    "FB_Sedo": "Facebook_Sedo",
-    "FB_Inmobi": "Facebook_Inmobi",
+    "FB_Sedo": "Facebook_Sedo"
 }
 const selectTimezone = {
     UTC: 'UTCDate',
@@ -121,7 +120,14 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                     cpclinkclicks: parseFloat((memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks), 0) / memorizedDailyData?.length).toFixed(2)),
                     fblinkclicks: parseFloat(memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0).toFixed(2)),
                     impressions: parseFloat(memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
-                    ctr: parseFloat((memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
+                    // tq: parseFloat(memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.tq), 0).toFixed(2)),
+                    ctr: parseFloat((memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)),
+                    tq: parseFloat(
+                        memorizedDailyData?.reduce((acc, curr) => {
+                          const tqValue = Number(curr?.tq);
+                          return acc + (isNaN(tqValue) ? 0 : tqValue);
+                        }, 0).toFixed(2)
+                    ),
                 }
             ]
         );
@@ -609,7 +615,7 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
             console.log(adsets, "adsets");
             const collectionName = newRevenuePratner === "FB_DomainActive" ? "Facebook_DActive_Names" : newtworkCollections[newRevenuePratner];
             // const fetchData = await apiClient.get(`/${api}?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`);
-            const fetchData = await apiClient.post(`/AdLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=Daily&network=${`${collectionName}_AD`}`, { adsetids : adsets, campaignids : campaigns });
+            const fetchData = await apiClient.post(`http://localhost:8000/AdLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=Daily&network=${`${collectionName}_AD`}`, { adsetids : adsets, campaignids : campaigns });
             const mainData = fetchData.data;
             timezone.current = mainData.length > 0  ? mainData[0].accountTimezone : "";
             console.log("hi");
@@ -699,6 +705,10 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                             actions: '...',
                             from: "",
                             profitloss: "",
+                            // tq: parseFloat(eachData.tq).toFixed(2),
+                            tq: eachData.tq !== undefined && !isNaN(eachData.tq)
+                            ? Math.round(Number(eachData.tq) * 100) / 100
+                            : 0
                             // compaignid: eachData.campaign_id,
                         }
                     )
@@ -727,7 +737,14 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                         fbclicks: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
                         fblinkclicks: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0).toFixed(2)),
                         impressions: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
-                        ctr: parseFloat((fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
+                        // tq: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.tq), 0).toFixed(2)),
+                        ctr: parseFloat((fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)),
+                        tq: fullData?.length
+                        ? Math.round(
+                            fullData.reduce((acc, curr) =>
+                                acc + (curr.tq !== undefined && !isNaN(curr.tq) ? Number(curr.tq) : 0), 0
+                        ) * 100) / 100
+                        : 0,
                     }
                 ]
             );
@@ -1161,7 +1178,14 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                                                     fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
                                                     fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
                                                     impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
-                                                    ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2))
+                                                    // tq: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.tq), 0).toFixed(2)),
+                                                    ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2)),
+                                                    tq: parseFloat(
+                                                        filteredData.reduce((acc, curr) => {
+                                                          const tqValue = Number(curr?.tq);
+                                                          return acc + (isNaN(tqValue) ? 0 : tqValue);
+                                                        }, 0).toFixed(2)
+                                                    ),
                                                 },
                                             ];
 

@@ -347,6 +347,7 @@ export default function CampaignAndAccount({ params }) {
     };
 
     const columnStructure = [
+        "tq",
         "date_n",
         "date_f",
         "hour_n",
@@ -508,7 +509,7 @@ export default function CampaignAndAccount({ params }) {
         // const fetchData = await fetch(`http://localhost:8000/MnetCampaignDailyHistory?accountNumber=${accountNumber}&timezone=${timeZone}&campaignName=${decodedString}`);
         // const data = await fetchData.json();
         // const mainData = await data;
-        const fetchData = await apiClient.get(`/DailyCampaignHistory?campaignName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`);
+        const fetchData = await apiClient.get(`http://localhost:8000/DailyCampaignHistory?campaignName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`);
         // console.log(`https://prodapis.adsgoat.in/LiveAdsetHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`, "url");
         const url = `http://localhost:8000/MnetLiveCampaignHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}`
 
@@ -570,9 +571,9 @@ export default function CampaignAndAccount({ params }) {
                         ctr: ctr,
                         adsetId: eachData.adset_id,
                         campaignId: eachData.campaign_id,
-
-
-
+                        tq: eachData.tq !== undefined && !isNaN(eachData.tq)
+                        ? Math.round(Number(eachData.tq) * 100) / 100
+                        : 0,
                     }
                 )
             })
@@ -615,7 +616,13 @@ export default function CampaignAndAccount({ params }) {
                 cpclinkclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks), 0) / filteredData?.length,
                 fblinkclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0),
                 impressions: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0),
-                ctr: `${(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)}%`
+                ctr: `${(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)}%`,
+                tq: filteredData?.length
+                ? Math.round(
+                    filteredData.reduce((acc, curr) =>
+                        acc + (curr.tq !== undefined && !isNaN(curr.tq) ? Number(curr.tq) : 0), 0
+                ) * 100) / 100
+                : 0,
             }
         ]);
     },[filteredData])
@@ -812,6 +819,20 @@ export default function CampaignAndAccount({ params }) {
     };
 
     const columnDefsObject = {
+        tq: {
+            headerName: 'TQ',
+            field: 'tq',
+            minWidth: 105,
+            aggFunc: 'avg', // Average for group rows
+            sortable: true,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            valueFormatter: (params) => {
+              const val = Number(params.value);
+              return isNaN(val) ? '0.00' : val.toFixed(2);
+            }
+        },
         campaignname : {headerName:'CampaignName', field:'campaignname',
             // rowGroup: true,
             // filter: true,
@@ -1880,6 +1901,12 @@ export default function CampaignAndAccount({ params }) {
                                                 filteredData.reduce((acc, curr) => acc + parseFloat(curr.impressions || 0), 0)) *
                                             100
                                         ).toFixed(2)}%`,
+                                        tq: parseFloat(
+                                            filteredData.reduce((acc, curr) => {
+                                              const tqValue = Number(curr?.tq);
+                                              return acc + (isNaN(tqValue) ? 0 : tqValue);
+                                            }, 0).toFixed(2)
+                                        ),
                                     },
                                 ];
 
