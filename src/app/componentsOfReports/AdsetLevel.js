@@ -769,6 +769,7 @@ const AdsetLevelReports = ({startDate, endDate, newaccount, newtime, newRevenueP
                             actions: '...',
                             from: "",
                             profitloss: "",
+                            tq: "",
                         }
                     )
                 })

@@ -664,6 +664,7 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
                             searchKeyword: eachData.searchKeyword,
                             from:'',
                             profitloss: "",
+                            tq: "",
                             // compaignid: eachData.campaign_id,
                         }
                     )
