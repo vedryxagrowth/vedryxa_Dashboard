@@ -514,6 +514,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
     const [defaultURlBuilder, setDefaultURLBuilder] = useState("");
     const [selectedOption, setSelectedOption] = useState("upload");
     const [changedFields, setChangedFields] = useState({});
+    const [panels, setPanels] = useState([]); // State to manage dynamic panels
 
 
     const handleModeChange = (value) => {
@@ -533,6 +534,32 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                     );
                     console.log("hello viewdata", ...response.data);
                     setDuplicatedampaignData(response?.data[0]);
+                    const enrichedPanels = (response?.data[0]?.addlevel || []).map((item, index) => {
+                        const selectedOption = item.selectedOption || "creative";
+                      
+                        const defaultFile = item.filename
+                          ? [
+                              {
+                                uid: `file-${index}`,
+                                name: item.filename.split("/").pop(),
+                                url: item.filename,
+                                type: "image/jpeg",
+                                source: selectedOption === "upload" ? "media" : "creative",
+                              },
+                            ]
+                          : [];
+                      
+                        return {
+                          ...item,
+                          key: `panel-${index}`,
+                          selectedOption,
+                          selectedFilesFromMedia: selectedOption === "upload" ? defaultFile : [],
+                          selectedFilesFromCreatives: selectedOption === "creative" ? defaultFile : [],
+                          selectedFiles: defaultFile,
+                        };
+                      });
+                      
+                    setPanels(enrichedPanels);
                 }
             } catch (error) {
                 console.error("Error fetching campaign list:", error);
@@ -541,6 +568,14 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
 
         fetchData();
     }, [selectedRow]);
+
+    const updatePanel = (key, field, value) => {
+        setPanels((prevPanels) =>
+          prevPanels.map((panel) =>
+            panel.key === key ? { ...panel, [field]: value } : panel
+          )
+        );
+    };
 
     useEffect(() => {
         if (visible) {
@@ -906,6 +941,23 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
             ...changedValues, // merge or update the changed fields
         }));
 
+        const groupedByPanel = {};
+
+        Object.entries(allValues).forEach(([fieldName, value]) => {
+            const inputEl = document.querySelector(`[name="${fieldName}"]`);
+
+            if (inputEl) {
+            const panelEl = inputEl.closest('.panel'); // Traverse DOM to find parent panel
+            const panelKey = panelEl?.getAttribute('data-panel');
+
+            if (panelKey) {
+                if (!groupedByPanel[panelKey]) groupedByPanel[panelKey] = {};
+                groupedByPanel[panelKey][fieldName] = value;
+            }
+            }
+        });
+
+        console.log('🔍 Grouped by Panel:', groupedByPanel);
         // Check if all fields are filled
         const isComplete = Object.values(allValues).every(value => value !== undefined && value !== '');
         setIsFormComplete(isComplete);
@@ -2137,7 +2189,348 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                             <div style={{ display: "flex", justifyContent: "space-between" }}>
                                 <div style={{ flex: "70%", marginRight: "5%" }}>
                                     <div style={{ display: 'flex', gap: '16px' }}>
-                                    <div style={{display:'flex', flexDirection:'column'}}>
+
+                                    <Collapse style={{ width: '100%' }}>
+  {panels.map((panel) => (
+    <Panel header={panel.AddName || "Untitled"} key={panel.key} style={{ width: '100%' }}>
+      <div style={{display:'flex'}}>
+        <div style={{ display: 'flex', flexDirection: 'column', width:"100%" }}>
+            {/* Ad Name Input */}
+            <Form.Item
+            label={<span style={{ color: "#B4B4B4" }}>Ad Name</span>}
+            name={`AddName_${panel.key}`}
+            rules={[{ required: true, message: 'Please enter Ad Name' }]}
+            initialValue={panel.AddName || ""}
+            >
+            <Input
+                value={panel.AddName}
+                onChange={(e) => updatePanel(panel.key, "AddName", e.target.value)}
+                placeholder="Enter Ad Name"
+                style={{width: "30%"}}
+            />
+            </Form.Item>
+
+            {/* Select Source Dropdown */}
+            <Form.Item label={<span style={{ color: "#B4B4B4" }}>Select Source</span>}>
+            <Select
+                value={panel.selectedOption}
+                onChange={(value) => {
+                updatePanel(panel.key, "selectedOption", value);
+                form.validateFields([`MediaContent_${panel.key}`]);
+                }}
+                style={{ marginBottom: 16, width: "30%" }}
+            >
+                <Option value="upload">Upload</Option>
+                <Option value="creative">Creative Library</Option>
+            </Select>
+            </Form.Item>
+
+            {/* File Selection Section with Validation */}
+            <Form.Item
+            name={`MediaContent_${panel.key}`}
+            rules={[
+                {
+                validator: async () => {
+                    const current = panels.find(p => p.key === panel.key);
+                    if (
+                    (current.selectedOption === "upload" && current.selectedFilesFromMedia.length === 0) ||
+                    (current.selectedOption === "creative" && current.selectedFilesFromCreatives.length === 0)
+                    ) {
+                    throw new Error("Please select Upload!");
+                    }
+                    return Promise.resolve();
+                },
+                },
+            ]}
+            >
+            <div>
+                {/* Upload Section */}
+                {panel.selectedOption === "upload" && (
+                <Upload
+                    key={panel.selectedFilesFromMedia.length} // ✅ force re-render when files change
+                    beforeUpload={() => false}
+                    multiple
+                    maxCount={10}
+                    listType="picture"
+                    accept="image/*, video/*"
+                    fileList={panel.selectedFilesFromMedia}
+                    onChange={(info) => {
+                    const newFiles = info.fileList.map((file) => ({
+                        ...file,
+                        uid: file.uid || `-${Date.now()}`,
+                        source: "media",
+                        thumbUrl:
+                        file.thumbUrl ||
+                        (file.originFileObj
+                            ? URL.createObjectURL(file.originFileObj)
+                            : undefined),
+                    }));
+
+                    const current = panels.find(p => p.key === panel.key);
+                    const existingUids = new Set(current.selectedFilesFromMedia.map(f => f.uid));
+                    const filteredNew = newFiles.filter(f => !existingUids.has(f.uid));
+                    const final = [...current.selectedFilesFromMedia, ...filteredNew];
+
+                    updatePanel(panel.key, "selectedFilesFromMedia", final);
+                    updatePanel(panel.key, "selectedFiles", final);
+                    form.setFieldsValue({ [`MediaContent_${panel.key}`]: final });
+                    form.validateFields([`MediaContent_${panel.key}`]);
+                    }}
+                    onRemove={(fileToRemove) => {
+                    const current = panels.find(p => p.key === panel.key);
+                    const filtered = current.selectedFilesFromMedia.filter(f => f.uid !== fileToRemove.uid);
+                    updatePanel(panel.key, "selectedFilesFromMedia", filtered);
+                    updatePanel(panel.key, "selectedFiles", filtered);
+                    form.setFieldsValue({ [`MediaContent_${panel.key}`]: filtered });
+                    form.validateFields([`MediaContent_${panel.key}`]);
+                    return true;
+                    }}
+                >
+                    <Button icon={<UploadOutlined />}>Select Files</Button>
+                </Upload>
+                )}
+
+                {/* Creative Library Section */}
+                {panel.selectedOption === "creative" && (
+                <div>
+                    <Button
+                    icon={<UploadOutlined />}
+                    onClick={() => onClickCreativesDrawer(panel.key)}
+                    >
+                    Select Files
+                    </Button>
+
+                    {panel.selectedFilesFromCreatives?.length > 0 && (
+                    <div style={{ marginTop: "10px" }}>
+                        {panel.selectedFilesFromCreatives.map((file) => (
+                        <div
+                            key={file.uid}
+                            style={{
+                            display: "flex",
+                            alignItems: "center",
+                            marginBottom: 8,
+                            }}
+                        >
+                            {file.type?.startsWith("image/") && (
+                            <img
+                                src={
+                                file.originFileObj
+                                    ? URL.createObjectURL(file.originFileObj)
+                                    : file.url
+                                }
+                                alt="preview"
+                                style={{
+                                width: 40,
+                                height: 40,
+                                objectFit: "cover",
+                                borderRadius: 4,
+                                marginLeft: 8,
+                                }}
+                            />
+                            )}
+                            <span
+                            style={{
+                                maxWidth: 160,
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                                paddingLeft: 8,
+                            }}
+                            >
+                            {file.name}
+                            </span>
+                            <DeleteOutlined
+                            onClick={() => {
+                                const current = panels.find(p => p.key === panel.key);
+                                const updated = current.selectedFilesFromCreatives.filter(f => f.uid !== file.uid);
+                                updatePanel(panel.key, "selectedFilesFromCreatives", updated);
+                                updatePanel(panel.key, "selectedFiles", updated);
+                                form.setFieldsValue({ [`MediaContent_${panel.key}`]: updated });
+                                form.validateFields([`MediaContent_${panel.key}`]);
+                            }}
+                            style={{ color: "red", marginLeft: 12, cursor: "pointer" }}
+                            />
+                        </div>
+                        ))}
+                    </div>
+                    )}
+                </div>
+                )}
+            </div>
+            </Form.Item>
+        </div>
+        <div>
+        {panel.selectedFilesFromCreatives.map((file) => (
+                        <div
+                            key={file.uid}
+                            style={{
+                            display: "flex",
+                            alignItems: "center",
+                            marginBottom: 8,
+                            }}
+                        >
+                            {file.type?.startsWith("image/") && (
+                            <img
+                                src={
+                                file.originFileObj
+                                    ? URL.createObjectURL(file.originFileObj)
+                                    : file.url
+                                }
+                                alt="preview"
+                                style={{
+                                width: 300,
+                                height: 300,
+                                objectFit: "cover",
+                                borderRadius: 4,
+                                marginLeft: 8,
+                                }}
+                            />
+                            )}
+                        </div>))}
+        </div>
+      </div>
+      {/* <div key={index} className="container-ad-preview">
+                                                        <div className="ad-preview" style={{ width: "350px" }}>
+                                                            <div className="ad-heading">
+                                                                <div className="img">
+                                                                    {panel?.url?.endsWith('.png') || panel?.url?.endsWith('.jpg') || panel?.url?.endsWith(".jpeg") ? (
+                                                                        <img
+                                                                            src={panel?.url}
+                                                                            alt="page id"
+                                                                            width="40"
+                                                                            height="40"
+                                                                            style={{ objectFit: 'cover' }}
+                                                                        />
+                                                                    ) : panel?.url?.endsWith('.mp4') ? (
+                                                                        <video
+                                                                            src={file?.url}
+                                                                            alt="page id"
+                                                                            width="40"
+                                                                            height="30"
+                                                                            style={{ objectFit: 'cover' }}
+                                                                            muted 
+                                                                        />
+                                                                    ) : 
+                                                                    panel?.type?.startsWith('image/') ? (
+                                                                        <img
+                                                                            src={editedImages[file?.name] ? editedImages[file?.name]:  file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url}
+                                                                            alt="page id"
+                                                                            width="40"
+                                                                            height="40"
+                                                                            style={{ objectFit: 'cover' }}
+                                                                        />
+                                                                    ) 
+                                                                    : 
+                                                                    (
+                                                                        <video
+                                                                            src={file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url}
+                                                                            alt="page id"
+                                                                            width="40"
+                                                                            height="30"
+                                                                            style={{ objectFit: 'cover' }}
+                                                                            muted 
+                                                                        />
+                                                                    )
+                                                                    }
+                                                                </div>
+
+                                                                <div className="title">
+                                                                    <div className="main" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
+                                                                        {addName}
+                                                                        <div className="sub">
+                                                                            {imagehash?.pageName ? (
+                                                                                <>
+                                                                                    {imagehash.pageName} <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                                                </>
+                                                                            ) : (
+                                                                                <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="close">
+                                                                    <CloseOutlined style={{ fontSize: "20px" }} />
+                                                                </div>
+                                                                <div className="moreoptions">
+                                                                    <MoreOutlined style={{ fontSize: "20px" }} />
+                                                                </div>
+                                                            </div>
+                                                            <div className="ad-desc" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
+                                                                {primaryText}
+                                                            </div>
+                                                            <div className="ad-image" style={{ width: '350px', height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                    {panel?.url?.endsWith('.png') || panel?.url?.endsWith('.jpg') || panel?.url?.endsWith(".jpeg") ? (
+                                                                        <img
+                                                                            src={panel?.url}
+                                                                            alt="ad content"
+                                                                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                                                                        />
+                                                                    ) : panel?.url?.endsWith('.mp4') ? (
+                                                                        <video
+                                                                        controls
+                                                                        style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                                                                        >
+                                                                            <source src={panel?.url} />
+                                                                            Your browser does not support the video tag.
+                                                                        </video>
+                                                                    ) 
+                                                                    :
+                                                                    file?.type?.startsWith('image/') ? (
+                                                                        <img
+                                                                            src={editedImages[file?.name] ? editedImages[file?.name]:  file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url} // Use edited image if available
+                                                                            alt="ad content"
+                                                                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                                                                        />
+                                                                    ) : 
+                                                                    (
+                                                                        <video
+                                                                            controls
+                                                                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                                                                        >
+                                                                            <source src={file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url} />
+                                                                            Your browser does not support the video tag.
+                                                                        </video>
+                                                                    )
+                                                                    // null
+                                                                    }
+                                                            </div>
+
+                                                            <div className="ad-cta">
+                                                                <div className="details">
+                                                                    <div className="link">{caption}</div>
+                                                                    <div className="title">{headline}</div>
+                                                                    <div className="desc">{description}</div>
+                                                                </div>
+                                                                <div className="ad-button">
+                                                                    <button type="button">Learn More</button>
+                                                                </div>
+                                                            </div>
+                                                            <a href={websiteURL} target="_blank" rel="noopener noreferrer" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: '#0066cc', padding: '10px' }}>
+                                                                {websiteURL}
+                                                            </a>                                                <div className="icons">
+                                                                <div className="like">
+                                                                    <LikeOutlined style={{ fontSize: "20px" }} />
+                                                                    Like
+                                                                </div>
+                                                                <div className="comment">
+                                                                    <CommentOutlined style={{ fontSize: "20px" }} />
+                                                                    Comment
+                                                                </div>
+                                                                <div className="share">
+                                                                    <ShareAltOutlined style={{ fontSize: "20px" }} />
+                                                                    Share
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div> */}
+    </Panel>
+  ))}
+</Collapse>
+
+
+
+
+                                    {/* <div style={{display:'flex', flexDirection:'column'}}>
                                         <Form.Item
                                             label={<span style={{ color: "#B4B4B4" }}>Select Source</span>}
                                             style={{ flex: 1 }}
@@ -2172,7 +2565,6 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             ]}
                                             >
                                                 <div>
-                                                    {/* Upload UI */}
                                                     <div style={{ display: selectedOption === "upload" ? "block" : "none" }}>
                                                         <Upload
                                                             beforeUpload={() => false}
@@ -2233,7 +2625,6 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                         </Upload>
                                                     </div>
 
-                                                    {/* Creative Library UI */}
                                                     {selectedOption === "creative" && (
                                                     <div>
                                                         <Button icon={<UploadOutlined />} onClick={onClickCreativesDrawer}>
@@ -2251,8 +2642,6 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                                 marginBottom: 8,
                                                                 }}
                                                             >
-                                                                {/* <PaperClipOutlined style={{ marginRight: 8 }} /> */}
-                                                                {/* <Tooltip title={file.name}> */}
                                                                 {file.type?.startsWith("image/") && (
                                                                     <img
                                                                         src={
@@ -2281,7 +2670,6 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                                 >
                                                                     {file.name}
                                                                 </span>
-                                                                {/* </Tooltip> */}
 
                                                                 
 
@@ -2307,9 +2695,11 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                     )}
                                                 </div>
                                         </Form.Item>
-                                    </div>
+                                    </div> */}
 
-                                        <Form.Item
+                                        
+                                    </div>
+                                    <Form.Item
                                             name="page_id"
                                             initialValue={imagehash?.pageID}
                                             label={<span style={{ color: "#B4B4B4" }}>Page id</span>}
@@ -2319,12 +2709,11 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                     message: "Please select an option!",
                                                 },
                                             ]}
-                                            style={{ flex: 3, marginLeft: "1%" }}
-                                        >
+                                            style={{ flex: 3, marginLeft: "1%", marginTop: "1%" }}
+                                    >
                                             <Input style={{ width: "45%" }} />
-                                        </Form.Item>
-                                    </div>
-                                    <Form.Item
+                                    </Form.Item>
+                                    {/* <Form.Item
                                         name="AddName"
                                         initialValue={campaignName}
                                         label={<span style={{ color: "#B4B4B4" }}>Add name</span>}
@@ -2340,7 +2729,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             onChange={(e) => setAddName(e.target.value)}
 
                                         />
-                                    </Form.Item>
+                                    </Form.Item> */}
                                     <Form.Item
                                         label="Primary text"
                                         name="message"
@@ -2495,7 +2884,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 </Form.Item> */}
                                 </div>
 
-                                <div style={{ flex: "30%" }}>
+                                {/* <div style={{ flex: "30%" }}>
                                         {selectedFiles && selectedFiles.length > 0 ? (
                                             selectedFiles.map((file, index) => (
                                                 <Badge
@@ -2523,7 +2912,6 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                         <div className="ad-preview" style={{ width: "350px" }}>
                                                             <div className="ad-heading">
                                                                 <div className="img">
-                                                                    {/* {file?.filename?.endsWith('.png') && console.log(file)} */}
                                                                     {file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") ? (
                                                                         <img
                                                                             src={file?.url}
@@ -2539,7 +2927,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                                             width="40"
                                                                             height="30"
                                                                             style={{ objectFit: 'cover' }}
-                                                                            muted // Muted to prevent sound on preview
+                                                                            muted 
                                                                         />
                                                                     ) : 
                                                                     file?.type?.startsWith('image/') ? (
@@ -2559,18 +2947,15 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                                             width="40"
                                                                             height="30"
                                                                             style={{ objectFit: 'cover' }}
-                                                                            muted // Muted to prevent sound on preview
+                                                                            muted 
                                                                         />
                                                                     )
-                                                                    // null
                                                                     }
                                                                 </div>
 
                                                                 <div className="title">
                                                                     <div className="main" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
                                                                         {addName}
-                                                                        {/* </div>                                                            <div className="sub">
-                                                                        Sponsored <GlobalOutlined style={{ opacity: "0.6" }} /> */}
                                                                         <div className="sub">
                                                                             {imagehash?.pageName ? (
                                                                                 <>
@@ -2597,13 +2982,11 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                                         <img
                                                                             src={file?.url}
                                                                             alt="ad content"
-                                                                            // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
                                                                             style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                                                                         />
                                                                     ) : file?.url?.endsWith('.mp4') ? (
                                                                         <video
                                                                         controls
-                                                                        // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
                                                                         style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                                                                         >
                                                                             <source src={file?.url} />
@@ -2615,14 +2998,12 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                                         <img
                                                                             src={editedImages[file?.name] ? editedImages[file?.name]:  file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url} // Use edited image if available
                                                                             alt="ad content"
-                                                                            // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
                                                                             style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                                                                         />
                                                                     ) : 
                                                                     (
                                                                         <video
                                                                             controls
-                                                                            // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
                                                                             style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                                                                         >
                                                                             <source src={file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url} />
@@ -2725,7 +3106,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                         //     </div>
                                         // )
                                         }
-                                    </div>
+                                    </div> */}
 
                             </div>
 

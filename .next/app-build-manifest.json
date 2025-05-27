@@ -12,10 +12,17 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/_not-found/page": [
+    "/Reports/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/_not-found/page.js"
+      "static/css/app/Reports/page.css",
+      "static/chunks/app/Reports/page.js"
+    ],
+    "/Dashboard/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/Dashboard/page.css",
+      "static/chunks/app/Dashboard/page.js"
     ]
   }
 }
