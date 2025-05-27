@@ -515,6 +515,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
     const [selectedOption, setSelectedOption] = useState("upload");
     const [changedFields, setChangedFields] = useState({});
     const [panels, setPanels] = useState([]); // State to manage dynamic panels
+    const [levelWiseChanges, setLevelWiseChanges] = useState({});
 
 
     const handleModeChange = (value) => {
@@ -553,7 +554,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                           ...item,
                           key: `panel-${index}`,
                           selectedOption,
-                          selectedFilesFromMedia: selectedOption === "upload" ? defaultFile : [],
+                          selectedFilesFromMedia: [], // selectedOption === "upload" ? defaultFile : []
                           selectedFilesFromCreatives: selectedOption === "creative" ? defaultFile : [],
                           selectedFiles: defaultFile,
                         };
@@ -635,40 +636,44 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
             // setHeadline(DuplicatedampaignData?.addlevel[0]?.headline);
             console.log(DuplicatedampaignData?.adsetlevel?.placements);
             form.setFieldsValue({
-                positions: DuplicatedampaignData?.adsetlevel?.position || ["feed"],
-                Account_Number: DuplicatedampaignData?.Account_Number,
-                // createdby:DuplicatedampaignData?.camapaignlevel?.createdby,
-                Name: DuplicatedampaignData?.camapaignlevel?.Name,
-                Objectives: DuplicatedampaignData?.camapaignlevel?.Objectives,
-                Special_categories: DuplicatedampaignData?.camapaignlevel?.Special_categories,
-                Bid_strategy: DuplicatedampaignData?.camapaignlevel?.Bid_strategy,
-                Daily_amount: (DuplicatedampaignData?.camapaignlevel?.Daily_amount) / 100,
-                Status: DuplicatedampaignData?.camapaignlevel?.Status,
-                AdsetName: DuplicatedampaignData?.adsetlevel?.AdsetName,
-                DailyAdd_amount: DuplicatedampaignData?.adsetlevel?.Daily_amount ? (DuplicatedampaignData?.adsetlevel?.Daily_amount) / 100 : 0,
-                optimization_goal: DuplicatedampaignData?.adsetlevel?.optimization_goal,
-                billing_event: DuplicatedampaignData?.adsetlevel?.billing_event,
-                // start_time: DuplicatedampaignData?.adsetlevel?.start_time,
-                action_source: DuplicatedampaignData?.adsetlevel?.action_source,
-                custom_event_type: DuplicatedampaignData?.adsetlevel?.custom_event_type,
-                pixel_id: DuplicatedampaignData?.adsetlevel?.pixel_id,
-                bid_amount: (DuplicatedampaignData?.adsetlevel?.bid_amount) / 100,
-                countries: DuplicatedampaignData?.adsetlevel?.countries,
-                Min_Age: DuplicatedampaignData?.adsetlevel?.Min_Age,
-                Max_Age: DuplicatedampaignData?.adsetlevel?.Max_Age,
-                Gender: DuplicatedampaignData?.adsetlevel?.Gender,
-                publisher_platforms: DuplicatedampaignData?.adsetlevel?.publisher_platforms ? DuplicatedampaignData?.adsetlevel?.publisher_platforms : "",
-                device_platforms: DuplicatedampaignData?.adsetlevel?.device_platforms ? DuplicatedampaignData?.adsetlevel?.device_platforms : "",
-                Language: DuplicatedampaignData?.adsetlevel?.locales,
-                placements: DuplicatedampaignData?.adsetlevel?.placements,
+                Campaign:{
+                    Account_Number: DuplicatedampaignData?.Account_Number,
+                    // createdby:DuplicatedampaignData?.camapaignlevel?.createdby,
+                    Name: DuplicatedampaignData?.camapaignlevel?.Name,
+                    Objectives: DuplicatedampaignData?.camapaignlevel?.Objectives,
+                    Special_categories: DuplicatedampaignData?.camapaignlevel?.Special_categories,
+                    Bid_strategy: DuplicatedampaignData?.camapaignlevel?.Bid_strategy,
+                    Daily_amount: (DuplicatedampaignData?.camapaignlevel?.Daily_amount) / 100,
+                    Status: DuplicatedampaignData?.camapaignlevel?.Status,
+                },
+                Adset:{
+                    AdsetName: DuplicatedampaignData?.adsetlevel?.AdsetName,
+                    positions: DuplicatedampaignData?.adsetlevel?.position || ["feed"],
+                    DailyAdd_amount: DuplicatedampaignData?.adsetlevel?.Daily_amount ? (DuplicatedampaignData?.adsetlevel?.Daily_amount) / 100 : 0,
+                    optimization_goal: DuplicatedampaignData?.adsetlevel?.optimization_goal,
+                    billing_event: DuplicatedampaignData?.adsetlevel?.billing_event,
+                    // start_time: DuplicatedampaignData?.adsetlevel?.start_time,
+                    action_source: DuplicatedampaignData?.adsetlevel?.action_source,
+                    custom_event_type: DuplicatedampaignData?.adsetlevel?.custom_event_type,
+                    pixel_id: DuplicatedampaignData?.adsetlevel?.pixel_id,
+                    bid_amount: (DuplicatedampaignData?.adsetlevel?.bid_amount) / 100,
+                    countries: DuplicatedampaignData?.adsetlevel?.countries,
+                    Min_Age: DuplicatedampaignData?.adsetlevel?.Min_Age,
+                    Max_Age: DuplicatedampaignData?.adsetlevel?.Max_Age,
+                    Gender: DuplicatedampaignData?.adsetlevel?.Gender,
+                    publisher_platforms: DuplicatedampaignData?.adsetlevel?.publisher_platforms ? DuplicatedampaignData?.adsetlevel?.publisher_platforms : "",
+                    device_platforms: DuplicatedampaignData?.adsetlevel?.device_platforms ? DuplicatedampaignData?.adsetlevel?.device_platforms : "",
+                    Language: DuplicatedampaignData?.adsetlevel?.locales,
+                    placements: DuplicatedampaignData?.adsetlevel?.placements,
+                },
                 // Facebook_positions: DuplicatedampaignData?.adsetlevel?.Facebook_positions,
                 // buying_type: DuplicatedampaignData?.adsetlevel?.buying_type,
-                AddName: DuplicatedampaignData?.adsetlevel?.AdsetName,
+                // AddName: DuplicatedampaignData?.adsetlevel?.AdsetName,
                 filename: DuplicatedampaignData?.addlevel[0]?.filename,
                 page_id: DuplicatedampaignData?.addlevel[0]?.page_id,
                 message: DuplicatedampaignData?.addlevel[0]?.message,
                 headline: DuplicatedampaignData?.addlevel[0]?.headline,
-                Description: "Find More",
+                Description: DuplicatedampaignData?.addlevel[0]?.Description,
                 Caption: DuplicatedampaignData?.addlevel[0]?.Caption,
                 Website_URL: DuplicatedampaignData?.addlevel[0]?.Website_URL,
                 Caption: DuplicatedampaignData?.addlevel[0]?.Caption,
@@ -735,11 +740,18 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
     const onChangeCampaignLevelDailyBudget = (event) => {
         setCampaignLevelDailyBudget(parseFloat(event.target.value));
         // form.setFieldsValue({ Daily_amount: event.target.value });
-        setChangedFields((prev) => ({
+        // setChangedFields((prev) => ({
+        //     ...prev,
+        //     Daily_amount: event.target.value, // merge or update the changed fields
+        //   }));
+        // console.log(event.target.value);
+        setLevelWiseChanges((prev) => ({
             ...prev,
-            Daily_amount: event.target.value, // merge or update the changed fields
-          }));
-        console.log(event.target.value);
+            Campaign: {
+                ...prev.campaign,
+                Daily_amount: parseFloat(event.target.value) * 100, // Convert to cents
+            }
+        })); // Update the levelWiseChanges state
     }
 
     const onChangeAdsetLevelDailyBudget = (event) => {
@@ -941,23 +953,46 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
             ...changedValues, // merge or update the changed fields
         }));
 
-        const groupedByPanel = {};
-
-        Object.entries(allValues).forEach(([fieldName, value]) => {
-            const inputEl = document.querySelector(`[name="${fieldName}"]`);
-
-            if (inputEl) {
-            const panelEl = inputEl.closest('.panel'); // Traverse DOM to find parent panel
-            const panelKey = panelEl?.getAttribute('data-panel');
-
-            if (panelKey) {
-                if (!groupedByPanel[panelKey]) groupedByPanel[panelKey] = {};
-                groupedByPanel[panelKey][fieldName] = value;
+        setLevelWiseChanges((prev) => {
+            const updated = { ...prev };
+        
+            for (const [level, fields] of Object.entries(changedValues)) {
+              updated[level] = {
+                ...(prev[level] || {}),
+                ...fields,
+              };
             }
-            }
+        
+            console.log("📦 Current level-wise changes:", updated);
+            return updated;
         });
 
-        console.log('🔍 Grouped by Panel:', groupedByPanel);
+        // const levelWise = Object.fromEntries(
+        //     Object.entries(changedValues).map(([level, fields]) => [
+        //       level,
+        //       { ...fields },
+        //     ])
+        // );
+      
+        // console.log(levelWise);
+
+        // const groupedByPanel = {};
+
+        // Object.entries(allValues).forEach(([fieldName, value]) => {
+        //     const inputEl = document.querySelector(`[name="${fieldName}"]`);
+
+        //     if (inputEl) {
+        //     const panelEl = inputEl.closest('.panel'); // Traverse DOM to find parent panel
+        //     const panelKey = panelEl?.getAttribute('data-panel');
+
+        //     if (panelKey) {
+        //         if (!groupedByPanel[panelKey]) groupedByPanel[panelKey] = {};
+        //         groupedByPanel[panelKey][fieldName] = value;
+        //     }
+        //     }
+        // });
+
+        // console.log('🔍 Grouped by Panel:', groupedByPanel);
         // Check if all fields are filled
         const isComplete = Object.values(allValues).every(value => value !== undefined && value !== '');
         setIsFormComplete(isComplete);
@@ -1646,7 +1681,8 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
         );
     };
 
-    console.log(changedFields, "changedFields");
+    // console.log(changedFields, "changedFields");
+    console.log(levelWiseChanges, "levelWiseChanges");
 
     return (
         <Drawer
@@ -1663,7 +1699,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                         <Panel header="CAMPAIGN LEVEL" key="1">
                             <div style={{ display: "flex" }}>
                                 <Form.Item
-                                    name="Account_Number"
+                                    name={["Campaign", "Account_Number"]}
                                     label={<span style={{ color: "#B4B4B4" }}>Account Number</span>}
                                     rules={[
                                         {
@@ -1675,7 +1711,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     <Input value={accountNumber} onChange={Accountchange} />
                                 </Form.Item>
                                 <Form.Item
-                                    name="Name"
+                                    name={["Campaign", "Name"]}
                                     label={<span style={{ color: "#B4B4B4" }}>Campaign name</span>}
                                     rules={[
                                         {
@@ -1689,7 +1725,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     />
                                 </Form.Item>
                                 <Form.Item
-                                    name="Objectives"
+                                    name={["Campaign", "Objectives"]}
                                     label={<span style={{ color: "#B4B4B4" }}>Objectives</span>}
                                     rules={[
                                         {
@@ -1713,7 +1749,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     />
                                 </Form.Item>
                                 <Form.Item
-                                    name="Special_categories"
+                                    name={["Campaign", "Special_categories"]}
                                     label={<span style={{ color: "#B4B4B4" }}>Categories</span>}
                                     rules={[
                                         {
@@ -1738,7 +1774,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     />
                                 </Form.Item>
                                 <Form.Item
-                                    name="Bid_strategy"
+                                    name={["Campaign", "Bid_strategy"]}
                                     label={<span style={{ color: "#B4B4B4" }}>Bid strategy</span>}
                                     rules={[
                                         {
@@ -1759,7 +1795,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     />
                                 </Form.Item>
                                 <Form.Item
-                                    name="Daily_amount"
+                                    name={["Campaign", "Daily_amount"]}
                                     label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
                                     style={{ flex: 0.1, marginLeft: "2%" }}
                                 // tooltip={adsetLevelDailyBudget !== "" ? "You have enabled daily budget in the Adset Level" : ""}
@@ -1785,7 +1821,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     </Tooltip>
                                 </Form.Item> {/*pk*/}
                                 <Form.Item
-                                    name="Status"
+                                    name={["Campaign", "Status"]}
                                     label={<span style={{ color: "#B4B4B4" }}>Status</span>}
                                     rules={[
                                         {
@@ -1808,7 +1844,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                         <Panel header="ADSET LEVEL" key="2" forceRender>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
                                 <Form.Item
-                                    name="AdsetName"
+                                    name={["Adset", "AdsetName"]}
                                     initialValue={campaignName}
                                     label={<span style={{ color: "#B4B4B4" }}>Adset name</span>}
                                     rules={[
@@ -1822,7 +1858,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     <Input />
                                 </Form.Item>
                                 <Form.Item
-                                    name="optimization_goal"
+                                    name={["Adset", "optimization_goal"]}
                                     label={<span style={{ color: "#B4B4B4" }}>Optimiz goal</span>}
                                     rules={[
                                         {
@@ -1842,7 +1878,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     />
                                 </Form.Item>
                                 <Form.Item
-                                    name="billing_event"
+                                    name={["Adset", "billing_event"]}
                                     label={<span style={{ color: "#B4B4B4" }}>Billing event</span>}
                                     rules={[
                                         {
@@ -1860,7 +1896,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     />
                                 </Form.Item>
                                 <Form.Item
-                                    name="DatePicker"
+                                    name={["Adset", "DatePicker"]}
                                     label={<span style={{ color: "#B4B4B4" }}>Start Time</span>}
                                     rules={[
                                         {
@@ -1879,7 +1915,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     style={{ width: '100%' }} />
                                 </Form.Item>
                                 <Form.Item
-                                    name="action_source"
+                                    name={["Adset", "action_source"]}
                                     label={<span style={{ color: "#B4B4B4" }}>Action source</span>}
                                     rules={[
                                         {
@@ -1899,7 +1935,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     />
                                 </Form.Item>
                                 <Form.Item
-                                    name="custom_event_type"
+                                    name={["Adset", "custom_event_type"]}
                                     label={<span style={{ color: "#B4B4B4" }}>Event type</span>}
                                     rules={[
                                         {
@@ -1919,7 +1955,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     />
                                 </Form.Item>
                                 <Form.Item
-                                    name="pixel_id"
+                                    name={["Adset", "pixel_id"]}
                                     initialValue={imagehash?.pixelID}
                                     label={<span style={{ color: "#B4B4B4" }}>Pixel id</span>}
                                     rules={[
@@ -1934,7 +1970,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 </Form.Item>
                                 {/*pk*/}
                                 <Form.Item
-                                    name="DailyAdd_amount" // Make sure this name matches the field you want to capture
+                                    name={["Adset", "DailyAdd_amount"]} // Make sure this name matches the field you want to capture
                                     label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
                                     style={{ flex: '1 1 200px' }}
                                 >
@@ -1960,7 +1996,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 </Form.Item>
                                 {showBidAmount && (
                                     <Form.Item
-                                        name="bid_amount"
+                                        name={["Adset", "bid_amount"]}
                                         label={<span style={{ color: "#B4B4B4" }}>Cost per Result Goal</span>}
                                         rules={[
                                             {
@@ -1994,7 +2030,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                             <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "green" }}>Targeting</span>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
                                 <Form.Item
-                                    name="countries"
+                                    name={["Adset", "countries"]}
                                     label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
                                     rules={[
                                         {
@@ -2028,7 +2064,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     />
                                 </Form.Item>
                                 <Form.Item
-                                    name="Min_Age"
+                                    name={["Adset", "Min_Age"]}
                                     label={<span style={{ color: "#B4B4B4" }}>Min Age</span>}
                                     rules={[
                                         {
@@ -2048,7 +2084,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     />
                                 </Form.Item>
                                 <Form.Item
-                                    name="Max_Age"
+                                    name={["Adset", "Max_Age"]}
                                     label={<span style={{ color: "#B4B4B4" }}>Max Age</span>}
                                     rules={[
                                         {
@@ -2068,7 +2104,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     />
                                 </Form.Item>
                                 <Form.Item
-                                    name="Gender"
+                                    name={["Adset", "Gender"]}
                                     label={<span style={{ color: "#B4B4B4" }}> Gender</span>}
                                     rules={[
                                         {
@@ -2087,7 +2123,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     />
                                 </Form.Item>
                                 <Form.Item
-                                    name="Language"
+                                    name={["Adset", "Language"]}
 
                                     label={<span style={{ color: "#B4B4B4" }}>Language</span>}
                                     rules={[{ required: true, message: "Please select an option!" }]}
@@ -2110,7 +2146,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 </Form.Item>
                                 <Form.Item
                                     label="Placements"
-                                    name="placements"
+                                    name={["Adset", "placements"]}
                                     rules={[{ required: true, message: 'Please select a mode!' }]}
                                 >
                                     <Select placeholder="Select a mode" onChange={handleModeChange}>
@@ -2122,7 +2158,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 {isManual && (
                                     <>
                                         <Form.Item
-                                            name="publisher_platforms"
+                                            name={["Adset", "publisher_platforms"]}
                                             label={<span style={{ color: "#B4B4B4" }}>Platforms</span>}
                                             rules={[{ required: true, message: "Please select an option!" }]}
                                             style={{ flex: '1 1 300px' }}
@@ -2141,7 +2177,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             </Select>
                                         </Form.Item>
                                         <Form.Item
-                                            name="positions"
+                                            name={["Adset", "positions"]}
                                             label={<span style={{ color: "#B4B4B4" }}>Positions</span>}
                                             rules={[{ required: true, message: "Please select an option!" }]}
                                             style={{ flex: '1 1 400px' }}
@@ -2160,7 +2196,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             </Select>
                                         </Form.Item>
                                         <Form.Item
-                                            name="device_platforms"
+                                            name={["Adset", "device_platforms"]}
                                             label={<span style={{ color: "#B4B4B4" }}>Device</span>}
                                             rules={[
                                                 {
@@ -2219,6 +2255,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                 form.validateFields([`MediaContent_${panel.key}`]);
                 }}
                 style={{ marginBottom: 16, width: "30%" }}
+                disabled={!(panel.selectedFiles.length === 0 && panel.selectedFilesFromCreatives.length === 0 && panel.selectedFilesFromMedia.length === 0)}
             >
                 <Option value="upload">Upload</Option>
                 <Option value="creative">Creative Library</Option>
@@ -2246,54 +2283,102 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
             <div>
                 {/* Upload Section */}
                 {panel.selectedOption === "upload" && (
-                <Upload
-                    key={panel.selectedFilesFromMedia.length} // ✅ force re-render when files change
-                    beforeUpload={() => false}
-                    multiple
-                    maxCount={10}
-                    listType="picture"
-                    accept="image/*, video/*"
-                    fileList={panel.selectedFilesFromMedia}
-                    onChange={(info) => {
-                    const newFiles = info.fileList.map((file) => ({
-                        ...file,
-                        uid: file.uid || `-${Date.now()}`,
-                        source: "media",
-                        thumbUrl:
-                        file.thumbUrl ||
-                        (file.originFileObj
-                            ? URL.createObjectURL(file.originFileObj)
-                            : undefined),
-                    }));
+  <Upload
+  key={`${panel.key}-${panel.selectedFilesFromMedia.map(f => f.uid).join(",")}`} // ✅ force re-render
+  beforeUpload={() => false}
+  multiple
+  maxCount={10}
+  listType="picture"
+  accept="image/*, video/*"
+  fileList={panel.selectedFilesFromMedia}
+  onChange={(info) => {
+    const newFiles = info.fileList.map((file) => ({
+      ...file,
+      uid: file.uid || `-${Date.now()}`,
+      source: "media",
+      thumbUrl:
+        file.thumbUrl ||
+        (file.originFileObj
+          ? URL.createObjectURL(file.originFileObj)
+          : undefined),
+    }));
 
-                    const current = panels.find(p => p.key === panel.key);
-                    const existingUids = new Set(current.selectedFilesFromMedia.map(f => f.uid));
-                    const filteredNew = newFiles.filter(f => !existingUids.has(f.uid));
-                    const final = [...current.selectedFilesFromMedia, ...filteredNew];
+    const current = panels.find((p) => p.key === panel.key);
+    const existingUids = new Set(current.selectedFilesFromMedia.map((f) => f.uid));
+    const filteredNew = newFiles.filter((f) => !existingUids.has(f.uid));
+    const final = [...current.selectedFilesFromMedia, ...filteredNew];
 
-                    updatePanel(panel.key, "selectedFilesFromMedia", final);
-                    updatePanel(panel.key, "selectedFiles", final);
-                    form.setFieldsValue({ [`MediaContent_${panel.key}`]: final });
-                    form.validateFields([`MediaContent_${panel.key}`]);
-                    }}
-                    onRemove={(fileToRemove) => {
-                    const current = panels.find(p => p.key === panel.key);
-                    const filtered = current.selectedFilesFromMedia.filter(f => f.uid !== fileToRemove.uid);
-                    updatePanel(panel.key, "selectedFilesFromMedia", filtered);
-                    updatePanel(panel.key, "selectedFiles", filtered);
-                    form.setFieldsValue({ [`MediaContent_${panel.key}`]: filtered });
-                    form.validateFields([`MediaContent_${panel.key}`]);
-                    return true;
-                    }}
-                >
-                    <Button icon={<UploadOutlined />}>Select Files</Button>
-                </Upload>
-                )}
+    updatePanel(panel.key, "selectedFilesFromMedia", final);
+    updatePanel(panel.key, "selectedFilesFromCreatives", []);
+    updatePanel(panel.key, "selectedFiles", final);
+
+    if (final.length > 0) {
+      const firstFileName = final[0].name || "";
+      const nameWithoutExt = firstFileName.split(".").slice(0, -1).join(".") || "";
+      updatePanel(panel.key, "AddName", nameWithoutExt);
+      updatePanel(panel.key, "filename", firstFileName);
+      form.setFieldsValue({
+        [`AddName_${panel.key}`]: nameWithoutExt,
+        [`MediaContent_${panel.key}`]: final,
+      });
+    } else {
+      form.setFieldsValue({ [`MediaContent_${panel.key}`]: final });
+    }
+
+    form.validateFields([`MediaContent_${panel.key}`]);
+  }}
+  onRemove={(fileToRemove) => {
+    const current = panels.find((p) => p.key === panel.key);
+    const filtered = current.selectedFilesFromMedia.filter(
+      (f) => f.uid !== fileToRemove.uid
+    );
+
+    updatePanel(panel.key, "selectedFilesFromMedia", filtered);
+    updatePanel(panel.key, "selectedFiles", filtered);
+
+    if (filtered.length === 0) {
+      updatePanel(panel.key, "AddName", "");
+      updatePanel(panel.key, "filename", "");
+      form.setFieldsValue({
+        [`AddName_${panel.key}`]: "",
+        [`MediaContent_${panel.key}`]: filtered,
+      });
+    } else {
+      const firstFileName = filtered[0].name || "";
+      const nameWithoutExt = firstFileName.split(".").slice(0, -1).join(".") || "";
+      updatePanel(panel.key, "AddName", nameWithoutExt);
+      updatePanel(panel.key, "filename", firstFileName);
+      form.setFieldsValue({
+        [`AddName_${panel.key}`]: nameWithoutExt,
+        [`MediaContent_${panel.key}`]: filtered,
+      });
+    }
+
+    form.validateFields([`MediaContent_${panel.key}`]);
+    return true;
+  }}
+>
+  <Button
+    icon={<UploadOutlined />}
+    disabled={
+      !(
+        panel.selectedFiles.length === 0 &&
+        panel.selectedFilesFromCreatives.length === 0 &&
+        panel.selectedFilesFromMedia.length === 0
+      )
+    }
+  >
+    Select Files
+  </Button>
+</Upload>
+
+)}
 
                 {/* Creative Library Section */}
                 {panel.selectedOption === "creative" && (
                 <div>
                     <Button
+                    disabled={!(panel.selectedFiles.length === 0 && panel.selectedFilesFromCreatives.length === 0 && panel.selectedFilesFromMedia.length === 0)}
                     icon={<UploadOutlined />}
                     onClick={() => onClickCreativesDrawer(panel.key)}
                     >
@@ -2360,7 +2445,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
             </Form.Item>
         </div>
         <div>
-        {panel.selectedFilesFromCreatives.map((file) => (
+        {panel.selectedFiles.map((file) => (
                         <div
                             key={file.uid}
                             style={{
@@ -2371,6 +2456,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                         >
                             {file.type?.startsWith("image/") && (
                             <img
+                            // style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                                 src={
                                 file.originFileObj
                                     ? URL.createObjectURL(file.originFileObj)
@@ -2378,12 +2464,15 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 }
                                 alt="preview"
                                 style={{
+                                maxWidth: '100%', maxHeight: '100%', 
                                 width: 300,
                                 height: 300,
-                                objectFit: "cover",
+                                objectFit: "contain",
                                 borderRadius: 4,
                                 marginLeft: 8,
+                                
                                 }}
+                                
                             />
                             )}
                         </div>))}
