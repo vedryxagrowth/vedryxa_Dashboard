@@ -183,7 +183,7 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
         headerName: 'CampaignName',
         minWidth: 450,
         pinned: 'left',
-        sortable: true, // Enable sorting
+        sortable: true,
 
         comparator: (campaignA, campaignB) => {
             if (!campaignA) return 1;
