@@ -88,6 +88,7 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
     const [apiStatus, setApiStatus ]= useState(false);
 
     const memorizedColumnDef1 = useMemo(()=> columnDefs.current, [columnDefs.current]);
+    console.log(memorizedColumnDef1,"1111");
     const memorizedDailyData = useMemo(()=> dailyData?.filter((each) => {
         const normalizedCampaign = each.campaignname.trim().toLowerCase();
         const normalizedInput = inputValue.trim().toLowerCase();
@@ -651,7 +652,7 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
             const api = newRevenuePratner === "FB_DomainActive" ? "Daily/CampaignName" : "Daily";
             const collectionName = newRevenuePratner === "FB_DomainActive" ? "Facebook_DActive_Names" : newtworkCollections[newRevenuePratner];
             // const fetchData = await apiClient.get(`/${api}?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`);
-            const fetchData = await apiClient.get(`http://localhost:8000/CampaignLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=Daily&network=${collectionName}`);
+            const fetchData = await apiClient.get(`/CampaignLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=Daily&network=${collectionName}`);
             const mainData = fetchData.data;
             timezone.current = mainData.length > 0  ? mainData[0].accountTimezone : "";
             let totalSpend = 0;
@@ -666,7 +667,7 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
             const specifiedTimeZone = selectTimezone[newtime];
             const totalRow = mainData && mainData.length > 0 ?
                 mainData.map((eachData) => {
-                    // console.log(eachData.tq, "tqvalue");
+                    // console.log("TQ value from API row:", eachData.tq, typeof eachData.tq);
                     const Revenue = eachData.estimated_revenue !== undefined ? (eachData.estimated_revenue) : 0;
                     const profit = (Revenue - eachData.spend);
                     const conversions = eachData.conversions !== undefined ? eachData.conversions : 0;

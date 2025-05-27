@@ -442,7 +442,7 @@ export default function AdsetNameAndAccount({params}){
     }
 
     const getHistoryData = async() => {
-        const fetchData = await apiClient.get(`http://localhost:8000/DailyAdsetHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`);
+        const fetchData = await apiClient.get(`/DailyAdsetHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`);
         // console.log(`https://prodapis.adsgoat.in/LiveAdsetHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`, "url");
         const url = `http://localhost:8000/MnetLiveCampaignHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}`
         
