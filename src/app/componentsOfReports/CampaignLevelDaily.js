@@ -195,7 +195,6 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                 return relatedComment ? relatedComment.pinned : false;
             };
 
-            // Prioritize pinned campaigns first (pinned campaigns should come to the top)
             const isPinnedA = getPinStatusForCampaign(campaignA);
             const isPinnedB = getPinStatusForCampaign(campaignB);
 
