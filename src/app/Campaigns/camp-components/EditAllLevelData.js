@@ -516,6 +516,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
     const [changedFields, setChangedFields] = useState({});
     const [panels, setPanels] = useState([]); // State to manage dynamic panels
     const [levelWiseChanges, setLevelWiseChanges] = useState({});
+    const [activePanelKey, setActivePanelKey] = useState(null);
 
 
     const handleModeChange = (value) => {
@@ -670,23 +671,25 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                 // buying_type: DuplicatedampaignData?.adsetlevel?.buying_type,
                 // AddName: DuplicatedampaignData?.adsetlevel?.AdsetName,
                 filename: DuplicatedampaignData?.addlevel[0]?.filename,
-                page_id: DuplicatedampaignData?.addlevel[0]?.page_id,
-                message: DuplicatedampaignData?.addlevel[0]?.message,
-                headline: DuplicatedampaignData?.addlevel[0]?.headline,
-                Description: DuplicatedampaignData?.addlevel[0]?.Description,
-                Caption: DuplicatedampaignData?.addlevel[0]?.Caption,
-                Website_URL: DuplicatedampaignData?.addlevel[0]?.Website_URL,
-                Caption: DuplicatedampaignData?.addlevel[0]?.Caption,
-                pixel_id: DuplicatedampaignData?.addlevel[0]?.pixel_id,
-                page_id: DuplicatedampaignData?.addlevel[0]?.page_id,
-                MediaContent: (DuplicatedampaignData?.addlevel?.map((file, index)=>{
-                    return({
-                        uid: `-${index+1}`,
-                        name: file?.filename,
-                        status: 'done',
-                        url: file?.filename,
-                    })
-                }))
+                // page_id: DuplicatedampaignData?.addlevel[0]?.page_id,
+                Ad:{
+                    message: DuplicatedampaignData?.addlevel[0]?.message,
+                    headline: DuplicatedampaignData?.addlevel[0]?.headline,
+                    Description: DuplicatedampaignData?.addlevel[0]?.Description,
+                    Caption: DuplicatedampaignData?.addlevel[0]?.Caption,
+                    Website_URL: DuplicatedampaignData?.addlevel[0]?.Website_URL,
+                    Caption: DuplicatedampaignData?.addlevel[0]?.Caption,
+                    pixel_id: DuplicatedampaignData?.addlevel[0]?.pixel_id,
+                    page_id: DuplicatedampaignData?.addlevel[0]?.page_id
+                }
+                // MediaContent: (DuplicatedampaignData?.addlevel?.map((file, index)=>{
+                //     return({
+                //         uid: `-${index+1}`,
+                //         name: file?.filename,
+                //         status: 'done',
+                //         url: file?.filename,
+                //     })
+                // }))
             });
         }
     }, [DuplicatedampaignData, form]);
@@ -719,19 +722,47 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
         setWebsiteURL(text);
         if (network === "FB_Mnet" || network === "FB_DomainActive") {
             setCaption(text.split('//')[1].split("/")[0]);
-            setChangedFields((prev) => ({
+            form.setFieldsValue({
+                Ad: {
+                  Website_URL: text, // merge or update the changed fields
+                  Caption: text.split('//')[1].split("/")[0],
+                },
+            });
+            setLevelWiseChanges((prev) => ({
                 ...prev,
-                Website_URL: text, // merge or update the changed fields
-                Caption: text.split('//')[1].split("/")[0],  // merge or update the changed fields
+                Ad: {
+                    ...prev.campaign,
+                    Website_URL: text, // Update the campaign level changes
+                    Caption: text.split('//')[1].split("/")[0], 
+                }
             }));
+            // setChangedFields((prev) => ({
+            //     ...prev,
+            //     Website_URL: text, // merge or update the changed fields
+            //     Caption: text.split('//')[1].split("/")[0],  // merge or update the changed fields
+            // }));
 
         } else {
             setCaption(text.split('/')[0]);
-            setChangedFields((prev) => ({
+            form.setFieldsValue({
+                Ad: {
+                  Website_URL: text, // merge or update the changed fields
+                  Caption: text.split('/')[0],
+                },
+            });
+            setLevelWiseChanges((prev) => ({
                 ...prev,
-                Website_URL: text, // merge or update the changed fields
-                Caption: text.split('/')[0],  // merge or update the changed fields
-              }));
+                Ad: {
+                    ...prev.campaign,
+                    Website_URL: text, // Update the campaign level changes
+                    Caption: text.split('/')[0], 
+                }
+            })); // Update the levelWiseChanges state
+            // setChangedFields((prev) => ({
+            //     ...prev,
+            //     Website_URL: text, // merge or update the changed fields
+            //     Caption: text.split('/')[0],  // merge or update the changed fields
+            //   }));
 
         }
         // console.log(text, "text");
@@ -1383,7 +1414,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
             };
 
             try {
-                console.log(changedFields, "changedFields on Submit");
+                console.log(levelWiseChanges, "changedFields on Submit");
                 // const imageHashArray = await customRequest(onSuccess, onError);
                 // console.log("Image Hash Array:", imageHashArray);
 
@@ -1612,8 +1643,13 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
         setSelectedOption(value);
     };
 
-    const onClickCreativesDrawer = () => {
+    const onClickCreativesDrawer = (panelKey) => {
         console.log("Creatives Drawer Opened");
+        // const onClickCreativesDrawer = (panelKey) => {
+        //     setActivePanelKey(panelKey);
+        //     setOpenCreativesDrawer(true);
+        //   };
+        setActivePanelKey(panelKey);
         setOpenCreativesDrawer(true);
     }
 
@@ -1661,6 +1697,40 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
             form.setFieldsValue({ MediaContent: updatedMediaContent });
             form.validateFields(["MediaContent"]);
         }
+        if (!activePanelKey || !data || data.length === 0) return;
+
+    // Only take the first file
+    const file = data[0];
+
+    const enrichedFile = {
+    uid: file.uid || `creative-${Date.now()}-0`,
+    source: "creative",
+    thumbUrl: file.thumbUrl || file.url,
+    url: file.url,
+    name: file.name || file.filename?.split("/").pop() || `file-0`,
+    type: file.type || "image/jpeg",
+    };
+
+    const enrichedFiles = [enrichedFile]; // wrap in array
+
+    setPanels((prev) =>
+    prev.map((panel) =>
+        panel.key === activePanelKey
+        ? {
+            ...panel,
+            selectedFiles: enrichedFiles,
+            selectedFilesFromCreatives: enrichedFiles,
+            selectedFilesFromMedia: [],
+            }
+        : panel
+    )
+    );
+
+    // ✅ Update form only for this panel
+    form.setFieldsValue({ [`MediaContent_${activePanelKey}`]: enrichedFiles });
+    form.validateFields([`MediaContent_${activePanelKey}`]);
+        
+        
     }
 
     console.log("Selected Files:", selectedFiles);
@@ -2283,169 +2353,156 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
             <div>
                 {/* Upload Section */}
                 {panel.selectedOption === "upload" && (
-  <Upload
-  key={`${panel.key}-${panel.selectedFilesFromMedia.map(f => f.uid).join(",")}`} // ✅ force re-render
-  beforeUpload={() => false}
-  multiple
-  maxCount={10}
-  listType="picture"
-  accept="image/*, video/*"
-  fileList={panel.selectedFilesFromMedia}
-  onChange={(info) => {
-    const newFiles = info.fileList.map((file) => ({
-      ...file,
-      uid: file.uid || `-${Date.now()}`,
-      source: "media",
-      thumbUrl:
-        file.thumbUrl ||
-        (file.originFileObj
-          ? URL.createObjectURL(file.originFileObj)
-          : undefined),
-    }));
+                    <Upload
+                        key={`${panel.key}-${panel.selectedFilesFromMedia.map(f => f.uid).join(",")}`} // force re-render
+                        beforeUpload={() => false}
+                        multiple
+                        maxCount={1} // ensures only one file is accepted at UI level
+                        listType="picture"
+                        accept="image/*,video/*"
+                        fileList={panel.selectedFilesFromMedia}
+                        onChange={(info) => {
+                        const firstFileRaw = info.fileList[0]; // only take the first file
+                        if (!firstFileRaw) return;
 
-    const current = panels.find((p) => p.key === panel.key);
-    const existingUids = new Set(current.selectedFilesFromMedia.map((f) => f.uid));
-    const filteredNew = newFiles.filter((f) => !existingUids.has(f.uid));
-    const final = [...current.selectedFilesFromMedia, ...filteredNew];
+                        const enrichedFile = {
+                            ...firstFileRaw,
+                            uid: firstFileRaw.uid || `media-${Date.now()}`,
+                            source: "media",
+                            thumbUrl:
+                            firstFileRaw.thumbUrl ||
+                            (firstFileRaw.originFileObj
+                                ? URL.createObjectURL(firstFileRaw.originFileObj)
+                                : undefined),
+                        };
 
-    updatePanel(panel.key, "selectedFilesFromMedia", final);
-    updatePanel(panel.key, "selectedFilesFromCreatives", []);
-    updatePanel(panel.key, "selectedFiles", final);
+                        const newFiles = [enrichedFile]; // only the first file in array form
 
-    if (final.length > 0) {
-      const firstFileName = final[0].name || "";
-      const nameWithoutExt = firstFileName.split(".").slice(0, -1).join(".") || "";
-      updatePanel(panel.key, "AddName", nameWithoutExt);
-      updatePanel(panel.key, "filename", firstFileName);
-      form.setFieldsValue({
-        [`AddName_${panel.key}`]: nameWithoutExt,
-        [`MediaContent_${panel.key}`]: final,
-      });
-    } else {
-      form.setFieldsValue({ [`MediaContent_${panel.key}`]: final });
-    }
+                        // ✅ Update state
+                        updatePanel(panel.key, "selectedFilesFromMedia", newFiles);
+                        updatePanel(panel.key, "selectedFilesFromCreatives", []);
+                        updatePanel(panel.key, "selectedFiles", newFiles);
 
-    form.validateFields([`MediaContent_${panel.key}`]);
-  }}
-  onRemove={(fileToRemove) => {
-    const current = panels.find((p) => p.key === panel.key);
-    const filtered = current.selectedFilesFromMedia.filter(
-      (f) => f.uid !== fileToRemove.uid
-    );
+                        form.setFieldsValue({ [`MediaContent_${panel.key}`]: newFiles });
+                        form.validateFields([`MediaContent_${panel.key}`]);
+                        }}
+                        onRemove={(fileToRemove) => {
+                        const filtered = panel.selectedFilesFromMedia.filter(
+                            (f) => f.uid !== fileToRemove.uid
+                        );
 
-    updatePanel(panel.key, "selectedFilesFromMedia", filtered);
-    updatePanel(panel.key, "selectedFiles", filtered);
+                        updatePanel(panel.key, "selectedFilesFromMedia", filtered);
+                        updatePanel(panel.key, "selectedFiles", filtered);
 
-    if (filtered.length === 0) {
-      updatePanel(panel.key, "AddName", "");
-      updatePanel(panel.key, "filename", "");
-      form.setFieldsValue({
-        [`AddName_${panel.key}`]: "",
-        [`MediaContent_${panel.key}`]: filtered,
-      });
-    } else {
-      const firstFileName = filtered[0].name || "";
-      const nameWithoutExt = firstFileName.split(".").slice(0, -1).join(".") || "";
-      updatePanel(panel.key, "AddName", nameWithoutExt);
-      updatePanel(panel.key, "filename", firstFileName);
-      form.setFieldsValue({
-        [`AddName_${panel.key}`]: nameWithoutExt,
-        [`MediaContent_${panel.key}`]: filtered,
-      });
-    }
+                        form.setFieldsValue({ [`MediaContent_${panel.key}`]: filtered });
+                        form.validateFields([`MediaContent_${panel.key}`]);
 
-    form.validateFields([`MediaContent_${panel.key}`]);
-    return true;
-  }}
->
-  <Button
-    icon={<UploadOutlined />}
-    disabled={
-      !(
-        panel.selectedFiles.length === 0 &&
-        panel.selectedFilesFromCreatives.length === 0 &&
-        panel.selectedFilesFromMedia.length === 0
-      )
-    }
-  >
-    Select Files
-  </Button>
-</Upload>
+                        return true;
+                        }}
+                    >
+                        <Button
+                        icon={<UploadOutlined />}
+                        disabled={
+                            !(
+                            panel.selectedFiles.length === 0 &&
+                            panel.selectedFilesFromCreatives.length === 0 &&
+                            panel.selectedFilesFromMedia.length === 0
+                            )
+                        }
+                        >
+                        Select Files
+                        </Button>
+                    </Upload>
+                )}
 
-)}
 
                 {/* Creative Library Section */}
                 {panel.selectedOption === "creative" && (
-                <div>
-                    <Button
-                    disabled={!(panel.selectedFiles.length === 0 && panel.selectedFilesFromCreatives.length === 0 && panel.selectedFilesFromMedia.length === 0)}
-                    icon={<UploadOutlined />}
-                    onClick={() => onClickCreativesDrawer(panel.key)}
-                    >
-                    Select Files
-                    </Button>
-
-                    {panel.selectedFilesFromCreatives?.length > 0 && (
-                    <div style={{ marginTop: "10px" }}>
-                        {panel.selectedFilesFromCreatives.map((file) => (
-                        <div
-                            key={file.uid}
-                            style={{
-                            display: "flex",
-                            alignItems: "center",
-                            marginBottom: 8,
-                            }}
+                    <div>
+                        <Button
+                        disabled={
+                            !(
+                            panel.selectedFiles.length === 0 &&
+                            panel.selectedFilesFromCreatives.length === 0 &&
+                            panel.selectedFilesFromMedia.length === 0
+                            )
+                        }
+                        icon={<UploadOutlined />}
+                        onClick={() =>
+                            onClickCreativesDrawer(panel.key)
+                        }
                         >
-                            {file.type?.startsWith("image/") && (
-                            <img
-                                src={
-                                file.originFileObj
-                                    ? URL.createObjectURL(file.originFileObj)
-                                    : file.url
-                                }
-                                alt="preview"
+                        Select Files
+                        </Button>
+
+                        {panel.selectedFilesFromCreatives?.length > 0 && (
+                        <div style={{ marginTop: "10px" }}>
+                            {panel.selectedFilesFromCreatives.map((file) => (
+                            <div
+                                key={file.uid}
                                 style={{
-                                width: 40,
-                                height: 40,
-                                objectFit: "cover",
-                                borderRadius: 4,
-                                marginLeft: 8,
+                                display: "flex",
+                                alignItems: "center",
+                                marginBottom: 8,
                                 }}
-                            />
-                            )}
-                            <span
-                            style={{
-                                maxWidth: 160,
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
-                                paddingLeft: 8,
-                            }}
                             >
-                            {file.name}
-                            </span>
-                            <DeleteOutlined
-                            onClick={() => {
-                                const current = panels.find(p => p.key === panel.key);
-                                const updated = current.selectedFilesFromCreatives.filter(f => f.uid !== file.uid);
-                                updatePanel(panel.key, "selectedFilesFromCreatives", updated);
-                                updatePanel(panel.key, "selectedFiles", updated);
-                                form.setFieldsValue({ [`MediaContent_${panel.key}`]: updated });
-                                form.validateFields([`MediaContent_${panel.key}`]);
-                            }}
-                            style={{ color: "red", marginLeft: 12, cursor: "pointer" }}
-                            />
+                                {file.type?.startsWith("image/") && (
+                                <img
+                                    src={
+                                    file.originFileObj
+                                        ? URL.createObjectURL(file.originFileObj)
+                                        : file.url
+                                    }
+                                    alt="preview"
+                                    style={{
+                                    width: 40,
+                                    height: 40,
+                                    objectFit: "cover",
+                                    borderRadius: 4,
+                                    marginLeft: 8,
+                                    }}
+                                />
+                                )}
+                                <span
+                                style={{
+                                    maxWidth: 160,
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    whiteSpace: "nowrap",
+                                    paddingLeft: 8,
+                                }}
+                                >
+                                {file.name}
+                                </span>
+                                <DeleteOutlined
+                                onClick={() => {
+                                    const current = panels.find((p) => p.key === panel.key);
+                                    const updated = current.selectedFilesFromCreatives.filter(
+                                    (f) => f.uid !== file.uid
+                                    );
+
+                                    updatePanel(panel.key, "selectedFilesFromCreatives", updated);
+                                    updatePanel(panel.key, "selectedFiles", updated);
+
+                                    form.setFieldsValue({
+                                    [`MediaContent_${panel.key}`]: updated,
+                                    });
+                                    form.validateFields([`MediaContent_${panel.key}`]);
+                                }}
+                                style={{ color: "red", marginLeft: 12, cursor: "pointer" }}
+                                />
+                            </div>
+                            ))}
                         </div>
-                        ))}
+                        )}
                     </div>
-                    )}
-                </div>
                 )}
+
             </div>
             </Form.Item>
         </div>
         <div>
-        {panel.selectedFiles.map((file) => (
+            {panel.selectedFiles.map((file) => (
                         <div
                             key={file.uid}
                             style={{
@@ -2475,7 +2532,19 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 
                             />
                             )}
-                        </div>))}
+                            {file.type?.startsWith("video/") && 
+                            (
+                                <video
+                                    controls
+                                    // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                    style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                                >
+                                    <source src={file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url} />
+                                    Your browser does not support the video tag.
+                                </video>
+                            )
+                            }
+            </div>))}
         </div>
       </div>
       {/* <div key={index} className="container-ad-preview">
@@ -2789,7 +2858,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                         
                                     </div>
                                     <Form.Item
-                                            name="page_id"
+                                            name={["Ad", "page_id"]}
                                             initialValue={imagehash?.pageID}
                                             label={<span style={{ color: "#B4B4B4" }}>Page id</span>}
                                             rules={[
@@ -2821,7 +2890,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     </Form.Item> */}
                                     <Form.Item
                                         label="Primary text"
-                                        name="message"
+                                        name={["Ad", "message"]}
                                         rules={[
                                             {
                                                 required: true,
@@ -2858,7 +2927,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     </Form.Item> */}
                                     <Form.Item
                                         label="Headline"
-                                        name="headline"
+                                        name={["Ad", "headline"]}
                                         rules={[
                                             {
                                                 required: true,
@@ -2877,7 +2946,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
 
                                     <Form.Item
                                         label="Description"
-                                        name="Description"
+                                        name={["Ad", "Description"]}
                                         rules={[
                                             {
                                                 required: true,
@@ -2907,7 +2976,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                         }
                                         labelCol={{ style: { width: '100%' } }}  // Makes the label full width
                                         wrapperCol={{ style: { width: '100%' } }}  // Ensures TextArea takes the same full width
-                                        name="Website_URL"
+                                        name={["Ad", "Website_URL"]}
                                         rules={[
                                             {
                                                 required: true,
@@ -2926,7 +2995,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     </Form.Item>
                                     <Form.Item
                                         label="Display Link"
-                                        name="Caption"
+                                        name={["Ad", "Caption"]}
                                         rules={[
                                             {
                                                 required: true,
@@ -3210,7 +3279,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                         )}
                     </Form.Item> */}
                     <Form.Item label=" ">
-                        {isFormComplete && (
+                        {/* {isFormComplete && ( */}
                             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
                             <Button
                                 type="primary"
@@ -3253,7 +3322,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 </div>
                             )}
                             </div>
-                        )}
+                        {/* )} */}
                     </Form.Item>
 
                     {isImgEditorShown && currentFile && (
