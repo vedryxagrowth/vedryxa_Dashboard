@@ -545,7 +545,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 uid: `file-${index}`,
                                 name: item.filename.split("/").pop(),
                                 url: item.filename,
-                                type: "image/jpeg",
+                                type: item.filename.endsWith(".mp4") ? "video/mp4" : "image/jpeg",
                                 source: selectedOption === "upload" ? "media" : "creative",
                               },
                             ]
@@ -728,14 +728,21 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                   Caption: text.split('//')[1].split("/")[0],
                 },
             });
-            setLevelWiseChanges((prev) => ({
-                ...prev,
-                Ad: {
-                    ...prev.campaign,
-                    Website_URL: text, // Update the campaign level changes
-                    Caption: text.split('//')[1].split("/")[0], 
-                }
-            }));
+            setLevelWiseChanges((prev) => {
+                const existingAd = prev?.Ad || {};
+                const existingAds = existingAd?.Ads || [];
+              
+                return {
+                  ...prev,
+                  Ad: {
+                    ...existingAd, // ✅ Preserve all existing keys (like Ads)
+                    Ads: existingAds, // ✅ Explicitly reassign Ads to be safe
+                    Website_URL: text,
+                    Caption: text.split('//')[1].split("/")[0],
+                  },
+                };
+            });
+              
             // setChangedFields((prev) => ({
             //     ...prev,
             //     Website_URL: text, // merge or update the changed fields
@@ -750,14 +757,21 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                   Caption: text.split('/')[0],
                 },
             });
-            setLevelWiseChanges((prev) => ({
-                ...prev,
-                Ad: {
-                    ...prev.campaign,
-                    Website_URL: text, // Update the campaign level changes
-                    Caption: text.split('/')[0], 
-                }
-            })); // Update the levelWiseChanges state
+            setLevelWiseChanges((prev) => {
+                const existingAd = prev?.Ad || {};
+                const existingAds = existingAd?.Ads || [];
+              
+                return {
+                  ...prev,
+                  Ad: {
+                    ...existingAd, // ✅ Preserve all existing keys (like Ads)
+                    Ads: existingAds, // ✅ Explicitly reassign Ads to be safe
+                    Website_URL: text,
+                    Caption: text.split('/')[0],
+                  },
+                };
+            });
+               // Update the levelWiseChanges state
             // setChangedFields((prev) => ({
             //     ...prev,
             //     Website_URL: text, // merge or update the changed fields
@@ -1415,6 +1429,259 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
 
             try {
                 console.log(levelWiseChanges, "changedFields on Submit");
+                const ads = levelWiseChanges?.Ad?.Ads || [];
+                console.log(ads, "ads on Submit");
+                const token = imagehash?.token;
+                // const account = imagehash?.accountNumber;
+                const adsData = await Promise.all(ads.map(async (file, index) => {
+                    console.log(file, "file on Submit");
+                    if (file?.filename?.source === "media") {
+                        if (file?.filename?.type.startsWith('image/') || file?.filename?.type.startsWith('video/')) {
+                            console.log(file, "file on Submit");
+                            const formData = new FormData();
+                            const uniqueId = uuidv4(); // Generate a unique ID for the file
+                            const fileId = `${uniqueId}_${file?.filename.name}`;
+                            console.log(fileId, "fileId on Submit");
+                            const editedImage = "";
+                            const uploadFile = editedImage ? await fetch(editedImage).then(res => res.blob()) : null;
+        
+                            // console.log(file.originFileObj.name);
+        
+                            if (uploadFile) {
+                                formData.append("file", uploadFile, `blob/${uniqueId}_${file?.filename.name}`);
+                            } else {
+                                formData.append("file", file?.filename.originFileObj, `blob/${uniqueId}_${file?.filename.originFileObj.name}`);
+                            }
+        
+                            // console.log(formData);
+                            let response, fbResponse;
+        
+                            if (file?.filename.type.startsWith('image/')) {
+                                response = await axios.post(
+                                    'https://www.testapi.adsgoat.in/upload',
+                                    formData,
+                                    {
+                                        headers: {
+                                            'Authorization': localStorage.getItem("token"),
+                                            "Content-Type": "multipart/form-data"
+                                        },
+                                    }
+                                );
+        
+                                if (!response.data.imageUrl) {
+                                    // onError("Error: Image URL not returned from custom API");
+                                    console.error("Image upload to custom API failed, imageUrl missing");
+                                    // continue;
+                                }
+        
+                                // console.log("Custom API response imageUrl:", response);
+                                formData.append('access_token', token);
+        
+                                fbResponse = await axios.post(
+                                    `https://graph.facebook.com/v20.0/act_${accountNumber}/adimages`,
+                                    formData,
+                                    { headers: { 'Content-Type': 'multipart/form-data' } }
+                                );
+
+                                // console.log("Facebook API response:", fbResponse.data);
+        
+                                if (response.status === 200 && fbResponse.status === 200) {
+                                    // onSuccess("ok", response);
+                                    return({
+                                        id: file.id,
+                                        AddName: file.AddName,
+                                        filename: response.data.imageUrl,
+                                        imag_hash: fbResponse.data?.images?.[fileId]?.hash,
+                                    });
+                                } else {
+                                    // onError("error", response);
+                                    console.error("Image upload failed");
+                                }
+                            } else if (file?.filename.type.startsWith('video/')) {
+                                response = await axios.post(
+                                    'https://www.testapi.adsgoat.in/upload',
+                                    formData,
+                                    {
+                                        headers: {
+                                            'Authorization': localStorage.getItem("token"),
+                                            "Content-Type": "multipart/form-data"
+                                        },
+                                    }
+                                );
+        
+                                if (response.status !== 200) {
+                                    // onError("error", response);
+                                    console.error("Video upload to custom API failed");
+                                    // continue;
+                                }
+        
+                                formData.append('access_token', token);
+        
+                                fbResponse = await axios.post(
+                                    `https://graph.facebook.com/v20.0/act_${accountNumber}/advideos`,
+                                    formData,
+                                    { headers: { 'Content-Type': 'multipart/form-data' } }
+                                );
+        
+                                if (fbResponse.status === 200) {
+                                    const videoid = fbResponse?.data?.id;
+                                    await new Promise(resolve => setTimeout(resolve, 10000));
+        
+                                    const thumbnailResponse = await axios.get(
+                                        `https://graph.facebook.com/v20.0/${videoid}`,
+                                        {
+                                            params: {
+                                                access_token: token,
+                                                fields: 'thumbnails',
+                                                is_preferred: true
+                                            }
+                                        }
+                                    );
+        
+                                    const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
+                                    const uri = preferredThumbnail ? preferredThumbnail.uri : "";
+        
+                                    // onSuccess("ok", fbResponse);
+                                    return({
+                                        id: file.id,
+                                        AddName: file.AddName,
+                                        filename: response.data.imageUrl,
+                                        videoid: videoid,
+                                        thambnailurl: uri,
+                                    });
+                                } else {
+                                    // onError("error", fbResponse);
+                                    console.error("Video upload to Facebook failed");
+                                }
+                            }
+                        }
+                    }else{
+                        if (file?.filename?.url?.endsWith('.png') || file?.filename?.url?.endsWith('.jpg') || file?.filename?.url?.endsWith(".jpeg") || file?.filename?.url?.endsWith('.mp4')) {
+                            const formData = new FormData();
+                            const response = await fetch(`https://prodapis.adsgoat.in/s3?s3Url=${file?.filename?.url}`, {
+                                method: 'GET',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    Authorization: localStorage.getItem("token"),
+                                },
+                            });
+        
+                            const uploadFile = await response.blob();
+                            if (!(uploadFile instanceof Blob)) {
+                                console.error("The fetched file is not a Blob:", uploadFile);
+                                // continue;
+                            }
+        
+                            formData.append("file", uploadFile, file?.filename.name);
+                            // console.log(formData);
+        
+                            let fbResponse;
+                            if (file?.filename?.url?.endsWith('.png') || file?.filename?.url?.endsWith('.jpg') || file?.filename?.url?.endsWith(".jpeg") ) {
+                                formData.append('file', uploadFile, file?.filename.name);
+                                formData.append('access_token', token);
+                                const fileName = file?.filename.name.split('/').pop();
+        
+                                fbResponse = await axios.post(
+                                    `https://graph.facebook.com/v20.0/act_${accountNumber}/adimages`,
+                                    formData,
+                                    { headers: { 'Content-Type': 'multipart/form-data' } }
+                                );
+                                
+        
+                                if (fbResponse.status === 200) {
+                                    // onSuccess("ok", response);
+                                    return({
+                                        id: file.id,
+                                        AddName: file.AddName,
+                                        filename: file?.filename?.url,
+                                        imag_hash: fbResponse.data?.images?.[fileName]?.hash,
+                                    });
+                                } else {
+                                    // onError("error", response);
+                                    console.error("Image upload failed");
+                                }
+                            } else if (file?.filename?.url?.endsWith('.mp4')) {
+                                formData.append('access_token', token);
+                                console.log("formData", formData);
+                                fbResponse = await axios.post(
+                                    `https://graph.facebook.com/v20.0/act_${accountNumber}/advideos`,
+                                    formData,
+                                    { headers: { 'Content-Type': 'multipart/form-data' } }
+                                );
+
+                                console.log("Facebook API response:", fbResponse.data);
+        
+                                if (fbResponse.status === 200) {
+                                    const videoid = fbResponse?.data?.id;
+                                    await new Promise(resolve => setTimeout(resolve, 10000));
+        
+                                    const thumbnailResponse = await axios.get(
+                                        `https://graph.facebook.com/v20.0/${videoid}`,
+                                        {
+                                            params: {
+                                                access_token: token,
+                                                fields: 'thumbnails',
+                                                is_preferred: true
+                                            }
+                                        }
+                                    );
+        
+                                    const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
+                                    const uri = preferredThumbnail ? preferredThumbnail.uri : "";
+                                    // console.log(videoid);
+                                    // console.log(uri);
+        
+                                    // onSuccess("ok", fbResponse);
+                                    return({
+                                        id: file.id,
+                                        AddName: file.AddName,
+                                        filename: file?.filename?.url,
+                                        videoid: videoid,
+                                        thambnailurl: uri,
+                                    });
+                                } else {
+                                    // onError("error", fbResponse);
+                                    console.error("Video upload to Facebook failed");
+                                }
+                            }
+                        }
+                    }
+                  
+                    
+                }));
+
+                console.log("Ads Data:", adsData);
+                
+                const allLevelData = {
+                    id: DuplicatedampaignData?.identifier,
+                    Campaign: levelWiseChanges?.Campaign || {},
+                    Adset: levelWiseChanges?.Adset || {},
+                    Ad: {
+                      ...(levelWiseChanges?.Ad || {}),
+                      Ads: adsData || []
+                    }
+                };
+                console.log("All Level Values:", allLevelData);
+                const payload = {
+                    accountnumber: accountNumber,
+                    identifier: DuplicatedampaignData?.identifier,
+                    updates: allLevelData,
+                    re_launch: DuplicatedampaignData?.fbstatus === "Live" ? true : false,
+                };
+                console.log("Payload for Update:", payload);
+                const headers = {
+                    'Content-Type': 'application/json',
+                    Authorization: localStorage.getItem("token"),
+                  };
+                const updateData = await axios.post('https://www.testapi.adsgoat.in/api/updateCampaignData', payload, { headers });
+                // console.log("Campaign updated successfully");
+                if(updateData.status === 200){
+                    message.success("Campaign updated successfully");
+                    changeRRefrst();
+                    setLevelWiseChanges({});
+                    onClose();
+                }
+
                 // const imageHashArray = await customRequest(onSuccess, onError);
                 // console.log("Image Hash Array:", imageHashArray);
 
@@ -1637,6 +1904,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
         setCampaignLevelDailyBudget(0);
         onClose(); // Call onClose handler to close the drawer
         setActiveKey(['1']);
+        setLevelWiseChanges({}); // Reset level-wise changes
     };
 
     const handleSelectChange = (value) => {
@@ -1700,35 +1968,66 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
         if (!activePanelKey || !data || data.length === 0) return;
 
     // Only take the first file
-    const file = data[0];
+        const file = data[0];
 
-    const enrichedFile = {
-    uid: file.uid || `creative-${Date.now()}-0`,
-    source: "creative",
-    thumbUrl: file.thumbUrl || file.url,
-    url: file.url,
-    name: file.name || file.filename?.split("/").pop() || `file-0`,
-    type: file.type || "image/jpeg",
-    };
+        const enrichedFile = {
+            uid: file.uid || `-${index+1}`,
+            name: file?.name,
+            thumbUrl: file.thumbUrl || file.url,
+            status: 'done',
+            type: `${file?.url?.endsWith(".jpg") || file?.url?.endsWith(".png") || file?.url?.endsWith(".jpeg") ? file?.url?.endsWith(".jpg") ? "image/jpg" : file?.url?.endsWith(".jpeg") ? "image/jpeg" : "image/png" : "video/"}`,
+            url: file?.url,
+        };
 
-    const enrichedFiles = [enrichedFile]; // wrap in array
+        const enrichedFiles = [enrichedFile]; // wrap in array
 
-    setPanels((prev) =>
-    prev.map((panel) =>
-        panel.key === activePanelKey
-        ? {
-            ...panel,
-            selectedFiles: enrichedFiles,
-            selectedFilesFromCreatives: enrichedFiles,
-            selectedFilesFromMedia: [],
-            }
-        : panel
-    )
-    );
+        setPanels((prev) =>
+        prev.map((panel) =>
+            panel.key === activePanelKey
+            ? {
+                ...panel,
+                selectedFiles: enrichedFiles,
+                selectedFilesFromCreatives: enrichedFiles,
+                selectedFilesFromMedia: [],
+                }
+            : panel
+        )
+        );
 
-    // ✅ Update form only for this panel
-    form.setFieldsValue({ [`MediaContent_${activePanelKey}`]: enrichedFiles });
-    form.validateFields([`MediaContent_${activePanelKey}`]);
+        
+
+        // ✅ Update form only for this panel
+        form.setFieldsValue({ [`MediaContent_${activePanelKey}`]: enrichedFiles });
+        form.validateFields([`MediaContent_${activePanelKey}`]);
+
+        // ✅ Update setLevelWiseChanges
+        const currentPanel = panels.find(p => p.key === activePanelKey);
+const fileData = enrichedFile; // or data[0], your enriched object
+
+setLevelWiseChanges(prev => {
+  const newEntry = {
+    id: currentPanel.id,
+    filename: fileData,
+    AddName: currentPanel.AddName,
+  };
+
+  const existingAd = prev?.Ad || {};
+  const existingAds = existingAd?.Ads || [];
+
+  const updatedAds = [
+    ...existingAds.filter(item => item.id !== newEntry.id),
+    newEntry,
+  ];
+
+  return {
+    ...prev,
+    Ad: {
+      ...existingAd,       // ✅ Preserve other keys inside Ad
+      Ads: updatedAds,     // ✅ Update only Ads array
+    },
+  };
+});
+
         
         
     }
@@ -1756,7 +2055,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
 
     return (
         <Drawer
-            title="Create a new campaign"
+            title={`${DuplicatedampaignData ? DuplicatedampaignData.campaign_name : "Edit Campaign"}`}
             width="95%"
             open={visible}
             onClose={handleDrawerClose}
@@ -2218,8 +2517,9 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     label="Placements"
                                     name={["Adset", "placements"]}
                                     rules={[{ required: true, message: 'Please select a mode!' }]}
+                                   
                                 >
-                                    <Select placeholder="Select a mode" onChange={handleModeChange}>
+                                    <Select placeholder="Select a mode" onChange={handleModeChange}  disabled={true} >
                                         <Option value="Advance">Advance</Option>
                                         <Option value="manual">Manual</Option>
 
@@ -2238,6 +2538,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                 placeholder="Select Platforms"
                                                 onChange={handlePublisherChange}
                                                 value={selectedPublishers}
+                                                disabled={true} 
                                             >
                                                 {publisherOptions.map(option => (
                                                     <Option key={option.value} value={option.value}>
@@ -2257,6 +2558,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                 placeholder="Select Positions"
                                                 value={selectedPositions}
                                                 onChange={handlePositionChange}
+                                                disabled={true} 
                                             >
                                                 {selectedPublishers.length > 0 && getPositionOptions()?.map(position => (
                                                     <Option key={`${position.key}_${position.label}`} value={position.key}>
@@ -2284,6 +2586,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                     { value: "mobile", label: "Mobile" },
                                                     { value: "desktop", label: "Desktop" }
                                                 ]}
+                                                disabled={true} 
                                             />
                                         </Form.Item>
                                     </>
@@ -2308,12 +2611,36 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
             rules={[{ required: true, message: 'Please enter Ad Name' }]}
             initialValue={panel.AddName || ""}
             >
-            <Input
-                value={panel.AddName}
-                onChange={(e) => updatePanel(panel.key, "AddName", e.target.value)}
-                placeholder="Enter Ad Name"
-                style={{width: "30%"}}
-            />
+                <Input
+                    value={panel.AddName}
+                    onChange={(e) => {
+                        const newAddName = e.target.value;
+
+                        // ✅ Update local panel state
+                        updatePanel(panel.key, "AddName", newAddName);
+
+                        // ✅ Sync AddName in setLevelWiseChanges
+                        setLevelWiseChanges((prev) => {
+                        const existingAd = prev.Ad || {};
+                        const existingAds = existingAd.Ads || [];
+
+                        const updatedAds = existingAds.map((ad) =>
+                            ad.id === panel.id ? { ...ad, AddName: newAddName } : ad
+                        );
+
+                        return {
+                            ...prev,
+                            Ad: {
+                            ...existingAd,
+                            Ads: updatedAds,
+                            },
+                        };
+                        });
+                    }}
+                    placeholder="Enter Ad Name"
+                    style={{ width: "30%" }}
+                />
+
             </Form.Item>
 
             {/* Select Source Dropdown */}
@@ -2382,10 +2709,38 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                         updatePanel(panel.key, "selectedFilesFromMedia", newFiles);
                         updatePanel(panel.key, "selectedFilesFromCreatives", []);
                         updatePanel(panel.key, "selectedFiles", newFiles);
+                        // ✅ Update setLevelWiseChanges
+                        const fileData = enrichedFile; // based on local upload
+
+                        setLevelWiseChanges(prev => {
+                            const newEntry = {
+                              id: panel.id,
+                              filename: enrichedFile,
+                              AddName: panel.AddName,
+                            };
+                    
+                            const existingAd = prev.Ad || {};
+                            const existingAds = existingAd.Ads || [];
+                    
+                            const updatedAds = [
+                              ...existingAds.filter(item => item.id !== panel.id),
+                              newEntry,
+                            ];
+                    
+                            return {
+                              ...prev,
+                              Ad: {
+                                ...existingAd,
+                                Ads: updatedAds,
+                              },
+                            };
+                        });
+    // }}
 
                         form.setFieldsValue({ [`MediaContent_${panel.key}`]: newFiles });
                         form.validateFields([`MediaContent_${panel.key}`]);
                         }}
+                        
                         onRemove={(fileToRemove) => {
                         const filtered = panel.selectedFilesFromMedia.filter(
                             (f) => f.uid !== fileToRemove.uid
@@ -2396,6 +2751,19 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
 
                         form.setFieldsValue({ [`MediaContent_${panel.key}`]: filtered });
                         form.validateFields([`MediaContent_${panel.key}`]);
+
+                        // ❌ Optionally remove from setLevelWiseChanges if no file remains
+                        if (filtered.length === 0) {
+                            setLevelWiseChanges(prev => {
+                            const remaining = (prev?.Ad?.Ads || []).filter(item => item.id !== panel.id);
+                            return {
+                                ...prev,
+                                Ad: {
+                                Ads: remaining,
+                                },
+                            };
+                            });
+                        }
 
                         return true;
                         }}
@@ -2463,6 +2831,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     }}
                                 />
                                 )}
+                                
                                 <span
                                 style={{
                                     maxWidth: 160,
@@ -2544,6 +2913,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 </video>
                             )
                             }
+                            
             </div>))}
         </div>
       </div>
@@ -3289,14 +3659,26 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     const values = await form.validateFields(); // Validates all form fields
 
                                     // Clear existing validation errors
+                                    console.log("hi");
+                                    
+                                    if (adsetLevelDailyBudget === 0 && campaignLevelDailyBudget === 0) {
+                                        // Throw a validation error manually in the same format as AntD expects
+                                        throw {
+                                          errorFields: [
+                                            {
+                                              name: ['Daily_amount'], // This should match your Form.Item name path
+                                              errors: ['Daily budget cannot be zero on both Adset and Campaign levels'],
+                                            },
+                                          ],
+                                        };
+                                    }
                                     setSubmitErrors([]);
-
                                     // Optionally trigger your existing logic
-                                    onFinish(values); // If you want to reuse your existing logic
+                                    // onFinish(values); // If you want to reuse your existing logic
 
                                     // Show confirmation modal
+                                    
                                     setIsModalVisible(true);
-
                                     // Save values if needed
                                     setFormValues(values);
                                 } catch (err) {
@@ -3304,6 +3686,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     name: field.name?.[0],       // field name
                                     message: field.errors?.[0],  // validation message
                                     }));
+                                    console.log("Errors:", allErrors);
                                     setSubmitErrors(allErrors);
                                 }
                                 }}
@@ -3312,7 +3695,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                             </Button>
 
                             {/* Show validation messages beside button */}
-                            {submitErrors.length > 0 && (
+                            {(submitErrors?.length) > 0 && (
                                 <div style={{ color: "red", marginTop: 8 }}>
                                 {submitErrors.map((err, index) => (
                                     <div key={index}>

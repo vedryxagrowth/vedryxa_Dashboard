@@ -921,7 +921,8 @@ const App = () => {
                             <Button type="primary" onClick={() => handleApproval(record)}>Approve</Button>
                         )}
                         {record.fbstatus !== 'Live' && (
-                            <Button icon={<EditOutlined />} onClick={() => handleEditOnlyClick(record)}></Button> 
+                            // <Button icon={<EditOutlined />} onClick={() => handleEditOnlyClick(record)}></Button> 
+                            <Button icon={<EditOutlined />} onClick={() => handleEditClickAllLevelData(record)}></Button> 
                         )}
                         <Modal
                             title="Confirm Approval"

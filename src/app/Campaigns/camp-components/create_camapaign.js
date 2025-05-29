@@ -2614,6 +2614,20 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     const values = await form.validateFields(); // Validates all form fields
 
                                     // Clear existing validation errors
+                                    
+
+                                    if (adsetLevelDailyBudget === 0 && campaignLevelDailyBudget === 0) {
+                                        // Throw a validation error manually in the same format as AntD expects
+                                        throw {
+                                          errorFields: [
+                                            {
+                                              name: ['Daily_amount'], // This should match your Form.Item name path
+                                              errors: ['Daily budget cannot be zero on both Adset and Campaign levels'],
+                                            },
+                                          ],
+                                        };
+                                    }
+
                                     setSubmitErrors([]);
 
                                     // Optionally trigger your existing logic
