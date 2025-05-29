@@ -744,6 +744,7 @@ const AdLevelReports = ({startDate, endDate, newaccount, newtime, newRevenuePrat
                             actions: '...',
                             from: "",
                             profitloss: "",
+                            tq: "",
                         }
                     )
                 })

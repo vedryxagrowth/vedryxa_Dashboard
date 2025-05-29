@@ -736,6 +736,7 @@ const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenueP
                             actions: '...',
                             from:"",
                             profitloss: "",
+                            tq: "",
                         }
                     )
                 })
