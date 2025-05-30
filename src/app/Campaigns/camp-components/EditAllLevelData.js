@@ -3661,12 +3661,13 @@ setLevelWiseChanges(prev => {
                                     // Clear existing validation errors
                                     console.log("hi");
                                     
-                                    if (adsetLevelDailyBudget === 0 && campaignLevelDailyBudget === 0) {
+                                    if (((adsetLevelDailyBudget === 0 && campaignLevelDailyBudget === 0) ||
+                                    isNaN(adsetLevelDailyBudget) || isNaN(campaignLevelDailyBudget))) {
                                         // Throw a validation error manually in the same format as AntD expects
                                         throw {
                                           errorFields: [
                                             {
-                                              name: ['Daily_amount'], // This should match your Form.Item name path
+                                              name: ['Daily_amount'], 
                                               errors: ['Daily budget cannot be zero on both Adset and Campaign levels'],
                                             },
                                           ],

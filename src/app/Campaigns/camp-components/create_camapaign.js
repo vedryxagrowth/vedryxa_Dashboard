@@ -578,6 +578,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
 
     const onChangeAdsetLevelDailyBudget = (event) => {
         setAdsetLevelDailyBudget(parseFloat(event.target.value));
+        console.log(event.target.value);
+        console.log(parseFloat(event.target.value));
     }
 
 
@@ -2616,7 +2618,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     // Clear existing validation errors
                                     
 
-                                    if (adsetLevelDailyBudget === 0 && campaignLevelDailyBudget === 0) {
+                                    if (((adsetLevelDailyBudget === 0 && campaignLevelDailyBudget === 0) ||
+                                    isNaN(adsetLevelDailyBudget) || isNaN(campaignLevelDailyBudget))) {
                                         // Throw a validation error manually in the same format as AntD expects
                                         throw {
                                           errorFields: [
