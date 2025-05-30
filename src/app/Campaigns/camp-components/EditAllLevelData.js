@@ -1674,7 +1674,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                     Authorization: localStorage.getItem("token"),
                   };
                 const updateData = await axios.post('https://www.testapi.adsgoat.in/api/updateCampaignData', payload, { headers });
-                // console.log("Campaign updated successfully");
+                
                 if(updateData.status === 200){
                     message.success("Campaign updated successfully");
                     changeRRefrst();
