@@ -1357,7 +1357,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns, network, Account_Num
                 <Col>
                         {fromCampaigns === true ? (
                             
-                            <Button onClick={onSubmitData} className={theme === 'dark' ? 'dark-theme' : 'light-theme'} style={{ display: 'flex', border:'none', justifyContent: 'center', maxWidth: '160px', backgroundColor: '#C7F39A', color: theme === 'dark' ? 'black' : undefined  }}>
+                            <Button onClick={onSubmitData} className={theme === 'dark' ? 'dark-theme' : 'light-theme'} style={{ display: 'flex', border:'none', justifyContent: 'center', maxWidth: '160px', backgroundColor: '#91C25F', color: theme === 'dark' ? 'black' : undefined  }}>
                                 Submit
                                 {checkboxSelected.length > 0 && (
                                     <Badge
@@ -1378,7 +1378,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns, network, Account_Num
                                 )}
                             </Button>  
                         ) : 
-                    <Button onClick={showDrawer} className={theme === 'dark' ? 'dark-theme' : 'light-theme'} icon={<PlusOutlined className="black-icon" />} style={{ display: 'flex', border:'none', justifyContent: 'center', maxWidth: '160px', backgroundColor: '#C7F39A', color: theme === 'dark' ? 'black' : undefined  }}>
+                    <Button onClick={showDrawer} className={theme === 'dark' ? 'dark-theme' : 'light-theme'} icon={<PlusOutlined className="black-icon" />} style={{ display: 'flex', border:'none', justifyContent: 'center', maxWidth: '160px', backgroundColor: '#91C25F', color: theme === 'dark' ? 'black' : undefined  }}>
                         New Campaign
                         {checkboxSelected.length > 0 && (
                             <Badge
@@ -1452,12 +1452,12 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns, network, Account_Num
                         onChange={handleSearch} // Call function on user input
                         style={{width:'170px', border:'none'}}
                     />   
-                    <Button style={{backgroundColor: '#C7F39A', border:'none', marginLeft:'5px'}} onClick={fetchUserImages} icon={<ReloadOutlined className="black-icon" />} /> 
+                    <Button style={{backgroundColor: '#91C25F', border:'none', marginLeft:'5px'}} onClick={fetchUserImages} icon={<ReloadOutlined className="black-icon" />} /> 
                     <Button
                         icon={<DeleteOutlined className="black-icon" />}
                         onClick={() => setIsTrashView(prev => !prev)}
                         style={{
-                            backgroundColor: isTrashView ? 'red' : '#C7F39A',
+                            backgroundColor: isTrashView ? 'red' : '#91C25F',
                             color: isTrashView ? 'white' : 'black',
                             border: 'none',
                             marginLeft: '10px'
@@ -1469,7 +1469,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns, network, Account_Num
             </div>
             <div style={{display:'flex'}}>
                 {currentFolder && (
-                    <Button type="link" icon={<ArrowLeftOutlined style={{color: theme === 'dark' ? '#C7F39A' : 'black'}}/>} onClick={() => {
+                    <Button type="link" icon={<ArrowLeftOutlined style={{color: theme === 'dark' ? '#91C25F' : 'black'}}/>} onClick={() => {
                         const segments = currentFolder.split('/').filter(Boolean);
                         const newPath = segments.slice(0, -1).join('/') + (segments.length > 1 ? '/' : '');
                         setCurrentFolder(newPath);
@@ -1478,7 +1478,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns, network, Account_Num
                 )}
 
                 {currentFolder && (
-                    <div style={{ marginTop: '8px', fontSize: '14px', color: theme === 'dark' ? '#C7F39A' : '#000' }}>
+                    <div style={{ marginTop: '8px', fontSize: '14px', color: theme === 'dark' ? '#91C25F' : '#000' }}>
                         {currentFolder
                         .split('/')
                         .filter(Boolean) // remove empty
@@ -1517,8 +1517,8 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns, network, Account_Num
                     gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
                     gap: '10px',
                     marginTop: '20px',
-                    // border: '2px solid #C7F39A',
-                    border: isTrashView ? '2px solid red' : '2px solid #C7F39A',
+                    // border: '2px solid #91C25F',
+                    border: isTrashView ? '2px solid red' : '2px solid #91C25F',
                     padding: '10px',
                     width: '100%',
                     position: 'relative',
@@ -1567,8 +1567,8 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns, network, Account_Num
                                     backgroundColor:
                                     hoveredImage === image.uid
                                         ? theme === 'dark'
-                                        ? '#C7F39A'
-                                        : '#C7F39A'
+                                        ? '#91C25F'
+                                        : '#91C25F'
                                         : 'transparent',
                                     display: 'flex',
                                     flexDirection: 'column',
@@ -1757,7 +1757,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns, network, Account_Num
                                         right: '8px',
                                         width: '24px',
                                         height: '24px',
-                                        backgroundColor: '#C7F39A',
+                                        backgroundColor: '#91C25F',
                                         color: 'black',
                                         borderRadius: '50%',
                                         display: 'flex',

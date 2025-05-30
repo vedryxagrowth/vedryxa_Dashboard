@@ -248,7 +248,7 @@ const Newaddaccounts = ({ visible, onClose }) => {
                                     </Option>
                                 ))}
                             </Select>
-                            <Button style={{backgroundColor:'#C7F39A', width:'24px', marginLeft:'5px'}} onClick={() => setIsModalOpen(true)}>
+                            <Button style={{backgroundColor:'#91C25F', width:'24px', marginLeft:'5px'}} onClick={() => setIsModalOpen(true)}>
                                 <PlusOutlined  className="black-icon"/>
                             </Button>
                         </div>

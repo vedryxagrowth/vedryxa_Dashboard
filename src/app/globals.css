@@ -461,11 +461,11 @@ body {
 
 /*  New Css  */
 :where(.css-dev-only-do-not-override-f7vrd6).ant-menu-light .ant-menu-item-selected{
-  background-color: #C7F39A !important;
+  background-color: #91C25F !important;
   
 }
 :where(.css-f7vrd6).ant-menu-light .ant-menu-item-selected{
-  background-color: #C7F39A !important;
+  background-color: #91C25F !important;
 }
 
 :where(.css-dev-only-do-not-override-f7vrd6).ant-btn-primary {
@@ -1009,7 +1009,7 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 .ant-picker-cell.ant-picker-cell-in-view.ant-picker-cell-range-start,
 .ant-picker-cell.ant-picker-cell-in-view.ant-picker-cell-range-end,
 .ant-picker-cell.ant-picker-cell-in-view.ant-picker-cell-selected {
-  background-color: #C7F39A !important; /* your highlight color */
+  background-color: #91C25F !important; /* your highlight color */
   color: #000 !important;              /* text color on top */
 }
 
@@ -1166,7 +1166,7 @@ body.dark-mode .black-icon.anticon svg {
   color: #000000 !important;
 }
 body.dark-mode .black-icon-info.anticon svg {
-  color: #C7F39A !important;
+  color: #91C25F !important;
 }
 body.dark-mode .black-icon-active.anticon svg {
   color: green !important;
@@ -1193,7 +1193,7 @@ body.dark-mode .black-icon-comment.anticon svg {
 }
 /* Green text for active tab */
 .custom-tabs.dark-mode-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
-  color: #C7F39A !important;
+  color: #91C25F !important;
 }
 
 .custom-tabs.light-mode-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
@@ -1210,7 +1210,7 @@ body.dark-mode .black-icon-comment.anticon svg {
 
 /* Ink bar */
 .custom-tabs.dark-mode-tabs .ant-tabs-ink-bar {
-  background-color: #C7F39A !important;
+  background-color: #91C25F !important;
 }
 .custom-tabs.light-mode-tabs .ant-tabs-ink-bar {
   background-color: #52c41a !important;
@@ -1319,8 +1319,8 @@ body.dark-mode .black-icon-comment.anticon svg {
 }
 
 .custom-dark-table.dark-mode-pagination .ant-pagination-item-active {
-  background-color: #C7F39A;
-  border-color: #C7F39A;
+  background-color: #91C25F;
+  border-color: #91C25F;
 }
 
 .custom-dark-table.dark-mode-pagination .ant-pagination-item-active a {
@@ -1328,8 +1328,8 @@ body.dark-mode .black-icon-comment.anticon svg {
 }
 
 .custom-dark-table.dark-mode-pagination .ant-pagination-item:hover {
-  border-color: #C7F39A;
-  color: #C7F39A;
+  border-color: #91C25F;
+  color: #91C25F;
 }
 
 .custom-dark-table.dark-mode-pagination .ant-table-tbody > tr > td {
@@ -1359,8 +1359,8 @@ body.dark-mode .black-icon-comment.anticon svg {
 }
 
 .custom-dark-table.light-mode-pagination .ant-pagination-item-active {
-  background-color: #C7F39A;
-  border-color: #C7F39A;
+  background-color: #91C25F;
+  border-color: #91C25F;
 }
 
 .custom-dark-table.light-mode-pagination .ant-pagination-item-active a {
@@ -1368,8 +1368,8 @@ body.dark-mode .black-icon-comment.anticon svg {
 }
 
 .custom-dark-table.light-mode-pagination .ant-pagination-item:hover {
-  border-color: #C7F39A;
-  color: #C7F39A;
+  border-color: #91C25F;
+  color: #91C25F;
 }
 
 /* ========== ARROWS AND ELLIPSIS ========== */
@@ -1496,8 +1496,8 @@ body.dark-mode .black-icon-comment.anticon svg {
 /* ✅ OK Button - consistent in both themes */
 .custom-confirm-dark .ant-btn-primary,
 .custom-confirm-light .ant-btn-primary {
-  background-color: #C7F39A !important;
-  border-color: #C7F39A !important;
+  background-color: #91C25F !important;
+  border-color: #91C25F !important;
   color: black !important;
   font-weight: 600;
 }
@@ -1507,8 +1507,8 @@ body.dark-mode .black-icon-comment.anticon svg {
 .custom-confirm-light .ant-btn-primary:hover,
 .custom-confirm-dark .ant-btn-primary:focus,
 .custom-confirm-light .ant-btn-primary:focus {
-  background-color: #C7F39A !important;
-  border-color: #C7F39A !important;
+  background-color: #91C25F !important;
+  border-color: #91C25F !important;
   color: black !important;
 }
 
@@ -1520,8 +1520,8 @@ body.dark-mode .black-icon-comment.anticon svg {
 }
 
 .custom-confirm-dark .ant-btn-default:hover {
-  color: #C7F39A !important;
-  border-color: #C7F39A !important;
+  color: #91C25F !important;
+  border-color: #91C25F !important;
 }
 
 /* 🌓 Dark theme modal background + text */
@@ -1614,7 +1614,7 @@ body.dark-mode .black-icon-comment.anticon svg {
 .dark-mode-pagination .ant-select-item-option-active,
 .dark-mode-pagination .ant-select-item-option-selected {
   background-color: #333 !important;
-  color: #C7F39A !important; /* Optional highlight text color */
+  color: #91C25F !important; /* Optional highlight text color */
 }
 
 /* Search input inside dropdown (if any) */
@@ -1765,14 +1765,14 @@ body.dark-mode .black-icon-comment.anticon svg {
 
 /* Force checkbox checked background and border */
 .ant-checkbox-checked .ant-checkbox-inner {
-  background-color: #C7F39A !important;
-  border-color: #C7F39A !important;
+  background-color: #91C25F !important;
+  border-color: #91C25F !important;
 }
 
 /* Optional: keep border color on hover/focus */
 .ant-checkbox-wrapper:hover .ant-checkbox-inner,
 .ant-checkbox-input:focus + .ant-checkbox-inner {
-  border-color: #C7F39A !important;
+  border-color: #91C25F !important;
 }
 
 /* Optional: adjust checkmark color (white for contrast) */

@@ -94,6 +94,9 @@ export default function CampaignAndAccount({ params }) {
         "hour_n",
         "hour_f",
         "date",
+        "M_tq",
+        "D_tq",
+        "adname",
         "campaignname",
         "adsetname",
         "spend",
@@ -497,6 +500,7 @@ export default function CampaignAndAccount({ params }) {
                         campaignname: eachData.campaign_name,
                         date: eachData[specifiedTimeZone],
                         adsetname: eachData.adsetName,
+                        adname: "",
                         spend: (eachData.spend).toString(),
                         revenue: mainRvenue,
                         profit: profit.toString(),
@@ -517,7 +521,8 @@ export default function CampaignAndAccount({ params }) {
                         campaignId: eachData.campaign_id,
                         cpclinkclicks: cpcLinkClicks.toString(),
                         fblinkclicks: (eachData.fbLinkClicks).toString(),
-
+                        M_tq: "",
+                        D_tq: "",
                     }
                 )
             })
@@ -678,6 +683,37 @@ export default function CampaignAndAccount({ params }) {
     };
 
     const columnDefsObject = {
+        M_tq: {
+            headerName: 'M_TQ',
+            field: 'M_tq',
+            // aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },             
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            // aggFunc: liveSpender,
+            hide: true,
+        },
+          D_tq: {
+            headerName: 'D_TQ',
+            field: 'D_tq',
+            // aggFunc: 'sum',
+            // valueFormatter: currencyFormatter, 
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            // aggFunc: liveSpender,
+            hide: true,
+        }, 
         campaignname : {headerName:'CampaignName', field:'campaignname',
             width: 300,
         cellStyle: { whiteSpace: "normal", lineHeight: "1.5" }, // Enables text wrapping
@@ -727,6 +763,26 @@ export default function CampaignAndAccount({ params }) {
         // pinned: 'left',
         // enableRowGroup: true,
         // autoHeight: true, 
+        },
+        adname : { headerName: 'Ad-Name', field: 'adname',
+            width: 300,
+            cellStyle: { whiteSpace: "normal", lineHeight: "1.5" }, // Enables text wrapping
+            autoHeight: true,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            cellRenderer: (params) => {
+              if (params.value && params.value.includes("Copied!")) {
+                  return (
+                      <span>
+                          {params.value.replace("Copied!", "")}
+                          <span style={{ color: "green", fontWeight: "bold" }}>Copied!</span>
+                      </span>
+                  );
+              }
+              return params.value;
+            },
+            hide: true, 
         },
         date: { headerName: 'Date', field: 'date', width: 160, sort: 'desc',
             comparator: (valueA, valueB) => {
@@ -1396,7 +1452,7 @@ export default function CampaignAndAccount({ params }) {
                 </div>  
             </Col>
             <Col style={{display: 'flex', justifyContent: 'flex-end'}}>
-                <Switch checked={isGraphVisible} style={{fontSize:"20px", paddingTop:'5px', marginRight:'10px', backgroundColor: isGraphVisible ? '#C7F39A' : undefined}} onClick={onClickBarChart}/>
+                <Switch checked={isGraphVisible} style={{fontSize:"20px", paddingTop:'5px', marginRight:'10px', backgroundColor: isGraphVisible ? '#91C25F' : undefined}} onClick={onClickBarChart}/>
             </Col> 
             {/* <h1>{params.campaignAndAccount}hi</h1> */}
             {isGraphVisible && ( 
@@ -1629,7 +1685,7 @@ export default function CampaignAndAccount({ params }) {
                     <Button 
                         type="default" 
                         icon={<ReloadOutlined className='black-icon'/>} 
-                        style={{ height: "30px", marginLeft: "10px", backgroundColor: '#C7F39A', border: 'none' }} 
+                        style={{ height: "30px", marginLeft: "10px", backgroundColor: '#91C25F', border: 'none' }} 
                         onClick={handleReload}  // Call refresh function when clicked
                     />
                     {/* <p style={{marginLeft:"10px"}}>{comment}</p> */}
@@ -1859,7 +1915,7 @@ export default function CampaignAndAccount({ params }) {
                                     <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
                                         Cancel
                                     </Button>
-                                    <Button key="ok"  onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#C7F39A"}}>
+                                    <Button key="ok"  onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#91C25F"}}>
                                         Ok
                                     </Button>
                                     </div>

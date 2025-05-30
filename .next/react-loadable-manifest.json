@@ -82,49 +82,49 @@
     "id": 16771,
     "files": [
       "static/chunks/7317.0e1fcba8d0590805.js",
-      "static/chunks/6771.7eb0c802f502de31.js"
+      "static/chunks/6771.747d638e1d832eaf.js"
     ]
   },
   "app\\NewUser\\page.js -> ./users-components/add-newaccount": {
     "id": 72834,
     "files": [
       "static/chunks/7254-3177457cb5926c0d.js",
-      "static/chunks/2834.eaaa0db7f1a0cbff.js"
+      "static/chunks/2834.a7b4157c0ee2af26.js"
     ]
   },
   "app\\NewUser\\page.js -> ./users-components/create-newuser": {
     "id": 18718,
     "files": [
       "static/chunks/7254-3177457cb5926c0d.js",
-      "static/chunks/8718.e3892361a1e7e616.js"
+      "static/chunks/8718.1df6e7f957eaff3c.js"
     ]
   },
   "app\\NewUser\\page.js -> ./users-components/edit-accountaccess": {
     "id": 88081,
     "files": [
       "static/chunks/7254-3177457cb5926c0d.js",
-      "static/chunks/8081.1a442ad8dc7ec494.js"
+      "static/chunks/8081.d809d0c345c85f38.js"
     ]
   },
   "app\\NewUser\\page.js -> ./users-components/edit-network": {
     "id": 1474,
     "files": [
       "static/chunks/7254-3177457cb5926c0d.js",
-      "static/chunks/1474.2dd56b657721d8ff.js"
+      "static/chunks/1474.8955f5550bc4e620.js"
     ]
   },
   "app\\NewUser\\page.js -> ./users-components/edit-urlbulder": {
     "id": 83881,
     "files": [
       "static/chunks/7254-3177457cb5926c0d.js",
-      "static/chunks/3881.fcc723ebed9931e9.js"
+      "static/chunks/3881.965e89982fab3c5b.js"
     ]
   },
   "app\\NewUser\\page.js -> ./users-components/edit-usersaccess": {
     "id": 39976,
     "files": [
       "static/chunks/7254-3177457cb5926c0d.js",
-      "static/chunks/9976.19df98942d26c597.js"
+      "static/chunks/9976.7dd3af67a27034ea.js"
     ]
   },
   "app\\Reports\\page.js -> ../componentsOfReports/AgencyAndBMName": {
@@ -142,11 +142,7 @@
       "static/chunks/160b575a-d0cb2137f22b95d9.js",
       "static/chunks/3458-882e294c5ec56a4b.js",
       "static/chunks/8110-71cd723e6a1d6072.js",
-<<<<<<< HEAD
-      "static/chunks/3397.a45a2f6a748353c4.js"
-=======
-      "static/chunks/3397.1df7ae60d62c592f.js"
->>>>>>> DevUi
+      "static/chunks/3397.38291c43d81319b1.js"
     ]
   },
   "app\\Reports\\page.js -> ../componentsOfReports/DAKeywords": {
@@ -155,11 +151,7 @@
       "static/chunks/160b575a-d0cb2137f22b95d9.js",
       "static/chunks/3458-882e294c5ec56a4b.js",
       "static/chunks/8110-71cd723e6a1d6072.js",
-<<<<<<< HEAD
-      "static/chunks/4411.93e0ba73cfe67a10.js"
-=======
-      "static/chunks/4411.6ff7e87f867f65d8.js"
->>>>>>> DevUi
+      "static/chunks/4411.9169da714c724e59.js"
     ]
   },
   "app\\Reports\\page.js -> ../componentsOfReports/Daily": {
@@ -184,11 +176,7 @@
       "static/chunks/160b575a-d0cb2137f22b95d9.js",
       "static/chunks/3458-882e294c5ec56a4b.js",
       "static/chunks/8110-71cd723e6a1d6072.js",
-<<<<<<< HEAD
-      "static/chunks/4521.1dc03da60e01d4b3.js"
-=======
-      "static/chunks/4521.05facd597eab27b7.js"
->>>>>>> DevUi
+      "static/chunks/4521.be7b3712e64c4942.js"
     ]
   },
   "app\\Reports\\page.js -> ../componentsOfReports/MnetAdLive": {
@@ -197,11 +185,7 @@
       "static/chunks/160b575a-d0cb2137f22b95d9.js",
       "static/chunks/3458-882e294c5ec56a4b.js",
       "static/chunks/8110-71cd723e6a1d6072.js",
-<<<<<<< HEAD
-      "static/chunks/4203.030e840864588dec.js"
-=======
-      "static/chunks/4203.20d41a9c0a655293.js"
->>>>>>> DevUi
+      "static/chunks/4203.a0d3bb35496c352e.js"
     ]
   },
   "app\\Reports\\page.js -> ../componentsOfReports/MnetDomainData": {
@@ -219,7 +203,7 @@
       "static/chunks/160b575a-d0cb2137f22b95d9.js",
       "static/chunks/3458-882e294c5ec56a4b.js",
       "static/chunks/8110-71cd723e6a1d6072.js",
-      "static/chunks/5439.ff35604d46e7072e.js"
+      "static/chunks/5439.51ba1dfb60170bb3.js"
     ]
   },
   "app\\Reports\\page.js -> ../componentsOfReports/Tonic1Keywords": {
@@ -228,77 +212,49 @@
       "static/chunks/160b575a-d0cb2137f22b95d9.js",
       "static/chunks/3458-882e294c5ec56a4b.js",
       "static/chunks/8110-71cd723e6a1d6072.js",
-<<<<<<< HEAD
-      "static/chunks/1459.1f8969f7836e7e48.js"
-=======
-      "static/chunks/1459.00d1a933ab769695.js"
->>>>>>> DevUi
+      "static/chunks/1459.36be1ef2985e724f.js"
     ]
   },
   "app\\componentsOfReports\\Daily.js -> ./AdLevelDaily": {
     "id": 15825,
     "files": [
       "static/chunks/8110-71cd723e6a1d6072.js",
-<<<<<<< HEAD
-      "static/chunks/5825.4afe7fa99c871bfd.js"
-=======
-      "static/chunks/5825.b013cf9a328a9fd4.js"
->>>>>>> DevUi
+      "static/chunks/5825.cc46cfba9c58c5ca.js"
     ]
   },
   "app\\componentsOfReports\\Daily.js -> ./AdsetLevelDaily": {
     "id": 99369,
     "files": [
       "static/chunks/8110-71cd723e6a1d6072.js",
-<<<<<<< HEAD
-      "static/chunks/9369.9c005a72238f740d.js"
-=======
-      "static/chunks/9369.4d5d984246a15c72.js"
->>>>>>> DevUi
+      "static/chunks/9369.fc2666f57694c533.js"
     ]
   },
   "app\\componentsOfReports\\Daily.js -> ./CampaignLevelDaily": {
     "id": 11997,
     "files": [
       "static/chunks/8110-71cd723e6a1d6072.js",
-<<<<<<< HEAD
-      "static/chunks/1997.80266f16d88f586b.js"
-=======
-      "static/chunks/1997.392daf948ed425bf.js"
->>>>>>> DevUi
+      "static/chunks/1997.6b39ac7db432b9dd.js"
     ]
   },
   "app\\componentsOfReports\\Live.js -> ./AdLevel": {
     "id": 54630,
     "files": [
       "static/chunks/8110-71cd723e6a1d6072.js",
-<<<<<<< HEAD
-      "static/chunks/4630.a9934d4e126be06b.js"
-=======
-      "static/chunks/4630.99d3190eb3cdbdfe.js"
->>>>>>> DevUi
+      "static/chunks/4630.3d0cf4e28f3534b8.js"
     ]
   },
   "app\\componentsOfReports\\Live.js -> ./AdsetLevel": {
     "id": 29941,
     "files": [
       "static/chunks/8110-71cd723e6a1d6072.js",
-<<<<<<< HEAD
-      "static/chunks/9941.f25cdafa36c5179a.js"
-=======
-      "static/chunks/9941.72d78939e669994e.js"
->>>>>>> DevUi
+      "static/chunks/9941.a7a4f873edcd71c0.js"
     ]
   },
   "app\\componentsOfReports\\Live.js -> ./CampaignLevel": {
     "id": 60781,
     "files": [
       "static/chunks/8110-71cd723e6a1d6072.js",
-<<<<<<< HEAD
-      "static/chunks/781.fbab65b47ff8a30a.js"
-=======
-      "static/chunks/781.6ab191ef14dc8719.js"
->>>>>>> DevUi
+      "static/chunks/781.88f17122bd4b5b6f.js"
     ]
   }
 }

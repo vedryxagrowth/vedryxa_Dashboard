@@ -4,7 +4,7 @@ import { Audio } from 'react-loader-spinner';
 import React from 'react';
 import moment from 'moment-timezone';
 import {  Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Tabs } from 'antd';
-import {  InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import {  InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import { Space } from 'antd';
 import StickyBox from 'react-sticky-box';
@@ -564,6 +564,13 @@ const AdLevelReports = ({startDate, endDate, newaccount, newtime, newRevenuePrat
                                 style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '10px' }}
                             />
                         </Tooltip>
+                        <LinkOutlined 
+                            onClick={() => {
+                                const url = `/LiveHistory/LiveAdHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                                window.open(url, '_blank', 'noopener,noreferrer');
+                            }}
+                            style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '5px' }}
+                        />
                         <Tooltip title={valueWithCount}>
                             <span
                                 // onClick={() => {
@@ -605,7 +612,7 @@ const AdLevelReports = ({startDate, endDate, newaccount, newtime, newRevenuePrat
                                     <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
                                         Cancel
                                     </Button>
-                                    <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#C7F39A"}}>
+                                    <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#91C25F"}}>
                                         Ok
                                     </Button>
                                     </div>
@@ -744,7 +751,8 @@ const AdLevelReports = ({startDate, endDate, newaccount, newtime, newRevenuePrat
                             actions: '...',
                             from: "",
                             profitloss: "",
-                            tq: "",
+                            M_tq: "",
+                            D_tq: "",
                         }
                     )
                 })
@@ -821,10 +829,10 @@ const AdLevelReports = ({startDate, endDate, newaccount, newtime, newRevenuePrat
     const onCellClickedLive = (event) => {
         // setSelectedCell({ rowIndex: event.node.rowIndex, colId: event.column.getId() });
 
-        if (event.colDef.field === "adsetname") {
+        if (event.colDef.field === "adname") {
             const value = event.value;
             if (value !== undefined) {
-                const url = `/LiveHistory/LiveAdsetHistory/${value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                const url = `/LiveHistory/LiveAdHistory/${value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
                 window.open(url, "_blank", "noopener,noreferrer");
             }
         }
@@ -1228,7 +1236,7 @@ const AdLevelReports = ({startDate, endDate, newaccount, newtime, newRevenuePrat
     //                                             </>
     //                                         }
     //                                         >
-    //                                             <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color:"#C7F39A" }} className="black-icon-info"/>
+    //                                             <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color:"#91C25F" }} className="black-icon-info"/>
     //                                         </Tooltip>
     //                                     </Col>
     //                                     {/* <Col>
@@ -1236,12 +1244,12 @@ const AdLevelReports = ({startDate, endDate, newaccount, newtime, newRevenuePrat
     //                                             title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
     //                                             mouseEnterDelay={0} // Tooltip appears after 1 second
     //                                         >
-    //                                             <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#C7F39A" }}/>
+    //                                             <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#91C25F" }}/>
     //                                         </Tooltip>
     //                                     </Col> */}
     //                                     <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
     //                                         <Tooltip title="Export to CSV">
-    //                                             <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={onBtExport1} />
+    //                                             <Button type="primary" style={{ backgroundColor: '#91C25F', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={onBtExport1} />
     //                                         </Tooltip>
     //                                     </Col>
     //                                 </Row>
@@ -1444,7 +1452,7 @@ const AdLevelReports = ({startDate, endDate, newaccount, newtime, newRevenuePrat
                                             </>
                                         }
                                         >
-                                            <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color:"#C7F39A" }} className="black-icon-info"/>
+                                            <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color:"#91C25F" }} className="black-icon-info"/>
                                         </Tooltip>
                                     </Col>
                                     {/* <Col>
@@ -1452,12 +1460,12 @@ const AdLevelReports = ({startDate, endDate, newaccount, newtime, newRevenuePrat
                                             title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
                                             mouseEnterDelay={0} // Tooltip appears after 1 second
                                         >
-                                            <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#C7F39A" }}/>
+                                            <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#91C25F" }}/>
                                         </Tooltip>
                                     </Col> */}
                                     <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                         <Tooltip title="Export to CSV">
-                                            <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={onBtExport1} />
+                                            <Button type="primary" style={{ backgroundColor: '#91C25F', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={onBtExport1} />
                                         </Tooltip>
                                     </Col>
                                 </Row>

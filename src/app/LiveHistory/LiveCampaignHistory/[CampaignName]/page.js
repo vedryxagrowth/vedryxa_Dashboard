@@ -107,8 +107,11 @@ const MnetLiveCampaignHistory = ({ params }) => {
         "hour_n",
         "hour_f",
         "date",
+        "M_tq",
+        "D_tq",
         "campaignname",
         "adsetname",
+        "adname",
         "spend",
         "revenue",
         "profit",
@@ -660,6 +663,37 @@ const MnetLiveCampaignHistory = ({ params }) => {
     }
 
     const columnDefsObject = {
+        M_tq: {
+            headerName: 'M_TQ',
+            field: 'M_tq',
+            // aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },             
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            // aggFunc: liveSpender,
+            hide: true,
+        },
+        D_tq: {
+            headerName: 'D_TQ',
+            field: 'D_tq',
+            // aggFunc: 'sum',
+            // valueFormatter: currencyFormatter, 
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            // aggFunc: liveSpender,
+            hide: true,
+        }, 
         date_n : {
             headerName: 'Date_N', field: 'date_n', minWidth: 100,
             resizable: true,
@@ -753,6 +787,27 @@ const MnetLiveCampaignHistory = ({ params }) => {
             //     return params.value;
             // }
             hide: true
+        },
+        adname : {
+            headerName: 'Ad-Name', field: 'adname',
+            width: 250,
+            hide: true,
+            cellStyle: { whiteSpace: "normal", lineHeight: "1.5" }, // Enables text wrapping
+            autoHeight: true,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            cellRenderer: (params) => {
+                if (params.value && params.value.includes("Copied!")) {
+                    return (
+                        <span>
+                            {params.value.replace("Copied!", "")}
+                            <span style={{ color: "green", fontWeight: "bold" }}>Copied!</span>
+                        </span>
+                    );
+                }
+                return params.value;
+            }
         },
         // { headerName: 'FB-Hour', field: 'fb-hour', width: 120 },
         // { headerName: 'MNet-Hour', field: 'mnet-hour', width: 120 },
@@ -1300,6 +1355,9 @@ const MnetLiveCampaignHistory = ({ params }) => {
                     hour_f: eachData.hour,
                     hour_n: eachData.updatedHour,
                     filteration: parseInt(eachData.fbLeads) !== 0 ? Math.round((((parseInt(eachData.fbLeads)-parseInt(eachData.conversions))/parseInt(eachData.fbLeads))*100)*100)/100 : 0,
+                    adname: "",
+                    M_tq: "",
+                    D_tq: "",
                 };
             })
             : null;
@@ -1762,7 +1820,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
 
                 </Col>}
             <Col style={{display: 'flex', justifyContent: 'flex-end'}}>
-                <Switch checked={isGraphVisible} style={{fontSize:"20px", paddingTop:'5px', marginRight:'10px', backgroundColor: isGraphVisible ? '#C7F39A' : undefined}} onClick={onClickBarChart}/>            
+                <Switch checked={isGraphVisible} style={{fontSize:"20px", paddingTop:'5px', marginRight:'10px', backgroundColor: isGraphVisible ? '#91C25F' : undefined}} onClick={onClickBarChart}/>            
             </Col>
             {isGraphVisible && (
                 <Col style={{ height: '400px', marginBottom: '10px' }}> {/* Container with fixed height */}
@@ -2044,7 +2102,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                     <Button 
                         type="default" 
                         icon={<ReloadOutlined  className='black-icon'/>} 
-                        style={{ height: "30px", marginLeft: "10px", backgroundColor: '#C7F39A', border: 'none' }} 
+                        style={{ height: "30px", marginLeft: "10px", backgroundColor: '#91C25F', border: 'none' }} 
                         onClick={handleReload}  // Call refresh function when clicked
                     />
                     {/* <p style={{marginLeft:"10px"}}>{comment}</p> */}
@@ -2272,7 +2330,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                                     <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
                                         Cancel
                                     </Button>
-                                    <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#C7F39A"}}>
+                                    <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#91C25F"}}>
                                         Ok
                                     </Button>
                                     </div>

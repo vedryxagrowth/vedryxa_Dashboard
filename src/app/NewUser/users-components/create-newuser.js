@@ -257,14 +257,14 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
                                 </div>
                             ))}
                         </div>
-                        <Button type="dashed" style={{  border: 'none', backgroundColor: '#C7F39A', color:'black', fontWeight:'600' }} onClick={handleAddAccount} icon={<PlusOutlined className="black-icon"/>}>
+                        <Button type="dashed" style={{  border: 'none', backgroundColor: '#91C25F', color:'black', fontWeight:'600' }} onClick={handleAddAccount} icon={<PlusOutlined className="black-icon"/>}>
                             Add Project
                         </Button>
                     </div>
                 </Form.Item>
 
                 <Form.Item>
-                    <Button style={{  border: 'none', backgroundColor: '#C7F39A', color:'black', fontWeight:'600' }} htmlType="submit">
+                    <Button style={{  border: 'none', backgroundColor: '#91C25F', color:'black', fontWeight:'600' }} htmlType="submit">
                         Submit
                     </Button>
                 </Form.Item>

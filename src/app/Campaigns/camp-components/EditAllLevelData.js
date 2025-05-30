@@ -1674,7 +1674,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                     Authorization: localStorage.getItem("token"),
                   };
                 const updateData = await axios.post('https://www.testapi.adsgoat.in/api/updateCampaignData', payload, { headers });
-                // console.log("Campaign updated successfully");
+                
                 if(updateData.status === 200){
                     message.success("Campaign updated successfully");
                     changeRRefrst();
@@ -1697,7 +1697,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                 console.error("Error:", error);
                 message.error("An error occurred during the campaign creation process.");
             } finally {
-                setLoading(false); // Stop the spinner after the process is complete
+                setLoading(false); 
             }
 
         }

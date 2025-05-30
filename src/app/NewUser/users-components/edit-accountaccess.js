@@ -269,7 +269,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
           </Form.Item>
 
           <Form.Item>
-            <Button  style={{  border: 'none', backgroundColor: '#C7F39A', color:'black', fontWeight:'600' }} onClick={showModal}>
+            <Button  style={{  border: 'none', backgroundColor: '#91C25F', color:'black', fontWeight:'600' }} onClick={showModal}>
               Submit
             </Button>
           </Form.Item>
