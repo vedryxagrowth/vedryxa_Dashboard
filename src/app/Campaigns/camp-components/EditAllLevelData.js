@@ -3667,7 +3667,7 @@ setLevelWiseChanges(prev => {
                                         throw {
                                           errorFields: [
                                             {
-                                              name: ['Daily_amount'], // This should match your Form.Item name path
+                                              name: ['Daily_amount'], 
                                               errors: ['Daily budget cannot be zero on both Adset and Campaign levels'],
                                             },
                                           ],
