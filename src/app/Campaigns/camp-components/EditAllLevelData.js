@@ -514,6 +514,9 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
     const [defaultURlBuilder, setDefaultURLBuilder] = useState("");
     const [selectedOption, setSelectedOption] = useState("upload");
     const [changedFields, setChangedFields] = useState({});
+    const [panels, setPanels] = useState([]); // State to manage dynamic panels
+    const [levelWiseChanges, setLevelWiseChanges] = useState({});
+    const [activePanelKey, setActivePanelKey] = useState(null);
 
 
     const handleModeChange = (value) => {
@@ -533,6 +536,32 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                     );
                     console.log("hello viewdata", ...response.data);
                     setDuplicatedampaignData(response?.data[0]);
+                    const enrichedPanels = (response?.data[0]?.addlevel || []).map((item, index) => {
+                        const selectedOption = item.selectedOption || "creative";
+                      
+                        const defaultFile = item.filename
+                          ? [
+                              {
+                                uid: `file-${index}`,
+                                name: item.filename.split("/").pop(),
+                                url: item.filename,
+                                type: item.filename.endsWith(".mp4") ? "video/mp4" : "image/jpeg",
+                                source: selectedOption === "upload" ? "media" : "creative",
+                              },
+                            ]
+                          : [];
+                      
+                        return {
+                          ...item,
+                          key: `panel-${index}`,
+                          selectedOption,
+                          selectedFilesFromMedia: [], // selectedOption === "upload" ? defaultFile : []
+                          selectedFilesFromCreatives: selectedOption === "creative" ? defaultFile : [],
+                          selectedFiles: defaultFile,
+                        };
+                      });
+                      
+                    setPanels(enrichedPanels);
                 }
             } catch (error) {
                 console.error("Error fetching campaign list:", error);
@@ -541,6 +570,14 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
 
         fetchData();
     }, [selectedRow]);
+
+    const updatePanel = (key, field, value) => {
+        setPanels((prevPanels) =>
+          prevPanels.map((panel) =>
+            panel.key === key ? { ...panel, [field]: value } : panel
+          )
+        );
+    };
 
     useEffect(() => {
         if (visible) {
@@ -600,53 +637,59 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
             // setHeadline(DuplicatedampaignData?.addlevel[0]?.headline);
             console.log(DuplicatedampaignData?.adsetlevel?.placements);
             form.setFieldsValue({
-                positions: DuplicatedampaignData?.adsetlevel?.position || ["feed"],
-                Account_Number: DuplicatedampaignData?.Account_Number,
-                // createdby:DuplicatedampaignData?.camapaignlevel?.createdby,
-                Name: DuplicatedampaignData?.camapaignlevel?.Name,
-                Objectives: DuplicatedampaignData?.camapaignlevel?.Objectives,
-                Special_categories: DuplicatedampaignData?.camapaignlevel?.Special_categories,
-                Bid_strategy: DuplicatedampaignData?.camapaignlevel?.Bid_strategy,
-                Daily_amount: (DuplicatedampaignData?.camapaignlevel?.Daily_amount) / 100,
-                Status: DuplicatedampaignData?.camapaignlevel?.Status,
-                AdsetName: DuplicatedampaignData?.adsetlevel?.AdsetName,
-                DailyAdd_amount: DuplicatedampaignData?.adsetlevel?.Daily_amount ? (DuplicatedampaignData?.adsetlevel?.Daily_amount) / 100 : 0,
-                optimization_goal: DuplicatedampaignData?.adsetlevel?.optimization_goal,
-                billing_event: DuplicatedampaignData?.adsetlevel?.billing_event,
-                // start_time: DuplicatedampaignData?.adsetlevel?.start_time,
-                action_source: DuplicatedampaignData?.adsetlevel?.action_source,
-                custom_event_type: DuplicatedampaignData?.adsetlevel?.custom_event_type,
-                pixel_id: DuplicatedampaignData?.adsetlevel?.pixel_id,
-                bid_amount: (DuplicatedampaignData?.adsetlevel?.bid_amount) / 100,
-                countries: DuplicatedampaignData?.adsetlevel?.countries,
-                Min_Age: DuplicatedampaignData?.adsetlevel?.Min_Age,
-                Max_Age: DuplicatedampaignData?.adsetlevel?.Max_Age,
-                Gender: DuplicatedampaignData?.adsetlevel?.Gender,
-                publisher_platforms: DuplicatedampaignData?.adsetlevel?.publisher_platforms ? DuplicatedampaignData?.adsetlevel?.publisher_platforms : "",
-                device_platforms: DuplicatedampaignData?.adsetlevel?.device_platforms ? DuplicatedampaignData?.adsetlevel?.device_platforms : "",
-                Language: DuplicatedampaignData?.adsetlevel?.locales,
-                placements: DuplicatedampaignData?.adsetlevel?.placements,
+                Campaign:{
+                    Account_Number: DuplicatedampaignData?.Account_Number,
+                    // createdby:DuplicatedampaignData?.camapaignlevel?.createdby,
+                    Name: DuplicatedampaignData?.camapaignlevel?.Name,
+                    Objectives: DuplicatedampaignData?.camapaignlevel?.Objectives,
+                    Special_categories: DuplicatedampaignData?.camapaignlevel?.Special_categories,
+                    Bid_strategy: DuplicatedampaignData?.camapaignlevel?.Bid_strategy,
+                    Daily_amount: (DuplicatedampaignData?.camapaignlevel?.Daily_amount) / 100,
+                    Status: DuplicatedampaignData?.camapaignlevel?.Status,
+                },
+                Adset:{
+                    AdsetName: DuplicatedampaignData?.adsetlevel?.AdsetName,
+                    positions: DuplicatedampaignData?.adsetlevel?.position || ["feed"],
+                    DailyAdd_amount: DuplicatedampaignData?.adsetlevel?.Daily_amount ? (DuplicatedampaignData?.adsetlevel?.Daily_amount) / 100 : 0,
+                    optimization_goal: DuplicatedampaignData?.adsetlevel?.optimization_goal,
+                    billing_event: DuplicatedampaignData?.adsetlevel?.billing_event,
+                    // start_time: DuplicatedampaignData?.adsetlevel?.start_time,
+                    action_source: DuplicatedampaignData?.adsetlevel?.action_source,
+                    custom_event_type: DuplicatedampaignData?.adsetlevel?.custom_event_type,
+                    pixel_id: DuplicatedampaignData?.adsetlevel?.pixel_id,
+                    bid_amount: (DuplicatedampaignData?.adsetlevel?.bid_amount) / 100,
+                    countries: DuplicatedampaignData?.adsetlevel?.countries,
+                    Min_Age: DuplicatedampaignData?.adsetlevel?.Min_Age,
+                    Max_Age: DuplicatedampaignData?.adsetlevel?.Max_Age,
+                    Gender: DuplicatedampaignData?.adsetlevel?.Gender,
+                    publisher_platforms: DuplicatedampaignData?.adsetlevel?.publisher_platforms ? DuplicatedampaignData?.adsetlevel?.publisher_platforms : "",
+                    device_platforms: DuplicatedampaignData?.adsetlevel?.device_platforms ? DuplicatedampaignData?.adsetlevel?.device_platforms : "",
+                    Language: DuplicatedampaignData?.adsetlevel?.locales,
+                    placements: DuplicatedampaignData?.adsetlevel?.placements,
+                },
                 // Facebook_positions: DuplicatedampaignData?.adsetlevel?.Facebook_positions,
                 // buying_type: DuplicatedampaignData?.adsetlevel?.buying_type,
-                AddName: DuplicatedampaignData?.adsetlevel?.AdsetName,
+                // AddName: DuplicatedampaignData?.adsetlevel?.AdsetName,
                 filename: DuplicatedampaignData?.addlevel[0]?.filename,
-                page_id: DuplicatedampaignData?.addlevel[0]?.page_id,
-                message: DuplicatedampaignData?.addlevel[0]?.message,
-                headline: DuplicatedampaignData?.addlevel[0]?.headline,
-                Description: "Find More",
-                Caption: DuplicatedampaignData?.addlevel[0]?.Caption,
-                Website_URL: DuplicatedampaignData?.addlevel[0]?.Website_URL,
-                Caption: DuplicatedampaignData?.addlevel[0]?.Caption,
-                pixel_id: DuplicatedampaignData?.addlevel[0]?.pixel_id,
-                page_id: DuplicatedampaignData?.addlevel[0]?.page_id,
-                MediaContent: (DuplicatedampaignData?.addlevel?.map((file, index)=>{
-                    return({
-                        uid: `-${index+1}`,
-                        name: file?.filename,
-                        status: 'done',
-                        url: file?.filename,
-                    })
-                }))
+                // page_id: DuplicatedampaignData?.addlevel[0]?.page_id,
+                Ad:{
+                    message: DuplicatedampaignData?.addlevel[0]?.message,
+                    headline: DuplicatedampaignData?.addlevel[0]?.headline,
+                    Description: DuplicatedampaignData?.addlevel[0]?.Description,
+                    Caption: DuplicatedampaignData?.addlevel[0]?.Caption,
+                    Website_URL: DuplicatedampaignData?.addlevel[0]?.Website_URL,
+                    Caption: DuplicatedampaignData?.addlevel[0]?.Caption,
+                    pixel_id: DuplicatedampaignData?.addlevel[0]?.pixel_id,
+                    page_id: DuplicatedampaignData?.addlevel[0]?.page_id
+                }
+                // MediaContent: (DuplicatedampaignData?.addlevel?.map((file, index)=>{
+                //     return({
+                //         uid: `-${index+1}`,
+                //         name: file?.filename,
+                //         status: 'done',
+                //         url: file?.filename,
+                //     })
+                // }))
             });
         }
     }, [DuplicatedampaignData, form]);
@@ -679,19 +722,61 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
         setWebsiteURL(text);
         if (network === "FB_Mnet" || network === "FB_DomainActive") {
             setCaption(text.split('//')[1].split("/")[0]);
-            setChangedFields((prev) => ({
-                ...prev,
-                Website_URL: text, // merge or update the changed fields
-                Caption: text.split('//')[1].split("/")[0],  // merge or update the changed fields
-            }));
+            form.setFieldsValue({
+                Ad: {
+                  Website_URL: text, // merge or update the changed fields
+                  Caption: text.split('//')[1].split("/")[0],
+                },
+            });
+            setLevelWiseChanges((prev) => {
+                const existingAd = prev?.Ad || {};
+                const existingAds = existingAd?.Ads || [];
+              
+                return {
+                  ...prev,
+                  Ad: {
+                    ...existingAd, // ✅ Preserve all existing keys (like Ads)
+                    Ads: existingAds, // ✅ Explicitly reassign Ads to be safe
+                    Website_URL: text,
+                    Caption: text.split('//')[1].split("/")[0],
+                  },
+                };
+            });
+              
+            // setChangedFields((prev) => ({
+            //     ...prev,
+            //     Website_URL: text, // merge or update the changed fields
+            //     Caption: text.split('//')[1].split("/")[0],  // merge or update the changed fields
+            // }));
 
         } else {
             setCaption(text.split('/')[0]);
-            setChangedFields((prev) => ({
-                ...prev,
-                Website_URL: text, // merge or update the changed fields
-                Caption: text.split('/')[0],  // merge or update the changed fields
-              }));
+            form.setFieldsValue({
+                Ad: {
+                  Website_URL: text, // merge or update the changed fields
+                  Caption: text.split('/')[0],
+                },
+            });
+            setLevelWiseChanges((prev) => {
+                const existingAd = prev?.Ad || {};
+                const existingAds = existingAd?.Ads || [];
+              
+                return {
+                  ...prev,
+                  Ad: {
+                    ...existingAd, // ✅ Preserve all existing keys (like Ads)
+                    Ads: existingAds, // ✅ Explicitly reassign Ads to be safe
+                    Website_URL: text,
+                    Caption: text.split('/')[0],
+                  },
+                };
+            });
+               // Update the levelWiseChanges state
+            // setChangedFields((prev) => ({
+            //     ...prev,
+            //     Website_URL: text, // merge or update the changed fields
+            //     Caption: text.split('/')[0],  // merge or update the changed fields
+            //   }));
 
         }
         // console.log(text, "text");
@@ -700,11 +785,18 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
     const onChangeCampaignLevelDailyBudget = (event) => {
         setCampaignLevelDailyBudget(parseFloat(event.target.value));
         // form.setFieldsValue({ Daily_amount: event.target.value });
-        setChangedFields((prev) => ({
+        // setChangedFields((prev) => ({
+        //     ...prev,
+        //     Daily_amount: event.target.value, // merge or update the changed fields
+        //   }));
+        // console.log(event.target.value);
+        setLevelWiseChanges((prev) => ({
             ...prev,
-            Daily_amount: event.target.value, // merge or update the changed fields
-          }));
-        console.log(event.target.value);
+            Campaign: {
+                ...prev.campaign,
+                Daily_amount: parseFloat(event.target.value) * 100, // Convert to cents
+            }
+        })); // Update the levelWiseChanges state
     }
 
     const onChangeAdsetLevelDailyBudget = (event) => {
@@ -906,6 +998,46 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
             ...changedValues, // merge or update the changed fields
         }));
 
+        setLevelWiseChanges((prev) => {
+            const updated = { ...prev };
+        
+            for (const [level, fields] of Object.entries(changedValues)) {
+              updated[level] = {
+                ...(prev[level] || {}),
+                ...fields,
+              };
+            }
+        
+            console.log("📦 Current level-wise changes:", updated);
+            return updated;
+        });
+
+        // const levelWise = Object.fromEntries(
+        //     Object.entries(changedValues).map(([level, fields]) => [
+        //       level,
+        //       { ...fields },
+        //     ])
+        // );
+      
+        // console.log(levelWise);
+
+        // const groupedByPanel = {};
+
+        // Object.entries(allValues).forEach(([fieldName, value]) => {
+        //     const inputEl = document.querySelector(`[name="${fieldName}"]`);
+
+        //     if (inputEl) {
+        //     const panelEl = inputEl.closest('.panel'); // Traverse DOM to find parent panel
+        //     const panelKey = panelEl?.getAttribute('data-panel');
+
+        //     if (panelKey) {
+        //         if (!groupedByPanel[panelKey]) groupedByPanel[panelKey] = {};
+        //         groupedByPanel[panelKey][fieldName] = value;
+        //     }
+        //     }
+        // });
+
+        // console.log('🔍 Grouped by Panel:', groupedByPanel);
         // Check if all fields are filled
         const isComplete = Object.values(allValues).every(value => value !== undefined && value !== '');
         setIsFormComplete(isComplete);
@@ -1296,7 +1428,260 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
             };
 
             try {
-                console.log(changedFields, "changedFields on Submit");
+                console.log(levelWiseChanges, "changedFields on Submit");
+                const ads = levelWiseChanges?.Ad?.Ads || [];
+                console.log(ads, "ads on Submit");
+                const token = imagehash?.token;
+                // const account = imagehash?.accountNumber;
+                const adsData = await Promise.all(ads.map(async (file, index) => {
+                    console.log(file, "file on Submit");
+                    if (file?.filename?.source === "media") {
+                        if (file?.filename?.type.startsWith('image/') || file?.filename?.type.startsWith('video/')) {
+                            console.log(file, "file on Submit");
+                            const formData = new FormData();
+                            const uniqueId = uuidv4(); // Generate a unique ID for the file
+                            const fileId = `${uniqueId}_${file?.filename.name}`;
+                            console.log(fileId, "fileId on Submit");
+                            const editedImage = "";
+                            const uploadFile = editedImage ? await fetch(editedImage).then(res => res.blob()) : null;
+        
+                            // console.log(file.originFileObj.name);
+        
+                            if (uploadFile) {
+                                formData.append("file", uploadFile, `blob/${uniqueId}_${file?.filename.name}`);
+                            } else {
+                                formData.append("file", file?.filename.originFileObj, `blob/${uniqueId}_${file?.filename.originFileObj.name}`);
+                            }
+        
+                            // console.log(formData);
+                            let response, fbResponse;
+        
+                            if (file?.filename.type.startsWith('image/')) {
+                                response = await axios.post(
+                                    'https://www.testapi.adsgoat.in/upload',
+                                    formData,
+                                    {
+                                        headers: {
+                                            'Authorization': localStorage.getItem("token"),
+                                            "Content-Type": "multipart/form-data"
+                                        },
+                                    }
+                                );
+        
+                                if (!response.data.imageUrl) {
+                                    // onError("Error: Image URL not returned from custom API");
+                                    console.error("Image upload to custom API failed, imageUrl missing");
+                                    // continue;
+                                }
+        
+                                // console.log("Custom API response imageUrl:", response);
+                                formData.append('access_token', token);
+        
+                                fbResponse = await axios.post(
+                                    `https://graph.facebook.com/v20.0/act_${accountNumber}/adimages`,
+                                    formData,
+                                    { headers: { 'Content-Type': 'multipart/form-data' } }
+                                );
+
+                                // console.log("Facebook API response:", fbResponse.data);
+        
+                                if (response.status === 200 && fbResponse.status === 200) {
+                                    // onSuccess("ok", response);
+                                    return({
+                                        id: file.id,
+                                        AddName: file.AddName,
+                                        filename: response.data.imageUrl,
+                                        imag_hash: fbResponse.data?.images?.[fileId]?.hash,
+                                    });
+                                } else {
+                                    // onError("error", response);
+                                    console.error("Image upload failed");
+                                }
+                            } else if (file?.filename.type.startsWith('video/')) {
+                                response = await axios.post(
+                                    'https://www.testapi.adsgoat.in/upload',
+                                    formData,
+                                    {
+                                        headers: {
+                                            'Authorization': localStorage.getItem("token"),
+                                            "Content-Type": "multipart/form-data"
+                                        },
+                                    }
+                                );
+        
+                                if (response.status !== 200) {
+                                    // onError("error", response);
+                                    console.error("Video upload to custom API failed");
+                                    // continue;
+                                }
+        
+                                formData.append('access_token', token);
+        
+                                fbResponse = await axios.post(
+                                    `https://graph.facebook.com/v20.0/act_${accountNumber}/advideos`,
+                                    formData,
+                                    { headers: { 'Content-Type': 'multipart/form-data' } }
+                                );
+        
+                                if (fbResponse.status === 200) {
+                                    const videoid = fbResponse?.data?.id;
+                                    await new Promise(resolve => setTimeout(resolve, 10000));
+        
+                                    const thumbnailResponse = await axios.get(
+                                        `https://graph.facebook.com/v20.0/${videoid}`,
+                                        {
+                                            params: {
+                                                access_token: token,
+                                                fields: 'thumbnails',
+                                                is_preferred: true
+                                            }
+                                        }
+                                    );
+        
+                                    const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
+                                    const uri = preferredThumbnail ? preferredThumbnail.uri : "";
+        
+                                    // onSuccess("ok", fbResponse);
+                                    return({
+                                        id: file.id,
+                                        AddName: file.AddName,
+                                        filename: response.data.imageUrl,
+                                        videoid: videoid,
+                                        thambnailurl: uri,
+                                    });
+                                } else {
+                                    // onError("error", fbResponse);
+                                    console.error("Video upload to Facebook failed");
+                                }
+                            }
+                        }
+                    }else{
+                        if (file?.filename?.url?.endsWith('.png') || file?.filename?.url?.endsWith('.jpg') || file?.filename?.url?.endsWith(".jpeg") || file?.filename?.url?.endsWith('.mp4')) {
+                            const formData = new FormData();
+                            const response = await fetch(`https://prodapis.adsgoat.in/s3?s3Url=${file?.filename?.url}`, {
+                                method: 'GET',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    Authorization: localStorage.getItem("token"),
+                                },
+                            });
+        
+                            const uploadFile = await response.blob();
+                            if (!(uploadFile instanceof Blob)) {
+                                console.error("The fetched file is not a Blob:", uploadFile);
+                                // continue;
+                            }
+        
+                            formData.append("file", uploadFile, file?.filename.name);
+                            // console.log(formData);
+        
+                            let fbResponse;
+                            if (file?.filename?.url?.endsWith('.png') || file?.filename?.url?.endsWith('.jpg') || file?.filename?.url?.endsWith(".jpeg") ) {
+                                formData.append('file', uploadFile, file?.filename.name);
+                                formData.append('access_token', token);
+                                const fileName = file?.filename.name.split('/').pop();
+        
+                                fbResponse = await axios.post(
+                                    `https://graph.facebook.com/v20.0/act_${accountNumber}/adimages`,
+                                    formData,
+                                    { headers: { 'Content-Type': 'multipart/form-data' } }
+                                );
+                                
+        
+                                if (fbResponse.status === 200) {
+                                    // onSuccess("ok", response);
+                                    return({
+                                        id: file.id,
+                                        AddName: file.AddName,
+                                        filename: file?.filename?.url,
+                                        imag_hash: fbResponse.data?.images?.[fileName]?.hash,
+                                    });
+                                } else {
+                                    // onError("error", response);
+                                    console.error("Image upload failed");
+                                }
+                            } else if (file?.filename?.url?.endsWith('.mp4')) {
+                                formData.append('access_token', token);
+                                console.log("formData", formData);
+                                fbResponse = await axios.post(
+                                    `https://graph.facebook.com/v20.0/act_${accountNumber}/advideos`,
+                                    formData,
+                                    { headers: { 'Content-Type': 'multipart/form-data' } }
+                                );
+
+                                console.log("Facebook API response:", fbResponse.data);
+        
+                                if (fbResponse.status === 200) {
+                                    const videoid = fbResponse?.data?.id;
+                                    await new Promise(resolve => setTimeout(resolve, 10000));
+        
+                                    const thumbnailResponse = await axios.get(
+                                        `https://graph.facebook.com/v20.0/${videoid}`,
+                                        {
+                                            params: {
+                                                access_token: token,
+                                                fields: 'thumbnails',
+                                                is_preferred: true
+                                            }
+                                        }
+                                    );
+        
+                                    const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
+                                    const uri = preferredThumbnail ? preferredThumbnail.uri : "";
+                                    // console.log(videoid);
+                                    // console.log(uri);
+        
+                                    // onSuccess("ok", fbResponse);
+                                    return({
+                                        id: file.id,
+                                        AddName: file.AddName,
+                                        filename: file?.filename?.url,
+                                        videoid: videoid,
+                                        thambnailurl: uri,
+                                    });
+                                } else {
+                                    // onError("error", fbResponse);
+                                    console.error("Video upload to Facebook failed");
+                                }
+                            }
+                        }
+                    }
+                  
+                    
+                }));
+
+                console.log("Ads Data:", adsData);
+                
+                const allLevelData = {
+                    id: DuplicatedampaignData?.identifier,
+                    Campaign: levelWiseChanges?.Campaign || {},
+                    Adset: levelWiseChanges?.Adset || {},
+                    Ad: {
+                      ...(levelWiseChanges?.Ad || {}),
+                      Ads: adsData || []
+                    }
+                };
+                console.log("All Level Values:", allLevelData);
+                const payload = {
+                    accountnumber: accountNumber,
+                    identifier: DuplicatedampaignData?.identifier,
+                    updates: allLevelData,
+                    re_launch: DuplicatedampaignData?.fbstatus === "Live" ? true : false,
+                };
+                console.log("Payload for Update:", payload);
+                const headers = {
+                    'Content-Type': 'application/json',
+                    Authorization: localStorage.getItem("token"),
+                  };
+                const updateData = await axios.post('https://www.testapi.adsgoat.in/api/updateCampaignData', payload, { headers });
+                // console.log("Campaign updated successfully");
+                if(updateData.status === 200){
+                    message.success("Campaign updated successfully");
+                    changeRRefrst();
+                    setLevelWiseChanges({});
+                    onClose();
+                }
+
                 // const imageHashArray = await customRequest(onSuccess, onError);
                 // console.log("Image Hash Array:", imageHashArray);
 
@@ -1519,14 +1904,20 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
         setCampaignLevelDailyBudget(0);
         onClose(); // Call onClose handler to close the drawer
         setActiveKey(['1']);
+        setLevelWiseChanges({}); // Reset level-wise changes
     };
 
     const handleSelectChange = (value) => {
         setSelectedOption(value);
     };
 
-    const onClickCreativesDrawer = () => {
+    const onClickCreativesDrawer = (panelKey) => {
         console.log("Creatives Drawer Opened");
+        // const onClickCreativesDrawer = (panelKey) => {
+        //     setActivePanelKey(panelKey);
+        //     setOpenCreativesDrawer(true);
+        //   };
+        setActivePanelKey(panelKey);
         setOpenCreativesDrawer(true);
     }
 
@@ -1574,6 +1965,71 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
             form.setFieldsValue({ MediaContent: updatedMediaContent });
             form.validateFields(["MediaContent"]);
         }
+        if (!activePanelKey || !data || data.length === 0) return;
+
+    // Only take the first file
+        const file = data[0];
+
+        const enrichedFile = {
+            uid: file.uid || `-${index+1}`,
+            name: file?.name,
+            thumbUrl: file.thumbUrl || file.url,
+            status: 'done',
+            type: `${file?.url?.endsWith(".jpg") || file?.url?.endsWith(".png") || file?.url?.endsWith(".jpeg") ? file?.url?.endsWith(".jpg") ? "image/jpg" : file?.url?.endsWith(".jpeg") ? "image/jpeg" : "image/png" : "video/"}`,
+            url: file?.url,
+        };
+
+        const enrichedFiles = [enrichedFile]; // wrap in array
+
+        setPanels((prev) =>
+        prev.map((panel) =>
+            panel.key === activePanelKey
+            ? {
+                ...panel,
+                selectedFiles: enrichedFiles,
+                selectedFilesFromCreatives: enrichedFiles,
+                selectedFilesFromMedia: [],
+                }
+            : panel
+        )
+        );
+
+        
+
+        // ✅ Update form only for this panel
+        form.setFieldsValue({ [`MediaContent_${activePanelKey}`]: enrichedFiles });
+        form.validateFields([`MediaContent_${activePanelKey}`]);
+
+        // ✅ Update setLevelWiseChanges
+        const currentPanel = panels.find(p => p.key === activePanelKey);
+const fileData = enrichedFile; // or data[0], your enriched object
+
+setLevelWiseChanges(prev => {
+  const newEntry = {
+    id: currentPanel.id,
+    filename: fileData,
+    AddName: currentPanel.AddName,
+  };
+
+  const existingAd = prev?.Ad || {};
+  const existingAds = existingAd?.Ads || [];
+
+  const updatedAds = [
+    ...existingAds.filter(item => item.id !== newEntry.id),
+    newEntry,
+  ];
+
+  return {
+    ...prev,
+    Ad: {
+      ...existingAd,       // ✅ Preserve other keys inside Ad
+      Ads: updatedAds,     // ✅ Update only Ads array
+    },
+  };
+});
+
+        
+        
     }
 
     console.log("Selected Files:", selectedFiles);
@@ -1594,11 +2050,12 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
         );
     };
 
-    console.log(changedFields, "changedFields");
+    // console.log(changedFields, "changedFields");
+    console.log(levelWiseChanges, "levelWiseChanges");
 
     return (
         <Drawer
-            title="Create a new campaign"
+            title={`${DuplicatedampaignData ? DuplicatedampaignData.campaign_name : "Edit Campaign"}`}
             width="95%"
             open={visible}
             onClose={handleDrawerClose}
@@ -1611,7 +2068,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                         <Panel header="CAMPAIGN LEVEL" key="1">
                             <div style={{ display: "flex" }}>
                                 <Form.Item
-                                    name="Account_Number"
+                                    name={["Campaign", "Account_Number"]}
                                     label={<span style={{ color: "#B4B4B4" }}>Account Number</span>}
                                     rules={[
                                         {
@@ -1623,7 +2080,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     <Input value={accountNumber} onChange={Accountchange} />
                                 </Form.Item>
                                 <Form.Item
-                                    name="Name"
+                                    name={["Campaign", "Name"]}
                                     label={<span style={{ color: "#B4B4B4" }}>Campaign name</span>}
                                     rules={[
                                         {
@@ -1637,7 +2094,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     />
                                 </Form.Item>
                                 <Form.Item
-                                    name="Objectives"
+                                    name={["Campaign", "Objectives"]}
                                     label={<span style={{ color: "#B4B4B4" }}>Objectives</span>}
                                     rules={[
                                         {
@@ -1661,7 +2118,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     />
                                 </Form.Item>
                                 <Form.Item
-                                    name="Special_categories"
+                                    name={["Campaign", "Special_categories"]}
                                     label={<span style={{ color: "#B4B4B4" }}>Categories</span>}
                                     rules={[
                                         {
@@ -1686,7 +2143,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     />
                                 </Form.Item>
                                 <Form.Item
-                                    name="Bid_strategy"
+                                    name={["Campaign", "Bid_strategy"]}
                                     label={<span style={{ color: "#B4B4B4" }}>Bid strategy</span>}
                                     rules={[
                                         {
@@ -1707,7 +2164,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     />
                                 </Form.Item>
                                 <Form.Item
-                                    name="Daily_amount"
+                                    name={["Campaign", "Daily_amount"]}
                                     label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
                                     style={{ flex: 0.1, marginLeft: "2%" }}
                                 // tooltip={adsetLevelDailyBudget !== "" ? "You have enabled daily budget in the Adset Level" : ""}
@@ -1733,7 +2190,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     </Tooltip>
                                 </Form.Item> {/*pk*/}
                                 <Form.Item
-                                    name="Status"
+                                    name={["Campaign", "Status"]}
                                     label={<span style={{ color: "#B4B4B4" }}>Status</span>}
                                     rules={[
                                         {
@@ -1756,7 +2213,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                         <Panel header="ADSET LEVEL" key="2" forceRender>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
                                 <Form.Item
-                                    name="AdsetName"
+                                    name={["Adset", "AdsetName"]}
                                     initialValue={campaignName}
                                     label={<span style={{ color: "#B4B4B4" }}>Adset name</span>}
                                     rules={[
@@ -1770,7 +2227,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     <Input />
                                 </Form.Item>
                                 <Form.Item
-                                    name="optimization_goal"
+                                    name={["Adset", "optimization_goal"]}
                                     label={<span style={{ color: "#B4B4B4" }}>Optimiz goal</span>}
                                     rules={[
                                         {
@@ -1790,7 +2247,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     />
                                 </Form.Item>
                                 <Form.Item
-                                    name="billing_event"
+                                    name={["Adset", "billing_event"]}
                                     label={<span style={{ color: "#B4B4B4" }}>Billing event</span>}
                                     rules={[
                                         {
@@ -1808,7 +2265,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     />
                                 </Form.Item>
                                 <Form.Item
-                                    name="DatePicker"
+                                    name={["Adset", "DatePicker"]}
                                     label={<span style={{ color: "#B4B4B4" }}>Start Time</span>}
                                     rules={[
                                         {
@@ -1827,7 +2284,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     style={{ width: '100%' }} />
                                 </Form.Item>
                                 <Form.Item
-                                    name="action_source"
+                                    name={["Adset", "action_source"]}
                                     label={<span style={{ color: "#B4B4B4" }}>Action source</span>}
                                     rules={[
                                         {
@@ -1847,7 +2304,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     />
                                 </Form.Item>
                                 <Form.Item
-                                    name="custom_event_type"
+                                    name={["Adset", "custom_event_type"]}
                                     label={<span style={{ color: "#B4B4B4" }}>Event type</span>}
                                     rules={[
                                         {
@@ -1867,7 +2324,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     />
                                 </Form.Item>
                                 <Form.Item
-                                    name="pixel_id"
+                                    name={["Adset", "pixel_id"]}
                                     initialValue={imagehash?.pixelID}
                                     label={<span style={{ color: "#B4B4B4" }}>Pixel id</span>}
                                     rules={[
@@ -1882,7 +2339,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 </Form.Item>
                                 {/*pk*/}
                                 <Form.Item
-                                    name="DailyAdd_amount" // Make sure this name matches the field you want to capture
+                                    name={["Adset", "DailyAdd_amount"]} // Make sure this name matches the field you want to capture
                                     label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
                                     style={{ flex: '1 1 200px' }}
                                 >
@@ -1908,7 +2365,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 </Form.Item>
                                 {showBidAmount && (
                                     <Form.Item
-                                        name="bid_amount"
+                                        name={["Adset", "bid_amount"]}
                                         label={<span style={{ color: "#B4B4B4" }}>Cost per Result Goal</span>}
                                         rules={[
                                             {
@@ -1942,7 +2399,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                             <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "green" }}>Targeting</span>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
                                 <Form.Item
-                                    name="countries"
+                                    name={["Adset", "countries"]}
                                     label={<span style={{ color: "#B4B4B4" }}>Countries</span>}
                                     rules={[
                                         {
@@ -1976,7 +2433,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     />
                                 </Form.Item>
                                 <Form.Item
-                                    name="Min_Age"
+                                    name={["Adset", "Min_Age"]}
                                     label={<span style={{ color: "#B4B4B4" }}>Min Age</span>}
                                     rules={[
                                         {
@@ -1996,7 +2453,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     />
                                 </Form.Item>
                                 <Form.Item
-                                    name="Max_Age"
+                                    name={["Adset", "Max_Age"]}
                                     label={<span style={{ color: "#B4B4B4" }}>Max Age</span>}
                                     rules={[
                                         {
@@ -2016,7 +2473,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     />
                                 </Form.Item>
                                 <Form.Item
-                                    name="Gender"
+                                    name={["Adset", "Gender"]}
                                     label={<span style={{ color: "#B4B4B4" }}> Gender</span>}
                                     rules={[
                                         {
@@ -2035,7 +2492,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     />
                                 </Form.Item>
                                 <Form.Item
-                                    name="Language"
+                                    name={["Adset", "Language"]}
 
                                     label={<span style={{ color: "#B4B4B4" }}>Language</span>}
                                     rules={[{ required: true, message: "Please select an option!" }]}
@@ -2058,10 +2515,11 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 </Form.Item>
                                 <Form.Item
                                     label="Placements"
-                                    name="placements"
+                                    name={["Adset", "placements"]}
                                     rules={[{ required: true, message: 'Please select a mode!' }]}
+                                   
                                 >
-                                    <Select placeholder="Select a mode" onChange={handleModeChange}>
+                                    <Select placeholder="Select a mode" onChange={handleModeChange}  disabled={true} >
                                         <Option value="Advance">Advance</Option>
                                         <Option value="manual">Manual</Option>
 
@@ -2070,7 +2528,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 {isManual && (
                                     <>
                                         <Form.Item
-                                            name="publisher_platforms"
+                                            name={["Adset", "publisher_platforms"]}
                                             label={<span style={{ color: "#B4B4B4" }}>Platforms</span>}
                                             rules={[{ required: true, message: "Please select an option!" }]}
                                             style={{ flex: '1 1 300px' }}
@@ -2080,6 +2538,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                 placeholder="Select Platforms"
                                                 onChange={handlePublisherChange}
                                                 value={selectedPublishers}
+                                                disabled={true} 
                                             >
                                                 {publisherOptions.map(option => (
                                                     <Option key={option.value} value={option.value}>
@@ -2089,7 +2548,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             </Select>
                                         </Form.Item>
                                         <Form.Item
-                                            name="positions"
+                                            name={["Adset", "positions"]}
                                             label={<span style={{ color: "#B4B4B4" }}>Positions</span>}
                                             rules={[{ required: true, message: "Please select an option!" }]}
                                             style={{ flex: '1 1 400px' }}
@@ -2099,6 +2558,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                 placeholder="Select Positions"
                                                 value={selectedPositions}
                                                 onChange={handlePositionChange}
+                                                disabled={true} 
                                             >
                                                 {selectedPublishers.length > 0 && getPositionOptions()?.map(position => (
                                                     <Option key={`${position.key}_${position.label}`} value={position.key}>
@@ -2108,7 +2568,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             </Select>
                                         </Form.Item>
                                         <Form.Item
-                                            name="device_platforms"
+                                            name={["Adset", "device_platforms"]}
                                             label={<span style={{ color: "#B4B4B4" }}>Device</span>}
                                             rules={[
                                                 {
@@ -2126,6 +2586,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                     { value: "mobile", label: "Mobile" },
                                                     { value: "desktop", label: "Desktop" }
                                                 ]}
+                                                disabled={true} 
                                             />
                                         </Form.Item>
                                     </>
@@ -2137,7 +2598,467 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                             <div style={{ display: "flex", justifyContent: "space-between" }}>
                                 <div style={{ flex: "70%", marginRight: "5%" }}>
                                     <div style={{ display: 'flex', gap: '16px' }}>
-                                    <div style={{display:'flex', flexDirection:'column'}}>
+
+                                    <Collapse style={{ width: '100%' }}>
+  {panels.map((panel) => (
+    <Panel header={panel.AddName || "Untitled"} key={panel.key} style={{ width: '100%' }}>
+      <div style={{display:'flex'}}>
+        <div style={{ display: 'flex', flexDirection: 'column', width:"100%" }}>
+            {/* Ad Name Input */}
+            <Form.Item
+            label={<span style={{ color: "#B4B4B4" }}>Ad Name</span>}
+            name={`AddName_${panel.key}`}
+            rules={[{ required: true, message: 'Please enter Ad Name' }]}
+            initialValue={panel.AddName || ""}
+            >
+                <Input
+                    value={panel.AddName}
+                    onChange={(e) => {
+                        const newAddName = e.target.value;
+
+                        // ✅ Update local panel state
+                        updatePanel(panel.key, "AddName", newAddName);
+
+                        // ✅ Sync AddName in setLevelWiseChanges
+                        setLevelWiseChanges((prev) => {
+                        const existingAd = prev.Ad || {};
+                        const existingAds = existingAd.Ads || [];
+
+                        const updatedAds = existingAds.map((ad) =>
+                            ad.id === panel.id ? { ...ad, AddName: newAddName } : ad
+                        );
+
+                        return {
+                            ...prev,
+                            Ad: {
+                            ...existingAd,
+                            Ads: updatedAds,
+                            },
+                        };
+                        });
+                    }}
+                    placeholder="Enter Ad Name"
+                    style={{ width: "30%" }}
+                />
+
+            </Form.Item>
+
+            {/* Select Source Dropdown */}
+            <Form.Item label={<span style={{ color: "#B4B4B4" }}>Select Source</span>}>
+            <Select
+                value={panel.selectedOption}
+                onChange={(value) => {
+                updatePanel(panel.key, "selectedOption", value);
+                form.validateFields([`MediaContent_${panel.key}`]);
+                }}
+                style={{ marginBottom: 16, width: "30%" }}
+                disabled={!(panel.selectedFiles.length === 0 && panel.selectedFilesFromCreatives.length === 0 && panel.selectedFilesFromMedia.length === 0)}
+            >
+                <Option value="upload">Upload</Option>
+                <Option value="creative">Creative Library</Option>
+            </Select>
+            </Form.Item>
+
+            {/* File Selection Section with Validation */}
+            <Form.Item
+            name={`MediaContent_${panel.key}`}
+            rules={[
+                {
+                validator: async () => {
+                    const current = panels.find(p => p.key === panel.key);
+                    if (
+                    (current.selectedOption === "upload" && current.selectedFilesFromMedia.length === 0) ||
+                    (current.selectedOption === "creative" && current.selectedFilesFromCreatives.length === 0)
+                    ) {
+                    throw new Error("Please select Upload!");
+                    }
+                    return Promise.resolve();
+                },
+                },
+            ]}
+            >
+            <div>
+                {/* Upload Section */}
+                {panel.selectedOption === "upload" && (
+                    <Upload
+                        key={`${panel.key}-${panel.selectedFilesFromMedia.map(f => f.uid).join(",")}`} // force re-render
+                        beforeUpload={() => false}
+                        multiple
+                        maxCount={1} // ensures only one file is accepted at UI level
+                        listType="picture"
+                        accept="image/*,video/*"
+                        fileList={panel.selectedFilesFromMedia}
+                        onChange={(info) => {
+                        const firstFileRaw = info.fileList[0]; // only take the first file
+                        if (!firstFileRaw) return;
+
+                        const enrichedFile = {
+                            ...firstFileRaw,
+                            uid: firstFileRaw.uid || `media-${Date.now()}`,
+                            source: "media",
+                            thumbUrl:
+                            firstFileRaw.thumbUrl ||
+                            (firstFileRaw.originFileObj
+                                ? URL.createObjectURL(firstFileRaw.originFileObj)
+                                : undefined),
+                        };
+
+                        const newFiles = [enrichedFile]; // only the first file in array form
+
+                        // ✅ Update state
+                        updatePanel(panel.key, "selectedFilesFromMedia", newFiles);
+                        updatePanel(panel.key, "selectedFilesFromCreatives", []);
+                        updatePanel(panel.key, "selectedFiles", newFiles);
+                        // ✅ Update setLevelWiseChanges
+                        const fileData = enrichedFile; // based on local upload
+
+                        setLevelWiseChanges(prev => {
+                            const newEntry = {
+                              id: panel.id,
+                              filename: enrichedFile,
+                              AddName: panel.AddName,
+                            };
+                    
+                            const existingAd = prev.Ad || {};
+                            const existingAds = existingAd.Ads || [];
+                    
+                            const updatedAds = [
+                              ...existingAds.filter(item => item.id !== panel.id),
+                              newEntry,
+                            ];
+                    
+                            return {
+                              ...prev,
+                              Ad: {
+                                ...existingAd,
+                                Ads: updatedAds,
+                              },
+                            };
+                        });
+    // }}
+
+                        form.setFieldsValue({ [`MediaContent_${panel.key}`]: newFiles });
+                        form.validateFields([`MediaContent_${panel.key}`]);
+                        }}
+                        
+                        onRemove={(fileToRemove) => {
+                        const filtered = panel.selectedFilesFromMedia.filter(
+                            (f) => f.uid !== fileToRemove.uid
+                        );
+
+                        updatePanel(panel.key, "selectedFilesFromMedia", filtered);
+                        updatePanel(panel.key, "selectedFiles", filtered);
+
+                        form.setFieldsValue({ [`MediaContent_${panel.key}`]: filtered });
+                        form.validateFields([`MediaContent_${panel.key}`]);
+
+                        // ❌ Optionally remove from setLevelWiseChanges if no file remains
+                        if (filtered.length === 0) {
+                            setLevelWiseChanges(prev => {
+                            const remaining = (prev?.Ad?.Ads || []).filter(item => item.id !== panel.id);
+                            return {
+                                ...prev,
+                                Ad: {
+                                Ads: remaining,
+                                },
+                            };
+                            });
+                        }
+
+                        return true;
+                        }}
+                    >
+                        <Button
+                        icon={<UploadOutlined />}
+                        disabled={
+                            !(
+                            panel.selectedFiles.length === 0 &&
+                            panel.selectedFilesFromCreatives.length === 0 &&
+                            panel.selectedFilesFromMedia.length === 0
+                            )
+                        }
+                        >
+                        Select Files
+                        </Button>
+                    </Upload>
+                )}
+
+
+                {/* Creative Library Section */}
+                {panel.selectedOption === "creative" && (
+                    <div>
+                        <Button
+                        disabled={
+                            !(
+                            panel.selectedFiles.length === 0 &&
+                            panel.selectedFilesFromCreatives.length === 0 &&
+                            panel.selectedFilesFromMedia.length === 0
+                            )
+                        }
+                        icon={<UploadOutlined />}
+                        onClick={() =>
+                            onClickCreativesDrawer(panel.key)
+                        }
+                        >
+                        Select Files
+                        </Button>
+
+                        {panel.selectedFilesFromCreatives?.length > 0 && (
+                        <div style={{ marginTop: "10px" }}>
+                            {panel.selectedFilesFromCreatives.map((file) => (
+                            <div
+                                key={file.uid}
+                                style={{
+                                display: "flex",
+                                alignItems: "center",
+                                marginBottom: 8,
+                                }}
+                            >
+                                {file.type?.startsWith("image/") && (
+                                <img
+                                    src={
+                                    file.originFileObj
+                                        ? URL.createObjectURL(file.originFileObj)
+                                        : file.url
+                                    }
+                                    alt="preview"
+                                    style={{
+                                    width: 40,
+                                    height: 40,
+                                    objectFit: "cover",
+                                    borderRadius: 4,
+                                    marginLeft: 8,
+                                    }}
+                                />
+                                )}
+                                
+                                <span
+                                style={{
+                                    maxWidth: 160,
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    whiteSpace: "nowrap",
+                                    paddingLeft: 8,
+                                }}
+                                >
+                                {file.name}
+                                </span>
+                                <DeleteOutlined
+                                onClick={() => {
+                                    const current = panels.find((p) => p.key === panel.key);
+                                    const updated = current.selectedFilesFromCreatives.filter(
+                                    (f) => f.uid !== file.uid
+                                    );
+
+                                    updatePanel(panel.key, "selectedFilesFromCreatives", updated);
+                                    updatePanel(panel.key, "selectedFiles", updated);
+
+                                    form.setFieldsValue({
+                                    [`MediaContent_${panel.key}`]: updated,
+                                    });
+                                    form.validateFields([`MediaContent_${panel.key}`]);
+                                }}
+                                style={{ color: "red", marginLeft: 12, cursor: "pointer" }}
+                                />
+                            </div>
+                            ))}
+                        </div>
+                        )}
+                    </div>
+                )}
+
+            </div>
+            </Form.Item>
+        </div>
+        <div>
+            {panel.selectedFiles.map((file) => (
+                        <div
+                            key={file.uid}
+                            style={{
+                            display: "flex",
+                            alignItems: "center",
+                            marginBottom: 8,
+                            }}
+                        >
+                            {file.type?.startsWith("image/") && (
+                            <img
+                            // style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                                src={
+                                file.originFileObj
+                                    ? URL.createObjectURL(file.originFileObj)
+                                    : file.url
+                                }
+                                alt="preview"
+                                style={{
+                                maxWidth: '100%', maxHeight: '100%', 
+                                width: 300,
+                                height: 300,
+                                objectFit: "contain",
+                                borderRadius: 4,
+                                marginLeft: 8,
+                                
+                                }}
+                                
+                            />
+                            )}
+                            {file.type?.startsWith("video/") && 
+                            (
+                                <video
+                                    controls
+                                    // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                    style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                                >
+                                    <source src={file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url} />
+                                    Your browser does not support the video tag.
+                                </video>
+                            )
+                            }
+                            
+            </div>))}
+        </div>
+      </div>
+      {/* <div key={index} className="container-ad-preview">
+                                                        <div className="ad-preview" style={{ width: "350px" }}>
+                                                            <div className="ad-heading">
+                                                                <div className="img">
+                                                                    {panel?.url?.endsWith('.png') || panel?.url?.endsWith('.jpg') || panel?.url?.endsWith(".jpeg") ? (
+                                                                        <img
+                                                                            src={panel?.url}
+                                                                            alt="page id"
+                                                                            width="40"
+                                                                            height="40"
+                                                                            style={{ objectFit: 'cover' }}
+                                                                        />
+                                                                    ) : panel?.url?.endsWith('.mp4') ? (
+                                                                        <video
+                                                                            src={file?.url}
+                                                                            alt="page id"
+                                                                            width="40"
+                                                                            height="30"
+                                                                            style={{ objectFit: 'cover' }}
+                                                                            muted 
+                                                                        />
+                                                                    ) : 
+                                                                    panel?.type?.startsWith('image/') ? (
+                                                                        <img
+                                                                            src={editedImages[file?.name] ? editedImages[file?.name]:  file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url}
+                                                                            alt="page id"
+                                                                            width="40"
+                                                                            height="40"
+                                                                            style={{ objectFit: 'cover' }}
+                                                                        />
+                                                                    ) 
+                                                                    : 
+                                                                    (
+                                                                        <video
+                                                                            src={file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url}
+                                                                            alt="page id"
+                                                                            width="40"
+                                                                            height="30"
+                                                                            style={{ objectFit: 'cover' }}
+                                                                            muted 
+                                                                        />
+                                                                    )
+                                                                    }
+                                                                </div>
+
+                                                                <div className="title">
+                                                                    <div className="main" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
+                                                                        {addName}
+                                                                        <div className="sub">
+                                                                            {imagehash?.pageName ? (
+                                                                                <>
+                                                                                    {imagehash.pageName} <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                                                </>
+                                                                            ) : (
+                                                                                <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="close">
+                                                                    <CloseOutlined style={{ fontSize: "20px" }} />
+                                                                </div>
+                                                                <div className="moreoptions">
+                                                                    <MoreOutlined style={{ fontSize: "20px" }} />
+                                                                </div>
+                                                            </div>
+                                                            <div className="ad-desc" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
+                                                                {primaryText}
+                                                            </div>
+                                                            <div className="ad-image" style={{ width: '350px', height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                    {panel?.url?.endsWith('.png') || panel?.url?.endsWith('.jpg') || panel?.url?.endsWith(".jpeg") ? (
+                                                                        <img
+                                                                            src={panel?.url}
+                                                                            alt="ad content"
+                                                                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                                                                        />
+                                                                    ) : panel?.url?.endsWith('.mp4') ? (
+                                                                        <video
+                                                                        controls
+                                                                        style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                                                                        >
+                                                                            <source src={panel?.url} />
+                                                                            Your browser does not support the video tag.
+                                                                        </video>
+                                                                    ) 
+                                                                    :
+                                                                    file?.type?.startsWith('image/') ? (
+                                                                        <img
+                                                                            src={editedImages[file?.name] ? editedImages[file?.name]:  file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url} // Use edited image if available
+                                                                            alt="ad content"
+                                                                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                                                                        />
+                                                                    ) : 
+                                                                    (
+                                                                        <video
+                                                                            controls
+                                                                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                                                                        >
+                                                                            <source src={file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url} />
+                                                                            Your browser does not support the video tag.
+                                                                        </video>
+                                                                    )
+                                                                    // null
+                                                                    }
+                                                            </div>
+
+                                                            <div className="ad-cta">
+                                                                <div className="details">
+                                                                    <div className="link">{caption}</div>
+                                                                    <div className="title">{headline}</div>
+                                                                    <div className="desc">{description}</div>
+                                                                </div>
+                                                                <div className="ad-button">
+                                                                    <button type="button">Learn More</button>
+                                                                </div>
+                                                            </div>
+                                                            <a href={websiteURL} target="_blank" rel="noopener noreferrer" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: '#0066cc', padding: '10px' }}>
+                                                                {websiteURL}
+                                                            </a>                                                <div className="icons">
+                                                                <div className="like">
+                                                                    <LikeOutlined style={{ fontSize: "20px" }} />
+                                                                    Like
+                                                                </div>
+                                                                <div className="comment">
+                                                                    <CommentOutlined style={{ fontSize: "20px" }} />
+                                                                    Comment
+                                                                </div>
+                                                                <div className="share">
+                                                                    <ShareAltOutlined style={{ fontSize: "20px" }} />
+                                                                    Share
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div> */}
+    </Panel>
+  ))}
+</Collapse>
+
+
+
+
+                                    {/* <div style={{display:'flex', flexDirection:'column'}}>
                                         <Form.Item
                                             label={<span style={{ color: "#B4B4B4" }}>Select Source</span>}
                                             style={{ flex: 1 }}
@@ -2172,7 +3093,6 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             ]}
                                             >
                                                 <div>
-                                                    {/* Upload UI */}
                                                     <div style={{ display: selectedOption === "upload" ? "block" : "none" }}>
                                                         <Upload
                                                             beforeUpload={() => false}
@@ -2233,7 +3153,6 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                         </Upload>
                                                     </div>
 
-                                                    {/* Creative Library UI */}
                                                     {selectedOption === "creative" && (
                                                     <div>
                                                         <Button icon={<UploadOutlined />} onClick={onClickCreativesDrawer}>
@@ -2251,8 +3170,6 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                                 marginBottom: 8,
                                                                 }}
                                                             >
-                                                                {/* <PaperClipOutlined style={{ marginRight: 8 }} /> */}
-                                                                {/* <Tooltip title={file.name}> */}
                                                                 {file.type?.startsWith("image/") && (
                                                                     <img
                                                                         src={
@@ -2281,7 +3198,6 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                                 >
                                                                     {file.name}
                                                                 </span>
-                                                                {/* </Tooltip> */}
 
                                                                 
 
@@ -2307,10 +3223,12 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                     )}
                                                 </div>
                                         </Form.Item>
-                                    </div>
+                                    </div> */}
 
-                                        <Form.Item
-                                            name="page_id"
+                                        
+                                    </div>
+                                    <Form.Item
+                                            name={["Ad", "page_id"]}
                                             initialValue={imagehash?.pageID}
                                             label={<span style={{ color: "#B4B4B4" }}>Page id</span>}
                                             rules={[
@@ -2319,12 +3237,11 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                     message: "Please select an option!",
                                                 },
                                             ]}
-                                            style={{ flex: 3, marginLeft: "1%" }}
-                                        >
+                                            style={{ flex: 3, marginLeft: "1%", marginTop: "1%" }}
+                                    >
                                             <Input style={{ width: "45%" }} />
-                                        </Form.Item>
-                                    </div>
-                                    <Form.Item
+                                    </Form.Item>
+                                    {/* <Form.Item
                                         name="AddName"
                                         initialValue={campaignName}
                                         label={<span style={{ color: "#B4B4B4" }}>Add name</span>}
@@ -2340,10 +3257,10 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             onChange={(e) => setAddName(e.target.value)}
 
                                         />
-                                    </Form.Item>
+                                    </Form.Item> */}
                                     <Form.Item
                                         label="Primary text"
-                                        name="message"
+                                        name={["Ad", "message"]}
                                         rules={[
                                             {
                                                 required: true,
@@ -2380,7 +3297,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     </Form.Item> */}
                                     <Form.Item
                                         label="Headline"
-                                        name="headline"
+                                        name={["Ad", "headline"]}
                                         rules={[
                                             {
                                                 required: true,
@@ -2399,7 +3316,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
 
                                     <Form.Item
                                         label="Description"
-                                        name="Description"
+                                        name={["Ad", "Description"]}
                                         rules={[
                                             {
                                                 required: true,
@@ -2429,7 +3346,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                         }
                                         labelCol={{ style: { width: '100%' } }}  // Makes the label full width
                                         wrapperCol={{ style: { width: '100%' } }}  // Ensures TextArea takes the same full width
-                                        name="Website_URL"
+                                        name={["Ad", "Website_URL"]}
                                         rules={[
                                             {
                                                 required: true,
@@ -2448,7 +3365,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     </Form.Item>
                                     <Form.Item
                                         label="Display Link"
-                                        name="Caption"
+                                        name={["Ad", "Caption"]}
                                         rules={[
                                             {
                                                 required: true,
@@ -2495,7 +3412,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 </Form.Item> */}
                                 </div>
 
-                                <div style={{ flex: "30%" }}>
+                                {/* <div style={{ flex: "30%" }}>
                                         {selectedFiles && selectedFiles.length > 0 ? (
                                             selectedFiles.map((file, index) => (
                                                 <Badge
@@ -2523,7 +3440,6 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                         <div className="ad-preview" style={{ width: "350px" }}>
                                                             <div className="ad-heading">
                                                                 <div className="img">
-                                                                    {/* {file?.filename?.endsWith('.png') && console.log(file)} */}
                                                                     {file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") ? (
                                                                         <img
                                                                             src={file?.url}
@@ -2539,7 +3455,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                                             width="40"
                                                                             height="30"
                                                                             style={{ objectFit: 'cover' }}
-                                                                            muted // Muted to prevent sound on preview
+                                                                            muted 
                                                                         />
                                                                     ) : 
                                                                     file?.type?.startsWith('image/') ? (
@@ -2559,18 +3475,15 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                                             width="40"
                                                                             height="30"
                                                                             style={{ objectFit: 'cover' }}
-                                                                            muted // Muted to prevent sound on preview
+                                                                            muted 
                                                                         />
                                                                     )
-                                                                    // null
                                                                     }
                                                                 </div>
 
                                                                 <div className="title">
                                                                     <div className="main" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
                                                                         {addName}
-                                                                        {/* </div>                                                            <div className="sub">
-                                                                        Sponsored <GlobalOutlined style={{ opacity: "0.6" }} /> */}
                                                                         <div className="sub">
                                                                             {imagehash?.pageName ? (
                                                                                 <>
@@ -2597,13 +3510,11 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                                         <img
                                                                             src={file?.url}
                                                                             alt="ad content"
-                                                                            // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
                                                                             style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                                                                         />
                                                                     ) : file?.url?.endsWith('.mp4') ? (
                                                                         <video
                                                                         controls
-                                                                        // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
                                                                         style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                                                                         >
                                                                             <source src={file?.url} />
@@ -2615,14 +3526,12 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                                         <img
                                                                             src={editedImages[file?.name] ? editedImages[file?.name]:  file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url} // Use edited image if available
                                                                             alt="ad content"
-                                                                            // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
                                                                             style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                                                                         />
                                                                     ) : 
                                                                     (
                                                                         <video
                                                                             controls
-                                                                            // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
                                                                             style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                                                                         >
                                                                             <source src={file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url} />
@@ -2725,7 +3634,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                         //     </div>
                                         // )
                                         }
-                                    </div>
+                                    </div> */}
 
                             </div>
 
@@ -2740,7 +3649,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                         )}
                     </Form.Item> */}
                     <Form.Item label=" ">
-                        {isFormComplete && (
+                        {/* {isFormComplete && ( */}
                             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
                             <Button
                                 type="primary"
@@ -2750,14 +3659,26 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     const values = await form.validateFields(); // Validates all form fields
 
                                     // Clear existing validation errors
+                                    console.log("hi");
+                                    
+                                    if (adsetLevelDailyBudget === 0 && campaignLevelDailyBudget === 0) {
+                                        // Throw a validation error manually in the same format as AntD expects
+                                        throw {
+                                          errorFields: [
+                                            {
+                                              name: ['Daily_amount'], // This should match your Form.Item name path
+                                              errors: ['Daily budget cannot be zero on both Adset and Campaign levels'],
+                                            },
+                                          ],
+                                        };
+                                    }
                                     setSubmitErrors([]);
-
                                     // Optionally trigger your existing logic
-                                    onFinish(values); // If you want to reuse your existing logic
+                                    // onFinish(values); // If you want to reuse your existing logic
 
                                     // Show confirmation modal
+                                    
                                     setIsModalVisible(true);
-
                                     // Save values if needed
                                     setFormValues(values);
                                 } catch (err) {
@@ -2765,6 +3686,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     name: field.name?.[0],       // field name
                                     message: field.errors?.[0],  // validation message
                                     }));
+                                    console.log("Errors:", allErrors);
                                     setSubmitErrors(allErrors);
                                 }
                                 }}
@@ -2773,7 +3695,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                             </Button>
 
                             {/* Show validation messages beside button */}
-                            {submitErrors.length > 0 && (
+                            {(submitErrors?.length) > 0 && (
                                 <div style={{ color: "red", marginTop: 8 }}>
                                 {submitErrors.map((err, index) => (
                                     <div key={index}>
@@ -2783,7 +3705,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 </div>
                             )}
                             </div>
-                        )}
+                        {/* )} */}
                     </Form.Item>
 
                     {isImgEditorShown && currentFile && (

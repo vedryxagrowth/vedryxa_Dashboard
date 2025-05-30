@@ -1993,3 +1993,25 @@ body.dark-mode .black-icon-comment.anticon svg {
   white-space: nowrap;
   flex-shrink: 0;
 }
+
+
+/* Compact Upload item - remove right padding/spacing */
+.ant-upload-list-item {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-start !important; /* 👈 prevent space between */
+  padding-right: 0 !important;
+}
+
+/* Optional: shrink width of whole item container */
+.ant-upload-list-item-container {
+  width: auto !important;
+}
+
+/* Tighten up delete button space */
+.ant-upload-list-item-actions {
+  margin-left: 4px !important;
+  margin-right: 0 !important;
+}
+
