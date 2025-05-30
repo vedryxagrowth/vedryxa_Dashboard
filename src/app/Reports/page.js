@@ -83,7 +83,8 @@ const MyTablePage = () => {
     const columnStructure = [
         "actions",
         "date",
-        "tq",
+        "M_tq",
+        "D_tq",
         "from",
         "profitloss",
         "spend",
@@ -1133,21 +1134,36 @@ const MyTablePage = () => {
     }, [Camapignlevelstatus]);
 
     const columnDefsObjectOfAdID = {
-        tq: {
-            headerName: 'TQ',
-            field: 'tq',
-            minWidth: 105,
-            aggFunc: 'avg', // Average for group rows
-            sortable: true,
+        M_tq: {
+            headerName: 'M_TQ',
+            field: 'M_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },             
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
-            valueFormatter: (params) => {
-              const val = Number(params.value);
-              return isNaN(val) ? '0.00' : val.toFixed(2);
-            },
-            hide: true,
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
         },
+          D_tq: {
+            headerName: 'D_TQ',
+            field: 'D_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        }, 
         campaignname: {
             headerName: 'CampaignName',
             field: 'campaignname',
@@ -1744,21 +1760,36 @@ const MyTablePage = () => {
     };
 
     const columnDefsObjectOfDailyAdID = {
-        tq: {
-            headerName: 'TQ',
-            field: 'tq',
-            minWidth: 105,
-            aggFunc: 'avg', // Average for group rows
-            sortable: true,
+        M_tq: {
+            headerName: 'M_TQ',
+            field: 'M_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },             
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
-            valueFormatter: (params) => {
-              const val = Number(params.value);
-              return isNaN(val) ? '0.00' : val.toFixed(2);
-            }, 
-            hide: true,
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
         },
+        D_tq: {
+            headerName: 'D_TQ',
+            field: 'D_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        },  
         campaignname: {
             headerName: 'CampaignName',
             field: 'campaignname',
@@ -3258,21 +3289,36 @@ const MyTablePage = () => {
 
 
     const columnDefsObjectAdsetLevel = {
-        tq: {
-            headerName: 'TQ',
-            field: 'tq',
-            minWidth: 105,
-            aggFunc: 'avg', // Average for group rows
-            sortable: true,
+        M_tq: {
+            headerName: 'M_TQ',
+            field: 'M_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },             
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
-            valueFormatter: (params) => {
-              const val = Number(params.value);
-              return isNaN(val) ? '0.00' : val.toFixed(2);
-            },
-            hide: true,
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
         },
+          D_tq: {
+            headerName: 'D_TQ',
+            field: 'D_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        },  
         campaignname: {
             headerName: 'CampaignName',
             field: 'campaignname',
@@ -3880,21 +3926,36 @@ const MyTablePage = () => {
     };
 
     const columnDefsObjectAdLevel = {
-        tq: {
-            headerName: 'TQ',
-            field: 'tq',
-            minWidth: 105,
-            aggFunc: 'avg', // Average for group rows
-            sortable: true,
+        M_tq: {
+            headerName: 'M_TQ',
+            field: 'M_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },             
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
-            valueFormatter: (params) => {
-              const val = Number(params.value);
-              return isNaN(val) ? '0.00' : val.toFixed(2);
-            },
-            hide: true,
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
         },
+          D_tq: {
+            headerName: 'D_TQ',
+            field: 'D_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        },  
         campaignname: {
             headerName: 'CampaignName',
             field: 'campaignname',
@@ -4502,21 +4563,36 @@ const MyTablePage = () => {
     };
 
     const columnDefsObject = {
-        tq: {
-            headerName: 'TQ',
-            field: 'tq',
-            minWidth: 105,
-            aggFunc: 'avg', // Average for group rows
-            sortable: true,
+        M_tq: {
+            headerName: 'M_TQ',
+            field: 'M_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },             
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
-            valueFormatter: (params) => {
-              const val = Number(params.value);
-              return isNaN(val) ? '0.00' : val.toFixed(2);
-            },
-            hide: true,
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
         },
+          D_tq: {
+            headerName: 'D_TQ',
+            field: 'D_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        },  
         campaignname: {
             headerName: 'CampaignName',
             field: 'campaignname',
@@ -5122,20 +5198,36 @@ const MyTablePage = () => {
     };
 
     const columnDefsObjectAdsetLevelDaily = {
-        tq: {
-            headerName: 'TQ',
-            field: 'tq',
-            minWidth: 105,
-            aggFunc: 'avg', // Average for group rows
-            sortable: true,
+        M_tq: {
+            headerName: 'M_TQ',
+            field: 'M_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },             
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
-            valueFormatter: (params) => {
-              const val = Number(params.value);
-              return isNaN(val) ? '0.00' : val.toFixed(2);
-            }
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
         },
+          D_tq: {
+            headerName: 'D_TQ',
+            field: 'D_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        }, 
         campaignname: {
             headerName: 'CampaignName',
             field: 'campaignname',
@@ -5590,20 +5682,35 @@ const MyTablePage = () => {
     };
 
     const columnDefsObjectAdLevelDaily = {
-        tq: {
-            headerName: 'TQ',
-            field: 'tq',
-            minWidth: 105,
-            aggFunc: 'avg', // Average for group rows
-            sortable: true,
+        M_tq: {
+            headerName: 'M_TQ',
+            field: 'M_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },             
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
-            valueFormatter: (params) => {
-              const val = Number(params.value);
-              return isNaN(val) ? '0.00' : val.toFixed(2);
-            }
+            sortable: true,
+            aggFunc: liveSpender,
         },
+          D_tq: {
+            headerName: 'D_TQ',
+            field: 'D_tq',
+            aggFunc: 'sum',
+            // valueFormatter: currencyFormatter, 
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+        },          
         campaignname: {
             headerName: 'CampaignName',
             field: 'campaignname',
@@ -6058,24 +6165,36 @@ const MyTablePage = () => {
     };
 
     const columnDefsObject1 = {
-        tq: {
-            headerName: 'TQ',
-            field: 'tq',
-            minWidth: 105,
-            aggFunc: 'avg',
-            sortable: true,
+        M_tq: {
+            headerName: 'M_TQ',
+            field: 'M_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },             
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
-            showRowGroup: true,
-            cellRenderer: (params) => {
-                const val = Number(params.value);
-                return !isNaN(val)
-                    ? val.toFixed(2)
-                    : '0.00'; // fallback for null/undefined
-            },
-            hide: true,           
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
         },
+          D_tq: {
+            headerName: 'D_TQ',
+            field: 'D_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        }, 
         campaignname: {
             headerName: 'CampaignName',
             field: 'campaignname',
@@ -6531,21 +6650,36 @@ const MyTablePage = () => {
 
     //campaignLevelDaily
     const columnDefsObject2 = {
-        tq: {
-            headerName: 'TQ',
-            field: 'tq',
-            minWidth: 105,
-            aggFunc: 'avg', // Average for group rows
-            sortable: true,
+        M_tq: {
+            headerName: 'M_TQ',
+            field: 'M_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },             
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
-            valueFormatter: (params) => {
-              const val = Number(params.value);
-              return isNaN(val) ? '0.00' : val.toFixed(2);
-            },
-            // hide: true,
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
         },
+          D_tq: {
+            headerName: 'D_TQ',
+            field: 'D_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        }, 
         campaignname: {
             headerName: 'CampaignName', field: 'campaignname', resizeble: true,
             // sortable: true,
@@ -7015,21 +7149,36 @@ const MyTablePage = () => {
     };
 
     const columnDefsObject3 = {
-        tq: {
-            headerName: 'TQ',
-            field: 'tq',
-            minWidth: 105,
-            aggFunc: 'avg', // Average for group rows
-            sortable: true,
+        M_tq: {
+            headerName: 'M_TQ',
+            field: 'M_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },             
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
-            valueFormatter: (params) => {
-              const val = Number(params.value);
-              return isNaN(val) ? '0.00' : val.toFixed(2);
-            },
-            hide: true,
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
         },
+          D_tq: {
+            headerName: 'D_TQ',
+            field: 'D_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        }, 
         campaignname: {
             headerName: 'CampaignName',
             field: 'campaignname',

@@ -765,7 +765,8 @@ const CampaignLevelReports = ({startDate, endDate, newaccount, newtime, newReven
                             actions: '...',
                             from: "",
                             profitloss: "",
-                            tq: "",
+                            M_tq: "",
+                            D_tq: "",
                         }
                     )
                 })

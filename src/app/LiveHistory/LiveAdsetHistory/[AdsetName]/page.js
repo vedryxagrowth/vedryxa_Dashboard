@@ -71,8 +71,11 @@ const MnetLiveAdsetHistory = ({params}) => {
         "hour_n",
         "hour_f",
         "date",
+        "M_tq",
+        "D_tq",
         "campaignname",
         "adsetname",
+        "adname",
         "spend",
         "revenue",
         "profit",
@@ -554,6 +557,37 @@ const MnetLiveAdsetHistory = ({params}) => {
     }
     
     const columnDefsObject = {
+        M_tq: {
+            headerName: 'M_TQ',
+            field: 'M_tq',
+            // aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },             
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            // aggFunc: liveSpender,
+            hide: true,
+        },
+          D_tq: {
+            headerName: 'D_TQ',
+            field: 'D_tq',
+            // aggFunc: 'sum',
+            // valueFormatter: currencyFormatter, 
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            // aggFunc: liveSpender,
+            hide: true,
+        }, 
         date : {
             headerName: 'Date', field: 'date', minWidth: 125,
             // resizable: true,
@@ -612,6 +646,27 @@ const MnetLiveAdsetHistory = ({params}) => {
             // pinned: 'left',
             // enableRowGroup: true,
             // autoHeight: true, 
+            cellStyle: { whiteSpace: "normal", lineHeight: "1.5" }, // Enables text wrapping
+            autoHeight: true,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            cellRenderer: (params) => {
+                if (params.value && params.value.includes("Copied!")) {
+                    return (
+                        <span>
+                            {params.value.replace("Copied!", "")}
+                            <span style={{ color: "green", fontWeight: "bold" }}>Copied!</span>
+                        </span>
+                    );
+                }
+                return params.value;
+            }
+        },
+        adname : {
+            headerName: 'Ad-Name', field: 'adname',
+            width: 250,
+            hide: true,
             cellStyle: { whiteSpace: "normal", lineHeight: "1.5" }, // Enables text wrapping
             autoHeight: true,
             suppressMenu: true,
@@ -1068,6 +1123,7 @@ const MnetLiveAdsetHistory = ({params}) => {
                     date_f: eachData[`${timeZone}Date`],
                     campaignname: eachData.campaign_name,
                     adsetname: eachData.adsetName,
+                    adname: "",
                     // 'fb-hour': eachData.hour,
                     // 'mnet-hour': eachData.updatedHour,
                     spend:eachData.spend,
@@ -1090,6 +1146,8 @@ const MnetLiveAdsetHistory = ({params}) => {
                     hour_f: eachData.hour,
                     hour_n: eachData.updatedHour,
                     filteration: parseInt(eachData.fbLeads) !== 0 ? Math.round((((parseInt(eachData.fbLeads)-parseInt(eachData.conversions))/parseInt(eachData.fbLeads))*100)*100)/100 : 0,
+                    M_tq: "",
+                    D_tq: "",
                 }
             )
         })

@@ -740,9 +740,8 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                             actions: '...',
                             from: "",
                             profitloss: "",
-                            tq: eachData.tq !== undefined && !isNaN(eachData.tq)
-                            ? Math.round(Number(eachData.tq) * 100) / 100
-                            : 0,
+                            M_tq: "",
+                            D_tq: "",
                         }
                     )
                 }) : null;

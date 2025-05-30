@@ -800,7 +800,8 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                             actions: '...',
                             from: "",
                             profitloss: "",
-                            tq: ""
+                            M_tq: "",
+                            D_tq: "",
                         }
                     )
                 })

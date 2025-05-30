@@ -629,7 +629,8 @@ const Tonic1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePrat
                             keyword: eachData.keyword,
                             from:'',
                             profitloss: "",
-                            tq: "",
+                            M_tq: "",
+                            D_tq: "",
                             // compaignid: eachData.campaign_id,
                         }
                     )

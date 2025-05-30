@@ -4,7 +4,7 @@ import { Audio } from 'react-loader-spinner';
 import React from 'react';
 import moment from 'moment-timezone';
 import {  Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Tabs } from 'antd';
-import {  InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import {  InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import { Space } from 'antd';
 import StickyBox from 'react-sticky-box';
@@ -751,7 +751,8 @@ const AdLevelReports = ({startDate, endDate, newaccount, newtime, newRevenuePrat
                             actions: '...',
                             from: "",
                             profitloss: "",
-                            tq: "",
+                            M_tq: "",
+                            D_tq: "",
                         }
                     )
                 })

@@ -751,7 +751,8 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                             actions: '...',
                             from: "",
                             profitloss: "",
-                            tq: "",
+                            M_tq: "",
+                            D_tq: "",
                             // compaignid: eachData.campaign_id,
                         }
                     )

@@ -71,8 +71,11 @@ const MnetLiveAdHistory = ({params}) => {
         "hour_n",
         "hour_f",
         "date",
+        "M_tq",
+        "D_tq",
         "campaignname",
         "adsetname",
+        "adname",
         "spend",
         "revenue",
         "profit",
@@ -554,6 +557,37 @@ const MnetLiveAdHistory = ({params}) => {
     }
     
     const columnDefsObject = {
+        M_tq: {
+            headerName: 'M_TQ',
+            field: 'M_tq',
+            // aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },             
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            // aggFunc: liveSpender,
+            hide: true,
+        },
+          D_tq: {
+            headerName: 'D_TQ',
+            field: 'D_tq',
+            // aggFunc: 'sum',
+            // valueFormatter: currencyFormatter, 
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            // aggFunc: liveSpender,
+            hide: true,
+        }, 
         date : {
             headerName: 'Date', field: 'date', minWidth: 125,
             // resizable: true,
@@ -602,6 +636,35 @@ const MnetLiveAdHistory = ({params}) => {
         },
         adsetname : {
             headerName: 'Adset-Name', field: 'adsetname',
+            // resizeble: true,
+            // // sortable: true,
+            width: 250,
+            hide: true,
+            // // // resizable:false,
+            // // rowGroup: true,
+            // filter: true,
+            // pinned: 'left',
+            // enableRowGroup: true,
+            // autoHeight: true, 
+            cellStyle: { whiteSpace: "normal", lineHeight: "1.5" }, // Enables text wrapping
+            autoHeight: true,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            cellRenderer: (params) => {
+                if (params.value && params.value.includes("Copied!")) {
+                    return (
+                        <span>
+                            {params.value.replace("Copied!", "")}
+                            <span style={{ color: "green", fontWeight: "bold" }}>Copied!</span>
+                        </span>
+                    );
+                }
+                return params.value;
+            }
+        },
+        adname : {
+            headerName: 'Ad-Name', field: 'adname',
             // resizeble: true,
             // // sortable: true,
             width: 250,
@@ -1023,14 +1086,13 @@ const MnetLiveAdHistory = ({params}) => {
         // const fetchData = await fetch(`http://localhost:8000/${network}?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}`);
         // const data = await fetchData.json();
         // const mainData = await data;
-        const fetchData = await apiClient.get(`http://localhost:8000/LiveAdHistory?adName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`);
-        // console.log(`https://prodapis.adsgoat.in/LiveAdsetHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`, "url");
-        const url = `http://localhost:8000/MnetLiveCampaignHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}`
+        const fetchData = await apiClient.get(`/LiveAdHistory?adName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${`${network}_AD`}`);
         
         const mainData = fetchData?.data?.filter(obj => !("ad_clicks" in obj));
         console.log(mainData[0]);
         const filteredData = mainData && mainData.length > 0 ? 
         mainData.map((eachData)=> {
+            console.log("obj:", eachData);
             let revenueData;
             if (eachData.estimated_revenue === 0){
                 revenueData = '0.00';
@@ -1067,6 +1129,7 @@ const MnetLiveAdHistory = ({params}) => {
                     date_n: eachData[`${timeZone}Date`],
                     date_f: eachData[`${timeZone}Date`],
                     campaignname: eachData.campaign_name,
+                    adsetname: eachData.adsetName,
                     adname: eachData.adName,
                     // 'fb-hour': eachData.hour,
                     // 'mnet-hour': eachData.updatedHour,
@@ -1084,12 +1147,15 @@ const MnetLiveAdHistory = ({params}) => {
                     rpc:rpc,
                     cpl:cpl,
                     ncpl:ncpl,
-                    ad_Id: eachData.ad_id,
-                    adset_Id: eachData.adset_id,
+                    adsetId: eachData.adset_id,
+                    campaignId: eachData.campaign_id,
+                    adId: eachData.ad_id,
                     timezone: eachData[timeZone],
                     hour_f: eachData.hour,
                     hour_n: eachData.updatedHour,
                     filteration: parseInt(eachData.fbLeads) !== 0 ? Math.round((((parseInt(eachData.fbLeads)-parseInt(eachData.conversions))/parseInt(eachData.fbLeads))*100)*100)/100 : 0,
+                    M_tq: "",
+                    D_tq: "",
                 }
             )
         })

@@ -808,7 +808,8 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                     adname: "",
                     from:"",
                     profitloss: "",
-                    tq: "",
+                    M_tq: "",
+                    D_tq: "",
                 };
             });
     
