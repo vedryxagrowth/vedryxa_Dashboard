@@ -724,7 +724,7 @@ const UsersTable = () => {
             key: 'action',
             render: (text, record) => (
                 <Space size="middle">
-                    <Button style={{backgroundColor:'#C7F39A', color:'black'}} onClick={() => handleEdit(record)}>Edit</Button>
+                    <Button style={{backgroundColor:'#91C25F', color:'black'}} onClick={() => handleEdit(record)}>Edit</Button>
                     <Button style={{backgroundColor: "transparent", color: theme === "dark" ? "white" : "black"}} onClick={() => handleDelete(record)}>Remove Access</Button>
                 </Space>
             ),
@@ -1006,7 +1006,7 @@ const UsersTable = () => {
             width: 150,
             render: (text, record) => (
                 <Space size="middle">
-                    <Button style={{backgroundColor:'#C7F39A', color:'black'}} onClick={()=>handleEditUrlBuilder(record)}>Edit</Button>
+                    <Button style={{backgroundColor:'#91C25F', color:'black'}} onClick={()=>handleEditUrlBuilder(record)}>Edit</Button>
                     {/* <Button type="dashed" onClick={() => handleDelete(record)}>Remove Access</Button> */}
                     <EditOutlined style={{ fontSize: '20px', cursor: 'pointer'}} onClick={()=>onClickOpenUrlBuilder(record)}  />
                 </Space>
@@ -1460,11 +1460,11 @@ const UsersTable = () => {
                                 <Button 
                                     type="default" 
                                     icon={<ReloadOutlined className="black-icon"/>} 
-                                    style={{ float: "right", marginLeft: "10px", backgroundColor: '#C7F39A' }} 
+                                    style={{ float: "right", marginLeft: "10px", backgroundColor: '#91C25F' }} 
                                     onClick={refreshUsers}  // Call refresh function when clicked
                                 >
                                 </Button>
-                                <Button style={{ float: "right", border: 'none', backgroundColor: '#C7F39A', color:'black' }} onClick={() => setDrawerVisible(true)}>
+                                <Button style={{ float: "right", border: 'none', backgroundColor: '#91C25F', color:'black' }} onClick={() => setDrawerVisible(true)}>
                                     Create User
                                 </Button>
                             </Col>
@@ -1566,11 +1566,11 @@ const UsersTable = () => {
                                 <Button 
                                     type="default" 
                                     icon={<ReloadOutlined className="black-icon"/>} 
-                                    style={{ float: "right", marginLeft: "10px", backgroundColor: '#C7F39A' }} 
+                                    style={{ float: "right", marginLeft: "10px", backgroundColor: '#91C25F' }} 
                                     onClick={refreshAccounts}  // Call refresh function when clicked
                                 >
                                 </Button>
-                                <Button style={{ float: "right", border: 'none', backgroundColor: '#C7F39A', color: "black" }} onClick={shownnewaccountdrawar}>
+                                <Button style={{ float: "right", border: 'none', backgroundColor: '#91C25F', color: "black" }} onClick={shownnewaccountdrawar}>
                                     Add New Account
                                 </Button>
                             </Col>
@@ -1665,7 +1665,7 @@ const UsersTable = () => {
                                 <Button 
                                     type="default" 
                                     icon={<ReloadOutlined className="black-icon"/>} 
-                                    style={{ float: "right", marginLeft: "10px", backgroundColor: '#C7F39A' }} 
+                                    style={{ float: "right", marginLeft: "10px", backgroundColor: '#91C25F' }} 
                                     onClick={refreshNetworks}  // Call refresh function when clicked
                                 >
                                 </Button>
@@ -1739,11 +1739,11 @@ const UsersTable = () => {
                                 <Button 
                                     type="default" 
                                     icon={<ReloadOutlined className="black-icon"/>} 
-                                    style={{ float: "right", marginLeft: "10px", backgroundColor: '#C7F39A' }} 
+                                    style={{ float: "right", marginLeft: "10px", backgroundColor: '#91C25F' }} 
                                     onClick={refreshUrlBuilder}  // Call refresh function when clicked
                                 >
                                 </Button>
-                                <Button  style={{ float: "right", marginLeft: "5%", backgroundColor:'#C7F39A', color:'black' }}>
+                                <Button  style={{ float: "right", marginLeft: "5%", backgroundColor:'#91C25F', color:'black' }}>
                                     Add New URL Builder
                                 </Button>
                             </Col>

@@ -1472,7 +1472,7 @@ export default function AdNameAndAccount({params}){
                     <Button 
                         type="default" 
                         icon={<ReloadOutlined  className='black-icon'/>} 
-                        style={{ height: "30px", marginLeft: "10px", backgroundColor: '#C7F39A', border: 'none' }} 
+                        style={{ height: "30px", marginLeft: "10px", backgroundColor: '#91C25F', border: 'none' }} 
                         onClick={handleReload}  // Call refresh function when clicked
                     />
                 </Col>
