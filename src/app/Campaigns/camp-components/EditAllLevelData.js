@@ -608,6 +608,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
             setCampaignLevelDailyBudget((DuplicatedampaignData?.camapaignlevel?.Daily_amount) / 100);
             setDefaultURLBuilder(DuplicatedampaignData?.addlevel[0]?.Website_URL);
             setSelectedOption("creative");
+            (DuplicatedampaignData?.camapaignlevel?.Bid_strategy === "COST_CAP") && setShowBidAmount("COST_CAP");
             setSelectedFilesFromCreatives(DuplicatedampaignData?.addlevel?.map((file, index)=>{
                 return({
                     uid: `-${index+1}`,
@@ -793,9 +794,9 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
         setLevelWiseChanges((prev) => ({
             ...prev,
             Campaign: {
-                ...prev.campaign,
-                Daily_amount: parseFloat(event.target.value) * 100, // Convert to cents
-            }
+                ...prev.Campaign, // ✅ correct capitalization
+                Daily_amount: parseFloat(event.target.value) * 100,
+            },
         })); // Update the levelWiseChanges state
     }
 
@@ -1555,7 +1556,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 }
                             }
                         }
-                    }else{
+                    }else if (file?.filename?.url){
                         if (file?.filename?.url?.endsWith('.png') || file?.filename?.url?.endsWith('.jpg') || file?.filename?.url?.endsWith(".jpeg") || file?.filename?.url?.endsWith('.mp4')) {
                             const formData = new FormData();
                             const response = await fetch(`https://prodapis.adsgoat.in/s3?s3Url=${file?.filename?.url}`, {
@@ -1646,6 +1647,12 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                             }
                         }
                     }
+                    else {
+                        return({
+                            id: file.id,
+                            AddName: file.AddName,
+                        });
+                    }
                   
                     
                 }));
@@ -1674,13 +1681,19 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                     Authorization: localStorage.getItem("token"),
                   };
                 const updateData = await axios.post('https://www.testapi.adsgoat.in/api/updateCampaignData', payload, { headers });
-                
+                //https://www.testapi.adsgoat.in
                 if(updateData.status === 200){
                     message.success("Campaign updated successfully");
                     changeRRefrst();
                     setLevelWiseChanges({});
+                    setActivePanelKey(null);
+                    setChangedFields({});
+                    setPanels([]);
+                    setIsManual(false);
                     onClose();
                 }
+
+
 
                 // const imageHashArray = await customRequest(onSuccess, onError);
                 // console.log("Image Hash Array:", imageHashArray);
@@ -1772,7 +1785,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                     action_source: values.action_source,
                     custom_event_type: values.custom_event_type,
                     pixel_id: values.pixel_id,
-                    bid_amount: values.bid_amount ? parseFloat(values.bid_amount) * 100 : 0,
+                    bid_amount: values.bid_amount ? parseFloat(values.bid_amount) : 0,
                     countries: values.countries,
                     Min_Age: values.Min_Age,
                     Max_Age: values.Max_Age,
@@ -1904,7 +1917,11 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
         setCampaignLevelDailyBudget(0);
         onClose(); // Call onClose handler to close the drawer
         setActiveKey(['1']);
-        setLevelWiseChanges({}); // Reset level-wise changes
+        setLevelWiseChanges({});
+        setActivePanelKey(null);
+        setChangedFields({});
+        setPanels([]);
+        setIsManual(false); // Reset manual mode
     };
 
     const handleSelectChange = (value) => {
@@ -2002,31 +2019,31 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
 
         // ✅ Update setLevelWiseChanges
         const currentPanel = panels.find(p => p.key === activePanelKey);
-const fileData = enrichedFile; // or data[0], your enriched object
+            const fileData = enrichedFile; // or data[0], your enriched object
 
-setLevelWiseChanges(prev => {
-  const newEntry = {
-    id: currentPanel.id,
-    filename: fileData,
-    AddName: currentPanel.AddName,
-  };
+            setLevelWiseChanges(prev => {
+            const newEntry = {
+                id: currentPanel.id,
+                filename: fileData,
+                AddName: currentPanel.AddName,
+            };
 
-  const existingAd = prev?.Ad || {};
-  const existingAds = existingAd?.Ads || [];
+            const existingAd = prev?.Ad || {};
+            const existingAds = existingAd?.Ads || [];
 
-  const updatedAds = [
-    ...existingAds.filter(item => item.id !== newEntry.id),
-    newEntry,
-  ];
+            const updatedAds = [
+                ...existingAds.filter(item => item.id !== newEntry.id),
+                newEntry,
+            ];
 
-  return {
-    ...prev,
-    Ad: {
-      ...existingAd,       // ✅ Preserve other keys inside Ad
-      Ads: updatedAds,     // ✅ Update only Ads array
-    },
-  };
-});
+            return {
+                ...prev,
+                Ad: {
+                ...existingAd,       // ✅ Preserve other keys inside Ad
+                Ads: updatedAds,     // ✅ Update only Ads array
+                },
+            };
+        });
 
         
         
@@ -2115,6 +2132,7 @@ setLevelWiseChanges(prev => {
                                             { value: "OUTCOME_APP_PROMOTION", label: "App promotion" }
 
                                         ]}
+                                        disabled={true} // Disable the select field
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2161,6 +2179,7 @@ setLevelWiseChanges(prev => {
                                             { value: "LOWEST_COST_WITH_MIN_ROAS", label: "ROAS Goal" }
                                         ]}
                                         onChange={handleBidStrategyChange}
+                                        disabled={true}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2244,6 +2263,7 @@ setLevelWiseChanges(prev => {
                                             { value: "REACH", label: "Reach" },
                                             { value: "VALUE", label: "Value" }
                                         ]}
+                                        disabled={true} 
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2262,6 +2282,7 @@ setLevelWiseChanges(prev => {
                                             { value: "IMPRESSIONS", label: "Impressions" },
                                             { value: "VALUE", label: "Value" }
                                         ]}
+                                        disabled={true} 
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2277,6 +2298,7 @@ setLevelWiseChanges(prev => {
                                     initialValue={currentDate}
                                 >
                                     <DatePicker showTime 
+                                    disabled={true} 
     //                                 onChange={(value, dateString) => {
     //     console.log("Local Time:", dateString)
     //     console.log("UTC ISO:", moment(value).utc().format("YYYY-MM-DDTHH:mm:ssZ"))
@@ -2321,6 +2343,7 @@ setLevelWiseChanges(prev => {
                                             { value: "SEARCH", label: "Search" },
                                             { value: "CONTACT", label: "Contact" },
                                         ]}
+                                        disabled={true} 
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2335,7 +2358,8 @@ setLevelWiseChanges(prev => {
                                     ]}
                                     style={{ flex: '1 1 200px' }}
                                 >
-                                    <Input />
+                                    <Input 
+                                    disabled={true} />
                                 </Form.Item>
                                 {/*pk*/}
                                 <Form.Item
@@ -2600,323 +2624,332 @@ setLevelWiseChanges(prev => {
                                     <div style={{ display: 'flex', gap: '16px' }}>
 
                                     <Collapse style={{ width: '100%' }}>
-  {panels.map((panel) => (
-    <Panel header={panel.AddName || "Untitled"} key={panel.key} style={{ width: '100%' }}>
-      <div style={{display:'flex'}}>
-        <div style={{ display: 'flex', flexDirection: 'column', width:"100%" }}>
-            {/* Ad Name Input */}
-            <Form.Item
-            label={<span style={{ color: "#B4B4B4" }}>Ad Name</span>}
-            name={`AddName_${panel.key}`}
-            rules={[{ required: true, message: 'Please enter Ad Name' }]}
-            initialValue={panel.AddName || ""}
-            >
-                <Input
-                    value={panel.AddName}
-                    onChange={(e) => {
-                        const newAddName = e.target.value;
+                                        {panels.map((panel) => (
+                                            <Panel header={panel.AddName || "Untitled"} key={panel.key} style={{ width: '100%' }}>
+                                            <div style={{display:'flex'}}>
+                                                <div style={{ display: 'flex', flexDirection: 'column', width:"100%" }}>
+                                                    {/* Ad Name Input */}
+                                                    <Form.Item
+                                                    label={<span style={{ color: "#B4B4B4" }}>Ad Name</span>}
+                                                    name={`AddName_${panel.key}`}
+                                                    rules={[{ required: true, message: 'Please enter Ad Name' }]}
+                                                    initialValue={panel.AddName || ""}
+                                                    >
+                                                        <Input
+                                                            value={panel.AddName}
+                                                            onChange={(e) => {
+                                                                const newAddName = e.target.value;
 
-                        // ✅ Update local panel state
-                        updatePanel(panel.key, "AddName", newAddName);
+                                                                // ✅ Update local panel state
+                                                                updatePanel(panel.key, "AddName", newAddName);
 
-                        // ✅ Sync AddName in setLevelWiseChanges
-                        setLevelWiseChanges((prev) => {
-                        const existingAd = prev.Ad || {};
-                        const existingAds = existingAd.Ads || [];
+                                                                // ✅ Sync AddName in setLevelWiseChanges
+                                                                setLevelWiseChanges((prev) => {
+                                                                    const existingAd = prev.Ad || {};
+                                                                    const existingAds = existingAd.Ads || [];
 
-                        const updatedAds = existingAds.map((ad) =>
-                            ad.id === panel.id ? { ...ad, AddName: newAddName } : ad
-                        );
+                                                                    const adIndex = existingAds.findIndex(ad => ad.id === panel.id);
+                                                                    let updatedAds;
 
-                        return {
-                            ...prev,
-                            Ad: {
-                            ...existingAd,
-                            Ads: updatedAds,
-                            },
-                        };
-                        });
-                    }}
-                    placeholder="Enter Ad Name"
-                    style={{ width: "30%" }}
-                />
+                                                                    if (adIndex >= 0) {
+                                                                        // If ad exists, update it
+                                                                        updatedAds = existingAds.map((ad) =>
+                                                                            ad.id === panel.id ? { ...ad, AddName: newAddName } : ad
+                                                                        );
+                                                                    } else {
+                                                                        // If ad doesn't exist, add it
+                                                                        updatedAds = [...existingAds, { id: panel.id, AddName: newAddName }];
+                                                                    }
 
-            </Form.Item>
+                                                                    return {
+                                                                        ...prev,
+                                                                        Ad: {
+                                                                            ...existingAd,
+                                                                            Ads: updatedAds,
+                                                                        },
+                                                                    };
+                                                                });
+                                                            }}
+                                                            placeholder="Enter Ad Name"
+                                                            style={{ width: "30%" }}
+                                                        />
 
-            {/* Select Source Dropdown */}
-            <Form.Item label={<span style={{ color: "#B4B4B4" }}>Select Source</span>}>
-            <Select
-                value={panel.selectedOption}
-                onChange={(value) => {
-                updatePanel(panel.key, "selectedOption", value);
-                form.validateFields([`MediaContent_${panel.key}`]);
-                }}
-                style={{ marginBottom: 16, width: "30%" }}
-                disabled={!(panel.selectedFiles.length === 0 && panel.selectedFilesFromCreatives.length === 0 && panel.selectedFilesFromMedia.length === 0)}
-            >
-                <Option value="upload">Upload</Option>
-                <Option value="creative">Creative Library</Option>
-            </Select>
-            </Form.Item>
+                                                    </Form.Item>
 
-            {/* File Selection Section with Validation */}
-            <Form.Item
-            name={`MediaContent_${panel.key}`}
-            rules={[
-                {
-                validator: async () => {
-                    const current = panels.find(p => p.key === panel.key);
-                    if (
-                    (current.selectedOption === "upload" && current.selectedFilesFromMedia.length === 0) ||
-                    (current.selectedOption === "creative" && current.selectedFilesFromCreatives.length === 0)
-                    ) {
-                    throw new Error("Please select Upload!");
-                    }
-                    return Promise.resolve();
-                },
-                },
-            ]}
-            >
-            <div>
-                {/* Upload Section */}
-                {panel.selectedOption === "upload" && (
-                    <Upload
-                        key={`${panel.key}-${panel.selectedFilesFromMedia.map(f => f.uid).join(",")}`} // force re-render
-                        beforeUpload={() => false}
-                        multiple
-                        maxCount={1} // ensures only one file is accepted at UI level
-                        listType="picture"
-                        accept="image/*,video/*"
-                        fileList={panel.selectedFilesFromMedia}
-                        onChange={(info) => {
-                        const firstFileRaw = info.fileList[0]; // only take the first file
-                        if (!firstFileRaw) return;
+                                                    {/* Select Source Dropdown */}
+                                                    <Form.Item label={<span style={{ color: "#B4B4B4" }}>Select Source</span>}>
+                                                    <Select
+                                                        value={panel.selectedOption}
+                                                        onChange={(value) => {
+                                                        updatePanel(panel.key, "selectedOption", value);
+                                                        form.validateFields([`MediaContent_${panel.key}`]);
+                                                        }}
+                                                        style={{ marginBottom: 16, width: "30%" }}
+                                                        disabled={!(panel.selectedFiles.length === 0 && panel.selectedFilesFromCreatives.length === 0 && panel.selectedFilesFromMedia.length === 0)}
+                                                    >
+                                                        <Option value="upload">Upload</Option>
+                                                        <Option value="creative">Creative Library</Option>
+                                                    </Select>
+                                                    </Form.Item>
 
-                        const enrichedFile = {
-                            ...firstFileRaw,
-                            uid: firstFileRaw.uid || `media-${Date.now()}`,
-                            source: "media",
-                            thumbUrl:
-                            firstFileRaw.thumbUrl ||
-                            (firstFileRaw.originFileObj
-                                ? URL.createObjectURL(firstFileRaw.originFileObj)
-                                : undefined),
-                        };
+                                                    {/* File Selection Section with Validation */}
+                                                    <Form.Item
+                                                    name={`MediaContent_${panel.key}`}
+                                                    rules={[
+                                                        {
+                                                        validator: async () => {
+                                                            const current = panels.find(p => p.key === panel.key);
+                                                            if (
+                                                            (current.selectedOption === "upload" && current.selectedFilesFromMedia.length === 0) ||
+                                                            (current.selectedOption === "creative" && current.selectedFilesFromCreatives.length === 0)
+                                                            ) {
+                                                            throw new Error("Please select Upload!");
+                                                            }
+                                                            return Promise.resolve();
+                                                        },
+                                                        },
+                                                    ]}
+                                                    >
+                                                    <div>
+                                                        {/* Upload Section */}
+                                                        {panel.selectedOption === "upload" && (
+                                                            <Upload
+                                                                key={`${panel.key}-${panel.selectedFilesFromMedia.map(f => f.uid).join(",")}`} // force re-render
+                                                                beforeUpload={() => false}
+                                                                multiple
+                                                                maxCount={1} // ensures only one file is accepted at UI level
+                                                                listType="picture"
+                                                                accept="image/*,video/*"
+                                                                fileList={panel.selectedFilesFromMedia}
+                                                                onChange={(info) => {
+                                                                const firstFileRaw = info.fileList[0]; // only take the first file
+                                                                if (!firstFileRaw) return;
 
-                        const newFiles = [enrichedFile]; // only the first file in array form
+                                                                const enrichedFile = {
+                                                                    ...firstFileRaw,
+                                                                    uid: firstFileRaw.uid || `media-${Date.now()}`,
+                                                                    source: "media",
+                                                                    thumbUrl:
+                                                                    firstFileRaw.thumbUrl ||
+                                                                    (firstFileRaw.originFileObj
+                                                                        ? URL.createObjectURL(firstFileRaw.originFileObj)
+                                                                        : undefined),
+                                                                };
 
-                        // ✅ Update state
-                        updatePanel(panel.key, "selectedFilesFromMedia", newFiles);
-                        updatePanel(panel.key, "selectedFilesFromCreatives", []);
-                        updatePanel(panel.key, "selectedFiles", newFiles);
-                        // ✅ Update setLevelWiseChanges
-                        const fileData = enrichedFile; // based on local upload
+                                                                const newFiles = [enrichedFile]; // only the first file in array form
 
-                        setLevelWiseChanges(prev => {
-                            const newEntry = {
-                              id: panel.id,
-                              filename: enrichedFile,
-                              AddName: panel.AddName,
-                            };
-                    
-                            const existingAd = prev.Ad || {};
-                            const existingAds = existingAd.Ads || [];
-                    
-                            const updatedAds = [
-                              ...existingAds.filter(item => item.id !== panel.id),
-                              newEntry,
-                            ];
-                    
-                            return {
-                              ...prev,
-                              Ad: {
-                                ...existingAd,
-                                Ads: updatedAds,
-                              },
-                            };
-                        });
-    // }}
+                                                                // ✅ Update state
+                                                                updatePanel(panel.key, "selectedFilesFromMedia", newFiles);
+                                                                updatePanel(panel.key, "selectedFilesFromCreatives", []);
+                                                                updatePanel(panel.key, "selectedFiles", newFiles);
+                                                                // ✅ Update setLevelWiseChanges
+                                                                const fileData = enrichedFile; // based on local upload
 
-                        form.setFieldsValue({ [`MediaContent_${panel.key}`]: newFiles });
-                        form.validateFields([`MediaContent_${panel.key}`]);
-                        }}
-                        
-                        onRemove={(fileToRemove) => {
-                        const filtered = panel.selectedFilesFromMedia.filter(
-                            (f) => f.uid !== fileToRemove.uid
-                        );
+                                                                setLevelWiseChanges(prev => {
+                                                                    const newEntry = {
+                                                                    id: panel.id,
+                                                                    filename: enrichedFile,
+                                                                    AddName: panel.AddName,
+                                                                    };
+                                                            
+                                                                    const existingAd = prev.Ad || {};
+                                                                    const existingAds = existingAd.Ads || [];
+                                                            
+                                                                    const updatedAds = [
+                                                                    ...existingAds.filter(item => item.id !== panel.id),
+                                                                    newEntry,
+                                                                    ];
+                                                            
+                                                                    return {
+                                                                    ...prev,
+                                                                    Ad: {
+                                                                        ...existingAd,
+                                                                        Ads: updatedAds,
+                                                                    },
+                                                                    };
+                                                                });
+                                            // }}
 
-                        updatePanel(panel.key, "selectedFilesFromMedia", filtered);
-                        updatePanel(panel.key, "selectedFiles", filtered);
+                                                                form.setFieldsValue({ [`MediaContent_${panel.key}`]: newFiles });
+                                                                form.validateFields([`MediaContent_${panel.key}`]);
+                                                                }}
+                                                                
+                                                                onRemove={(fileToRemove) => {
+                                                                const filtered = panel.selectedFilesFromMedia.filter(
+                                                                    (f) => f.uid !== fileToRemove.uid
+                                                                );
 
-                        form.setFieldsValue({ [`MediaContent_${panel.key}`]: filtered });
-                        form.validateFields([`MediaContent_${panel.key}`]);
+                                                                updatePanel(panel.key, "selectedFilesFromMedia", filtered);
+                                                                updatePanel(panel.key, "selectedFiles", filtered);
 
-                        // ❌ Optionally remove from setLevelWiseChanges if no file remains
-                        if (filtered.length === 0) {
-                            setLevelWiseChanges(prev => {
-                            const remaining = (prev?.Ad?.Ads || []).filter(item => item.id !== panel.id);
-                            return {
-                                ...prev,
-                                Ad: {
-                                Ads: remaining,
-                                },
-                            };
-                            });
-                        }
+                                                                form.setFieldsValue({ [`MediaContent_${panel.key}`]: filtered });
+                                                                form.validateFields([`MediaContent_${panel.key}`]);
 
-                        return true;
-                        }}
-                    >
-                        <Button
-                        icon={<UploadOutlined />}
-                        disabled={
-                            !(
-                            panel.selectedFiles.length === 0 &&
-                            panel.selectedFilesFromCreatives.length === 0 &&
-                            panel.selectedFilesFromMedia.length === 0
-                            )
-                        }
-                        >
-                        Select Files
-                        </Button>
-                    </Upload>
-                )}
+                                                                // ❌ Optionally remove from setLevelWiseChanges if no file remains
+                                                                if (filtered.length === 0) {
+                                                                    setLevelWiseChanges(prev => {
+                                                                    const remaining = (prev?.Ad?.Ads || []).filter(item => item.id !== panel.id);
+                                                                    return {
+                                                                        ...prev,
+                                                                        Ad: {
+                                                                        Ads: remaining,
+                                                                        },
+                                                                    };
+                                                                    });
+                                                                }
+
+                                                                return true;
+                                                                }}
+                                                            >
+                                                                <Button
+                                                                icon={<UploadOutlined />}
+                                                                disabled={
+                                                                    !(
+                                                                    panel.selectedFiles.length === 0 &&
+                                                                    panel.selectedFilesFromCreatives.length === 0 &&
+                                                                    panel.selectedFilesFromMedia.length === 0
+                                                                    )
+                                                                }
+                                                                >
+                                                                Select Files
+                                                                </Button>
+                                                            </Upload>
+                                                        )}
 
 
-                {/* Creative Library Section */}
-                {panel.selectedOption === "creative" && (
-                    <div>
-                        <Button
-                        disabled={
-                            !(
-                            panel.selectedFiles.length === 0 &&
-                            panel.selectedFilesFromCreatives.length === 0 &&
-                            panel.selectedFilesFromMedia.length === 0
-                            )
-                        }
-                        icon={<UploadOutlined />}
-                        onClick={() =>
-                            onClickCreativesDrawer(panel.key)
-                        }
-                        >
-                        Select Files
-                        </Button>
+                                                        {/* Creative Library Section */}
+                                                        {panel.selectedOption === "creative" && (
+                                                            <div>
+                                                                <Button
+                                                                disabled={
+                                                                    !(
+                                                                    panel.selectedFiles.length === 0 &&
+                                                                    panel.selectedFilesFromCreatives.length === 0 &&
+                                                                    panel.selectedFilesFromMedia.length === 0
+                                                                    )
+                                                                }
+                                                                icon={<UploadOutlined />}
+                                                                onClick={() =>
+                                                                    onClickCreativesDrawer(panel.key)
+                                                                }
+                                                                >
+                                                                Select Files
+                                                                </Button>
 
-                        {panel.selectedFilesFromCreatives?.length > 0 && (
-                        <div style={{ marginTop: "10px" }}>
-                            {panel.selectedFilesFromCreatives.map((file) => (
-                            <div
-                                key={file.uid}
-                                style={{
-                                display: "flex",
-                                alignItems: "center",
-                                marginBottom: 8,
-                                }}
-                            >
-                                {file.type?.startsWith("image/") && (
-                                <img
-                                    src={
-                                    file.originFileObj
-                                        ? URL.createObjectURL(file.originFileObj)
-                                        : file.url
-                                    }
-                                    alt="preview"
-                                    style={{
-                                    width: 40,
-                                    height: 40,
-                                    objectFit: "cover",
-                                    borderRadius: 4,
-                                    marginLeft: 8,
-                                    }}
-                                />
-                                )}
-                                
-                                <span
-                                style={{
-                                    maxWidth: 160,
-                                    overflow: "hidden",
-                                    textOverflow: "ellipsis",
-                                    whiteSpace: "nowrap",
-                                    paddingLeft: 8,
-                                }}
-                                >
-                                {file.name}
-                                </span>
-                                <DeleteOutlined
-                                onClick={() => {
-                                    const current = panels.find((p) => p.key === panel.key);
-                                    const updated = current.selectedFilesFromCreatives.filter(
-                                    (f) => f.uid !== file.uid
-                                    );
+                                                                {panel.selectedFilesFromCreatives?.length > 0 && (
+                                                                <div style={{ marginTop: "10px" }}>
+                                                                    {panel.selectedFilesFromCreatives.map((file) => (
+                                                                    <div
+                                                                        key={file.uid}
+                                                                        style={{
+                                                                        display: "flex",
+                                                                        alignItems: "center",
+                                                                        marginBottom: 8,
+                                                                        }}
+                                                                    >
+                                                                        {file.type?.startsWith("image/") && (
+                                                                        <img
+                                                                            src={
+                                                                            file.originFileObj
+                                                                                ? URL.createObjectURL(file.originFileObj)
+                                                                                : file.url
+                                                                            }
+                                                                            alt="preview"
+                                                                            style={{
+                                                                            width: 40,
+                                                                            height: 40,
+                                                                            objectFit: "cover",
+                                                                            borderRadius: 4,
+                                                                            marginLeft: 8,
+                                                                            }}
+                                                                        />
+                                                                        )}
+                                                                        
+                                                                        <span
+                                                                        style={{
+                                                                            maxWidth: 160,
+                                                                            overflow: "hidden",
+                                                                            textOverflow: "ellipsis",
+                                                                            whiteSpace: "nowrap",
+                                                                            paddingLeft: 8,
+                                                                        }}
+                                                                        >
+                                                                        {file.name}
+                                                                        </span>
+                                                                        <DeleteOutlined
+                                                                        onClick={() => {
+                                                                            const current = panels.find((p) => p.key === panel.key);
+                                                                            const updated = current.selectedFilesFromCreatives.filter(
+                                                                            (f) => f.uid !== file.uid
+                                                                            );
 
-                                    updatePanel(panel.key, "selectedFilesFromCreatives", updated);
-                                    updatePanel(panel.key, "selectedFiles", updated);
+                                                                            updatePanel(panel.key, "selectedFilesFromCreatives", updated);
+                                                                            updatePanel(panel.key, "selectedFiles", updated);
 
-                                    form.setFieldsValue({
-                                    [`MediaContent_${panel.key}`]: updated,
-                                    });
-                                    form.validateFields([`MediaContent_${panel.key}`]);
-                                }}
-                                style={{ color: "red", marginLeft: 12, cursor: "pointer" }}
-                                />
-                            </div>
-                            ))}
-                        </div>
-                        )}
-                    </div>
-                )}
+                                                                            form.setFieldsValue({
+                                                                            [`MediaContent_${panel.key}`]: updated,
+                                                                            });
+                                                                            form.validateFields([`MediaContent_${panel.key}`]);
+                                                                        }}
+                                                                        style={{ color: "red", marginLeft: 12, cursor: "pointer" }}
+                                                                        />
+                                                                    </div>
+                                                                    ))}
+                                                                </div>
+                                                                )}
+                                                            </div>
+                                                        )}
 
-            </div>
-            </Form.Item>
-        </div>
-        <div>
-            {panel.selectedFiles.map((file) => (
-                        <div
-                            key={file.uid}
-                            style={{
-                            display: "flex",
-                            alignItems: "center",
-                            marginBottom: 8,
-                            }}
-                        >
-                            {file.type?.startsWith("image/") && (
-                            <img
-                            // style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                                src={
-                                file.originFileObj
-                                    ? URL.createObjectURL(file.originFileObj)
-                                    : file.url
-                                }
-                                alt="preview"
-                                style={{
-                                maxWidth: '100%', maxHeight: '100%', 
-                                width: 300,
-                                height: 300,
-                                objectFit: "contain",
-                                borderRadius: 4,
-                                marginLeft: 8,
-                                
-                                }}
-                                
-                            />
-                            )}
-                            {file.type?.startsWith("video/") && 
-                            (
-                                <video
-                                    controls
-                                    // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
-                                    style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                                >
-                                    <source src={file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url} />
-                                    Your browser does not support the video tag.
-                                </video>
-                            )
-                            }
-                            
-            </div>))}
-        </div>
-      </div>
+                                                    </div>
+                                                    </Form.Item>
+                                                </div>
+                                                <div>
+                                                    {panel.selectedFiles.map((file) => (
+                                                                <div
+                                                                    key={file.uid}
+                                                                    style={{
+                                                                    display: "flex",
+                                                                    alignItems: "center",
+                                                                    marginBottom: 8,
+                                                                    }}
+                                                                >
+                                                                    {file.type?.startsWith("image/") && (
+                                                                    <img
+                                                                    // style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                                                                        src={
+                                                                        file.originFileObj
+                                                                            ? URL.createObjectURL(file.originFileObj)
+                                                                            : file.url
+                                                                        }
+                                                                        alt="preview"
+                                                                        style={{
+                                                                        maxWidth: '100%', maxHeight: '100%', 
+                                                                        width: 300,
+                                                                        height: 300,
+                                                                        objectFit: "contain",
+                                                                        borderRadius: 4,
+                                                                        marginLeft: 8,
+                                                                        
+                                                                        }}
+                                                                        
+                                                                    />
+                                                                    )}
+                                                                    {file.type?.startsWith("video/") && 
+                                                                    (
+                                                                        <video
+                                                                            controls
+                                                                            // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                                                                        >
+                                                                            <source src={file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url} />
+                                                                            Your browser does not support the video tag.
+                                                                        </video>
+                                                                    )
+                                                                    }
+                                                                    
+                                                    </div>))}
+                                                </div>
+                                            </div>
       {/* <div key={index} className="container-ad-preview">
                                                         <div className="ad-preview" style={{ width: "350px" }}>
                                                             <div className="ad-heading">
@@ -3053,7 +3086,7 @@ setLevelWiseChanges(prev => {
                                                     </div> */}
     </Panel>
   ))}
-</Collapse>
+                                    </Collapse>
 
 
 
@@ -3238,8 +3271,9 @@ setLevelWiseChanges(prev => {
                                                 },
                                             ]}
                                             style={{ flex: 3, marginLeft: "1%", marginTop: "1%" }}
+                                             // Disable the input field
                                     >
-                                            <Input style={{ width: "45%" }} />
+                                            <Input style={{ width: "45%" }} disabled={true}/>
                                     </Form.Item>
                                     {/* <Form.Item
                                         name="AddName"
