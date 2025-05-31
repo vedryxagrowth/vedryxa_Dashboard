@@ -2323,7 +2323,6 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             { value: "app", label: "App" },
                                             { value: "phone_call", label: "Phone Call" }
                                         ]}
-                                        // disabled={true} 
                                     />
                                 </Form.Item>
                                 <Form.Item
