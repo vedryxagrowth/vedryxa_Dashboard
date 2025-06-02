@@ -1225,7 +1225,7 @@ const MyTablePage = () => {
             
         },
         from:{
-            headerName: 'From',
+            headerName: 'Start',
             field: 'from',
             valueGetter: (params) => {
               if (params.node.group) {
@@ -1976,7 +1976,7 @@ const MyTablePage = () => {
             
         },
         from:{
-            headerName: 'From',
+            headerName: 'Start',
             field: 'from',
             valueGetter: (params) => {
               if (params.node.group) {
@@ -3536,7 +3536,7 @@ const MyTablePage = () => {
             
         },
         from: {
-            headerName: 'From',
+            headerName: 'Start',
             field: 'from',
             minWidth: 110,
             valueGetter: (params) => {
@@ -4173,7 +4173,7 @@ const MyTablePage = () => {
             
         },
         from: {
-            headerName: 'From',
+            headerName: 'Start',
             field: 'from',
             minWidth: 110,
             valueGetter: (params) => {
@@ -4594,7 +4594,7 @@ const MyTablePage = () => {
             hide: true
         },  
         campaignname: {
-            headerName: 'CampaignName',
+            headerName: 'Campaign name',
             field: 'campaignname',
             resizable: true,
             sortable: true,
@@ -4808,7 +4808,7 @@ const MyTablePage = () => {
             
         },
         from: {
-            headerName: 'From',
+            headerName: 'Start',
             field: 'from',
             minWidth: 110,
             valueGetter: (params) => {
@@ -5445,7 +5445,7 @@ const MyTablePage = () => {
             
         },
         from:{
-            headerName: 'From',
+            headerName: 'Start',
             field: 'from',
             minWidth: 110,
             valueGetter: (params) => {
@@ -5695,6 +5695,7 @@ const MyTablePage = () => {
             headerClass: 'hide-menu',
             sortable: true,
             aggFunc: liveSpender,
+            // hide: true
         },
           D_tq: {
             headerName: 'D_TQ',
@@ -5710,6 +5711,7 @@ const MyTablePage = () => {
             headerClass: 'hide-menu',
             sortable: true,
             aggFunc: liveSpender,
+            // hide: true
         },          
         campaignname: {
             headerName: 'CampaignName',
@@ -5928,7 +5930,7 @@ const MyTablePage = () => {
             
         },
         from:{
-            headerName: 'From',
+            headerName: 'Start',
             field: 'from',
             minWidth: 110,
             valueGetter: (params) => {
@@ -6412,7 +6414,7 @@ const MyTablePage = () => {
             
         },
         from:{
-            headerName: 'From',
+            headerName: 'Start',
             field: 'from',
             minWidth: 110,
             valueGetter: (params) => {
@@ -6889,7 +6891,7 @@ const MyTablePage = () => {
             
         },
         from:{
-            headerName: 'From',
+            headerName: 'Start',
             field: 'from',
             minWidth: 110,
             valueGetter: (params) => {
@@ -7411,7 +7413,7 @@ const MyTablePage = () => {
             
         },
         from:{
-            headerName: 'From',
+            headerName: 'Start',
             field: 'from',
             minWidth: 110,
             valueGetter: (params) => {
@@ -8564,7 +8566,7 @@ const MyTablePage = () => {
                             </Col> */}
                             <Col>
                                 <Input
-                                placeholder="Search here"
+                                placeholder="Search keyword"
                                 value={inputValue}
                                 onChange={handleChangeInput}
                                 onBlur={handleBlur}

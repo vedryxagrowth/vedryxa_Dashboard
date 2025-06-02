@@ -1,7 +1,7 @@
-export default function AdHistroyComponent(){
+export default function AdsetHistroyComponent(){
     return(
         <div>
-            <h1>AdHistroyComponent</h1>
+            <h1>HistroyComponent</h1>
         </div>
     )
 }

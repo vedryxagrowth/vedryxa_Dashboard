@@ -169,7 +169,7 @@ const CampaignLevelReports = ({startDate, endDate, newaccount, newtime, newReven
     };
 
     const autoGroupColumnDefLive = {
-        headerName: 'CampaignName',
+        headerName: 'Campaign name',
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting

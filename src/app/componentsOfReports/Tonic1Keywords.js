@@ -124,7 +124,7 @@ const Tonic1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePrat
     };
 
     const autoGroupColumnDef3 = {
-        headerName: 'CampaignName',
+        headerName: 'Campaign name',
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting

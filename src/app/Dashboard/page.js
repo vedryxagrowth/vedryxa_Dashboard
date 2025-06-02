@@ -691,11 +691,13 @@ const RevenuePartnerDashboard = () => {
                             direction="vertical"
                             style={{
                                 width: '100%',
+                                backgroundColor: theme === 'dark' ? '#333' : ''
                             }}
                         >
                             <Select {...sharedProps} {...selectProps} 
                                     className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                dropdownClassName={theme === 'dark' && 'custom-dropdown'}/>
+                                    dropdownClassName={theme === 'dark' && 'custom-dropdown'}
+                            />
                         </Space>
                     </Col>
                     <Col xs={16} sm={16} md={10} lg={8}>
@@ -3268,7 +3270,7 @@ const Dashboard = () => {
                     <div style={{ height: '100%' }}>
                         <Row gutter={24} style={{ marginTop: '20px' }} justify="space-between">
                             <Col flex="1">
-                                <Card>
+                                <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
                                     <Statistic
                                         title={
                                             <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -3287,13 +3289,13 @@ const Dashboard = () => {
                                         }
                                         value={data.length > 0 ? revenue1.current : 0}
                                         prefix="$"
-                                        valueStyle={{ color: '#3f8600' }}
+                                        valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}
                                     />
                                 </Card>
                             </Col>
     
                             <Col flex="1">
-                                <Card>
+                                <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
                                     <Statistic
                                         title={
                                             <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -3312,13 +3314,12 @@ const Dashboard = () => {
                                         }
                                         value={data.length > 0 ? profit1.current : 0}
                                         prefix="$"
-                                        valueStyle={{ color: '#3f8600' }}
-                                    />
+                                        valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
                                 </Card>
                             </Col>
     
                             <Col flex="1">
-                                <Card>
+                                <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
                                     <Statistic
                                         title={
                                             <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -3337,13 +3338,12 @@ const Dashboard = () => {
                                         }
                                         value={data.length > 0 ? spend1.current : 0}
                                         prefix="$"
-                                        valueStyle={{ color: '#3f8600' }}
-                                    />
+                                        valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
                                 </Card>
                             </Col>
     
                             <Col flex="1">
-                                <Card>
+                                <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
                                     <Statistic
                                         title={
                                             <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -3361,13 +3361,12 @@ const Dashboard = () => {
                                             </div>
                                         }
                                         value={data.length > 0 ? leads1.current : 0}
-                                        valueStyle={{ color: '#3f8600' }}
-                                    />
+                                        valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
                                 </Card>
                             </Col>
     
                             <Col flex="1">
-                                <Card>
+                                <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
                                     <Statistic
                                         title={
                                             <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -3385,15 +3384,14 @@ const Dashboard = () => {
                                             </div>
                                         }
                                         value={data.length > 0 ? conversions1.current : 0}
-                                        valueStyle={{ color: '#3f8600' }}
-                                    />
+                                        valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
                                 </Card>
                             </Col>
                         </Row>
     
                         <Row gutter={24} style={{ marginTop: '20px' }} justify="space-between">
                             <Col flex="1">
-                                <Card>
+                                <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
                                     <Statistic
                                         title={
                                             <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -3411,13 +3409,12 @@ const Dashboard = () => {
                                             </div>
                                         }
                                         value={data.length > 0 ? ncpl1.current : 0}
-                                        valueStyle={{ color: '#3f8600' }}
-                                    />
+                                        valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
                                 </Card>
                             </Col>
     
                             <Col flex="1">
-                                <Card>
+                                <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
                                     <Statistic
                                         title={
                                             <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -3435,13 +3432,12 @@ const Dashboard = () => {
                                             </div>
                                         }
                                         value={data.length > 0 ? cpl1.current !== Infinity ? cpl1.current: 0 : 0}
-                                        valueStyle={{ color: '#3f8600' }}
-                                    />
+                                        valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
                                 </Card>
                             </Col>
     
                             <Col flex="1">
-                                <Card>
+                                <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
                                     <Statistic
                                         title={
                                             <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -3459,13 +3455,12 @@ const Dashboard = () => {
                                             </div>
                                         }
                                         value={data.length > 0 ? ctr1.current : 0}
-                                        valueStyle={{ color: '#3f8600' }}
-                                    />
+                                        valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
                                 </Card>
                             </Col>
     
                             <Col flex="1">
-                                <Card>
+                                <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
                                     <Statistic
                                         title={
                                             <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -3483,13 +3478,12 @@ const Dashboard = () => {
                                             </div>
                                         }
                                         value={data.length > 0 ? cpc1.current : 0}
-                                        valueStyle={{ color: '#3f8600' }}
-                                    />
+                                        valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
                                 </Card>
                             </Col>
     
                             <Col flex="1">
-                                <Card>
+                                <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
                                     <Statistic
                                         title={
                                             <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -3507,8 +3501,7 @@ const Dashboard = () => {
                                             </div>
                                         }
                                         value={data.length > 0 ? rpc1.current : 0}
-                                        valueStyle={{ color: '#3f8600' }}
-                                    />
+                                        valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
                                 </Card>
                             </Col>
                         </Row>

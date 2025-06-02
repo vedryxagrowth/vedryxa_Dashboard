@@ -189,7 +189,7 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
     };
 
     const autoGroupColumnDef2 = {
-        headerName: 'CampaignName',
+        headerName: 'Campaign name',
         minWidth: 450,
         pinned: 'left',
 
