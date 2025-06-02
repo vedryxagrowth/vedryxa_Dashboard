@@ -168,7 +168,7 @@ const AdsetLevelReports = ({startDate, endDate, newaccount, newtime, newRevenueP
     };
 
     const autoGroupColumnDefLive = {
-        headerName: 'AdsetName',
+        headerName: 'Adset name',
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting

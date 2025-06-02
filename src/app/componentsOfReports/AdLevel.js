@@ -168,7 +168,7 @@ const AdLevelReports = ({startDate, endDate, newaccount, newtime, newRevenuePrat
     };
 
     const autoGroupColumnDefLive = {
-        headerName: 'AdName',
+        headerName: 'Ad name',
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting

@@ -171,7 +171,7 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
     };
 
     const autoGroupColumnDef = {
-        headerName: 'AdsetName',
+        headerName: 'Adset name',
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting

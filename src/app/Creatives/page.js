@@ -1260,7 +1260,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns, network, Account_Num
                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             showSearch
                             placeholder="Select Projects"
-                            style={{ width: '100%' }}
+                            style={{ width: '100%', border: '1px solid #37474F', borderRadius: '6px' }}
                             onChange={handleKeyChange}
                             value={selectedKey}
                         >
@@ -1280,7 +1280,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns, network, Account_Num
                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                         showSearch
                         placeholder="Select Accounts"
-                        style={{ width: '90%' }}
+                        style={{ width: '90%', border: '1px solid #37474F', borderRadius: '6px' }}
                         onChange={handleValueChange}
                         disabled={!selectedKey}
                         value={selectedValue}
@@ -1349,7 +1349,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns, network, Account_Num
                             defaultValue={[dayjs().subtract(7, 'day'), dayjs().subtract(1, 'day')]}
                             format="YYYY-MM-DD"
                             allowClear={true}
-                            style={{ width: '100%' }}
+                            style={{ width: '100%', border: '1px solid #37474F' }}
                         />
                         
                     </ConfigProvider>                       
@@ -1415,7 +1415,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns, network, Account_Num
                         style={{ 
                             width: '180px',
                             marginRight: '10px', 
-                            border: 'none',
+                            border: '1px solid #37474F',
                             // backgroundColor: theme === 'dark' ? '#2c2c2c' : undefined,
                             // color: theme === 'dark' ? '#fff' : undefined
                         }}
@@ -1433,8 +1433,8 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns, network, Account_Num
                         <Button 
                             style={{
                                 marginLeft: '10px', 
-                                border:'none',
-                                backgroundColor: theme === 'dark' ? '#2c2c2c' : undefined,
+                                border:'1px solid #37474F',
+                                backgroundColor: theme === 'dark' ? '#5d5b5b' : undefined,
                                 color: theme === 'dark' ? '#fff' : undefined
                             }} 
                             icon={<UploadOutlined style={{ color: theme === 'dark' ? '#fff' : undefined }} />}
@@ -1445,12 +1445,12 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns, network, Account_Num
                 </Col>
                 <Col style={{display:'flex'}}>
                     <Input
-                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                        placeholder="search....."
+                        className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                        placeholder="Search keyword"
                         suffix={<SearchOutlined />}
                         value={searchQuery}
                         onChange={handleSearch} // Call function on user input
-                        style={{width:'170px', border:'none'}}
+                        style={{width:'170px', border:'1px solid #37474F'}}
                     />   
                     <Button style={{backgroundColor: '#91C25F', border:'none', marginLeft:'5px'}} onClick={fetchUserImages} icon={<ReloadOutlined className="black-icon" />} /> 
                     <Button

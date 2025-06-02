@@ -233,7 +233,7 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
     }
 
     const autoGroupColumnDefLive = {
-        headerName: 'CampaignName',
+        headerName: 'Campaign name',
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting

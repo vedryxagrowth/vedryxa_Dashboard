@@ -623,7 +623,7 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 
 /* Dark mode styles */
 .dark-mode {
-  background-color: #333; /* gray-700 from Tailwind */
+  background-color: #37474F; /* gray-700 from Tailwind */
 }
 
 /* General icon styles */
@@ -904,9 +904,14 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 .dark-mode .Badge{
   color: black;
 }
- .ag-header {
-  background-color: #c7f39a57 !important;
+
+.ag-header {
+  background-color: #E5E9EF !important;
 }
+.dark-mode .ag-header {
+  background-color: #11111057 !important;
+}
+
 .dark-mode .notifiview{
   color: #fff;
   background-color: #333333;
@@ -1185,12 +1190,36 @@ body.dark-mode .black-icon-pause-1.anticon svg {
 body.dark-mode .black-icon-comment.anticon svg {
   color: #f5582c !important;
 }
+
+.custom-input-dark {
+  background-color: #5d5b5b !important;  /* Input background */
+  color: #fff !important;                /* Input text color */
+}
 .custom-input-dark::placeholder {
-  color: #ccc;
+  color: #ccc !important;                /* Placeholder color */
 }
+.custom-input-dark .ant-input::placeholder {
+  color: #fff !important;  /* White placeholder */
+}
+
 .custom-input-light::placeholder {
-  color: #888;
+  color: #888 !important;
+  /* border: none !important; */
 }
+/* .custom-input-light .ant-input {
+  border: 1px solid #37474F !important;
+  border-radius: 6px !important;
+  background-color: white !important;
+  color: #555 !important;
+  box-shadow: none !important;
+  outline: none !important;  
+} */
+.custom-input-light .ant-input:focus {
+  border-color: #37474F !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
 /* Green text for active tab */
 .custom-tabs.dark-mode-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
   color: #91C25F !important;
@@ -1264,14 +1293,14 @@ body.dark-mode .black-icon-comment.anticon svg {
 
 /* ========== TABLE HEADERS ========== */
 .custom-dark-table.dark-mode-pagination .ant-table-thead > tr > th {
-  background-color: #4e5f3f !important; /* Olive green for dark mode */
+  background-color: #000000 !important; /* Olive green for dark mode */
   color: white !important;
   font-weight: 600;
   border-bottom: 1px solid #4e5f3f;
 }
 
 .custom-dark-table.light-mode-pagination .ant-table-thead > tr > th {
-  background-color: #edffd9 !important; /* Light green for light mode */
+  background-color: #E5E9EF !important; /* Light green for light mode */
   color: black !important;
   font-weight: 600;
   border-bottom: 1px solid #ccc;

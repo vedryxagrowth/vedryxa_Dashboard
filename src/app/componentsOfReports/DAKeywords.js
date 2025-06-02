@@ -126,7 +126,7 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
     };
 
     const autoGroupColumnDef3 = {
-        headerName: 'CampaignName',
+        headerName: 'Campaign name',
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting
