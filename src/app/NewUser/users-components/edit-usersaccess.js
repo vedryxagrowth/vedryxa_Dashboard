@@ -564,7 +564,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                             </div>
                         ))}
                     </div>
-                    <Button type="dashed" style={{  border: 'none', backgroundColor: '#C7F39A', color:'black', fontWeight:'600' }} onClick={handleAddAccount} icon={<span style={{ color: theme === 'dark' ? 'white' : 'black' }}> {/* Wrap icon in a span */}
+                    <Button type="dashed" style={{  border: 'none', backgroundColor: '#91C25F', color:'black', fontWeight:'600' }} onClick={handleAddAccount} icon={<span style={{ color: theme === 'dark' ? 'white' : 'black' }}> {/* Wrap icon in a span */}
                         <PlusOutlined className="black-icon"/>
                         </span>}>
                         Add Project
@@ -572,7 +572,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose }) => {
                 </Form.Item>
                 
                 <Form.Item>
-                    <Button style={{  border: 'none', backgroundColor: '#C7F39A', color:'black', fontWeight:'600' }} htmlType="submit">
+                    <Button style={{  border: 'none', backgroundColor: '#91C25F', color:'black', fontWeight:'600' }} htmlType="submit">
                         Submit
                     </Button>
                 </Form.Item>

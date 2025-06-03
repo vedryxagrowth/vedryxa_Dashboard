@@ -124,7 +124,7 @@ const Tonic1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePrat
     };
 
     const autoGroupColumnDef3 = {
-        headerName: 'CampaignName',
+        headerName: 'Campaign name',
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting
@@ -536,7 +536,7 @@ const Tonic1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePrat
                                     <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
                                         Cancel
                                     </Button>
-                                    <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#C7F39A"}}>
+                                    <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#91C25F"}}>
                                         Ok
                                     </Button>
                                     </div>
@@ -629,6 +629,8 @@ const Tonic1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePrat
                             keyword: eachData.keyword,
                             from:'',
                             profitloss: "",
+                            M_tq: "",
+                            D_tq: "",
                             // compaignid: eachData.campaign_id,
                         }
                     )

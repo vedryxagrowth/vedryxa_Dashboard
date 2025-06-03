@@ -413,7 +413,7 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
                                     icon={<PlusOutlined className="black-icon" />}
                                     onClick={addNewCampaign}
                                     style={{
-                                        backgroundColor: '#C7F39A',
+                                        backgroundColor: '#91C25F',
                                         color: 'black',
                                         fontWeight: 600,
                                     }}
@@ -438,7 +438,7 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
                                 <Button key="cancel" onClick={cancelDelete1} style={{marginLeft:"4px"}}>
                                     Cancel
                                 </Button>
-                                <Button key="ok" onClick={deleteCampaign} style={{marginLeft:"4px", backgroundColor:"#C7F39A"}}>
+                                <Button key="ok" onClick={deleteCampaign} style={{marginLeft:"4px", backgroundColor:"#91C25F"}}>
                                     Ok
                                 </Button>
                             </div>
@@ -535,7 +535,7 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
                                         icon={<PlusOutlined className="black-icon" />}
                                         onClick={addNewChannel}
                                         style={{
-                                            backgroundColor: '#C7F39A',
+                                            backgroundColor: '#91C25F',
                                             color: 'black',
                                             fontWeight: 600,
                                         }}
@@ -560,7 +560,7 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
                                 <Button key="cancel" onClick={cancelChannelDeletion} style={{marginLeft:"4px"}}>
                                     Cancel
                                 </Button>
-                                <Button key="ok" onClick={confirmChannelDeletion} style={{marginLeft:"4px", backgroundColor:"#C7F39A"}}>
+                                <Button key="ok" onClick={confirmChannelDeletion} style={{marginLeft:"4px", backgroundColor:"#91C25F"}}>
                                     Ok
                                 </Button>
                             </div>
@@ -667,7 +667,7 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
                                     icon={<PlusOutlined style={{ fontSize: '15px' }} className="black-icon" />}
                                     onClick={addNewRow}
                                     style={{
-                                        backgroundColor: '#C7F39A',
+                                        backgroundColor: '#91C25F',
                                         color: 'black',
                                         fontWeight: 600,
                                     }}
@@ -692,7 +692,7 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
                                 <Button key="cancel" onClick={cancelDelete} style={{marginLeft:"4px"}}>
                                     Cancel
                                 </Button>
-                                <Button key="ok" onClick={confirmDelete} style={{marginLeft:"4px", backgroundColor:"#C7F39A", color:'black'}}>
+                                <Button key="ok" onClick={confirmDelete} style={{marginLeft:"4px", backgroundColor:"#91C25F", color:'black'}}>
                                     Ok
                                 </Button>
                             </div>
@@ -782,7 +782,7 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
                                 />
                                     {index === objects.length - 1 && (
                                         <Button
-                                        style={{backgroundColor:"#C7F39A", color:'black', fontWeight:'600', marginRight: "5px"}}
+                                        style={{backgroundColor:"#91C25F", color:'black', fontWeight:'600', marginRight: "5px"}}
                                         icon={<PlusOutlined className='black-icon'/>}
                                         onClick={handleAddObject}
                                         />
@@ -806,7 +806,7 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
                                 <Button key="cancel" onClick={handleCancelDelete} style={{marginLeft:"4px"}}>
                                     Cancel
                                 </Button>
-                                <Button key="ok" onClick={handleConfirmDelete} style={{marginLeft:"4px", backgroundColor:"#C7F39A"}}>
+                                <Button key="ok" onClick={handleConfirmDelete} style={{marginLeft:"4px", backgroundColor:"#91C25F"}}>
                                     Ok
                                 </Button>
                             </div>
@@ -818,7 +818,7 @@ const EditUrlBuilder = ({ editeddata, visible, onClose }) =>{
                 )}
 
                 <Form.Item>
-                    <Button style={{backgroundColor:"#C7F39A", color:'black', fontWeight:'600'}} htmlType="submit">
+                    <Button style={{backgroundColor:"#91C25F", color:'black', fontWeight:'600'}} htmlType="submit">
                         Submit
                     </Button>
                 </Form.Item>

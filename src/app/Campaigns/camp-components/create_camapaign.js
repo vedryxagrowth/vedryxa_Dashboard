@@ -38,31 +38,31 @@ const positionOptions = {
         { key: "facebook_reels", label: "Facebook Reels" },
         { key: "profile_feed", label: "Facebook Profile Feed" },
         { key: "search", label: "Facebook Search" },
-        { key: "story_fb", label: "Facebook Stories" },
-        { key: "right_column", label: "Facebook Right Column" },
-        { key: "instant_articles", label: "Facebook Instant Articles" },
-        { key: "business_explore", label: "Facebook Business Explore" } // Added Business Explore
+        { key: "story", label: "Facebook Stories" },
+        { key: "right_hand_column", label: "Facebook Right Column" },
+        { key: "instant_article", label: "Facebook Instant Articles" },
+        { key: "biz_disco_feed", label: "Facebook Business Explore" } // Added Business Explore
     ],
     instagram: [
         { key: "stream", label: "Instagram Stream" },
-        { key: "story_in", label: "Instagram Stories" },
+        { key: "story", label: "Instagram Stories" },
         { key: "explore", label: "Instagram Explore" },
         { key: "explore_home", label: "Instagram Explore Home" },
         { key: "reels", label: "Instagram Reels" },
-        { key: "profile_feed_in", label: "Instagram Profile Feed" },
+        { key: "profile_feed", label: "Instagram Profile Feed" },
         { key: "ig_search", label: "Instagram Search" },
         { key: "profile_reels", label: "Instagram Profile Reels" }
     ],
     messenger: [
         { key: "messenger_home", label: "Messenger Home" },
-        { key: "story_ms", label: "Messenger Stories" },
+        { key: "story", label: "Messenger Stories" },
         { key: "sponsored_messages", label: "Messenger Sponsored Messages" },
-        { key: "messenger_inbox", label: "Messenger Inbox" }
+        // { key: "messenger_inbox", label: "Messenger Inbox" }
     ],
     audience_network: [
         { key: "classic", label: "Audience Network Classic" },
         { key: "rewarded_video", label: "Audience Network Rewarded Video" },
-        { key: "in_stream", label: "Audience Network In-Stream Video" }
+        { key: "instream_video", label: "Audience Network In-Stream Video" }
     ]
 };
 
@@ -482,6 +482,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     const [form] = Form.useForm();
     const formRef = useRef(null);
     const [isFormComplete, setIsFormComplete] = useState(false);
+    const [submitErrors, setSubmitErrors] = useState([]);
+
     const [accountNumber, setAccountNumber] = useState(accountis);
     const [imagehash, setimagehash] = useState('')
     const { data: session } = useSession();
@@ -576,6 +578,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
 
     const onChangeAdsetLevelDailyBudget = (event) => {
         setAdsetLevelDailyBudget(parseFloat(event.target.value));
+        console.log(event.target.value);
+        console.log(parseFloat(event.target.value));
     }
 
 
@@ -1298,7 +1302,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
 
     };
 
-
+    console.log("test:");
 
     const handleChange = (info) => {
         const newFiles = info.fileList.map(file => ({
@@ -1939,7 +1943,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         >
                                             <Select
                                                 mode="multiple"
-                                                placeholder="Select Publishers"
+                                                placeholder="Select Platforms"
                                                 onChange={handlePublisherChange}
                                                 value={selectedPublishers}
                                             >
@@ -2116,21 +2120,21 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                                                 {/* <PaperClipOutlined style={{ marginRight: 8 }} /> */}
                                                                 {/* <Tooltip title={file.name}> */}
                                                                 {file.type?.startsWith("image/") && (
-                                                                <img
-                                                                    src={
-                                                                    file.originFileObj
-                                                                        ? URL.createObjectURL(file.originFileObj)
-                                                                        : file.url
-                                                                    }
-                                                                    alt="preview"
-                                                                    style={{
-                                                                    width: 40,
-                                                                    height: 40,
-                                                                    objectFit: "cover",
-                                                                    borderRadius: 4,
-                                                                    marginLeft: 8,
-                                                                    }}
-                                                                />
+                                                                    <img
+                                                                        src={
+                                                                        file.originFileObj
+                                                                            ? URL.createObjectURL(file.originFileObj)
+                                                                            : file.url
+                                                                        }
+                                                                        alt="preview"
+                                                                        style={{
+                                                                        width: 40,
+                                                                        height: 40,
+                                                                        objectFit: "cover",
+                                                                        borderRadius: 4,
+                                                                        marginLeft: 8,
+                                                                        }}
+                                                                    />
                                                                 )}
                                                                 <span
                                                                     style={{
@@ -2426,8 +2430,6 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                                                     )
                                                                     // null
                                                                     }
-
-                                                                    
                                                                 </div>
 
                                                                 <div className="title">
@@ -2456,17 +2458,19 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                                             <div className="ad-desc" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
                                                                 {primaryText}
                                                             </div>
-                                                            <div className="ad-image" style={{ width: '350px', height: '200px' }}>
+                                                            <div className="ad-image" style={{ width: '350px', height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                                     {file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") ? (
                                                                         <img
                                                                             src={file?.url}
                                                                             alt="ad content"
-                                                                            style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                            // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                                                                         />
                                                                     ) : file?.url?.endsWith('.mp4') ? (
                                                                         <video
                                                                         controls
-                                                                        style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                        // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                        style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                                                                         >
                                                                             <source src={file?.url} />
                                                                             Your browser does not support the video tag.
@@ -2477,13 +2481,15 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                                                         <img
                                                                             src={editedImages[file?.name] ? editedImages[file?.name]:  file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url} // Use edited image if available
                                                                             alt="ad content"
-                                                                            style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                            // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                                                                         />
                                                                     ) : 
                                                                     (
                                                                         <video
                                                                             controls
-                                                                            style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                            // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                                                                         >
                                                                             <source src={file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url} />
                                                                             Your browser does not support the video tag.
@@ -2592,13 +2598,75 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
 
                         </Panel>
                     </Collapse>
-                    <Form.Item label=" ">
+                    {/* <Form.Item label=" ">
                         {isFormComplete && (
                             <Button type="primary" htmlType="submit" style={{ background: '#21c55d', minWidth: '200px' }}>
                                 Submit
                             </Button>
                         )}
+                    </Form.Item> */}
+                    <Form.Item label=" ">
+                        {isFormComplete && (
+                            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+                            <Button
+                                type="primary"
+                                style={{ background: '#21c55d', minWidth: '200px' }}
+                                onClick={async () => {
+                                try {
+                                    const values = await form.validateFields(); // Validates all form fields
+
+                                    // Clear existing validation errors
+                                    
+
+                                    if (((adsetLevelDailyBudget === 0 && campaignLevelDailyBudget === 0) ||
+                                    isNaN(adsetLevelDailyBudget) || isNaN(campaignLevelDailyBudget))) {
+                                        // Throw a validation error manually in the same format as AntD expects
+                                        throw {
+                                          errorFields: [
+                                            {
+                                              name: ['Daily_amount'], // This should match your Form.Item name path
+                                              errors: ['Daily budget cannot be zero on both Adset and Campaign levels'],
+                                            },
+                                          ],
+                                        };
+                                    }
+
+                                    setSubmitErrors([]);
+
+                                    // Optionally trigger your existing logic
+                                    onFinish(values); // If you want to reuse your existing logic
+
+                                    // Show confirmation modal
+                                    setIsModalVisible(true);
+
+                                    // Save values if needed
+                                    setFormValues(values);
+                                } catch (err) {
+                                    const allErrors = err?.errorFields?.map((field) => ({
+                                    name: field.name?.[0],       // field name
+                                    message: field.errors?.[0],  // validation message
+                                    }));
+                                    setSubmitErrors(allErrors);
+                                }
+                                }}
+                            >
+                                Submit
+                            </Button>
+
+                            {/* Show validation messages beside button */}
+                            {submitErrors.length > 0 && (
+                                <div style={{ color: "red", marginTop: 8 }}>
+                                {submitErrors.map((err, index) => (
+                                    <div key={index}>
+                                    <strong>{err.name}:</strong> {err.message}
+                                    </div>
+                                ))}
+                                </div>
+                            )}
+                            </div>
+                        )}
                     </Form.Item>
+
                     {isImgEditorShown && currentFile && (
                             <FabricCanvas
                                 fileId={currentFile.name} // Pass a unique identifier

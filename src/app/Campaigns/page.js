@@ -1,8 +1,9 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { Table, Tag, Button, Col, Card, Drawer, Dropdown, Flex, Input, Row, Select, Spin, Menu, Space, Modal, message, Switch, Tooltip, ConfigProvider } from 'antd';
+import { Table, Tag, Button, Col, Card, Drawer, Dropdown, Flex, Input, Row, Select, Spin, Menu, Space, Modal, message, Switch, Tooltip, ConfigProvider, Skeleton } from 'antd';
 import { EditOutlined, EyeOutlined, SearchOutlined, CloseOutlined, SwapRightOutlined, PlusOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, ExclamationCircleFilled, ReloadOutlined, LinkOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import CreateCampaignDrawer from './camp-components/create_camapaign';
+import EditAllLevelDataDrawer from './camp-components/EditAllLevelData';
 import ViewDrawer from './camp-components/view-campaign';
 // import EditOnlyCampaignDrawer from './camp-components/EditCamp';
 import EditCampaignDrawer1 from './camp-components/EditCamp';
@@ -27,11 +28,12 @@ const App = () => {
 
     if (!userdetails?.adAccounts) {
         return <div style={{ width: '100%', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <Flex align="center" gap="middle">
-                {/* <Spin size="small" />
-                <Spin /> */}
+            {/* <Flex align="center" gap="middle">
                 <Spin size="large" />
-            </Flex>
+            </Flex> */}
+            <div style={{ padding: '24px' }}>
+                <Skeleton active paragraph={{ rows: 20 }} />
+            </div>
         </div>;
     }
     if(userdetails?.role === "Revenue_Partner"){
@@ -47,8 +49,10 @@ const App = () => {
     const [campaignData, setCampaignData] = useState([]);
     const [viewDrawerVisible, setViewDrawerVisible] = useState(false);
     const [editOnlyDrawerVisible, setEditOnlyDrawerVisible] = useState(false);
+    const [viewEditAllLevelDataDrawerVisible, setViewEditAllLevelDataDrawerVisible] = useState(false);
     const [selectedRowData, setSelectedRowData] = useState(null);
     const [selectedOnlyEditData, setSelectedOnlyEditData] = useState(null);
+    const [selectedEditAllLevelData, setSelectedEditAllLevelData] = useState(null);
     const [viewEditDrawerVisible, setViewEditDrawerVisible] = useState(false);
     const [selectedEditRowData, setSelectedEditRowData] = useState(null);
     const [EditcamapaignDrawerVisible, setEditcamapaignDrawerVisible] = useState(false);
@@ -155,6 +159,12 @@ const App = () => {
         setSelectedOnlyEditData(record);
         setEditOnlyDrawerVisible(true);
     };
+
+    const handleEditClickAllLevelData = (record) => {
+        // console.log(record, "viewdata campaign")
+        setSelectedEditAllLevelData(record);
+        setViewEditAllLevelDataDrawerVisible(true);
+    }
     // const handleEditClick = (record) => {
     //     console.log(record, "Editdata")
     //     setSelectedEditRowData(record);
@@ -176,6 +186,7 @@ const App = () => {
         setadsetsDrawerVisible(false);
         setEditcamapaignDrawerVisible(false)
         setdupDrawerVisible(false)
+        setViewEditAllLevelDataDrawerVisible(false);
     };
 
     useEffect(() => {
@@ -886,6 +897,7 @@ const App = () => {
                     return (
                         <div style={{display:'flex', alignItems:'center', justifyContent:'center'}}>
                             <Button icon={<EyeOutlined />} onClick={() => handleViewClick(record)}></Button>
+                            <Button icon={<EditOutlined />} onClick={() => handleEditClickAllLevelData(record)}></Button> 
                             {(record.adlevel_error || record.campaignlevel_error || record.adsetlevel_error) && (
                                 <Tooltip title={errorDisplay(record.campaignlevel_error,record.adsetlevel_error,record.adlevel_error)}>
                                     <InfoCircleOutlined style={{marginLeft:'10px', color:"red", fontSize:'15px'}}/>
@@ -894,7 +906,9 @@ const App = () => {
                         </div>
                     )
                 } 
+                // console.log('Record Status:', record?.fbstatus);
                 // if (record.fbstatus === 'Live'){
+                //     console.log('Record in Action column:', record);
                 //     return (
                 //         <Button icon={<EditOutlined />} onClick={() => handleEditOnlyClick(record)}></Button> 
                 //     )
@@ -907,7 +921,8 @@ const App = () => {
                             <Button type="primary" onClick={() => handleApproval(record)}>Approve</Button>
                         )}
                         {record.fbstatus !== 'Live' && (
-                            <Button icon={<EditOutlined />} onClick={() => handleEditOnlyClick(record)}></Button> 
+                            // <Button icon={<EditOutlined />} onClick={() => handleEditOnlyClick(record)}></Button> 
+                            <Button icon={<EditOutlined />} onClick={() => handleEditClickAllLevelData(record)}></Button> 
                         )}
                         <Modal
                             title="Confirm Approval"
@@ -932,7 +947,12 @@ const App = () => {
         <div>
             <CreateCampaignDrawer visible={cdrawerVisible} accountis={createcamselectedacc} onClose={onCloseDrawer} changeRRefrst={changeRRefrst} network={selectedKey} />
 
+            <EditAllLevelDataDrawer visible={viewEditAllLevelDataDrawerVisible} accountis={createcamselectedacc} onClose={onCloseDrawer} changeRRefrst={changeRRefrst} network={selectedKey} selectedRow={selectedEditAllLevelData} />
+
             <DuplicateCampaignDrawer visible={dupdrawerVisible} onClose={onCloseDrawer} selectedRow={duplicatenewcampaigns} changeRRefrst={changeRRefrst} network={selectedKey} />
+
+
+
             <ViewDrawer
                 rowData={selectedRowData}
                 visible={viewDrawerVisible}

@@ -37,7 +37,8 @@ const newtworkCollections = {
     "FB_Bodies1": "Facebook_Bodies1",
     "Newsbreak_DA": "Newsbreak_DomainActive",
     "FB_Tonic1": "Facebook_Tonic1",
-    "FB_Sedo": "Facebook_Sedo"
+    "FB_Sedo": "Facebook_Sedo",
+    "FB_Inmobi": "Facebook_Inmobi",
 }
 const selectTimezone = {
     UTC: 'UTCDate',
@@ -168,7 +169,7 @@ const CampaignLevelReports = ({startDate, endDate, newaccount, newtime, newReven
     };
 
     const autoGroupColumnDefLive = {
-        headerName: 'CampaignName',
+        headerName: 'Campaign name',
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting
@@ -631,7 +632,7 @@ const CampaignLevelReports = ({startDate, endDate, newaccount, newtime, newReven
                                     <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
                                         Cancel
                                     </Button>
-                                    <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#C7F39A"}}>
+                                    <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#91C25F"}}>
                                         Ok
                                     </Button>
                                     </div>
@@ -764,6 +765,8 @@ const CampaignLevelReports = ({startDate, endDate, newaccount, newtime, newReven
                             actions: '...',
                             from: "",
                             profitloss: "",
+                            M_tq: "",
+                            D_tq: "",
                         }
                     )
                 })
@@ -1276,7 +1279,7 @@ const CampaignLevelReports = ({startDate, endDate, newaccount, newtime, newReven
     //                                             </>
     //                                         }
     //                                         >
-    //                                             <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color:"#C7F39A" }} className="black-icon-info"/>
+    //                                             <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color:"#91C25F" }} className="black-icon-info"/>
     //                                         </Tooltip>
     //                                     </Col>
     //                                     {/* <Col>
@@ -1284,12 +1287,12 @@ const CampaignLevelReports = ({startDate, endDate, newaccount, newtime, newReven
     //                                             title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
     //                                             mouseEnterDelay={0} // Tooltip appears after 1 second
     //                                         >
-    //                                             <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#C7F39A" }}/>
+    //                                             <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#91C25F" }}/>
     //                                         </Tooltip>
     //                                     </Col> */}
     //                                     <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
     //                                         <Tooltip title="Export to CSV">
-    //                                             <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={onBtExport1} />
+    //                                             <Button type="primary" style={{ backgroundColor: '#91C25F', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={onBtExport1} />
     //                                         </Tooltip>
     //                                     </Col>
     //                                 </Row>
@@ -1492,7 +1495,7 @@ const CampaignLevelReports = ({startDate, endDate, newaccount, newtime, newReven
                                             </>
                                         }
                                         >
-                                            <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color:"#C7F39A" }} className="black-icon-info"/>
+                                            <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color:"#91C25F" }} className="black-icon-info"/>
                                         </Tooltip>
                                     </Col>
                                     {/* <Col>
@@ -1500,12 +1503,12 @@ const CampaignLevelReports = ({startDate, endDate, newaccount, newtime, newReven
                                             title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
                                             mouseEnterDelay={0} // Tooltip appears after 1 second
                                         >
-                                            <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#C7F39A" }}/>
+                                            <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#91C25F" }}/>
                                         </Tooltip>
                                     </Col> */}
                                     <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                         <Tooltip title="Export to CSV">
-                                            <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={onBtExport1} />
+                                            <Button type="primary" style={{ backgroundColor: '#91C25F', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={onBtExport1} />
                                         </Tooltip>
                                     </Col>
                                 </Row>

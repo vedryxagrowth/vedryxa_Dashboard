@@ -13,7 +13,7 @@ import jwt from 'jsonwebtoken';
 import { useRouter } from "next/navigation";
 import { UAParser } from "ua-parser-js";
 
-import { Spin, message } from 'antd';
+import { Spin, message, Skeleton } from 'antd';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -310,9 +310,12 @@ const ContentWrapper = ({ children }) => {
 
   if (status === "loading" || loading) {
     return (
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
-        <Spin size="small" />
+      <div style={{ padding: '24px' }}>
+        <Skeleton active paragraph={{ rows: 20 }} />
       </div>
+      // <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+      //   <Spin size="small" />
+      // </div>
     );
   }
 

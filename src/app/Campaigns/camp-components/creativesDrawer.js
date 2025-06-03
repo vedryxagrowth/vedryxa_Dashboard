@@ -145,7 +145,11 @@ const CreativesDrawer = ({selectedFilesData}) => {
     };
     // Prevent rendering until userdetails is available
     if (!userdetails) {
-        return <Spin size="large" style={{ display: "flex", justifyContent: "center", marginTop: "20px" }} />;
+        return (
+        <div style={{ padding: '24px' }}>
+            <Skeleton active paragraph={{ rows: 10 }} />
+        </div>);
+        // <Spin size="large" style={{ display: "flex", justifyContent: "center", marginTop: "20px" }} />
     }
     // Redirect non-admin users
     if (userdetails?.role === "Revenue_Partner") {

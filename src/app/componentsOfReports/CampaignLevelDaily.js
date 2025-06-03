@@ -41,7 +41,8 @@ const newtworkCollections = {
     "FB_Bodies1": "Facebook_Bodies1",
     "Newsbreak_DA": "Newsbreak_DomainActive",
     "FB_Tonic1": "Facebook_Tonic1",
-    "FB_Sedo": "Facebook_Sedo"
+    "FB_Sedo": "Facebook_Sedo",
+    "FB_Inmobi": "Facebook_Inmobi",
 }
 const selectTimezone = {
     UTC: 'UTCDate',
@@ -87,6 +88,7 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
     const [apiStatus, setApiStatus ]= useState(false);
 
     const memorizedColumnDef1 = useMemo(()=> columnDefs.current, [columnDefs.current]);
+    console.log(memorizedColumnDef1,"1111");
     const memorizedDailyData = useMemo(()=> dailyData?.filter((each) => {
         const normalizedCampaign = each.campaignname.trim().toLowerCase();
         const normalizedInput = inputValue.trim().toLowerCase();
@@ -134,7 +136,13 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                     cpclinkclicks: parseFloat((memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks), 0) / memorizedDailyData?.length).toFixed(2)),
                     fblinkclicks: parseFloat(memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0).toFixed(2)),
                     impressions: parseFloat(memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
-                    ctr: parseFloat((memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
+                    ctr: parseFloat((memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)),
+                    tq: parseFloat(
+                        memorizedDailyData?.reduce((acc, curr) => {
+                          const tqValue = Number(curr?.tq);
+                          return acc + (isNaN(tqValue) ? 0 : tqValue);
+                        }, 0).toFixed(2)
+                    ),
                 }
             ]
         );
@@ -172,10 +180,10 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
     };
 
     const autoGroupColumnDef = {
-        headerName: 'CampaignName',
+        headerName: 'Campaign name',
         minWidth: 450,
         pinned: 'left',
-        sortable: true, // Enable sorting
+        sortable: true,
 
         comparator: (campaignA, campaignB) => {
             if (!campaignA) return 1;
@@ -187,7 +195,6 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                 return relatedComment ? relatedComment.pinned : false;
             };
 
-            // Prioritize pinned campaigns first (pinned campaigns should come to the top)
             const isPinnedA = getPinStatusForCampaign(campaignA);
             const isPinnedB = getPinStatusForCampaign(campaignB);
 
@@ -620,7 +627,7 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                                     <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
                                         Cancel
                                     </Button>
-                                    <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#C7F39A"}}>
+                                    <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#91C25F"}}>
                                         Ok
                                     </Button>
                                     </div>
@@ -659,6 +666,7 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
             const specifiedTimeZone = selectTimezone[newtime];
             const totalRow = mainData && mainData.length > 0 ?
                 mainData.map((eachData) => {
+                    // console.log("TQ value from API row:", eachData.tq, typeof eachData.tq);
                     const Revenue = eachData.estimated_revenue !== undefined ? (eachData.estimated_revenue) : 0;
                     const profit = (Revenue - eachData.spend);
                     const conversions = eachData.conversions !== undefined ? eachData.conversions : 0;
@@ -732,7 +740,8 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                             actions: '...',
                             from: "",
                             profitloss: "",
-                            // compaignid: eachData.campaign_id,
+                            M_tq: "",
+                            D_tq: "",
                         }
                     )
                 }) : null;
@@ -760,7 +769,13 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                         fbclicks: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
                         fblinkclicks: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0).toFixed(2)),
                         impressions: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
-                        ctr: parseFloat((fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
+                        ctr: parseFloat((fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)),
+                        tq: fullData?.length
+                        ? Math.round(
+                            fullData.reduce((acc, curr) =>
+                                acc + (curr.tq !== undefined && !isNaN(curr.tq) ? Number(curr.tq) : 0), 0
+                        ) * 100) / 100
+                        : 0,
                     }
                 ]
             );
@@ -1090,12 +1105,12 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                                                 title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
                                                 mouseEnterDelay={0} // Tooltip appears after 1 second
                                             >
-                                                <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#C7F39A" }}/>
+                                                <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#91C25F" }}/>
                                             </Tooltip>
                                         </Col> */}
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                             <Tooltip title="Export to CSV">
-                                                <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={() => onBtExport(gridRef1, "Daily")} />
+                                                <Button type="primary" style={{ backgroundColor: '#91C25F', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={() => onBtExport(gridRef1, "Daily")} />
                                             </Tooltip>
                                         </Col>
                                     </Row>
@@ -1208,7 +1223,13 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                                                     fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
                                                     fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
                                                     impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
-                                                    ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2))
+                                                    ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2)),
+                                                    tq: parseFloat(
+                                                        filteredData.reduce((acc, curr) => {
+                                                          const tqValue = Number(curr?.tq);
+                                                          return acc + (isNaN(tqValue) ? 0 : tqValue);
+                                                        }, 0).toFixed(2)
+                                                    ),
                                                 },
                                             ];
 

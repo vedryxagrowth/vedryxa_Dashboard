@@ -691,11 +691,13 @@ const RevenuePartnerDashboard = () => {
                             direction="vertical"
                             style={{
                                 width: '100%',
+                                backgroundColor: theme === 'dark' ? '#333' : ''
                             }}
                         >
                             <Select {...sharedProps} {...selectProps} 
                                     className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                dropdownClassName={theme === 'dark' && 'custom-dropdown'}/>
+                                    dropdownClassName={theme === 'dark' && 'custom-dropdown'}
+                            />
                         </Space>
                     </Col>
                     <Col xs={16} sm={16} md={10} lg={8}>
@@ -703,7 +705,7 @@ const RevenuePartnerDashboard = () => {
                             locale={locale}
                             theme={{
                                 token: {
-                                  colorPrimary: '#C7F39A', 
+                                  colorPrimary: '#91C25F', 
                                   colorTextLightSolid: '#000',
                                 },
                             }}
@@ -734,7 +736,7 @@ const RevenuePartnerDashboard = () => {
                         />
                     </Col>
                     <Col xs={12} sm={12} md={2}>
-                        <Button onClick={onClickSubmit} style={{backgroundColor: '#C7F39A', color:"black", fontWeight:'600'}}>
+                        <Button onClick={onClickSubmit} style={{backgroundColor: '#91C25F', color:"black", fontWeight:'600'}}>
                             Submit
                         </Button>
                     </Col>
@@ -3210,7 +3212,7 @@ const Dashboard = () => {
                                     locale={locale}
                                     theme={{
                                         token: {
-                                          colorPrimary: '#C7F39A', 
+                                          colorPrimary: '#91C25F', 
                                           colorTextLightSolid: '#000',
                                         },
                                     }}
@@ -3239,7 +3241,7 @@ const Dashboard = () => {
                                                 Close
                                             </Button>
                                             <Button
-                                                style={{ backgroundColor: '#C7F39A' }} 
+                                                style={{ backgroundColor: '#91C25F' }} 
                                                 onClick={handleSubmit}
                                             >
                                                 Submit
@@ -3253,7 +3255,7 @@ const Dashboard = () => {
                                 <Button 
                                     type="default" 
                                     icon={<ReloadOutlined className='black-icon' />} 
-                                    style={{ float: "right", marginLeft: "10px", backgroundColor: '#C7F39A' }} 
+                                    style={{ float: "right", marginLeft: "10px", backgroundColor: '#91C25F' }} 
                                     onClick={refreshUsers}  // Call refresh function when clicked
                                 >
                                 </Button>
@@ -3268,7 +3270,7 @@ const Dashboard = () => {
                     <div style={{ height: '100%' }}>
                         <Row gutter={24} style={{ marginTop: '20px' }} justify="space-between">
                             <Col flex="1">
-                                <Card>
+                                <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
                                     <Statistic
                                         title={
                                             <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -3287,13 +3289,13 @@ const Dashboard = () => {
                                         }
                                         value={data.length > 0 ? revenue1.current : 0}
                                         prefix="$"
-                                        valueStyle={{ color: '#3f8600' }}
+                                        valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}
                                     />
                                 </Card>
                             </Col>
     
                             <Col flex="1">
-                                <Card>
+                                <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
                                     <Statistic
                                         title={
                                             <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -3312,13 +3314,12 @@ const Dashboard = () => {
                                         }
                                         value={data.length > 0 ? profit1.current : 0}
                                         prefix="$"
-                                        valueStyle={{ color: '#3f8600' }}
-                                    />
+                                        valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
                                 </Card>
                             </Col>
     
                             <Col flex="1">
-                                <Card>
+                                <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
                                     <Statistic
                                         title={
                                             <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -3337,13 +3338,12 @@ const Dashboard = () => {
                                         }
                                         value={data.length > 0 ? spend1.current : 0}
                                         prefix="$"
-                                        valueStyle={{ color: '#3f8600' }}
-                                    />
+                                        valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
                                 </Card>
                             </Col>
     
                             <Col flex="1">
-                                <Card>
+                                <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
                                     <Statistic
                                         title={
                                             <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -3361,13 +3361,12 @@ const Dashboard = () => {
                                             </div>
                                         }
                                         value={data.length > 0 ? leads1.current : 0}
-                                        valueStyle={{ color: '#3f8600' }}
-                                    />
+                                        valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
                                 </Card>
                             </Col>
     
                             <Col flex="1">
-                                <Card>
+                                <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
                                     <Statistic
                                         title={
                                             <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -3385,15 +3384,14 @@ const Dashboard = () => {
                                             </div>
                                         }
                                         value={data.length > 0 ? conversions1.current : 0}
-                                        valueStyle={{ color: '#3f8600' }}
-                                    />
+                                        valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
                                 </Card>
                             </Col>
                         </Row>
     
                         <Row gutter={24} style={{ marginTop: '20px' }} justify="space-between">
                             <Col flex="1">
-                                <Card>
+                                <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
                                     <Statistic
                                         title={
                                             <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -3411,13 +3409,12 @@ const Dashboard = () => {
                                             </div>
                                         }
                                         value={data.length > 0 ? ncpl1.current : 0}
-                                        valueStyle={{ color: '#3f8600' }}
-                                    />
+                                        valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
                                 </Card>
                             </Col>
     
                             <Col flex="1">
-                                <Card>
+                                <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
                                     <Statistic
                                         title={
                                             <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -3435,13 +3432,12 @@ const Dashboard = () => {
                                             </div>
                                         }
                                         value={data.length > 0 ? cpl1.current !== Infinity ? cpl1.current: 0 : 0}
-                                        valueStyle={{ color: '#3f8600' }}
-                                    />
+                                        valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
                                 </Card>
                             </Col>
     
                             <Col flex="1">
-                                <Card>
+                                <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
                                     <Statistic
                                         title={
                                             <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -3459,13 +3455,12 @@ const Dashboard = () => {
                                             </div>
                                         }
                                         value={data.length > 0 ? ctr1.current : 0}
-                                        valueStyle={{ color: '#3f8600' }}
-                                    />
+                                        valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
                                 </Card>
                             </Col>
     
                             <Col flex="1">
-                                <Card>
+                                <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
                                     <Statistic
                                         title={
                                             <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -3483,13 +3478,12 @@ const Dashboard = () => {
                                             </div>
                                         }
                                         value={data.length > 0 ? cpc1.current : 0}
-                                        valueStyle={{ color: '#3f8600' }}
-                                    />
+                                        valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
                                 </Card>
                             </Col>
     
                             <Col flex="1">
-                                <Card>
+                                <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
                                     <Statistic
                                         title={
                                             <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -3507,8 +3501,7 @@ const Dashboard = () => {
                                             </div>
                                         }
                                         value={data.length > 0 ? rpc1.current : 0}
-                                        valueStyle={{ color: '#3f8600' }}
-                                    />
+                                        valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
                                 </Card>
                             </Col>
                         </Row>
@@ -3592,7 +3585,7 @@ const Dashboard = () => {
                     </Row> */}
                         <Row style={{display:'flex', justifyContent:'flex-end', alignItems:'center'}}>
                             <Col style={{marginTop:'10px'}}>
-                                <Switch checked={showGraphs} style={{backgroundColor: showGraphs && "#A3F254"}} onClick={onClickBarChart}/> Chart
+                                <Switch checked={showGraphs} style={{backgroundColor: showGraphs && "#91C25F"}} onClick={onClickBarChart}/> Chart
                             </Col>
                         </Row>
                         <div style={{ display: showGraphs ? 'flex' : "none", flexDirection: 'column' }}>

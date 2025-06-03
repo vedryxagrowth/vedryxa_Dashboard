@@ -6,7 +6,7 @@ import React from 'react';
 import axios from 'axios';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
-import { Carousel, Input, Button, Row, Col, Typography, Modal, message, ConfigProvider, Switch, Flex, Spin, Tabs } from 'antd';
+import { Carousel, Input, Button, Row, Col, Typography, Modal, message, ConfigProvider, Switch, Flex, Spin, Tabs, Skeleton } from 'antd';
 import {   SearchOutlined, ReloadOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
 import { Tooltip, Popover } from 'antd';
 import StickyBox from 'react-sticky-box';
@@ -32,7 +32,8 @@ const newtworkCollections = {
     "FB_Bodies1": "Facebook_Bodies1",
     "Newsbreak_DA": "Newsbreak_DomainActive",
     "FB_Tonic1": "Facebook_Tonic1",
-    "FB_Sedo": "Facebook_Sedo"
+    "FB_Sedo": "Facebook_Sedo",
+    "FB_Inmobi": "Facebook_Inmobi",
 }
 
 const LiveReports = React.lazy(() => import('../componentsOfReports/Live'));
@@ -61,9 +62,12 @@ const MyTablePage = () => {
     const { apiClient } = useTokenContext();
     if (!userdetails?.adAccounts) {
         return <div style={{ width: '100%', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <Flex align="center" gap="middle">
+            {/* <Flex align="center" gap="middle">
                 <Spin size="large" />
-            </Flex>
+            </Flex> */}
+            <div style={{ padding: '24px' }}>
+                <Skeleton active paragraph={{ rows: 20 }} />
+            </div>
         </div>;
     }
     if (userdetails?.role === "Revenue_Partner") {
@@ -79,6 +83,8 @@ const MyTablePage = () => {
     const columnStructure = [
         "actions",
         "date",
+        "M_tq",
+        "D_tq",
         "from",
         "profitloss",
         "spend",
@@ -1128,6 +1134,36 @@ const MyTablePage = () => {
     }, [Camapignlevelstatus]);
 
     const columnDefsObjectOfAdID = {
+        M_tq: {
+            headerName: 'M_TQ',
+            field: 'M_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },             
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        },
+          D_tq: {
+            headerName: 'D_TQ',
+            field: 'D_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        }, 
         campaignname: {
             headerName: 'CampaignName',
             field: 'campaignname',
@@ -1189,7 +1225,7 @@ const MyTablePage = () => {
             
         },
         from:{
-            headerName: 'From',
+            headerName: 'Start',
             field: 'from',
             valueGetter: (params) => {
               if (params.node.group) {
@@ -1364,13 +1400,13 @@ const MyTablePage = () => {
                                 onCancel={handleCancel}
                                 width={600}  
                                 style={{ padding: '20px' }} 
-                                okButtonProps={{ style: { backgroundColor: '#C7F39A', borderColor: '#C7F39A' } }} 
+                                okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }} 
                             >
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                         <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-                                        <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#C7F39A"}} onChange={onChangeCampaignStatus} />
+                                        <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#91C25F"}} onChange={onChangeCampaignStatus} />
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong style={{ marginBottom: '10px' }}>Budget: <span style={{fontWeight:'normal'}}>{campaignActualSpend.daily_budget ? "Daily" : campaignActualSpend.lifetime_budget ? "Lifetime" : "Adset"}</span></Typography.Text>
@@ -1724,6 +1760,36 @@ const MyTablePage = () => {
     };
 
     const columnDefsObjectOfDailyAdID = {
+        M_tq: {
+            headerName: 'M_TQ',
+            field: 'M_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },             
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        },
+        D_tq: {
+            headerName: 'D_TQ',
+            field: 'D_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        },  
         campaignname: {
             headerName: 'CampaignName',
             field: 'campaignname',
@@ -1867,12 +1933,12 @@ const MyTablePage = () => {
                                 onCancel={handleCancel}
                                 width={600}  // Set a custom width for the modal
                                 style={{ padding: '20px' }}  // Adjust body padding
-                                okButtonProps={{ style: { backgroundColor: '#C7F39A', borderColor: '#C7F39A' } }} 
+                                okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }} 
                             >
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                         <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-                                        <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#C7F39A"}} onChange={onChangeCampaignStatus} />
+                                        <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#91C25F"}} onChange={onChangeCampaignStatus} />
                                     </div>
 
                                     {/* Input Field */}
@@ -1910,7 +1976,7 @@ const MyTablePage = () => {
             
         },
         from:{
-            headerName: 'From',
+            headerName: 'Start',
             field: 'from',
             valueGetter: (params) => {
               if (params.node.group) {
@@ -2411,13 +2477,13 @@ const MyTablePage = () => {
     //                             onCancel={handleCancel}
     //                             width={600}  
     //                             style={{ padding: '20px' }} 
-    //                             okButtonProps={{ style: { backgroundColor: '#C7F39A', borderColor: '#C7F39A' } }} 
+    //                             okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }} 
     //                         >
     //                             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     
     //                                 <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
     //                                     <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-    //                                     <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#C7F39A"}} onChange={onChangeCampaignStatus} />
+    //                                     <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#91C25F"}} onChange={onChangeCampaignStatus} />
     //                                 </div>
     //                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
     //                                     <Typography.Text strong style={{ marginBottom: '10px' }}>Budget: <span style={{fontWeight:'normal'}}>{campaignActualSpend.daily_budget ? "Daily" : campaignActualSpend.lifetime_budget ? "Lifetime" : "Adset"}</span></Typography.Text>
@@ -2914,12 +2980,12 @@ const MyTablePage = () => {
     //                             onCancel={handleCancel}
     //                             width={600}  // Set a custom width for the modal
     //                             style={{ padding: '20px' }}  // Adjust body padding
-    //                             okButtonProps={{ style: { backgroundColor: '#C7F39A', borderColor: '#C7F39A' } }} 
+    //                             okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }} 
     //                         >
     //                             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
     //                                 <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
     //                                     <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-    //                                     <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#C7F39A"}} onChange={onChangeCampaignStatus} />
+    //                                     <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#91C25F"}} onChange={onChangeCampaignStatus} />
     //                                 </div>
 
     //                                 {/* Input Field */}
@@ -3223,6 +3289,36 @@ const MyTablePage = () => {
 
 
     const columnDefsObjectAdsetLevel = {
+        M_tq: {
+            headerName: 'M_TQ',
+            field: 'M_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },             
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        },
+          D_tq: {
+            headerName: 'D_TQ',
+            field: 'D_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        },  
         campaignname: {
             headerName: 'CampaignName',
             field: 'campaignname',
@@ -3368,13 +3464,13 @@ const MyTablePage = () => {
                                 onCancel={handleCancel}
                                 width={600}  
                                 style={{ padding: '20px' }}
-                                okButtonProps={{ style: { backgroundColor: '#C7F39A', borderColor: '#C7F39A' } }} 
+                                okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }} 
                             >
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                         <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-                                        <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#C7F39A"}} onChange={onChangeCampaignStatus} />
+                                        <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#91C25F"}} onChange={onChangeCampaignStatus} />
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong style={{ marginBottom: '10px' }}>Budget: <span style={{fontWeight:'normal'}}>{campaignActualSpend.daily_budget ? "Daily" : campaignActualSpend.lifetime_budget ? "Lifetime" : "Adset"}</span></Typography.Text>
@@ -3440,7 +3536,7 @@ const MyTablePage = () => {
             
         },
         from: {
-            headerName: 'From',
+            headerName: 'Start',
             field: 'from',
             minWidth: 110,
             valueGetter: (params) => {
@@ -3830,6 +3926,36 @@ const MyTablePage = () => {
     };
 
     const columnDefsObjectAdLevel = {
+        M_tq: {
+            headerName: 'M_TQ',
+            field: 'M_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },             
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        },
+          D_tq: {
+            headerName: 'D_TQ',
+            field: 'D_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        },  
         campaignname: {
             headerName: 'CampaignName',
             field: 'campaignname',
@@ -3975,13 +4101,13 @@ const MyTablePage = () => {
                                 onCancel={handleCancel}
                                 width={600}  
                                 style={{ padding: '20px' }}
-                                okButtonProps={{ style: { backgroundColor: '#C7F39A', borderColor: '#C7F39A' } }} 
+                                okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }} 
                             >
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                         <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-                                        <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#C7F39A"}} onChange={onChangeCampaignStatus} />
+                                        <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#91C25F"}} onChange={onChangeCampaignStatus} />
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong style={{ marginBottom: '10px' }}>Budget: <span style={{fontWeight:'normal'}}>{campaignActualSpend.daily_budget ? "Daily" : campaignActualSpend.lifetime_budget ? "Lifetime" : "Adset"}</span></Typography.Text>
@@ -4047,7 +4173,7 @@ const MyTablePage = () => {
             
         },
         from: {
-            headerName: 'From',
+            headerName: 'Start',
             field: 'from',
             minWidth: 110,
             valueGetter: (params) => {
@@ -4437,8 +4563,38 @@ const MyTablePage = () => {
     };
 
     const columnDefsObject = {
+        M_tq: {
+            headerName: 'M_TQ',
+            field: 'M_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },             
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        },
+          D_tq: {
+            headerName: 'D_TQ',
+            field: 'D_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        },  
         campaignname: {
-            headerName: 'CampaignName',
+            headerName: 'Campaign name',
             field: 'campaignname',
             resizable: true,
             sortable: true,
@@ -4585,13 +4741,13 @@ const MyTablePage = () => {
                                 onCancel={handleCancel}
                                 width={600}  
                                 style={{ padding: '20px' }}
-                                okButtonProps={{ style: { backgroundColor: '#C7F39A', borderColor: '#C7F39A' } }} 
+                                okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }} 
                             >
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                         <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-                                        <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#C7F39A"}} onChange={onChangeCampaignStatus} />
+                                        <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#91C25F"}} onChange={onChangeCampaignStatus} />
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong style={{ marginBottom: '10px' }}>Budget: <span style={{fontWeight:'normal'}}>{campaignActualSpend.daily_budget ? "Daily" : campaignActualSpend.lifetime_budget ? "Lifetime" : "Adset"}</span></Typography.Text>
@@ -4652,7 +4808,7 @@ const MyTablePage = () => {
             
         },
         from: {
-            headerName: 'From',
+            headerName: 'Start',
             field: 'from',
             minWidth: 110,
             valueGetter: (params) => {
@@ -5042,6 +5198,36 @@ const MyTablePage = () => {
     };
 
     const columnDefsObjectAdsetLevelDaily = {
+        M_tq: {
+            headerName: 'M_TQ',
+            field: 'M_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },             
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        },
+          D_tq: {
+            headerName: 'D_TQ',
+            field: 'D_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        }, 
         campaignname: {
             headerName: 'CampaignName',
             field: 'campaignname',
@@ -5183,12 +5369,12 @@ const MyTablePage = () => {
                                 onCancel={handleCancel}
                                 width={600}  // Set a custom width for the modal
                                 style={{ padding: '20px' }}  // Adjust body padding
-                                okButtonProps={{ style: { backgroundColor: '#C7F39A', borderColor: '#C7F39A' } }} 
+                                okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }} 
                             >
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                         <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-                                        <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#C7F39A"}} onChange={onChangeCampaignStatus} />
+                                        <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#91C25F"}} onChange={onChangeCampaignStatus} />
                                     </div>
 
                                     {/* Input Field */}
@@ -5259,7 +5445,7 @@ const MyTablePage = () => {
             
         },
         from:{
-            headerName: 'From',
+            headerName: 'Start',
             field: 'from',
             minWidth: 110,
             valueGetter: (params) => {
@@ -5496,6 +5682,37 @@ const MyTablePage = () => {
     };
 
     const columnDefsObjectAdLevelDaily = {
+        M_tq: {
+            headerName: 'M_TQ',
+            field: 'M_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },             
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            // hide: true
+        },
+          D_tq: {
+            headerName: 'D_TQ',
+            field: 'D_tq',
+            aggFunc: 'sum',
+            // valueFormatter: currencyFormatter, 
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            // hide: true
+        },          
         campaignname: {
             headerName: 'CampaignName',
             field: 'campaignname',
@@ -5636,12 +5853,12 @@ const MyTablePage = () => {
                                 onCancel={handleCancel}
                                 width={600}  // Set a custom width for the modal
                                 style={{ padding: '20px' }}  // Adjust body padding
-                                okButtonProps={{ style: { backgroundColor: '#C7F39A', borderColor: '#C7F39A' } }} 
+                                okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }} 
                             >
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                         <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-                                        <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#C7F39A"}} onChange={onChangeCampaignStatus} />
+                                        <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#91C25F"}} onChange={onChangeCampaignStatus} />
                                     </div>
 
                                     {/* Input Field */}
@@ -5713,7 +5930,7 @@ const MyTablePage = () => {
             
         },
         from:{
-            headerName: 'From',
+            headerName: 'Start',
             field: 'from',
             minWidth: 110,
             valueGetter: (params) => {
@@ -5950,6 +6167,36 @@ const MyTablePage = () => {
     };
 
     const columnDefsObject1 = {
+        M_tq: {
+            headerName: 'M_TQ',
+            field: 'M_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },             
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        },
+          D_tq: {
+            headerName: 'D_TQ',
+            field: 'D_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        }, 
         campaignname: {
             headerName: 'CampaignName',
             field: 'campaignname',
@@ -5974,7 +6221,8 @@ const MyTablePage = () => {
             filter: false,      // Ensure filtering is disabled
             enableSorting: false,  // Disable sorting at the column level
             enableFilter: false,
-            hide: false,
+            // hide: false,
+            // hide : true,
             suppressMenu: true,
             hide: !isYesterday(),
             cellRenderer: (params) => {
@@ -6094,12 +6342,12 @@ const MyTablePage = () => {
                                 onCancel={handleCancel}
                                 width={600}  // Set a custom width for the modal
                                 style={{ padding: '20px' }}  // Adjust body padding
-                                okButtonProps={{ style: { backgroundColor: '#C7F39A', borderColor: '#C7F39A' } }} 
+                                okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }} 
                             >
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                         <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-                                        <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#C7F39A"}} onChange={onChangeCampaignStatus} />
+                                        <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#91C25F"}} onChange={onChangeCampaignStatus} />
                                     </div>
 
                                     {/* Input Field */}
@@ -6126,6 +6374,7 @@ const MyTablePage = () => {
         adsetname: {
             headerName: 'AdsetName', field: 'adsetname',
             // resizeble: true,
+            // hide: true,
             sortable: true,
             minWidth: 450,
             filter: 'agSetColumnFilter',
@@ -6165,7 +6414,7 @@ const MyTablePage = () => {
             
         },
         from:{
-            headerName: 'From',
+            headerName: 'Start',
             field: 'from',
             minWidth: 110,
             valueGetter: (params) => {
@@ -6401,7 +6650,38 @@ const MyTablePage = () => {
         timezone: { headerName: 'TimeZone', field: 'timezone', sortable: true, hide: true, filter: "agTextColumnFilter", suppressMenu: true, menuTabs: [], headerClass: 'hide-menu' },
     };
 
+    //campaignLevelDaily
     const columnDefsObject2 = {
+        M_tq: {
+            headerName: 'M_TQ',
+            field: 'M_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },             
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        },
+          D_tq: {
+            headerName: 'D_TQ',
+            field: 'D_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        }, 
         campaignname: {
             headerName: 'CampaignName', field: 'campaignname', resizeble: true,
             // sortable: true,
@@ -6546,12 +6826,12 @@ const MyTablePage = () => {
                                 onCancel={handleCancel}
                                 width={600}  // Set a custom width for the modal
                                 style={{ padding: '20px' }}  // Adjust body padding
-                                okButtonProps={{ style: { backgroundColor: '#C7F39A', borderColor: '#C7F39A' } }} 
+                                okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }} 
                             >
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                         <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-                                        <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#C7F39A"}} onChange={onChangeCampaignStatus} />
+                                        <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#91C25F"}} onChange={onChangeCampaignStatus} />
                                     </div>
 
                                     {/* Input Field */}
@@ -6611,7 +6891,7 @@ const MyTablePage = () => {
             
         },
         from:{
-            headerName: 'From',
+            headerName: 'Start',
             field: 'from',
             minWidth: 110,
             valueGetter: (params) => {
@@ -6871,6 +7151,36 @@ const MyTablePage = () => {
     };
 
     const columnDefsObject3 = {
+        M_tq: {
+            headerName: 'M_TQ',
+            field: 'M_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },             
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        },
+          D_tq: {
+            headerName: 'D_TQ',
+            field: 'D_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        }, 
         campaignname: {
             headerName: 'CampaignName',
             field: 'campaignname',
@@ -7029,12 +7339,12 @@ const MyTablePage = () => {
                                 onCancel={handleCancel}
                                 width={600}  // Set a custom width for the modal
                                 style={{ padding: '20px' }}  // Adjust body padding
-                                okButtonProps={{ style: { backgroundColor: '#C7F39A', borderColor: '#C7F39A' } }} 
+                                okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }} 
                             >
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                         <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-                                        <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#C7F39A"}} onChange={onChangeCampaignStatus} />
+                                        <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#91C25F"}} onChange={onChangeCampaignStatus} />
                                     </div>
 
                                     {/* Input Field */}
@@ -7103,7 +7413,7 @@ const MyTablePage = () => {
             
         },
         from:{
-            headerName: 'From',
+            headerName: 'Start',
             field: 'from',
             minWidth: 110,
             valueGetter: (params) => {
@@ -7994,7 +8304,6 @@ const MyTablePage = () => {
         accountNumberFromDashboard ? accountNumberFromDashboard?.replace(/\+/g, " ") : (storedData ? storedData?.account : typeof networksData[0] === 'string' ? networksData[0] : networksData[0].accountNumber)
     ); // Track selected value
 
-    // Handle dropdown open/close state
     const handleDropdownVisibleChange = (open) => {
         setIsOpen(open); // Set dropdown open state
         setAccountNumberToPass(null);
@@ -8202,7 +8511,7 @@ const MyTablePage = () => {
                             locale={locale}
                             theme={{
                                 token: {
-                                  colorPrimary: '#C7F39A', 
+                                  colorPrimary: '#91C25F', 
                                   colorTextLightSolid: '#000',
                                 },
                             }}
@@ -8241,7 +8550,7 @@ const MyTablePage = () => {
                     </Col>
 
                     <Col xs={24} sm={12} md={2}>
-                        <Button className='submit-button' type='primary' style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black', fontWeight: '600' }} onClick={onClickButton} block>
+                        <Button className='submit-button' type='primary' style={{ backgroundColor: '#91C25F', border: 'solid 0px', color: 'black', fontWeight: '600' }} onClick={onClickButton} block>
                             Submit
                         </Button>
                     </Col>
@@ -8257,7 +8566,7 @@ const MyTablePage = () => {
                             </Col> */}
                             <Col>
                                 <Input
-                                placeholder="Search here"
+                                placeholder="Search keyword"
                                 value={inputValue}
                                 onChange={handleChangeInput}
                                 onBlur={handleBlur}
@@ -8269,7 +8578,7 @@ const MyTablePage = () => {
                             <Col>
                                 <Button
                                 style={{
-                                    backgroundColor: '#C7F39A',
+                                    backgroundColor: '#91C25F',
                                     border: 'solid 0px',
                                     color: 'black',
                                     height:'30px'
@@ -8283,7 +8592,7 @@ const MyTablePage = () => {
                                     <Button
                                     type="primary"
                                     style={{
-                                        backgroundColor: '#C7F39A',
+                                        backgroundColor: '#91C25F',
                                         border: 'solid 0px',
                                         color: 'black',
                                         height:'30px'
@@ -8300,9 +8609,12 @@ const MyTablePage = () => {
             {!moveForward ? 
             (
                 <div style={{ width: '100%', height: '200px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                    <Flex align="center" gap="middle">
+                    {/* <Flex align="center" gap="middle">
                         <Spin size="large" />
-                    </Flex>
+                    </Flex> */}
+                    <div style={{ padding: '24px' }}>
+                        <Skeleton active paragraph={{ rows: 20 }} />
+                    </div>
                 </div>
             ) : 
             (
@@ -8310,7 +8622,7 @@ const MyTablePage = () => {
 
                 <Tabs activeKey={activeTab} onChange={handleTabChange} renderTabBar={() => <></>}>
                 <Tabs.TabPane key="1">
-                {Camapignlevelstatus.length > 0 && (
+                {/* {Camapignlevelstatus.length > 0 && ( */}
                     <LiveReports 
                     startDate={newStartDate} 
                     endDate={newendDate} 
@@ -8334,7 +8646,7 @@ const MyTablePage = () => {
                     handleChangeToggle={handleChangeToggle}
                     theme={theme}
                     />
-                )}
+                {/* )} */}
                 </Tabs.TabPane>
 
                 <Tabs.TabPane key="2">

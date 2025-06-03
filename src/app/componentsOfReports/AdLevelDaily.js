@@ -5,7 +5,7 @@ import { Audio } from 'react-loader-spinner';
 import moment from 'moment-timezone';
 import React from 'react';
 import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch} from 'antd';
-import {  DownloadOutlined,  SmileOutlined, CopyOutlined,  EditOutlined,  MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import {  DownloadOutlined,  SmileOutlined, CopyOutlined,  EditOutlined,  MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined } from '@ant-design/icons';
 import { Tooltip} from 'antd';
 import { Space } from 'antd';
 import 'antd/dist/reset.css';
@@ -88,7 +88,7 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
 
     const memorizedColumnDef1 = useMemo(()=> columnDefs.current, [columnDefs.current]);
     const memorizedDailyData = useMemo(()=> dailyData?.filter((each) => {
-        const normalizedCampaign = each.campaignname.trim().toLowerCase();
+        const normalizedCampaign = (each?.campaignname || "").trim().toLowerCase();
         const normalizedInput = inputValue.trim().toLowerCase();
         return (
             normalizedCampaign.startsWith(normalizedInput) ||
@@ -99,6 +99,19 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
     ), [dailyData, inputValue,theme]);
 
     useEffect(()=>{
+        // const groupedTQMap = new Map();
+        // memorizedDailyData.forEach((row) => {
+        //     if (!groupedTQMap.has(row.adname)) {
+        //         groupedTQMap.set(row.adname, 0);
+        //     }
+        //     const currSum = groupedTQMap.get(row.adname);
+        //     groupedTQMap.set(row.adname, currSum + (isNaN(row.tq) ? 0 : Number(row.tq)));
+        // });
+    
+        // // ✅ Compute average of grouped TQ sums
+        // const totalGroupedSum = Array.from(groupedTQMap.values()).reduce((acc, val) => acc + val, 0);
+        // const tqAvgPerAdname = groupedTQMap.size > 0 ? parseFloat((totalGroupedSum / groupedTQMap.size).toFixed(2)) : 0;    
+       
         setDailyFixedFooter(
             [
                 {
@@ -120,7 +133,20 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                     cpclinkclicks: parseFloat((memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks), 0) / memorizedDailyData?.length).toFixed(2)),
                     fblinkclicks: parseFloat(memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0).toFixed(2)),
                     impressions: parseFloat(memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
-                    ctr: parseFloat((memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
+                    ctr: parseFloat((memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)),
+                    // tq: tqAvgPerAdname,
+                    M_tq: (() => {
+                        const nonZeroM = memorizedDailyData.filter(d => parseFloat(d?.M_tq) > 0);
+                        const totalM = nonZeroM.reduce((acc, curr) => acc + parseFloat(curr?.M_tq || 0), 0);
+                        return parseFloat((totalM / (nonZeroM.length || 1)).toFixed(2));
+                    })(),
+        
+                    // ✅ Added average of non-zero D_TQ
+                    D_tq: (() => {
+                        const nonZeroD = memorizedDailyData.filter(d => parseFloat(d?.D_tq) > 0);
+                        const totalD = nonZeroD.reduce((acc, curr) => acc + parseFloat(curr?.D_tq || 0), 0);
+                        return parseFloat((totalD / (nonZeroD.length || 1)).toFixed(2));
+                    })(),
                 }
             ]
         );
@@ -158,7 +184,7 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
     };
 
     const autoGroupColumnDef = {
-        headerName: 'AdName',
+        headerName: 'Ad name',
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting
@@ -538,6 +564,13 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                                 style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '10px' }}
                             />
                         </Tooltip>
+                        <LinkOutlined 
+                            onClick={() => {
+                                const url = `/DailyAndCampaignHistory/AdHistory/${params.value.replace(/\//g, "*").replace(/-/g, "^")}-${newaccount}-${newtime}-${newtworkCollections[newRevenuePratner]}`;
+                                window.open(url, '_blank', 'noopener,noreferrer');
+                            }}
+                            style={{ cursor: 'pointer', marginLeft: '0px', color: "#1e1e1f", marginRight: '5px' }}
+                        />
                         <Tooltip title={valueWithCount}>
                             <span
                                 // onClick={() => {
@@ -577,7 +610,7 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                                     <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
                                         Cancel
                                     </Button>
-                                    <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#C7F39A"}}>
+                                    <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#91C25F"}}>
                                         Ok
                                     </Button>
                                     </div>
@@ -611,6 +644,29 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
             const fetchData = await apiClient.post(`/AdLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=Daily&network=${`${collectionName}_AD`}`, { adsetids : adsets, campaignids : campaigns });
             const mainData = fetchData.data;
             timezone.current = mainData.length > 0  ? mainData[0].accountTimezone : "";
+
+            const deviceTqMap = new Map();
+
+            // Organize data by ad_id + date
+            mainData.forEach(item => {
+                const key = `${item.ad_id}_${item[selectTimezone[newtime]]}`;
+                if (!deviceTqMap.has(key)) {
+                    deviceTqMap.set(key, {});
+                }
+                const entry = deviceTqMap.get(key);
+                if (item.device === "Mobile") entry.M_tq = item.tq;
+                if (item.device === "Desktop") entry.D_tq = item.tq;
+                deviceTqMap.set(key, { ...entry, ...item });
+            });
+
+            const mergedData = Array.from(deviceTqMap.values()).map(entry => {
+                return {
+                    ...entry,
+                    M_tq: entry.M_tq !== undefined ? entry.M_tq : 0,
+                    D_tq: entry.D_tq !== undefined ? entry.D_tq : 0,
+                };
+            });
+
             console.log("hi");
             let totalSpend = 0;
             let totalRevenue = 0;
@@ -638,8 +694,9 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                     totalFbleads += eachData.fbLeads;
                     totalImpressions += eachData.impressions;
                 }) : null;
-            const filteredData = mainData && mainData.length > 0 ?
-                mainData.map((eachData) => {
+
+            const filteredData = mergedData && mergedData.length > 0 ?
+            mergedData.map((eachData) => {
                     const Revenue = eachData.estimated_revenue !== undefined ? (eachData.estimated_revenue) : 0;
                     const profit = Math.round((Revenue - eachData.spend) * 100) / 100;
                     const margin = Revenue !== 0 ? `${Math.round((((Revenue - eachData.spend) / eachData.estimated_revenue) * 100) * 100) / 100}%` : '0%'
@@ -698,7 +755,8 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                             actions: '...',
                             from: "",
                             profitloss: "",
-                            // compaignid: eachData.campaign_id,
+                            M_tq: parseFloat(eachData.M_tq).toFixed(2),
+                            D_tq: parseFloat(eachData.D_tq).toFixed(2), 
                         }
                     )
                 }) : null;
@@ -726,7 +784,17 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                         fbclicks: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
                         fblinkclicks: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0).toFixed(2)),
                         impressions: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
-                        ctr: parseFloat((fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
+                        ctr: parseFloat((fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)),
+                        M_tq: (function() {
+                            const nonZero = fullData.filter(d => parseFloat(d.M_tq) > 0);
+                            const total = nonZero.reduce((acc, d) => acc + parseFloat(d.M_tq), 0);
+                            return (total / nonZero.length || 0).toFixed(2);
+                          })(),
+                          D_tq: (function() {
+                            const nonZero = fullData.filter(d => parseFloat(d.D_tq) > 0);
+                            const total = nonZero.reduce((acc, d) => acc + parseFloat(d.D_tq), 0);
+                            return (total / nonZero.length || 0).toFixed(2);
+                          })(),    
                     }
                 ]
             );
@@ -996,7 +1064,7 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                                     </div>
                                 </div>
                             ) : dailyData?.filter((each) => {
-                                const normalizedCampaign = each.campaignname.trim().toLowerCase();
+                                const normalizedCampaign = (each?.campaignname || "").trim().toLowerCase();
                                 const normalizedInput = inputValue.trim().toLowerCase();
                                 return (
                                     normalizedCampaign.startsWith(normalizedInput) ||
@@ -1047,12 +1115,12 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                                                 title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
                                                 mouseEnterDelay={0} // Tooltip appears after 1 second
                                             >
-                                                <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#C7F39A" }}/>
+                                                <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#91C25F" }}/>
                                             </Tooltip>
                                         </Col> */}
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                             <Tooltip title="Export to CSV">
-                                                <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={() => onBtExport(gridRef1, "Daily")} />
+                                                <Button type="primary" style={{ backgroundColor: '#91C25F', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={() => onBtExport(gridRef1, "Daily")} />
                                             </Tooltip>
                                         </Col>
                                     </Row>
@@ -1140,6 +1208,21 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                                                 }
                                             });
 
+                                            // Step 1: Group rows by adname
+                                            // const groupedTQMap = new Map();
+
+                                            // filteredData.forEach((row) => {
+                                            // if (!groupedTQMap.has(row.adname)) {
+                                            //     groupedTQMap.set(row.adname, 0);
+                                            // }
+                                            // const currentTQ = groupedTQMap.get(row.adname);
+                                            // groupedTQMap.set(row.adname, currentTQ + (isNaN(row.tq) ? 0 : Number(row.tq)));
+                                            // });
+
+                                            // Step 2: Compute average of grouped totals
+                                            // const totalGroupedSum = Array.from(groupedTQMap.values()).reduce((acc, val) => acc + val, 0);
+                                            // const averageGroupedTQ = groupedTQMap.size > 0 ? (totalGroupedSum / groupedTQMap.size).toFixed(2) : "0.00";
+
                                             const updatedFooter = [
                                                 {
                                                     // [`${newtime}Date`]: 'Totals',
@@ -1160,7 +1243,18 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                                                     fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
                                                     fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
                                                     impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
-                                                    ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2))
+                                                    ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2)),
+                                                    // tq: averageGroupedTQ,
+                                                    M_tq: (() => {
+                                                        const nonZero = filteredData.filter(d => parseFloat(d?.M_tq) > 0);
+                                                        const total = nonZero.reduce((acc, d) => acc + parseFloat(d.M_tq || 0), 0);
+                                                        return parseFloat((total / (nonZero.length || 1)).toFixed(2));
+                                                    })(),
+                                                    D_tq: (() => {
+                                                        const nonZero = filteredData.filter(d => parseFloat(d?.D_tq) > 0);
+                                                        const total = nonZero.reduce((acc, d) => acc + parseFloat(d.D_tq || 0), 0);
+                                                        return parseFloat((total / (nonZero.length || 1)).toFixed(2));
+                                                    })(),
                                                 },
                                             ];
 

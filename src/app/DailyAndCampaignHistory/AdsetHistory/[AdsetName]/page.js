@@ -12,7 +12,7 @@ import 'ag-grid-community/styles/ag-theme-alpine.css';
 import {useTokenContext} from '../../../components/parent'
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
-import { Spin, Row, Col, Select, Input, Button } from 'antd';
+import { Spin, Row, Col, Select, Input, Button, Skeleton } from 'antd';
 import { ReloadOutlined } from '@ant-design/icons';
 Chart.register(...registerables);
 import debounce from 'lodash.debounce';
@@ -304,6 +304,9 @@ export default function AdsetNameAndAccount({params}){
     };
 
     const columnStructure = [
+      "M_tq",
+      "D_tq",
+      "adname",
       "date_n",
       "date_f",
       "hour_n",
@@ -481,6 +484,7 @@ export default function AdsetNameAndAccount({params}){
                     date_f : eachData[specifiedTimeZone],
                     date_n : eachData[specifiedTimeZone],
                     adsetname: eachData.adsetName,
+                    adname: "",
                     spend:(eachData.spend).toString(),
                     revenue: mainRvenue,
                     profit: profit.toString(),
@@ -501,8 +505,9 @@ export default function AdsetNameAndAccount({params}){
                     fmargin: fMargin,
                     ctr: ctr,
                     adsetId: eachData.adset_id,
-                    campaignId: eachData.campaign_id
-
+                    campaignId: eachData.campaign_id,
+                    M_tq: "",
+                    D_tq: "",
                 }
             )
         })
@@ -545,7 +550,13 @@ export default function AdsetNameAndAccount({params}){
               cpclinkclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks), 0) / filteredData?.length,
               fblinkclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0),
               impressions: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0),
-              ctr: `${(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)}%`
+              ctr: `${(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)}%`,
+            //   tq: filteredData?.length
+            //   ? Math.round(
+            //       filteredData.reduce((acc, curr) =>
+            //           acc + (curr.tq !== undefined && !isNaN(curr.tq) ? Number(curr.tq) : 0), 0
+            //   ) * 100) / 100
+            //   : 0,
           }
       ]);
     },[filteredData])
@@ -708,6 +719,37 @@ export default function AdsetNameAndAccount({params}){
     });
 
     const columnDefsObject = {
+        M_tq: {
+            headerName: 'M_TQ',
+            field: 'M_tq',
+            // aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },             
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            // aggFunc: liveSpender,
+            hide: true,
+        },
+          D_tq: {
+            headerName: 'D_TQ',
+            field: 'D_tq',
+            // aggFunc: 'sum',
+            // valueFormatter: currencyFormatter, 
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            // aggFunc: liveSpender,
+            hide: true,
+        }, 
       campaignname : {headerName:'CampaignName', field:'campaignname',
           // rowGroup: true,
           // filter: true,
@@ -746,6 +788,28 @@ export default function AdsetNameAndAccount({params}){
       // pinned: 'left',
       // enableRowGroup: true,
       // autoHeight: true, 
+      },
+      adname : { headerName: 'Ad-Name', field: 'adname',
+        // resizeble: true,
+        // sortable: true,
+        width: 300,
+        cellStyle: { whiteSpace: "normal", lineHeight: "1.5" }, // Enables text wrapping
+        autoHeight: true,
+        suppressMenu: true,
+        menuTabs: [],
+        headerClass: 'hide-menu',
+        cellRenderer: (params) => {
+          if (params.value && params.value.includes("Copied!")) {
+              return (
+                  <span>
+                      {params.value.replace("Copied!", "")}
+                      <span style={{ color: "green", fontWeight: "bold" }}>Copied!</span>
+                  </span>
+              );
+          }
+          return params.value;
+        },
+        hide: true, 
       },
       date : { headerName: 'Date', field: 'date', width: 160, sort: 'desc',
       comparator: (valueA, valueB) => {
@@ -1167,7 +1231,12 @@ export default function AdsetNameAndAccount({params}){
                     
             </Col>
             <Col style={{ height: '400px', marginBottom: '10px' }}> {/* Container with fixed height */}
-              {chartData.dates.length === 0 ? (<div style={{width:'100%', height:'100%', display:'flex', justifyContent:'center', alignItems:'center'}}><Spin size="large" /></div>):
+              {chartData.dates.length === 0 ? (<div style={{width:'100%', height:'100%', display:'flex', justifyContent:'center', alignItems:'center'}}>
+                {/* <Spin size="large" /> */}
+                <div style={{ padding: '24px' }}>
+                    <Skeleton active paragraph={{ rows: 20 }} />
+                </div>
+                </div>):
                 (
                     <Line
                     data={{
@@ -1388,7 +1457,7 @@ export default function AdsetNameAndAccount({params}){
                     <Button 
                         type="default" 
                         icon={<ReloadOutlined  className='black-icon'/>} 
-                        style={{ height: "30px", marginLeft: "10px", backgroundColor: '#C7F39A', border: 'none' }} 
+                        style={{ height: "30px", marginLeft: "10px", backgroundColor: '#91C25F', border: 'none' }} 
                         onClick={handleReload}  // Call refresh function when clicked
                     />
                 </Col>
@@ -1527,6 +1596,12 @@ export default function AdsetNameAndAccount({params}){
                                           filteredData.reduce((acc, curr) => acc + parseFloat(curr.impressions || 0), 0)) *
                                       100
                                   ).toFixed(2)}%`,
+                                //   tq: parseFloat(
+                                //     filteredData.reduce((acc, curr) => {
+                                //       const tqValue = Number(curr?.tq);
+                                //       return acc + (isNaN(tqValue) ? 0 : tqValue);
+                                //     }, 0).toFixed(2)
+                                // ),
                               },
                           ];
 

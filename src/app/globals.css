@@ -461,11 +461,11 @@ body {
 
 /*  New Css  */
 :where(.css-dev-only-do-not-override-f7vrd6).ant-menu-light .ant-menu-item-selected{
-  background-color: #C7F39A !important;
+  background-color: #91C25F !important;
   
 }
 :where(.css-f7vrd6).ant-menu-light .ant-menu-item-selected{
-  background-color: #C7F39A !important;
+  background-color: #91C25F !important;
 }
 
 :where(.css-dev-only-do-not-override-f7vrd6).ant-btn-primary {
@@ -623,7 +623,7 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 
 /* Dark mode styles */
 .dark-mode {
-  background-color: #333; /* gray-700 from Tailwind */
+  background-color: #37474F; /* gray-700 from Tailwind */
 }
 
 /* General icon styles */
@@ -904,9 +904,14 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 .dark-mode .Badge{
   color: black;
 }
- .ag-header {
-  background-color: #c7f39a57 !important;
+
+.ag-header {
+  background-color: #E5E9EF !important;
 }
+.dark-mode .ag-header {
+  background-color: #11111057 !important;
+}
+
 .dark-mode .notifiview{
   color: #fff;
   background-color: #333333;
@@ -1009,7 +1014,7 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 .ant-picker-cell.ant-picker-cell-in-view.ant-picker-cell-range-start,
 .ant-picker-cell.ant-picker-cell-in-view.ant-picker-cell-range-end,
 .ant-picker-cell.ant-picker-cell-in-view.ant-picker-cell-selected {
-  background-color: #C7F39A !important; /* your highlight color */
+  background-color: #91C25F !important; /* your highlight color */
   color: #000 !important;              /* text color on top */
 }
 
@@ -1166,7 +1171,7 @@ body.dark-mode .black-icon.anticon svg {
   color: #000000 !important;
 }
 body.dark-mode .black-icon-info.anticon svg {
-  color: #C7F39A !important;
+  color: #91C25F !important;
 }
 body.dark-mode .black-icon-active.anticon svg {
   color: green !important;
@@ -1185,15 +1190,39 @@ body.dark-mode .black-icon-pause-1.anticon svg {
 body.dark-mode .black-icon-comment.anticon svg {
   color: #f5582c !important;
 }
+
+.custom-input-dark {
+  background-color: #5d5b5b !important;  /* Input background */
+  color: #fff !important;                /* Input text color */
+}
 .custom-input-dark::placeholder {
-  color: #ccc;
+  color: #ccc !important;                /* Placeholder color */
 }
+.custom-input-dark .ant-input::placeholder {
+  color: #fff !important;  /* White placeholder */
+}
+
 .custom-input-light::placeholder {
-  color: #888;
+  color: #888 !important;
+  /* border: none !important; */
 }
+/* .custom-input-light .ant-input {
+  border: 1px solid #37474F !important;
+  border-radius: 6px !important;
+  background-color: white !important;
+  color: #555 !important;
+  box-shadow: none !important;
+  outline: none !important;  
+} */
+.custom-input-light .ant-input:focus {
+  border-color: #37474F !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
 /* Green text for active tab */
 .custom-tabs.dark-mode-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
-  color: #C7F39A !important;
+  color: #91C25F !important;
 }
 
 .custom-tabs.light-mode-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
@@ -1210,7 +1239,7 @@ body.dark-mode .black-icon-comment.anticon svg {
 
 /* Ink bar */
 .custom-tabs.dark-mode-tabs .ant-tabs-ink-bar {
-  background-color: #C7F39A !important;
+  background-color: #91C25F !important;
 }
 .custom-tabs.light-mode-tabs .ant-tabs-ink-bar {
   background-color: #52c41a !important;
@@ -1264,14 +1293,14 @@ body.dark-mode .black-icon-comment.anticon svg {
 
 /* ========== TABLE HEADERS ========== */
 .custom-dark-table.dark-mode-pagination .ant-table-thead > tr > th {
-  background-color: #4e5f3f !important; /* Olive green for dark mode */
+  background-color: #000000 !important; /* Olive green for dark mode */
   color: white !important;
   font-weight: 600;
   border-bottom: 1px solid #4e5f3f;
 }
 
 .custom-dark-table.light-mode-pagination .ant-table-thead > tr > th {
-  background-color: #edffd9 !important; /* Light green for light mode */
+  background-color: #E5E9EF !important; /* Light green for light mode */
   color: black !important;
   font-weight: 600;
   border-bottom: 1px solid #ccc;
@@ -1319,8 +1348,8 @@ body.dark-mode .black-icon-comment.anticon svg {
 }
 
 .custom-dark-table.dark-mode-pagination .ant-pagination-item-active {
-  background-color: #C7F39A;
-  border-color: #C7F39A;
+  background-color: #91C25F;
+  border-color: #91C25F;
 }
 
 .custom-dark-table.dark-mode-pagination .ant-pagination-item-active a {
@@ -1328,8 +1357,8 @@ body.dark-mode .black-icon-comment.anticon svg {
 }
 
 .custom-dark-table.dark-mode-pagination .ant-pagination-item:hover {
-  border-color: #C7F39A;
-  color: #C7F39A;
+  border-color: #91C25F;
+  color: #91C25F;
 }
 
 .custom-dark-table.dark-mode-pagination .ant-table-tbody > tr > td {
@@ -1359,8 +1388,8 @@ body.dark-mode .black-icon-comment.anticon svg {
 }
 
 .custom-dark-table.light-mode-pagination .ant-pagination-item-active {
-  background-color: #C7F39A;
-  border-color: #C7F39A;
+  background-color: #91C25F;
+  border-color: #91C25F;
 }
 
 .custom-dark-table.light-mode-pagination .ant-pagination-item-active a {
@@ -1368,8 +1397,8 @@ body.dark-mode .black-icon-comment.anticon svg {
 }
 
 .custom-dark-table.light-mode-pagination .ant-pagination-item:hover {
-  border-color: #C7F39A;
-  color: #C7F39A;
+  border-color: #91C25F;
+  color: #91C25F;
 }
 
 /* ========== ARROWS AND ELLIPSIS ========== */
@@ -1496,8 +1525,8 @@ body.dark-mode .black-icon-comment.anticon svg {
 /* ✅ OK Button - consistent in both themes */
 .custom-confirm-dark .ant-btn-primary,
 .custom-confirm-light .ant-btn-primary {
-  background-color: #C7F39A !important;
-  border-color: #C7F39A !important;
+  background-color: #91C25F !important;
+  border-color: #91C25F !important;
   color: black !important;
   font-weight: 600;
 }
@@ -1507,8 +1536,8 @@ body.dark-mode .black-icon-comment.anticon svg {
 .custom-confirm-light .ant-btn-primary:hover,
 .custom-confirm-dark .ant-btn-primary:focus,
 .custom-confirm-light .ant-btn-primary:focus {
-  background-color: #C7F39A !important;
-  border-color: #C7F39A !important;
+  background-color: #91C25F !important;
+  border-color: #91C25F !important;
   color: black !important;
 }
 
@@ -1520,8 +1549,8 @@ body.dark-mode .black-icon-comment.anticon svg {
 }
 
 .custom-confirm-dark .ant-btn-default:hover {
-  color: #C7F39A !important;
-  border-color: #C7F39A !important;
+  color: #91C25F !important;
+  border-color: #91C25F !important;
 }
 
 /* 🌓 Dark theme modal background + text */
@@ -1614,7 +1643,7 @@ body.dark-mode .black-icon-comment.anticon svg {
 .dark-mode-pagination .ant-select-item-option-active,
 .dark-mode-pagination .ant-select-item-option-selected {
   background-color: #333 !important;
-  color: #C7F39A !important; /* Optional highlight text color */
+  color: #91C25F !important; /* Optional highlight text color */
 }
 
 /* Search input inside dropdown (if any) */
@@ -1765,14 +1794,14 @@ body.dark-mode .black-icon-comment.anticon svg {
 
 /* Force checkbox checked background and border */
 .ant-checkbox-checked .ant-checkbox-inner {
-  background-color: #C7F39A !important;
-  border-color: #C7F39A !important;
+  background-color: #91C25F !important;
+  border-color: #91C25F !important;
 }
 
 /* Optional: keep border color on hover/focus */
 .ant-checkbox-wrapper:hover .ant-checkbox-inner,
 .ant-checkbox-input:focus + .ant-checkbox-inner {
-  border-color: #C7F39A !important;
+  border-color: #91C25F !important;
 }
 
 /* Optional: adjust checkmark color (white for contrast) */
@@ -1993,3 +2022,25 @@ body.dark-mode .black-icon-comment.anticon svg {
   white-space: nowrap;
   flex-shrink: 0;
 }
+
+
+/* Compact Upload item - remove right padding/spacing */
+.ant-upload-list-item {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-start !important; /* 👈 prevent space between */
+  padding-right: 0 !important;
+}
+
+/* Optional: shrink width of whole item container */
+.ant-upload-list-item-container {
+  width: auto !important;
+}
+
+/* Tighten up delete button space */
+.ant-upload-list-item-actions {
+  margin-left: 4px !important;
+  margin-right: 0 !important;
+}
+

@@ -120,6 +120,12 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                     cpclinkclicks: parseFloat((memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks), 0) / memorizedDailyData?.length).toFixed(2)),
                     fblinkclicks: parseFloat(memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0).toFixed(2)),
                     impressions: parseFloat(memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
+                    tq: parseFloat(
+                        memorizedDailyData?.reduce((acc, curr) => {
+                          const tqValue = Number(curr?.tq);
+                          return acc + (isNaN(tqValue) ? 0 : tqValue);
+                        }, 0).toFixed(2)
+                    ),
                     ctr: parseFloat((memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
                 }
             ]
@@ -165,7 +171,7 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
     };
 
     const autoGroupColumnDef = {
-        headerName: 'AdsetName',
+        headerName: 'Adset name',
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting
@@ -610,7 +616,7 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                                     <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
                                         Cancel
                                     </Button>
-                                    <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#C7F39A"}}>
+                                    <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#91C25F"}}>
                                         Ok
                                     </Button>
                                     </div>
@@ -669,6 +675,7 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                 }) : null;
             const filteredData = mainData && mainData.length > 0 ?
                 mainData.map((eachData) => {
+                    // console.log('TQ in row:', eachData.tq, typeof eachData.tq);
                     const Revenue = eachData.estimated_revenue !== undefined ? (eachData.estimated_revenue) : 0;
                     const profit = Math.round((Revenue - eachData.spend) * 100) / 100;
                     const margin = Revenue !== 0 ? `${Math.round((((Revenue - eachData.spend) / eachData.estimated_revenue) * 100) * 100) / 100}%` : '0%'
@@ -727,6 +734,8 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                             actions: '...',
                             from: "",
                             profitloss: "",
+                            M_tq: "",
+                            D_tq: "",
                             // compaignid: eachData.campaign_id,
                         }
                     )
@@ -755,7 +764,14 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                         fbclicks: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
                         fblinkclicks: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0).toFixed(2)),
                         impressions: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
-                        ctr: parseFloat((fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
+                        // tq: parseFloat(fullData?.reduce((acc, curr) => acc + parseFloat(curr.tq), 0).toFixed(2)),
+                        ctr: parseFloat((fullData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / fullData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)),
+                        tq: fullData?.length
+                        ? Math.round(
+                            fullData.reduce((acc, curr) =>
+                                acc + (curr.tq !== undefined && !isNaN(curr.tq) ? Number(curr.tq) : 0), 0
+                        ) * 100) / 100
+                        : 0,
                     }
                 ]
             );
@@ -1093,12 +1109,12 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                                                 title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
                                                 mouseEnterDelay={0} // Tooltip appears after 1 second
                                             >
-                                                <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#C7F39A" }}/>
+                                                <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#91C25F" }}/>
                                             </Tooltip>
                                         </Col> */}
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                             <Tooltip title="Export to CSV">
-                                                <Button type="primary" style={{ backgroundColor: '#C7F39A', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={() => onBtExport(gridRef1, "Daily")} />
+                                                <Button type="primary" style={{ backgroundColor: '#91C25F', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={() => onBtExport(gridRef1, "Daily")} />
                                             </Tooltip>
                                         </Col>
                                     </Row>
@@ -1210,6 +1226,12 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                                                     fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
                                                     fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
                                                     impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
+                                                    tq: parseFloat(
+                                                        filteredData.reduce((acc, curr) => {
+                                                          const tqValue = Number(curr?.tq);
+                                                          return acc + (isNaN(tqValue) ? 0 : tqValue);
+                                                        }, 0).toFixed(2)
+                                                    ),
                                                     ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2))
                                                 },
                                             ];
