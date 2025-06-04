@@ -3612,7 +3612,7 @@ const Dashboard = () => {
                                                     label: 'Spend',
                                                     data: chartDataByDate.spendByDate,
                                                     borderColor: 'rgba(44, 144, 192, 1)',
-                                                    backgroundColor: 'rgba(44, 144, 192, 0.2)',
+                                                    // backgroundColor: 'rgba(44, 144, 192, 0.2)',
                                                     fill: true,
                                                     hidden: true,
                                                     tension: 0.3,
@@ -3625,7 +3625,7 @@ const Dashboard = () => {
                                                     label: 'Revenue',
                                                     data: chartDataByDate.revenueByDate,
                                                     borderColor: 'rgba(99, 200, 99, 1)',
-                                                    backgroundColor: 'rgba(99, 200, 99, 0.2)',
+                                                    // backgroundColor: 'rgba(99, 200, 99, 0.2)',
                                                     fill: true,
                                                     hidden: true,
                                                     tension: 0.3,
@@ -3638,7 +3638,7 @@ const Dashboard = () => {
                                                     label: 'RPC',
                                                     data: chartDataByDate.rpcByDate,
                                                     borderColor: 'rgba(255, 99, 132, 1)',
-                                                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                                    // backgroundColor: 'rgba(255, 99, 132, 0.2)',
                                                     fill: true,
                                                     hidden: true,
                                                     tension: 0.3,
@@ -3651,7 +3651,7 @@ const Dashboard = () => {
                                                     label: 'CPL',
                                                     data: chartDataByDate.cplByDate,
                                                     borderColor: 'rgba(255, 159, 64, 1)',
-                                                    backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                                                    // backgroundColor: 'rgba(255, 159, 64, 0.2)',
                                                     fill: true,
                                                     hidden: true,
                                                     tension: 0.3,
@@ -3664,7 +3664,7 @@ const Dashboard = () => {
                                                     label: 'Profit',
                                                     data: chartDataByDate.profitByDate,
                                                     borderColor: 'rgba(255, 206, 86, 1)',
-                                                    backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                                                    // backgroundColor: 'rgba(255, 206, 86, 0.2)',
                                                     fill: true,
                                                     tension: 0.3,
                                                     pointRadius: 5,
@@ -3676,7 +3676,7 @@ const Dashboard = () => {
                                                     label: 'Margin',
                                                     data: chartDataByDate.marginByDate,
                                                     borderColor: 'rgba(153, 102, 255, 1)',
-                                                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                                                    // backgroundColor: 'rgba(153, 102, 255, 0.2)',
                                                     fill: true,
                                                     hidden: true,
                                                     tension: 0.3,
@@ -3770,8 +3770,8 @@ const Dashboard = () => {
                                                     label: 'Spend',
                                                     data: chartData?.spend,
                                                     borderColor: 'rgba(44, 144, 192, 1)',
-                                                    backgroundColor: 'rgba(44, 144, 192, 0.2)',
-                                                    fill: true,
+                                                    // backgroundColor: 'rgba(44, 144, 192, 0.2)',
+                                                    // fill: true,
                                                     hidden: true,
                                                     tension: 0.3,
                                                     pointRadius: 5,
@@ -3783,8 +3783,8 @@ const Dashboard = () => {
                                                     label: 'Revenue',
                                                     data: chartData?.revenue,
                                                     borderColor: 'rgba(99, 200, 99, 1)',
-                                                    backgroundColor: 'rgba(99, 200, 99, 0.2)',
-                                                    fill: true,
+                                                    // backgroundColor: 'rgba(99, 200, 99, 0.2)',
+                                                    // fill: true,
                                                     hidden: true,
                                                     tension: 0.3,
                                                     pointRadius: 5,
@@ -3796,8 +3796,8 @@ const Dashboard = () => {
                                                     label: 'RPC',
                                                     data: chartData.rpc,
                                                     borderColor: 'rgba(255, 99, 132, 1)',
-                                                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                                                    fill: true,
+                                                    // backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                                    // fill: true,
                                                     hidden: true,
                                                     tension: 0.3,
                                                     pointRadius: 5,
@@ -3809,8 +3809,8 @@ const Dashboard = () => {
                                                     label: 'CPL',
                                                     data: chartData?.cpl,
                                                     borderColor: 'rgba(255, 159, 64, 1)',
-                                                    backgroundColor: 'rgba(255, 159, 64, 0.2)',
-                                                    fill: true,
+                                                    // backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                                                    // fill: true,
                                                     hidden: true,
                                                     tension: 0.3,
                                                     pointRadius: 5,
@@ -3822,8 +3822,8 @@ const Dashboard = () => {
                                                     label: 'Profit',
                                                     data: chartData?.profit,
                                                     borderColor: 'rgba(255, 206, 86, 1)',
-                                                    backgroundColor: 'rgba(255, 206, 86, 0.2)',
-                                                    fill: true,
+                                                    // backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                                                    // fill: true,
                                                     tension: 0.3,
                                                     pointRadius: 5,
                                                     pointHoverRadius: 8,
@@ -3834,8 +3834,8 @@ const Dashboard = () => {
                                                     label: 'Margin',
                                                     data: chartData?.margin,
                                                     borderColor: 'rgba(153, 102, 255, 1)',
-                                                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                                                    fill: true,
+                                                    // backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                                                    // fill: true,
                                                     hidden: true,
                                                     tension: 0.3,
                                                     pointRadius: 5,
@@ -3849,59 +3849,104 @@ const Dashboard = () => {
                                                 responsive: true,
                                                 maintainAspectRatio: false,
                                                 scales: {
-                                                x: {
+                                                  x: {
                                                     ticks: {
-                                                    padding: 30,
-                                                    color: (context) => {
+                                                      padding: 30,
+                                                      color: (context) => {
                                                         const label = chartData?.dates[context.index];
                                                         return getColorForValue(label);
-                                                    },
+                                                      },
                                                     },
                                                     grid: {
-                                                    color: theme === "dark" ? '#444' : '#e0e0e0',
+                                                      color: theme === "dark" ? '#444' : '#e0e0e0',
                                                     },
-                                                },
-                                                y: {
+                                                  },
+                                                  y: {
                                                     beginAtZero: true,
                                                     ticks: {
-                                                    callback: function (value) {
+                                                      callback: function (value) {
                                                         return value.toFixed(2);
-                                                    },
-                                                    color: theme === "dark" ? '#fff' : '#000',
+                                                      },
+                                                      color: theme === "dark" ? '#fff' : '#000',
                                                     },
                                                     grid: {
-                                                    color: theme === "dark" ? '#444' : '#e0e0e0',
+                                                      color: theme === "dark" ? '#444' : '#e0e0e0',
                                                     },
-                                                },
+                                                  },
                                                 },
                                                 plugins: {
-                                                legend: {
-                                                    labels: {
-                                                    color: theme === "dark" ? '#fff' : '#000',
-                                                    },
-                                                },
-                                                tooltip: {
-                                                    mode: 'index', // Ensure all datasets at this x-axis point are shown
-                                                    intersect: true, // Show tooltip only when hovering directly over a bubble/point
+                                                    legend: {
+                                                        position: 'top',
+                                                        labels: {
+                                                          usePointStyle: true,
+                                                          color: '#fff',
+                                                          font: {
+                                                            size: 13,
+                                                            weight: 'normal',
+                                                          },
+                                                          generateLabels: (chart) => {
+                                                            const colors = {
+                                                              'Spend': 'rgba(44, 144, 192, 1)',
+                                                              'Revenue': 'rgba(99, 200, 99, 1)',
+                                                              'RPC': 'rgba(255, 99, 132, 1)',
+                                                              'CPL': 'rgba(255, 159, 64, 1)',
+                                                              'Profit': 'rgba(255, 206, 86, 1)',
+                                                              'Margin': 'rgba(153, 102, 255, 1)',
+                                                            };
+                                                      
+                                                            return chart.data.datasets.map((dataset, i) => {
+                                                              const isVisible = chart.isDatasetVisible(i);
+                                                      
+                                                              return {
+                                                                text: dataset.label,
+                                                                fillStyle: colors[dataset.label],
+                                                                strokeStyle: colors[dataset.label],
+                                                                pointStyle: 'rectRounded',
+                                                                hidden: !isVisible,
+                                                                index: i,
+                                                                // ✅ Override any internal strikethrough
+                                                                font: {
+                                                                  style: 'normal',
+                                                                  lineHeight: 1.2,
+                                                                  size: 13,
+                                                                  weight: 'normal',
+                                                                  family: 'sans-serif',
+                                                                }
+                                                              };
+                                                            });
+                                                          },
+                                                        },
+                                                        onClick: (e, legendItem, legend) => {
+                                                          const chart = legend.chart;
+                                                          const index = legendItem.index;
+                                                          const meta = chart.getDatasetMeta(index);
+                                                          meta.hidden = meta.hidden === null ? !chart.data.datasets[index].hidden : null;
+                                                          chart.update();
+                                                        },
+                                                      },
+                                                      
+                                                      
+                                                  tooltip: {
+                                                    mode: 'index',
+                                                    intersect: true,
                                                     callbacks: {
-                                                    label: function (tooltipItem) {
+                                                      label: function (tooltipItem) {
                                                         const index = tooltipItem.dataIndex;
                                                         const dataset = tooltipItem.dataset;
                                                         const value = dataset.data[index];
                                                         const datasetLabel = dataset.label || '';
-
-                                                        // Return label with value and date
                                                         return `${datasetLabel}: ${value} (Date: ${chartData?.newDates[index]})`;
+                                                      },
                                                     },
-                                                    },
-                                                    displayColors: true, // Enable color box for each dataset
-                                                    boxWidth: 15, // Adjust the width of the color box
-                                                    boxHeight: 15, // Adjust the height of the color box
-                                                },
-                                                },
-                                            }}
-                                            height={350}
-                                        />
+                                                    displayColors: true,
+                                                    boxWidth: 15,
+                                                    boxHeight: 15,
+                                                  },
+                                                }
+                                              }}
+                                              height={350}
+                                              />
+                                              
                                     </Row>
                                 </div>
                             </Carousel>
