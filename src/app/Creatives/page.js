@@ -1263,6 +1263,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns, network, Account_Num
                             style={{ width: '100%', border: '1px solid #37474F', borderRadius: '6px' }}
                             onChange={handleKeyChange}
                             value={selectedKey}
+                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
                         >
                             {options.length > 0 ? (
                                 options.map(option => (
@@ -1285,7 +1286,8 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns, network, Account_Num
                         disabled={!selectedKey}
                         value={selectedValue}
                         selectedAccountNumber={selectedAccountNumber} 
-                        optionLabelProp="value"                         
+                        optionLabelProp="value"
+                        dropdownClassName={theme === 'dark' && "custom-dropdown"}                        
                     >
                         {valueOptions.length > 0 ? (
                             valueOptions.map(option => (
@@ -1350,6 +1352,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns, network, Account_Num
                             format="YYYY-MM-DD"
                             allowClear={true}
                             style={{ width: '100%', border: '1px solid #37474F' }}
+                            dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}  
                         />
                         
                     </ConfigProvider>                       

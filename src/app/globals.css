@@ -2044,3 +2044,16 @@ body.dark-mode .black-icon-comment.anticon svg {
   margin-right: 0 !important;
 }
 
+.dark-dropdown {
+  background-color: #2e2e2e !important;
+}
+.dark-dropdown .ant-select-item {
+  color: #fff !important;
+}
+.dark-dropdown .ant-select-item-option-active {
+  background-color: #000000 !important;
+}
+
+.font-green {
+  color: green;
+}
