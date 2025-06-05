@@ -1514,7 +1514,8 @@ const MyTablePage = () => {
             sortable: true,
             aggFunc: liveSpender,
             cellClassRules: {
-                'font-red': p => p.value < 0
+                'font-red': p => p.value < 0,
+                'font-green': params => params.value > 0,
             },
             filter: "agNumberColumnFilter",
             valueFormatter: currencyFormatter,
@@ -2120,7 +2121,8 @@ const MyTablePage = () => {
             aggFunc: liveSpender,
             sortable: true,
             cellClassRules: {
-                'font-red': p => p.value < 0 // Conditional formatting for negative profit
+                'font-red': p => p.value < 0, // Conditional formatting for negative profit,
+                'font-green': params => params.value > 0,
             },
             filter: "agNumberColumnFilter",
             valueFormatter: currencyFormatter,
@@ -3674,7 +3676,8 @@ const MyTablePage = () => {
             sortable: true,
             aggFunc: liveSpender,
             cellClassRules: {
-                'font-red': p => p.value < 0
+                'font-red': p => p.value < 0,
+                'font-green': params => params.value > 0,
             },
             filter: "agNumberColumnFilter",
             valueFormatter: currencyFormatter,
@@ -4311,7 +4314,8 @@ const MyTablePage = () => {
             sortable: true,
             aggFunc: liveSpender,
             cellClassRules: {
-                'font-red': p => p.value < 0
+                'font-red': p => p.value < 0,
+                'font-green': params => params.value > 0,
             },
             filter: "agNumberColumnFilter",
             valueFormatter: currencyFormatter,
@@ -4946,7 +4950,8 @@ const MyTablePage = () => {
             sortable: true,
             aggFunc: liveSpender,
             cellClassRules: {
-                'font-red': p => p.value < 0
+                'font-red': p => p.value < 0,
+                'font-green': params => params.value > 0,
             },
             filter: "agNumberColumnFilter",
             valueFormatter: currencyFormatter,
@@ -5561,7 +5566,8 @@ const MyTablePage = () => {
             aggFunc: liveSpender,
             sortable: true,
             cellClassRules: {
-                'font-red': p => p.value < 0 // Conditional formatting for negative profit
+                'font-red': p => p.value < 0,
+                'font-green': params => params.value > 0, // Conditional formatting for negative profit
             },
             filter: "agNumberColumnFilter",
             valueFormatter: currencyFormatter,
@@ -6046,7 +6052,8 @@ const MyTablePage = () => {
             aggFunc: liveSpender,
             sortable: true,
             cellClassRules: {
-                'font-red': p => p.value < 0 // Conditional formatting for negative profit
+                'font-red': p => p.value < 0,
+                'font-green': params => params.value > 0, // Conditional formatting for negative profit
             },
             filter: "agNumberColumnFilter",
             valueFormatter: currencyFormatter,
@@ -6530,7 +6537,8 @@ const MyTablePage = () => {
             aggFunc: liveSpender,
             sortable: true,
             cellClassRules: {
-                'font-red': p => p.value < 0 // Conditional formatting for negative profit
+                'font-red': p => p.value < 0,
+                'font-green': params => params.value > 0, // Conditional formatting for negative profit
             },
             filter: "agNumberColumnFilter",
             valueFormatter: currencyFormatter,
@@ -6993,7 +7001,8 @@ const MyTablePage = () => {
         },
         profit: {
             headerName: 'Profit', field: 'profit', minWidth: 105, aggFunc: spender, cellClassRules: {
-                'font-red': p => p.value < 0
+                'font-red': p => p.value < 0,
+                'font-green': params => params.value > 0,
             }, sortable: true, headerTooltip: 'Profit = Revenue - Spend', filter: 'agNumberColumnFilter',
             valueFormatter: currencyFormatter, comparator: numberComparator,
             suppressMenu: true,
@@ -7529,7 +7538,8 @@ const MyTablePage = () => {
             aggFunc: liveSpender,
             sortable: true,
             cellClassRules: {
-                'font-red': p => p.value < 0 // Conditional formatting for negative profit
+                'font-red': p => p.value < 0,
+                'font-green': params => params.value > 0, // Conditional formatting for negative profit
             },
             filter: "agNumberColumnFilter",
             valueFormatter: currencyFormatter,

@@ -17,6 +17,15 @@ import { ReloadOutlined } from '@ant-design/icons';
 Chart.register(...registerables);
 import debounce from 'lodash.debounce';
 
+const datasetColorMap = {
+    Spend: 'rgba(75, 192, 192, 1)',
+    Revenue: 'rgba(54, 162, 235, 1)',
+    RPC: 'rgba(255, 99, 132, 1)',
+    CPL: 'rgba(255, 159, 64, 1)',
+    Profit: 'rgba(255, 206, 86, 1)',
+    Margin: 'rgba(153, 102, 255, 1)',
+  };
+
 export default function AdsetNameAndAccount({params}){
     
     const {userdetails} = useTokenContext();
@@ -67,6 +76,30 @@ export default function AdsetNameAndAccount({params}){
         DST: 'DSTDate',
         CEST: 'CESTDate'
     };
+
+    const [hiddenKeys, setHiddenKeys] = useState([
+        'Spend', 'Revenue', 'RPC', 'CPL', 'Margin', // ❌ Only "Profit" shown by default
+      ]);
+    
+      const toggleLegend = (label) => {
+        setHiddenKeys(prev =>
+          prev.includes(label) ? prev.filter(k => k !== label) : [...prev, label]
+        );
+      };
+    
+      const datasets = Object.keys(datasetColorMap).map(label => ({
+        label,
+        data: chartData[label.toLowerCase()],
+        borderColor: datasetColorMap[label],
+        // backgroundColor: datasetColorMap[label].replace('1)', '0.2)'),
+        // fill: true,
+        hidden: hiddenKeys.includes(label),
+        tension: 0.3,
+        pointRadius: 5,
+        pointHoverRadius: 8,
+        pointBackgroundColor: datasetColorMap[label],
+        pointHoverBackgroundColor: datasetColorMap[label],
+      }));
 
     const getMargin = (params) =>{
         if (params.data !== undefined) {
@@ -1012,7 +1045,9 @@ export default function AdsetNameAndAccount({params}){
       },
       profit : { headerName: 'Profit', field: 'profit', width: 100, 
           cellClassRules:{
-          'font-red': p => p.value < 0
+          'font-red': p => p.value < 0,
+          'font-green': params => params.value > 0,
+        
           },
           aggFunc: agFunc,
           valueFormatter: params => params.value ? Math.round(params.value*100)/100 : '',
@@ -1210,6 +1245,11 @@ export default function AdsetNameAndAccount({params}){
         return colorMap[value]; // Return the assigned color
     };
 
+    
+    
+      
+    
+
     const handleReload = () => {
         setLoading(true);
         const functionCall = async()=>{
@@ -1238,147 +1278,105 @@ export default function AdsetNameAndAccount({params}){
                 </div>
                 </div>):
                 (
-                    <Line
-                    data={{
-                      labels: chartData.dates, // X-axis labels
-                      datasets: [
-                        {
-                          label: 'Spend',
-                          data: chartData.spend,
-                          borderColor: 'rgba(75, 192, 192, 1)', // Teal
-                          backgroundColor: 'rgba(75, 192, 192, 0.2)', // Light Teal
-                          fill: true,
-                          hidden: true,
-                          tension: 0.3,
-                          pointRadius: 5,
-                          pointHoverRadius: 8,
-                          pointBackgroundColor: 'rgba(75, 192, 192, 1)',
-                          pointHoverBackgroundColor: 'rgba(75, 192, 192, 1)',
-                        },
-                        {
-                          label: 'Revenue',
-                          data: chartData.revenue,
-                          borderColor: 'rgba(54, 162, 235, 1)', // Blue
-                          backgroundColor: 'rgba(54, 162, 235, 0.2)', // Light Blue
-                          fill: true,
-                          hidden: true,
-                          tension: 0.3,
-                          pointRadius: 5,
-                          pointHoverRadius: 8,
-                          pointBackgroundColor: 'rgba(54, 162, 235, 1)',
-                          pointHoverBackgroundColor: 'rgba(54, 162, 235, 1)',
-                        },
-                        {
-                          label: 'RPC',
-                          data: chartData.rpc,
-                          borderColor: 'rgba(255, 99, 132, 1)', // Red
-                          backgroundColor: 'rgba(255, 99, 132, 0.2)', // Light Red
-                          fill: true,
-                          hidden: true,
-                          tension: 0.3,
-                          pointRadius: 5,
-                          pointHoverRadius: 8,
-                          pointBackgroundColor: 'rgba(255, 99, 132, 1)',
-                          pointHoverBackgroundColor: 'rgba(255, 99, 132, 1)',
-                        },
-                        {
-                          label: 'CPL',
-                          data: chartData.cpl,
-                          borderColor: 'rgba(255, 159, 64, 1)', // Orange
-                          backgroundColor: 'rgba(255, 159, 64, 0.2)', // Light Orange
-                          fill: true,
-                          hidden: true,
-                          tension: 0.3,
-                          pointRadius: 5,
-                          pointHoverRadius: 8,
-                          pointBackgroundColor: 'rgba(255, 159, 64, 1)',
-                          pointHoverBackgroundColor: 'rgba(255, 159, 64, 1)',
-                        },
-                        {
-                          label: 'Profit',
-                          data: chartData.profit,
-                          borderColor: 'rgba(255, 206, 86, 1)', // Yellow
-                          backgroundColor: 'rgba(255, 206, 86, 0.2)', // Light Yellow
-                          fill: true,
-                          tension: 0.3,
-                          pointRadius: 5,
-                          pointHoverRadius: 8,
-                          pointBackgroundColor: 'rgba(255, 206, 86, 1)',
-                          pointHoverBackgroundColor: 'rgba(255, 206, 86, 1)',
-                        },
-                        {
-                          label: 'Margin',
-                          data: chartData.margin,
-                          borderColor: 'rgba(153, 102, 255, 1)', // Purple
-                          backgroundColor: 'rgba(153, 102, 255, 0.2)', // Light Purple
-                          fill: true,
-                          hidden: true,
-                          tension: 0.3,
-                          pointRadius: 5,
-                          pointHoverRadius: 8,
-                          pointBackgroundColor: 'rgba(153, 102, 255, 1)',
-                          pointHoverBackgroundColor: 'rgba(153, 102, 255, 1)',
-                        },
-                      ],
-                    }}
-                    options={{
-                      responsive: true,
-                      maintainAspectRatio: false, // Allow the chart to take the full height of its container
-                      scales: {
-                        x: {
-                        //   ticks: {
-                        //     padding: 30, // Increase padding between labels and the axis
-                        //     color: (context) => {
-                        //       // Dynamically set color for x-axis labels
-                        //       const label = chartData.dates[context.index];
-                        //       return getColorForValue(label); // Add your custom color logic here
-                        //     },
-                        //   },
-                          grid: {
-                            color: theme === "dark" ? '#444' : '#e0e0e0', // Adjust gridline color based on theme
-                          },
-                        },
-                        y: {
-                          beginAtZero: true, // Ensure the y-axis starts at zero
-                          ticks: {
-                            callback: function (value) {
-                              return value.toFixed(2); // Format y-axis values to 2 decimals
-                            },
-                            color: theme === "dark" ? '#e0e0e0':'#050505', // Axis label color based on theme
-                          },
-                          grid: {
-                            color: theme === "dark" ? '#444' : '#e0e0e0', // Adjust gridline color based on theme
-                          },
-                        },
-                      },
-                      plugins: {
-                        legend: {
-                          labels: {
-                            color: theme === "dark" ? '#faf7f7' : '#050505', // Legend text color
-                          },
-                        },
-                        tooltip: {
-                          mode: 'index', // Ensure all datasets at this x-axis point are shown
-                          intersect: true, // Show tooltip only when hovering directly over a point
-                          callbacks: {
-                            label: function (tooltipItem) {
-                              const index = tooltipItem.dataIndex;
-                              const dataset = tooltipItem.dataset;
-                              const value = dataset.data[index];
-                              const datasetLabel = dataset.label || '';
-                  
-                              // Return label with value and date
-                              return `${datasetLabel}: ${value} (Date: ${chartData.dates[index]})`;
-                            },
-                          },
-                          displayColors: true, // Enable color box for each dataset
-                          boxWidth: 15, // Adjust the width of the color box
-                          boxHeight: 15, // Adjust the height of the color box
-                        },
-                      },
-                    }}
-                    height={350} // Set the height of the chart
-                  />
+                    <div>
+                        {/* ✅ Custom Checkbox-Style Legend */}
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '12px', justifyContent:'center' }}>
+                            {Object.keys(datasetColorMap).map(label => {
+                            const isVisible = !hiddenKeys.includes(label);
+                            return (
+                                <div
+                                key={label}
+                                onClick={() => toggleLegend(label)}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    cursor: 'pointer',
+                                    gap: '6px',
+                                    fontSize: '13px',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                }}
+                                >
+                                <div
+                                    style={{
+                                    width: '16px',
+                                    height: '16px',
+                                    borderRadius: '4px',
+                                    backgroundColor: datasetColorMap[label],
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: '#fff',
+                                    fontWeight: 'bold',
+                                    fontSize: '11px',
+                                    }}
+                                >
+                                    {isVisible ? '✔' : ''}
+                                </div>
+                                {label}
+                                </div>
+                            );
+                            })}
+                        </div>
+                        <Row style={{ height: '400px', marginTop: '20px' }}>
+                            <Line
+                            data={{
+                                labels: chartData.dates || [],
+                                datasets,
+                            }}
+                            options={{
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: true,
+                                    displayColors: true,
+                                    boxWidth: 15,
+                                    boxHeight: 15,
+                                    callbacks: {
+                                    label: function (tooltipItem) {
+                                        const index = tooltipItem.dataIndex;
+                                        const dataset = tooltipItem.dataset;
+                                        const value = dataset.data[index];
+                                        const datasetLabel = dataset.label || '';
+                                        return `${datasetLabel}: ${value}`;
+                                    },
+                                    },
+                                },
+                                },
+                                scales: {
+                                x: {
+                                    ticks: {
+                                    padding: 30,
+                                    color: (context) => {
+                                        const index = context.index;
+                                        const label = chartData?.dates?.[index];
+                                        return getColorForValue(label);
+                                    },
+                                    },
+                                    grid: {
+                                    color: theme === 'dark' ? '#444' : '#e0e0e0',
+                                    },
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                    callback: value => value.toFixed(2),
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    },
+                                    grid: {
+                                    color: theme === 'dark' ? '#444' : '#e0e0e0',
+                                    },
+                                },
+                                },
+                            }}
+                            height={350}
+                            />
+                        </Row>
+
+                        
+                    </div>
                   
                 )}
             </Col>
