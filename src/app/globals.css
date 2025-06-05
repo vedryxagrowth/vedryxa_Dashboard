@@ -2058,7 +2058,6 @@ body.dark-mode .black-icon-comment.anticon svg {
   color: green;
 }
 
-/* ✅ START and END dates — Green with circular highlight */
 .dark-theme-dropdown .ant-picker-cell-range-start .ant-picker-cell-inner,
 .dark-theme-dropdown .ant-picker-cell-range-end .ant-picker-cell-inner {
   background-color: #91C25F !important;
