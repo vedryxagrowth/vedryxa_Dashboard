@@ -2057,3 +2057,35 @@ body.dark-mode .black-icon-comment.anticon svg {
 .font-green {
   color: green;
 }
+
+/* ✅ START and END dates — Green with circular highlight */
+.dark-theme-dropdown .ant-picker-cell-range-start .ant-picker-cell-inner,
+.dark-theme-dropdown .ant-picker-cell-range-end .ant-picker-cell-inner {
+  background-color: #91C25F !important;
+  color: black !important;
+  border-radius: 50% !important;
+}
+
+/* ✅ IN-RANGE (middle) dates — completely remove green background */
+.dark-theme-dropdown .ant-picker-cell-in-range::before,
+.dark-theme-dropdown .ant-picker-cell-in-range::after {
+  background: transparent !important;
+}
+
+.dark-theme-dropdown .ant-picker-cell-in-range .ant-picker-cell-inner {
+  background-color: transparent !important;
+  color: white !important;
+  border-radius: 0 !important;
+}
+
+/* ✅ IN-RANGE hover fix — remove hover overlay color */
+.dark-theme-dropdown .ant-picker-cell-in-range:hover::before,
+.dark-theme-dropdown .ant-picker-cell-in-range:hover::after,
+.dark-theme-dropdown .ant-picker-cell-in-range:hover .ant-picker-cell-inner {
+  background-color: transparent !important;
+}
+
+/* ✅ Calendar arrow buttons white in dark mode */
+.dark-theme-dropdown .ant-picker-header button {
+  color: white !important;
+}
