@@ -2152,7 +2152,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                         allowClear
                                         options={[
                                             { value: "HOUSING", label: "Housing" },
-                                            { value: "CREDIT", label: "Credit" },
+                                            { value: "FINANCIAL_PRODUCTS_SERVICES", label: "Credit" },
                                             { value: "EMPLOYMENT", label: "Employment" },
                                             { value: "ISSUES_ELECTIONS_POLITICS", label: "Politics" },
                                             { value: "NONE", label: "None" }
