@@ -26,41 +26,73 @@ const publisherOptions = [
     { label: 'Audience Network', value: 'audience_network' }
 ];
 const positionOptions = {
-  facebook: [
+    facebook: [
+        { key: "feed", label: "Facebook Feed" },
+        { key: "marketplace", label: "Facebook Marketplace" },
+        { key: "video_feeds", label: "Facebook Video Feeds" },
+        { key: "instream_video", label: "Facebook In-Stream Videos" },
+        { key: "facebook_reels", label: "Facebook Reels" },
+        { key: "profile_feed-f", label: "Facebook Profile Feed" },
+        { key: "search", label: "Facebook Search" },
+        { key: "story_f", label: "Facebook Stories" },
+        { key: "right_hand_column", label: "Facebook Right Column" },
+        { key: "instant_article", label: "Facebook Instant Articles" },
+        { key: "biz_disco_feed", label: "Facebook Business Explore" } // Added Business Explore
+    ],
+    instagram: [
+        { key: "stream", label: "Instagram Stream" },
+        { key: "story_i", label: "Instagram Stories" },
+        { key: "explore", label: "Instagram Explore" },
+        { key: "explore_home", label: "Instagram Explore Home" },
+        { key: "reels", label: "Instagram Reels" },
+        { key: "profile_feed-i", label: "Instagram Profile Feed" },
+        { key: "ig_search", label: "Instagram Search" },
+        { key: "profile_reels", label: "Instagram Profile Reels" }
+    ],
+    messenger: [
+        { key: "messenger_home", label: "Messenger Home" },
+        { key: "story_m", label: "Messenger Stories" },
+        { key: "sponsored_messages", label: "Messenger Sponsored Messages" },
+        // { key: "messenger_inbox", label: "Messenger Inbox" }
+    ],
+    audience_network: [
+        { key: "classic", label: "Audience Network Classic" },
+        { key: "rewarded_video", label: "Audience Network Rewarded Video" },
+        // { key: "instream_video", label: "Audience Network In-Stream Video" }
+    ]
+};
+
+const allPositions = [
     { key: "feed", label: "Facebook Feed" },
     { key: "marketplace", label: "Facebook Marketplace" },
     { key: "video_feeds", label: "Facebook Video Feeds" },
-    // { key: "instream_video", label: "Facebook In-Stream Videos" },
-    // { key: "reels", label: "Facebook Reels" }, // ✅ renamed from facebook_reels
-    { key: "profile_feed", label: "Facebook Profile Feed" },
+    { key: "instream_video", label: "Facebook In-Stream Videos" },
+    { key: "facebook_reels", label: "Facebook Reels" },
+    { key: "profile_feed-f", label: "Facebook Profile Feed" },
     { key: "search", label: "Facebook Search" },
-    { key: "story", label: "Facebook Stories" }, // ✅ renamed from story_fb
-    { key: "right_hand_column", label: "Facebook Right Column" }, // ✅ renamed from right_column
-    { key: "instant_article", label: "Facebook Instant Articles" } // ✅ renamed from instant_articles
-  ],
-
-  instagram: [
+    { key: "story_f", label: "Facebook Stories" },
+    { key: "right_hand_column", label: "Facebook Right Column" },
+    { key: "instant_article", label: "Facebook Instant Articles" },
+    { key: "biz_disco_feed", label: "Facebook Business Explore" },
+  
     { key: "stream", label: "Instagram Stream" },
-    { key: "story", label: "Instagram Stories" }, // ✅ renamed from story_in
+    { key: "story_i", label: "Instagram Stories" },
     { key: "explore", label: "Instagram Explore" },
-    // { key: "reels", label: "Instagram Reels" },
-    { key: "profile_feed", label: "Instagram Profile Feed" } // ✅ renamed from profile_feed_in
-    // ❌ Removed: explore_home, ig_search, profile_reels
-  ],
-
-  messenger: [
+    { key: "explore_home", label: "Instagram Explore Home" },
+    { key: "reels", label: "Instagram Reels" },
+    { key: "profile_feed-i", label: "Instagram Profile Feed" },
+    { key: "ig_search", label: "Instagram Search" },
+    { key: "profile_reels", label: "Instagram Profile Reels" },
+  
     { key: "messenger_home", label: "Messenger Home" },
-    { key: "story", label: "Messenger Stories" }, // ✅ renamed from story_ms
-    // { key: "sponsored_messages", label: "Messenger Sponsored Messages" }
-    // ❌ Removed: messenger_inbox
-  ],
-
-  audience_network: [
+    { key: "story_m", label: "Messenger Stories" },
+    { key: "sponsored_messages", label: "Messenger Sponsored Messages" },
+  
     { key: "classic", label: "Audience Network Classic" },
-    { key: "rewarded_video", label: "Audience Network Rewarded Video" },
-    { key: "instream_video", label: "Audience Network In-Stream Video" } // ✅ renamed from in_stream
-  ]
-};
+    { key: "rewarded_video", label: "Audience Network Rewarded Video" }
+];
+  
+  
 // const positionOptions = {
 //     facebook: [
 //         { key: "feed", label: "Facebook Feed" },
@@ -469,6 +501,12 @@ const localesdata = [
         "key": 1005
     }
 ]
+
+function getPositionsByKeys(keys) {
+    const keySet = new Set(keys); // Faster lookup
+    return allPositions.filter(pos => keySet.has(pos.key));
+}
+
 const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst, network }) => {
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -490,7 +528,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
     var token = localStorage.getItem("token")
     const [showBidAmount, setShowBidAmount] = useState(false);
     const [selectedPublishers, setSelectedPublishers] = useState([]);
-    const [selectedPositions, setSelectedPositions] = useState(["feed"]);
+    const [selectedPositions, setSelectedPositions] = useState([]);
     const [addName, setAddName] = useState('');
     const [primaryText, setPrimaryText] = useState('');
     const [caption, setCaption] = useState('');
@@ -519,7 +557,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
             setHeadline('');             // Clear headline field
             setDescription('');          // Clear description field
             setSelectedPublishers([]);   // Clear selected publishers
-            setSelectedPositions({});    // Clear selected positions
+            setSelectedPositions([]);    // Clear selected positions
             setIsFormComplete(false);    // Reset form completion state
             setCampaignName('');
             setAddName('');
@@ -637,6 +675,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
             setAdsetLevelDailyBudget(DuplicatedampaignData?.adsetlevel?.Daily_amount ? (DuplicatedampaignData?.adsetlevel?.Daily_amount) / 100 : 0);
             setCampaignLevelDailyBudget((DuplicatedampaignData?.camapaignlevel?.Daily_amount) / 100);
             setDefaultURLBuilder(DuplicatedampaignData?.addlevel[0]?.Website_URL);
+            DuplicatedampaignData?.adsetlevel?.placements === "manual" ? setIsManual("manual") : setIsManual(false);
             setSelectedFiles(DuplicatedampaignData?.addlevel?.map((file, index)=>{
                 return({
                     uid: `-${index+1}`,
@@ -646,6 +685,12 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                     url: file?.filename,
                 })
             }));
+
+            setSelectedPositions(getPositionsByKeys(DuplicatedampaignData?.adsetlevel?.position || []));
+
+            setCampaignName(`${DuplicatedampaignData?.camapaignlevel?.Name || ""}_Copy`);
+
+            
             // form.setFieldsValue({
             //     MediaContent: fileList, // Ensure the selected files are added to the form value
             //   });
@@ -748,8 +793,14 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
         // form.resetFields(['positions']); // Reset positions field
     };
 
-    const handlePositionChange = (value) => {
-        setSelectedPositions(value);
+    const handlePositionChange = (values, options) => {
+        // console.log(values, "values");
+        // console.log(options, "options");
+        const formatted = options.map(opt => ({
+          value: opt.value,
+          label: opt.label || opt.children
+        }));
+        setSelectedPositions(formatted);
     };
 
     const getPositionOptions = () => {
@@ -1432,8 +1483,19 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
     //         });
     // };
 
+    function extractValuesByPartialLabel(dataArray, labelName) {
+        return dataArray
+            .filter(item => item.label?.toLowerCase().includes(labelName.toLowerCase()))
+            .map(item => {
+                if (item.key.includes('story_')) return 'story';
+                if (item.key.includes('profile_feed-')) return 'profile_feed';
+                return item.key;
+            });
+    }
+
     const postData = async (values) => {
         setLoading(true); // Start the spinner post
+        console.log(selectedPositions)
         try {
             const dataToSubmit = {
                 campaign_name: values.Name,
@@ -1475,10 +1537,10 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                     locales: values.Language,
                     ...(values.placements !== 'Advance' && {
                         publisher_platforms: values.publisher_platforms,
-                        Facebook_positions: values.facebook_positions || [],
-                        instagram_positions: values.instagram_positions || [],
-                        audience_network_positions: values.audience_network_positions || [],
-                        messenger_positions: values.messenger_positions || [],
+                        Facebook_positions: extractValuesByPartialLabel(selectedPositions, 'Facebook') || [],
+                        instagram_positions: extractValuesByPartialLabel(selectedPositions, 'Instagram') || [],
+                        audience_network_positions: extractValuesByPartialLabel(selectedPositions, 'Audience') || [],
+                        messenger_positions: extractValuesByPartialLabel(selectedPositions, 'Messenger') || [],
                         position: values.positions,
                         device_platforms: values.device_platforms,
                     }),
@@ -1501,6 +1563,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
 
             if (response.ok) {
                 console.log('Form data submitted successfully');
+                isManual !== "manual" && setIsManual(false); 
                 onClose(); // Close the drawer or perform any other action
                 message.success("Campaign was created");
                 // changeRRefrst();
@@ -1610,13 +1673,15 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
         setHeadline('');             // Clear headline field
         setDescription('');          // Clear description field
         setSelectedPublishers([]);   // Clear selected publishers
-        setSelectedPositions({});    // Clear selected positions
+        setSelectedPositions([]);    // Clear selected positions
         setIsFormComplete(false);    // Reset form completion state
         setCampaignName('');
         setAddName('');
         setCampaignLevelDailyBudget(0);
         setAdsetLevelDailyBudget(0);
         onClose(); // Call onClose handler to close the drawer
+        isManual !== "manual" && setIsManual(false); 
+        setSelectedPositions([]);
     };
 
     // console.log(selectedFiles);
@@ -1707,7 +1772,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             allowClear
                                             options={[
                                                 { value: "HOUSING", label: "Housing" },
-                                                { value: "CREDIT", label: "Credit" },
+                                                { value: "FINANCIAL_PRODUCTS_SERVICES", label: "Credit" },
                                                 { value: "EMPLOYMENT", label: "Employment" },
                                                 { value: "ISSUES_ELECTIONS_POLITICS", label: "Politics" },
                                                 { value: "NONE", label: "None" }
@@ -1751,6 +1816,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 onChange={onChangeCampaignLevelDailyBudget}
                                                 readOnly={adsetLevelDailyBudget !== 0 ? true : false}
                                                 step="0.01"
+                                                onWheel={(e) => e.target.blur()}
                                                 style={{
                                                     backgroundColor: adsetLevelDailyBudget !== 0 ? '#f0f0f0' : 'transparent',
                                                     borderRadius: '6px',
@@ -1925,6 +1991,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 type="number"
                                                 placeholder="$"
                                                 value={adsetLevelDailyBudget}
+                                                onWheel={(e) => e.target.blur()}
                                                 onChange={onChangeAdsetLevelDailyBudget}
                                                 readOnly={campaignLevelDailyBudget !== 0} // This will keep the field readonly
                                                 step="0.01"
@@ -1962,6 +2029,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 <Input
                                                     type="number"
                                                     placeholder="$"
+                                                    onWheel={(e) => e.target.blur()}
                                                     onKeyPress={(event) => {
                                                         const charCode = event.charCode;
                                                         const charStr = String.fromCharCode(charCode);
@@ -2209,7 +2277,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 <Select
                                                     mode="multiple"
                                                     placeholder="Select Positions"
-                                                    value={selectedPositions}
+                                                    value={selectedPositions.map(pos => pos.value)}
                                                     onChange={handlePositionChange}
                                                     style={{ width: 400 }}
                                                 >
