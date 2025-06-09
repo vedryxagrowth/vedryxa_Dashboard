@@ -434,7 +434,8 @@ const RevenuePartnerDashboard = () => {
                 minWidth: 150,
                 aggFunc:spender,
                 cellClassRules: {
-                    'font-red': p => p.value < 0
+                    'font-red': p => p.value < 0,
+                    'font-green': params => params.value > 0,
                 },
                 valueFormatter:currencyFormatter,
                 suppressMenu: true,
@@ -555,7 +556,8 @@ const RevenuePartnerDashboard = () => {
                 sortable: true,
                 minWidth: 150,
                 cellClassRules: {
-                    'font-red': p => p.value < 0
+                    'font-red': p => p.value < 0,
+                    'font-green': params => params.value > 0,
                 },
                 aggFunc:spender,
                 valueFormatter:currencyFormatter,
@@ -1128,7 +1130,7 @@ const Dashboard = () => {
         borderColor: colorMaps[key],
         pointBackgroundColor: colorMaps[key],
         pointHoverBackgroundColor: colorMaps[key],
-        fill: true,
+        // fill: true,
         tension: 0.3,
         pointRadius: 5,
         pointHoverRadius: 8,
@@ -2565,7 +2567,8 @@ const Dashboard = () => {
             field: "profit",
             aggFunc: spender,
             cellClassRules: {
-                'font-red': p => p.value < 0
+                'font-red': p => p.value < 0,
+                'font-green': params => params.value > 0,
             },
             valueFormatter: currencyFormatter,
             suppressMenu: true,
@@ -2837,7 +2840,8 @@ const Dashboard = () => {
             aggFunc: spender,
             sort: 'desc',
             cellClassRules: {
-                'font-red': p => p.value < 0
+                'font-red': p => p.value < 0,
+                'font-green': params => params.value > 0,
             },
             valueFormatter: currencyFormatter,
             suppressMenu: true,
@@ -2909,7 +2913,8 @@ const Dashboard = () => {
             field: "profit",
             aggFunc: spender,
             cellClassRules: {
-                'font-red': p => p.value < 0
+                'font-red': p => p.value < 0,
+                'font-green': params => params.value > 0,
             },
             valueFormatter: currencyFormatter,
             minWidth: 108,
@@ -2989,7 +2994,8 @@ const Dashboard = () => {
             field: "profit",
             aggFunc: spender,
             cellClassRules: {
-                'font-red': p => p.value < 0
+                'font-red': p => p.value < 0,
+                'font-green': params => params.value > 0,
             },
             valueFormatter: currencyFormatter,
             minWidth: 125,
@@ -3072,7 +3078,8 @@ const Dashboard = () => {
             field: "profit",
             aggFunc: spender,
             cellClassRules: {
-                'font-red': p => p.value < 0
+                'font-red': p => p.value < 0,
+                'font-green': params => params.value > 0,
             },
             valueFormatter: currencyFormatter,
             minWidth: 125,

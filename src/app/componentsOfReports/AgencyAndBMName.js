@@ -175,7 +175,8 @@ const AgencyAndBMNameReports = ({startDate, endDate, newaccount, newtime, newRev
             minWidth: 100,
             flex: 4,
             cellClassRules: {
-                'font-red': p => p.value < 0
+                'font-red': p => p.value < 0,
+                'font-green': params => params.value > 0,
             },
             aggFunc: spender,
             filter: true,

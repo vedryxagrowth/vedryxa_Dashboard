@@ -36,33 +36,33 @@ const positionOptions = {
         { key: "video_feeds", label: "Facebook Video Feeds" },
         { key: "instream_video", label: "Facebook In-Stream Videos" },
         { key: "facebook_reels", label: "Facebook Reels" },
-        { key: "profile_feed", label: "Facebook Profile Feed" },
+        { key: "profile_feed-f", label: "Facebook Profile Feed" },
         { key: "search", label: "Facebook Search" },
-        { key: "story", label: "Facebook Stories" },
+        { key: "story_f", label: "Facebook Stories" },
         { key: "right_hand_column", label: "Facebook Right Column" },
         { key: "instant_article", label: "Facebook Instant Articles" },
         { key: "biz_disco_feed", label: "Facebook Business Explore" } // Added Business Explore
     ],
     instagram: [
         { key: "stream", label: "Instagram Stream" },
-        { key: "story", label: "Instagram Stories" },
+        { key: "story_i", label: "Instagram Stories" },
         { key: "explore", label: "Instagram Explore" },
         { key: "explore_home", label: "Instagram Explore Home" },
         { key: "reels", label: "Instagram Reels" },
-        { key: "profile_feed", label: "Instagram Profile Feed" },
+        { key: "profile_feed-i", label: "Instagram Profile Feed" },
         { key: "ig_search", label: "Instagram Search" },
         { key: "profile_reels", label: "Instagram Profile Reels" }
     ],
     messenger: [
         { key: "messenger_home", label: "Messenger Home" },
-        { key: "story", label: "Messenger Stories" },
+        { key: "story_m", label: "Messenger Stories" },
         { key: "sponsored_messages", label: "Messenger Sponsored Messages" },
         // { key: "messenger_inbox", label: "Messenger Inbox" }
     ],
     audience_network: [
         { key: "classic", label: "Audience Network Classic" },
         { key: "rewarded_video", label: "Audience Network Rewarded Video" },
-        { key: "instream_video", label: "Audience Network In-Stream Video" }
+        // { key: "instream_video", label: "Audience Network In-Stream Video" }
     ]
 };
 
@@ -490,7 +490,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     var token = localStorage.getItem("token")
     const [showBidAmount, setShowBidAmount] = useState(false);
     const [selectedPublishers, setSelectedPublishers] = useState([]);
-    const [selectedPositions, setSelectedPositions] = useState({});
+    const [selectedPositions, setSelectedPositions] = useState([]);
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [addName, setAddName] = useState('');
     const [primaryText, setPrimaryText] = useState('');
@@ -526,7 +526,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
             setHeadline('');             // Clear headline field
             setDescription('');          // Clear description field
             setSelectedPublishers([]);   // Clear selected publishers
-            setSelectedPositions({});    // Clear selected positions
+            setSelectedPositions([]);    // Clear selected positions
             setIsFormComplete(false);    // Reset form completion state
             setCampaignName('');
             setAddName('');
@@ -614,11 +614,21 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         setSelectedPositions([]); // Clear positions when publisher selection changes
     };
 
-    const handlePositionChange = (value) => {
-        setSelectedPositions(value);
-        setSelectedPositions(["feed"]); // Set default positions to "feed"
-        // form.resetFields(['positions']);
+    const handlePositionChange = (values, options) => {
+        console.log(values, "values");
+        console.log(options, "options");
+        const formatted = options.map(opt => ({
+          value: opt.value,
+          label: opt.label || opt.children
+        }));
+        setSelectedPositions(formatted);
     };
+
+    // const handlePositionChange = (value) => {
+    //     setSelectedPositions(value);
+    //     // setSelectedPositions(["feed"]); // Set default positions to "feed"
+    //     // form.resetFields(['positions']);
+    // };
 
     const getPositionOptions = () => {
         const allPositions = selectedPublishers.reduce((acc, publisher) => {
@@ -1184,6 +1194,16 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         }
     };
 
+    function extractValuesByPartialLabel(dataArray, labelName) {
+        return dataArray
+          .filter(item => item.label.toLowerCase().includes(labelName.toLowerCase()))
+          .map(item => {
+            if (item.value.includes('story_')) return 'story';
+            if (item.value.includes('profile_feed-')) return 'profile_feed';
+            return item.value;
+          });
+    }
+
     const postData = async (values) => {
         console.log("Form Values:", values);
         setLoading(true); // Start the spinner
@@ -1262,10 +1282,10 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                     placements: values.placements,
                     ...(values.placements !== 'Advance' && {
                         publisher_platforms: values.publisher_platforms,
-                        Facebook_positions: values.facebook_positions || [],
-                        instagram_positions: values.instagram_positions || [],
-                        audience_network_positions: values.audience_network_positions || [],
-                        messenger_positions: values.messenger_positions || [],
+                        Facebook_positions: extractValuesByPartialLabel(selectedPositions, 'Facebook') || [],
+                        instagram_positions: extractValuesByPartialLabel(selectedPositions, 'Instagram') || [],
+                        audience_network_positions: extractValuesByPartialLabel(selectedPositions, 'Audience') || [],
+                        messenger_positions: extractValuesByPartialLabel(selectedPositions, 'Messenger') || [],
                         position: values.positions,
                         device_platforms: values.device_platforms,
                     }),
@@ -1273,6 +1293,16 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                 },
                 addlevel: addLevelData
             };
+
+            // console.log("Data to Submit:", extractValuesByPartialLabel(selectedPositions, 'Facebook'));
+
+            // console.log("Data to Submit:", extractValuesByPartialLabel(selectedPositions, 'Instagram'));
+
+            // console.log("Data to Submit:", extractValuesByPartialLabel(selectedPositions, 'Messenger'));
+
+            // console.log("Data to Submit:", extractValuesByPartialLabel(selectedPositions, 'Audience'));
+
+            // console.log("selectedPositions:", selectedPositions);
 
             console.log("Final Data to Submit:", data1);
 
@@ -1291,6 +1321,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                 setSelectedFilesFromMedia([]);
                 setSelectedFiles([]);
                 onClose();
+                setSelectedPositions([]);
+                isManual !== "manual" && setIsManual(false); 
             } else {
                 console.error('Failed to submit form data');
             }
@@ -1377,7 +1409,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         setHeadline('');             // Clear headline field
         setDescription('');          // Clear description field
         setSelectedPublishers([]);   // Clear selected publishers
-        setSelectedPositions({});    // Clear selected positions
+        setSelectedPositions([]);    // Clear selected positions
         setIsFormComplete(false);    // Reset form completion state
         setCampaignName('');
         setAddName('');
@@ -1385,6 +1417,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         setCampaignLevelDailyBudget(0);
         onClose(); // Call onClose handler to close the drawer
         setActiveKey(['1']);
+        isManual !== "manual" && setIsManual(false); 
+        setSelectedPositions([]); // Clear selected positions
     };
 
     const [selectedOption, setSelectedOption] = useState("upload");
@@ -1543,7 +1577,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         allowClear
                                         options={[
                                             { value: "HOUSING", label: "Housing" },
-                                            { value: "CREDIT", label: "Credit" },
+                                            { value: "FINANCIAL_PRODUCTS_SERVICES", label: "Credit" },
                                             { value: "EMPLOYMENT", label: "Employment" },
                                             { value: "ISSUES_ELECTIONS_POLITICS", label: "Politics" },
                                             { value: "NONE", label: "None" }
@@ -1586,6 +1620,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             onChange={onChangeCampaignLevelDailyBudget}
                                             readOnly={adsetLevelDailyBudget !== 0 ? true : false}
                                             step="0.01"
+                                            onWheel={(e) => e.target.blur()}
                                             style={{
                                                 backgroundColor: adsetLevelDailyBudget !== 0 ? '#f0f0f0' : 'transparent',
                                                 borderRadius: '6px',
@@ -1760,6 +1795,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             onChange={onChangeAdsetLevelDailyBudget}
                                             readOnly={campaignLevelDailyBudget !== 0} // This will keep the field readonly
                                             step="0.01"
+                                            onWheel={(e) => e.target.blur()}
                                             style={{
                                                 backgroundColor: campaignLevelDailyBudget !== 0 ? '#f0f0f0' : 'transparent',
                                                 borderRadius: '6px',
@@ -1793,6 +1829,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         <Input
                                             type="number"
                                             placeholder="$"
+                                            step="0.1"
+                                            onWheel={(e) => e.target.blur()}
                                             onKeyPress={(event) => {
                                                 const charCode = event.charCode;
                                                 const charStr = String.fromCharCode(charCode);
@@ -1801,7 +1839,14 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                                     event.preventDefault();
                                                 }
                                             }}
+                                            onKeyDown={(event) => {
+                                                // Prevent up/down arrow keys from changing the value
+                                                if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+                                                    event.preventDefault();
+                                                }
+                                            }}
                                         />
+
                                     </Form.Item>
                                 )}
                             </div>
@@ -1963,7 +2008,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             <Select
                                                 mode="multiple"
                                                 placeholder="Select Positions"
-                                                value={selectedPositions}
+                                                value={selectedPositions.map(pos => pos.value)}
                                                 onChange={handlePositionChange}
                                             >
                                                 {selectedPublishers.length > 0 && getPositionOptions()?.map(position => (
