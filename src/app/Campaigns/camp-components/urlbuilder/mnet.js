@@ -9,7 +9,7 @@ import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import { v4 as uuidv4 } from 'uuid';
 import { useTokenContext } from '../../../components/parent';
-const MnetUrlBuilder = ({ defaultValues, onReturnMessage, showSubmitButton }) => {
+const MnetUrlBuilder = ({ defaultValues, onReturnMessage, showSubmitButton, accountis }) => {
   // Initial data array
   const [domain, setDomain] = useState(null);
   const [source, setSource] = useState("FB");
@@ -204,11 +204,23 @@ const MnetUrlBuilder = ({ defaultValues, onReturnMessage, showSubmitButton }) =>
         setMembetId(defaultValues?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[0]);
         setSource(defaultValues?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[1]);
         setGeo(defaultValues?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[2]);
+        setSource("FB");
         // console.log(defaultValues.split("//")[1].split("/")[0]);
         // const domainData = response 
       }
     }
   };
+
+  useEffect(() => {
+    setDomain(null)
+    setSource("FB");
+    setChannel(null);
+    setGeo('');
+    setMembetId('');
+    setKeyWords('');
+    setErrorMessage('');
+    setPixelId('PixelId');
+  }, [accountis]);
 
   useEffect(() => {
     getUrlBuilderData();
