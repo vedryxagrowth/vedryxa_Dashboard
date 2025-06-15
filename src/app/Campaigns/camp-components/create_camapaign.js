@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Drawer, Button, DatePicker, Space, Form, Input, Select, Collapse, Upload, Steps, Modal, message, Spin, Badge, Tooltip } from 'antd';
 import { PlusOutlined, UploadOutlined, ShareAltOutlined, CommentOutlined, LikeOutlined, MoreOutlined, CloseOutlined, GlobalOutlined, EditOutlined, QuestionCircleOutlined,PaperClipOutlined,DeleteOutlined  } from '@ant-design/icons';
 import moment from 'moment-timezone';
@@ -583,18 +583,19 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     }
 
 
-    const getUrlBuilder = (network) => {
+    const getUrlBuilder = useMemo(() => {
         switch (network) {
             case 'FB_Mnet':
-                return <MnetUrlBuilder onReturnMessage={onReturnUrl} />
+                return <MnetUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
             case 'FB_Tonic1':
-                return <TonicUrlBuilder onReturnMessage={onReturnUrl} />
+                return <TonicUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
             case 'FB_System1':
-                return <System1UrlBuilder onReturnMessage={onReturnUrl} />
+                return <System1UrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
             case 'FB_DomainActive':
-                return <DActiveUrlBuilder onReturnMessage={onReturnUrl} />
+                return <DActiveUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
         }
-    }
+        
+    },[network, accountis, onReturnUrl])
 
 
 
@@ -2391,7 +2392,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         width="80%" // Set width of the modal
                                         bodyStyle={{ height: '50vh', overflowY: 'auto' }}
                                     >
-                                        {getUrlBuilder(network)}
+                                        {getUrlBuilder}
                                     </Modal>
 
                                     {/* <Form.Item

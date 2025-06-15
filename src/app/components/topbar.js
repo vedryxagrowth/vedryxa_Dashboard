@@ -1,17 +1,31 @@
 // Topbar.js
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { SessionProvider, useSession, signIn, signOut } from 'next-auth/react';
 import Image from "next/image";
-import { Layout, Avatar, Dropdown, Button, Switch, Spin, Form, Input, Divider, Modal, Badge, Card, Upload, notification, Drawer } from "antd";
+import { Layout, Avatar, Dropdown, Button, Switch, Spin, Form, Input, Divider, Modal, Badge, Card, Upload, notification, Drawer , Menu} from "antd";
 import React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter,  usePathname} from "next/navigation";
 import axios from 'axios';
 const { Header } = Layout;
 import { useTokenContext } from './parent';
 import Draggable from "react-draggable";
 import moment from 'moment-timezone';
 import ContactForm from './mail';
-import { BellFilled, EyeOutlined, GoogleOutlined, LockOutlined, PlusOutlined, UserOutlined, UploadOutlined, CalculatorOutlined  } from '@ant-design/icons';
+import { BellFilled, EyeOutlined, GoogleOutlined, LockOutlined, PlusOutlined, UserOutlined, UploadOutlined, CalculatorOutlined,
+  DoubleRightOutlined,
+  DoubleLeftOutlined,  } from '@ant-design/icons';
+  import {
+    HomeOutlined,
+    PieChartOutlined,
+    DesktopOutlined,
+    ContainerOutlined,
+    SettingOutlined,
+    // LockOutlined,
+    LogoutOutlined,
+    DatabaseOutlined,
+    // UserOutlined,
+    LaptopOutlined
+  } from '@ant-design/icons';
 import { Bell, Edit3Icon, Moon, Sun, StickyNote } from 'lucide-react';
 import { getSession } from 'next-auth/react';
 import debounce from 'lodash.debounce';
@@ -31,9 +45,10 @@ import { message } from 'antd';
 
 import { useGlobalLoading } from "../layout";
 
-const Topbar = ({onComplete}) => {
+const Topbar = ({onComplete, usersDataForLogin}) => {
   const { darkMode, toggleTheme } = useTokenContext();
   const router = useRouter();
+  const pathname = usePathname();
   const { data: session, status } = useSession(); // Session status from next-auth
   const { userdetails } = useTokenContext(); // User details from your context
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -48,6 +63,12 @@ const Topbar = ({onComplete}) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const wrapperRef = useRef(null);
+  const [visible, setVisible] = useState(false);
+  const [drawerPosition, setDrawerPosition] = useState({ top: 0, left: 0, width: 0 });
+  const containerRef = useRef(null);
+  
+  const [showIcons, setShowIcons] = useState(false);
+  
   
   const { apiClient } = useTokenContext();
 
@@ -58,6 +79,8 @@ const Topbar = ({onComplete}) => {
 
   const [loading, setLoading] = useState(false);
   // console.log(userdetails);
+
+  const toggleDrawer = () => setVisible((prev) => !prev);
 
   const tokenForAuth = localStorage.getItem('token');
   if(userdetails?.role === "Revenue_Partner"){
@@ -143,6 +166,52 @@ const Topbar = ({onComplete}) => {
     // First attempt without delay
     await makeRequest(retries);
   };
+  function getItem(label, key, icon) {
+    return {
+        key,
+        icon,
+        label,
+    };
+  }
+
+  const menuItems = [
+    getItem('Dashboard', '/Dashboard', <HomeOutlined className={pathname === '/Dashboard' && 'black-icon'}/>),
+    status === 'authenticated' && (usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Reports', '/Reports', <DatabaseOutlined  className={pathname === '/Reports' && 'black-icon'}/>)),
+    status === 'authenticated' &&(usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Creatives', '/Creatives', <PieChartOutlined  className={pathname === '/Creatives' && 'black-icon'}/>)),
+    status === 'authenticated' &&(usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Campaigns', '/Campaigns', <DesktopOutlined  className={pathname === '/Campaigns' && 'black-icon'}/>)),
+    // getItem('Users', '/Users', <ContainerOutlined />),
+    status === 'authenticated' &&(usersDataForLogin[0]?.role === 'Admin' && getItem('NewUser', '/NewUser', <UserOutlined  className={pathname === '/NewUser' && 'black-icon'}/>)),
+    status === 'authenticated' &&(usersDataForLogin[0]?.role === 'Admin' && getItem('Activities', '/Activities', <LaptopOutlined  className={pathname === '/Activities' && 'black-icon'}/>)),
+].filter(Boolean);
+
+  useLayoutEffect(() => {
+    if (visible && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setDrawerPosition({
+        top: rect.bottom,
+        left: rect.left,
+        width: rect.width,
+      });
+    }
+  }, [visible]);
+
+  useEffect(() => {
+    const updateDrawerPosition = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        setDrawerPosition({
+          top: rect.bottom,
+          left: rect.left,
+          width: rect.width,
+        });
+      }
+    };
+  
+    if (visible) updateDrawerPosition();
+  
+    window.addEventListener("resize", updateDrawerPosition);
+    return () => window.removeEventListener("resize", updateDrawerPosition);
+  }, [visible]);
 
   useEffect(() => {
     if (userdetails?.email && status === "authenticated" && userdetails?.role !== "Revenue_Partner") {
@@ -170,6 +239,9 @@ const Topbar = ({onComplete}) => {
       description: description,
       duration: 3, // Auto-close after 3 seconds
     });
+  };
+  const handleMenuItemClick = (key) => {
+    router.push(key);
   };
 
   // Function to handle adding a notification via the backend API
@@ -560,6 +632,7 @@ const Topbar = ({onComplete}) => {
 
   return (
     <div
+      ref={containerRef}
       style={{
         backgroundColor: darkMode ? '#333' : '#fff',
         paddingRight: '20px',
@@ -591,13 +664,28 @@ const Topbar = ({onComplete}) => {
           alignItems: 'center',
           gap: '1em',
           height: '60px',
-          // justifyContent: 'flex-end',
+          justifyContent: 'flex-end',
           marginLeft: 'auto',
+          width: '100%',
         }}
       >
         {/* Conditional rendering based on authentication and authorization status */}
         {isUserAuthorized ? (
-          <>
+          <div style={{display:'flex', alignItems:'center', justifyContent:"space-between", width:'100%'}}>
+          <div>
+            <Image
+                // src="/ssk1.png"
+                src={darkMode ? "/ssk2.png" : "/ssk1.png"}
+                width={70}   // Smaller logo when collapsed
+                height={35}
+                priority={true}
+                alt="Collapsed Logo"
+                style={{ margin: "0px 12px", width: "60%", height: "revert-layer", objectFit: "contain" }}
+                onClick={toggleDrawer}
+                className='logo'
+            />
+          </div>
+          <div className='navbar-1'>
             {userdetails?.role !== "Revenue_Partner" && <div className="relative inline-block" ref={wrapperRef}>
               <div className="cursor-pointer" onClick={openNotificationsList}>
                 <Bell size={20} />
@@ -614,25 +702,25 @@ const Topbar = ({onComplete}) => {
             </div>}
 
             {userdetails?.role !== "Revenue_Partner" && <button  style={{padding: '0px', margin:'0px'}} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onChangeStickyNotes}>
-                <SlNotebook  size={20}/>
+                <SlNotebook  size={20} style={{marginLeft: '10px'}}/>
             </button>}
 
             {userdetails?.role !== "Revenue_Partner" && <button style={{padding: '0px', margin:'0px'}} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickCalculator}>
-                 <CalculatorOutlined style={{fontSize:'20px',padding: '0px', margin:'0px'}}/>
+                <CalculatorOutlined style={{fontSize:'20px',padding: '0px', margin:'0px',marginLeft:  '10px' }}/>
             </button>}
             {userdetails?.role !== "Revenue_Partner" && <button style={{padding: '0px', margin:'0px'}} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickWorlTime}>
-                 <TfiWorld size={20} />
+                <TfiWorld size={20} style={{marginLeft:  '10px'}} />
             </button>}
 
             <button
               onClick={toggleTheme}
-              style={{padding: '0px', margin:'0px'}}
+              style={{padding: '0px', margin:'0px', marginLeft:  '10px' }}
               className={`${darkMode ? 'dark-mode' : 'light-mode'}`}
             >
               {darkMode ? (
                 <Sun className="icon sun-icon" style={{ width: "20px", height: "20px" }}/>
               ) : (
-                <Moon className="icon moon-icon" style={{ width: "20px", height: "20px" }} />
+                <Moon className="icon moon-icon" style={{ width: "20px", height: "20px", }} />
               )}
             </button>
             <h2
@@ -641,6 +729,8 @@ const Topbar = ({onComplete}) => {
                 margin: 0,
                 fontSize: '17px',
                 transition: 'color 0.3s ease',
+                // display: width <= 500 ? 'none' : 'block', 
+                marginLeft:  '10px' ,
               }}
             >
               Hi, {session?.user?.name || ''}
@@ -659,10 +749,73 @@ const Topbar = ({onComplete}) => {
                   background: darkMode ? '#333' : '#ebebeb',
                   fontSize: '1.8em',
                   transition: 'background 0.3s ease',
+                  marginLeft:  '10px',
                 }}
               />
             </Dropdown>
-          </>
+          </div>
+          <div className='navbar-2'>
+            {!showIcons && <div><DoubleLeftOutlined onClick={()=> setShowIcons(true)} style={{fontSize:'10px',padding: '0px', margin:'0px'}}/></div>}
+            
+
+            {userdetails?.role !== "Revenue_Partner" && showIcons && <div className="relative inline-block" ref={wrapperRef}>
+              <div className="cursor-pointer" onClick={openNotificationsList}>
+                <Bell size={20} style={{marginLeft:  '5px'}}/>
+                {notifications.length > 0 && (
+                  <Badge
+                    style={{ color: 'red' }}
+                    className="Badge absolute -top-2 -right-2"
+                    variant="destructive"
+                  >
+                    {notifications.length}
+                  </Badge>
+                )}
+              </div>
+            </div>}
+
+            {userdetails?.role !== "Revenue_Partner" && showIcons && <button  style={{padding: '0px', margin:'0px'}} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onChangeStickyNotes}>
+                <SlNotebook  size={20} style={{marginLeft:  '5px'}}/>
+            </button>}
+
+            {userdetails?.role !== "Revenue_Partner" && showIcons && <button style={{padding: '0px', margin:'0px'}} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickCalculator}>
+                <CalculatorOutlined style={{fontSize:'20px',padding: '0px', margin:'0px',marginLeft:  '5px'}}/>
+            </button>}
+            {userdetails?.role !== "Revenue_Partner" && showIcons && <button style={{padding: '0px', margin:'0px'}} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickWorlTime}>
+                <TfiWorld size={20} style={{marginLeft:  '5px'}} />
+            </button>}
+
+            {showIcons && <button
+              onClick={toggleTheme}
+              style={{padding: '0px', margin:'0px', marginLeft:  '5px'}}
+              className={`${darkMode ? 'dark-mode' : 'light-mode'}`}
+            >
+              {darkMode ? (
+                <Sun className="icon sun-icon" style={{ width: "20px", height: "20px" }}/>
+              ) : (
+                <Moon className="icon moon-icon" style={{ width: "20px", height: "20px", }} />
+              )}
+            </button>}
+            {showIcons && <div><DoubleRightOutlined onClick={()=> setShowIcons(false)} style={{fontSize:'10px',padding: '0px', margin:'0px', marginLeft:'5px'}}/></div>}
+            <Dropdown
+              menu={{
+                items: dropdownItemsAuthenticated,
+              }}
+              placement="bottomLeft"
+              arrow={{ pointAtCenter: true }}
+            >
+              <Avatar
+                size={36}
+                src={avatarUrl || getDefaultAvatar()}
+                style={{
+                  background: darkMode ? '#333' : '#ebebeb',
+                  fontSize: '1.8em',
+                  transition: 'background 0.3s ease',
+                  marginLeft:  '5px',
+                }}
+              />
+            </Dropdown>
+          </div>
+        </div>
         ) : (
           <Dropdown
             menu={{
@@ -873,6 +1026,84 @@ const Topbar = ({onComplete}) => {
         <Calculator setOpenCalculator={setOpenCalculator} />
       </div>
     </Drawer>
+
+    {visible && (
+          <div
+            style={{
+              position: "fixed",
+              top: drawerPosition.top,
+              left: drawerPosition.left,
+              width: drawerPosition.width,
+              zIndex: 1000, // above page content
+              // display: width > 500 ? 'none' : 'block', // Hide on mobile
+            }}
+            className='mobile-navbar'
+          >
+            <Drawer
+              open={visible}
+              onClose={() => setVisible(false)}
+              placement="top"
+              height={50}
+              getContainer={false}
+              mask={false} // ❌ no AntD mask
+              motion={null}
+              closable={false}
+              title={null}
+              bodyStyle={{ padding: 0 }}
+              style={{
+                position: "fixed",
+                top: drawerPosition.top,
+                left: drawerPosition.left,
+                width: drawerPosition.width,
+                height: 50,
+                margin: 0,
+                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                transition: "none",
+                // backgroundColor: theme === "dark" ? "#000" : "#fff",
+              }}
+            >
+              {/* 🔥 Transparent full-page backdrop for outside click detection */}
+              <div
+                onClick={() => setVisible(false)}
+                style={{
+                  position: "fixed",
+                  inset: 0,
+                  zIndex: -1, // behind drawer content
+                  background: "transparent", // fully transparent
+                  pointerEvents: "none",
+                }}
+              />
+
+              {/* 👇 Your actual content */}
+              <div style={{  zIndex: 1 }}>
+              <Menu
+                                mode="inline"
+                                selectedKeys={[pathname]}
+                                style={{
+                                    backgroundColor: darkMode ? '#333' : '#fff',
+                                    color: darkMode ? '#007BFF' : '#000',
+                                    // color: '#007BFF',
+                                    fontSize: '16px',
+                                    borderRight: 'none',
+                                    // marginTop: '10px',
+                                    width:'100%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                }}
+                                onClick={(e) => handleMenuItemClick(e.key)}
+                            >
+                                {menuItems.map(item => (
+                                    <Menu.Item key={item.key}   style={{ color: darkMode ? pathname === item.key ? "#000" : 'white' : '#000', fontWeight: "500", fontSize: "16px", display:'flex', alignItems:'center', justifyContent:'center', width:'100%', padding:'0px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            {item.icon}
+                                        </div>
+                                    </Menu.Item>
+                                ))}
+                            </Menu>
+              </div>
+            </Drawer>
+          </div>
+        )}
       
     </div>
   );
@@ -1070,7 +1301,7 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
 
   return (
     <>
-      <Topbar session={session} darkMode={darkMode} toggleTheme={toggleTheme} usersData={!loading && usersData} onComplete={handleTopbarCalling}/>
+      <Topbar usersDataForLogin={usersDataForLogin} session={session} darkMode={darkMode} toggleTheme={toggleTheme} usersData={!loading && usersData} onComplete={handleTopbarCalling}/>
       
       {sessionStatus == "authenticated" && usersData?.length === 0 && !loading ?
         null

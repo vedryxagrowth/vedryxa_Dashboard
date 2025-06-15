@@ -234,6 +234,7 @@ const Appbar = ({ children, usersDataForLogin }) => {
                     height: '100vh',
 
                 }}
+                className="sider zoom-90"
             >
                 <div
                     style={{
@@ -354,7 +355,7 @@ const Appbar = ({ children, usersDataForLogin }) => {
             <Layout style={{ marginLeft: collapsed ? 0 : 0, transition: 'margin-left 0.2s', backgroundColor: darkMode ? '#262426d6' : '#f5f5f5' }}>
                 
               
-                <LayoutWrapper usersDataForLogin={usersDataForLogin} onComplete={handleMoveForward} style={{position:'absolute'}}/>
+                <LayoutWrapper  className="zoom-90" usersDataForLogin={usersDataForLogin} onComplete={handleMoveForward} style={{position:'absolute'}}/>
                 {!moveForward &&
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
                     {/* <Spin size="large" /> */}
@@ -364,40 +365,42 @@ const Appbar = ({ children, usersDataForLogin }) => {
                 </div>}
                 
                 {moveForward && (
-  <div
-    style={{
-      margin: "0px 10px",
-      height: "86vh",
-      overflowY: 'auto',
-      backgroundColor: darkMode ? '#262326' : '#f0f0f0',
-      scrollbarWidth: "thin",
-    }}
-  >
-    {/* Full-height flex column */}
-    <div
-      style={{
-        minHeight: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-      }}
-    >
-      {/* Main content */}
-      <div>
-        {React.Children.map(children, child => {
-          return React.cloneElement(child, { darkMode });
-        })}
-      </div>
+                  <div
+                    style={{
+                      margin: "0px 10px",
+                      height: "86vh",
+                      overflowY: 'auto',
+                      backgroundColor: darkMode ? '#262326' : '#f0f0f0',
+                      scrollbarWidth: "thin",
+                    }}
+                    
+                  >
+                    {/* Full-height flex column */}
+                    <div
+                      style={{
+                        minHeight: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                      }}
+                        className="zoom-90"
+                    >
+                      {/* Main content */}
+                      <div>
+                        {React.Children.map(children, child => {
+                          return React.cloneElement(child, { darkMode });
+                        })}
+                      </div>
 
-      {/* Footer always at bottom of 86vh */}
-      <div style={{ marginTop: '50px', marginLeft: '15px', marginBottom:'10px' }}>
-        <h4 style={{ fontWeight: "200", margin: 0 }}>
-          Copyright © {dayjs().format('YYYY')} All rights reserved | vyaktimetrics
-        </h4>
-      </div>
-    </div>
-  </div>
-)}
+                      {/* Footer always at bottom of 86vh */}
+                      <div style={{ marginTop: '50px', marginLeft: '15px', marginBottom:'10px' }}>
+                        <h4 style={{ fontWeight: "200", margin: 0 }}>
+                          Copyright © {dayjs().format('YYYY')} All rights reserved | vyaktimetrics
+                        </h4>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
 
             </Layout>

@@ -8516,7 +8516,7 @@ const MyTablePage = () => {
                             onDropdownVisibleChange={handleDropdownVisibleChange} // Toggle dropdown state
                         />
                     </Col>
-                    <Col xs={24} sm={24} md={15} lg={6}>
+                    <Col xs={24} sm={24} md={15} lg={6} className=' Dashboard-Details-1'>
                         <ConfigProvider 
                             locale={locale}
                             theme={{
@@ -8541,8 +8541,33 @@ const MyTablePage = () => {
                             />
                         </ConfigProvider>
                     </Col>
+                    <Col xs={24} sm={24} md={15} lg={6} className=' Dashboard-Details-2'>
+                        <ConfigProvider 
+                            locale={locale}
+                            theme={{
+                                token: {
+                                  colorPrimary: '#91C25F', 
+                                  colorTextLightSolid: '#000',
+                                },
+                            }}
+                        >
+                            <RangePicker
+                                presets={rangePresets}
+                                onChange={handleChange}
+                                disabledDate={disabledDate}
+                                defaultValue={defaultDates}
+                                format="YYYY-MM-DD"
+                                style={{
+                                    width: '100%',
+                                    backgroundColor: theme === 'dark' ? '#555' : undefined,
+                                    color: theme === 'dark' ? 'white' : undefined,
+                                }}
+                                dropdownClassName={`custom-single-month-picker Dashboard-Details-2 ${theme === 'dark' ? 'dark-theme-dropdown' : ''}`}
+                            />
+                        </ConfigProvider>
+                    </Col>
 
-                    <Col xs={24} sm={12} md={3} lg={3} xl={2}>
+                    <Col xs={12} sm={12} md={3} lg={3} xl={2}>
                         <Select
                             showSearch
                             onChange={onChangeTime}
@@ -8559,7 +8584,7 @@ const MyTablePage = () => {
                         />
                     </Col>
 
-                    <Col xs={24} sm={12} md={2}>
+                    <Col xs={12} sm={12} md={2}>
                         <Button className='submit-button' type='primary' style={{ backgroundColor: '#91C25F', border: 'solid 0px', color: 'black', fontWeight: '600' }} onClick={onClickButton} block>
                             Submit
                         </Button>
@@ -8630,7 +8655,7 @@ const MyTablePage = () => {
             (
                 <div>
 
-                <Tabs activeKey={activeTab} onChange={handleTabChange} renderTabBar={() => <></>}>
+                <Tabs   className="zoom-95" activeKey={activeTab} onChange={handleTabChange} renderTabBar={() => <></>}>
                 <Tabs.TabPane key="1">
                 {/* {Camapignlevelstatus.length > 0 && ( */}
                     <LiveReports 
