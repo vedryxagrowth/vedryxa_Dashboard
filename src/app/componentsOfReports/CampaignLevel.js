@@ -56,7 +56,7 @@ const selectTimezone = {
     CEST: 'CESTDate'
 };
 
-const CampaignLevelReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, showCampaignLevel, removeSelectedCampaigns, moveToNextTab}) => {
+const CampaignLevelReports = ({functionCallForCommnets, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, showCampaignLevel, removeSelectedCampaigns, moveToNextTab}) => {
     console.log(columnDefs, "columnDefs");
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
@@ -266,8 +266,70 @@ const CampaignLevelReports = ({startDate, endDate, newaccount, newtime, newReven
 
                 const [tooltipText, setTooltipText] = useState("Click to Copy");
                 const [isModalVisibles, setIsModalVisibles] = useState(false);
+                const [isCampaignModalVisibles, setIsCampaignModalVisibles] = useState(false);
+                const [selectedCampaign, setSelectedCampaign] = useState(null); // store adid when switch clicked
+                const [switchOn, setSwitchOn] = useState(false); // control toggle state
+                const [nextChecked, setNextChecked] = useState(false); // what user clicked
                 const [comment, setComment] = useState(relatedComment || '');
                 const [pinned, setPinned] = useState(getPinStatusForCampaign(campaignName));
+
+                useEffect(() => {
+                    const campaignStatus = Camapignlevelstatus.find(
+                        statusObj => statusObj.campaign_id === campaignid
+                    );
+                    if (campaignStatus) {
+                        setSwitchOn(campaignStatus.status === "ACTIVE");
+                    }
+                }, [Camapignlevelstatus, campaignid]);
+
+                const handlePauseClick = (campaignid, checked) => {
+                    setSelectedCampaign(campaignid); 
+                    setNextChecked(checked); // user’s toggle intent
+                    setIsCampaignModalVisibles(true);
+                };
+
+                const handlePauseOk = async () => {
+                    setSwitchOn(nextChecked); // update visual switch state
+                  
+                    try {
+                      const token = localStorage.getItem("token");
+                  
+                      const response = await apiClient.post(`/campaignStatusChange`,
+                        {
+                          status: nextChecked ? "ACTIVE" : "PAUSED",
+                          id: params.data?.identifier,
+                          campaign_id: campaignid,
+                          accountNumber: newaccount,
+                          adset_id: adsetid,
+                          name: campaignName,
+                          email: userdetails?.email,
+                        },
+                        {
+                          headers: {
+                            Authorization: token
+                          }
+                        }
+                      );
+                  
+                      if (response.status === 200 || response.status === 201) {
+                        functionCallForCampaigns(newaccount);
+                        console.log(" Status updated on Facebook:", response.data.status, "Campaign ID:", response.data.campaign_id);
+                      } else {
+                        console.warn(" Backend returned unexpected status:", response.status);
+                      }
+                  
+                    } catch (error) {
+                      console.error(" API call to /adStatusChange failed:", error?.response?.data || error.message);
+                    }
+                  
+                    setIsCampaignModalVisibles(false);
+                    setSelectedCampaign(null);
+                };
+
+                const handlePauseCancel = () => {
+                    setIsCampaignModalVisibles(false);
+                    setSelectedCampaign(null);
+                };
 
                 const copyToClipboard = () => {
                     navigator.clipboard.writeText(firstColumnValue)
@@ -478,13 +540,32 @@ const CampaignLevelReports = ({startDate, endDate, newaccount, newtime, newReven
 
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                        <Switch 
+                            checked={switchOn}
+                            onClick={(checked) => handlePauseClick(campaignid, checked)} 
+                            size="small" 
+                            style={{
+                              backgroundColor: switchOn ? '#91C25F' : '#d9d9d9',
+                            }} 
+                        />
+                        <Modal
+                            title="Confirm Action"
+                            open={isCampaignModalVisibles}
+                            onOk={handlePauseOk}
+                            onCancel={handlePauseCancel}
+                        >
+                            <p>
+                                Are you sure you want to turn <b>{nextChecked ? "ON" : "OFF"}</b> this campaign?
+                            </p>
+                            <p>campaign ID: <strong>{selectedCampaign}</strong></p>
+                        </Modal>
                         <PinIcon
                             campaignName={campaignName}
                             campaignid={campaignid}
                             adsetid={adsetid}
                             pinned={pinned}
                         />
-                        <div style={{ marginLeft: '2px' }}>
+                        {/* <div style={{ marginLeft: '2px' }}>
                             {(() => {
                                 // Find the matching campaign in the Camapignlevelstatus array
                                 const campaignStatus = Camapignlevelstatus.find(statusObj => statusObj.name === campaignName);
@@ -529,7 +610,7 @@ const CampaignLevelReports = ({startDate, endDate, newaccount, newtime, newReven
                                     );
                                 }
                             })()}
-                        </div>
+                        </div> */}
                         {/* {relatedComment && (
                             <Tooltip title={(
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -767,6 +848,10 @@ const CampaignLevelReports = ({startDate, endDate, newaccount, newtime, newReven
                             profitloss: "",
                             M_tq: "",
                             D_tq: "",
+                            fbCron: eachData.fbCron,
+                            revenueCron: eachData.revenueCron,
+                            cronStatus: eachData.cronStatus,
+                            accountStatus: eachData.accountStatus
                         }
                     )
                 })

@@ -86,6 +86,7 @@ const MyTablePage = () => {
         "M_tq",
         "D_tq",
         "from",
+        "to",
         "profitloss",
         "spend",
         "revenue",
@@ -1125,10 +1126,21 @@ const MyTablePage = () => {
         return startDate1.isSame(yesterday1, 'day') && endDate1.isSame(yesterday1, 'day');
     };
 
+    // const campaignMap = useMemo(() => {
+    //     const map = new Map();
+    //     Camapignlevelstatus.forEach((item) => {
+    //       map.set(item.name, item.start);
+    //     });
+    //     return map;
+    // }, [Camapignlevelstatus]);
+
     const campaignMap = useMemo(() => {
         const map = new Map();
         Camapignlevelstatus.forEach((item) => {
-          map.set(item.name, item.start);
+          map.set(item.name, {
+            start: item.start,
+            end: item.end
+          });
         });
         return map;
     }, [Camapignlevelstatus]);
@@ -1224,28 +1236,72 @@ const MyTablePage = () => {
             // suppressMenu: true,    // Suppress the column menu
             
         },
-        from:{
+        // from:{
+        //     headerName: 'Start',
+        //     field: 'from',
+        //     valueGetter: (params) => {
+        //       if (params.node.group) {
+        //         const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
+        //         const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
+        //         // const {  start } = campaignStatus;
+        //         // console.log(params.node.groupData?.campaignname, "groupData");
+        //         // console.log(params.node.key, "start");
+        //         return moment(campaignStatus?.start, "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
+        //       }
+        //       return '';
+        //     },
+        //     cellClassRules: {
+        //       'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     minWidth: 110,
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu', // Add a custom class
+        // },
+        from: {
             headerName: 'Start',
             field: 'from',
+            minWidth: 110,
             valueGetter: (params) => {
               if (params.node.group) {
-                const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
-                const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
-                // const {  start } = campaignStatus;
-                // console.log(params.node.groupData?.campaignname, "groupData");
-                // console.log(params.node.key, "start");
-                return moment(campaignStatus?.start, "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
+                const campaignName =
+                  params.node.groupData?.campaignname || params.node.key;
+                const campaign = campaignMap.get(campaignName);
+                return campaign && campaign.start
+                  ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+                  : '-';
               }
               return '';
             },
             cellClassRules: {
               'hide-leaf-cell': (params) => !params.node.group,
             },
-            minWidth: 110,
             suppressMenu: true,
             menuTabs: [],
-            headerClass: 'hide-menu', // Add a custom class
+            headerClass: 'hide-menu',
         },
+        to:{
+            headerName: 'End',
+            field: 'to',
+            minWidth: 110,
+            valueGetter: (params) => {
+              if (params.node.group) {
+                const campaignName =
+                  params.node.groupData?.campaignname || params.node.key;
+                const campaign = campaignMap.get(campaignName);
+                return campaign && campaign.end
+                  ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+                  : '-';
+              }
+              return '';
+            },
+            cellClassRules: {
+              'hide-leaf-cell': (params) => !params.node.group,
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        }, 
         profitloss:{
               headerName: 'P/L',
               minWidth: 110,
@@ -1976,28 +2032,72 @@ const MyTablePage = () => {
             // hide: true,
             
         },
-        from:{
+        // from:{
+        //     headerName: 'Start',
+        //     field: 'from',
+        //     valueGetter: (params) => {
+        //       if (params.node.group) {
+        //         const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
+        //         const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
+        //         // const {  start } = campaignStatus;
+        //         // console.log(params.node.groupData?.campaignname, "groupData");
+        //         // console.log(params.node.key, "start");
+        //         return moment(campaignStatus?.start, "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
+        //       }
+        //       return '';
+        //     },
+        //     cellClassRules: {
+        //       'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     minWidth: 110,
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu', // Add a custom class
+        // },
+        from: {
             headerName: 'Start',
             field: 'from',
+            minWidth: 110,
             valueGetter: (params) => {
               if (params.node.group) {
-                const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
-                const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
-                // const {  start } = campaignStatus;
-                // console.log(params.node.groupData?.campaignname, "groupData");
-                // console.log(params.node.key, "start");
-                return moment(campaignStatus?.start, "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
+                const campaignName =
+                  params.node.groupData?.campaignname || params.node.key;
+                const campaign = campaignMap.get(campaignName);
+                return campaign && campaign.start
+                  ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+                  : '-';
               }
               return '';
             },
             cellClassRules: {
               'hide-leaf-cell': (params) => !params.node.group,
             },
-            minWidth: 110,
             suppressMenu: true,
             menuTabs: [],
-            headerClass: 'hide-menu', // Add a custom class
+            headerClass: 'hide-menu',
         },
+        to:{
+            headerName: 'End',
+            field: 'to',
+            minWidth: 110,
+            valueGetter: (params) => {
+              if (params.node.group) {
+                const campaignName =
+                  params.node.groupData?.campaignname || params.node.key;
+                const campaign = campaignMap.get(campaignName);
+                return campaign && campaign.end
+                  ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+                  : '-';
+              }
+              return '';
+            },
+            cellClassRules: {
+              'hide-leaf-cell': (params) => !params.node.group,
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        }, 
         profitloss:{
             headerName: 'P/L',
             field: 'profitloss',
@@ -3537,6 +3637,25 @@ const MyTablePage = () => {
             // suppressMenu: true,    // Suppress the column menu
             
         },
+        // from: {
+        //     headerName: 'Start',
+        //     field: 'from',
+        //     minWidth: 110,
+        //     valueGetter: (params) => {
+        //       if (params.node.group) {
+        //         const campaignName =
+        //           params.node.groupData?.campaignname || params.node.key;
+        //         return moment(campaignMap.get(campaignName), "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
+        //       }
+        //       return '';
+        //     },
+        //     cellClassRules: {
+        //       'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu', // Add a custom class
+        // },
         from: {
             headerName: 'Start',
             field: 'from',
@@ -3545,7 +3664,10 @@ const MyTablePage = () => {
               if (params.node.group) {
                 const campaignName =
                   params.node.groupData?.campaignname || params.node.key;
-                return moment(campaignMap.get(campaignName), "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
+                const campaign = campaignMap.get(campaignName);
+                return campaign && campaign.start
+                  ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+                  : '-';
               }
               return '';
             },
@@ -3554,8 +3676,30 @@ const MyTablePage = () => {
             },
             suppressMenu: true,
             menuTabs: [],
-            headerClass: 'hide-menu', // Add a custom class
+            headerClass: 'hide-menu',
         },
+        to:{
+            headerName: 'End',
+            field: 'to',
+            minWidth: 110,
+            valueGetter: (params) => {
+              if (params.node.group) {
+                const campaignName =
+                  params.node.groupData?.campaignname || params.node.key;
+                const campaign = campaignMap.get(campaignName);
+                return campaign && campaign.end
+                  ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+                  : '-';
+              }
+              return '';
+            },
+            cellClassRules: {
+              'hide-leaf-cell': (params) => !params.node.group,
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        }, 
         profitloss:{
               headerName: 'P/L',
               field: 'profitloss',
@@ -4175,6 +4319,26 @@ const MyTablePage = () => {
             // suppressMenu: true,    // Suppress the column menu
             
         },
+        // from: {
+        //     headerName: 'Start',
+        //     field: 'from',
+        //     minWidth: 110,
+        //     valueGetter: (params) => {
+        //       if (params.node.group) {
+        //         const campaignName =
+        //           params.node.groupData?.campaignname || params.node.key;
+        //         return moment(campaignMap.get(campaignName), "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
+        //       }
+        //       return '';
+        //     },
+        //     cellClassRules: {
+        //       'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu', // Add a custom class
+        // },
+        
         from: {
             headerName: 'Start',
             field: 'from',
@@ -4183,7 +4347,10 @@ const MyTablePage = () => {
               if (params.node.group) {
                 const campaignName =
                   params.node.groupData?.campaignname || params.node.key;
-                return moment(campaignMap.get(campaignName), "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
+                const campaign = campaignMap.get(campaignName);
+                return campaign && campaign.start
+                  ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+                  : '-';
               }
               return '';
             },
@@ -4192,8 +4359,30 @@ const MyTablePage = () => {
             },
             suppressMenu: true,
             menuTabs: [],
-            headerClass: 'hide-menu', // Add a custom class
+            headerClass: 'hide-menu',
         },
+        to:{
+            headerName: 'End',
+            field: 'to',
+            minWidth: 110,
+            valueGetter: (params) => {
+              if (params.node.group) {
+                const campaignName =
+                  params.node.groupData?.campaignname || params.node.key;
+                const campaign = campaignMap.get(campaignName);
+                return campaign && campaign.end
+                  ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+                  : '-';
+              }
+              return '';
+            },
+            cellClassRules: {
+              'hide-leaf-cell': (params) => !params.node.group,
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        }, 
         profitloss:{
               headerName: 'P/L',
               field: 'profitloss',
@@ -4811,6 +5000,25 @@ const MyTablePage = () => {
             // suppressMenu: true,    // Suppress the column menu
             
         },
+        // from: {
+        //     headerName: 'Start',
+        //     field: 'from',
+        //     minWidth: 110,
+        //     valueGetter: (params) => {
+        //       if (params.node.group) {
+        //         const campaignName =
+        //           params.node.groupData?.campaignname || params.node.key;
+        //         return moment(campaignMap.get(campaignName), "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
+        //       }
+        //       return '';
+        //     },
+        //     cellClassRules: {
+        //       'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu', // Add a custom class
+        // },
         from: {
             headerName: 'Start',
             field: 'from',
@@ -4819,7 +5027,10 @@ const MyTablePage = () => {
               if (params.node.group) {
                 const campaignName =
                   params.node.groupData?.campaignname || params.node.key;
-                return moment(campaignMap.get(campaignName), "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
+                const campaign = campaignMap.get(campaignName);
+                return campaign && campaign.start
+                  ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+                  : '-';
               }
               return '';
             },
@@ -4828,8 +5039,30 @@ const MyTablePage = () => {
             },
             suppressMenu: true,
             menuTabs: [],
-            headerClass: 'hide-menu', // Add a custom class
+            headerClass: 'hide-menu',
         },
+        to:{
+            headerName: 'End',
+            field: 'to',
+            minWidth: 110,
+            valueGetter: (params) => {
+              if (params.node.group) {
+                const campaignName =
+                  params.node.groupData?.campaignname || params.node.key;
+                const campaign = campaignMap.get(campaignName);
+                return campaign && campaign.end
+                  ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+                  : '-';
+              }
+              return '';
+            },
+            cellClassRules: {
+              'hide-leaf-cell': (params) => !params.node.group,
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        }, 
         profitloss:{
               headerName: 'P/L',
               field: 'profitloss',
@@ -5402,7 +5635,6 @@ const MyTablePage = () => {
             filterParams: { filterEnabled: false },
 
         },
-
         adsetname: {
             headerName: 'AdsetName', field: 'adsetname',
             // resizeble: true,
@@ -5449,18 +5681,40 @@ const MyTablePage = () => {
             // suppressMenu: true,    // Suppress the column menu
             
         },
-        from:{
+        // from:{
+        //     headerName: 'Start',
+        //     field: 'from',
+        //     minWidth: 110,
+        //     valueGetter: (params) => {
+        //       if (params.node.group) {
+        //         const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
+        //         const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
+        //         // const {  start } = campaignStatus;
+        //         // console.log(params.node.groupData?.campaignname, "groupData");
+        //         // console.log(params.node.key, "start");
+        //         return moment(campaignStatus?.start, "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
+        //       }
+        //       return '';
+        //     },
+        //     cellClassRules: {
+        //       'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu', // Add a custom class
+        // },
+        from: {
             headerName: 'Start',
             field: 'from',
             minWidth: 110,
             valueGetter: (params) => {
               if (params.node.group) {
-                const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
-                const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
-                // const {  start } = campaignStatus;
-                // console.log(params.node.groupData?.campaignname, "groupData");
-                // console.log(params.node.key, "start");
-                return moment(campaignStatus?.start, "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
+                const campaignName =
+                  params.node.groupData?.campaignname || params.node.key;
+                const campaign = campaignMap.get(campaignName);
+                return campaign && campaign.start
+                  ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+                  : '-';
               }
               return '';
             },
@@ -5469,8 +5723,30 @@ const MyTablePage = () => {
             },
             suppressMenu: true,
             menuTabs: [],
-            headerClass: 'hide-menu', // Add a custom class
+            headerClass: 'hide-menu',
         },
+        to:{
+            headerName: 'End',
+            field: 'to',
+            minWidth: 110,
+            valueGetter: (params) => {
+              if (params.node.group) {
+                const campaignName =
+                  params.node.groupData?.campaignname || params.node.key;
+                const campaign = campaignMap.get(campaignName);
+                return campaign && campaign.end
+                  ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+                  : '-';
+              }
+              return '';
+            },
+            cellClassRules: {
+              'hide-leaf-cell': (params) => !params.node.group,
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        }, 
         profitloss:{
             headerName: 'P/L',
             field: 'profitloss',
@@ -5935,18 +6211,40 @@ const MyTablePage = () => {
             // suppressMenu: true,    // Suppress the column menu
             
         },
-        from:{
+        // from:{
+        //     headerName: 'Start',
+        //     field: 'from',
+        //     minWidth: 110,
+        //     valueGetter: (params) => {
+        //       if (params.node.group) {
+        //         const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
+        //         const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
+        //         // const {  start } = campaignStatus;
+        //         // console.log(params.node.groupData?.campaignname, "groupData");
+        //         // console.log(params.node.key, "start");
+        //         return moment(campaignStatus?.start, "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
+        //       }
+        //       return '';
+        //     },
+        //     cellClassRules: {
+        //       'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu', // Add a custom class
+        // },
+        from: {
             headerName: 'Start',
             field: 'from',
             minWidth: 110,
             valueGetter: (params) => {
               if (params.node.group) {
-                const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
-                const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
-                // const {  start } = campaignStatus;
-                // console.log(params.node.groupData?.campaignname, "groupData");
-                // console.log(params.node.key, "start");
-                return moment(campaignStatus?.start, "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
+                const campaignName =
+                  params.node.groupData?.campaignname || params.node.key;
+                const campaign = campaignMap.get(campaignName);
+                return campaign && campaign.start
+                  ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+                  : '-';
               }
               return '';
             },
@@ -5955,8 +6253,30 @@ const MyTablePage = () => {
             },
             suppressMenu: true,
             menuTabs: [],
-            headerClass: 'hide-menu', // Add a custom class
+            headerClass: 'hide-menu',
         },
+        to:{
+            headerName: 'End',
+            field: 'to',
+            minWidth: 110,
+            valueGetter: (params) => {
+              if (params.node.group) {
+                const campaignName =
+                  params.node.groupData?.campaignname || params.node.key;
+                const campaign = campaignMap.get(campaignName);
+                return campaign && campaign.end
+                  ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+                  : '-';
+              }
+              return '';
+            },
+            cellClassRules: {
+              'hide-leaf-cell': (params) => !params.node.group,
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        }, 
         profitloss:{
             headerName: 'P/L',
             field: 'profitloss',
@@ -6420,18 +6740,40 @@ const MyTablePage = () => {
             // suppressMenu: true,    // Suppress the column menu
             
         },
-        from:{
+        // from:{
+        //     headerName: 'Start',
+        //     field: 'from',
+        //     minWidth: 110,
+        //     valueGetter: (params) => {
+        //       if (params.node.group) {
+        //         const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
+        //         const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
+        //         // const {  start } = campaignStatus;
+        //         // console.log(params.node.groupData?.campaignname, "groupData");
+        //         // console.log(params.node.key, "start");
+        //         return moment(campaignStatus?.start, "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
+        //       }
+        //       return '';
+        //     },
+        //     cellClassRules: {
+        //       'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu', // Add a custom class
+        // },
+        from: {
             headerName: 'Start',
             field: 'from',
             minWidth: 110,
             valueGetter: (params) => {
               if (params.node.group) {
-                const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
-                const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
-                // const {  start } = campaignStatus;
-                // console.log(params.node.groupData?.campaignname, "groupData");
-                // console.log(params.node.key, "start");
-                return moment(campaignStatus?.start, "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
+                const campaignName =
+                  params.node.groupData?.campaignname || params.node.key;
+                const campaign = campaignMap.get(campaignName);
+                return campaign && campaign.start
+                  ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+                  : '-';
               }
               return '';
             },
@@ -6440,7 +6782,29 @@ const MyTablePage = () => {
             },
             suppressMenu: true,
             menuTabs: [],
-            headerClass: 'hide-menu', // Add a custom class
+            headerClass: 'hide-menu',
+        },
+        to:{
+            headerName: 'End',
+            field: 'to',
+            minWidth: 110,
+            valueGetter: (params) => {
+              if (params.node.group) {
+                const campaignName =
+                  params.node.groupData?.campaignname || params.node.key;
+                const campaign = campaignMap.get(campaignName);
+                return campaign && campaign.end
+                  ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+                  : '-';
+              }
+              return '';
+            },
+            cellClassRules: {
+              'hide-leaf-cell': (params) => !params.node.group,
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
         },
         profitloss:{
             headerName: 'P/L',
@@ -6898,20 +7262,42 @@ const MyTablePage = () => {
             // suppressMenu: true,    // Suppress the column menu
             
         },
-        from:{
+        // from:{
+        //     headerName: 'Start',
+        //     field: 'from',
+        //     minWidth: 110,
+        //     valueGetter: (params) => {
+        //       if (params.node.group) {
+        //         const campaignName =  params.node.key;
+        //         const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
+        //         // const {  start } = campaignStatus;
+        //         // console.log(params.node.groupData?.campaignname, "groupData");
+        //         // console.log(params.node.key, "start");
+        //         // console.log(campaignStatus?.start);
+        //         // console.log(campaignStatus, "campaignStatus");
+        //         return moment(campaignStatus?.start, "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
+        //       }
+        //       return '';
+        //     },
+        //     cellClassRules: {
+        //       'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu', // Add a custom class
+        // },
+        from: {
             headerName: 'Start',
             field: 'from',
             minWidth: 110,
             valueGetter: (params) => {
               if (params.node.group) {
-                const campaignName =  params.node.key;
-                const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
-                // const {  start } = campaignStatus;
-                // console.log(params.node.groupData?.campaignname, "groupData");
-                // console.log(params.node.key, "start");
-                // console.log(campaignStatus?.start);
-                // console.log(campaignStatus, "campaignStatus");
-                return moment(campaignStatus?.start, "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
+                const campaignName =
+                  params.node.groupData?.campaignname || params.node.key;
+                const campaign = campaignMap.get(campaignName);
+                return campaign && campaign.start
+                  ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+                  : '-';
               }
               return '';
             },
@@ -6920,9 +7306,30 @@ const MyTablePage = () => {
             },
             suppressMenu: true,
             menuTabs: [],
-            headerClass: 'hide-menu', // Add a custom class
+            headerClass: 'hide-menu',
         },
-        profitloss:{
+        to:{
+            headerName: 'End',
+            field: 'to',
+            minWidth: 110,
+            valueGetter: (params) => {
+              if (params.node.group) {
+                const campaignName =
+                  params.node.groupData?.campaignname || params.node.key;
+                const campaign = campaignMap.get(campaignName);
+                return campaign && campaign.end
+                  ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+                  : '-';
+              }
+              return '';
+            },
+            cellClassRules: {
+              'hide-leaf-cell': (params) => !params.node.group,
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        }, profitloss:{
             headerName: 'P/L',
             field: 'profitloss',
             minWidth: 110,
@@ -7421,18 +7828,40 @@ const MyTablePage = () => {
             // suppressMenu: true,    // Suppress the column menu
             
         },
-        from:{
+        // from:{
+        //     headerName: 'Start',
+        //     field: 'from',
+        //     minWidth: 110,
+        //     valueGetter: (params) => {
+        //       if (params.node.group) {
+        //         const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
+        //         const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
+        //         // const {  start } = campaignStatus;
+        //         // console.log(params.node.groupData?.campaignname, "groupData");
+        //         // console.log(params.node.key, "start");
+        //         return moment(campaignStatus?.start, "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
+        //       }
+        //       return '';
+        //     },
+        //     cellClassRules: {
+        //       'hide-leaf-cell': (params) => !params.node.group,
+        //     },
+        //     suppressMenu: true,
+        //     menuTabs: [],
+        //     headerClass: 'hide-menu', // Add a custom class
+        // },
+        from: {
             headerName: 'Start',
             field: 'from',
             minWidth: 110,
             valueGetter: (params) => {
               if (params.node.group) {
-                const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
-                const campaignStatus = Camapignlevelstatus?.find(statusObj => statusObj.name === campaignName);
-                // const {  start } = campaignStatus;
-                // console.log(params.node.groupData?.campaignname, "groupData");
-                // console.log(params.node.key, "start");
-                return moment(campaignStatus?.start, "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
+                const campaignName =
+                  params.node.groupData?.campaignname || params.node.key;
+                const campaign = campaignMap.get(campaignName);
+                return campaign && campaign.start
+                  ? moment(campaign.start, "YYYY-MM-DD").format("DD-MM-YYYY")
+                  : '-';
               }
               return '';
             },
@@ -7441,8 +7870,30 @@ const MyTablePage = () => {
             },
             suppressMenu: true,
             menuTabs: [],
-            headerClass: 'hide-menu', // Add a custom class
+            headerClass: 'hide-menu',
         },
+        to:{
+            headerName: 'End',
+            field: 'to',
+            minWidth: 110,
+            valueGetter: (params) => {
+              if (params.node.group) {
+                const campaignName =
+                  params.node.groupData?.campaignname || params.node.key;
+                const campaign = campaignMap.get(campaignName);
+                return campaign && campaign.end
+                  ? moment(campaign.end, "YYYY-MM-DD").format("DD-MM-YYYY")
+                  : '-';
+              }
+              return '';
+            },
+            cellClassRules: {
+              'hide-leaf-cell': (params) => !params.node.group,
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        }, 
         profitloss:{
             headerName: 'P/L',
             field: 'profitloss',
@@ -8680,6 +9131,8 @@ const MyTablePage = () => {
                     toggleStatus={checked}
                     handleChangeToggle={handleChangeToggle}
                     theme={theme}
+                    functionCallForCommnets={functionCallForCommnets}
+                    functionCallForCampaigns={functionCallForCampaigns}
                     />
                 {/* )} */}
                 </Tabs.TabPane>
@@ -8706,6 +9159,8 @@ const MyTablePage = () => {
                     getMainMenuItems={getMainMenuItems}
                     toggleStatus={checked}
                     handleChangeToggle={handleChangeToggle}
+                    functionCallForCommnets={functionCallForCommnets}
+                    functionCallForCampaigns={functionCallForCampaigns}
                     />
                 </Tabs.TabPane>
 
