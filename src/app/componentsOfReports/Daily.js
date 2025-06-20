@@ -62,7 +62,7 @@ const selectTimezone = {
 };
 
 
-const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle}) => {
+const Daily = ({functionCallForCampaigns, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle}) => {
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -1177,6 +1177,8 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                                 showCampaignLevel={showCampaignLevel}
                                 removeSelectedCampaigns={removeSelectedCampaigns}
                                 moveToNextTab={moveToNextTab}
+                                functionCallForCommnets={functionCallForCommnets}
+                                functionCallForCampaigns={functionCallForCampaigns}
                             />
                         </Tabs.TabPane>
                         <Tabs.TabPane key="2">
@@ -1206,6 +1208,8 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                                 selectedCampaigns={selectedCampaigns}
                                 selectedAdsets={selectedAdsets}
                                 moveToNextTab={moveToNextTab}
+                                functionCallForCommnets={functionCallForCommnets}
+                                functionCallForCampaigns={functionCallForCampaigns}
                             />
                         </Tabs.TabPane>
                         <Tabs.TabPane key="3">
@@ -1232,6 +1236,8 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                                 tabStatus={"Live"}
                                 selectedCampaigns={selectedCampaigns}
                                 selectedAdsets={selectedAdsets}
+                                functionCallForCommnets={functionCallForCommnets}
+                                functionCallForCampaigns={functionCallForCampaigns}
                             />
                         </Tabs.TabPane>
                     </Tabs>
