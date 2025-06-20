@@ -2724,7 +2724,7 @@ body.dark-mode .black-icon-comment.anticon svg {
   padding-left: 0 !important;
 }
 
-/* ✅ 4. Footer (Submit/Close button row): remove left spacing */
+/* ✅ 4 Footer (Submit/Close button row): remove left spacing */
 .custom-single-month-picker .ant-picker-footer {
   margin-left: 0 !important;
   padding-left: 0 !important;
