@@ -242,6 +242,7 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
   };
   const handleMenuItemClick = (key) => {
     router.push(key);
+    setVisible(false);
   };
 
   // Function to handle adding a notification via the backend API

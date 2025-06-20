@@ -1,7 +1,7 @@
 "use client"
 import React from 'react';
 import { Drawer, Button, DatePicker, Space, Form, Input, Select, Collapse, Upload, Steps, Modal, message, Spin, Badge, Tooltip, Skeleton } from 'antd';
-import { PlusOutlined, UploadOutlined, ShareAltOutlined, CommentOutlined, LikeOutlined, MoreOutlined, CloseOutlined, GlobalOutlined, EditOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { PlusOutlined, UploadOutlined, ShareAltOutlined, CommentOutlined, LikeOutlined, MoreOutlined, CloseOutlined, GlobalOutlined, EditOutlined, QuestionCircleOutlined, DeleteOutlined } from '@ant-design/icons';
 import moment from 'moment-timezone';
 import { useState, useRef, useEffect } from 'react';
 import TextArea from 'antd/es/input/TextArea';
@@ -15,6 +15,7 @@ import MnetUrlBuilder from './urlbuilder/mnet';
 import TonicUrlBuilder from './urlbuilder/tonic';
 import System1UrlBuilder from './urlbuilder/system1';
 import DActiveUrlBuilder from './urlbuilder/dactive';
+import ImageUploadPage from '../../Creatives/page';
 
 const { Panel } = Collapse;
 const { Option } = Select;
@@ -545,6 +546,11 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
     const [campaignLevelDailyBudget, setCampaignLevelDailyBudget] = useState(0);
     const [adsetLevelDailyBudget, setAdsetLevelDailyBudget] = useState(0);
     const [defaultImages, setDefaultImages] = useState([]);
+    const [selectedOption, setSelectedOption] = useState("creative");
+    const [selectedFilesFromCreatives, setSelectedFilesFromCreatives] = useState([]);
+    const [selectedFilesFromMedia, setSelectedFilesFromMedia] = useState([]);
+    const [openCreativesDrawer, setOpenCreativesDrawer] = useState(false);
+    const [submitErrors, setSubmitErrors] = useState([]);
 
     useEffect(() => {
         if (visible) {
@@ -565,6 +571,58 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
             setAdsetLevelDailyBudget(0);
         }
     }, [visible]);
+
+    const onClickCreativesDrawer = () => {
+        console.log("Creatives Drawer Opened");
+        setOpenCreativesDrawer(true);
+    }
+
+    const selectedFilesData = (data) => {
+        console.log("Selected Files Data:", data);
+        setSelectedFiles(prev => [...prev, ...data.map((file, index)=>{
+            return({
+                uid: file.uid || `-${index+1}`,
+                name: file?.name,
+                status: 'done',
+                type: `${file?.url?.endsWith(".jpg") || file?.url?.endsWith(".png") || file?.url?.endsWith(".jpeg") ? file?.url?.endsWith(".jpg") ? "image/jpg" : file?.url?.endsWith(".jpeg") ? "image/jpeg" : "image/png" : "video/"}`,
+                url: file?.url,
+            })
+        })]);
+        setSelectedFilesFromCreatives(prev => [...prev, ...data.map((file, index)=>{
+            return({
+                uid: file.uid || `-${index+1}`,
+                name: file?.name,
+                status: 'done',
+                type: `${file?.url?.endsWith(".jpg") || file?.url?.endsWith(".png") || file?.url?.endsWith(".jpeg") ? file?.url?.endsWith(".jpg") ? "image/jpg" : file?.url?.endsWith(".jpeg") ? "image/jpeg" : "image/png" : "video/"}`,
+                url: file?.url,
+            })
+        })]);
+        setOpenCreativesDrawer(false);
+        
+        if (data.length > 0) {
+            const currentMediaContent = form.getFieldValue("MediaContent") || [];
+        
+            const newFiles = data.map((file, index) => ({
+                uid: file.uid || `-${index + 1}`,
+                name: file?.name,
+                status: 'done',
+                type: file?.url?.endsWith(".jpg")
+                    ? "image/jpg"
+                    : file?.url?.endsWith(".jpeg")
+                    ? "image/jpeg"
+                    : file?.url?.endsWith(".png")
+                    ? "image/png"
+                    : "video/",
+                url: file?.url,
+            }));
+        
+            const updatedMediaContent = [...currentMediaContent, ...newFiles];
+        
+            form.setFieldsValue({ MediaContent: updatedMediaContent });
+            form.validateFields(["MediaContent"]);
+        }
+    }
+
 
     const handleEditClick = (file) => {
         setCurrentFile(file); // Set the file to be edited
@@ -677,6 +735,15 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
             setDefaultURLBuilder(DuplicatedampaignData?.addlevel[0]?.Website_URL);
             DuplicatedampaignData?.adsetlevel?.placements === "manual" ? setIsManual("manual") : setIsManual(false);
             setSelectedFiles(DuplicatedampaignData?.addlevel?.map((file, index)=>{
+                return({
+                    uid: `-${index+1}`,
+                    name: file?.filename,
+                    status: 'done',
+                    type: `${file?.filename?.endsWith(".jpg") || file?.filename?.endsWith(".png") ? file?.filename?.endsWith(".jpg") ? "image/jpg" : "image/png" : "video/"}`,
+                    url: file?.filename,
+                })
+            }));
+            setSelectedFilesFromCreatives(DuplicatedampaignData?.addlevel?.map((file, index)=>{
                 return({
                     uid: `-${index+1}`,
                     name: file?.filename,
@@ -815,7 +882,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
     };
 
     var token = localStorage.getItem("token")
-    // console.log(selectedRow, "selectedRow")
+    console.log(selectedRow, "selectedRow")
 
 
 
@@ -992,7 +1059,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                     }
         
                     if (file?.url) {
-                        if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith('.mp4')) {
+                        if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") || file?.url?.endsWith('.mp4')) {
                             const formData = new FormData();
                             const response = await fetch(`https://prodapis.adsgoat.in/s3?s3Url=${file.url}`, {
                                 method: 'GET',
@@ -1012,7 +1079,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                             // console.log(formData);
         
                             let fbResponse;
-                            if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg')) {
+                            if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") ) {
                                 formData.append('file', uploadFile, file.name);
                                 formData.append('access_token', token);
                                 const fileName = file.name.split('/').pop();
@@ -1022,6 +1089,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                     formData,
                                     { headers: { 'Content-Type': 'multipart/form-data' } }
                                 );
+                                
         
                                 if (fbResponse.status === 200) {
                                     onSuccess("ok", response);
@@ -1076,16 +1144,17 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                     } else {
                         if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
                             const formData = new FormData();
-                            const fileId = file.name;
-                            const editedImage = editedImages[fileId];
+                            const uniqueId = uuidv4(); // Generate a unique ID for the file
+                            const fileId = `${uniqueId}_${file.name}`;
+                            const editedImage = editedImages[file.name];
                             const uploadFile = editedImage ? await fetch(editedImage).then(res => res.blob()) : null;
         
                             console.log(file.originFileObj.name);
         
                             if (uploadFile) {
-                                formData.append("file", uploadFile, `blob/${file.name}`);
+                                formData.append("file", uploadFile, `blob/${uniqueId}_${file.name}`);
                             } else {
-                                formData.append("file", file.originFileObj, `blob/${file.originFileObj.name}`);
+                                formData.append("file", file.originFileObj, `blob/${uniqueId}_${file.originFileObj.name}`);
                             }
         
                             // console.log(formData);
@@ -1117,6 +1186,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                     formData,
                                     { headers: { 'Content-Type': 'multipart/form-data' } }
                                 );
+
+                                // console.log("Facebook API response:", fbResponse.data);
         
                                 if (response.status === 200 && fbResponse.status === 200) {
                                     onSuccess("ok", response);
@@ -2394,7 +2465,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                 <div style={{ display: "flex", justifyContent: "space-between" }}>
                                     <div style={{ flex: "70%", marginRight: "5%" }}>
                                         <div style={{ display: 'flex', gap: '16px' }}>
-                                            <Form.Item
+                                            {/* <Form.Item
                                                 name="MediaContent"
                                                 label={<span style={{ color: "#B4B4B4" }}>Upload</span>}
                                                 rules={[
@@ -2426,7 +2497,178 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                     <Button icon={<UploadOutlined />}>Select Files</Button>
                                                 </Upload>
 
-                                            </Form.Item>
+                                            </Form.Item> */}
+                                            <div style={{display:'flex', flexDirection:'column'}}>
+                                                <Form.Item
+                                                    label={<span style={{ color: "#B4B4B4" }}>Select Source</span>}
+                                                    style={{ flex: 1 }}
+                                                    >
+                                                    <Select
+                                                        defaultValue="creative"
+                                                        onChange={(value) => {
+                                                        setSelectedOption(value);
+                                                        form.validateFields(["MediaContent"]); // Revalidate when switching source
+                                                        }}
+                                                        style={{ marginBottom: 16 }}
+                                                    >
+                                                        <Option value="upload">Upload</Option>
+                                                        <Option value="creative">Creative Library</Option>
+                                                    </Select>
+                                                    </Form.Item>
+
+                                                    <Form.Item
+                                                    name="MediaContent"
+                                                    rules={[
+                                                        {
+                                                        validator: async () => {
+                                                            if (
+                                                            (selectedOption === "upload" && selectedFilesFromMedia.length === 0) ||
+                                                            (selectedOption === "creative" && selectedFilesFromCreatives.length === 0)
+                                                            ) {
+                                                            throw new Error("Please select Upload!");
+                                                            }
+                                                            return Promise.resolve();
+                                                        },
+                                                        },
+                                                    ]}
+                                                    >
+                                                        <div>
+                                                            {/* Upload UI */}
+                                                            <div style={{ display: selectedOption === "upload" ? "block" : "none" }}>
+                                                                <Upload
+                                                                    beforeUpload={() => false}
+                                                                    onChange={(info) => {
+                                                                    const newFiles = info.fileList.map((file) => ({
+                                                                        ...file,
+                                                                        uid: file.uid || `-${Date.now()}`,
+                                                                        source: "media",
+                                                                        thumbUrl:
+                                                                        file.thumbUrl ||
+                                                                        (file.originFileObj
+                                                                            ? URL.createObjectURL(file.originFileObj)
+                                                                            : undefined),
+                                                                    }));
+
+                                                                    setSelectedFiles((prev) => {
+                                                                        const existingUids = new Set(prev.map((f) => f.uid));
+                                                                        const filteredNewFiles = newFiles.filter((f) => !existingUids.has(f.uid));
+                                                                        const updated = [...prev, ...filteredNewFiles];
+                                                                        form.setFieldsValue({ MediaContent: updated });
+                                                                        form.validateFields(["MediaContent"]);
+                                                                        return updated;
+                                                                    });
+
+                                                                    setSelectedFilesFromMedia((prev) => {
+                                                                        const existingUids = new Set(prev.map((f) => f.uid));
+                                                                        const filteredNewFiles = newFiles.filter((f) => !existingUids.has(f.uid));
+                                                                        const updated = [...prev, ...filteredNewFiles];
+                                                                        form.setFieldsValue({ MediaContent: updated });
+                                                                        form.validateFields(["MediaContent"]);
+                                                                        return updated;
+                                                                    });
+                                                                    }}
+                                                                    onRemove={(fileToRemove) => {
+                                                                    setSelectedFilesFromMedia((prev) => {
+                                                                        const updated = prev.filter((file) => file.uid !== fileToRemove.uid);
+                                                                        form.setFieldsValue({ MediaContent: updated });
+                                                                        form.validateFields(["MediaContent"]);
+                                                                        return updated;
+                                                                    });
+
+                                                                    setSelectedFiles((prev) => {
+                                                                        const updated = prev.filter((file) => file.uid !== fileToRemove.uid);
+                                                                        form.setFieldsValue({ MediaContent: updated });
+                                                                        form.validateFields(["MediaContent"]);
+                                                                        return updated;
+                                                                    });
+
+                                                                    return true;
+                                                                    }}
+                                                                    multiple
+                                                                    maxCount={10}
+                                                                    fileList={selectedFilesFromMedia}
+                                                                    listType="picture"
+                                                                    accept="image/*, video/*"
+                                                                >
+                                                                    <Button icon={<UploadOutlined />}>Select Files</Button>
+                                                                </Upload>
+                                                            </div>
+
+                                                            {/* Creative Library UI */}
+                                                            {selectedOption === "creative" && (
+                                                            <div>
+                                                                <Button icon={<UploadOutlined />} onClick={onClickCreativesDrawer}>
+                                                                Select Files
+                                                                </Button>
+
+                                                                {selectedFilesFromCreatives?.length > 0 && (
+                                                                <div style={{ marginTop: "10px" }}>
+                                                                    {selectedFilesFromCreatives.map((file, index) => (
+                                                                    <div
+                                                                        key={index}
+                                                                        style={{
+                                                                        display: "flex",
+                                                                        alignItems: "center",
+                                                                        marginBottom: 8,
+                                                                        }}
+                                                                    >
+                                                                        {/* <PaperClipOutlined style={{ marginRight: 8 }} /> */}
+                                                                        {/* <Tooltip title={file.name}> */}
+                                                                        {file.type?.startsWith("image/") && (
+                                                                            <img
+                                                                                src={
+                                                                                file.originFileObj
+                                                                                    ? URL.createObjectURL(file.originFileObj)
+                                                                                    : file.url
+                                                                                }
+                                                                                alt="preview"
+                                                                                style={{
+                                                                                width: 40,
+                                                                                height: 40,
+                                                                                objectFit: "cover",
+                                                                                borderRadius: 4,
+                                                                                marginLeft: 8,
+                                                                                }}
+                                                                            />
+                                                                        )}
+                                                                        <span
+                                                                            style={{
+                                                                            maxWidth: 160,
+                                                                            overflow: "hidden",
+                                                                            textOverflow: "ellipsis",
+                                                                            whiteSpace: "nowrap",
+                                                                            paddingLeft: 8,
+                                                                            }}
+                                                                        >
+                                                                            {file.name}
+                                                                        </span>
+                                                                        {/* </Tooltip> */}
+
+                                                                        
+
+                                                                        <DeleteOutlined
+                                                                        onClick={() => {
+                                                                            const updated = selectedFilesFromCreatives.filter(
+                                                                            (f) => f.uid !== file.uid
+                                                                            );
+                                                                            setSelectedFilesFromCreatives(updated);
+                                                                            setSelectedFiles((prev) =>
+                                                                            prev.filter((f) => f.uid !== file.uid)
+                                                                            );
+                                                                            form.setFieldsValue({ MediaContent: updated });
+                                                                            form.validateFields(["MediaContent"]);
+                                                                        }}
+                                                                        style={{ color: "red", marginLeft: 12, cursor: "pointer" }}
+                                                                        />
+                                                                    </div>
+                                                                    ))}
+                                                                </div>
+                                                                )}
+                                                            </div>
+                                                            )}
+                                                        </div>
+                                                </Form.Item>
+                                            </div>
                                             <Form.Item
                                                 name="page_id"
                                                 initialValue={pageid}
@@ -2865,12 +3107,66 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                             </Panel>
                         </Collapse>
                         <Form.Item label=" ">
-                            {isFormComplete && (
-                                <Button type="primary" htmlType="submit" style={{ background: '#21c55d', minWidth: '200px' }}>
-                                    Submit
-                                </Button>
+                        {isFormComplete && (
+                            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+                            <Button
+                                type="primary"
+                                style={{ background: '#21c55d', minWidth: '200px' }}
+                                onClick={async () => {
+                                try {
+                                    const values = await form.validateFields(); // Validates all form fields
+
+                                    // Clear existing validation errors
+                                    
+
+                                    if (((adsetLevelDailyBudget === 0 && campaignLevelDailyBudget === 0) ||
+                                    isNaN(adsetLevelDailyBudget) || isNaN(campaignLevelDailyBudget))) {
+                                        // Throw a validation error manually in the same format as AntD expects
+                                        throw {
+                                          errorFields: [
+                                            {
+                                              name: ['Daily_amount'], // This should match your Form.Item name path
+                                              errors: ['Daily budget cannot be zero on both Adset and Campaign levels'],
+                                            },
+                                          ],
+                                        };
+                                    }
+
+                                    setSubmitErrors([]);
+
+                                    // Optionally trigger your existing logic
+                                    onFinish(values); // If you want to reuse your existing logic
+
+                                    // Show confirmation modal
+                                    setIsModalVisible(true);
+
+                                    // Save values if needed
+                                    setFormValues(values);
+                                } catch (err) {
+                                    const allErrors = err?.errorFields?.map((field) => ({
+                                    name: field.name?.[0],       // field name
+                                    message: field.errors?.[0],  // validation message
+                                    }));
+                                    setSubmitErrors(allErrors);
+                                }
+                                }}
+                            >
+                                Submit
+                            </Button>
+
+                            {/* Show validation messages beside button */}
+                            {submitErrors.length > 0 && (
+                                <div style={{ color: "red", marginTop: 8 }}>
+                                {submitErrors.map((err, index) => (
+                                    <div key={index}>
+                                    <strong>{err.name}:</strong> {err.message}
+                                    </div>
+                                ))}
+                                </div>
                             )}
-                        </Form.Item>
+                            </div>
+                        )}
+                    </Form.Item>
                         {isImgEditorShown && currentFile && (
                             <FabricCanvas
                                 fileId={currentFile.name} // Pass a unique identifier
@@ -2895,6 +3191,20 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                         <Skeleton active paragraph={{ rows: 20 }} />
                     </div>
                 </div>
+            )}
+            {openCreativesDrawer && (
+                <Drawer
+                    title="Select Creatives"
+                    width="95%"
+                    open={openCreativesDrawer}
+                    onClose={() => setOpenCreativesDrawer(false)}
+                >
+                    {/* <CreativesDrawer
+                        selectedFilesData={selectedFilesData}
+                        
+                    /> */}
+                    <ImageUploadPage selectedFilesData={selectedFilesData} fromCampaigns={true} network={network} Account_Number={selectedRow?.Account_Number} />
+                </Drawer>
             )}
         </Drawer>
     );

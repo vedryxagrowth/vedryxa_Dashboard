@@ -702,7 +702,7 @@ const RevenuePartnerDashboard = () => {
                             />
                         </Space>
                     </Col>
-                    <Col xs={16} sm={16} md={10} lg={8}>
+                    <Col xs={16} sm={16} md={10} lg={8} className='Dashboard-Details-1'>
                         <ConfigProvider 
                             locale={locale}
                             theme={{
@@ -727,11 +727,37 @@ const RevenuePartnerDashboard = () => {
                             />
                         </ConfigProvider>
                     </Col>
+                    <Col xs={16} sm={16} md={10} lg={8} className='Dashboard-Details-2'>
+                        <ConfigProvider 
+                            locale={locale}
+                            theme={{
+                                token: {
+                                  colorPrimary: '#91C25F', 
+                                  colorTextLightSolid: '#000',
+                                },
+                            }}
+                        >
+                            <RangePicker
+                                presets={rangePresets}
+                                onChange={handleChange}
+                                disabledDate={disabledDate}
+                                defaultValue={defaultDates}
+                                format="YYYY-MM-DD"
+                                style={{
+                                    width: '100%',
+                                    backgroundColor: theme === 'dark' ? '#555' : undefined,
+                                    color: theme === 'dark' ? 'white' : undefined,
+                                }}
+                                dropdownClassName={`custom-single-month-picker Dashboard-Details-2 ${theme === 'dark' ? 'dark-theme-dropdown' : ''}`}
+                            />
+                        </ConfigProvider>
+                    </Col>
                     <Col xs={12} sm={12} md={4} lg={3}>
                         <Select
                             placeholder="Select Timezone"
                             onChange={onChangeTime}
                             value={timeZone}
+                            style={{width: '100%'}}
                             options={timezones.map((item) => ({ value: item, label: item }))}
                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             dropdownClassName={theme === 'dark' && 'custom-dropdown'}
@@ -750,7 +776,7 @@ const RevenuePartnerDashboard = () => {
             >
                 {renderCarouselNav()}
             </div>
-            <Carousel dots={false}  ref={carouselRef} beforeChange={handleSlideChange}>
+            <Carousel  className='zoom-90' dots={false}  ref={carouselRef} beforeChange={handleSlideChange}>
                 <div>
                     {loading ? (
                         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '75vh' }}>
@@ -759,8 +785,8 @@ const RevenuePartnerDashboard = () => {
                     ) : (
                         revenuePartnerData.length > 0 && (
                             <div
-                                className={`ag-theme-alpine ${gridThemeClass}`}
-                                style={{ width: '100%', height: '70vh' }}
+                                className={`ag-theme-alpine ${gridThemeClass} zoom-size`}
+                                style={{ width: '100%', height: '100%' }}
                             >
                                 <AgGridReact
                                     rowData={revenuePartnerData}
@@ -2658,7 +2684,7 @@ const Dashboard = () => {
         setActiveTab(index);
         // console.log(index);
         // console.log(parseInt(index)-1);
-        carouselRef.current.goTo(parseInt(index)-1)
+        // carouselRef.current.goTo(parseInt(index)-1)
         
     };
 
@@ -2683,7 +2709,7 @@ const Dashboard = () => {
         setActiveTab1(index);
         // console.log(index);
         // console.log(parseInt(index)-1);
-        carouselRef1.current.goTo(parseInt(index)-1)
+        // carouselRef1.current.goTo(parseInt(index)-1)
         
     };
 
@@ -2691,7 +2717,7 @@ const Dashboard = () => {
         setActiveTab2(index);
         // console.log(index);
         // console.log(parseInt(index)-1);
-        carouselRef2.current.goTo(parseInt(index)-1)
+        // carouselRef2.current.goTo(parseInt(index)-1)
         
     };
 
@@ -2699,9 +2725,25 @@ const Dashboard = () => {
         setActiveTab3(index);
         // console.log(index);
         // console.log(parseInt(index)-1);
-        carouselRef3.current.goTo(parseInt(index)-1)
+        // carouselRef3.current.goTo(parseInt(index)-1)
         
     };
+
+    const handleTabChange = (key) => {
+        setActiveTab3(key)
+    }
+
+    const handleTabChange1 = (key) => {
+        setActiveTab3(key)
+    }
+
+    const handleTabChange2 = (key) => {
+        setActiveTab2(key)
+    }
+
+    const handleTabChange3 = (key) => {
+        setActiveTab3(key)
+    }
 
     const renderCarouselNav1 = () => (
         <StickyBox offsetTop={64} offsetBottom={20} style={{ zIndex: 1, padding: '0px', margin: '0px', paddingLeft: '0px' }}>
@@ -4031,246 +4073,272 @@ const Dashboard = () => {
                             <div style={{padding:'0px', marginTop:'15px'}}>
                                 <RenderCarouselNav2/>
                             </div>
-                            <Carousel ref={carouselRef2} beforeChange={handleSlideChange2} dots={false}>
-                                <div>
-                                    {/* ✅ Custom Checkbox-style Legend */}
-                                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '8px', justifyContent:'center' }}>
-                                        {Object.keys(colorMaps).map((label) => {
-                                        const isVisible = !hiddenByDate.includes(label);
-                                        return (
-                                            <div
-                                            key={label}
-                                            onClick={() => toggle0(label)}
-                                            style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '6px',
-                                                cursor: 'pointer',
-                                                fontSize: '13px',
-                                                color: theme === 'dark' ? '#fff' : '#000',
-                                            }}
-                                            >
-                                            <div
+                            <Tabs activeKey={activeTab2} onChange={handleTabChange2} renderTabBar={() => <></>}>    
+                            {/* <Carousel ref={carouselRef2} beforeChange={handleSlideChange2} dots={false}> */}
+                                <Tabs.TabPane key="1">
+                                    <div>
+                                        {/* ✅ Custom Checkbox-style Legend */}
+                                        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '8px', justifyContent:'center' }}>
+                                            {Object.keys(colorMaps).map((label) => {
+                                            const isVisible = !hiddenByDate.includes(label);
+                                            return (
+                                                <div
+                                                key={label}
+                                                onClick={() => toggle0(label)}
                                                 style={{
-                                                width: '16px',
-                                                height: '16px',
-                                                borderRadius: '4px',
-                                                backgroundColor: colorMaps[label],
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                color: '#fff',
-                                                fontWeight: 'bold',
-                                                fontSize: '11px',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '6px',
+                                                    cursor: 'pointer',
+                                                    fontSize: '13px',
+                                                    color: theme === 'dark' ? '#fff' : '#000',
                                                 }}
-                                            >
-                                                {isVisible ? '✔' : ''}
-                                            </div>
-                                            {label}
-                                            </div>
-                                        );
-                                        })}
+                                                >
+                                                <div
+                                                    style={{
+                                                    width: '16px',
+                                                    height: '16px',
+                                                    borderRadius: '4px',
+                                                    backgroundColor: colorMaps[label],
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    color: '#fff',
+                                                    fontWeight: 'bold',
+                                                    fontSize: '11px',
+                                                    }}
+                                                >
+                                                    {isVisible ? '✔' : ''}
+                                                </div>
+                                                {label}
+                                                </div>
+                                            );
+                                            })}
+                                        </div>
+                                        <Row
+                                            style={{
+                                            height: '400px',
+                                            marginBottom: '10px',
+                                            marginTop: '25px',
+                                            padding: '0px',
+                                            }}
+                                        >
+                                            {Array.isArray(datasets0) && datasets0.length > 0 && (
+                                            <Line
+                                                ref={chartByDateRef}
+                                                data={{
+                                                labels: chartDataByDate?.datesByDate || [],
+                                                datasets: datasets0,
+                                                }}
+                                                options={{
+                                                responsive: true,
+                                                maintainAspectRatio: false,
+                                                plugins: {
+                                                    legend: {
+                                                    display: false,
+                                                    },
+                                                    tooltip: {
+                                                    mode: 'index',
+                                                    intersect: false,
+                                                    displayColors: true,
+                                                    callbacks: {
+                                                        title: function (tooltipItems) {
+                                                        const index = tooltipItems[0].dataIndex;
+                                                        const rawDate = chartDataByDate?.datesByDate?.[index];
+                                                        const dateObj = new Date(rawDate);
+                                                        const weekday = dateObj.toLocaleDateString('en-US', { weekday: 'long' });
+                                                        return [`${rawDate} (${weekday})`];
+                                                        },
+                                                        label: function (tooltipItem) {
+                                                        const dataset = tooltipItem.dataset;
+                                                        const value = dataset.data[tooltipItem.dataIndex];
+                                                        return `${dataset.label}: ${value}`;
+                                                        },
+                                                    },
+                                                    },
+                                                },
+                                                scales: {
+                                                    x: {
+                                                        ticks: {
+                                                        padding: 30,
+                                                        color: (context) => {
+                                                            const index = context.index;
+                                                            const label = chartData?.dates?.[index]; // get the X label
+                                                            return getColorForValue(label); // ✅ apply unique color
+                                                        },
+                                                        },
+                                                        grid: {
+                                                        color: theme === 'dark' ? '#444' : '#e0e0e0',
+                                                        },
+                                                    },
+                                                    y: {
+                                                    beginAtZero: true,
+                                                    ticks: {
+                                                        callback: (value) => value.toFixed(2),
+                                                        color: theme === 'dark' ? '#fff' : '#000',
+                                                    },
+                                                    grid: {
+                                                        color: theme === 'dark' ? '#444' : '#e0e0e0',
+                                                    },
+                                                    },
+                                                },
+                                                }}
+                                                height={350}
+                                            />
+                                            )}
+                                        </Row>
+
+                                    
                                     </div>
-                                    <Row
-                                        style={{
-                                        height: '400px',
-                                        marginBottom: '10px',
-                                        marginTop: '25px',
-                                        padding: '0px',
-                                        }}
-                                    >
-                                        {Array.isArray(datasets0) && datasets0.length > 0 && (
-                                        <Line
-                                            ref={chartByDateRef}
+                                </Tabs.TabPane>
+                                <Tabs.TabPane key="2">
+                                    <div>
+                                        {/* ✅ Custom Legend */}
+                                        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '8px', justifyContent:'center' }}>
+                                            {Object.keys(colorMaps).map((label) => {
+                                            const isVisible = !hidden.includes(label);
+                                            return (
+                                                <div
+                                                key={label}
+                                                onClick={() => toggle(label)}
+                                                style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '6px',
+                                                    cursor: 'pointer',
+                                                    fontSize: '13px',
+                                                    color: theme === 'dark' ? '#fff' : '#000', // Adjust text color based on theme
+                                                }}
+                                                >
+                                                <div
+                                                    style={{
+                                                    width: '16px',
+                                                    height: '16px',
+                                                    borderRadius: '4px',
+                                                    backgroundColor: colorMaps[label],
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    color: '#fff',
+                                                    fontWeight: 'bold',
+                                                    fontSize: '11px',
+                                                    }}
+                                                >
+                                                    {isVisible ? '✔' : ''}
+                                                </div>
+                                                {label}
+                                                </div>
+                                            );
+                                            })}
+                                        </div>
+                                        <Row
+                                            style={{
+                                            height: '400px',
+                                            marginBottom: '10px',
+                                            marginTop: '25px',
+                                            padding: '0px',
+                                            }}
+                                        >
+                                            <Line
+                                            ref={chartRef}
                                             data={{
-                                            labels: chartDataByDate?.datesByDate || [],
-                                            datasets: datasets0,
+                                                labels: chartData?.dates || [],
+                                                datasets,
                                             }}
                                             options={{
-                                            responsive: true,
-                                            maintainAspectRatio: false,
-                                            plugins: {
+                                                responsive: true,
+                                                maintainAspectRatio: false,
+                                                plugins: {
                                                 legend: {
-                                                display: false,
+                                                    display: false, // disable default
                                                 },
                                                 tooltip: {
-                                                mode: 'index',
-                                                intersect: true,
-                                                displayColors: true,
-                                                callbacks: {
-                                                    title: function (tooltipItems) {
-                                                    const index = tooltipItems[0].dataIndex;
-                                                    const rawDate = chartDataByDate?.datesByDate?.[index];
-                                                    const dateObj = new Date(rawDate);
-                                                    const weekday = dateObj.toLocaleDateString('en-US', { weekday: 'long' });
-                                                    return [`${rawDate} (${weekday})`];
-                                                    },
+                                                    mode: 'index',
+                                                    intersect: false,
+                                                    displayColors: true,
+                                                    boxWidth: 15,
+                                                    boxHeight: 15,
+                                                    callbacks: {
+                                                        title: function (tooltipItems) {
+                                                            const index = tooltipItems[0].dataIndex;
+                                                            const xValue = tooltipItems[0].label;
+                                                            const date = chartData?.newDates?.[index] || chartData?.dates?.[index] || '';
+                                                            return `${xValue} ( ${date} )`; // ⬅️ both lines at top
+                                                        },
                                                     label: function (tooltipItem) {
-                                                    const dataset = tooltipItem.dataset;
-                                                    const value = dataset.data[tooltipItem.dataIndex];
-                                                    return `${dataset.label}: ${value}`;
+                                                        const index = tooltipItem.dataIndex;
+                                                        const dataset = tooltipItem.dataset;
+                                                        const value = dataset.data[index];
+                                                        const label = dataset.label || '';
+                                                        return `${label}: ${value}`;
+                                                    },
+                                                    
                                                     },
                                                 },
                                                 },
-                                            },
-                                            scales: {
-                                                x: {
+                                                scales: {
+                                                    x: {
+                                                        ticks: {
+                                                        padding: 30,
+                                                        // color: (context) => {
+                                                        //     const index = context.index;
+                                                        //     const label = chartData?.dates?.[index]; // get the X label
+                                                        //     return getColorForValue(label); // ✅ apply unique color
+                                                        // },
+                                                        color: (function () {
+                                                            const memoizedColors = {};
+                                                            return (context) => {
+                                                                const index = context.index;
+                                                                const label = chartData?.dates?.[index];
+                                                                if (!label) return '#ccc';
+                                                                if (!memoizedColors[label]) {
+                                                                    memoizedColors[label] = getColorForValue(label);
+                                                                }
+                                                                return memoizedColors[label];
+                                                            };
+                                                        })()
+                                                        
+                                                        },
+                                                        grid: {
+                                                        color: theme === 'dark' ? '#444' : '#e0e0e0',
+                                                        },
+                                                    },
+                                                y: {
+                                                    beginAtZero: true,
                                                     ticks: {
-                                                      padding: 30,
-                                                      color: (context) => {
-                                                        const index = context.index;
-                                                        const label = chartData?.dates?.[index]; // get the X label
-                                                        return getColorForValue(label); // ✅ apply unique color
-                                                      },
+                                                    callback: function (value) {
+                                                        return value.toFixed(2);
+                                                    },
+                                                    color: theme === 'dark' ? '#fff' : '#000',
                                                     },
                                                     grid: {
-                                                      color: theme === 'dark' ? '#444' : '#e0e0e0',
+                                                    color: theme === 'dark' ? '#444' : '#e0e0e0',
                                                     },
                                                 },
-                                                y: {
-                                                beginAtZero: true,
-                                                ticks: {
-                                                    callback: (value) => value.toFixed(2),
-                                                    color: theme === 'dark' ? '#fff' : '#000',
                                                 },
-                                                grid: {
-                                                    color: theme === 'dark' ? '#444' : '#e0e0e0',
-                                                },
-                                                },
-                                            },
+                                                elements: {
+                                                    point: {
+                                                      radius: 4,
+                                                      hitRadius: 10,
+                                                      hoverRadius: 6,
+                                                    },
+                                                  },
                                             }}
                                             height={350}
-                                        />
-                                        )}
-                                    </Row>
+                                            />
+                                        </Row>
 
-                                
-                                </div>
-                                <div>
-                                    {/* ✅ Custom Legend */}
-                                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '8px', justifyContent:'center' }}>
-                                        {Object.keys(colorMaps).map((label) => {
-                                        const isVisible = !hidden.includes(label);
-                                        return (
-                                            <div
-                                            key={label}
-                                            onClick={() => toggle(label)}
-                                            style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '6px',
-                                                cursor: 'pointer',
-                                                fontSize: '13px',
-                                                color: theme === 'dark' ? '#fff' : '#000', // Adjust text color based on theme
-                                            }}
-                                            >
-                                            <div
-                                                style={{
-                                                width: '16px',
-                                                height: '16px',
-                                                borderRadius: '4px',
-                                                backgroundColor: colorMaps[label],
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                color: '#fff',
-                                                fontWeight: 'bold',
-                                                fontSize: '11px',
-                                                }}
-                                            >
-                                                {isVisible ? '✔' : ''}
-                                            </div>
-                                            {label}
-                                            </div>
-                                        );
-                                        })}
+                                    
                                     </div>
-                                    <Row
-                                        style={{
-                                        height: '400px',
-                                        marginBottom: '10px',
-                                        marginTop: '25px',
-                                        padding: '0px',
-                                        }}
-                                    >
-                                        <Line
-                                        ref={chartRef}
-                                        data={{
-                                            labels: chartData?.dates || [],
-                                            datasets,
-                                        }}
-                                        options={{
-                                            responsive: true,
-                                            maintainAspectRatio: false,
-                                            plugins: {
-                                            legend: {
-                                                display: false, // disable default
-                                            },
-                                            tooltip: {
-                                                mode: 'index',
-                                                intersect: true,
-                                                displayColors: true,
-                                                boxWidth: 15,
-                                                boxHeight: 15,
-                                                callbacks: {
-                                                    title: function (tooltipItems) {
-                                                        const index = tooltipItems[0].dataIndex;
-                                                        const xValue = tooltipItems[0].label;
-                                                        const date = chartData?.newDates?.[index] || chartData?.dates?.[index] || '';
-                                                        return `${xValue} ( ${date} )`; // ⬅️ both lines at top
-                                                    },
-                                                label: function (tooltipItem) {
-                                                    const index = tooltipItem.dataIndex;
-                                                    const dataset = tooltipItem.dataset;
-                                                    const value = dataset.data[index];
-                                                    const label = dataset.label || '';
-                                                    return `${label}: ${value}`;
-                                                },
-                                                
-                                                },
-                                            },
-                                            },
-                                            scales: {
-                                                x: {
-                                                    ticks: {
-                                                      padding: 30,
-                                                      color: (context) => {
-                                                        const index = context.index;
-                                                        const label = chartData?.dates?.[index]; // get the X label
-                                                        return getColorForValue(label); // ✅ apply unique color
-                                                      },
-                                                    },
-                                                    grid: {
-                                                      color: theme === 'dark' ? '#444' : '#e0e0e0',
-                                                    },
-                                                },
-                                            y: {
-                                                beginAtZero: true,
-                                                ticks: {
-                                                callback: function (value) {
-                                                    return value.toFixed(2);
-                                                },
-                                                color: theme === 'dark' ? '#fff' : '#000',
-                                                },
-                                                grid: {
-                                                color: theme === 'dark' ? '#444' : '#e0e0e0',
-                                                },
-                                            },
-                                            },
-                                        }}
-                                        height={350}
-                                        />
-                                    </Row>
-
-                                
-                                </div>
-                            </Carousel>
+                                </Tabs.TabPane>
+                            {/* </Carousel> */}
+                            </Tabs>
                         </div>
                         
 
                         
     
-                        <Row style={{ display: 'flex', flexDirection: 'column' }}>
+                        <Row style={{ display: 'flex', flexDirection: 'column', }}>
                             <Col>
                                 <h2>
                                     Overall Report
@@ -4292,401 +4360,434 @@ const Dashboard = () => {
                             </div>
                         </Col> */}
                             <Col>
-                                <div
-                                    className={`ag-theme-alpine ${gridThemeClass}`}
-                                    style={{ width: '100%', height: '400px' }}
-                                >
-                                    <AgGridReact
-                                        rowData={rowData}
-                                        columnDefs={columnDefs}
-                                        defaultColDef={defaultColDef}
-                                        gridOptions={{
-                                            ensureDomOrder: false,
-                                            suppressRowClickSelection: true,
-                                            suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                            enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                        }}
-                                        autoGroupColumnDef={autoGroupColumnDefOverAllReport}
-                                        rowGroupPanelShow="always"
-                                        suppressAggFuncInHeader={true}
-                                        groupIncludeFooter={true}
-                                        groupIncludeTotalFooter={true}
-                                    />
-                                </div>
+                                {/* <div className='ag-grid-responsive'> */}
+                                    <div
+                                        className={`ag-theme-alpine ${gridThemeClass}`}
+                                        // style={{ width: '100%', height: '100%' }}
+                                    >
+                                        <AgGridReact
+                                            domLayout="normal"
+                                            rowData={rowData}
+                                            columnDefs={columnDefs}
+                                            defaultColDef={defaultColDef}
+                                            gridOptions={{
+                                                ensureDomOrder: false,
+                                                suppressRowClickSelection: true,
+                                                suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                            }}
+                                            autoGroupColumnDef={autoGroupColumnDefOverAllReport}
+                                            rowGroupPanelShow="always"
+                                            suppressAggFuncInHeader={true}
+                                            groupIncludeFooter={true}
+                                            groupIncludeTotalFooter={true}
+                                        />
+                                    </div>
+                                {/* </div> */}
                             </Col>
     
                         </Row>
+                        
                         <h2 style={{marginTop: "15px"}}>Accounts</h2>
                         <div style={{padding:'0px', margin:'0px'}}>
                             {renderCarouselNav()}
                         </div>
-                        <Carousel ref={carouselRef} beforeChange={handleSlideChange} dots={false}>
-                            <div>
-                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                    <Col>
-                                        <div
-                                            className={`ag-theme-alpine ${gridThemeClass}`}
-                                            style={{ width: '100%', height: '400px' }}
-                                        >
-                                            <AgGridReact
-                                                rowData={rowData?.filter((each) => each.profit > 0)}
-                                                columnDefs={columnDefs1}
-                                                defaultColDef={defaultColDef}
-                                                gridOptions={{
-                                                    ensureDomOrder: false,
-                                                    suppressRowClickSelection: true,
-                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                }}
-                                                rowGroupPanelShow="always"
-                                                suppressAggFuncInHeader={true}
-                                                groupIncludeFooter={true}
-                                                groupIncludeTotalFooter={true}
-                                                autoGroupColumnDef={autoGroupColumnDefProfit}
-                                            />
-                                        </div>
-                                    </Col>
-            
-                                </Row>
-                            </div>
-                            <div>
-                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                    <Col>
-                                        <div
-                                            className={`ag-theme-alpine ${gridThemeClass}`}
-                                            style={{ width: '100%', height: '400px' }}
-                                        >             <AgGridReact
-                                                rowData={rowData?.filter(each => each.profit < 0)}
-                                                columnDefs={columnDefs1}
-                                                defaultColDef={defaultColDef}
-                                                gridOptions={{
-                                                    ensureDomOrder: false,
-                                                    suppressRowClickSelection: true,
-                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                }}
-                                                rowGroupPanelShow="always"
-                                                suppressAggFuncInHeader={true}
-                                                groupIncludeFooter={true}
-                                                groupIncludeTotalFooter={true}
-                                                autoGroupColumnDef={autoGroupColumnDefLoss}
-                                            />
-                                        </div>
-                                    </Col>
-                                </Row>
-                            </div>
-                            <div>
-                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                    <Col>
-                                        <div
-                                            className={`ag-theme-alpine ${gridThemeClass}`}
-                                            style={{ width: '100%', height: '400px' }}
-                                        >
-                                            <AgGridReact
-                                                rowData={Object.values(
-                                                    byAccountNumber?.reduce((acc, curr) => {
-                                                      (acc[curr.specifiedDate] = acc[curr.specifiedDate] || []).push(curr);
-                                                      return acc;
-                                                    }, {})
-                                                  ).flatMap(records =>
-                                                    records
-                                                      .sort((a, b) => b.spend - a.spend) // Sort by spend (descending)
-                                                      .slice(0, 5) // Get top 5 records per date
-                                                  )}
-                                                columnDefs={columnDefs1}
-                                                defaultColDef={defaultColDef}
-                                                gridOptions={{
-                                                    ensureDomOrder: false,
-                                                    suppressRowClickSelection: true,
-                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                }}
-                                                rowGroupPanelShow="always"
-                                                suppressAggFuncInHeader={true}
-                                                groupIncludeFooter={true}
-                                                groupIncludeTotalFooter={true}
-                                                autoGroupColumnDef={autoGroupColumnDefProfit}
-                                            />
-                                        </div>
-                                    </Col>
-            
-                                </Row>
-                            </div>
-                            <div>
-                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                    <Col>
-                                        <div
-                                            className={`ag-theme-alpine ${gridThemeClass}`}
-                                            style={{ width: '100%', height: '400px' }}
-                                        >
-                                            <AgGridReact
-                                                rowData={Object.values(
-                                                    byAccountNumber?.reduce((acc, curr) => {
-                                                      (acc[curr.specifiedDate] = acc[curr.specifiedDate] || []).push(curr);
-                                                      return acc;
-                                                    }, {})
-                                                  ).flatMap(records =>
-                                                    records
-                                                      .sort((a, b) => b.estimated_revenue - a.estimated_revenue) // Sort by spend (descending)
-                                                      .slice(0, 5) // Get top 5 records per date
-                                                  )}
-                                                columnDefs={columnDefs1}
-                                                defaultColDef={defaultColDef}
-                                                gridOptions={{
-                                                    ensureDomOrder: false,
-                                                    suppressRowClickSelection: true,
-                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                }}
-                                                rowGroupPanelShow="always"
-                                                suppressAggFuncInHeader={true}
-                                                groupIncludeFooter={true}
-                                                groupIncludeTotalFooter={true}
-                                                autoGroupColumnDef={autoGroupColumnDefProfit}
-                                            />
-                                        </div>
-                                    </Col>
-            
-                                </Row>
-                            </div>
-                            <div>
-                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                    <Col>
-                                        <div
-                                            className={`ag-theme-alpine ${gridThemeClass}`}
-                                            style={{ width: '100%', height: '400px' }}
-                                        >
-                                            <AgGridReact
-                                                rowData={Object.values(
-                                                    byAccountNumber?.reduce((acc, curr) => {
-                                                      (acc[curr.specifiedDate] = acc[curr.specifiedDate] || []).push(curr);
-                                                      return acc;
-                                                    }, {})
-                                                  ).flatMap(records =>
-                                                    records
-                                                      .sort((a, b) => b.profit - a.profit) // Sort by spend (descending)
-                                                      .slice(0, 5) // Get top 5 records per date
-                                                  )}
-                                                columnDefs={columnDefs1}
-                                                defaultColDef={defaultColDef}
-                                                gridOptions={{
-                                                    ensureDomOrder: false,
-                                                    suppressRowClickSelection: true,
-                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                }}
-                                                rowGroupPanelShow="always"
-                                                suppressAggFuncInHeader={true}
-                                                groupIncludeFooter={true}
-                                                groupIncludeTotalFooter={true}
-                                                autoGroupColumnDef={autoGroupColumnDefProfit}
-                                            />
-                                        </div>
-                                    </Col>
-            
-                                </Row>
-                            </div>
-                        </Carousel>
+                        <Tabs activeKey={activeTab} onChange={handleSlideChange} renderTabBar={() => <></>}>
+                        {/* <Carousel ref={carouselRef} beforeChange={handleSlideChange} dots={false}> */}
+                            <Tabs.TabPane key="1">
+                                {/* <div>
+                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                        <Col> */}
+                                            <div
+                                                className={`ag-theme-alpine ${gridThemeClass}`}
+                                                style={{ width: '100%', height: '100%' }}
+                                            >
+                                                <AgGridReact
+                                                    rowData={rowData?.filter((each) => each.profit > 0)}
+                                                    columnDefs={columnDefs1}
+                                                    defaultColDef={defaultColDef}
+                                                    gridOptions={{
+                                                        ensureDomOrder: false,
+                                                        suppressRowClickSelection: true,
+                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                    }}
+                                                    rowGroupPanelShow="always"
+                                                    suppressAggFuncInHeader={true}
+                                                    groupIncludeFooter={true}
+                                                    groupIncludeTotalFooter={true}
+                                                    autoGroupColumnDef={autoGroupColumnDefProfit}
+                                                />
+                                            </div>
+                                        {/* </Col>
+                
+                                    </Row>
+                                </div> */}
+                            </Tabs.TabPane>
+                            <Tabs.TabPane key="2">
+                                {/* <div>
+                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                        <Col> */}
+                                            <div
+                                                className={`ag-theme-alpine ${gridThemeClass}`}
+                                                style={{ width: '100%', height: '100%' }}
+                                            >             <AgGridReact
+                                                    rowData={rowData?.filter(each => each.profit < 0)}
+                                                    columnDefs={columnDefs1}
+                                                    defaultColDef={defaultColDef}
+                                                    gridOptions={{
+                                                        ensureDomOrder: false,
+                                                        suppressRowClickSelection: true,
+                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                    }}
+                                                    rowGroupPanelShow="always"
+                                                    suppressAggFuncInHeader={true}
+                                                    groupIncludeFooter={true}
+                                                    groupIncludeTotalFooter={true}
+                                                    autoGroupColumnDef={autoGroupColumnDefLoss}
+                                                />
+                                            </div>
+                                        {/* </Col>
+                                    </Row>
+                                </div> */}
+                            </Tabs.TabPane>
+                            <Tabs.TabPane key="3">
+                                {/* <div>
+                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                        <Col> */}
+                                            <div
+                                                className={`ag-theme-alpine ${gridThemeClass}`}
+                                                style={{ width: '100%', height: '100%' }}
+                                            >
+                                                <AgGridReact
+                                                    rowData={Object.values(
+                                                        byAccountNumber?.reduce((acc, curr) => {
+                                                        (acc[curr.specifiedDate] = acc[curr.specifiedDate] || []).push(curr);
+                                                        return acc;
+                                                        }, {})
+                                                    ).flatMap(records =>
+                                                        records
+                                                        .sort((a, b) => b.spend - a.spend) // Sort by spend (descending)
+                                                        .slice(0, 5) // Get top 5 records per date
+                                                    )}
+                                                    columnDefs={columnDefs1}
+                                                    defaultColDef={defaultColDef}
+                                                    gridOptions={{
+                                                        ensureDomOrder: false,
+                                                        suppressRowClickSelection: true,
+                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                    }}
+                                                    rowGroupPanelShow="always"
+                                                    suppressAggFuncInHeader={true}
+                                                    groupIncludeFooter={true}
+                                                    groupIncludeTotalFooter={true}
+                                                    autoGroupColumnDef={autoGroupColumnDefProfit}
+                                                />
+                                            </div>
+                                        {/* </Col>
+                
+                                    </Row>
+                                </div> */}
+                            </Tabs.TabPane>
+                            <Tabs.TabPane key="4">
+                                {/* <div>
+                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                        <Col> */}
+                                            <div
+                                                className={`ag-theme-alpine ${gridThemeClass}`}
+                                                style={{ width: '100%', height: '100%' }}
+                                            >
+                                                <AgGridReact
+                                                    rowData={Object.values(
+                                                        byAccountNumber?.reduce((acc, curr) => {
+                                                        (acc[curr.specifiedDate] = acc[curr.specifiedDate] || []).push(curr);
+                                                        return acc;
+                                                        }, {})
+                                                    ).flatMap(records =>
+                                                        records
+                                                        .sort((a, b) => b.estimated_revenue - a.estimated_revenue) // Sort by spend (descending)
+                                                        .slice(0, 5) // Get top 5 records per date
+                                                    )}
+                                                    columnDefs={columnDefs1}
+                                                    defaultColDef={defaultColDef}
+                                                    gridOptions={{
+                                                        ensureDomOrder: false,
+                                                        suppressRowClickSelection: true,
+                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                    }}
+                                                    rowGroupPanelShow="always"
+                                                    suppressAggFuncInHeader={true}
+                                                    groupIncludeFooter={true}
+                                                    groupIncludeTotalFooter={true}
+                                                    autoGroupColumnDef={autoGroupColumnDefProfit}
+                                                />
+                                            </div>
+                                        {/* </Col>
+                
+                                    </Row>
+                                </div> */}
+                            </Tabs.TabPane>
+                            <Tabs.TabPane key="5">
+                                {/* <div>
+                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                        <Col> */}
+                                            <div
+                                                className={`ag-theme-alpine ${gridThemeClass}`}
+                                                style={{ width: '100%', height: '100%' }}
+                                            >
+                                                <AgGridReact
+                                                    rowData={Object.values(
+                                                        byAccountNumber?.reduce((acc, curr) => {
+                                                        (acc[curr.specifiedDate] = acc[curr.specifiedDate] || []).push(curr);
+                                                        return acc;
+                                                        }, {})
+                                                    ).flatMap(records =>
+                                                        records
+                                                        .sort((a, b) => b.profit - a.profit) // Sort by spend (descending)
+                                                        .slice(0, 5) // Get top 5 records per date
+                                                    )}
+                                                    columnDefs={columnDefs1}
+                                                    defaultColDef={defaultColDef}
+                                                    gridOptions={{
+                                                        ensureDomOrder: false,
+                                                        suppressRowClickSelection: true,
+                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                    }}
+                                                    rowGroupPanelShow="always"
+                                                    suppressAggFuncInHeader={true}
+                                                    groupIncludeFooter={true}
+                                                    groupIncludeTotalFooter={true}
+                                                    autoGroupColumnDef={autoGroupColumnDefProfit}
+                                                />
+                                            </div>
+                                        {/* </Col>
+                
+                                    </Row>
+                                </div> */}
+                            </Tabs.TabPane>
+                        {/* </Carousel> */}
+                        </Tabs>
 
                         <h2 style={{marginTop: "15px"}}>Top 5 Campaigns</h2>
 
                         <div style={{padding:'0px', margin:'0px'}}>
                             {renderCarouselNav1()}
                         </div>
-    
-                        <Carousel ref={carouselRef1} beforeChange={handleSlideChange1} dots={false}>
-                            <div>
-                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                    <Col>
-                                        <div
-                                            className={`ag-theme-alpine ${gridThemeClass}`}
-                                            style={{ width: '100%', height: '400px' }}
-                                        >             <AgGridReact
-                                                rowData={top5Campaigns}
-                                                columnDefs={columnDefs2}
-                                                defaultColDef={defaultColDef}
-                                                gridOptions={{
-                                                    ensureDomOrder: false,
-                                                    suppressRowClickSelection: true,
-                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                }}
-                                                rowGroupPanelShow="always"
-                                                suppressAggFuncInHeader={true}
-                                                groupIncludeFooter={true}
-                                                groupIncludeTotalFooter={true}
-                                                autoGroupColumnDef={autoGroupColumnDefCampaigns}
-                                            />
-                                        </div>
-                                    </Col>
-                                </Row>
-                            </div>
-                            <div>
-                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                    <Col>
-                                        <div
-                                            className={`ag-theme-alpine ${gridThemeClass}`}
-                                            style={{ width: '100%', height: '400px' }}
-                                        >             <AgGridReact
-                                                rowData={top5RevenueCampaigns}
-                                                columnDefs={columnDefs2}
-                                                defaultColDef={defaultColDef}
-                                                gridOptions={{
-                                                    ensureDomOrder: false,
-                                                    suppressRowClickSelection: true,
-                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                }}
-                                                rowGroupPanelShow="always"
-                                                suppressAggFuncInHeader={true}
-                                                groupIncludeFooter={true}
-                                                groupIncludeTotalFooter={true}
-                                                autoGroupColumnDef={autoGroupColumnDefCampaigns}
-                                            />
-                                        </div>
-                                    </Col>
-                                </Row>
-                            </div>
-                            <div>
-                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                    <Col>
-                                        <div
-                                            className={`ag-theme-alpine ${gridThemeClass}`}
-                                            style={{ width: '100%', height: '400px' }}
-                                        >   <AgGridReact
-                                                rowData={top5ProfitCampaigns}
-                                                columnDefs={columnDefs2}
-                                                defaultColDef={defaultColDef}
-                                                gridOptions={{
-                                                    ensureDomOrder: false,
-                                                    suppressRowClickSelection: true,
-                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                }}
-                                                rowGroupPanelShow="always"
-                                                suppressAggFuncInHeader={true}
-                                                groupIncludeFooter={true}
-                                                groupIncludeTotalFooter={true}
-                                                autoGroupColumnDef={autoGroupColumnDefCampaigns}
-                                            />
-                                        </div>
-                                    </Col>
-                                </Row>
-                            </div>
-                            <div>
-                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                    <Col>
-                                        <div
-                                            className={`ag-theme-alpine ${gridThemeClass}`}
-                                            style={{ width: '100%', height: '400px' }}
-                                        >             <AgGridReact
-                                                rowData={overAllProfitCampaigns}
-                                                columnDefs={columnDefs2}
-                                                defaultColDef={defaultColDef}
-                                                gridOptions={{
-                                                    ensureDomOrder: false,
-                                                    suppressRowClickSelection: true,
-                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                }}
-                                                rowGroupPanelShow="always"
-                                                suppressAggFuncInHeader={true}
-                                                groupIncludeFooter={true}
-                                                groupIncludeTotalFooter={true}
-                                                autoGroupColumnDef={autoGroupColumnDefCampaigns}
-                                            />
-                                        </div>
-                                    </Col>
-                                </Row>
-                            </div>
-                            <div>
-                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                    <Col>
-                                        <div
-                                            className={`ag-theme-alpine ${gridThemeClass}`}
-                                            style={{ width: '100%', height: '400px' }}
-                                        >             <AgGridReact
-                                                rowData={overAllLossCampaigns}
-                                                columnDefs={columnDefs2}
-                                                defaultColDef={defaultColDef}
-                                                gridOptions={{
-                                                    ensureDomOrder: false,
-                                                    suppressRowClickSelection: true,
-                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                }}
-                                                rowGroupPanelShow="always"
-                                                suppressAggFuncInHeader={true}
-                                                groupIncludeFooter={true}
-                                                groupIncludeTotalFooter={true}
-                                                autoGroupColumnDef={autoGroupColumnDefCampaigns}
-                                            />
-                                        </div>
-                                    </Col>
-                                </Row>
-                            </div>
-                        </Carousel>
+                        <Tabs  activeKey={activeTab1} onChange={handleSlideChange1} renderTabBar={() => <></>}>
+                        {/* <Carousel ref={carouselRef1} beforeChange={handleSlideChange1} dots={false}> */}
+                            <Tabs.TabPane key="1">
+                                {/* <div>
+                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                        <Col> */}
+                                            <div
+                                                className={`ag-theme-alpine ${gridThemeClass}`}
+                                                style={{ width: '100%', height: '100%' }}
+                                            >             <AgGridReact
+                                                    rowData={top5Campaigns}
+                                                    columnDefs={columnDefs2}
+                                                    defaultColDef={defaultColDef}
+                                                    gridOptions={{
+                                                        ensureDomOrder: false,
+                                                        suppressRowClickSelection: true,
+                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                    }}
+                                                    rowGroupPanelShow="always"
+                                                    suppressAggFuncInHeader={true}
+                                                    groupIncludeFooter={true}
+                                                    groupIncludeTotalFooter={true}
+                                                    autoGroupColumnDef={autoGroupColumnDefCampaigns}
+                                                />
+                                            </div>
+                                        {/* </Col>
+                                    </Row>
+                                </div> */}
+                            </Tabs.TabPane>
+                            <Tabs.TabPane key="2">
+                                {/* <div>
+                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                        <Col> */}
+                                            <div
+                                                className={`ag-theme-alpine ${gridThemeClass}`}
+                                                style={{ width: '100%', height: '100%' }}
+                                            >             <AgGridReact
+                                                    rowData={top5RevenueCampaigns}
+                                                    columnDefs={columnDefs2}
+                                                    defaultColDef={defaultColDef}
+                                                    gridOptions={{
+                                                        ensureDomOrder: false,
+                                                        suppressRowClickSelection: true,
+                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                    }}
+                                                    rowGroupPanelShow="always"
+                                                    suppressAggFuncInHeader={true}
+                                                    groupIncludeFooter={true}
+                                                    groupIncludeTotalFooter={true}
+                                                    autoGroupColumnDef={autoGroupColumnDefCampaigns}
+                                                />
+                                            </div>
+                                        {/* </Col>
+                                    </Row>
+                                </div> */}
+                            </Tabs.TabPane>
+                            <Tabs.TabPane key="3">
+                                {/* <div>
+                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                        <Col> */}
+                                            <div
+                                                className={`ag-theme-alpine ${gridThemeClass}`}
+                                                style={{ width: '100%', height: '100%' }}
+                                            >   <AgGridReact
+                                                    rowData={top5ProfitCampaigns}
+                                                    columnDefs={columnDefs2}
+                                                    defaultColDef={defaultColDef}
+                                                    gridOptions={{
+                                                        ensureDomOrder: false,
+                                                        suppressRowClickSelection: true,
+                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                    }}
+                                                    rowGroupPanelShow="always"
+                                                    suppressAggFuncInHeader={true}
+                                                    groupIncludeFooter={true}
+                                                    groupIncludeTotalFooter={true}
+                                                    autoGroupColumnDef={autoGroupColumnDefCampaigns}
+                                                />
+                                            </div>
+                                        {/* </Col>
+                                    </Row>
+                                </div> */}
+                            </Tabs.TabPane>
+                            <Tabs.TabPane key="4">
+                                {/* <div>
+                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                        <Col> */}
+                                            <div
+                                                className={`ag-theme-alpine ${gridThemeClass}`}
+                                                style={{ width: '100%', height: '100%' }}
+                                            >             <AgGridReact
+                                                    rowData={overAllProfitCampaigns}
+                                                    columnDefs={columnDefs2}
+                                                    defaultColDef={defaultColDef}
+                                                    gridOptions={{
+                                                        ensureDomOrder: false,
+                                                        suppressRowClickSelection: true,
+                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                    }}
+                                                    rowGroupPanelShow="always"
+                                                    suppressAggFuncInHeader={true}
+                                                    groupIncludeFooter={true}
+                                                    groupIncludeTotalFooter={true}
+                                                    autoGroupColumnDef={autoGroupColumnDefCampaigns}
+                                                />
+                                            </div>
+                                        {/* </Col>
+                                    </Row>
+                                </div> */}
+                            </Tabs.TabPane>
+                            <Tabs.TabPane key="5">
+                                {/* <div>
+                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                        <Col> */}
+                                            <div
+                                                className={`ag-theme-alpine ${gridThemeClass}`}
+                                                style={{ width: '100%', height: '100%' }}
+                                            >             <AgGridReact
+                                                    rowData={overAllLossCampaigns}
+                                                    columnDefs={columnDefs2}
+                                                    defaultColDef={defaultColDef}
+                                                    gridOptions={{
+                                                        ensureDomOrder: false,
+                                                        suppressRowClickSelection: true,
+                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                    }}
+                                                    rowGroupPanelShow="always"
+                                                    suppressAggFuncInHeader={true}
+                                                    groupIncludeFooter={true}
+                                                    groupIncludeTotalFooter={true}
+                                                    autoGroupColumnDef={autoGroupColumnDefCampaigns}
+                                                />
+                                            </div>
+                                        {/* </Col>
+                                    </Row>
+                                </div> */}
+                            </Tabs.TabPane>
+                        {/* </Carousel> */}
+                        </Tabs>
                         
                         <div style={{padding:'0px', marginTop:'15px'}}>
                             <RenderCarouselNav3/>
                         </div>
-                        <Carousel ref={carouselRef3} beforeChange={handleSlideChange3} dots={false}>
-                            <div>
-                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                    <Col>
-                                        <div
-                                            className={`ag-theme-alpine ${gridThemeClass}`}
-                                            style={{ width: '100%', height: '400px' }}
-                                        >             <AgGridReact
-                                                rowData={domainWiseData}
-                                                columnDefs={columnDefs3}
-                                                defaultColDef={defaultColDef}
-                                                gridOptions={{
-                                                    ensureDomOrder: false,
-                                                    suppressRowClickSelection: true,
-                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                }}
-                                                // rowGroupPanelShow="always"
-                                                suppressAggFuncInHeader={true}
-                                                // groupIncludeFooter={true}
-                                                groupIncludeTotalFooter={true}
-                                                autoGroupColumnDef={autoGroupColumnDefDomain}
-                                            />
-                                        </div>
-                                    </Col>
-                                </Row>
-                            </div>
-                            <div>
-                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                    <Col>
-                                        <div
-                                            className={`ag-theme-alpine ${gridThemeClass}`}
-                                            style={{ width: '100%', height: '400px' }}
-                                        >           <AgGridReact
-                                                        rowData={agencyNameReport}
-                                                        columnDefs={columnDefs4}
-                                                        defaultColDef={defaultColDef}
-                                                        gridOptions={{
-                                                            groupDefaultExpanded: -1, 
-                                                            ensureDomOrder: false,
-                                                            suppressRowClickSelection: true,
-                                                            suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                            enableRangeSelection: true,// Expands all groups by default
-                                                        }}
-                                                        // rowGroupPanelShow="always"
-                                                        suppressAggFuncInHeader={true}
-                                                        rowGroupPanelShow="always"
-                                                        // groupIncludeFooter={true}
-                                                        groupIncludeTotalFooter={true}
-                                                        autoGroupColumnDef={autoGroupColumnDefAgency}
-                                                    />
-                                        </div>
-                                    </Col>
-                                </Row>
-                            </div>
-                        </Carousel>
-                        {/* <Row></Row> */}
+                        {/* <Carousel ref={carouselRef3} beforeChange={handleSlideChange3} dots={false}> */}
+                        <Tabs  activeKey={activeTab3} onChange={handleTabChange3} renderTabBar={() => <></>}>
+                            <Tabs.TabPane key="1">
+                                {/* <div>
+                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                        <Col> */}
+                                            <div
+                                                className={`ag-theme-alpine ${gridThemeClass}`}
+                                                style={{ width: '100%', height: '100%' }}
+                                            >             <AgGridReact
+                                                    rowData={domainWiseData}
+                                                    columnDefs={columnDefs3}
+                                                    defaultColDef={defaultColDef}
+                                                    gridOptions={{
+                                                        ensureDomOrder: false,
+                                                        suppressRowClickSelection: true,
+                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                    }}
+                                                    // rowGroupPanelShow="always"
+                                                    suppressAggFuncInHeader={true}
+                                                    // groupIncludeFooter={true}
+                                                    groupIncludeTotalFooter={true}
+                                                    autoGroupColumnDef={autoGroupColumnDefDomain}
+                                                />
+                                            </div>
+                                        {/* </Col>
+                                    </Row>
+                                </div> */}
+                            </Tabs.TabPane>
+                            <Tabs.TabPane key="2">
+                                {/* <div>
+                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                        <Col> */}
+                                            <div
+                                                className={`ag-theme-alpine ${gridThemeClass}`}
+                                                style={{ width: '100%', height: '100%' }}
+                                            >           <AgGridReact
+                                                            rowData={agencyNameReport}
+                                                            columnDefs={columnDefs4}
+                                                            defaultColDef={defaultColDef}
+                                                            gridOptions={{
+                                                                groupDefaultExpanded: -1, 
+                                                                ensureDomOrder: false,
+                                                                suppressRowClickSelection: true,
+                                                                suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                                enableRangeSelection: true,// Expands all groups by default
+                                                            }}
+                                                            // rowGroupPanelShow="always"
+                                                            suppressAggFuncInHeader={true}
+                                                            rowGroupPanelShow="always"
+                                                            // groupIncludeFooter={true}
+                                                            groupIncludeTotalFooter={true}
+                                                            autoGroupColumnDef={autoGroupColumnDefAgency}
+                                                        />
+                                            </div>
+                                        {/* </Col>
+                                    </Row>
+                                </div> */}
+                            </Tabs.TabPane>
+                        </Tabs>
+                        {/* </Carousel> */}
+                        {/* <Row className='showin-mobile'></Row> */}
                     </div>
                 )}
             </div>
