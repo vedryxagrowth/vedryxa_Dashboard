@@ -272,8 +272,10 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                                     <Select
                                         disabled
                                         options={[
-                                            { value: "facebook", label: "Facebook" },
-                                            { value: "instagram", label: "Instagram" },
+                                            { label: 'Facebook', value: 'facebook' },
+                                            { label: 'Instagram', value: 'instagram' },
+                                            { label: 'Messenger', value: 'messenger' },
+                                            { label: 'Audience Network', value: 'audience_network' }
                                         ]}
                                     />
                                 </Form.Item>
@@ -289,15 +291,33 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                                         style={{ width: "100%" }}
                                         placeholder="Please select"
                                         options={[
-                                            { value: "feed", label: "Facebook Feed" },
-                                            { value: "marketplace", label: "Facebook Marketplace" },
-                                            { value: "video_feeds", label: "Facebook Video Feeds" },
-                                            { value: "search", label: "Facebook Search Results" },
-                                            { value: "explore", label: "Facebook Explore" },
-                                            { value: "right_hand_column", label: "Facebook Right Column" },
-                                            { value: "story", label: "Facebook Stories" },
-                                            { value: "instream_video", label: "Facebook In-Stream Videos" },
-                                            { value: "reels", label: "Facebook Reels" },
+                                            { key: "feed", label: "Facebook Feed" },
+                                            { key: "marketplace", label: "Facebook Marketplace" },
+                                            { key: "video_feeds", label: "Facebook Video Feeds" },
+                                            { key: "instream_video", label: "Facebook In-Stream Videos" },
+                                            { key: "facebook_reels", label: "Facebook Reels" },
+                                            { key: "profile_feed-f", label: "Facebook Profile Feed" },
+                                            { key: "search", label: "Facebook Search" },
+                                            { key: "story_f", label: "Facebook Stories" },
+                                            { key: "right_hand_column", label: "Facebook Right Column" },
+                                            { key: "instant_article", label: "Facebook Instant Articles" },
+                                            { key: "biz_disco_feed", label: "Facebook Business Explore" },
+                                          
+                                            { key: "stream", label: "Instagram Stream" },
+                                            { key: "story_i", label: "Instagram Stories" },
+                                            { key: "explore", label: "Instagram Explore" },
+                                            { key: "explore_home", label: "Instagram Explore Home" },
+                                            { key: "reels", label: "Instagram Reels" },
+                                            { key: "profile_feed-i", label: "Instagram Profile Feed" },
+                                            { key: "ig_search", label: "Instagram Search" },
+                                            { key: "profile_reels", label: "Instagram Profile Reels" },
+                                          
+                                            { key: "messenger_home", label: "Messenger Home" },
+                                            { key: "story_m", label: "Messenger Stories" },
+                                            { key: "sponsored_messages", label: "Messenger Sponsored Messages" },
+                                          
+                                            { key: "classic", label: "Audience Network Classic" },
+                                            { key: "rewarded_video", label: "Audience Network Rewarded Video" }
                                         ]}
                                     />
                                 </Form.Item>

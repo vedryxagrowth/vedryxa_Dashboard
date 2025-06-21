@@ -1,4 +1,9 @@
 {
+<<<<<<< HEAD
+  "/Campaigns/page": "app/Campaigns/page.js",
+  "/Dashboard/page": "app/Dashboard/page.js",
+  "/Reports/page": "app/Reports/page.js"
+=======
   "/_not-found/page": "app/_not-found/page.js",
   "/AllCampaigns/AdsetHistory/page": "app/AllCampaigns/AdsetHistory/page.js",
   "/Activities/page": "app/Activities/page.js",
@@ -27,4 +32,5 @@
   "/NewUser/page": "app/NewUser/page.js",
   "/LiveHistory/LiveCampaignHistory/[CampaignName]/page": "app/LiveHistory/LiveCampaignHistory/[CampaignName]/page.js",
   "/Users/page": "app/Users/page.js"
+>>>>>>> DevUi
 }

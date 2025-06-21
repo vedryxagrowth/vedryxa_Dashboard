@@ -8,7 +8,7 @@ import Editads from './EditAds';
 import moment from 'moment-timezone';
 import Createnewads from './Createads';
 
-const ExpandedRowContent = ({ record, changeRRefrst }) => {
+const ExpandedRowContent = ({ record, changeRRefrst, network}) => {
     const [viewCampaignData, setViewCampaignData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [isRejectModalVisible, setIsRejectModalVisible] = useState(false);
@@ -412,7 +412,7 @@ const ExpandedRowContent = ({ record, changeRRefrst }) => {
                 open={newadsDrawerVisible}
                 width="90%" // Adjust width as needed
             >
-                <Createnewads data={viewCampaignData} onClose={onCloseDrawer} rerenders={changeRRefrst} />
+                <Createnewads data={viewCampaignData} visible={newadsDrawerVisible} onClose={onCloseDrawer} rerenders={changeRRefrst} adsData={viewCampaignData?.addlevel} network={network} />
             </Drawer>
             <Drawer
                 title="Edit Ad"

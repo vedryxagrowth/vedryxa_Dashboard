@@ -1,5 +1,30 @@
 {
   "pages": {
+<<<<<<< HEAD
+    "/Campaigns/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/Campaigns/page.css",
+      "static/chunks/app/Campaigns/page.js"
+    ],
+    "/layout": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/layout.css",
+      "static/chunks/app/layout.js"
+    ],
+    "/Dashboard/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/Dashboard/page.css",
+      "static/chunks/app/Dashboard/page.js"
+    ],
+    "/Reports/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/Reports/page.css",
+      "static/chunks/app/Reports/page.js"
+=======
     "/_not-found/page": [
       "static/chunks/webpack-06b924cc7cbe8a2c.js",
       "static/chunks/fd9d1056-5875aa7e6087797a.js",
@@ -512,6 +537,7 @@
       "static/chunks/8980-47fac929160c4f7d.js",
       "static/chunks/1122-7461eeaf15619739.js",
       "static/chunks/app/Users/page-2700ac98b7f4f6ea.js"
+>>>>>>> DevUi
     ]
   }
 }

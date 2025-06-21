@@ -66,6 +66,36 @@ const positionOptions = {
     ]
 };
 
+const allPositions = [
+    { key: "feed", label: "Facebook Feed" },
+    { key: "marketplace", label: "Facebook Marketplace" },
+    { key: "video_feeds", label: "Facebook Video Feeds" },
+    { key: "instream_video", label: "Facebook In-Stream Videos" },
+    { key: "facebook_reels", label: "Facebook Reels" },
+    { key: "profile_feed-f", label: "Facebook Profile Feed" },
+    { key: "search", label: "Facebook Search" },
+    { key: "story_f", label: "Facebook Stories" },
+    { key: "right_hand_column", label: "Facebook Right Column" },
+    { key: "instant_article", label: "Facebook Instant Articles" },
+    { key: "biz_disco_feed", label: "Facebook Business Explore" },
+  
+    { key: "stream", label: "Instagram Stream" },
+    { key: "story_i", label: "Instagram Stories" },
+    { key: "explore", label: "Instagram Explore" },
+    { key: "explore_home", label: "Instagram Explore Home" },
+    { key: "reels", label: "Instagram Reels" },
+    { key: "profile_feed-i", label: "Instagram Profile Feed" },
+    { key: "ig_search", label: "Instagram Search" },
+    { key: "profile_reels", label: "Instagram Profile Reels" },
+  
+    { key: "messenger_home", label: "Messenger Home" },
+    { key: "story_m", label: "Messenger Stories" },
+    { key: "sponsored_messages", label: "Messenger Sponsored Messages" },
+  
+    { key: "classic", label: "Audience Network Classic" },
+    { key: "rewarded_video", label: "Audience Network Rewarded Video" }
+];
+
 // const positionOptions = {
 //     facebook: [
 //         { key: "feed", label: "Facebook Feed" },
@@ -473,7 +503,12 @@ const localesdata = [
     }
 ]
 
-const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, network }) => {
+function getPositionsByKeys(keys) {
+    const keySet = new Set(keys); // Faster lookup
+    return allPositions.filter(pos => keySet.has(pos.key));
+}
+
+const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, network, draftsData }) => {
     // const [selectedFile, setSelectedFile] = useState(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] = useState(false);
@@ -510,7 +545,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     const [selectedFilesFromCreatives, setSelectedFilesFromCreatives] = useState([]);
     const [selectedFilesFromMedia, setSelectedFilesFromMedia] = useState([]);
     const [openCreativesDrawer, setOpenCreativesDrawer] = useState(false);
-
+    const selectedRef = useRef({});
+    const newSelectedRef = useRef(null);
 
     const handleModeChange = (value) => {
         setIsManual(value === "manual");
@@ -568,6 +604,17 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
             setCaption(text.split('/')[0]);
 
         }
+        // const checkFormCompletion = () => {
+        //     const allValues = form.getFieldsValue(true);
+        //     const isComplete = Object.keys(allValues).every(
+        //         key => allValues[key] !== undefined && allValues[key] !== ''
+        //     );
+        //     setIsFormComplete(isComplete);
+        // };
+
+        // // Trigger form completion check
+        // checkFormCompletion();
+        setIsFormComplete(true); 
         // console.log(text, "text");
     }
 
@@ -619,9 +666,10 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         console.log(values, "values");
         console.log(options, "options");
         const formatted = options.map(opt => ({
-          value: opt.value,
+          key: opt.value,
           label: opt.label || opt.children
         }));
+        console.log(formatted, "formatted positions");
         setSelectedPositions(formatted);
     };
 
@@ -895,7 +943,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                             const formData = new FormData();
                             const uniqueId = uuidv4(); // Generate a unique ID for the file
                             const fileId = `${uniqueId}_${file.name}`;
-                            const editedImage = editedImages[fileId];
+                            const editedImage = editedImages[file.name];
                             const uploadFile = editedImage ? await fetch(editedImage).then(res => res.blob()) : null;
         
                             console.log(file.originFileObj.name);
@@ -1142,23 +1190,27 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         setIsModalVisible(false);
     };
     const onFinish = (values) => {
-        const selectedPlatforms = selectedPublishers.reduce((acc, publisher) => {
-            acc[publisher + '_positions'] = values.positions.filter(position =>
-                positionOptions[publisher].map(option => option.key).includes(position)
-            );
-            return acc;
-        }, {});
-        console.log({
-            publisher_platforms: values.publisher_platforms,
-            ...selectedPlatforms, ...values
-        });
-
-        setIsModalVisible(true);
-        setFormValues({
-            publisher_platforms: values.publisher_platforms,
-            ...selectedPlatforms,
-            ...values
-        });
+        // console.log("Form Values:", values);
+        // console.log("Selected Publishers:", formValues);
+        if(values.placements === 'manual'){
+            const selectedPlatforms = selectedPublishers.reduce((acc, publisher) => {
+                acc[publisher + '_positions'] = values.positions.filter(position =>
+                    positionOptions[publisher].map(option => option.key).includes(position)
+                );
+                return acc;
+            }, {});
+            console.log({
+                publisher_platforms: values.publisher_platforms,
+                ...selectedPlatforms, ...values
+            });
+    
+            setIsModalVisible(true);
+            setFormValues({
+                publisher_platforms: values.publisher_platforms,
+                ...selectedPlatforms,
+                ...values
+            });
+        }
     };
     const handleOk = async () => {
         setLoading(true); // Start the spinner
@@ -1196,12 +1248,13 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     };
 
     function extractValuesByPartialLabel(dataArray, labelName) {
+        console.log(dataArray, labelName);
         return dataArray
           .filter(item => item.label.toLowerCase().includes(labelName.toLowerCase()))
           .map(item => {
-            if (item.value.includes('story_')) return 'story';
-            if (item.value.includes('profile_feed-')) return 'profile_feed';
-            return item.value;
+            if (item.key.includes('story_')) return 'story';
+            if (item.key.includes('profile_feed-')) return 'profile_feed';
+            return item.key;
           });
     }
 
@@ -1254,6 +1307,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                 Account_Number: values.Account_Number,
                 Approval: "PENDING_APPROVAL",
                 fbstatus: "No-Live",
+                ...(Object.keys(selectedRef.current).length > 0 ? selectedRef.current : {}),
                 camapaignlevel: {
                     createdby: session?.user?.name,
                     Name: values.Name,
@@ -1306,7 +1360,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
             // console.log("selectedPositions:", selectedPositions);
 
             console.log("Final Data to Submit:", data1);
-
+            // https://www.testapi.adsgoat.in
             const response = await fetch('https://www.testapi.adsgoat.in/api/submitFormData', {
                 method: 'POST',
                 headers: {
@@ -1323,7 +1377,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                 setSelectedFiles([]);
                 onClose();
                 setSelectedPositions([]);
-                isManual !== "manual" && setIsManual(false); 
+                isManual !== "manual" && setIsManual(false);
+                newSelectedRef.current = null; // Reset the newSelectedRef 
             } else {
                 console.error('Failed to submit form data');
             }
@@ -1420,6 +1475,10 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         setActiveKey(['1']);
         isManual !== "manual" && setIsManual(false); 
         setSelectedPositions([]); // Clear selected positions
+        newSelectedRef.current = null;
+        setSelectedFilesFromCreatives([]); // Clear selected files from creatives
+        setSelectedFilesFromMedia([]); // Clear selected files from media
+        setSelectedFiles([]); // Clear all selected files
     };
 
     const [selectedOption, setSelectedOption] = useState("upload");
@@ -1497,9 +1556,103 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         );
     };
 
+    const setFormValuesFromDraft = (draft) => {
+        form.setFieldsValue({
+            positions: draft?.adsetlevel?.position || [],
+            // Account_Number: draft?.Account_Number,
+            // createdby:draft?.camapaignlevel?.createdby,
+            Name: draft?.camapaignlevel?.Name,
+            Objectives: draft?.camapaignlevel?.Objectives,
+            Special_categories: draft?.camapaignlevel?.Special_categories,
+            Bid_strategy: draft?.camapaignlevel?.Bid_strategy,
+            Daily_amount: (draft?.camapaignlevel?.Daily_amount) / 100,
+            Status: draft?.camapaignlevel?.Status,
+            AdsetName: draft?.adsetlevel?.AdsetName,
+            DailyAdd_amount: draft?.adsetlevel?.Daily_amount ? (draft?.adsetlevel?.Daily_amount) / 100 : 0,
+            optimization_goal: draft?.adsetlevel?.optimization_goal,
+            billing_event: draft?.adsetlevel?.billing_event,
+            // start_time: draft?.adsetlevel?.start_time,
+            action_source: draft?.adsetlevel?.action_source,
+            custom_event_type: draft?.adsetlevel?.custom_event_type,
+            // pixel_id: draft?.adsetlevel?.pixel_id,
+            bid_amount: (draft?.adsetlevel?.bid_amount) / 100,
+            countries: draft?.adsetlevel?.countries,
+            Min_Age: draft?.adsetlevel?.Min_Age,
+            Max_Age: draft?.adsetlevel?.Max_Age,
+            Gender: draft?.adsetlevel?.Gender,
+            publisher_platforms: draft?.adsetlevel?.publisher_platforms ? draft?.adsetlevel?.publisher_platforms : null,
+            device_platforms: draft?.adsetlevel?.device_platforms ? draft?.adsetlevel?.device_platforms : null,
+            Language: draft?.adsetlevel?.locales,
+            placements: draft?.adsetlevel?.placements,
+            // Facebook_positions: draft?.adsetlevel?.Facebook_positions,
+            // buying_type: draft?.adsetlevel?.buying_type,
+            AddName: draft?.addlevel?.AddName,
+            filename: draft?.addlevel?.filename,
+            // page_id: draft?.addlevel?.page_id,
+            message: draft?.addlevel?.message,
+            headline: draft?.addlevel?.headline,
+            Description: draft?.addlevel?.Description || "Find More",
+            Caption: draft?.addlevel?.Caption,
+            Website_URL: draft?.addlevel?.Website_URL,
+            Caption: draft?.addlevel?.Caption,
+            // pixel_id: draft?.addlevel[0]?.pixel_id,
+            // page_id: draft?.addlevel[0]?.page_id,
+            MediaContent: (draft?.addlevel?.ads)
+        });
+        draft?.camapaignlevel?.Daily_amount && setCampaignLevelDailyBudget((draft?.camapaignlevel?.Daily_amount) / 100);
+        draft?.adsetlevel?.Daily_amount && setAdsetLevelDailyBudget((draft?.adsetlevel?.Daily_amount) / 100);
+        // draft?.adsetlevel?.bid_amount && setShowBidAmount(true);
+        console.log(draft?.camapaignlevel?.Bid_strategy);
+        draft?.camapaignlevel?.Bid_strategy !== "LOWEST_COST_WITHOUT_CAP" && setShowBidAmount(true);
+        draft?.camapaignlevel?.Bid_strategy === "LOWEST_COST_WITHOUT_CAP" && setShowBidAmount(false);
+        setSelectedPositions(getPositionsByKeys(draft?.adsetlevel?.position || []));
+        console.log("Selected Positions:", draft?.adsetlevel?.position || []);
+        console.log("Selected Positions:", getPositionsByKeys(draft?.adsetlevel?.position || []));
+        setAddName(draft?.addlevel?.AddName);
+        setSelectedFilesFromCreatives(draft?.addlevel?.ads);
+        setSelectedFiles(draft?.addlevel?.ads);
+        setSelectedPublishers(draft?.adsetlevel?.publisher_platforms || []);
+        setIsManual(draft?.adsetlevel?.placements === "manual" ? "manual" : false);
+        setSelectedOption("creative");
+        const checkFormCompletion = () => {
+            const allValues = form.getFieldsValue(true);
+            const isComplete = Object.keys(allValues).every(
+                key => allValues[key] !== undefined && allValues[key] !== ''
+            );
+            setIsFormComplete(isComplete);
+        };
+        
+        setSubmitErrors([]); // Reset submit errors when loading a draft
+
+
+        // Trigger form completion check
+        checkFormCompletion();
+    }
+
+    const onChangeDraft = (value) => {
+        const draft = draftsData.find(draft => draft.id === value);
+        console.log("Selected Draft:", value);
+        console.log("Drafts Data:", draftsData.find(draft => draft.id === value));
+        setFormValuesFromDraft(draftsData.find(draft => draft.id === value));
+        selectedRef.current = {Draft_Name: draft?.Draft_Name, Draft_Id: draft?.id};
+        newSelectedRef.current = draft?.Draft_Name;
+    }
+
     return (
         <Drawer
-            title="Create a new campaign"
+            title={
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>Create a new campaign</span>
+                    <Select value={newSelectedRef.current} placeholder="Select Draft" style={{ width: 150 }} onChange={onChangeDraft}>
+                        {draftsData.map((draft) => (
+                            <Select.Option value={draft.id}>{draft.Draft_Name}</Select.Option>
+                        ))}
+
+                        {/* <Select.Option value="creative">Creative</Select.Option>
+                        <Select.Option value="video">Video</Select.Option> */}
+                    </Select>
+                </div>
+            }
             width="95%"
             open={visible}
             onClose={handleDrawerClose}
@@ -2055,7 +2208,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             style={{ flex: 1 }}
                                             >
                                             <Select
-                                                defaultValue="upload"
+                                                defaultValue={selectedOption}
                                                 onChange={(value) => {
                                                 setSelectedOption(value);
                                                 form.validateFields(["MediaContent"]); // Revalidate when switching source
@@ -2678,6 +2831,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     }
 
                                     setSubmitErrors([]);
+                                    console.log("Form values:", values);
 
                                     // Optionally trigger your existing logic
                                     onFinish(values); // If you want to reuse your existing logic
