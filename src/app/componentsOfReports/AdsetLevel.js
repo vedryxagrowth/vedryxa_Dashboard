@@ -172,6 +172,11 @@ const AdsetLevelReports = ({functionCallForCampaigns, functionCallForCommnets, s
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting
+        filter: 'agTextColumnFilter',      // Enable string filter
+        floatingFilter: false,              // Optional: show quick filter below header
+        suppressMenu: false,
+        showRowGroup: 'adsetname',
+        field: 'adsetname',
 
         comparator: (campaignA, campaignB) => {
             if (!campaignA) return 1;
@@ -197,11 +202,14 @@ const AdsetLevelReports = ({functionCallForCampaigns, functionCallForCommnets, s
 
         cellRenderer: "agGroupCellRenderer", // ✅ Use AG Grid's built-in renderer
         cellRendererParams: {
-            checkbox: true,
+            // checkbox: true,
+            checkbox: (params) => {
+                return params.node.group && !params.node.footer;
+            },
             suppressCount: false,
             innerRenderer: (params) => {
-                if (params.node.footer) {
-                    return 'Total';
+                if (params.node.footer || !params.node.group) {
+                    return '';
                 }
                 // console.log(params.value, "value");
 

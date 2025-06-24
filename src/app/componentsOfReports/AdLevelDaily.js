@@ -193,6 +193,12 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting
+        filter: 'agTextColumnFilter',      // Enable string filter
+        floatingFilter: false,              // Optional: show quick filter below header
+        suppressMenu: false,
+        showRowGroup: 'adname',
+        field: 'adname',
+        suppressCellSelection: true,
 
         comparator: (campaignA, campaignB) => {
             if (!campaignA) return 1;
@@ -219,8 +225,8 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
         cellRendererParams: {
             suppressCount: false,
             innerRenderer: (params) => {
-                if (params.node.footer) {
-                    return 'Total';
+                if (params.node.footer || !params.node.group) {
+                    return '';
                 }
 
                 const firstColumnValue = params.node.key;  // campaign name

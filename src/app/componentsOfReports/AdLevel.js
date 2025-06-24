@@ -56,7 +56,7 @@ const selectTimezone = {
     CEST: 'CESTDate'
 };
 
-const AdLevelReports = ({functionCallForCampaigns, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedCampaigns, selectedAdsets }) => {
+const AdLevelReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedCampaigns, selectedAdsets }) => {
     // console.log(columnDefs, "columnDefs");
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
@@ -207,7 +207,7 @@ const AdLevelReports = ({functionCallForCampaigns, functionCallForCommnets, star
                 const firstColumnValue = params.node.key;  // campaign name
                 const campaignName = params.node.key;
 
-                let campaignid, adsetid, adid;
+                let campaignid, adsetid;
 
                 if (params.node.group && Array.isArray(params.node.childrenAfterGroup) && params.node.childrenAfterGroup.length > 0) {
                     const firstChild = params.node.childrenAfterGroup[0]?.data;  // Safe access with optional chaining
@@ -215,14 +215,12 @@ const AdLevelReports = ({functionCallForCampaigns, functionCallForCommnets, star
                     if (firstChild) {  // Ensure firstChild is not undefined before accessing properties
                         campaignid = firstChild.campaignid ?? null;  // Use null-safe access
                         adsetid = firstChild.adsetid ?? null;
-                        adid = firstChild.adid ?? null;
                     } else {
                         console.log("First child data is undefined", params.node.childrenAfterGroup[0]);
                     }
                 } else if (params.data) {
                     campaignid = params.data.campaignid ?? null;
                     adsetid = params.data.adsetid ?? null;
-                    adid = params.data.adid ?? null;
                 } else {
                     console.error('Missing campaignid or adsetid for campaign:', campaignName);
                     return (
@@ -273,8 +271,8 @@ const AdLevelReports = ({functionCallForCampaigns, functionCallForCommnets, star
                 const [comment, setComment] = useState(relatedComment || '');
                 const [pinned, setPinned] = useState(getPinStatusForCampaign(campaignName));
 
-                // Update switch state from AdLevel
-                useEffect(() => {
+                 // Update switch state from AdLevel
+                 useEffect(() => {
                     const matchedComment = campaignComments.find(
                     (item) =>
                         item.campaignid === campaignid &&
@@ -289,7 +287,7 @@ const AdLevelReports = ({functionCallForCampaigns, functionCallForCommnets, star
                         setSwitchOn(true);
                       }
                 }, [campaignComments, campaignid, adsetid, adid]);
-
+                
                 const handlePauseClick = (adid, checked) => {
                     setSelectedAdid(adid); 
                     setNextChecked(checked); // user’s toggle intent
@@ -302,7 +300,7 @@ const AdLevelReports = ({functionCallForCampaigns, functionCallForCommnets, star
                     try {
                       const token = localStorage.getItem("token");
                   
-                      const response = await apiClient.post(`/adStatusChange`,
+                      const response = await apiClient.post('/adStatusChange',
                         {
                             status: nextChecked ? "ACTIVE" : "PAUSED",
                             id: params.data?.identifier,             
@@ -340,7 +338,6 @@ const AdLevelReports = ({functionCallForCampaigns, functionCallForCommnets, star
                     setIsAdidModalVisibles(false);
                     setSelectedAdid(null);
                 };
-
 
                 const copyToClipboard = () => {
                     navigator.clipboard.writeText(firstColumnValue)
@@ -551,7 +548,7 @@ const AdLevelReports = ({functionCallForCampaigns, functionCallForCommnets, star
 
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                         <Switch 
+                        <Switch 
                             checked={switchOn}
                             onClick={(checked) => handlePauseClick(adid, checked)}
                             size="small" 
@@ -847,8 +844,6 @@ const AdLevelReports = ({functionCallForCampaigns, functionCallForCommnets, star
                             profitloss: "",
                             M_tq: "",
                             D_tq: "",
-                            fbCron: eachData.fbCron,
-                            revenueCron: eachData.revenueCron
                         }
                     )
                 })
