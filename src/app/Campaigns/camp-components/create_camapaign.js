@@ -568,7 +568,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
             setAddName('');
             setAdsetLevelDailyBudget(0);
             setCampaignLevelDailyBudget(0);
-
+            setSelectedOption("upload");
         }
     }, [visible]);
 
@@ -1613,7 +1613,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         setSelectedFiles(draft?.addlevel?.ads);
         setSelectedPublishers(draft?.adsetlevel?.publisher_platforms || []);
         setIsManual(draft?.adsetlevel?.placements === "manual" ? "manual" : false);
-        setSelectedOption("creative");
+        draft?.addlevel?.ads?.length > 0 ? setSelectedOption("creative"): setSelectedOption("upload");
         const checkFormCompletion = () => {
             const allValues = form.getFieldsValue(true);
             const isComplete = Object.keys(allValues).every(
@@ -1636,6 +1636,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         setFormValuesFromDraft(draftsData.find(draft => draft.id === value));
         selectedRef.current = {Draft_Name: draft?.Draft_Name, Draft_Id: draft?.id};
         newSelectedRef.current = draft?.Draft_Name;
+        setWebsiteURL("");
+        setCaption("");
     }
 
     return (
@@ -2208,7 +2210,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             style={{ flex: 1 }}
                                             >
                                             <Select
-                                                defaultValue={selectedOption}
+                                                value={selectedOption}
                                                 onChange={(value) => {
                                                 setSelectedOption(value);
                                                 form.validateFields(["MediaContent"]); // Revalidate when switching source
@@ -2805,7 +2807,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                         )}
                     </Form.Item> */}
                     <Form.Item label=" ">
-                        {isFormComplete && (
+                        {(isFormComplete || newSelectedRef.current) && (
                             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
                             <Button
                                 type="primary"

@@ -1,53 +1,31 @@
 {
   "polyfillFiles": [
-    "static/chunks/polyfills.js"
+    "static/chunks/polyfills-42372ed130431b0a.js"
   ],
-  "devFiles": [
-    "static/chunks/react-refresh.js"
-  ],
+  "devFiles": [],
   "ampDevFiles": [],
   "lowPriorityFiles": [
-<<<<<<< HEAD
-    "static/development/_buildManifest.js",
-    "static/development/_ssgManifest.js"
+    "static/PXvH-C57-jti9R2FVs4nW/_buildManifest.js",
+    "static/PXvH-C57-jti9R2FVs4nW/_ssgManifest.js"
   ],
   "rootMainFiles": [
-    "static/chunks/webpack.js",
-    "static/chunks/main-app.js"
+    "static/chunks/webpack-c153764addf66646.js",
+    "static/chunks/fd9d1056-06d8b6421cc88c5e.js",
+    "static/chunks/2117-893fdd90b2eddcbc.js",
+    "static/chunks/main-app-78eeb644082b86b3.js"
   ],
   "pages": {
     "/_app": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/_app.js"
-    ],
-    "/_error": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/_error.js"
-=======
-    "static/Z9SScvjAZdWc0-kt6FmgW/_buildManifest.js",
-    "static/Z9SScvjAZdWc0-kt6FmgW/_ssgManifest.js"
-  ],
-  "rootMainFiles": [
-    "static/chunks/webpack-06b924cc7cbe8a2c.js",
-    "static/chunks/fd9d1056-5875aa7e6087797a.js",
-    "static/chunks/2117-ef2ab84538b378c3.js",
-    "static/chunks/main-app-a4128005f2adfa3a.js"
-  ],
-  "pages": {
-    "/_app": [
-      "static/chunks/webpack-06b924cc7cbe8a2c.js",
+      "static/chunks/webpack-c153764addf66646.js",
       "static/chunks/framework-0af805db6f0c0b82.js",
-      "static/chunks/main-bef1358b194ee132.js",
+      "static/chunks/main-e00b473018218e02.js",
       "static/chunks/pages/_app-3c9ca398d360b709.js"
     ],
     "/_error": [
-      "static/chunks/webpack-06b924cc7cbe8a2c.js",
+      "static/chunks/webpack-c153764addf66646.js",
       "static/chunks/framework-0af805db6f0c0b82.js",
-      "static/chunks/main-bef1358b194ee132.js",
+      "static/chunks/main-e00b473018218e02.js",
       "static/chunks/pages/_error-cf5ca766ac8f493f.js"
->>>>>>> DevUi
     ]
   },
   "ampFirstPages": []
