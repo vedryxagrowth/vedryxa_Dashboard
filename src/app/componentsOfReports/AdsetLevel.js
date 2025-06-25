@@ -172,11 +172,11 @@ const AdsetLevelReports = ({functionCallForCampaigns, functionCallForCommnets, s
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting
-        filter: 'agTextColumnFilter',      // Enable string filter
-        floatingFilter: false,              // Optional: show quick filter below header
-        suppressMenu: false,
-        showRowGroup: 'adsetname',
-        field: 'adsetname',
+        // filter: 'agTextColumnFilter',      // Enable string filter
+        // floatingFilter: false,              // Optional: show quick filter below header
+        // suppressMenu: false,
+        // showRowGroup: 'adsetname',
+        // field: 'adsetname',
 
         comparator: (campaignA, campaignB) => {
             if (!campaignA) return 1;
@@ -202,14 +202,11 @@ const AdsetLevelReports = ({functionCallForCampaigns, functionCallForCommnets, s
 
         cellRenderer: "agGroupCellRenderer", // ✅ Use AG Grid's built-in renderer
         cellRendererParams: {
-            // checkbox: true,
-            checkbox: (params) => {
-                return params.node.group && !params.node.footer;
-            },
+            checkbox: true,
             suppressCount: false,
             innerRenderer: (params) => {
-                if (params.node.footer || !params.node.group) {
-                    return '';
+                if (params.node.footer) {
+                    return 'Total';
                 }
                 // console.log(params.value, "value");
 
@@ -280,31 +277,44 @@ const AdsetLevelReports = ({functionCallForCampaigns, functionCallForCommnets, s
                 const [comment, setComment] = useState(relatedComment || '');
                 const [pinned, setPinned] = useState(getPinStatusForCampaign(campaignName));
 
-                const commentForCampaign = campaignComments.find(
-                    obj => obj.campaignid === campaignid
-                );
+                // const commentForCampaign = campaignComments.find(
+                //     obj => obj.campaignid === campaignid
+                // );
 
                 // Default to ACTIVE if not defined
-                const [switchOn, setSwitchOn] = useState(
-                    commentForCampaign?.AdsetLevel
-                    ? commentForCampaign.AdsetLevel.adset_id === adsetid &&
-                        commentForCampaign.AdsetLevel.status === "ACTIVE"
-                    : true // Default to ACTIVE if AdsetLevel not found
-                );
-                  
                 // const [switchOn, setSwitchOn] = useState(
-                //     commentForCampaign?.AdsetLevel?.adset_id === adsetid &&
-                //     commentForCampaign?.AdsetLevel?.status === "ACTIVE"
-                // );
+                //     commentForCampaign?.AdsetLevel
+                //     ? commentForCampaign.AdsetLevel.adset_id === adsetid &&
+                //         commentForCampaign.AdsetLevel.status === "ACTIVE"
+                //     : true // Default to ACTIVE if AdsetLevel not found
+                // );                
                     
-                useEffect(() => {
-                    const updated = campaignComments.find(obj => obj.campaignid === campaignid);
-                    const adsetMatch =
-                      updated?.AdsetLevel?.adset_id === adsetid &&
-                      updated?.AdsetLevel?.status === "ACTIVE";
+                // useEffect(() => {
+                //     const updated = campaignComments.find(obj => obj.campaignid === campaignid);
+                //     const adsetMatch =
+                //       updated?.AdsetLevel?.adset_id === adsetid &&
+                //       updated?.AdsetLevel?.status === "ACTIVE";
                   
-                    // setSwitchOn(adsetMatch);
-                    setSwitchOn(updated?.AdsetLevel ? adsetMatch : true);
+                //     // setSwitchOn(adsetMatch);
+                //     setSwitchOn(updated?.AdsetLevel ? adsetMatch : true);
+                // }, [campaignComments, campaignid, adsetid]);
+
+                const [switchOn, setSwitchOn] = useState(true); // default to ACTIVE
+
+                useEffect(() => {
+                const commentForCampaign = campaignComments.find(obj => obj.campaignid === campaignid);
+
+                let matchedAdset = null;
+
+                if (Array.isArray(commentForCampaign?.AdsetLevel)) {
+                    matchedAdset = commentForCampaign.AdsetLevel.find(a => a.adset_id === adsetid);
+                } else if (commentForCampaign?.AdsetLevel?.adset_id === adsetid) {
+                    matchedAdset = commentForCampaign.AdsetLevel;
+                }
+
+                const isActive = matchedAdset?.status === "ACTIVE";
+
+                setSwitchOn(matchedAdset ? isActive : true); // fallback to ACTIVE
                 }, [campaignComments, campaignid, adsetid]);
 
                 const handlePauseClick = (adsetid, checked) => {

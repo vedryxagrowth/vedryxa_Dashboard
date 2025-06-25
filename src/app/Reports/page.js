@@ -3633,7 +3633,7 @@ const MyTablePage = () => {
                 try {
                   const [commentsRes, fbRes] = await Promise.all([
                     apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${campaignname}`),
-                    apiClient.get(`http://localhost:8000/get/ActualAdsetSpend?adsetId=${adsetId}`),
+                    apiClient.get(`/get/ActualAdsetSpend?adsetId=${adsetId}`),
                   ]);
           
                   if (commentsRes.status === 200 && commentsRes.data.length !== 0) {
@@ -3675,7 +3675,7 @@ const MyTablePage = () => {
                 }
 
                 try {
-                  await apiClient.post('http://localhost:8000/update/adset/budget', payload);
+                  await apiClient.post('/update/adset/budget', payload);
                   message.success("Budget Updated Successfully");
                   changeRRefrst();
                 } catch (err) {
@@ -4260,8 +4260,9 @@ const MyTablePage = () => {
             
         },
         actions: {
-            headerName: 'Actions',
+            headerName: 'Budget',
             field: 'actions',
+            hide: true,
             minWidth: 90,
             // sortable: true,
             // filter: true,
@@ -4271,7 +4272,7 @@ const MyTablePage = () => {
             enableFilter: false,
             suppressMenu: true,    // Suppress the column menu
             menuTabs: [],
-            hide: !isYesterday(),
+            // hide: !isYesterday(),
             cellRenderer: (params) => {
                 const [isModalVisible, setIsModalVisible] = useState(false);
                 const [groupedData, setGroupedData] = useState([]);
@@ -4903,6 +4904,7 @@ const MyTablePage = () => {
         },
     };
 
+    //campaign level live
     const columnDefsObject = {
         M_tq: {
             headerName: 'M_TQ',
@@ -5187,7 +5189,7 @@ const MyTablePage = () => {
                 }
 
                 try {
-                  await apiClient.post('http://localhost:8000/update/campaign/budget', payload);
+                  await apiClient.post('/update/campaign/budget', payload);
                   message.success("Budget Updated Successfully");
                   changeRRefrst();
                 } catch (err) {
@@ -5971,7 +5973,7 @@ const MyTablePage = () => {
                 try {
                   const [commentsRes, fbRes] = await Promise.all([
                     apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${campaignname}`),
-                    apiClient.get(`http://localhost:8000/get/ActualAdsetSpend?adsetId=${adsetId}`),
+                    apiClient.get(`/get/ActualAdsetSpend?adsetId=${adsetId}`),
                   ]);
           
                   if (commentsRes.status === 200 && commentsRes.data.length !== 0) {
@@ -6013,7 +6015,7 @@ const MyTablePage = () => {
                 }
 
                 try {
-                  await apiClient.post('http://localhost:8000/update/adset/budget', payload);
+                  await apiClient.post('/update/adset/budget', payload);
                   message.success("Budget Updated Successfully");
                   changeRRefrst();
                 } catch (err) {
@@ -6448,16 +6450,16 @@ const MyTablePage = () => {
             // cellRenderer: campaignNameRenderer,
         },
         actions: {
-            headerName: 'Actions',
+            headerName: 'Budget',
             field: 'actions',
             minWidth: 90,
             sortable: false,    // Ensure sorting is disabled
             filter: false,      // Ensure filtering is disabled
             enableSorting: false,  // Disable sorting at the column level
             enableFilter: false,
-            hide: false,
+            hide: true,
             suppressMenu: true,
-            hide: !isYesterday(),
+            // hide: !isYesterday(),
             cellRenderer: (params) => {
                 const [isModalVisible, setIsModalVisible] = useState(false);
                 const [newgroupedData, setNewGroupedData] = useState([]);
@@ -7748,7 +7750,7 @@ const MyTablePage = () => {
                 }
 
                 try {
-                  await apiClient.post('http://localhost:8000/update/campaign/budget', payload);
+                  await apiClient.post('/update/campaign/budget', payload);
                   message.success("Budget Updated Successfully");
                   changeRRefrst();
                 } catch (err) {
