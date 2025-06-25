@@ -98,6 +98,10 @@ const App = () => {
 
     const rangePresets = [
         {
+            label: 'ALL',
+            value: [dayjs().startOf('year'), dayjs()],
+        },
+        {
             label: 'Today',
             value: [dayjs(), dayjs()],
         },
