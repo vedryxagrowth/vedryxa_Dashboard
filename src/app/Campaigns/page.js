@@ -702,6 +702,7 @@ const App = () => {
                         onPressEnter={handleSave}
                         onBlur={handleSave}
                         autoFocus
+                        className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                     />
                 ) : (
                     value !== 0 && value !== '' && (
@@ -773,9 +774,9 @@ const App = () => {
                 <>
                     {/* Display green check or red close icon based on fbstatus */}
                     {record.fbstatus === 'Live' ? (
-                        <CheckCircleFilled style={{ color: 'green' }} />
+                        <CheckCircleFilled style={{ color: 'green' }} className='black-icon-active' />
                     ) : (
-                        <CloseCircleFilled style={{ color: 'red' }} />
+                        <CloseCircleFilled style={{ color: 'red' }}   className='black-icon-pause-1' />
                     )}
 
                     {/* Display link icon if reports field is true */}
@@ -912,6 +913,7 @@ const App = () => {
                     onChange={(checked) => onToggleStatus(record, checked)}
                     checkedChildren="ACTIVE"
                     unCheckedChildren="PAUSED"
+                    style={{ backgroundColor: record.Status === 'ACTIVE' && "#91C25F" }}
                 />
             )
         },
@@ -986,8 +988,8 @@ const App = () => {
                 if (record.Approval === 'Approved') {
                     return (
                         <div style={{display:'flex', alignItems:'center', justifyContent:'center'}}>
-                            <Button icon={<EyeOutlined />} onClick={() => handleViewClick(record)}></Button>
-                            <Button icon={<EditOutlined />} onClick={() => handleEditClickAllLevelData(record)} style={{marginLeft:'10px'}}></Button> 
+                            <Button className="dark-icon-button" icon={<EyeOutlined />} onClick={() => handleViewClick(record)}></Button>
+                            <Button className="dark-icon-button" icon={<EditOutlined />} onClick={() => handleEditClickAllLevelData(record)} style={{marginLeft:'10px'}}></Button> 
                             {(record.adlevel_error || record.campaignlevel_error || record.adsetlevel_error) && (
                                 <Tooltip title={errorDisplay(record.campaignlevel_error,record.adsetlevel_error,record.adlevel_error)}>
                                     <InfoCircleOutlined style={{marginLeft:'10px', color:"red", fontSize:'15px'}}/>
@@ -1006,13 +1008,13 @@ const App = () => {
 
                 return (
                     <Space size="middle">
-                        <Button icon={<EyeOutlined />} onClick={() => handleViewClick(record)}></Button>
+                        <Button className="dark-icon-button" icon={<EyeOutlined />} onClick={() => handleViewClick(record)}></Button>
                         {record.fbstatus !== 'Live' && (
                             // <Button icon={<EditOutlined />} onClick={() => handleEditOnlyClick(record)}></Button> 
-                            <Button icon={<EditOutlined />} onClick={() => handleEditClickAllLevelData(record)}></Button> 
+                            <Button className="dark-icon-button" icon={<EditOutlined />} onClick={() => handleEditClickAllLevelData(record)}></Button> 
                         )}
                         {record.Approval === 'PENDING_APPROVAL' && (
-                            <Button type="primary" onClick={() => handleApproval(record)}>Approve</Button>
+                            <Button style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}} onClick={() => handleApproval(record)}>Approve</Button>
                         )}
                         <Modal
                             title="Confirm Approval"
@@ -1103,7 +1105,8 @@ const App = () => {
                 onClose={() => setEditcamapaignDrawerVisible(false)}
             /> */}
             <Card 
-                title="Campaigns" 
+                // title="Campaigns" 
+                title={<span style={{ color: theme === "dark" && "white" }}>Campaigns</span>}
                 size="small"
                 extra={
                     // <Dropdown
@@ -1163,7 +1166,8 @@ const App = () => {
                             type="primary"
                             onClick={draftsData.length === 5 ? undefined : showCreateNewDraftDrawer}
                             disabled={draftsData.length === 5}
-                            style={{color: theme !== "dark" && draftsData.length === 5 ? "black" : "white" }}
+                            // style={{color: theme !== "dark" && draftsData.length === 5 ? "black" : "white" }}
+                            style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}}
                             >
                             Create Draft
                             </Button>
@@ -1172,10 +1176,11 @@ const App = () => {
 
                         {/* 🟣 Right: Edit Dropdown */}
                         <Dropdown overlay={draftDropdownMenu} trigger={['click']}>
-                        <Button type="primary" icon={<DownOutlined />} />
+                        <Button style={{backgroundColor:'#91C25F', color: "#000", border: "#91C25F"}} icon={<DownOutlined  className="black-icon"/>} />
                         </Dropdown>
                     </Button.Group>
                 } 
+                // style={{ backgroundColor:'blue'}}
             >
                 <Row justify="start" align="middle" gutter={[16, 16]}>
                     <Col span={3}>
@@ -1185,6 +1190,8 @@ const App = () => {
                             style={{ width: '100%' }}
                             onChange={handleKeyChange}
                             value={selectedKey}
+                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                         >
                             {options.map(option => (
                                 <Option key={option.value} value={option.value}>{option.label}</Option>
@@ -1224,6 +1231,8 @@ const App = () => {
                             optionFilterProp="children"
                             filterOption={(input, option) => /^[0-9]*$/.test(input) && option?.value.toString().includes(input)}
                             onDropdownVisibleChange={(open) => setIsOpen(open)} // Track dropdown visibility
+                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                         >
                             {valueOptions.map(option => (
                                 <Select.Option key={option.value} value={option.value}>
@@ -1285,6 +1294,7 @@ const App = () => {
                                 defaultValue={[dayjs(), dayjs()]}
                                 format="YYYY-MM-DD"
                                 style={{ width: '100%' }}
+                                dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}
                             />
                         </ConfigProvider>
                     </Col>
@@ -1297,16 +1307,17 @@ const App = () => {
                             value={searchInput}
                             onChange={handleSearchChange}
                             onPressEnter={handleSearchSubmit}
+                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                         />
                     </Col>
                     {!restrictedEmails.includes(userdetails.email) && (
                         <Col>
-                            <Button type="primary" onClick={showDrawer} icon={<PlusOutlined />}>
+                            <Button type="primary" onClick={showDrawer} icon={<PlusOutlined  className="black-icon"/>} style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}}>
                                 Create Campaign
                             </Button>
                         </Col>
                     )}
-                    <Button type="primary" onClick={handleRefresh} icon={<ReloadOutlined />}>
+                    <Button type="primary" onClick={handleRefresh} icon={<ReloadOutlined  className="black-icon"/>} style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}}>
                     </Button>
                     <Col span={4}>
                         <span style={{ fontWeight: 'bold', fontSize: '16px' }}>
@@ -1321,6 +1332,7 @@ const App = () => {
                     ) :
             (<Table
                 style={{ width: "100%" }}  // Ensures table takes full available width
+                className={`custom-dark-table ${theme === 'dark' ? 'dark-mode-pagination' : 'light-mode-pagination'}`}
                 columns={columns}
                 // dataSource={
                 //     searchInput
@@ -1353,7 +1365,7 @@ const App = () => {
                     }, 0);
 
                     return (
-                        <Table.Summary.Row >
+                        <Table.Summary.Row style={{backgroundColor: theme === "dark" && "#333", borderBottom: "0px"}}>
                             <Table.Summary.Cell colSpan={columns.length - 2} align="right">
                                 <strong>Total Daily Budget: ${(totalDailyBudget / 100).toFixed(2)}</strong>
                             </Table.Summary.Cell>

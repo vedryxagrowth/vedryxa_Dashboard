@@ -2874,3 +2874,13 @@ body.dark-mode .black-icon-comment.anticon svg {
     margin-top: 10px;
   }
 }
+
+.dark-icon-button {
+  background-color: transparent !important;
+  /* border: none; */
+}
+
+.dark-icon-button:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important; /* or your custom color */
+}
+

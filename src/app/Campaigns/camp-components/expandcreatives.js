@@ -1,6 +1,6 @@
 "use client"
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Card, Tooltip, Button, Modal, Input, Space, Drawer } from 'antd';
+import { Row, Col, Card, Tooltip, Button, Modal, Input, Space, Drawer, theme } from 'antd';
 import { LikeOutlined, CommentOutlined, ShareAltOutlined, GlobalOutlined, MoreOutlined, CheckOutlined, CloseOutlined, EditOutlined, DeleteOutlined, CheckCircleOutlined, MessageOutlined, CloseCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import axios from 'axios';
 import { useTokenContext } from '../../components/parent';
@@ -22,6 +22,8 @@ const ExpandedRowContent = ({ record, changeRRefrst, network}) => {
     const [imagehash, setimagehash] = useState('')
 
     console.log(userdetails, "userdetails")
+    
+    const { theme } = useTokenContext();
     // console.log(record);
 
 
@@ -178,7 +180,7 @@ const ExpandedRowContent = ({ record, changeRRefrst, network}) => {
 
     return (
         <>
-            <Row gutter={[16, 16]} style={{ display: "flex", flexWrap: "nowrap", overflowX: "auto" }}>
+            <Row gutter={[16, 16]} style={{ display: "flex", flexWrap: "nowrap", overflowX: "auto", }}>
                 {viewCampaignData.addlevel && viewCampaignData.addlevel.map((item, index) => (
                     <Col key={index} flex="0 0 340px">
                         <Card
@@ -242,7 +244,7 @@ const ExpandedRowContent = ({ record, changeRRefrst, network}) => {
                                         <MoreOutlined style={{ fontSize: '16px', cursor: 'pointer' }} />
                                     </Tooltip>
                                 </div>
-                                <div style={{ fontSize: "14px", color: "#333", marginBottom: "10px" }}>
+                                <div style={{ fontSize: "14px", color: theme === "dark" ? "white" : "#333", marginBottom: "10px" }}>
                                     {item?.message}
                                 </div>
                             </div>
@@ -270,10 +272,10 @@ const ExpandedRowContent = ({ record, changeRRefrst, network}) => {
                             </div>
 
                             <div style={{ padding: '10px 16px' }}>
-                                <div style={{ fontSize: "16px", fontWeight: "bold", color: "#333" }}>
+                                <div style={{ fontSize: "16px", fontWeight: "bold", color: theme === "dark" ? "white" : "#333" }}>
                                     {item?.headline}
                                 </div>
-                                <div style={{ fontSize: "14px", color: "#333", marginBottom: "10px" }}>
+                                <div style={{ fontSize: "14px", color: theme === "dark" ? "white" : "#333", marginBottom: "10px" }}>
                                     {item?.Description}
                                 </div>
                                 <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -285,12 +287,13 @@ const ExpandedRowContent = ({ record, changeRRefrst, network}) => {
                                         style={{
                                             padding: "8px 12px",
                                             borderRadius: "20px",
-                                            backgroundColor: "#007BFF",
-                                            color: "#fff",
+                                            backgroundColor: "#91C25F",
+                                            color: "#000",
                                             border: "none",
                                             cursor: "pointer",
                                             flexShrink: 0,
                                         }}
+                                        // style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}}
                                         onClick={() => console.log('Learn More clicked:', item)}
                                     >
                                         Learn More
@@ -375,23 +378,24 @@ const ExpandedRowContent = ({ record, changeRRefrst, network}) => {
                             bordered={false}
                             style={{
                                 maxWidth: '340px',
-                                height: '480px', // Set height for the card
+                                height: '100%', // Set height for the card
                                 display: 'flex', // Flexbox to center content
                                 justifyContent: 'center', // Center horizontally
                                 alignItems: 'center', // Center vertically
                                 borderRadius: '8px',
                                 boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                                backgroundColor: '#f5f5f5', // Light background color
+                                backgroundColor: theme === "dark" ? "#333" : '#f5f5f5', // Light background color
                             }}
                         >
                             <Button
                                 type="primary"
-                                icon={<PlusOutlined />} // Icon for "Create Ads"
+                                icon={<PlusOutlined   className="black-icon"/>} // Icon for "Create Ads"
                                 onClick={createnewads} // Your function to create new ads
-                                style={{
-                                    padding: '8px 16px',
-                                    borderRadius: '8px',
-                                }}
+                                // style={{
+                                //     padding: '8px 16px',
+                                //     borderRadius: '8px',
+                                // }}
+                                style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px",padding: '8px 16px',borderRadius: '8px',}}
                             >
                                 Create Ads
                             </Button>

@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { SessionProvider, useSession, signIn, signOut } from 'next-auth/react';
 import Image from "next/image";
-import { Layout, Avatar, Dropdown, Button, Switch, Spin, Form, Input, Divider, Modal, Badge, Card, Upload, notification, Drawer , Menu} from "antd";
+import { Layout, Avatar, Dropdown, Button, Switch, Spin, Form, Input, Divider, Modal, Badge, Card, Upload, notification, Drawer , Menu, theme} from "antd";
 import React from "react";
 import { useRouter,  usePathname} from "next/navigation";
 import axios from 'axios';
@@ -709,7 +709,8 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
             {userdetails?.role !== "Revenue_Partner" && <button style={{padding: '0px', margin:'0px'}} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickCalculator}>
                 <CalculatorOutlined style={{fontSize:'20px',padding: '0px', margin:'0px',marginLeft:  '10px' }}/>
             </button>}
-            {userdetails?.role !== "Revenue_Partner" && <button style={{padding: '0px', margin:'0px'}} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickWorlTime}>
+            {userdetails?.role !== "Revenue_Partner" && <button style={{padding: '0px', margin:'0px', backgroundColor: theme === "dark" && 
+                  "green"}} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickWorlTime}>
                 <TfiWorld size={20} style={{marginLeft:  '10px'}} />
             </button>}
 
@@ -781,7 +782,8 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
             {userdetails?.role !== "Revenue_Partner" && showIcons && <button style={{padding: '0px', margin:'0px'}} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickCalculator}>
                 <CalculatorOutlined style={{fontSize:'20px',padding: '0px', margin:'0px',marginLeft:  '5px'}}/>
             </button>}
-            {userdetails?.role !== "Revenue_Partner" && showIcons && <button style={{padding: '0px', margin:'0px'}} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickWorlTime}>
+            {userdetails?.role !== "Revenue_Partner" && showIcons && <button style={{padding: '0px', margin:'0px', backgroundColor: theme === "dark" && 
+                  "green"}} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickWorlTime}>
                 <TfiWorld size={20} style={{marginLeft:  '5px'}} />
             </button>}
 
