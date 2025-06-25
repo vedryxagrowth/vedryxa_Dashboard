@@ -539,7 +539,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
             setSelectedFiles([]); // Clear selected files
             setEditedImages({}); // Clear edited images
             setIsManual(false); // Reset manual mode
-            setSelectedOption("creative"); // Reset selected option to "creative"
+            setSelectedOption("upload"); // Reset selected option to "creative"
             setShowBidAmount(false); // Reset bid amount visibility
         }
     }, [visible, selectedDraftToEdit]);
@@ -684,8 +684,6 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
             Caption: draft?.addlevel?.Caption,
             Website_URL: draft?.addlevel?.Website_URL,
             Caption: draft?.addlevel?.Caption,
-            // pixel_id: draft?.addlevel[0]?.pixel_id,
-            // page_id: draft?.addlevel[0]?.page_id,
             MediaContent: (draft?.addlevel?.ads)
         });
         draft?.camapaignlevel?.Daily_amount && setCampaignLevelDailyBudget((draft?.camapaignlevel?.Daily_amount) / 100);
@@ -697,7 +695,8 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
         setSelectedFilesFromMedia([]);
         setSelectedPublishers(draft?.adsetlevel?.publisher_platforms || []);
         setIsManual(draft?.adsetlevel?.placements === "manual" ? "manual" : false);
-        setSelectedOption("creative");
+        draft?.addlevel?.ads?.length > 0 ? setSelectedOption("creative"): setSelectedOption("upload");
+        // setSelectedOption("creative");
     }
 
     const handleBidStrategyChange = (value) => {
@@ -2339,7 +2338,8 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                             style={{ flex: 1 }}
                                             >
                                             <Select
-                                                defaultValue="upload"
+                                                // defaultValue="upload"
+                                                value={selectedOption}
                                                 onChange={(value) => {
                                                 setSelectedOption(value);
                                                 form.validateFields(["MediaContent"]); // Revalidate when switching source
