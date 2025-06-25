@@ -2864,7 +2864,6 @@ body.dark-mode .black-icon-comment.anticon svg {
     display: flex;
     width: 100%;
     flex-wrap: wrap;
-    /* justify-content: space-around; */
   }
   .container{
     width: 100%;
