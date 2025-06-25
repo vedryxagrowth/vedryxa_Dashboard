@@ -684,8 +684,6 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
             Caption: draft?.addlevel?.Caption,
             Website_URL: draft?.addlevel?.Website_URL,
             Caption: draft?.addlevel?.Caption,
-            // pixel_id: draft?.addlevel[0]?.pixel_id,
-            // page_id: draft?.addlevel[0]?.page_id,
             MediaContent: (draft?.addlevel?.ads)
         });
         draft?.camapaignlevel?.Daily_amount && setCampaignLevelDailyBudget((draft?.camapaignlevel?.Daily_amount) / 100);
