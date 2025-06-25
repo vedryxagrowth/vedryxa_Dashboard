@@ -280,31 +280,39 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
                 // const [starred, setStarred] = useState(isStarred);
                 const [pinned, setPinned] = useState(getPinStatusForCampaign(campaignName));
 
-                const commentForCampaign = campaignComments.find(
-                    obj => obj.campaignid === campaignid
-                );
+                // const commentForCampaign = campaignComments.find(
+                //     obj => obj.campaignid === campaignid
+                // );
 
-                // Default to ACTIVE if not defined
-                const [switchOn, setSwitchOn] = useState(
-                    commentForCampaign?.AdsetLevel
-                    ? commentForCampaign.AdsetLevel.adset_id === adsetid &&
-                        commentForCampaign.AdsetLevel.status === "ACTIVE"
-                    : true // Default to ACTIVE if AdsetLevel not found
-                );
+                // // Default to ACTIVE if not defined
+                // const [switchOn, setSwitchOn] = useState(
+                //     commentForCampaign?.AdsetLevel
+                //     ? commentForCampaign.AdsetLevel.adset_id === adsetid &&
+                //         commentForCampaign.AdsetLevel.status === "ACTIVE"
+                //     : true // Default to ACTIVE if AdsetLevel not found
+                // );
                   
                 // const [switchOn, setSwitchOn] = useState(
                 //     commentForCampaign?.AdsetLevel?.adset_id === adsetid &&
                 //     commentForCampaign?.AdsetLevel?.status === "ACTIVE"
                 // );
                     
+                const [switchOn, setSwitchOn] = useState(true); // default to ACTIVE
+
                 useEffect(() => {
-                    const updated = campaignComments.find(obj => obj.campaignid === campaignid);
-                    const adsetMatch =
-                      updated?.AdsetLevel?.adset_id === adsetid &&
-                      updated?.AdsetLevel?.status === "ACTIVE";
-                  
-                    // setSwitchOn(adsetMatch);
-                    setSwitchOn(updated?.AdsetLevel ? adsetMatch : true); 
+                const commentForCampaign = campaignComments.find(obj => obj.campaignid === campaignid);
+
+                let matchedAdset = null;
+
+                if (Array.isArray(commentForCampaign?.AdsetLevel)) {
+                    matchedAdset = commentForCampaign.AdsetLevel.find(a => a.adset_id === adsetid);
+                } else if (commentForCampaign?.AdsetLevel?.adset_id === adsetid) {
+                    matchedAdset = commentForCampaign.AdsetLevel;
+                }
+
+                const isActive = matchedAdset?.status === "ACTIVE";
+
+                setSwitchOn(matchedAdset ? isActive : true); // fallback to ACTIVE
                 }, [campaignComments, campaignid, adsetid]);
 
                 const handlePauseClick = (adsetid, checked) => {

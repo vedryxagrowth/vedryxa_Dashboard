@@ -193,6 +193,12 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting
+        // filter: 'agTextColumnFilter',      // Enable string filter
+        // floatingFilter: false,              // Optional: show quick filter below header
+        // suppressMenu: false,
+        // showRowGroup: 'adname',
+        // field: 'adname',
+        // suppressCellSelection: true,
 
         comparator: (campaignA, campaignB) => {
             if (!campaignA) return 1;
@@ -224,7 +230,9 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
                 }
 
                 const firstColumnValue = params.node.key;  // campaign name
-                const campaignName = params.node.key;
+                // const campaignName = params.node.key;
+                const campaignName = params.node.allLeafChildren?.[0]?.data?.campaignname || "";
+
 
                 let campaignid, adsetid, adid;
 
@@ -232,9 +240,11 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
                     const firstChild = params.node.childrenAfterGroup[0].data;
                     campaignid = firstChild.campaignid;
                     adsetid = firstChild.adsetid;
+                    adid = firstChild.adid;
                 } else if (params.data) {
                     campaignid = params.data.campaignid;
                     adsetid = params.data.adsetid;
+                    adid = params.data.adid;
                 } else {
                     console.error('Missing campaignid or adsetid for campaign:', campaignName);
                     return (
@@ -283,29 +293,68 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
 
                 const [tooltipText, setTooltipText] = useState("Click to Copy");
                 const [isModalVisibles, setIsModalVisibles] = useState(false);
+
                 const [isAdidModalVisibles, setIsAdidModalVisibles] = useState(false);
                 const [selectedAdid, setSelectedAdid] = useState(null); // store adid when switch clicked
-                const [switchOn, setSwitchOn] = useState(false); // control toggle state
+                // const [switchOn, setSwitchOn] = useState(false); // control toggle state
+                const [switchStates, setSwitchStates] = useState({}); // { adid1: true, adid2: false }
                 const [nextChecked, setNextChecked] = useState(false); // what user clicked
+
                 const [comment, setComment] = useState(relatedComment || '');
                 // const [starred, setStarred] = useState(isStarred);
                 const [pinned, setPinned] = useState(getPinStatusForCampaign(campaignName));
 
                  // Update switch state from AdLevel
-                 useEffect(() => {
-                    const matchedComment = campaignComments.find(
-                    (item) =>
-                        item.campaignid === campaignid &&
-                        item.adsetid === adsetid &&
-                        item.AdLevel?.ad_id === adid
-                    );
+                //  useEffect(() => {
+                //     const matchedComment = campaignComments.find(
+                //     (item) =>
+                //         item.campaignid === campaignid &&
+                //         item.adsetid === adsetid &&
+                //         item.AdLevel?.ad_id === adid
+                //     );
                 
-                    if (matchedComment?.AdLevel?.status) {
-                        setSwitchOn(matchedComment.AdLevel.status === "ACTIVE");
-                    } else {
-                        // Default to ACTIVE if AdLevel doesn't exist
-                        setSwitchOn(true);
-                      }
+                //     if (matchedComment?.AdLevel?.status) {
+                //         setSwitchOn(matchedComment.AdLevel.status === "ACTIVE");
+                //     } else {
+                //         // Default to ACTIVE if AdLevel doesn't exist
+                //         setSwitchOn(true);
+                //       }
+                // }, [campaignComments, campaignid, adsetid, adid]);
+
+                useEffect(() => {
+                    if (!adid) return;
+
+                    // Search by campaignid only, not adsetid
+                    const matchedComment = campaignComments.find(
+                        (item) =>
+                        item.campaignid === campaignid &&
+                        Array.isArray(item.AdLevel) &&
+                        item.AdLevel.some(ad => ad.ad_id === adid)
+                    );
+                  
+                    // const matchedComment = campaignComments.find(
+                    //   (item) =>
+                    //     item.campaignid === campaignid &&
+                    //     item.adsetid === adsetid &&
+                    //     Array.isArray(item.AdLevel) &&
+                    //     item.AdLevel.find(ad => ad.ad_id === adid)
+                    // );
+                  
+                    const adEntry = matchedComment?.AdLevel?.find(ad => ad.ad_id === adid);
+                    const isActive = adEntry?.status === "ACTIVE";
+                  
+                    if (matchedComment && adEntry) {
+                        setSwitchStates((prev) => ({
+                          ...prev,
+                          [adid]: isActive
+                        }));
+                    }else {
+                        // fallback to true (assume ACTIVE) if no comment in DB
+                        setSwitchStates((prev) => ({
+                          ...prev,
+                          [adid]: true
+                        }));
+                    }
                 }, [campaignComments, campaignid, adsetid, adid]);
 
                 const handlePauseClick = (adid, checked) => {
@@ -315,7 +364,18 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
                 };
 
                 const handlePauseOk = async () => {
-                    setSwitchOn(nextChecked); // update visual switch state
+                    if (!selectedAdid) {
+                        console.warn("No ad selected.");
+                        return;
+                    }
+
+                    // update visual switch state for selected ad
+                    setSwitchStates((prev) => ({
+                        ...prev,
+                        [selectedAdid]: nextChecked
+                    }));
+
+                    // setSwitchOn(nextChecked); // update visual switch state
                   
                     try {
                       const token = localStorage.getItem("token");
@@ -324,7 +384,7 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
                         {
                             status: nextChecked ? "ACTIVE" : "PAUSED",
                             id: params.data?.identifier,             
-                            ad_id: adid,                              
+                            ad_id: selectedAdid,                              
                             name: campaignName,
                             accountNumber: newaccount,
                             revenuePartner: params.data?.revenuePartner || "",
@@ -565,12 +625,13 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
 
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                         <Switch 
-                            checked={switchOn}
+                        <Switch 
+                            // checked={switchOn}
+                            checked={!!switchStates[adid]}
                             onClick={(checked) => handlePauseClick(adid, checked)}
                             size="small" 
                             style={{
-                              backgroundColor: switchOn ? '#91C25F' : '#d9d9d9',
+                              backgroundColor: switchStates[adid] ? '#91C25F' : '#d9d9d9',
                             }} 
                         />
                         <Modal
