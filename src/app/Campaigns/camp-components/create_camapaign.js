@@ -569,6 +569,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
             setAdsetLevelDailyBudget(0);
             setCampaignLevelDailyBudget(0);
             setSelectedOption("upload");
+            setIsManual(false); 
         }
     }, [visible]);
 

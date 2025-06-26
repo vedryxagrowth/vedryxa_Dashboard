@@ -330,7 +330,7 @@ const ExpandedRowContent = ({ record, changeRRefrst, network}) => {
                                     {/* Edit/Delete buttons (only if not Approved and email is not restricted) */}
                                     {item.status !== "Approved" && !restrictedEmails.includes(userdetails.email) && (
                                         <Space style={{ display: "flex", justifyContent: "space-evenly" }}>
-                                            <Button shape="circle" icon={<EditOutlined />} onClick={() => handleEditClick(item)} />
+                                            <Button  className="dark-icon-button"  shape="circle" icon={<EditOutlined />} onClick={() => handleEditClick(item)} />
                                             {/* {item.status !== "Rejected" && (
                                                 <Button shape="circle" icon={<DeleteOutlined />} onClick={() => handleDeleteClick(item)} />
                                             )} */}
@@ -340,7 +340,7 @@ const ExpandedRowContent = ({ record, changeRRefrst, network}) => {
                                     {/* Approve/Reject buttons (only if the user is not a media buyer and the item is not approved or rejected) */}
                                     {(!isMediaBuyer && item.status !== "Approved" && item.status !== "Rejected") && (
                                         <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                                            <Button type='primary' style={{ marginRight: 'auto' }} onClick={() => handleApprove(item)}>Approve</Button>
+                                            <Button style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px", marginRight: 'auto'}} onClick={() => handleApprove(item)}>Approve</Button>
                                             <Button type='primary' danger style={{ marginLeft: 'auto' }} onClick={() => handleRejectClick(item)}>Reject</Button>
                                         </div>
                                     )}
@@ -415,6 +415,7 @@ const ExpandedRowContent = ({ record, changeRRefrst, network}) => {
                 onClose={onCloseDrawer}
                 open={newadsDrawerVisible}
                 width="90%" // Adjust width as needed
+                style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
             >
                 <Createnewads data={viewCampaignData} visible={newadsDrawerVisible} onClose={onCloseDrawer} rerenders={changeRRefrst} adsData={viewCampaignData?.addlevel} network={network} />
             </Drawer>
@@ -427,6 +428,7 @@ const ExpandedRowContent = ({ record, changeRRefrst, network}) => {
                 }}
                 visible={isDrawerVisible}
                 bodyStyle={{ paddingBottom: 80 }}
+                style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
             >
                 {selectedItem && <Editads editdata={selectedItem} viewCampaignData={viewCampaignData} changeRRefrst={changeRRefrst} onClose={() => {
                     setIsDrawerVisible(false);   // Close the drawer

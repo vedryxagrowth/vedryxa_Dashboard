@@ -2879,7 +2879,25 @@ body.dark-mode .black-icon-comment.anticon svg {
   /* border: none; */
 }
 
+/* On hover — change only border and icon color */
 .dark-icon-button:hover {
-  background-color: rgba(255, 255, 255, 0.1) !important; /* or your custom color */
+  border-color: #91C25F !important; /* green border */
+  color: #91C25F !important;        /* icon color */
 }
 
+/* Optional: focus state for accessibility */
+.dark-icon-button:focus {
+  border-color: #91C25F !important;
+  color: #91C25F !important;
+}
+
+.dark-icon-button:hover .anticon,
+.dark-icon-button:hover .anticon > svg {
+  color: #91C25F !important;
+  fill: #91C25F !important;
+}
+
+/* Assuming your app has a class like .dark-theme on the root in dark mode */
+.custom-dark-mode .ant-upload-list-item-name {
+  color: white !important;
+}

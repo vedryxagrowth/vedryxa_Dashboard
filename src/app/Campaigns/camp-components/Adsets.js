@@ -37,7 +37,7 @@ import {
 import axios from "axios";
 import moment from "moment-timezone";
 import { useEffect, useState, useMemo } from "react";
-
+import { useTokenContext } from "../../components/parent";
 import Createadsets from "./Createadsets";
 import Createads from "./Ads";
 import Editadset from "./EditAdset";
@@ -59,6 +59,7 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
   const [ovrallcampdetal, setovrallcampdetal] = useState({});
   const [twoor, settwoor] = useState(false)
   const [loading, setLoading] = useState(false);  // Add loading state
+  const { theme } = useTokenContext();
 
   console.log(ovrallcampdetal, "ovrallcampdetal")
 
@@ -458,6 +459,7 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
           onChange={(checked) => onToggleStatus(record, checked)}
           checkedChildren="ACTIVE"
           unCheckedChildren="PAUSED"
+          style={{ backgroundColor: record.Status === 'ACTIVE' && "#91C25F" }}
           disabled={
             !(
               ovrallcampdetal?.fbstatus === 'Live' &&
@@ -472,10 +474,10 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
       key: 'action',
       render: (_, record) => (
         <div style={{ display: 'flex', gap: '10px' }}>
-          <Button onClick={() => handleadsetsEdit(record)} icon={<EditOutlined />}>
+          <Button  className="dark-icon-button" onClick={() => handleadsetsEdit(record)} icon={<EditOutlined />}>
             Edit
           </Button>
-          <Button onClick={() => handleadsetsView(record)} icon={<EyeOutlined />}>
+          <Button  className="dark-icon-button" onClick={() => handleadsetsView(record)} icon={<EyeOutlined />}>
             View
           </Button>
         </div>
@@ -497,11 +499,11 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
       <Flex justify="space-between" align="center">
         <Title
           level={3}
-          style={{ margin: "0 0 10px 0", color: "#1677ff" }}>
+          style={{ margin: "0 0 10px 0", color: theme === "dark" ? "white" : "#1677ff" }}>
           Adsets
         </Title>
         <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <Button type="primary" onClick={showDrawer1} style={{ marginRight: '10px' }}>
+          <Button  style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px",marginRight: '10px'}} onClick={showDrawer1}>
             Create Adset
           </Button>
         </div>
@@ -513,6 +515,7 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
             placeholder="Search..."
             variant="filled"
             suffix={<SearchOutlined />}
+            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
           // value={searchInput}
           // onChange={handleSearchChange}
           />
@@ -523,6 +526,8 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
           <Select
             // defaultValue="All"
             style={{ width: "100%" }}
+            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
             // onChange={handleSelectChange}
             options={[
               { value: "CREATED", label: "CREATED" },
@@ -551,6 +556,7 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
         onClose={onCloseDrawer}
         open={adsDrawerVisible}
         width="90%" // Adjust width as needed
+        style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
       >
         <Createads selectedRow={ovrallcampdetal} network={network}/>
 
@@ -562,6 +568,7 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
         onClose={onCloseDrawer}
         open={editadsetsDrawerVisible}
         width="90%" // Adjust width as needed
+        style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
       >
         <Editadset selectedRow={ovrallcampdetal} editadsetlevel={editadsetsdata} onClose={onCloseDrawer} changeRRefrst={changeRRefrst} rerender={rerender} />
 
@@ -573,11 +580,12 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
         onClose={onCloseDrawer}
         open={viewadsetsDrawerVisible}
         width="90%" // Adjust width as needed
+        style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
       >
         <Viewadsets selectedRow={ovrallcampdetal} viewadsetlevel={viewadsetsdata} onClose={onCloseDrawer} />
 
       </Drawer>
-      <Table dataSource={data} columns={columns} rowKey={(record, index) => index} />
+      <Table dataSource={data} columns={columns} rowKey={(record, index) => index} className={`custom-dark-table ${theme === 'dark' ? 'dark-mode-pagination' : 'light-mode-pagination'}`}/>
     </>
   )
 }

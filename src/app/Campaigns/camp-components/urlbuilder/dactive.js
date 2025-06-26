@@ -20,6 +20,7 @@ const DActiveUrlBuilder = ({ onReturnMessage, showSubmitButton }) => {
   const [NetworkData, setNetworkData]= useState([]);
   const [generatedUrl, setGeneratedUrl] = useState(""); // To store the generated URL
   const { apiClient } = useTokenContext();
+  const { theme } = useTokenContext();
 
   const getUrlBuilderData = async()=>{
     const response = await apiClient.get(`/get/urlbuilderdata?network=DActive`);
@@ -174,14 +175,14 @@ const onCopyUrl = () => {
         <Col span={24}>
           <label><span style={{ color: 'red', paddingRight: '2px', paddingTop: '2px' }}>*</span>Base URL</label>
           <div style={{ width: '100%' }}>
-            <Input placeholder="Base URL" style={{ width: '100%', paddingRight: '2px' }} value={baseUrl} onChange={(e) => setBaseUrl(e.target.value)} />
+            <Input placeholder="Base URL" style={{ width: '100%', paddingRight: '2px' }} value={baseUrl} onChange={(e) => setBaseUrl(e.target.value)}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
           </div>
         </Col>
       </Row>
       <Row style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '10px', paddingTop: '15px' }}>
         <Col style={{ display: 'flex', flexDirection: 'column' }} span={10}>
           <label><span style={{ color: 'red', paddingRight: '2px', paddingTop: '2px' }}>*</span>AdText</label>
-          <Input placeholder="AdText" value={geo} required onChange={(e) => setGeo(e.target.value)} />
+          <Input placeholder="AdText" value={geo} required onChange={(e) => setGeo(e.target.value)}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
         </Col>
         <Col style={{ display: 'flex', flexDirection: 'column' }} span={4}>
           <label><span style={{ color: 'red', paddingRight: '2px', paddingTop: '2px' }}>*</span>Category</label>
@@ -195,6 +196,8 @@ const onCopyUrl = () => {
               value: item.name,
               label: item.name,
             }))}
+            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
           />
         </Col>
         <Col style={{ display: 'flex', flexDirection: 'column' }} span={3}>
@@ -212,6 +215,8 @@ const onCopyUrl = () => {
                 label: item.name,
               }))}
             style={{ width: '100%' }}
+            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
           />
         </Col>
         
@@ -228,7 +233,7 @@ const onCopyUrl = () => {
         </Col>
         <Col>
           <Button onClick={onClickGet} style={{ marginRight: '10px', backgroundColor: '#b7e8c6', borderColor: '#b7e8c6', color: 'black' }}>Get</Button>
-          {!showSubmitButton && <Button type="primary" onClick={onClickSubmit}>Submit</Button>}
+          {!showSubmitButton && <Button  style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}} onClick={onClickSubmit}>Submit</Button>}
         </Col>
       </Row>
 

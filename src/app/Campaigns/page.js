@@ -1160,6 +1160,8 @@ const App = () => {
                         title={draftsData.length === 5 ? "You have exceeded the draft limit of 5" : ""}
                         placement="top"
                         open={draftsData.length === 5 ? undefined : false}
+                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                         >
                         <span>
                             <Button
@@ -1312,7 +1314,7 @@ const App = () => {
                     </Col>
                     {!restrictedEmails.includes(userdetails.email) && (
                         <Col>
-                            <Button type="primary" onClick={showDrawer} icon={<PlusOutlined  className="black-icon"/>} style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}}>
+                            <Button onClick={showDrawer} icon={<PlusOutlined  className="black-icon"/>} style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}}>
                                 Create Campaign
                             </Button>
                         </Col>
@@ -1382,6 +1384,7 @@ const App = () => {
                     onClose={onCloseDrawer}
                     open={adsetsdrawerVisible}
                     width="90%" // Adjust width as needed
+                    style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
                 >
                     <Adsets selectedRow={adsetcampaigndata} onClose={onCloseDrawer} changeRRefrst={changeRRefrst} network={selectedKey} />
                 </Drawer>
