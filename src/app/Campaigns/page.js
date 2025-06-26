@@ -1021,6 +1021,7 @@ const App = () => {
                             visible={isModalVisible}
                             onOk={handleOk}
                             onCancel={handleCancel}
+                            className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                         >
                             <p>Are you sure you want to approve?</p>
                         </Modal>
@@ -1369,7 +1370,7 @@ const App = () => {
                     return (
                         <Table.Summary.Row style={{backgroundColor: theme === "dark" && "#333", borderBottom: "0px"}}>
                             <Table.Summary.Cell colSpan={columns.length - 2} align="right">
-                                <strong>Total Daily Budget: ${(totalDailyBudget / 100).toFixed(2)}</strong>
+                                <strong style={{color: theme === "dark" ? "white" : "#000"}}>Total Daily Budget: ${(totalDailyBudget / 100).toFixed(2)}</strong>
                             </Table.Summary.Cell>
                         </Table.Summary.Row>
                     );
@@ -1405,6 +1406,7 @@ const App = () => {
                 visible={deleteModalVisible}
                 onOk={handleOkDeleteDraft}
                 onCancel={()=> setDeleteModalVisible(false)}
+                className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
             >
                 <p>Are you sure you want to delete this draft</p>
             </Modal>

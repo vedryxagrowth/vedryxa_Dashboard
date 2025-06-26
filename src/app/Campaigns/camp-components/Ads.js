@@ -250,7 +250,7 @@ export default function Createads({ selectedRow, network }) {
       render: (_, record) => (
         <Space>
           {/* <Button icon={<EditOutlined />} onClick={() => handleadsEdit(record)}>Edit</Button> */}
-          <Button className="dark-icon-button" icon={<EyeOutlined />} onClick={() => handleadsView(record)}>View</Button>
+          <Button className="dark-icon-button" icon={<EyeOutlined />} onClick={() => handleadsView(record)} style={{color: theme === "dark" ? "white" : "#000"}}>View</Button>
           <Button  style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}} onClick={() => handleadsdelete(record)}>Delete</Button>
         </Space>
       ),
