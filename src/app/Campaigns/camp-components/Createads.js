@@ -29,6 +29,7 @@ import {
   EditOutlined,
   DeleteOutlined
 } from '@ant-design/icons';
+import { useTokenContext } from "../../components/parent";
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 
@@ -71,6 +72,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
   console.log(data, "data from createads component");
   console.log(adsData, "adsData from createads component");
   console.log(network, "network from createads component");
+  const { theme } = useTokenContext();
 
   var token = localStorage.getItem("token")
   console.log(data, "selectedRow")
@@ -923,6 +925,8 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
                                                 }}
                                                 style={{ marginBottom: 16 }}
                                                 disabled={selectedFiles.length > 0 && true} 
+                                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                             >
                                                 <Option value="upload">Upload</Option>
                                                 <Option value="creative">Creative Library</Option>
@@ -947,7 +951,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
                                             >
                                                 <div>
                                                     {/* Upload UI */}
-                                                    <div style={{ display: selectedOption === "upload" ? "block" : "none" }}>
+                                                    <div className="custom-dark-mode" style={{ display: selectedOption === "upload" ? "block" : "none" }}>
                                                         <Upload
                                                             beforeUpload={() => false}
                                                             onChange={(info) => {
@@ -1003,14 +1007,14 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
                                                             listType="picture"
                                                             accept="image/*, video/*"
                                                         >
-                                                            <Button icon={<UploadOutlined /> }  disabled={selectedFiles.length > 0 && true}>Select Files</Button>
+                                                            <Button icon={<UploadOutlined /> }  disabled={selectedFiles.length > 0 && true}  className="dark-icon-button">Select Files</Button>
                                                         </Upload>
                                                     </div>
 
                                                     {/* Creative Library UI */}
                                                     {selectedOption === "creative" && (
                                                     <div>
-                                                        <Button icon={<UploadOutlined />} onClick={onClickCreativesDrawer}  disabled={selectedFiles.length > 0 && true}>
+                                                        <Button className="dark-icon-button" icon={<UploadOutlined />} onClick={onClickCreativesDrawer}  disabled={selectedFiles.length > 0 && true}>
                                                           Select Files
                                                         </Button>
 
@@ -1051,6 +1055,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
                                                                     textOverflow: "ellipsis",
                                                                     whiteSpace: "nowrap",
                                                                     paddingLeft: 8,
+                                                                    color: theme === 'dark' ? '#fff' : '#000', 
                                                                     }}
                                                                 >
                                                                     {file.name}
@@ -1094,7 +1099,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
                   ]}
                   style={{ flex: 3, marginLeft: "1%" }}
                 >
-                  <Input style={{ width: "45%" }} />
+                  <Input style={{ width: "45%" }} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                 </Form.Item>
               </div>
               <Form.Item
@@ -1110,7 +1115,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
                 <Input
                   style={{ width: "60%" }}
                   onChange={(e) => setAddName(e.target.value)}
-
+                  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                 />
               </Form.Item>
               <Form.Item
@@ -1128,7 +1133,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
                   placeholder="Primary text"
                   autoSize={{ minRows: 2, maxRows: 10 }}
                   onChange={(e) => setPrimaryText(e.target.value)}
-
+                  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
 
                 />
               </Form.Item>
@@ -1149,7 +1154,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
                   placeholder="Headline"
                   autoSize={{ minRows: 2, maxRows: 10 }}
                   onChange={(e) => setHeadline(e.target.value)}
-
+                  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                 />
               </Form.Item>
 
@@ -1168,7 +1173,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
                   placeholder="Description"
                   autoSize={{ minRows: 2, maxRows: 10 }}
                   onChange={(e) => setDescription(e.target.value)}
-
+                  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                 />
               </Form.Item>
               <Form.Item
@@ -1199,6 +1204,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
                   autoSize={{ minRows: 5, maxRows: 15 }}
                   onChange={(e) => setWebsiteURL(e.target.value)}
                   value={websiteURL}
+                  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                 />
               </Form.Item>
               <Form.Item
@@ -1216,7 +1222,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
                   placeholder="Display Link"
                   autoSize={{ minRows: 2, maxRows: 10 }}
                   onChange={(e) => setCaption(e.target.value)}
-
+                  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                 />
               </Form.Item>
               {/* <Form.Item
@@ -1372,7 +1378,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
                                                     key={index}
                                                 >
                                                     <div key={index} className="container-ad-preview">
-                                                        <div className="ad-preview" style={{ width: "350px" }}>
+                                                        <div className="ad-preview" style={{ width: "350px" , backgroundColor: theme === "dark" && "#333"}}>
                                                             <div className="ad-heading">
                                                                 <div className="img">
                                                                     {/* {file?.filename?.endsWith('.png') && console.log(file)} */}
@@ -1419,7 +1425,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
                                                                 </div>
 
                                                                 <div className="title">
-                                                                    <div className="main" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
+                                                                    <div className="main" style={{ wordWrap: 'break-word', whiteSpace: 'normal',color : theme === "dark" && "white" }} >
                                                                         {addName}
                                                                         {/* </div>                                                            <div className="sub">
                                                                         Sponsored <GlobalOutlined style={{ opacity: "0.6" }} /> */}
@@ -1441,7 +1447,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
                                                                     <MoreOutlined style={{ fontSize: "20px" }} />
                                                                 </div>
                                                             </div>
-                                                            <div className="ad-desc" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
+                                                            <div className="ad-desc" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color : theme === "dark" && "white", marginBottom:'10px' }}>
                                                                 {primaryText}
                                                             </div>
                                                             <div className="ad-image" style={{ width: '350px', height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -1485,28 +1491,28 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
                                                                     }
                                                             </div>
 
-                                                            <div className="ad-cta">
+                                                            <div className="ad-cta" style={{marginTop: "10px"}}>
                                                                 <div className="details">
-                                                                    <div className="link">{caption}</div>
-                                                                    <div className="title">{headline}</div>
-                                                                    <div className="desc">{description}</div>
+                                                                    <div className="link" style={{color : theme === "dark" && "white"}}>{caption}</div>
+                                                                    <div className="title" style={{color : theme === "dark" && "white"}}>{headline}</div>
+                                                                    <div className="desc" style={{color : theme === "dark" && "white"}}>{description}</div>
                                                                 </div>
                                                                 <div className="ad-button">
-                                                                    <button type="button">Learn More</button>
+                                                                    <button  style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}}>Learn More</button>
                                                                 </div>
                                                             </div>
                                                             <a href={websiteURL} target="_blank" rel="noopener noreferrer" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: '#0066cc', padding: '10px' }}>
                                                                 {websiteURL}
                                                             </a>                                                <div className="icons">
-                                                                <div className="like">
+                                                                <div className="like" style={{color : theme === "dark" && "white"}}>
                                                                     <LikeOutlined style={{ fontSize: "20px" }} />
                                                                     Like
                                                                 </div>
-                                                                <div className="comment">
+                                                                <div className="comment" style={{color : theme === "dark" && "white"}}>
                                                                     <CommentOutlined style={{ fontSize: "20px" }} />
                                                                     Comment
                                                                 </div>
-                                                                <div className="share">
+                                                                <div className="share" style={{color : theme === "dark" && "white"}}>
                                                                     <ShareAltOutlined style={{ fontSize: "20px" }} />
                                                                     Share
                                                                 </div>
@@ -1582,10 +1588,10 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
           </div>
           <Form.Item>
             <Space>
-              <Button type="primary" htmlType="submit">
+              <Button style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}} htmlType="submit">
                 Submit
               </Button>
-              <Button onClick={handleClear}>Clear</Button>
+              <Button className="dark-icon-button"  onClick={handleClear}>Clear</Button>
             </Space>
           </Form.Item>
         </Form>
@@ -1596,6 +1602,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
                     width="95%"
                     open={openCreativesDrawer}
                     onClose={() => setOpenCreativesDrawer(false)}
+                    style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
                 >
                     {/* <CreativesDrawer
                         selectedFilesData={selectedFilesData}
@@ -1634,6 +1641,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
         footer={null}
         width="80%" // Set width of the modal
         bodyStyle={{ height: '50vh', overflowY: 'auto' }}
+        className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
       >
         {getUrlBuilder}
       </Modal>

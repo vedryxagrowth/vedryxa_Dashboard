@@ -23,6 +23,7 @@ const MnetUrlBuilder = ({ defaultValues, onReturnMessage, showSubmitButton, acco
   const [copyText, setCopyText] = useState('Copy');
   const [pixelId, setPixelId] = useState('PixelId');
   const pixelIds = ['PixelId', 'None'];
+  const { theme } = useTokenContext();
 
 
   // const MnetDomains = [
@@ -345,6 +346,8 @@ const MnetUrlBuilder = ({ defaultValues, onReturnMessage, showSubmitButton, acco
               value: item.url,
               label: item.name,
             }))}
+            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
           />
         </Col>
         <Col style={{ display: 'flex', flexDirection: 'column' }} span={4}>
@@ -359,6 +362,8 @@ const MnetUrlBuilder = ({ defaultValues, onReturnMessage, showSubmitButton, acco
               value: item.code,
               label: item.name,
             }))}
+            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
           />
         </Col>
         <Col style={{ display: 'flex', flexDirection: 'column' }} span={3}>
@@ -376,6 +381,8 @@ const MnetUrlBuilder = ({ defaultValues, onReturnMessage, showSubmitButton, acco
                 label: item.name,
               }))}
             style={{ width: '100%' }}
+            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
           />
         </Col>
         <Col style={{ display: 'flex', flexDirection: 'column', marginBottom:'5px' }} xs={11} sm={5} lg={4}>
@@ -391,6 +398,8 @@ const MnetUrlBuilder = ({ defaultValues, onReturnMessage, showSubmitButton, acco
               value: item
             }))}
             style={{ width: '100%' }}
+            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
           />
         </Col>
         {/* <Col style={{ display: 'flex', flexDirection: 'column' }} span={5}>
@@ -406,7 +415,7 @@ const MnetUrlBuilder = ({ defaultValues, onReturnMessage, showSubmitButton, acco
         <Col span={24}>
           <label><span style={{ color: 'red', paddingRight: '2px', paddingTop: '2px' }}>*</span>Keywords</label>
           <div style={{ width: '100%' }}>
-            <Input placeholder="Keywords" style={{ width: '100%', paddingRight: '2px' }} value={keywords} onChange={onChangeKeyword} />
+            <Input placeholder="Keywords" style={{ width: '100%', paddingRight: '2px' }} value={keywords} onChange={onChangeKeyword} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
           </div>
         </Col>
       </Row>
@@ -421,7 +430,7 @@ const MnetUrlBuilder = ({ defaultValues, onReturnMessage, showSubmitButton, acco
         </Col>
         <Col>
           <Button onClick={onClickGet} style={{ marginRight: '10px', backgroundColor: '#b7e8c6', borderColor: '#b7e8c6', color: 'black' }}>Get</Button>
-          {!showSubmitButton && <Button type="primary" onClick={onClickSubmit}>Submit</Button>}
+          {!showSubmitButton && <Button style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}} onClick={onClickSubmit}>Submit</Button>}
         </Col>
       </Row>
       <Row justify="center" style={{ marginTop: '10px' }}>
