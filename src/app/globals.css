@@ -2897,7 +2897,7 @@ body.dark-mode .black-icon-comment.anticon svg {
   fill: #91C25F !important;
 }
 
-/* Assuming your app has a class like .dark-theme on the root in dark mode /*/
+/* Assuming your app has a class like .dark-theme on the root in dark mode */
 .custom-dark-mode .ant-upload-list-item-name {
   color: white !important;
 }
