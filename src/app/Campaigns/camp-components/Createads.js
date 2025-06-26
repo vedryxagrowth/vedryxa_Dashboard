@@ -888,6 +888,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
           layout="vertical"
           onFinish={handleSubmit}
           initialValues={initialValue}
+          className={theme === 'dark' ? 'form-dark' : 'form-light'}
         >
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             <div style={{ flex: "70%", marginRight: "5%" }}>
@@ -1007,7 +1008,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
                                                             listType="picture"
                                                             accept="image/*, video/*"
                                                         >
-                                                            <Button icon={<UploadOutlined /> }  disabled={selectedFiles.length > 0 && true}  className="dark-icon-button">Select Files</Button>
+                                                            <Button icon={<UploadOutlined /> }  disabled={selectedFiles.length > 0 && true}  className="dark-icon-button"  style={{color: theme === "dark" ? "white" : "#000"}}>Select Files</Button>
                                                         </Upload>
                                                     </div>
 
@@ -1591,7 +1592,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
               <Button style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}} htmlType="submit">
                 Submit
               </Button>
-              <Button className="dark-icon-button"  onClick={handleClear}>Clear</Button>
+              <Button className="dark-icon-button"  style={{color: theme === "dark" ? "white" : "#000"}}  onClick={handleClear}>Clear</Button>
             </Space>
           </Form.Item>
         </Form>

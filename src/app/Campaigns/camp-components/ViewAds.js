@@ -94,6 +94,7 @@ export default function Viewads({ selectedRow, viewdata }) {
                 layout="vertical"
                 onFinish={handleSubmit}
                 initialValues={initialValue}
+                className={theme === 'dark' ? 'form-dark' : 'form-light'}
             >
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
                     <div style={{ flex: "70%", marginRight: "5%" }}>

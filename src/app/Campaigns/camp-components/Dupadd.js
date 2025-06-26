@@ -602,6 +602,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                     layout="vertical"
                     onFinish={handleSubmit}
                     initialValues={initialValue}
+                    className={theme === 'dark' ? 'form-dark' : 'form-light'}
                 >
                     <div style={{ display: "flex", justifyContent: "space-between" }}>
                         <div style={{ flex: "70%", marginRight: "5%" }}>
@@ -624,7 +625,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                         maxCount={1}
                                         accept="image/*, video/*"
                                     >
-                                        <Button className="dark-icon-button" icon={<UploadOutlined/>}>Select File</Button>
+                                        <Button className="dark-icon-button" icon={<UploadOutlined/>}  style={{color: theme === "dark" ? "white" : "#000"}}>Select File</Button>
                                     </Upload>
                                 </Form.Item>
                                 <Form.Item
@@ -1076,7 +1077,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                             <Button  style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}} htmlType="submit">
                                 Submit
                             </Button>
-                            <Button className="dark-icon-button"  onClick={handleClear}>Clear</Button>
+                            <Button className="dark-icon-button"  style={{color: theme === "dark" ? "white" : "#000"}} onClick={handleClear}>Clear</Button>
                         </Space>
                     </Form.Item>
                 </Form>
@@ -1100,6 +1101,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                 footer={null}
                 width="80%" // Set width of the modal
                 bodyStyle={{ height: '50vh', overflowY: 'auto' }}
+                className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
             >
                 {getUrlBuilder(network)}
             </Modal>

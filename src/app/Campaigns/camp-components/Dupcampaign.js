@@ -16,6 +16,7 @@ import TonicUrlBuilder from './urlbuilder/tonic';
 import System1UrlBuilder from './urlbuilder/system1';
 import DActiveUrlBuilder from './urlbuilder/dactive';
 import ImageUploadPage from '../../Creatives/page';
+import { useTokenContext } from "../../components/parent";
 
 const { Panel } = Collapse;
 const { Option } = Select;
@@ -551,6 +552,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
     const [selectedFilesFromMedia, setSelectedFilesFromMedia] = useState([]);
     const [openCreativesDrawer, setOpenCreativesDrawer] = useState(false);
     const [submitErrors, setSubmitErrors] = useState([]);
+
+    const { theme } = useTokenContext();
 
     useEffect(() => {
         if (visible) {
@@ -1768,13 +1771,14 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
             width="95%"
             open={visible}
             onClose={handleDrawerClose}
+            style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
         >
             {DuplicatedampaignData?.identifier === selectedRow?.identifier ? (
                 <Spin spinning={loading}>
-                    <Form layout="vertical" form={form} onFinish={onFinish} onValuesChange={handleFormChange} initialValues={initialValues}>
-                        <Collapse accordion defaultActiveKey={['1']} >
-                            <Panel header="CAMPAIGN LEVEL" key="1">
-                                <div style={{ display: "flex" }}>
+                    <Form layout="vertical" form={form} onFinish={onFinish} onValuesChange={handleFormChange} initialValues={initialValues} className={theme === 'dark' ? 'form-dark' : 'form-light'}>
+                        <Collapse accordion defaultActiveKey={['1']} className={theme === 'dark' ? 'custom-collapse-dark' : 'custom-collapse-light'}>
+                            <Panel header="CAMPAIGN LEVEL" key="1" style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}>
+                                <div style={{ display: "flex", backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}>
                                     <Form.Item
                                         name="Account_Number"
                                         label={<span style={{ color: "#B4B4B4" }}>Account Number</span>}
@@ -1785,7 +1789,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             },
                                         ]}
                                         style={{ flex: 0.2 }}>
-                                        <Input />
+                                        <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
                                     </Form.Item>
                                     <Form.Item
                                         name="Name"
@@ -1799,6 +1803,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                         style={{ flex: 0.25 }}>
                                         <Input onChange={handleNameChange}
                                             style={{ width: "100%", marginLeft: "3%" }}
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                         />
                                     </Form.Item>
                                     <Form.Item
@@ -1823,6 +1828,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 { value: "OUTCOME_APP_PROMOTION", label: "App promotion" }
 
                                             ]}
+                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
 
                                         />
                                     </Form.Item>
@@ -1849,6 +1856,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 { value: "NONE", label: "None" }
 
                                             ]}
+                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                            className={theme === 'dark' ? 'dark-theme-category' : 'light-theme'}
                                         />
                                     </Form.Item>
                                     <Form.Item
@@ -1871,6 +1880,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 { value: "LOWEST_COST_WITH_MIN_ROAS", label: "ROAS Goal" }
                                             ]}
                                             onChange={handleBidStrategyChange}
+                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                         />
                                     </Form.Item>
                                     <Form.Item
@@ -1897,6 +1908,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                     width: '200px',
                                                     boxSizing: 'border-box'
                                                 }}
+                                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                             />
                                         </Tooltip>
                                     </Form.Item> {/*pk*/}
@@ -1917,6 +1929,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 { value: "PAUSED", label: "PAUSED" },
 
                                             ]}
+                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                         />
                                     </Form.Item>
 
@@ -1937,6 +1951,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                         style={{ flex: '1 1 200px' }}>
                                         <Input
                                             style={{ width: "100%" }}
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                         />
                                     </Form.Item>
                                     <Form.Item
@@ -1958,6 +1973,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 { value: "REACH", label: "Reach" },
                                                 { value: "VALUE", label: "Value" }
                                             ]}
+                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                         />
                                     </Form.Item>
                                     <Form.Item
@@ -1977,6 +1994,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 { value: "IMPRESSIONS", label: "Impressions" },
                                                 { value: "VALUE", label: "Value" }
                                             ]}
+                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                         />
                                     </Form.Item>
                                     <Form.Item
@@ -1992,7 +2011,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                         initialValue={currentDate}
 
                                     >
-                                        <DatePicker showTime/>
+                                        <DatePicker showTime dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}/>
                                     </Form.Item>
                                     <Form.Item
                                         name="action_source"
@@ -2013,6 +2032,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 { value: "app", label: "App" },
                                                 { value: "phone_call", label: "Phone Call" }
                                             ]}
+                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                         />
                                     </Form.Item>
                                     <Form.Item
@@ -2034,6 +2055,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 { value: "SEARCH", label: "Search" },
                                                 { value: "CONTACT", label: "Contact" },
                                             ]}
+                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                         />
                                     </Form.Item>
                                     <Form.Item
@@ -2049,6 +2072,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                         style={{ flex: '1 1 200px' }}>
                                         <Input
                                             style={{ width: "100%" }}
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                         />
                                     </Form.Item>
                                     {/*pk*/}
@@ -2075,6 +2099,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                     width: '200px',
                                                     boxSizing: 'border-box'
                                                 }}
+                                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                             />
                                         </Tooltip>
                                     </Form.Item>
@@ -2109,6 +2134,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                             event.preventDefault();
                                                         }
                                                     }}
+                                                    className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                                 />
                                             </Form.Item>
                                         )}
@@ -2214,6 +2240,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 { value: "NZ", label: "New Zealand" },
                                                 { value: "MX", label: "Mexico" }
                                             ]}
+                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                         />
                                     </Form.Item>
                                     <Form.Item
@@ -2234,6 +2262,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 { value: "35", label: "35" },
                                                 { value: "40", label: "40", disabled: true },
                                             ]}
+                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                         />
                                     </Form.Item>
                                     <Form.Item
@@ -2255,6 +2285,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 { value: "65", label: "65+" },
                                                 { value: "80", label: "80", disabled: true },
                                             ]}
+                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                         />
                                     </Form.Item>
                                     <Form.Item
@@ -2275,6 +2307,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 { value: "1", label: "Male" },
                                                 { value: "2", label: "Female" },
                                             ]}
+                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                         />
                                     </Form.Item>
                                     <Form.Item
@@ -2293,6 +2327,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             value={DuplicatedampaignData?.adsetlevel?.locales}
                                             placeholder="Select language"
                                             optionFilterProp="children"
+                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                         >
                                             {localesdata.map(option => (
                                                 <Option key={option.key} value={option.key}>
@@ -2307,7 +2343,9 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                         name="placements"
                                         rules={[{ required: true, message: 'Please select a mode!' }]}
                                     >
-                                        <Select placeholder="Select a mode" onChange={handleModeChange}>
+                                        <Select placeholder="Select a mode" onChange={handleModeChange}
+                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}>
                                             <Option value="Advance">Advance</Option>
                                             <Option value="manual">Manual</Option>
 
@@ -2329,6 +2367,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                     onChange={handlePublisherChange}
                                                     value={selectedPublishers}
                                                     style={{ width: 300 }}
+                                                    dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                                 >
                                                     {publisherOptions.map(option => (
                                                         <Option key={option.value} value={option.value}>
@@ -2351,6 +2391,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                     value={selectedPositions.map(pos => pos.value)}
                                                     onChange={handlePositionChange}
                                                     style={{ width: 400 }}
+                                                    dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                                 >
                                                     {selectedPublishers && selectedPublishers.length > 0 ? (
                                                         getPositionOptions()?.map(position => (
@@ -2384,6 +2426,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                         { value: "mobile", label: "Mobile" },
                                                         { value: "desktop", label: "Desktop" }
                                                     ]}
+                                                    dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                                 />
                                             </Form.Item>
                                         </>
@@ -2510,6 +2554,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                         form.validateFields(["MediaContent"]); // Revalidate when switching source
                                                         }}
                                                         style={{ marginBottom: 16 }}
+                                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                                     >
                                                         <Option value="upload">Upload</Option>
                                                         <Option value="creative">Creative Library</Option>
@@ -2534,7 +2580,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                     >
                                                         <div>
                                                             {/* Upload UI */}
-                                                            <div style={{ display: selectedOption === "upload" ? "block" : "none" }}>
+                                                            <div className="custom-dark-mode" style={{ display: selectedOption === "upload" ? "block" : "none" }}>
                                                                 <Upload
                                                                     beforeUpload={() => false}
                                                                     onChange={(info) => {
@@ -2590,14 +2636,14 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                                     listType="picture"
                                                                     accept="image/*, video/*"
                                                                 >
-                                                                    <Button icon={<UploadOutlined />}>Select Files</Button>
+                                                                    <Button icon={<UploadOutlined />}  className="dark-icon-button"  style={{color: theme === "dark" ? "white" : "#000"}}>Select Files</Button>
                                                                 </Upload>
                                                             </div>
 
                                                             {/* Creative Library UI */}
                                                             {selectedOption === "creative" && (
                                                             <div>
-                                                                <Button icon={<UploadOutlined />} onClick={onClickCreativesDrawer}>
+                                                                <Button icon={<UploadOutlined />} onClick={onClickCreativesDrawer}  className="dark-icon-button"  style={{color: theme === "dark" ? "white" : "#000"}}>
                                                                 Select Files
                                                                 </Button>
 
@@ -2638,7 +2684,9 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                                             textOverflow: "ellipsis",
                                                                             whiteSpace: "nowrap",
                                                                             paddingLeft: 8,
+                                                                            color: theme === 'dark' ? '#fff' : '#000',
                                                                             }}
+
                                                                         >
                                                                             {file.name}
                                                                         </span>
@@ -2681,7 +2729,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 ]}
                                                 style={{ flex: 3, marginLeft: "1%" }}
                                             >
-                                                <Input style={{ width: "45%" }} />
+                                                <Input style={{ width: "45%" }}
+                                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                                             </Form.Item>
                                         </div>
                                         <Form.Item
@@ -2698,6 +2747,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             <Input
                                                 style={{ width: "60%" }}
                                                 onChange={(e) => setAddName(e.target.value)}
+                                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                             />
                                         </Form.Item>
                                         <Form.Item
@@ -2715,6 +2765,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 placeholder="Primary text"
                                                 autoSize={{ minRows: 2, maxRows: 10 }}
                                                 onChange={(e) => setPrimaryText(e.target.value)}
+                                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
 
                                             />
                                         </Form.Item>
@@ -2751,6 +2802,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 placeholder="Headline"
                                                 autoSize={{ minRows: 2, maxRows: 10 }}
                                                 onChange={(e) => setHeadline(e.target.value)}
+                                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                             />
                                         </Form.Item>
 
@@ -2769,6 +2821,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 placeholder="Description"
                                                 autoSize={{ minRows: 2, maxRows: 10 }}
                                                 onChange={(e) => setDescription(e.target.value)}
+                                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                             />
                                         </Form.Item>
 
@@ -2819,7 +2872,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 autoSize={{ minRows: 5, maxRows: 15 }}
                                                 value={websiteURL}
                                                 onChange={(e) => setWebsiteURL(e.target.value)}
-
+                                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
 
                                             />
                                         </Form.Item>
@@ -2838,6 +2891,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 placeholder="Display Link"
                                                 autoSize={{ minRows: 2, maxRows: 10 }}
                                                 onChange={(e) => setCaption(e.target.value)}
+                                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                             />
                                         </Form.Item>
                                         <Modal
@@ -2855,6 +2909,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             footer={null}
                                             width="80%" // Set width of the modal
                                             bodyStyle={{ height: '50vh', overflowY: 'auto' }}
+                                            className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                                         >
                                             {getUrlBuilder(network)}
                                         </Modal>
@@ -2895,7 +2950,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                     key={index}
                                                 >
                                                     <div key={index} className="container-ad-preview">
-                                                        <div className="ad-preview" style={{ width: "350px" }}>
+                                                        <div className="ad-preview" style={{ width: "350px", backgroundColor: theme === "dark" && "#333" }}>
                                                             <div className="ad-heading">
                                                                 <div className="img">
                                                                     {/* {file?.filename?.endsWith('.png') && console.log(file)} */}
@@ -2944,7 +2999,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                                 </div>
 
                                                                 <div className="title">
-                                                                    <div className="main" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
+                                                                    <div className="main" style={{ wordWrap: 'break-word', whiteSpace: 'normal',color : theme === "dark" && "white" }}>
                                                                         {addName}
                                                                         {/* </div>                                                            <div className="sub">
                                                                         Sponsored <GlobalOutlined style={{ opacity: "0.6" }} /> */}
@@ -2966,7 +3021,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                                     <MoreOutlined style={{ fontSize: "20px" }} />
                                                                 </div>
                                                             </div>
-                                                            <div className="ad-desc" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
+                                                            <div className="ad-desc" style={{ wordWrap: 'break-word', whiteSpace: 'normal',color : theme === "dark" && "white" }}>
                                                                 {primaryText}
                                                             </div>
                                                             <div className="ad-image" style={{ width: '350px', height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -3012,26 +3067,26 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
 
                                                             <div className="ad-cta">
                                                                 <div className="details">
-                                                                    <div className="link">{caption}</div>
-                                                                    <div className="title">{headline}</div>
-                                                                    <div className="desc">{description}</div>
+                                                                    <div className="link" style={{color : theme === "dark" && "white"}}>{caption}</div>
+                                                                    <div className="title" style={{color : theme === "dark" && "white"}}>{headline}</div>
+                                                                    <div className="desc" style={{color : theme === "dark" && "white"}}>{description}</div>
                                                                 </div>
                                                                 <div className="ad-button">
-                                                                    <button type="button">Learn More</button>
+                                                                    <button  style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}}>Learn More</button>
                                                                 </div>
                                                             </div>
                                                             <a href={websiteURL} target="_blank" rel="noopener noreferrer" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: '#0066cc', padding: '10px' }}>
                                                                 {websiteURL}
                                                             </a>                                                <div className="icons">
-                                                                <div className="like">
+                                                                <div className="like" style={{color : theme === "dark" && "white"}}>
                                                                     <LikeOutlined style={{ fontSize: "20px" }} />
                                                                     Like
                                                                 </div>
-                                                                <div className="comment">
+                                                                <div className="comment" style={{color : theme === "dark" && "white"}}>
                                                                     <CommentOutlined style={{ fontSize: "20px" }} />
                                                                     Comment
                                                                 </div>
-                                                                <div className="share">
+                                                                <div className="share" style={{color : theme === "dark" && "white"}}>
                                                                     <ShareAltOutlined style={{ fontSize: "20px" }} />
                                                                     Share
                                                                 </div>
@@ -3042,63 +3097,64 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
 
                                             ))
                                         ) : (
-                                            <div className="container-ad-preview">
-                                                <div className="ad-preview">
-                                                    <div className="ad-heading">
-                                                        <div className="filename">
-                                                            <img
-                                                                src={initialValues?.filename}
-                                                                alt="page id"
-                                                                width="40"
-                                                                height="40"
-                                                            />
-                                                        </div>
-                                                        <div className="title">
-                                                            <div className="main">{"Facebook Page"}</div>
-                                                            <div className="sub">
-                                                                Sponsored <GlobalOutlined style={{ opacity: "0.6" }} />
-                                                            </div>
-                                                        </div>
-                                                        <div className="close">
-                                                            <CloseOutlined style={{ fontSize: "20px" }} />
-                                                        </div>
-                                                        <div className="moreoptions">
-                                                            <MoreOutlined style={{ fontSize: "20px" }} />
-                                                        </div>
-                                                    </div>
-                                                    <div className="ad-desc">{"adMessage"}</div>
-                                                    <div className="ad-image">
-                                                        <img
-                                                            src={initialValues?.filename}
-                                                            alt="ad content"
-                                                        />
-                                                    </div>
-                                                    <div className="ad-cta">
-                                                        <div className="details">
-                                                            <div className="link">{"adCaption"}</div>
-                                                            <div className="title">{"adName"}</div>
-                                                            <div className="desc">{"adDesc"}</div>
-                                                        </div>
-                                                        <div className="ad-button">
-                                                            <button type="button">Learn More</button>
-                                                        </div>
-                                                    </div>
-                                                    <div className="icons">
-                                                        <div className="like">
-                                                            <LikeOutlined style={{ fontSize: "20px" }} />
-                                                            Like
-                                                        </div>
-                                                        <div className="comment">
-                                                            <CommentOutlined style={{ fontSize: "20px" }} />
-                                                            Comment
-                                                        </div>
-                                                        <div className="share">
-                                                            <ShareAltOutlined style={{ fontSize: "20px" }} />
-                                                            Share
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            // <div className="container-ad-preview">
+                                            //     <div className="ad-preview">
+                                            //         <div className="ad-heading">
+                                            //             <div className="filename">
+                                            //                 <img
+                                            //                     src={initialValues?.filename}
+                                            //                     alt="page id"
+                                            //                     width="40"
+                                            //                     height="40"
+                                            //                 />
+                                            //             </div>
+                                            //             <div className="title">
+                                            //                 <div className="main">{"Facebook Page"}</div>
+                                            //                 <div className="sub">
+                                            //                     Sponsored <GlobalOutlined style={{ opacity: "0.6" }} />
+                                            //                 </div>
+                                            //             </div>
+                                            //             <div className="close">
+                                            //                 <CloseOutlined style={{ fontSize: "20px" }} />
+                                            //             </div>
+                                            //             <div className="moreoptions">
+                                            //                 <MoreOutlined style={{ fontSize: "20px" }} />
+                                            //             </div>
+                                            //         </div>
+                                            //         <div className="ad-desc">{"adMessage"}</div>
+                                            //         <div className="ad-image">
+                                            //             <img
+                                            //                 src={initialValues?.filename}
+                                            //                 alt="ad content"
+                                            //             />
+                                            //         </div>
+                                            //         <div className="ad-cta">
+                                            //             <div className="details">
+                                            //                 <div className="link">{"adCaption"}</div>
+                                            //                 <div className="title">{"adName"}</div>
+                                            //                 <div className="desc">{"adDesc"}</div>
+                                            //             </div>
+                                            //             <div className="ad-button">
+                                            //                 <button type="button">Learn More</button>
+                                            //             </div>
+                                            //         </div>
+                                            //         <div className="icons">
+                                            //             <div className="like">
+                                            //                 <LikeOutlined style={{ fontSize: "20px" }} />
+                                            //                 Like
+                                            //             </div>
+                                            //             <div className="comment">
+                                            //                 <CommentOutlined style={{ fontSize: "20px" }} />
+                                            //                 Comment
+                                            //             </div>
+                                            //             <div className="share">
+                                            //                 <ShareAltOutlined style={{ fontSize: "20px" }} />
+                                            //                 Share
+                                            //             </div>
+                                            //         </div>
+                                            //     </div>
+                                            // </div>
+                                            null
                                         )}
                                     </div>
                                 </div>
@@ -3107,7 +3163,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                             </Panel>
                         </Collapse>
                         <Form.Item label=" ">
-                        {isFormComplete && (
+                        {/* {isFormComplete && ( */}
                             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
                             <Button
                                 type="primary"
@@ -3165,7 +3221,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                 </div>
                             )}
                             </div>
-                        )}
+                        {/* )} */}
                     </Form.Item>
                         {isImgEditorShown && currentFile && (
                             <FabricCanvas
@@ -3179,6 +3235,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                             title="Confirmation"
                             open={isModalVisible}
                             onOk={handleOk}
+                            className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             onCancel={handleCancel}>
                             <p>Are you sure you want to submit?</p>
                         </Modal>

@@ -474,10 +474,10 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
       key: 'action',
       render: (_, record) => (
         <div style={{ display: 'flex', gap: '10px' }}>
-          <Button  className="dark-icon-button" onClick={() => handleadsetsEdit(record)} icon={<EditOutlined />}>
+          <Button  className="dark-icon-button" onClick={() => handleadsetsEdit(record)} icon={<EditOutlined />} style={{color: theme === "dark" ? "white" : "#000"}}>
             Edit
           </Button>
-          <Button  className="dark-icon-button" onClick={() => handleadsetsView(record)} icon={<EyeOutlined />}>
+          <Button  className="dark-icon-button" onClick={() => handleadsetsView(record)} icon={<EyeOutlined />} style={{color: theme === "dark" ? "white" : "#000"}}>
             View
           </Button>
         </div>

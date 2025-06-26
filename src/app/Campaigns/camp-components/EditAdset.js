@@ -693,6 +693,7 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
           layout="vertical"
           onFinish={handleSubmit}
           initialValues={initialValue}
+          className={theme === 'dark' ? 'form-dark' : 'form-light'}
         >
           <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
             <Form.Item
@@ -997,7 +998,7 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
           <Form.Item>
             <Space>
               <Button style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}} htmlType="submit">Submit</Button>
-              <Button className="dark-icon-button" onClick={handleClear}>Clear</Button>
+              <Button className="dark-icon-button" onClick={handleClear}   style={{color: theme === "dark" ? "white" : "#000"}}>Clear</Button>
             </Space>
           </Form.Item>
         </Form>
