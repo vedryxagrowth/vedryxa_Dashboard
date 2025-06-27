@@ -881,7 +881,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                 //         // key={index}
                                 // >
                                 <div className="container-ad-preview">
-                                    <div className="ad-preview" style={{ width: "350px", backgroundColor: theme === "dark" && "#333" }}>
+                                    <div className="ad-preview" style={{ width: "350px", backgroundColor: theme === "dark" && "#4d4c49" }}>
                                         <div className="ad-heading">
                                             <div className="img">
                                                 {selectedFile.type.startsWith('image/') ? (
@@ -979,9 +979,9 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                 // {/* </Badge> */}
                             ) :
                                 <div className="container-ad-preview">
-                                    <div className="ad-preview" style={{ width: "350px", backgroundColor: theme === "dark" && "#333" }}>
+                                    <div className="ad-preview" style={{ width: "350px", backgroundColor: theme === "dark" && "#4d4c49" }}>
                                         <div className="ad-heading">
-                                            <div className="filename" style={{ width: '40px', height: '40px', backgroundColor: theme === "dark" ? "#4d4b46" : "#333" , borderRadius:'50%', marginRight:'10px' }}>
+                                            <div className="filename" style={{ width: '40px', height: '40px', backgroundColor: theme === "dark" ? "#7a7973" : "#333" , borderRadius:'50%', marginRight:'10px' }}>
                                                 {initialValue.fileType === 'image' ? (
                                                     <img
                                                         src={initialValue.filename}
