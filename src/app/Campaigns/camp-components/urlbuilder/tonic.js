@@ -10,6 +10,7 @@ const TonicUrlBuilder = ({defaultValues, onReturnMessage, showSubmitButton}) => 
     const [errorMessage, setErrorMessage] = useState('');
     const [NetworkData, setNetworkData]= useState([]);
     const { apiClient } = useTokenContext();
+    const { theme } = useTokenContext();
     // const businessData = [
     //     {
     //       "id":5,
@@ -87,7 +88,7 @@ const TonicUrlBuilder = ({defaultValues, onReturnMessage, showSubmitButton}) => 
             <Row style={{display:'flex', alignItems:'center', paddingBottom:'10px'}}>
                 <Col style={{display:'flex', flexDirection:'column'}} span={9}>
                     <label><span style={{ color: 'red', paddingRight:'2px',paddingTop:'2px' }}>*</span>Site Name</label>
-                    <Input placeholder='Site Name' value={siteName} required style={{width:'80%'}} onChange={onChangeSiteName}></Input>
+                    <Input placeholder='Site Name' value={siteName} required style={{width:'80%'}} onChange={onChangeSiteName} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}></Input>
                 </Col>
                 {/* <Col style={{display:'flex', flexDirection:'column'}} span={6}>
                     <label>Sorce</label>
@@ -113,7 +114,7 @@ const TonicUrlBuilder = ({defaultValues, onReturnMessage, showSubmitButton}) => 
                 <Col span={24}>
                     <label><span style={{ color: 'red', paddingRight:'2px',paddingTop:'2px' }}>*</span>Keywords</label>
                     <div style={{ width: '100%' }}>
-                        <Input placeholder="Key words" style={{ width: '100%' }} value={keywords} onChange={onChangeKeyword}/>
+                        <Input placeholder="Key words" style={{ width: '100%' }} value={keywords} onChange={onChangeKeyword} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
                     </div>
                 </Col>
             </Row>
@@ -127,7 +128,7 @@ const TonicUrlBuilder = ({defaultValues, onReturnMessage, showSubmitButton}) => 
                 </Col>
                 <Col>
                     <Button onClick={onClickGet} style={{ marginRight: '10px', backgroundColor: '#b7e8c6', borderColor: '#b7e8c6', color: 'black' }}>Get</Button>
-                    {!showSubmitButton && <Button type="primary" onClick={onClickSubmit}>Submit</Button>}
+                    {!showSubmitButton && <Button  style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}} onClick={onClickSubmit}>Submit</Button>}
                 </Col>
             </Row>
             <Row justify="center" style={{marginTop:'10px'}}>

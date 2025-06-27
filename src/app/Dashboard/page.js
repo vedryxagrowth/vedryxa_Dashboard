@@ -702,7 +702,7 @@ const RevenuePartnerDashboard = () => {
                             />
                         </Space>
                     </Col>
-                    <Col xs={16} sm={16} md={10} lg={8}>
+                    <Col xs={16} sm={16} md={10} lg={8} className='Dashboard-Details-1'>
                         <ConfigProvider 
                             locale={locale}
                             theme={{
@@ -727,11 +727,37 @@ const RevenuePartnerDashboard = () => {
                             />
                         </ConfigProvider>
                     </Col>
+                    <Col xs={16} sm={16} md={10} lg={8} className='Dashboard-Details-2'>
+                        <ConfigProvider 
+                            locale={locale}
+                            theme={{
+                                token: {
+                                  colorPrimary: '#91C25F', 
+                                  colorTextLightSolid: '#000',
+                                },
+                            }}
+                        >
+                            <RangePicker
+                                presets={rangePresets}
+                                onChange={handleChange}
+                                disabledDate={disabledDate}
+                                defaultValue={defaultDates}
+                                format="YYYY-MM-DD"
+                                style={{
+                                    width: '100%',
+                                    backgroundColor: theme === 'dark' ? '#555' : undefined,
+                                    color: theme === 'dark' ? 'white' : undefined,
+                                }}
+                                dropdownClassName={`custom-single-month-picker Dashboard-Details-2 ${theme === 'dark' ? 'dark-theme-dropdown' : ''}`}
+                            />
+                        </ConfigProvider>
+                    </Col>
                     <Col xs={12} sm={12} md={4} lg={3}>
                         <Select
                             placeholder="Select Timezone"
                             onChange={onChangeTime}
                             value={timeZone}
+                            style={{width: '100%'}}
                             options={timezones.map((item) => ({ value: item, label: item }))}
                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             dropdownClassName={theme === 'dark' && 'custom-dropdown'}
@@ -750,7 +776,7 @@ const RevenuePartnerDashboard = () => {
             >
                 {renderCarouselNav()}
             </div>
-            <Carousel dots={false}  ref={carouselRef} beforeChange={handleSlideChange}>
+            <Carousel  className='zoom-90' dots={false}  ref={carouselRef} beforeChange={handleSlideChange}>
                 <div>
                     {loading ? (
                         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '75vh' }}>
@@ -759,8 +785,8 @@ const RevenuePartnerDashboard = () => {
                     ) : (
                         revenuePartnerData.length > 0 && (
                             <div
-                                className={`ag-theme-alpine ${gridThemeClass}`}
-                                style={{ width: '100%', height: '70vh' }}
+                                className={`ag-theme-alpine ${gridThemeClass} zoom-size`}
+                                style={{ width: '100%', height: '100%' }}
                             >
                                 <AgGridReact
                                     rowData={revenuePartnerData}
@@ -2511,6 +2537,7 @@ const Dashboard = () => {
             hide: true,
             rowGroup: true,
             enableRowGroup: true,
+            minWidth: 108,
         }, // Group by Network
         {
             field: "holder",
@@ -2545,6 +2572,7 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            minWidth: 108,
         }, // Display Media Buyer name
         {
             field: "spend",
@@ -2553,6 +2581,7 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            minWidth: 108,
         }, // Summing Spend column
         {
             headerName: 'Revenue',
@@ -2562,6 +2591,7 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            minWidth: 108,
         }, // Summing Revenue column
         {
             field: "profit",
@@ -2574,6 +2604,7 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            minWidth: 108,
         }, // Custom aggregation for Profit
         {
             field: 'rpc',
@@ -2582,6 +2613,7 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            minWidth: 95,
             // valueFormatter: rpcCplFormatter,
         },
         {
@@ -2591,6 +2623,7 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            minWidth: 95,
             // valueFormatter: rpcCplFormatter,
         }, 
         {
@@ -2600,6 +2633,7 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            minWidth: 108,
             // valueFormatter: rpcCplFormatter,
         }, 
         {
@@ -2609,6 +2643,7 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            minWidth: 108,
             // valueFormatter: rpcCplFormatter,
         }, 
 
@@ -2649,7 +2684,7 @@ const Dashboard = () => {
         setActiveTab(index);
         // console.log(index);
         // console.log(parseInt(index)-1);
-        carouselRef.current.goTo(parseInt(index)-1)
+        // carouselRef.current.goTo(parseInt(index)-1)
         
     };
 
@@ -2674,7 +2709,7 @@ const Dashboard = () => {
         setActiveTab1(index);
         // console.log(index);
         // console.log(parseInt(index)-1);
-        carouselRef1.current.goTo(parseInt(index)-1)
+        // carouselRef1.current.goTo(parseInt(index)-1)
         
     };
 
@@ -2682,7 +2717,7 @@ const Dashboard = () => {
         setActiveTab2(index);
         // console.log(index);
         // console.log(parseInt(index)-1);
-        carouselRef2.current.goTo(parseInt(index)-1)
+        // carouselRef2.current.goTo(parseInt(index)-1)
         
     };
 
@@ -2690,9 +2725,25 @@ const Dashboard = () => {
         setActiveTab3(index);
         // console.log(index);
         // console.log(parseInt(index)-1);
-        carouselRef3.current.goTo(parseInt(index)-1)
+        // carouselRef3.current.goTo(parseInt(index)-1)
         
     };
+
+    const handleTabChange = (key) => {
+        setActiveTab3(key)
+    }
+
+    const handleTabChange1 = (key) => {
+        setActiveTab3(key)
+    }
+
+    const handleTabChange2 = (key) => {
+        setActiveTab2(key)
+    }
+
+    const handleTabChange3 = (key) => {
+        setActiveTab3(key)
+    }
 
     const renderCarouselNav1 = () => (
         <StickyBox offsetTop={64} offsetBottom={20} style={{ zIndex: 1, padding: '0px', margin: '0px', paddingLeft: '0px' }}>
@@ -2816,6 +2867,7 @@ const Dashboard = () => {
         }, // Group by Network
         {field:'specifiedDate', headerName:'Date',
             suppressMenu: true,
+            minWidth: 108,
             menuTabs: [],
             headerClass: 'hide-menu',},
         {
@@ -2825,6 +2877,7 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            minWidth: 108,
         }, // Summing Spend column
         {
             headerName: 'Revenue',
@@ -2834,6 +2887,7 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            minWidth: 108,
         }, // Summing Revenue column
         {
             field: "profit",
@@ -2847,6 +2901,7 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            minWidth: 108,
         },
         {
             headerName: 'Project Name',
@@ -2854,18 +2909,21 @@ const Dashboard = () => {
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            minWidth: 108,
         }, // Group by Holder
         {
             field: "holder",
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            minWidth: 108,
         },
         {
             field: "mediaBuyerName", headerName:'User',
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
+            minWidth: 108,
         },
     ]);
     
@@ -3305,386 +3363,629 @@ const Dashboard = () => {
             <div>
             {rendering === true ? <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><Spin size="large"/></div> : (
                 <div style={{ padding: '20px', paddingBottom:'0px' }}>
-                <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ width: '40%' }}>
-                        <h1 style={{  color: theme === 'dark' ? 'white' : 'black' , fontSize: '22px', textAlign: 'start' }}>
-                            Welcome, {userdetails?.userName} !
-                        </h1>
+                <div className='Dashboard-Details-2'>
+                    <div style={{ width: '100%' }}>
+                            <h3 style={{  color: theme === 'dark' ? 'white' : 'black' , textAlign: 'start' }}>
+                                Welcome, {userdetails?.userName} !
+                            </h3>
                     </div>
-                    <div style={{ width: '60%', display: 'flex', justifyContent: 'flex-end', height: '50px' }}>
-                        <Row style={{ width: '100%', height: '100px', display: 'flex', justifyContent: 'space-between' }}>
-                            <Col span={5}>
-                                <Select
-                                    mode="tags"
-                                    style={{
-                                        width: '100%',
-                                        maxHeight: '40px',
-                                        overflowY: 'auto',
-                                        // width: '100%',
-                                    }}
-                                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                    placeholder="Select Projects"
-                                    value={firstSelectValues}
-                                    onChange={handleFirstSelectChange}
-                                    maxTagCount="responsive"
-                                    dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                    dropdownRender={(menu) => (
-                                        <div
-                                            style={{
-                                                width: '100%',
-                                                maxHeight: '200px',
-                                                overflowY: 'auto',
-                                                overflowX: 'hidden',
-                                                // padding: '8px',
-                                                scrollbarWidth: 'none', // For Firefox
-                                                msOverflowStyle: 'none',
-                                            }}
-                                        >
-                                            {menu}
-                                        </div>
-                                    )}
-                                    options={Object.keys(transformedData).map((category) => ({
-                                        value: category,
-                                        label: category,
-                                    }))}
-                                />
-                            </Col>
-    
-                            <Col span={6}>
-            <Select
-                mode="multiple"
-                showSearch
-                onSearch={handleSearchChange}  // Update searchValue dynamically
-                style={{ width: '100%' }}
-                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                placeholder="Select Accounts"
-                dropdownClassName={theme === 'dark' && 'custom-dropdown'}
-                value={[]} // This should be updated to reflect selectedItems based on the selected categories
-                dropdownRender={() => (
-                    <div style={{ maxHeight: '300px', overflowY: 'auto', padding: '8px' }}>
-                        {renderInnerSelects(theme)}
-                    </div>
-                )}
-            />
-        </Col>
-    
-                            <Col span={3}>
-                                <Select
-                                    showSearch
-                                    onChange={onChangeTime}
-                                    style={{
-                                        width: '100%',
-                                    }}
-                                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                    placeholder="Select Timezone"
-                                    dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                    optionFilterProp="label"
-                                    value={time}
-                                    options={timezones.map((item) => ({
-                                        value: item,
-                                        label: item,
-                                    }))}
-                                />
-                            </Col>
-    
-                            <Col span={8}>
-                                <ConfigProvider 
-                                    locale={locale}
-                                    theme={{
-                                        token: {
-                                          colorPrimary: '#91C25F', 
-                                          colorTextLightSolid: '#000',
-                                        },
-                                    }}
-                                >
-                                    <RangePicker
-                                        presets={rangePresets}
-                                        value={selectedDates}
-                                        onCalendarChange={handleChangeDates}
-                                        open={isPickerOpen} // Control the open/close state
-                                        onOpenChange={handleOpenChange} // Handle outside click
-                                        onClick={() => setIsPickerOpen(true)} // Open the picker when clicked
-                                        disabledDate={disabledDate}
-                                        format="YYYY-MM-DD"
+                    <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
+                        
+                        <div style={{ width: '100%', display: 'flex', justifyContent: "space-between" }}>
+                            <Row style={{ width: '100%', height: '100px', display: 'flex', justifyContent: 'space-between' }}>
+                                <Col xs={12} sm={8} md={6} >
+                                    <Select
+                                        mode="tags"
                                         style={{
                                             width: '100%',
-                                            backgroundColor: theme === 'dark' ? '#555' : undefined,
-                                            color: theme === 'dark' ? 'white' : undefined,
+                                            maxHeight: '40px',
+                                            overflowY: 'auto',
+                                            // width: '100%',
                                         }}
-                                        dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}
-                                        renderExtraFooter={() => (
-                                            <div style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '8px', paddingTop: '5px', paddingBottom: '5px' }}>
-                                            <Button
-                                                style={{ marginRight: '8px' }} // Adds spacing between buttons
-                                                onClick={onClickCloseButton} // Close the picker
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                        placeholder="Select Projects"
+                                        value={firstSelectValues}
+                                        onChange={handleFirstSelectChange}
+                                        maxTagCount="responsive"
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        dropdownRender={(menu) => (
+                                            <div
+                                                style={{
+                                                    width: '100%',
+                                                    maxHeight: '200px',
+                                                    overflowY: 'auto',
+                                                    overflowX: 'hidden',
+                                                    // padding: '8px',
+                                                    scrollbarWidth: 'none', // For Firefox
+                                                    msOverflowStyle: 'none',
+                                                }}
                                             >
-                                                Close
-                                            </Button>
-                                            <Button
-                                                style={{ backgroundColor: '#91C25F' }} 
-                                                onClick={handleSubmit}
-                                            >
-                                                Submit
-                                            </Button>
+                                                {menu}
+                                            </div>
+                                        )}
+                                        options={Object.keys(transformedData).map((category) => ({
+                                            value: category,
+                                            label: category,
+                                        }))}
+                                    />
+                                </Col>
+        
+                                <Col xs={16} style={{marginBottom:'5px'}}>
+                                    <Select
+                                        mode="multiple"
+                                        showSearch
+                                        onSearch={handleSearchChange}  // Update searchValue dynamically
+                                        style={{ width: '100%' }}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                        placeholder="Select Accounts"
+                                        dropdownClassName={theme === 'dark' && 'custom-dropdown'}
+                                        value={[]} // This should be updated to reflect selectedItems based on the selected categories
+                                        dropdownRender={() => (
+                                            <div style={{ maxHeight: '300px', overflowY: 'auto', padding: '8px' }}>
+                                                {renderInnerSelects(theme)}
                                             </div>
                                         )}
                                     />
-                                </ConfigProvider>
-                            </Col>
-                            <Col>
-                                <Button 
-                                    type="default" 
-                                    icon={<ReloadOutlined className='black-icon' />} 
-                                    style={{ float: "right", marginLeft: "10px", backgroundColor: '#91C25F' }} 
-                                    onClick={refreshUsers}  // Call refresh function when clicked
-                                >
-                                </Button>
-                            </Col>
-                        </Row>
+                                </Col>
+        
+                                <Col  xs={7} style={{marginBottom:'5px'}}>
+                                    <Select
+                                        showSearch
+                                        onChange={onChangeTime}
+                                        style={{
+                                            width: '100%',
+                                        }}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                        placeholder="Select Timezone"
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        optionFilterProp="label"
+                                        value={time}
+                                        options={timezones.map((item) => ({
+                                            value: item,
+                                            label: item,
+                                        }))}
+                                    />
+                                </Col>
+        
+                                <Col  xs={20}>
+                                    <ConfigProvider 
+                                        locale={locale}
+                                        theme={{
+                                            token: {
+                                            colorPrimary: '#C7F39A', 
+                                            colorTextLightSolid: '#000',
+                                            },
+                                        }}
+                                    >
+                                        <RangePicker
+                                            presets={rangePresets}
+                                            value={selectedDates}
+                                            onCalendarChange={handleChangeDates}
+                                            open={isPickerOpen} // Control the open/close state
+                                            onOpenChange={handleOpenChange} // Handle outside click
+                                            onClick={() => setIsPickerOpen(true)} // Open the picker when clicked
+                                            disabledDate={disabledDate}
+                                            format="YYYY-MM-DD"
+                                            dropdownClassName={`custom-single-month-picker Dashboard-Details-2 ${theme === 'dark' ? 'dark-theme-dropdown' : ''}`}
+                                            style={{
+                                                width: '100%',
+                                                height: '35px', // Adjust height as needed
+                                                backgroundColor: theme === 'dark' ? '#333' : '#fff',
+                                                color: theme === 'dark' ? '#fff' : '#000',
+                                                borderRadius: 6,
+                                                padding: '8px 12px',
+                                            }}
+                                            renderExtraFooter={() => (
+                                                <div style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '8px', paddingTop: '5px', paddingBottom: '5px' }}>
+                                                <Button
+                                                    style={{ marginRight: '8px' }} // Adds spacing between buttons
+                                                    onClick={onClickCloseButton} // Close the picker
+                                                >
+                                                    Close
+                                                </Button>
+                                                <Button
+                                                    style={{ backgroundColor: '#C7F39A' }} 
+                                                    onClick={handleSubmit}
+                                                >
+                                                    Submit
+                                                </Button>
+                                                </div>
+                                            )}
+                                        />
+                                    </ConfigProvider>
+                                </Col>
+                                <Col xs={4}>
+                                    <Button 
+                                        type="default" 
+                                        icon={<ReloadOutlined className='black-icon' />} 
+                                        style={{ float: "right", marginLeft: "10px", backgroundColor: '#C7F39A' }} 
+                                        onClick={refreshUsers}  // Call refresh function when clicked
+                                    >
+                                    </Button>
+                                </Col>
+                            </Row>
+                        </div>
+                    </div>
+                </div>
+                <div className='Dashboard-Details-1'>
+                    <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ width: '40%' }}>
+                            <h1 style={{  color: theme === 'dark' ? 'white' : 'black' , fontSize: '22px', textAlign: 'start' }}>
+                                Welcome, {userdetails?.userName} !
+                            </h1>
+                        </div>
+                        <div style={{ width: '60%', display: 'flex', justifyContent: 'flex-end', height: '50px' }}>
+                            <Row style={{ width: '100%', height: '100px', display: 'flex', justifyContent: 'space-between' }}>
+                                <Col span={5}>
+                                    <Select
+                                        mode="tags"
+                                        style={{
+                                            width: '100%',
+                                            maxHeight: '40px',
+                                            overflowY: 'auto',
+                                            // width: '100%',
+                                        }}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                        placeholder="Select Projects"
+                                        value={firstSelectValues}
+                                        onChange={handleFirstSelectChange}
+                                        maxTagCount="responsive"
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        dropdownRender={(menu) => (
+                                            <div
+                                                style={{
+                                                    width: '100%',
+                                                    maxHeight: '200px',
+                                                    overflowY: 'auto',
+                                                    overflowX: 'hidden',
+                                                    // padding: '8px',
+                                                    scrollbarWidth: 'none', // For Firefox
+                                                    msOverflowStyle: 'none',
+                                                }}
+                                            >
+                                                {menu}
+                                            </div>
+                                        )}
+                                        options={Object.keys(transformedData).map((category) => ({
+                                            value: category,
+                                            label: category,
+                                        }))}
+                                    />
+                                </Col>
+        
+                                <Col span={6}>
+                <Select
+                    mode="multiple"
+                    showSearch
+                    onSearch={handleSearchChange}  // Update searchValue dynamically
+                    style={{ width: '100%' }}
+                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                    placeholder="Select Accounts"
+                    dropdownClassName={theme === 'dark' && 'custom-dropdown'}
+                    value={[]} // This should be updated to reflect selectedItems based on the selected categories
+                    dropdownRender={() => (
+                        <div style={{ maxHeight: '300px', overflowY: 'auto', padding: '8px' }}>
+                            {renderInnerSelects(theme)}
+                        </div>
+                    )}
+                />
+            </Col>
+        
+                                <Col span={3}>
+                                    <Select
+                                        showSearch
+                                        onChange={onChangeTime}
+                                        style={{
+                                            width: '100%',
+                                        }}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                        placeholder="Select Timezone"
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        optionFilterProp="label"
+                                        value={time}
+                                        options={timezones.map((item) => ({
+                                            value: item,
+                                            label: item,
+                                        }))}
+                                    />
+                                </Col>
+        
+                                <Col span={8}>
+                                    <ConfigProvider 
+                                        locale={locale}
+                                        theme={{
+                                            token: {
+                                            colorPrimary: '#91C25F', 
+                                            colorTextLightSolid: '#000',
+                                            },
+                                        }}
+                                    >
+                                        <RangePicker
+                                            presets={rangePresets}
+                                            value={selectedDates}
+                                            onCalendarChange={handleChangeDates}
+                                            open={isPickerOpen} // Control the open/close state
+                                            onOpenChange={handleOpenChange} // Handle outside click
+                                            onClick={() => setIsPickerOpen(true)} // Open the picker when clicked
+                                            disabledDate={disabledDate}
+                                            format="YYYY-MM-DD"
+                                            style={{
+                                                width: '100%',
+                                                backgroundColor: theme === 'dark' ? '#555' : undefined,
+                                                color: theme === 'dark' ? 'white' : undefined,
+                                            }}
+                                            dropdownClassName={theme === 'dark' ? 'Dashboard-Details-1 dark-theme-dropdown' : ' Dashboard-Details-1'}
+                                            renderExtraFooter={() => (
+                                                <div style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '8px', paddingTop: '5px', paddingBottom: '5px' }}>
+                                                <Button
+                                                    style={{ marginRight: '8px' }} // Adds spacing between buttons
+                                                    onClick={onClickCloseButton} // Close the picker
+                                                >
+                                                    Close
+                                                </Button>
+                                                <Button
+                                                    style={{ backgroundColor: '#91C25F' }} 
+                                                    onClick={handleSubmit}
+                                                >
+                                                    Submit
+                                                </Button>
+                                                </div>
+                                            )}
+                                        />
+                                    </ConfigProvider>
+                                </Col>
+                                <Col>
+                                    <Button 
+                                        type="default" 
+                                        icon={<ReloadOutlined className='black-icon' />} 
+                                        style={{ float: "right", marginLeft: "10px", backgroundColor: '#91C25F' }} 
+                                        onClick={refreshUsers}  // Call refresh function when clicked
+                                    >
+                                    </Button>
+                                </Col>
+                            </Row>
+                        </div>
                     </div>
                 </div>
     
                 {skeletonLoading ? (
-                    <Skeleton active paragraph={{ rows: 15 }} />
+                    <Skeleton active paragraph={{ rows: 15 }} style={{marginTop:'20px'}}/>
                 ) : (
                     <div style={{ height: '100%' }}>
-                        <Row gutter={24} style={{ marginTop: '20px' }} justify="space-between">
-                            <Col flex="1">
-                                <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
-                                    <Statistic
-                                        title={
-                                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <Card
+                            style={{
+                                marginTop: '25px',
+                                border: 'none',
+                                boxShadow: 'none',
+                                padding: 0,
+                                borderRadius: '20px',
+                                overflow: 'hidden',
+                                backgroundColor: theme === 'dark' ? '#0E1E38' : '#fff',
+                            }}
+                            bodyStyle={{ padding: 0 }}
+                            className='Dashboard-Details-2'
+                        >
+                            <div
+                                className="responsive-grid"
+                                style={{
+                                    display: 'grid',
+                                    // gridTemplateColumns: 'repeat(2, fr)',
+                                    // gap: '1px',
+                                    // backgroundColor: theme === 'dark' ? '#ffffff' : '#0B3D63',
+                                    width: '100%',
+                                    position: 'relative',
+                                }}
+                            >
+                                {[
+                                    { title: 'Revenue', value: revenue1.current, prefix: '$', color: '#91C25F', dot: '#91C25F' },
+                                    { title: 'Profit', value: profit1.current, prefix: '$', color: '#EC7117', dot: '#EC7117' },
+                                    { title: 'Spend', value: spend1.current, prefix: '$', color: '#5C58EE', dot: '#5C58EE' },
+                                    { title: 'Leads', value: leads1.current, color: '#EC7117', dot: '#EC7117' },
+                                    { title: 'Conversions', value: conversions1.current, color: '#5C58EE', dot: '#5C58EE' },
+                                    { title: 'NCPL', value: ncpl1.current, prefix: '$', color: '#91C25F', dot: '#91C25F' },
+                                    { title: 'CPL', value: cpl1.current, color: '#EC7117', dot: '#EC7117' },
+                                    { title: 'CTR', value: ctr1.current, color: '#5C58EE', dot: '#5C58EE' },
+                                    { title: 'CPC', value: cpc1.current, prefix: '$', color: '#EC7117', dot: '#EC7117' },
+                                    { title: 'RPC', value: rpc1.current, color: '#5C58EE', dot: '#5C58EE' },
+                                ].map((item, idx) => (
+                                    <div
+                                        key={idx}
+                                        className={theme === 'dark' ? "grid-cell" : "grid-cell-1"}
+                                        style={{
+                                            backgroundColor: theme === 'dark' ? '#333' : '#e1e2e3',
+                                            padding: '16px',
+                                            textAlign: 'center',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            justifyContent: 'center',
+                                            width: '100%',
+                                            position: 'relative',
+                                            zIndex: 2,
+                                            borderBottom: idx < 8 ? (theme === 'dark' ? '1px solid #8d8989' : '1px solid #9e9e9e') : 'none',
+                                            borderLeft:
+                                                (idx % 2 === 1 && idx < 8  || idx === 9) ? (theme === 'dark' ? '1px solid #8d8989' : '1px solid #9e9e9e') : 'none',
+                                            // borderLeft: idx === 9 ? (theme === 'dark' ? '1px solid #fff' : '1px solid #0B3D63') : 'none',
+                                        }}
+                                    >
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 6 }}>
+                                            {item.dot && (
                                                 <span
                                                     style={{
                                                         display: 'inline-block',
-                                                        height: '12px',
-                                                        width: '12px',
-                                                        backgroundColor: '#A3F254',
+                                                        height: '10px',
+                                                        width: '10px',
                                                         borderRadius: '50%',
-                                                        marginRight: '8px',
+                                                        backgroundColor: item.dot,
+                                                        marginRight: 6,
                                                     }}
                                                 ></span>
-                                                <span style={{ color: '#A3F254', fontWeight: 600 }}>Revenue</span>
-                                            </div>
-                                        }
-                                        value={data.length > 0 ? revenue1.current : 0}
-                                        prefix="$"
-                                        valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}
-                                    />
-                                </Card>
-                            </Col>
-    
-                            <Col flex="1">
-                                <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
-                                    <Statistic
-                                        title={
-                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                <span
-                                                    style={{
-                                                        display: 'inline-block',
-                                                        height: '12px',
-                                                        width: '12px',
-                                                        backgroundColor: '#EC7117',
-                                                        borderRadius: '50%',
-                                                        marginRight: '8px',
-                                                    }}
-                                                ></span>
-                                                <span style={{ color: '#EC7117', fontWeight: 600 }}>Profit</span>
-                                            </div>
-                                        }
-                                        value={data.length > 0 ? profit1.current : 0}
-                                        prefix="$"
-                                        valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
-                                </Card>
-                            </Col>
-    
-                            <Col flex="1">
-                                <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
-                                    <Statistic
-                                        title={
-                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                <span
-                                                    style={{
-                                                        display: 'inline-block',
-                                                        height: '12px',
-                                                        width: '12px',
-                                                        backgroundColor: '#5C58EE',
-                                                        borderRadius: '50%',
-                                                        marginRight: '8px',
-                                                    }}
-                                                ></span>
-                                                <span style={{ color: '#5C58EE', fontWeight: 600 }}>Spend</span>
-                                            </div>
-                                        }
-                                        value={data.length > 0 ? spend1.current : 0}
-                                        prefix="$"
-                                        valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
-                                </Card>
-                            </Col>
-    
-                            <Col flex="1">
-                                <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
-                                    <Statistic
-                                        title={
-                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                <span
-                                                    style={{
-                                                        display: 'inline-block',
-                                                        height: '12px',
-                                                        width: '12px',
-                                                        backgroundColor: '#EC7117',
-                                                        borderRadius: '50%',
-                                                        marginRight: '8px',
-                                                    }}
-                                                ></span>
-                                                <span style={{ color: '#EC7117', fontWeight: 600 }}>Leads</span>
-                                            </div>
-                                        }
-                                        value={data.length > 0 ? leads1.current : 0}
-                                        valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
-                                </Card>
-                            </Col>
-    
-                            <Col flex="1">
-                                <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
-                                    <Statistic
-                                        title={
-                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                <span
-                                                    style={{
-                                                        display: 'inline-block',
-                                                        height: '12px',
-                                                        width: '12px',
-                                                        backgroundColor: '#5C58EE',
-                                                        borderRadius: '50%',
-                                                        marginRight: '8px',
-                                                    }}
-                                                ></span>
-                                                <span style={{ color: '#5C58EE', fontWeight: 600 }}>Conversions</span>
-                                            </div>
-                                        }
-                                        value={data.length > 0 ? conversions1.current : 0}
-                                        valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
-                                </Card>
-                            </Col>
-                        </Row>
-    
-                        <Row gutter={24} style={{ marginTop: '20px' }} justify="space-between">
-                            <Col flex="1">
-                                <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
-                                    <Statistic
-                                        title={
-                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                <span
-                                                    style={{
-                                                        display: 'inline-block',
-                                                        height: '12px',
-                                                        width: '12px',
-                                                        backgroundColor: '#A3F254',
-                                                        borderRadius: '50%',
-                                                        marginRight: '8px',
-                                                    }}
-                                                ></span>
-                                                <span style={{ color: '#A3F254', fontWeight: 600 }}>NCPL</span>
-                                            </div>
-                                        }
-                                        value={data.length > 0 ? ncpl1.current : 0}
-                                        valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
-                                </Card>
-                            </Col>
-    
-                            <Col flex="1">
-                                <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
-                                    <Statistic
-                                        title={
-                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                <span
-                                                    style={{
-                                                        display: 'inline-block',
-                                                        height: '12px',
-                                                        width: '12px',
-                                                        backgroundColor: '#EC7117',
-                                                        borderRadius: '50%',
-                                                        marginRight: '8px',
-                                                    }}
-                                                ></span>
-                                                <span style={{ color: '#EC7117', fontWeight: 600 }}>CPL</span>
-                                            </div>
-                                        }
-                                        value={data.length > 0 ? cpl1.current !== Infinity ? cpl1.current: 0 : 0}
-                                        valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
-                                </Card>
-                            </Col>
-    
-                            <Col flex="1">
-                                <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
-                                    <Statistic
-                                        title={
-                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                <span
-                                                    style={{
-                                                        display: 'inline-block',
-                                                        height: '12px',
-                                                        width: '12px',
-                                                        backgroundColor: '#5C58EE',
-                                                        borderRadius: '50%',
-                                                        marginRight: '8px',
-                                                    }}
-                                                ></span>
-                                                <span style={{ color: '#5C58EE', fontWeight: 600 }}>CTR</span>
-                                            </div>
-                                        }
-                                        value={data.length > 0 ? ctr1.current : 0}
-                                        valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
-                                </Card>
-                            </Col>
-    
-                            <Col flex="1">
-                                <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
-                                    <Statistic
-                                        title={
-                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                <span
-                                                    style={{
-                                                        display: 'inline-block',
-                                                        height: '12px',
-                                                        width: '12px',
-                                                        backgroundColor: '#EC7117',
-                                                        borderRadius: '50%',
-                                                        marginRight: '8px',
-                                                    }}
-                                                ></span>
-                                                <span style={{ color: '#EC7117', fontWeight: 600 }}>CPC</span>
-                                            </div>
-                                        }
-                                        value={data.length > 0 ? cpc1.current : 0}
-                                        valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
-                                </Card>
-                            </Col>
-    
-                            <Col flex="1">
-                                <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
-                                    <Statistic
-                                        title={
-                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                <span
-                                                    style={{
-                                                        display: 'inline-block',
-                                                        height: '12px',
-                                                        width: '12px',
-                                                        backgroundColor: '#5C58EE',
-                                                        borderRadius: '50%',
-                                                        marginRight: '8px',
-                                                    }}
-                                                ></span>
-                                                <span style={{ color: '#5C58EE', fontWeight: 600 }}>RPC</span>
-                                            </div>
-                                        }
-                                        value={data.length > 0 ? rpc1.current : 0}
-                                        valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
-                                </Card>
-                            </Col>
-                        </Row>
+                                            )}
+                                            <span
+                                                style={{
+                                                    fontSize: 15,
+                                                    fontWeight: 600,
+                                                    color: item.color || (theme === 'dark' ? '#66b2ff' : '#4a5d78'),
+                                                }}
+                                            >
+                                                {item.title}
+                                            </span>
+                                        </div>
+                                        <div
+                                            style={{
+                                                fontSize: 18,
+                                                fontWeight: 700,
+                                                // color: '#fff',
+                                            }}
+                                        >
+                                            {item.prefix || ''}
+                                            {data.length > 0 && item.value !== undefined && item.value !== Infinity ? item.value : 0}
+                                        </div>
+                                    </div>
+                                ))}
+                                <div className="vertical-divider" />
+                                <div className="horizontal-divider" />
+                            </div>
+                        </Card>
+
+                        <div className='Dashboard-Details-1'>
+                            <Row gutter={24} style={{ marginTop: '20px' }} justify="space-between">
+                                <Col flex="1">
+                                    <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
+                                        <Statistic
+                                            title={
+                                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                    <span
+                                                        style={{
+                                                            display: 'inline-block',
+                                                            height: '12px',
+                                                            width: '12px',
+                                                            backgroundColor: '#A3F254',
+                                                            borderRadius: '50%',
+                                                            marginRight: '8px',
+                                                        }}
+                                                    ></span>
+                                                    <span style={{ color: '#A3F254', fontWeight: 600 }}>Revenue</span>
+                                                </div>
+                                            }
+                                            value={data.length > 0 ? revenue1.current : 0}
+                                            prefix="$"
+                                            valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}
+                                        />
+                                    </Card>
+                                </Col>
+        
+                                <Col flex="1">
+                                    <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
+                                        <Statistic
+                                            title={
+                                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                    <span
+                                                        style={{
+                                                            display: 'inline-block',
+                                                            height: '12px',
+                                                            width: '12px',
+                                                            backgroundColor: '#EC7117',
+                                                            borderRadius: '50%',
+                                                            marginRight: '8px',
+                                                        }}
+                                                    ></span>
+                                                    <span style={{ color: '#EC7117', fontWeight: 600 }}>Profit</span>
+                                                </div>
+                                            }
+                                            value={data.length > 0 ? profit1.current : 0}
+                                            prefix="$"
+                                            valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
+                                    </Card>
+                                </Col>
+        
+                                <Col flex="1">
+                                    <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
+                                        <Statistic
+                                            title={
+                                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                    <span
+                                                        style={{
+                                                            display: 'inline-block',
+                                                            height: '12px',
+                                                            width: '12px',
+                                                            backgroundColor: '#5C58EE',
+                                                            borderRadius: '50%',
+                                                            marginRight: '8px',
+                                                        }}
+                                                    ></span>
+                                                    <span style={{ color: '#5C58EE', fontWeight: 600 }}>Spend</span>
+                                                </div>
+                                            }
+                                            value={data.length > 0 ? spend1.current : 0}
+                                            prefix="$"
+                                            valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
+                                    </Card>
+                                </Col>
+        
+                                <Col flex="1">
+                                    <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
+                                        <Statistic
+                                            title={
+                                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                    <span
+                                                        style={{
+                                                            display: 'inline-block',
+                                                            height: '12px',
+                                                            width: '12px',
+                                                            backgroundColor: '#EC7117',
+                                                            borderRadius: '50%',
+                                                            marginRight: '8px',
+                                                        }}
+                                                    ></span>
+                                                    <span style={{ color: '#EC7117', fontWeight: 600 }}>Leads</span>
+                                                </div>
+                                            }
+                                            value={data.length > 0 ? leads1.current : 0}
+                                            valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
+                                    </Card>
+                                </Col>
+        
+                                <Col flex="1">
+                                    <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
+                                        <Statistic
+                                            title={
+                                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                    <span
+                                                        style={{
+                                                            display: 'inline-block',
+                                                            height: '12px',
+                                                            width: '12px',
+                                                            backgroundColor: '#5C58EE',
+                                                            borderRadius: '50%',
+                                                            marginRight: '8px',
+                                                        }}
+                                                    ></span>
+                                                    <span style={{ color: '#5C58EE', fontWeight: 600 }}>Conversions</span>
+                                                </div>
+                                            }
+                                            value={data.length > 0 ? conversions1.current : 0}
+                                            valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
+                                    </Card>
+                                </Col>
+                            </Row>
+        
+                            <Row gutter={24} style={{ marginTop: '20px' }} justify="space-between">
+                                <Col flex="1">
+                                    <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
+                                        <Statistic
+                                            title={
+                                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                    <span
+                                                        style={{
+                                                            display: 'inline-block',
+                                                            height: '12px',
+                                                            width: '12px',
+                                                            backgroundColor: '#A3F254',
+                                                            borderRadius: '50%',
+                                                            marginRight: '8px',
+                                                        }}
+                                                    ></span>
+                                                    <span style={{ color: '#A3F254', fontWeight: 600 }}>NCPL</span>
+                                                </div>
+                                            }
+                                            value={data.length > 0 ? ncpl1.current : 0}
+                                            valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
+                                    </Card>
+                                </Col>
+        
+                                <Col flex="1">
+                                    <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
+                                        <Statistic
+                                            title={
+                                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                    <span
+                                                        style={{
+                                                            display: 'inline-block',
+                                                            height: '12px',
+                                                            width: '12px',
+                                                            backgroundColor: '#EC7117',
+                                                            borderRadius: '50%',
+                                                            marginRight: '8px',
+                                                        }}
+                                                    ></span>
+                                                    <span style={{ color: '#EC7117', fontWeight: 600 }}>CPL</span>
+                                                </div>
+                                            }
+                                            value={data.length > 0 ? cpl1.current !== Infinity ? cpl1.current: 0 : 0}
+                                            valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
+                                    </Card>
+                                </Col>
+        
+                                <Col flex="1">
+                                    <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
+                                        <Statistic
+                                            title={
+                                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                    <span
+                                                        style={{
+                                                            display: 'inline-block',
+                                                            height: '12px',
+                                                            width: '12px',
+                                                            backgroundColor: '#5C58EE',
+                                                            borderRadius: '50%',
+                                                            marginRight: '8px',
+                                                        }}
+                                                    ></span>
+                                                    <span style={{ color: '#5C58EE', fontWeight: 600 }}>CTR</span>
+                                                </div>
+                                            }
+                                            value={data.length > 0 ? ctr1.current : 0}
+                                            valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
+                                    </Card>
+                                </Col>
+        
+                                <Col flex="1">
+                                    <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
+                                        <Statistic
+                                            title={
+                                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                    <span
+                                                        style={{
+                                                            display: 'inline-block',
+                                                            height: '12px',
+                                                            width: '12px',
+                                                            backgroundColor: '#EC7117',
+                                                            borderRadius: '50%',
+                                                            marginRight: '8px',
+                                                        }}
+                                                    ></span>
+                                                    <span style={{ color: '#EC7117', fontWeight: 600 }}>CPC</span>
+                                                </div>
+                                            }
+                                            value={data.length > 0 ? cpc1.current : 0}
+                                            valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
+                                    </Card>
+                                </Col>
+        
+                                <Col flex="1">
+                                    <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
+                                        <Statistic
+                                            title={
+                                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                    <span
+                                                        style={{
+                                                            display: 'inline-block',
+                                                            height: '12px',
+                                                            width: '12px',
+                                                            backgroundColor: '#5C58EE',
+                                                            borderRadius: '50%',
+                                                            marginRight: '8px',
+                                                        }}
+                                                    ></span>
+                                                    <span style={{ color: '#5C58EE', fontWeight: 600 }}>RPC</span>
+                                                </div>
+                                            }
+                                            value={data.length > 0 ? rpc1.current : 0}
+                                            valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
+                                    </Card>
+                                </Col>
+                            </Row>
+                        </div>
     
                         {/* <Row style={{ height: '400px', marginBottom: '10px', marginTop: '25px', padding: '0px', marginLeft:'0px', marginRight:'0px' }}>
                         <Line
@@ -3772,246 +4073,272 @@ const Dashboard = () => {
                             <div style={{padding:'0px', marginTop:'15px'}}>
                                 <RenderCarouselNav2/>
                             </div>
-                            <Carousel ref={carouselRef2} beforeChange={handleSlideChange2} dots={false}>
-                                <div>
-                                    {/* ✅ Custom Checkbox-style Legend */}
-                                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '8px', justifyContent:'center' }}>
-                                        {Object.keys(colorMaps).map((label) => {
-                                        const isVisible = !hiddenByDate.includes(label);
-                                        return (
-                                            <div
-                                            key={label}
-                                            onClick={() => toggle0(label)}
-                                            style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '6px',
-                                                cursor: 'pointer',
-                                                fontSize: '13px',
-                                                color: theme === 'dark' ? '#fff' : '#000',
-                                            }}
-                                            >
-                                            <div
+                            <Tabs activeKey={activeTab2} onChange={handleTabChange2} renderTabBar={() => <></>}>    
+                            {/* <Carousel ref={carouselRef2} beforeChange={handleSlideChange2} dots={false}> */}
+                                <Tabs.TabPane key="1">
+                                    <div>
+                                        {/* ✅ Custom Checkbox-style Legend */}
+                                        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '8px', justifyContent:'center' }}>
+                                            {Object.keys(colorMaps).map((label) => {
+                                            const isVisible = !hiddenByDate.includes(label);
+                                            return (
+                                                <div
+                                                key={label}
+                                                onClick={() => toggle0(label)}
                                                 style={{
-                                                width: '16px',
-                                                height: '16px',
-                                                borderRadius: '4px',
-                                                backgroundColor: colorMaps[label],
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                color: '#fff',
-                                                fontWeight: 'bold',
-                                                fontSize: '11px',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '6px',
+                                                    cursor: 'pointer',
+                                                    fontSize: '13px',
+                                                    color: theme === 'dark' ? '#fff' : '#000',
                                                 }}
-                                            >
-                                                {isVisible ? '✔' : ''}
-                                            </div>
-                                            {label}
-                                            </div>
-                                        );
-                                        })}
+                                                >
+                                                <div
+                                                    style={{
+                                                    width: '16px',
+                                                    height: '16px',
+                                                    borderRadius: '4px',
+                                                    backgroundColor: colorMaps[label],
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    color: '#fff',
+                                                    fontWeight: 'bold',
+                                                    fontSize: '11px',
+                                                    }}
+                                                >
+                                                    {isVisible ? '✔' : ''}
+                                                </div>
+                                                {label}
+                                                </div>
+                                            );
+                                            })}
+                                        </div>
+                                        <Row
+                                            style={{
+                                            height: '400px',
+                                            marginBottom: '10px',
+                                            marginTop: '25px',
+                                            padding: '0px',
+                                            }}
+                                        >
+                                            {Array.isArray(datasets0) && datasets0.length > 0 && (
+                                            <Line
+                                                ref={chartByDateRef}
+                                                data={{
+                                                labels: chartDataByDate?.datesByDate || [],
+                                                datasets: datasets0,
+                                                }}
+                                                options={{
+                                                responsive: true,
+                                                maintainAspectRatio: false,
+                                                plugins: {
+                                                    legend: {
+                                                    display: false,
+                                                    },
+                                                    tooltip: {
+                                                    mode: 'index',
+                                                    intersect: false,
+                                                    displayColors: true,
+                                                    callbacks: {
+                                                        title: function (tooltipItems) {
+                                                        const index = tooltipItems[0].dataIndex;
+                                                        const rawDate = chartDataByDate?.datesByDate?.[index];
+                                                        const dateObj = new Date(rawDate);
+                                                        const weekday = dateObj.toLocaleDateString('en-US', { weekday: 'long' });
+                                                        return [`${rawDate} (${weekday})`];
+                                                        },
+                                                        label: function (tooltipItem) {
+                                                        const dataset = tooltipItem.dataset;
+                                                        const value = dataset.data[tooltipItem.dataIndex];
+                                                        return `${dataset.label}: ${value}`;
+                                                        },
+                                                    },
+                                                    },
+                                                },
+                                                scales: {
+                                                    x: {
+                                                        ticks: {
+                                                        padding: 30,
+                                                        color: (context) => {
+                                                            const index = context.index;
+                                                            const label = chartData?.dates?.[index]; // get the X label
+                                                            return getColorForValue(label); // ✅ apply unique color
+                                                        },
+                                                        },
+                                                        grid: {
+                                                        color: theme === 'dark' ? '#444' : '#e0e0e0',
+                                                        },
+                                                    },
+                                                    y: {
+                                                    beginAtZero: true,
+                                                    ticks: {
+                                                        callback: (value) => value.toFixed(2),
+                                                        color: theme === 'dark' ? '#fff' : '#000',
+                                                    },
+                                                    grid: {
+                                                        color: theme === 'dark' ? '#444' : '#e0e0e0',
+                                                    },
+                                                    },
+                                                },
+                                                }}
+                                                height={350}
+                                            />
+                                            )}
+                                        </Row>
+
+                                    
                                     </div>
-                                    <Row
-                                        style={{
-                                        height: '400px',
-                                        marginBottom: '10px',
-                                        marginTop: '25px',
-                                        padding: '0px',
-                                        }}
-                                    >
-                                        {Array.isArray(datasets0) && datasets0.length > 0 && (
-                                        <Line
-                                            ref={chartByDateRef}
+                                </Tabs.TabPane>
+                                <Tabs.TabPane key="2">
+                                    <div>
+                                        {/* ✅ Custom Legend */}
+                                        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '8px', justifyContent:'center' }}>
+                                            {Object.keys(colorMaps).map((label) => {
+                                            const isVisible = !hidden.includes(label);
+                                            return (
+                                                <div
+                                                key={label}
+                                                onClick={() => toggle(label)}
+                                                style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '6px',
+                                                    cursor: 'pointer',
+                                                    fontSize: '13px',
+                                                    color: theme === 'dark' ? '#fff' : '#000', // Adjust text color based on theme
+                                                }}
+                                                >
+                                                <div
+                                                    style={{
+                                                    width: '16px',
+                                                    height: '16px',
+                                                    borderRadius: '4px',
+                                                    backgroundColor: colorMaps[label],
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    color: '#fff',
+                                                    fontWeight: 'bold',
+                                                    fontSize: '11px',
+                                                    }}
+                                                >
+                                                    {isVisible ? '✔' : ''}
+                                                </div>
+                                                {label}
+                                                </div>
+                                            );
+                                            })}
+                                        </div>
+                                        <Row
+                                            style={{
+                                            height: '400px',
+                                            marginBottom: '10px',
+                                            marginTop: '25px',
+                                            padding: '0px',
+                                            }}
+                                        >
+                                            <Line
+                                            ref={chartRef}
                                             data={{
-                                            labels: chartDataByDate?.datesByDate || [],
-                                            datasets: datasets0,
+                                                labels: chartData?.dates || [],
+                                                datasets,
                                             }}
                                             options={{
-                                            responsive: true,
-                                            maintainAspectRatio: false,
-                                            plugins: {
+                                                responsive: true,
+                                                maintainAspectRatio: false,
+                                                plugins: {
                                                 legend: {
-                                                display: false,
+                                                    display: false, // disable default
                                                 },
                                                 tooltip: {
-                                                mode: 'index',
-                                                intersect: true,
-                                                displayColors: true,
-                                                callbacks: {
-                                                    title: function (tooltipItems) {
-                                                    const index = tooltipItems[0].dataIndex;
-                                                    const rawDate = chartDataByDate?.datesByDate?.[index];
-                                                    const dateObj = new Date(rawDate);
-                                                    const weekday = dateObj.toLocaleDateString('en-US', { weekday: 'long' });
-                                                    return [`${rawDate} (${weekday})`];
-                                                    },
+                                                    mode: 'index',
+                                                    intersect: false,
+                                                    displayColors: true,
+                                                    boxWidth: 15,
+                                                    boxHeight: 15,
+                                                    callbacks: {
+                                                        title: function (tooltipItems) {
+                                                            const index = tooltipItems[0].dataIndex;
+                                                            const xValue = tooltipItems[0].label;
+                                                            const date = chartData?.newDates?.[index] || chartData?.dates?.[index] || '';
+                                                            return `${xValue} ( ${date} )`; // ⬅️ both lines at top
+                                                        },
                                                     label: function (tooltipItem) {
-                                                    const dataset = tooltipItem.dataset;
-                                                    const value = dataset.data[tooltipItem.dataIndex];
-                                                    return `${dataset.label}: ${value}`;
+                                                        const index = tooltipItem.dataIndex;
+                                                        const dataset = tooltipItem.dataset;
+                                                        const value = dataset.data[index];
+                                                        const label = dataset.label || '';
+                                                        return `${label}: ${value}`;
+                                                    },
+                                                    
                                                     },
                                                 },
                                                 },
-                                            },
-                                            scales: {
-                                                x: {
+                                                scales: {
+                                                    x: {
+                                                        ticks: {
+                                                        padding: 30,
+                                                        // color: (context) => {
+                                                        //     const index = context.index;
+                                                        //     const label = chartData?.dates?.[index]; // get the X label
+                                                        //     return getColorForValue(label); // ✅ apply unique color
+                                                        // },
+                                                        color: (function () {
+                                                            const memoizedColors = {};
+                                                            return (context) => {
+                                                                const index = context.index;
+                                                                const label = chartData?.dates?.[index];
+                                                                if (!label) return '#ccc';
+                                                                if (!memoizedColors[label]) {
+                                                                    memoizedColors[label] = getColorForValue(label);
+                                                                }
+                                                                return memoizedColors[label];
+                                                            };
+                                                        })()
+                                                        
+                                                        },
+                                                        grid: {
+                                                        color: theme === 'dark' ? '#444' : '#e0e0e0',
+                                                        },
+                                                    },
+                                                y: {
+                                                    beginAtZero: true,
                                                     ticks: {
-                                                      padding: 30,
-                                                      color: (context) => {
-                                                        const index = context.index;
-                                                        const label = chartData?.dates?.[index]; // get the X label
-                                                        return getColorForValue(label); // ✅ apply unique color
-                                                      },
+                                                    callback: function (value) {
+                                                        return value.toFixed(2);
+                                                    },
+                                                    color: theme === 'dark' ? '#fff' : '#000',
                                                     },
                                                     grid: {
-                                                      color: theme === 'dark' ? '#444' : '#e0e0e0',
+                                                    color: theme === 'dark' ? '#444' : '#e0e0e0',
                                                     },
                                                 },
-                                                y: {
-                                                beginAtZero: true,
-                                                ticks: {
-                                                    callback: (value) => value.toFixed(2),
-                                                    color: theme === 'dark' ? '#fff' : '#000',
                                                 },
-                                                grid: {
-                                                    color: theme === 'dark' ? '#444' : '#e0e0e0',
-                                                },
-                                                },
-                                            },
+                                                elements: {
+                                                    point: {
+                                                      radius: 4,
+                                                      hitRadius: 10,
+                                                      hoverRadius: 6,
+                                                    },
+                                                  },
                                             }}
                                             height={350}
-                                        />
-                                        )}
-                                    </Row>
+                                            />
+                                        </Row>
 
-                                
-                                </div>
-                                <div>
-                                    {/* ✅ Custom Legend */}
-                                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '8px', justifyContent:'center' }}>
-                                        {Object.keys(colorMaps).map((label) => {
-                                        const isVisible = !hidden.includes(label);
-                                        return (
-                                            <div
-                                            key={label}
-                                            onClick={() => toggle(label)}
-                                            style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '6px',
-                                                cursor: 'pointer',
-                                                fontSize: '13px',
-                                                color: theme === 'dark' ? '#fff' : '#000', // Adjust text color based on theme
-                                            }}
-                                            >
-                                            <div
-                                                style={{
-                                                width: '16px',
-                                                height: '16px',
-                                                borderRadius: '4px',
-                                                backgroundColor: colorMaps[label],
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                color: '#fff',
-                                                fontWeight: 'bold',
-                                                fontSize: '11px',
-                                                }}
-                                            >
-                                                {isVisible ? '✔' : ''}
-                                            </div>
-                                            {label}
-                                            </div>
-                                        );
-                                        })}
+                                    
                                     </div>
-                                    <Row
-                                        style={{
-                                        height: '400px',
-                                        marginBottom: '10px',
-                                        marginTop: '25px',
-                                        padding: '0px',
-                                        }}
-                                    >
-                                        <Line
-                                        ref={chartRef}
-                                        data={{
-                                            labels: chartData?.dates || [],
-                                            datasets,
-                                        }}
-                                        options={{
-                                            responsive: true,
-                                            maintainAspectRatio: false,
-                                            plugins: {
-                                            legend: {
-                                                display: false, // disable default
-                                            },
-                                            tooltip: {
-                                                mode: 'index',
-                                                intersect: true,
-                                                displayColors: true,
-                                                boxWidth: 15,
-                                                boxHeight: 15,
-                                                callbacks: {
-                                                    title: function (tooltipItems) {
-                                                        const index = tooltipItems[0].dataIndex;
-                                                        const xValue = tooltipItems[0].label;
-                                                        const date = chartData?.newDates?.[index] || chartData?.dates?.[index] || '';
-                                                        return `${xValue} ( ${date} )`; // ⬅️ both lines at top
-                                                    },
-                                                label: function (tooltipItem) {
-                                                    const index = tooltipItem.dataIndex;
-                                                    const dataset = tooltipItem.dataset;
-                                                    const value = dataset.data[index];
-                                                    const label = dataset.label || '';
-                                                    return `${label}: ${value}`;
-                                                },
-                                                
-                                                },
-                                            },
-                                            },
-                                            scales: {
-                                                x: {
-                                                    ticks: {
-                                                      padding: 30,
-                                                      color: (context) => {
-                                                        const index = context.index;
-                                                        const label = chartData?.dates?.[index]; // get the X label
-                                                        return getColorForValue(label); // ✅ apply unique color
-                                                      },
-                                                    },
-                                                    grid: {
-                                                      color: theme === 'dark' ? '#444' : '#e0e0e0',
-                                                    },
-                                                },
-                                            y: {
-                                                beginAtZero: true,
-                                                ticks: {
-                                                callback: function (value) {
-                                                    return value.toFixed(2);
-                                                },
-                                                color: theme === 'dark' ? '#fff' : '#000',
-                                                },
-                                                grid: {
-                                                color: theme === 'dark' ? '#444' : '#e0e0e0',
-                                                },
-                                            },
-                                            },
-                                        }}
-                                        height={350}
-                                        />
-                                    </Row>
-
-                                
-                                </div>
-                            </Carousel>
+                                </Tabs.TabPane>
+                            {/* </Carousel> */}
+                            </Tabs>
                         </div>
                         
 
                         
     
-                        <Row style={{ display: 'flex', flexDirection: 'column' }}>
+                        <Row style={{ display: 'flex', flexDirection: 'column', }}>
                             <Col>
                                 <h2>
                                     Overall Report
@@ -4033,401 +4360,434 @@ const Dashboard = () => {
                             </div>
                         </Col> */}
                             <Col>
-                                <div
-                                    className={`ag-theme-alpine ${gridThemeClass}`}
-                                    style={{ width: '100%', height: '400px' }}
-                                >
-                                    <AgGridReact
-                                        rowData={rowData}
-                                        columnDefs={columnDefs}
-                                        defaultColDef={defaultColDef}
-                                        gridOptions={{
-                                            ensureDomOrder: false,
-                                            suppressRowClickSelection: true,
-                                            suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                            enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                        }}
-                                        autoGroupColumnDef={autoGroupColumnDefOverAllReport}
-                                        rowGroupPanelShow="always"
-                                        suppressAggFuncInHeader={true}
-                                        groupIncludeFooter={true}
-                                        groupIncludeTotalFooter={true}
-                                    />
-                                </div>
+                                {/* <div className='ag-grid-responsive'> */}
+                                    <div
+                                        className={`ag-theme-alpine ${gridThemeClass}`}
+                                        // style={{ width: '100%', height: '100%' }}
+                                    >
+                                        <AgGridReact
+                                            domLayout="normal"
+                                            rowData={rowData}
+                                            columnDefs={columnDefs}
+                                            defaultColDef={defaultColDef}
+                                            gridOptions={{
+                                                ensureDomOrder: false,
+                                                suppressRowClickSelection: true,
+                                                suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                            }}
+                                            autoGroupColumnDef={autoGroupColumnDefOverAllReport}
+                                            rowGroupPanelShow="always"
+                                            suppressAggFuncInHeader={true}
+                                            groupIncludeFooter={true}
+                                            groupIncludeTotalFooter={true}
+                                        />
+                                    </div>
+                                {/* </div> */}
                             </Col>
     
                         </Row>
+                        
                         <h2 style={{marginTop: "15px"}}>Accounts</h2>
                         <div style={{padding:'0px', margin:'0px'}}>
                             {renderCarouselNav()}
                         </div>
-                        <Carousel ref={carouselRef} beforeChange={handleSlideChange} dots={false}>
-                            <div>
-                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                    <Col>
-                                        <div
-                                            className={`ag-theme-alpine ${gridThemeClass}`}
-                                            style={{ width: '100%', height: '400px' }}
-                                        >
-                                            <AgGridReact
-                                                rowData={rowData?.filter((each) => each.profit > 0)}
-                                                columnDefs={columnDefs1}
-                                                defaultColDef={defaultColDef}
-                                                gridOptions={{
-                                                    ensureDomOrder: false,
-                                                    suppressRowClickSelection: true,
-                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                }}
-                                                rowGroupPanelShow="always"
-                                                suppressAggFuncInHeader={true}
-                                                groupIncludeFooter={true}
-                                                groupIncludeTotalFooter={true}
-                                                autoGroupColumnDef={autoGroupColumnDefProfit}
-                                            />
-                                        </div>
-                                    </Col>
-            
-                                </Row>
-                            </div>
-                            <div>
-                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                    <Col>
-                                        <div
-                                            className={`ag-theme-alpine ${gridThemeClass}`}
-                                            style={{ width: '100%', height: '400px' }}
-                                        >             <AgGridReact
-                                                rowData={rowData?.filter(each => each.profit < 0)}
-                                                columnDefs={columnDefs1}
-                                                defaultColDef={defaultColDef}
-                                                gridOptions={{
-                                                    ensureDomOrder: false,
-                                                    suppressRowClickSelection: true,
-                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                }}
-                                                rowGroupPanelShow="always"
-                                                suppressAggFuncInHeader={true}
-                                                groupIncludeFooter={true}
-                                                groupIncludeTotalFooter={true}
-                                                autoGroupColumnDef={autoGroupColumnDefLoss}
-                                            />
-                                        </div>
-                                    </Col>
-                                </Row>
-                            </div>
-                            <div>
-                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                    <Col>
-                                        <div
-                                            className={`ag-theme-alpine ${gridThemeClass}`}
-                                            style={{ width: '100%', height: '400px' }}
-                                        >
-                                            <AgGridReact
-                                                rowData={Object.values(
-                                                    byAccountNumber?.reduce((acc, curr) => {
-                                                      (acc[curr.specifiedDate] = acc[curr.specifiedDate] || []).push(curr);
-                                                      return acc;
-                                                    }, {})
-                                                  ).flatMap(records =>
-                                                    records
-                                                      .sort((a, b) => b.spend - a.spend) // Sort by spend (descending)
-                                                      .slice(0, 5) // Get top 5 records per date
-                                                  )}
-                                                columnDefs={columnDefs1}
-                                                defaultColDef={defaultColDef}
-                                                gridOptions={{
-                                                    ensureDomOrder: false,
-                                                    suppressRowClickSelection: true,
-                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                }}
-                                                rowGroupPanelShow="always"
-                                                suppressAggFuncInHeader={true}
-                                                groupIncludeFooter={true}
-                                                groupIncludeTotalFooter={true}
-                                                autoGroupColumnDef={autoGroupColumnDefProfit}
-                                            />
-                                        </div>
-                                    </Col>
-            
-                                </Row>
-                            </div>
-                            <div>
-                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                    <Col>
-                                        <div
-                                            className={`ag-theme-alpine ${gridThemeClass}`}
-                                            style={{ width: '100%', height: '400px' }}
-                                        >
-                                            <AgGridReact
-                                                rowData={Object.values(
-                                                    byAccountNumber?.reduce((acc, curr) => {
-                                                      (acc[curr.specifiedDate] = acc[curr.specifiedDate] || []).push(curr);
-                                                      return acc;
-                                                    }, {})
-                                                  ).flatMap(records =>
-                                                    records
-                                                      .sort((a, b) => b.estimated_revenue - a.estimated_revenue) // Sort by spend (descending)
-                                                      .slice(0, 5) // Get top 5 records per date
-                                                  )}
-                                                columnDefs={columnDefs1}
-                                                defaultColDef={defaultColDef}
-                                                gridOptions={{
-                                                    ensureDomOrder: false,
-                                                    suppressRowClickSelection: true,
-                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                }}
-                                                rowGroupPanelShow="always"
-                                                suppressAggFuncInHeader={true}
-                                                groupIncludeFooter={true}
-                                                groupIncludeTotalFooter={true}
-                                                autoGroupColumnDef={autoGroupColumnDefProfit}
-                                            />
-                                        </div>
-                                    </Col>
-            
-                                </Row>
-                            </div>
-                            <div>
-                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                    <Col>
-                                        <div
-                                            className={`ag-theme-alpine ${gridThemeClass}`}
-                                            style={{ width: '100%', height: '400px' }}
-                                        >
-                                            <AgGridReact
-                                                rowData={Object.values(
-                                                    byAccountNumber?.reduce((acc, curr) => {
-                                                      (acc[curr.specifiedDate] = acc[curr.specifiedDate] || []).push(curr);
-                                                      return acc;
-                                                    }, {})
-                                                  ).flatMap(records =>
-                                                    records
-                                                      .sort((a, b) => b.profit - a.profit) // Sort by spend (descending)
-                                                      .slice(0, 5) // Get top 5 records per date
-                                                  )}
-                                                columnDefs={columnDefs1}
-                                                defaultColDef={defaultColDef}
-                                                gridOptions={{
-                                                    ensureDomOrder: false,
-                                                    suppressRowClickSelection: true,
-                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                }}
-                                                rowGroupPanelShow="always"
-                                                suppressAggFuncInHeader={true}
-                                                groupIncludeFooter={true}
-                                                groupIncludeTotalFooter={true}
-                                                autoGroupColumnDef={autoGroupColumnDefProfit}
-                                            />
-                                        </div>
-                                    </Col>
-            
-                                </Row>
-                            </div>
-                        </Carousel>
+                        <Tabs activeKey={activeTab} onChange={handleSlideChange} renderTabBar={() => <></>}>
+                        {/* <Carousel ref={carouselRef} beforeChange={handleSlideChange} dots={false}> */}
+                            <Tabs.TabPane key="1">
+                                {/* <div>
+                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                        <Col> */}
+                                            <div
+                                                className={`ag-theme-alpine ${gridThemeClass}`}
+                                                style={{ width: '100%', height: '100%' }}
+                                            >
+                                                <AgGridReact
+                                                    rowData={rowData?.filter((each) => each.profit > 0)}
+                                                    columnDefs={columnDefs1}
+                                                    defaultColDef={defaultColDef}
+                                                    gridOptions={{
+                                                        ensureDomOrder: false,
+                                                        suppressRowClickSelection: true,
+                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                    }}
+                                                    rowGroupPanelShow="always"
+                                                    suppressAggFuncInHeader={true}
+                                                    groupIncludeFooter={true}
+                                                    groupIncludeTotalFooter={true}
+                                                    autoGroupColumnDef={autoGroupColumnDefProfit}
+                                                />
+                                            </div>
+                                        {/* </Col>
+                
+                                    </Row>
+                                </div> */}
+                            </Tabs.TabPane>
+                            <Tabs.TabPane key="2">
+                                {/* <div>
+                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                        <Col> */}
+                                            <div
+                                                className={`ag-theme-alpine ${gridThemeClass}`}
+                                                style={{ width: '100%', height: '100%' }}
+                                            >             <AgGridReact
+                                                    rowData={rowData?.filter(each => each.profit < 0)}
+                                                    columnDefs={columnDefs1}
+                                                    defaultColDef={defaultColDef}
+                                                    gridOptions={{
+                                                        ensureDomOrder: false,
+                                                        suppressRowClickSelection: true,
+                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                    }}
+                                                    rowGroupPanelShow="always"
+                                                    suppressAggFuncInHeader={true}
+                                                    groupIncludeFooter={true}
+                                                    groupIncludeTotalFooter={true}
+                                                    autoGroupColumnDef={autoGroupColumnDefLoss}
+                                                />
+                                            </div>
+                                        {/* </Col>
+                                    </Row>
+                                </div> */}
+                            </Tabs.TabPane>
+                            <Tabs.TabPane key="3">
+                                {/* <div>
+                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                        <Col> */}
+                                            <div
+                                                className={`ag-theme-alpine ${gridThemeClass}`}
+                                                style={{ width: '100%', height: '100%' }}
+                                            >
+                                                <AgGridReact
+                                                    rowData={Object.values(
+                                                        byAccountNumber?.reduce((acc, curr) => {
+                                                        (acc[curr.specifiedDate] = acc[curr.specifiedDate] || []).push(curr);
+                                                        return acc;
+                                                        }, {})
+                                                    ).flatMap(records =>
+                                                        records
+                                                        .sort((a, b) => b.spend - a.spend) // Sort by spend (descending)
+                                                        .slice(0, 5) // Get top 5 records per date
+                                                    )}
+                                                    columnDefs={columnDefs1}
+                                                    defaultColDef={defaultColDef}
+                                                    gridOptions={{
+                                                        ensureDomOrder: false,
+                                                        suppressRowClickSelection: true,
+                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                    }}
+                                                    rowGroupPanelShow="always"
+                                                    suppressAggFuncInHeader={true}
+                                                    groupIncludeFooter={true}
+                                                    groupIncludeTotalFooter={true}
+                                                    autoGroupColumnDef={autoGroupColumnDefProfit}
+                                                />
+                                            </div>
+                                        {/* </Col>
+                
+                                    </Row>
+                                </div> */}
+                            </Tabs.TabPane>
+                            <Tabs.TabPane key="4">
+                                {/* <div>
+                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                        <Col> */}
+                                            <div
+                                                className={`ag-theme-alpine ${gridThemeClass}`}
+                                                style={{ width: '100%', height: '100%' }}
+                                            >
+                                                <AgGridReact
+                                                    rowData={Object.values(
+                                                        byAccountNumber?.reduce((acc, curr) => {
+                                                        (acc[curr.specifiedDate] = acc[curr.specifiedDate] || []).push(curr);
+                                                        return acc;
+                                                        }, {})
+                                                    ).flatMap(records =>
+                                                        records
+                                                        .sort((a, b) => b.estimated_revenue - a.estimated_revenue) // Sort by spend (descending)
+                                                        .slice(0, 5) // Get top 5 records per date
+                                                    )}
+                                                    columnDefs={columnDefs1}
+                                                    defaultColDef={defaultColDef}
+                                                    gridOptions={{
+                                                        ensureDomOrder: false,
+                                                        suppressRowClickSelection: true,
+                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                    }}
+                                                    rowGroupPanelShow="always"
+                                                    suppressAggFuncInHeader={true}
+                                                    groupIncludeFooter={true}
+                                                    groupIncludeTotalFooter={true}
+                                                    autoGroupColumnDef={autoGroupColumnDefProfit}
+                                                />
+                                            </div>
+                                        {/* </Col>
+                
+                                    </Row>
+                                </div> */}
+                            </Tabs.TabPane>
+                            <Tabs.TabPane key="5">
+                                {/* <div>
+                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                        <Col> */}
+                                            <div
+                                                className={`ag-theme-alpine ${gridThemeClass}`}
+                                                style={{ width: '100%', height: '100%' }}
+                                            >
+                                                <AgGridReact
+                                                    rowData={Object.values(
+                                                        byAccountNumber?.reduce((acc, curr) => {
+                                                        (acc[curr.specifiedDate] = acc[curr.specifiedDate] || []).push(curr);
+                                                        return acc;
+                                                        }, {})
+                                                    ).flatMap(records =>
+                                                        records
+                                                        .sort((a, b) => b.profit - a.profit) // Sort by spend (descending)
+                                                        .slice(0, 5) // Get top 5 records per date
+                                                    )}
+                                                    columnDefs={columnDefs1}
+                                                    defaultColDef={defaultColDef}
+                                                    gridOptions={{
+                                                        ensureDomOrder: false,
+                                                        suppressRowClickSelection: true,
+                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                    }}
+                                                    rowGroupPanelShow="always"
+                                                    suppressAggFuncInHeader={true}
+                                                    groupIncludeFooter={true}
+                                                    groupIncludeTotalFooter={true}
+                                                    autoGroupColumnDef={autoGroupColumnDefProfit}
+                                                />
+                                            </div>
+                                        {/* </Col>
+                
+                                    </Row>
+                                </div> */}
+                            </Tabs.TabPane>
+                        {/* </Carousel> */}
+                        </Tabs>
 
                         <h2 style={{marginTop: "15px"}}>Top 5 Campaigns</h2>
 
                         <div style={{padding:'0px', margin:'0px'}}>
                             {renderCarouselNav1()}
                         </div>
-    
-                        <Carousel ref={carouselRef1} beforeChange={handleSlideChange1} dots={false}>
-                            <div>
-                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                    <Col>
-                                        <div
-                                            className={`ag-theme-alpine ${gridThemeClass}`}
-                                            style={{ width: '100%', height: '400px' }}
-                                        >             <AgGridReact
-                                                rowData={top5Campaigns}
-                                                columnDefs={columnDefs2}
-                                                defaultColDef={defaultColDef}
-                                                gridOptions={{
-                                                    ensureDomOrder: false,
-                                                    suppressRowClickSelection: true,
-                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                }}
-                                                rowGroupPanelShow="always"
-                                                suppressAggFuncInHeader={true}
-                                                groupIncludeFooter={true}
-                                                groupIncludeTotalFooter={true}
-                                                autoGroupColumnDef={autoGroupColumnDefCampaigns}
-                                            />
-                                        </div>
-                                    </Col>
-                                </Row>
-                            </div>
-                            <div>
-                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                    <Col>
-                                        <div
-                                            className={`ag-theme-alpine ${gridThemeClass}`}
-                                            style={{ width: '100%', height: '400px' }}
-                                        >             <AgGridReact
-                                                rowData={top5RevenueCampaigns}
-                                                columnDefs={columnDefs2}
-                                                defaultColDef={defaultColDef}
-                                                gridOptions={{
-                                                    ensureDomOrder: false,
-                                                    suppressRowClickSelection: true,
-                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                }}
-                                                rowGroupPanelShow="always"
-                                                suppressAggFuncInHeader={true}
-                                                groupIncludeFooter={true}
-                                                groupIncludeTotalFooter={true}
-                                                autoGroupColumnDef={autoGroupColumnDefCampaigns}
-                                            />
-                                        </div>
-                                    </Col>
-                                </Row>
-                            </div>
-                            <div>
-                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                    <Col>
-                                        <div
-                                            className={`ag-theme-alpine ${gridThemeClass}`}
-                                            style={{ width: '100%', height: '400px' }}
-                                        >   <AgGridReact
-                                                rowData={top5ProfitCampaigns}
-                                                columnDefs={columnDefs2}
-                                                defaultColDef={defaultColDef}
-                                                gridOptions={{
-                                                    ensureDomOrder: false,
-                                                    suppressRowClickSelection: true,
-                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                }}
-                                                rowGroupPanelShow="always"
-                                                suppressAggFuncInHeader={true}
-                                                groupIncludeFooter={true}
-                                                groupIncludeTotalFooter={true}
-                                                autoGroupColumnDef={autoGroupColumnDefCampaigns}
-                                            />
-                                        </div>
-                                    </Col>
-                                </Row>
-                            </div>
-                            <div>
-                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                    <Col>
-                                        <div
-                                            className={`ag-theme-alpine ${gridThemeClass}`}
-                                            style={{ width: '100%', height: '400px' }}
-                                        >             <AgGridReact
-                                                rowData={overAllProfitCampaigns}
-                                                columnDefs={columnDefs2}
-                                                defaultColDef={defaultColDef}
-                                                gridOptions={{
-                                                    ensureDomOrder: false,
-                                                    suppressRowClickSelection: true,
-                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                }}
-                                                rowGroupPanelShow="always"
-                                                suppressAggFuncInHeader={true}
-                                                groupIncludeFooter={true}
-                                                groupIncludeTotalFooter={true}
-                                                autoGroupColumnDef={autoGroupColumnDefCampaigns}
-                                            />
-                                        </div>
-                                    </Col>
-                                </Row>
-                            </div>
-                            <div>
-                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                    <Col>
-                                        <div
-                                            className={`ag-theme-alpine ${gridThemeClass}`}
-                                            style={{ width: '100%', height: '400px' }}
-                                        >             <AgGridReact
-                                                rowData={overAllLossCampaigns}
-                                                columnDefs={columnDefs2}
-                                                defaultColDef={defaultColDef}
-                                                gridOptions={{
-                                                    ensureDomOrder: false,
-                                                    suppressRowClickSelection: true,
-                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                }}
-                                                rowGroupPanelShow="always"
-                                                suppressAggFuncInHeader={true}
-                                                groupIncludeFooter={true}
-                                                groupIncludeTotalFooter={true}
-                                                autoGroupColumnDef={autoGroupColumnDefCampaigns}
-                                            />
-                                        </div>
-                                    </Col>
-                                </Row>
-                            </div>
-                        </Carousel>
+                        <Tabs  activeKey={activeTab1} onChange={handleSlideChange1} renderTabBar={() => <></>}>
+                        {/* <Carousel ref={carouselRef1} beforeChange={handleSlideChange1} dots={false}> */}
+                            <Tabs.TabPane key="1">
+                                {/* <div>
+                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                        <Col> */}
+                                            <div
+                                                className={`ag-theme-alpine ${gridThemeClass}`}
+                                                style={{ width: '100%', height: '100%' }}
+                                            >             <AgGridReact
+                                                    rowData={top5Campaigns}
+                                                    columnDefs={columnDefs2}
+                                                    defaultColDef={defaultColDef}
+                                                    gridOptions={{
+                                                        ensureDomOrder: false,
+                                                        suppressRowClickSelection: true,
+                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                    }}
+                                                    rowGroupPanelShow="always"
+                                                    suppressAggFuncInHeader={true}
+                                                    groupIncludeFooter={true}
+                                                    groupIncludeTotalFooter={true}
+                                                    autoGroupColumnDef={autoGroupColumnDefCampaigns}
+                                                />
+                                            </div>
+                                        {/* </Col>
+                                    </Row>
+                                </div> */}
+                            </Tabs.TabPane>
+                            <Tabs.TabPane key="2">
+                                {/* <div>
+                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                        <Col> */}
+                                            <div
+                                                className={`ag-theme-alpine ${gridThemeClass}`}
+                                                style={{ width: '100%', height: '100%' }}
+                                            >             <AgGridReact
+                                                    rowData={top5RevenueCampaigns}
+                                                    columnDefs={columnDefs2}
+                                                    defaultColDef={defaultColDef}
+                                                    gridOptions={{
+                                                        ensureDomOrder: false,
+                                                        suppressRowClickSelection: true,
+                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                    }}
+                                                    rowGroupPanelShow="always"
+                                                    suppressAggFuncInHeader={true}
+                                                    groupIncludeFooter={true}
+                                                    groupIncludeTotalFooter={true}
+                                                    autoGroupColumnDef={autoGroupColumnDefCampaigns}
+                                                />
+                                            </div>
+                                        {/* </Col>
+                                    </Row>
+                                </div> */}
+                            </Tabs.TabPane>
+                            <Tabs.TabPane key="3">
+                                {/* <div>
+                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                        <Col> */}
+                                            <div
+                                                className={`ag-theme-alpine ${gridThemeClass}`}
+                                                style={{ width: '100%', height: '100%' }}
+                                            >   <AgGridReact
+                                                    rowData={top5ProfitCampaigns}
+                                                    columnDefs={columnDefs2}
+                                                    defaultColDef={defaultColDef}
+                                                    gridOptions={{
+                                                        ensureDomOrder: false,
+                                                        suppressRowClickSelection: true,
+                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                    }}
+                                                    rowGroupPanelShow="always"
+                                                    suppressAggFuncInHeader={true}
+                                                    groupIncludeFooter={true}
+                                                    groupIncludeTotalFooter={true}
+                                                    autoGroupColumnDef={autoGroupColumnDefCampaigns}
+                                                />
+                                            </div>
+                                        {/* </Col>
+                                    </Row>
+                                </div> */}
+                            </Tabs.TabPane>
+                            <Tabs.TabPane key="4">
+                                {/* <div>
+                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                        <Col> */}
+                                            <div
+                                                className={`ag-theme-alpine ${gridThemeClass}`}
+                                                style={{ width: '100%', height: '100%' }}
+                                            >             <AgGridReact
+                                                    rowData={overAllProfitCampaigns}
+                                                    columnDefs={columnDefs2}
+                                                    defaultColDef={defaultColDef}
+                                                    gridOptions={{
+                                                        ensureDomOrder: false,
+                                                        suppressRowClickSelection: true,
+                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                    }}
+                                                    rowGroupPanelShow="always"
+                                                    suppressAggFuncInHeader={true}
+                                                    groupIncludeFooter={true}
+                                                    groupIncludeTotalFooter={true}
+                                                    autoGroupColumnDef={autoGroupColumnDefCampaigns}
+                                                />
+                                            </div>
+                                        {/* </Col>
+                                    </Row>
+                                </div> */}
+                            </Tabs.TabPane>
+                            <Tabs.TabPane key="5">
+                                {/* <div>
+                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                        <Col> */}
+                                            <div
+                                                className={`ag-theme-alpine ${gridThemeClass}`}
+                                                style={{ width: '100%', height: '100%' }}
+                                            >             <AgGridReact
+                                                    rowData={overAllLossCampaigns}
+                                                    columnDefs={columnDefs2}
+                                                    defaultColDef={defaultColDef}
+                                                    gridOptions={{
+                                                        ensureDomOrder: false,
+                                                        suppressRowClickSelection: true,
+                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                    }}
+                                                    rowGroupPanelShow="always"
+                                                    suppressAggFuncInHeader={true}
+                                                    groupIncludeFooter={true}
+                                                    groupIncludeTotalFooter={true}
+                                                    autoGroupColumnDef={autoGroupColumnDefCampaigns}
+                                                />
+                                            </div>
+                                        {/* </Col>
+                                    </Row>
+                                </div> */}
+                            </Tabs.TabPane>
+                        {/* </Carousel> */}
+                        </Tabs>
                         
                         <div style={{padding:'0px', marginTop:'15px'}}>
                             <RenderCarouselNav3/>
                         </div>
-                        <Carousel ref={carouselRef3} beforeChange={handleSlideChange3} dots={false}>
-                            <div>
-                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                    <Col>
-                                        <div
-                                            className={`ag-theme-alpine ${gridThemeClass}`}
-                                            style={{ width: '100%', height: '400px' }}
-                                        >             <AgGridReact
-                                                rowData={domainWiseData}
-                                                columnDefs={columnDefs3}
-                                                defaultColDef={defaultColDef}
-                                                gridOptions={{
-                                                    ensureDomOrder: false,
-                                                    suppressRowClickSelection: true,
-                                                    suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                    enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                }}
-                                                // rowGroupPanelShow="always"
-                                                suppressAggFuncInHeader={true}
-                                                // groupIncludeFooter={true}
-                                                groupIncludeTotalFooter={true}
-                                                autoGroupColumnDef={autoGroupColumnDefDomain}
-                                            />
-                                        </div>
-                                    </Col>
-                                </Row>
-                            </div>
-                            <div>
-                                <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                    <Col>
-                                        <div
-                                            className={`ag-theme-alpine ${gridThemeClass}`}
-                                            style={{ width: '100%', height: '400px' }}
-                                        >           <AgGridReact
-                                                        rowData={agencyNameReport}
-                                                        columnDefs={columnDefs4}
-                                                        defaultColDef={defaultColDef}
-                                                        gridOptions={{
-                                                            groupDefaultExpanded: -1, 
-                                                            ensureDomOrder: false,
-                                                            suppressRowClickSelection: true,
-                                                            suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                            enableRangeSelection: true,// Expands all groups by default
-                                                        }}
-                                                        // rowGroupPanelShow="always"
-                                                        suppressAggFuncInHeader={true}
-                                                        rowGroupPanelShow="always"
-                                                        // groupIncludeFooter={true}
-                                                        groupIncludeTotalFooter={true}
-                                                        autoGroupColumnDef={autoGroupColumnDefAgency}
-                                                    />
-                                        </div>
-                                    </Col>
-                                </Row>
-                            </div>
-                        </Carousel>
-                        {/* <Row></Row> */}
+                        {/* <Carousel ref={carouselRef3} beforeChange={handleSlideChange3} dots={false}> */}
+                        <Tabs  activeKey={activeTab3} onChange={handleTabChange3} renderTabBar={() => <></>}>
+                            <Tabs.TabPane key="1">
+                                {/* <div>
+                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                        <Col> */}
+                                            <div
+                                                className={`ag-theme-alpine ${gridThemeClass}`}
+                                                style={{ width: '100%', height: '100%' }}
+                                            >             <AgGridReact
+                                                    rowData={domainWiseData}
+                                                    columnDefs={columnDefs3}
+                                                    defaultColDef={defaultColDef}
+                                                    gridOptions={{
+                                                        ensureDomOrder: false,
+                                                        suppressRowClickSelection: true,
+                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                                    }}
+                                                    // rowGroupPanelShow="always"
+                                                    suppressAggFuncInHeader={true}
+                                                    // groupIncludeFooter={true}
+                                                    groupIncludeTotalFooter={true}
+                                                    autoGroupColumnDef={autoGroupColumnDefDomain}
+                                                />
+                                            </div>
+                                        {/* </Col>
+                                    </Row>
+                                </div> */}
+                            </Tabs.TabPane>
+                            <Tabs.TabPane key="2">
+                                {/* <div>
+                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
+                                        <Col> */}
+                                            <div
+                                                className={`ag-theme-alpine ${gridThemeClass}`}
+                                                style={{ width: '100%', height: '100%' }}
+                                            >           <AgGridReact
+                                                            rowData={agencyNameReport}
+                                                            columnDefs={columnDefs4}
+                                                            defaultColDef={defaultColDef}
+                                                            gridOptions={{
+                                                                groupDefaultExpanded: -1, 
+                                                                ensureDomOrder: false,
+                                                                suppressRowClickSelection: true,
+                                                                suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                                                enableRangeSelection: true,// Expands all groups by default
+                                                            }}
+                                                            // rowGroupPanelShow="always"
+                                                            suppressAggFuncInHeader={true}
+                                                            rowGroupPanelShow="always"
+                                                            // groupIncludeFooter={true}
+                                                            groupIncludeTotalFooter={true}
+                                                            autoGroupColumnDef={autoGroupColumnDefAgency}
+                                                        />
+                                            </div>
+                                        {/* </Col>
+                                    </Row>
+                                </div> */}
+                            </Tabs.TabPane>
+                        </Tabs>
+                        {/* </Carousel> */}
+                        {/* <Row className='showin-mobile'></Row> */}
                     </div>
                 )}
             </div>

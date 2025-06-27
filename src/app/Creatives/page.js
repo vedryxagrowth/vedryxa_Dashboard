@@ -1255,7 +1255,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns, network, Account_Num
 
             <h1 style={{fontSize:'20px', color: theme === 'dark' ? '#ffffff' : '#384551'}}>Creative Library</h1>
             <Row justify="start" align="middle" gutter={[16, 16]}>
-                <Col span={3}>
+                <Col xs={10} md={4} span={3}>
                         <Select
                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             showSearch
@@ -1276,7 +1276,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns, network, Account_Num
                             )}
                         </Select>
                 </Col>
-                <Col span={4}>
+                <Col xs={14} md={5} span={4}>
                     <Select
                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                         showSearch
@@ -1342,7 +1342,23 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns, network, Account_Num
                         )}
                     </Select>                       
                 </Col>
-                <Col span={5} style={{ marginLeft:'0px'}}>
+                <Col xs={14} md={6} span={5} style={{ marginLeft:'0px'}}  className="Dashboard-Details-1">
+                    <ConfigProvider>
+                        <RangePicker
+                            presets={rangePresets}
+                            onChange={handleChange}
+                            disabledDate={disabledDate}
+                            defaultValue={[dayjs().subtract(7, 'day'), dayjs().subtract(1, 'day')]}
+                            format="YYYY-MM-DD"
+                            allowClear={true}
+                            // className="Dashboard-Details-1"
+                            style={{ width: '100%', border: '1px solid #37474F' }}
+                            dropdownClassName={theme === 'dark' ? 'Dashboard-Details-1 dark-theme-dropdown' : 'Dashboard-Details-1'}  
+                        />
+                        
+                    </ConfigProvider>                     
+                </Col>
+                <Col xs={14} md={5} span={5} style={{ marginLeft:'0px'}}  className="Dashboard-Details-2">
                     <ConfigProvider>
                         <RangePicker
                             presets={rangePresets}
@@ -1352,10 +1368,10 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns, network, Account_Num
                             format="YYYY-MM-DD"
                             allowClear={true}
                             style={{ width: '100%', border: '1px solid #37474F' }}
-                            dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}  
+                            dropdownClassName={`custom-single-month-picker Dashboard-Details-2 ${theme === 'dark' ? 'dark-theme-dropdown' : ''}`} 
                         />
                         
-                    </ConfigProvider>                       
+                    </ConfigProvider>                     
                 </Col>
                 <Col>
                         {fromCampaigns === true ? (
@@ -1405,10 +1421,10 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns, network, Account_Num
                 </Col>                
             </Row>
             {/* URL Input for Image */}
-            <div style={{ display: 'flex', justifyContent:'space-between', marginBottom: '20px', marginTop: '10px' }}>
-                <Col>
+            <div className='upload-container-11'>
+                <Col className='container'>
                     <Input
-                        className={theme === 'dark' ? 'custom-input-dark' : ''}
+                        className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                         placeholder="Image URL"
                         value={urlInput}
                         onChange={(e) => setUrlInput(e.target.value)}
@@ -1446,7 +1462,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns, network, Account_Num
                         </Button>
                     </Upload>
                 </Col>
-                <Col style={{display:'flex'}}>
+                <Col  className='container'>
                     <Input
                         className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                         placeholder="Search keyword"

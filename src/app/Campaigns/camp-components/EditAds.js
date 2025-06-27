@@ -335,6 +335,7 @@ import {
 } from '@ant-design/icons';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
+import { useTokenContext } from "../../components/parent";
 
 const { TextArea } = Input;
 
@@ -365,6 +366,7 @@ const Editads = ({ viewCampaignData, changeRRefrst, editdata, onClose }) => {
         ]
       : []
   );
+  const { theme } = useTokenContext();
 
   let s3UrlPath = '';
   let hashid = '';
@@ -664,7 +666,7 @@ const Editads = ({ viewCampaignData, changeRRefrst, editdata, onClose }) => {
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <div style={{ flex: '70%', marginRight: '5%' }}>
             <Form.Item name="page_id" label="Page ID" rules={[{ required: true, message: 'Please enter a Page ID' }]}>
-              <Input />
+              <Input  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
             </Form.Item>
 
             <Form.Item
@@ -710,27 +712,27 @@ const Editads = ({ viewCampaignData, changeRRefrst, editdata, onClose }) => {
 
 
             <Form.Item name="AddName" label="Add Name" rules={[{ required: true, message: 'Please enter an ad name!' }]}>
-              <Input onChange={(e) => setAddName(e.target.value)} />
+              <Input onChange={(e) => setAddName(e.target.value)}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
             </Form.Item>
 
             <Form.Item name="message" label="Primary Text" rules={[{ required: true, message: 'Please enter a message!' }]}>
-              <TextArea placeholder="Primary Text" autoSize={{ minRows: 2, maxRows: 10 }} onChange={(e) => setPrimaryText(e.target.value)} />
+              <TextArea placeholder="Primary Text" autoSize={{ minRows: 2, maxRows: 10 }} onChange={(e) => setPrimaryText(e.target.value)}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
             </Form.Item>
 
             <Form.Item name="Caption" label="Caption" rules={[{ required: true, message: 'Please enter a caption!' }]}>
-              <TextArea placeholder="Caption" autoSize={{ minRows: 2, maxRows: 10 }} onChange={(e) => setCaption(e.target.value)} />
+              <TextArea placeholder="Caption" autoSize={{ minRows: 2, maxRows: 10 }} onChange={(e) => setCaption(e.target.value)}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
             </Form.Item>
 
             <Form.Item name="headline" label="Headline" rules={[{ required: true, message: 'Please enter a headline!' }]}>
-              <TextArea placeholder="Headline" autoSize={{ minRows: 2, maxRows: 10 }} onChange={(e) => setHeadline(e.target.value)} />
+              <TextArea placeholder="Headline" autoSize={{ minRows: 2, maxRows: 10 }} onChange={(e) => setHeadline(e.target.value)}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
             </Form.Item>
 
             <Form.Item name="Description" label="Description" rules={[{ required: true, message: 'Please enter a description!' }]}>
-              <TextArea placeholder="Description" autoSize={{ minRows: 2, maxRows: 10 }} onChange={(e) => setDescription(e.target.value)} />
+              <TextArea placeholder="Description" autoSize={{ minRows: 2, maxRows: 10 }} onChange={(e) => setDescription(e.target.value)}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
             </Form.Item>
 
             <Form.Item name="Website_URL" label="Website URL" rules={[{ required: true, message: 'Please enter a website URL!' }]}>
-              <TextArea placeholder="Website URL" autoSize={{ minRows: 2, maxRows: 10 }} onChange={(e) => setWebsiteURL(e.target.value)} />
+              <TextArea placeholder="Website URL" autoSize={{ minRows: 2, maxRows: 10 }} onChange={(e) => setWebsiteURL(e.target.value)}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
             </Form.Item>
           </div>
 

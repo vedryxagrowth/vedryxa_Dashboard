@@ -1202,6 +1202,20 @@ body.dark-mode .black-icon-comment.anticon svg {
   color: #fff !important;  /* White placeholder */
 }
 
+@media (max-width: 500px) {
+  .custom-input-dark{
+    width: 310px !important; /* Adjust width for smaller screens */
+    /* margin-bottom: 10px; */
+    /* margin-top: 10px; */
+  }
+  .custom-input-light{
+    width: 310px !important; /* Adjust width for smaller screens */
+    /* margin-bottom: 10px; */
+    /* margin-top: 10px; */
+  }
+}
+  
+
 .custom-input-light::placeholder {
   color: #888 !important;
   /* border: none !important; */
@@ -1429,6 +1443,10 @@ body.dark-mode .black-icon-comment.anticon svg {
   color: black !important;
 }
 
+.custom-dark-table.dark-mode-pagination .ant-table-body {
+  background-color: #333 !important;
+}
+
 
 .custom-collapse.dark-mode-collapse .ant-collapse-content-box {
   background-color: #333;
@@ -1505,7 +1523,7 @@ body.dark-mode .black-icon-comment.anticon svg {
   margin: 0%; */
 }
 .form-dark .ant-form-item-label > label {
-  color: white !important;
+  color: #d4d4d4 !important;
 }
 
 /* Optional: Light mode label styling */
@@ -1663,7 +1681,7 @@ body.dark-mode .black-icon-comment.anticon svg {
 
 /* Dark theme modal header background and title text */
 .dark-theme-modal .ant-modal-header {
-  background-color: #1e1e1e !important;
+  background-color: #333 !important;
   /* border-bottom: 1px solid #333 !important; */
 }
 
@@ -1674,7 +1692,7 @@ body.dark-mode .black-icon-comment.anticon svg {
 
 /* Modal content background */
 .dark-theme-modal .ant-modal-content {
-  background-color: #1e1e1e !important;
+  background-color: #333 !important;
   color: white !important;
 }
 
@@ -2086,5 +2104,861 @@ body.dark-mode .black-icon-comment.anticon svg {
 
 /* ✅ Calendar arrow buttons white in dark mode */
 .dark-theme-dropdown .ant-picker-header button {
+  color: white !important;
+}
+
+.zoom-90 {
+  zoom: 0.9;                  /* Chrome, Edge, Safari */
+  transform-origin: top left; /* Optional fallback */
+  /* display: inline-block;      Prevent extra space */
+}
+
+.zoom-95 {
+  zoom: 0.98;                  /* Chrome, Edge, Safari */
+  transform-origin: top left; /* Optional fallback */
+  /* display: inline-block;      Prevent extra space */
+}
+.showin-mobile{
+  display: none;
+}
+
+@media (max-width: 500px) {
+  .zoom-90 {
+    zoom: 0.6;                /* Adjust for smaller screens */
+  }
+  .zoom-revenue{
+    transform: scale(0.9);
+    /* transform-origin: top left; */
+  }
+  .sider-bar{
+    display: none;
+  }
+  .zoom-95 {
+    zoom: 0.82;                  /* Chrome, Edge, Safari */
+    transform-origin: top left; /* Optional fallback */
+    /* display: inline-block;      Prevent extra space */
+  }
+  .margin-top-10 {
+    margin-top: 70px !important;
+    margin-bottom: 5px;
+  }
+  .showin-mobile{
+    display: block;
+    margin-top: 25px;
+  }
+}
+
+@media (max-width: 500px) {
+  .sider{
+    display: none;
+  }
+  .navbar-2{
+    display: flex;
+    align-items: center;
+  }
+  .navbar-1{
+    display: none;
+  }
+  .Dashboard-Details-1{
+    display: none;
+  }
+  .Dashboard-Details-2{
+    display: block;
+  }
+  .Mobile{
+    display: block;
+  }
+  .Desktop{
+    display: none;
+  }
+}
+
+@media (min-width: 501px) {
+  .sider {
+    border-radius: 5px;
+    overflow: hidden;
+    height: 100vh;
+    transition: all 0.3s ease; /* Optional: smoother collapse/expand */
+  }
+  .logo{
+    display: none;
+  }
+  .navbar-1{
+    display: flex;
+    align-items: center;
+  }
+  .navbar-2{
+    display: none;
+  }
+  .Mobile{
+    display: none;
+  }
+  .Desktop{
+    display: block;
+    
+  }
+  .mobile-navbar{
+    display: none;
+  }
+  .Dashboard-Details-1{
+    display: block;
+  }
+  .Dashboard-Details-2{
+    display: none;
+  }
+}
+
+/* .responsive-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  background-color: #a8ade0; 
+  border-radius: 20px;
+}
+
+.grid-cell {
+  background-color: #0E1E38;
+  padding: 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-right: 1px solid #0B3D63;
+  border-bottom: 1px solid #0B3D63;
+} */
+
+/* Remove right border for right column items */
+/* .grid-cell:nth-child(2n) {
+  border-right: none;
+} */
+
+/* Remove bottom border for last row (last 2 items in 10-item grid) */
+/* .grid-cell:nth-last-child(-n+2) {
+  border-bottom: none;
+} */
+
+/* Wrapper grid container */
+.responsive-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  background-color: transparent;
+  gap: 0;
+  border: none;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+/* Grid cells */
+.grid-cell {
+  background-color: #0E1E38;
+  color: #fff;
+  padding: 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  /* border-right: 1px solid #838282;
+  border-bottom: 1px solid #8d8989; */
+}
+
+.grid-cell-1 {
+  background-color: #dedfe0;
+  color: #1a1818;
+  padding: 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  /* border-right: 1px solid #9d9d9e; */
+  /* border-bottom: 1px solid #9d9d9e; */
+}
+
+/* Remove right border for every 2nd column */
+.grid-cell:nth-child(2n) {
+  border-right: none;
+}
+
+/* Remove bottom border for last row (item 9 & 10) */
+.grid-cell:nth-child(9),
+.grid-cell:nth-child(10) {
+  border-bottom: none;
+}
+
+
+
+
+@media (max-width: 500px) {
+  .responsive-grid {
+    position: relative;
+  }
+
+  .vertical-divider {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    /* background-color: #fff; or #0B3D63 for light */
+    transform: translateX(-50%);
+    z-index: 1;
+  }
+
+  .horizontal-divider {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    /* background-color: #fff; */
+    transform: translateY(-50%);
+    z-index: 1;
+  }
+
+  .grid-cell {
+    position: relative;
+    z-index: 2; /* Make sure content is above lines */
+  }
+}
+
+
+/* Root container: responsive width */
+.custom-single-month-picker {
+  width: 100% !important;
+  max-width: 90% !important;
+  min-width: 280px !important;
+  font-size: 12px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-sizing: border-box;
+  /* background-color: #fff; */
+}
+
+/* Restrict preset column width */
+.custom-single-month-picker .ant-picker-presets {
+  width: 30% !important;
+  min-width: 80px;
+  max-width: 120px;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+/* Responsive panel container */
+.custom-single-month-picker .ant-picker-panel-container {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  flex-wrap: wrap; /* wraps on small screens */
+}
+
+/* Let calendar take up remaining space */
+.custom-single-month-picker .ant-picker-panels {
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-direction: column !important;
+}
+
+/* Hide second panel for single-month view */
+.custom-single-month-picker .ant-picker-panels > *:nth-child(2) {
+  display: none !important;
+}
+
+/* Show real arrows */
+.custom-single-month-picker .ant-picker-header-next-btn,
+.custom-single-month-picker .ant-picker-header-super-next-btn,
+.custom-single-month-picker .ant-picker-header-prev-btn,
+.custom-single-month-picker .ant-picker-header-super-prev-btn {
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* SVG icons visible */
+.custom-single-month-picker .ant-picker-header button svg {
+  display: inline-block !important;
+  font-size: 14px;
+  color: inherit;
+}
+
+/* Dark Theme Styling */
+.dark-theme-dropdown.custom-single-month-picker .ant-picker-panel,
+.dark-theme-dropdown.custom-single-month-picker .ant-picker-header {
+  background-color: #1e1e1e;
+  color: #fff;
+  border-radius: 8px;
+  padding: 4px 8px;
+}
+
+.dark-theme-dropdown.custom-single-month-picker .ant-picker-header button {
+  color: #ccc !important;
+}
+
+.dark-theme-dropdown.custom-single-month-picker .ant-picker-content th {
+  color: #999;
+}
+
+.dark-theme-dropdown.custom-single-month-picker .ant-picker-cell {
+  color: #ccc;
+  font-size: 12px;
+}
+
+.dark-theme-dropdown.custom-single-month-picker .ant-picker-cell-in-view {
+  color: #fff;
+  font-weight: 500;
+}
+
+.dark-theme-dropdown.custom-single-month-picker .ant-picker-cell-selected::before {
+  background-color: #91C25F !important;
+}
+
+.dark-theme-dropdown.custom-single-month-picker .ant-picker-cell-disabled {
+  color: #444 !important;
+}
+
+.dark-theme-dropdown.custom-single-month-picker .ant-picker-cell:hover::before {
+  background-color: rgba(199, 243, 154, 0.2);
+}
+
+/* 📱 Mobile responsive tweaks */
+@media (max-width: 500px) {
+  .custom-single-month-picker .ant-picker-panel-container {
+    flex-direction: column;
+  }
+
+  .custom-single-month-picker .ant-picker-presets {
+    width: 50% !important;
+    max-width: 50px;
+    text-align: center;
+    border-bottom: 1px solid #444;
+  }
+  .custom-single-month-picker .ant-picker-presets {
+    width: 80px !important;
+    min-width: 60px !important;
+    max-width: 90px !important;
+    padding: 4px 6px !important;
+    font-size: 8px !important;
+    box-sizing: border-box;
+  }
+}
+
+
+/* 🔹 Shrink preset column width globally */
+.custom-single-month-picker .ant-picker-presets {
+  width: 80px !important;
+  min-width: 60px !important;
+  max-width: 100px !important;
+  padding: 4px 6px !important;
+  font-size: 8px !important;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+/* 🔹 Optional: reduce padding/margin of each item */
+.custom-single-month-picker .ant-picker-presets ul {
+  margin: 0;
+  padding: 0;
+}
+
+.custom-single-month-picker .ant-picker-presets li {
+  padding: 2px 4px !important;
+  line-height: 1.3;
+}
+
+/* 🔥 Force the calendar panel itself to shrink */
+.custom-single-month-picker .ant-picker-panel {
+  max-width: 240px !important;
+  min-width: 220px !important;
+  width: 100% !important;
+  padding: 0 !important;
+  box-sizing: border-box;
+}
+
+/* ✅ Shrink the table grid inside the calendar */
+.custom-single-month-picker .ant-picker-content {
+  width: 100%;
+  table-layout: fixed;
+}
+
+/* ✅ Shrink day cells */
+.custom-single-month-picker .ant-picker-cell {
+  padding: 2px !important;
+  width: 28px !important;
+  height: 28px !important;
+  line-height: 28px !important;
+}
+
+/* ✅ Shrink the inner day content */
+.custom-single-month-picker .ant-picker-cell-inner {
+  font-size: 10px !important;
+  height: 15px;
+  width: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+/* ✅ Shrink weekday header */
+.custom-single-month-picker .ant-picker-content th {
+  font-size: 10px;
+  padding: 2px;
+  height: 26px;
+}
+
+/* ✅ Force single-calendar view */
+.custom-single-month-picker .ant-picker-panels {
+  flex-direction: column !important;
+  width: 100% !important;
+}
+
+/* ✅ Hide second calendar panel */
+.custom-single-month-picker .ant-picker-panels > *:nth-child(2) {
+  display: none !important;
+}
+
+/* ✅ Force show right arrows */
+.custom-single-month-picker .ant-picker-header-next-btn,
+.custom-single-month-picker .ant-picker-header-super-next-btn {
+  display: inline-flex !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  opacity: 1 !important;
+}
+
+/* ✅ Ensure arrows stay visible */
+.custom-single-month-picker .ant-picker-header button svg {
+  display: inline-block !important;
+  font-size: 14px;
+}
+
+/* ✅ Prevent calendar clipping / missing weeks */
+.custom-single-month-picker .ant-picker-panel {
+  width: 100% !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+}
+
+/* ✅ Allow table to render full height */
+.custom-single-month-picker .ant-picker-content {
+  table-layout: fixed;
+  width: 100%;
+  height: auto;
+}
+
+.custom-single-month-picker .ant-picker-panels {
+  /* width: 220px !important; */
+  min-width: 200px !important;
+  max-width: 280px !important;
+  padding: 4px 6px !important;
+  font-size: 12px !important;
+  box-sizing: border-box;
+}
+
+.custom-single-month-picker .ant-picker-cell {
+  width: 28px !important;
+  height: 28px !important;
+  padding: 0 !important;
+  text-align: center;
+}
+
+.custom-single-month-picker .ant-picker-content th {
+  font-size: 10px !important;
+  padding: 4px 0 !important;
+  text-align: center;
+  height: 24px !important;
+}
+/* ✅ Shrink the calendar table to 80% and center it */
+.custom-single-month-picker .ant-picker-content {
+  width: 80% !important;
+  margin: 0 auto !important;
+  table-layout: fixed;
+}
+.custom-single-month-picker .ant-picker-cell-inner {
+  font-size: 10px !important;
+  height: 18px !important;
+  width: 18px !important;
+}
+/* 🔥 Remove ALL spacing between preset and calendar */
+.custom-single-month-picker .ant-picker-panel-container {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 0 !important;
+  column-gap: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* 🔥 No margin or padding on presets */
+.custom-single-month-picker .ant-picker-presets {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+}
+
+/* 🔥 No margin or padding on calendar panel */
+.custom-single-month-picker .ant-picker-panel {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* 🔥 No margin/padding on calendar content container */
+.custom-single-month-picker .ant-picker-panels {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* 🔥 Shrink calendar to fit exactly beside presets */
+.custom-single-month-picker .ant-picker-panels {
+  width: calc(100% - 80px) !important; /* Assuming presets width is 80px */
+}
+
+/* 🔥 No left margin on table/grid */
+.custom-single-month-picker .ant-picker-content {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  width: 100% !important;
+  table-layout: fixed !important;
+}
+/* ✅ Shrink calendar header to 60% and center */
+.custom-single-month-picker .ant-picker-header {
+  width: 70% !important;
+  margin: 0 auto !important;
+  justify-content: space-between !important;
+}
+
+/* ✅ Shrink calendar date grid to 60% and center */
+.custom-single-month-picker .ant-picker-content {
+  width: 70% !important;
+  margin: 0 auto !important;
+  table-layout: fixed !important;
+}
+
+/* ✅ Shrink footer buttons to 60% and center */
+.custom-single-month-picker .ant-picker-footer {
+  width: 70% !important;
+  margin: 0 auto !important;
+  padding: 8px 0 !important;
+  display: flex !important;
+  justify-content: space-between !important;
+}
+
+@media (max-width: 500px)  and (min-width: 321px) {
+  .custom-single-month-picker .ant-picker-header {
+    width: 80% !important;
+    margin: 0 auto !important;
+    justify-content: space-between !important;
+  }
+  
+  /* ✅ Shrink calendar date grid to 60% and center */
+  .custom-single-month-picker .ant-picker-content {
+    width: 80% !important;
+    margin: 0 auto !important;
+    table-layout: fixed !important;
+  }
+  
+  /* ✅ Shrink footer buttons to 60% and center */
+  .custom-single-month-picker .ant-picker-footer {
+    width: 80% !important;
+    margin: 0 auto !important;
+    padding: 8px 0 !important;
+    display: flex !important;
+    justify-content: space-between !important;
+  }
+  
+}
+
+
+/* ✅ 1. Remove ALL flex spacing between preset and calendar */
+.custom-single-month-picker .ant-picker-panel-container {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 0 !important;
+  column-gap: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-spacing: 0 !important;
+}
+
+/* ✅ 2. Remove padding/margin from presets container */
+.custom-single-month-picker .ant-picker-presets {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  box-sizing: border-box;
+}
+
+/* ✅ 3. Remove padding/margin from calendar panel */
+.custom-single-month-picker .ant-picker-panel,
+.custom-single-month-picker .ant-picker-panels {
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box;
+}
+
+/* ✅ 4. (Optional) Ensure calendar fills space beside presets */
+.custom-single-month-picker .ant-picker-panel {
+  width: calc(100% - 90px) !important; /* adjust 90px to match your preset width */
+}
+/* ✅ Remove any spacing that causes a gap to the right of presets */
+.custom-single-month-picker .ant-picker-panel {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  border: none !important;
+}
+
+.custom-single-month-picker .ant-picker-panels {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  border-left: none !important;
+}
+
+/* ✅ Prevent spacing caused by table itself */
+.custom-single-month-picker .ant-picker-content {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+}
+.custom-single-month-picker .ant-picker-presets {
+  border-right: 1px solid red;
+}
+.custom-single-month-picker .ant-picker-panel {
+  border-left: 1px solid blue;
+}
+/* ✅ 1. Calendar HEADER: remove left spacing */
+.custom-single-month-picker .ant-picker-header {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  border-left: none !important;
+  box-sizing: border-box;
+}
+
+/* ✅ 2. Calendar MAIN PANEL: already handled, but safe fallback */
+.custom-single-month-picker .ant-picker-panels {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+}
+
+/* ✅ 3. Calendar PANEL wrapper */
+.custom-single-month-picker .ant-picker-panel {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+}
+
+/* ✅ 4 Footer (Submit/Close button row): remove left spacing */
+.custom-single-month-picker .ant-picker-footer {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  border-left: none !important;
+  box-sizing: border-box;
+}
+.custom-single-month-picker .ant-picker-presets {
+  border-right: 1px solid red;
+}
+.custom-single-month-picker .ant-picker-header,
+.custom-single-month-picker .ant-picker-panel,
+.custom-single-month-picker .ant-picker-footer {
+  border-left: 1px solid blue;
+}
+.dark-theme-dropdown.custom-single-month-picker .ant-picker-panel {
+  background-color: #2e2e2e !important;
+}
+.dark-theme-dropdown.custom-single-month-picker .ant-picker-header {
+  background-color: #2e2e2e !important;
+}
+/* ✅ Make all calendar date cells use consistent background in dark mode */
+.dark-theme-dropdown.custom-single-month-picker .ant-picker-cell {
+  background-color: #2e2e2e !important; /* or #000 if you prefer true black */
+  color: #ccc !important;
+  border: none !important;
+}
+
+/* ✅ Keep cell inner style consistent across all columns */
+.dark-theme-dropdown.custom-single-month-picker .ant-picker-cell-inner {
+  background-color: transparent !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.dark-theme-dropdown.custom-single-month-picker .ant-picker-panel {
+  background-color: #2e2e2e !important;
+}
+/* 🌙 Make selected date background visible in dark theme */
+.dark-theme-dropdown.custom-single-month-picker .ant-picker-cell-selected::before {
+  background-color: #91C25F !important; /* or any highlight color you prefer */
+  border-radius: 4px;
+}
+
+/* ✅ Ensure text inside selected date is readable */
+.dark-theme-dropdown.custom-single-month-picker .ant-picker-cell-selected .ant-picker-cell-inner {
+  color: #000 !important; /* dark text on light highlight */
+  font-weight: bold;
+}
+/* ✅ Selected date background (single date or start/end of range) */
+.dark-theme-dropdown.custom-single-month-picker 
+  .ant-picker-cell-selected::before,
+.dark-theme-dropdown.custom-single-month-picker 
+  .ant-picker-cell-range-start::before,
+.dark-theme-dropdown.custom-single-month-picker 
+  .ant-picker-cell-range-end::before {
+  background-color: #91C25F !important; /* Or any visible color */
+  border-radius: 4px;
+}
+
+/* ✅ Selected date text must contrast */
+.dark-theme-dropdown.custom-single-month-picker 
+  .ant-picker-cell-selected .ant-picker-cell-inner,
+.dark-theme-dropdown.custom-single-month-picker 
+  .ant-picker-cell-range-start .ant-picker-cell-inner,
+.dark-theme-dropdown.custom-single-month-picker 
+  .ant-picker-cell-range-end .ant-picker-cell-inner {
+  color: #333 !important;
+  background-color: #91C25F !important;
+  font-weight: 600;
+  border-radius: 0% !important; /* Remove rounded corners */
+}
+.custom-single-month-picker 
+  .ant-picker-cell-selected .ant-picker-cell-inner,
+.custom-single-month-picker 
+  .ant-picker-cell-range-start .ant-picker-cell-inner,
+.custom-single-month-picker 
+  .ant-picker-cell-range-end .ant-picker-cell-inner {
+  color: #333 !important;
+  background-color: #91C25F !important;
+  font-weight: 600;
+  border-radius: 0% !important; /* Remove rounded corners */
+  border: 0 !important; /* Remove any border */
+}
+.dark-theme-dropdown.custom-single-month-picker 
+  .ant-picker-cell-selected::before {
+  background-color: red !important;
+}
+
+/* ✅ Remove unwanted default border around range-end date */
+.dark-theme-dropdown.custom-single-month-picker 
+  .ant-picker-cell-range-end::after {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* ✅ Make start/end backgrounds match */
+.dark-theme-dropdown.custom-single-month-picker 
+  .ant-picker-cell-range-start::before,
+.dark-theme-dropdown.custom-single-month-picker 
+  .ant-picker-cell-range-end::before {
+  background-color: #333 !important;
+  border-radius: 4px !important;
+}
+
+.upload-container-11{
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  margin-top: 10px;
+}
+
+@media (max-width: 500px) {
+  .ag-root-wrapper {
+    flex-grow: 1;
+    min-height: 500px; /* Ensure grid takes up space */
+  }
+  .ag-grid-responsive {
+    height: 200px !important; /* Adjust height for mobile */
+    overflow: auto !important; 
+  }
+  .upload-container-11 {
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  .container{
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+  }
+}
+
+.dark-icon-button {
+  background-color: transparent !important;
+  /* border: none; */
+}
+
+/* On hover — change only border and icon color */
+.dark-icon-button:hover {
+  border-color: #91C25F !important; /* green border */
+  color: #91C25F !important;        /* icon color */
+}
+
+/* Optional: focus state for accessibility */
+.dark-icon-button:focus {
+  border-color: #91C25F !important;
+  color: #91C25F !important;
+}
+
+.dark-icon-button:hover .anticon,
+.dark-icon-button:hover .anticon > svg {
+  color: #91C25F !important;
+  fill: #91C25F !important;
+}
+
+/* Assuming your app has a class like .dark-theme on the root in dark mode */
+.custom-dark-mode .ant-upload-list-item-name {
+  color: white !important;
+}
+
+.custom-collapse-dark .custom-panel {
+  background-color: #1e1e1e !important; /* panel content background */
+  color: white !important;
+}
+
+.custom-collapse-dark .custom-panel .ant-collapse-header {
+  background-color: #333 !important; /* header background */
+  color: white !important;           /* header text */
+}
+
+/* Light mode styles */
+.custom-collapse-light .custom-panel {
+  background-color: #fff !important;
+  color: #000 !important;
+}
+
+.custom-collapse-light .custom-panel .ant-collapse-header {
+  background-color: #f5f5f5 !important;
+  color: #000 !important;
+}
+/* Dark theme panel content fix */
+.custom-collapse-dark .ant-collapse-content {
+  background-color: #333 !important; /* Matches your desired dark */
+  color: white !important;
+}
+
+.custom-collapse-dark .ant-collapse-content-box {
+  background-color: #333 !important;  /* This is the inner padding box */
+  color: white !important;
+}
+/* Dark theme header fix */
+.custom-collapse-dark .ant-collapse-header {
+  background-color: #333 !important;  /* Your intended dark header */
+  color: white !important;            /* Ensure header text is visible */
+  border-bottom: 1px solid #444;      /* Optional: border for separation */
+}
+
+
+/* Tag background and text for selected items in dark theme */
+.dark-theme-category .ant-select-selector {
+  background-color: #444 !important; /* background of the full selector */
+  color: white !important;
+  border-color: #555 !important;
+}
+
+.dark-theme-category .ant-select-selection-item {
+  background-color: #333 !important;  /* tag background */
+  color: white !important;            /* tag text */
+  border: none !important;
+}
+
+/* Clear icon and arrow color */
+.dark-theme-category .ant-select-arrow,
+.dark-theme-category .ant-select-clear {
   color: white !important;
 }

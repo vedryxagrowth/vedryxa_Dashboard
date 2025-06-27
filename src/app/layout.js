@@ -336,7 +336,7 @@ const AuthenticationProvider = ({ children }) => {
       ) : (
         <TokenProvider>
           <BodyWrapper>
-            <ContentWrapper>{children}</ContentWrapper>
+            <ContentWrapper className="zoom-90">{children}</ContentWrapper>
           </BodyWrapper>
         </TokenProvider>
       )}
@@ -349,7 +349,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head></head>
-      <body className={`${inter.className} full-width`}>
+      <body className={`${inter.className} full-width `}>
         <SessionProvider refetchOnWindowFocus={false} refetchInterval={0} broadcast={false}>
           
               <AuthenticationProvider>

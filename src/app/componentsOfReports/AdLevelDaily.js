@@ -5,7 +5,7 @@ import { Audio } from 'react-loader-spinner';
 import moment from 'moment-timezone';
 import React from 'react';
 import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch} from 'antd';
-import {  DownloadOutlined,  SmileOutlined, CopyOutlined,  EditOutlined,  MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined } from '@ant-design/icons';
+import { InfoCircleOutlined, DownloadOutlined,  SmileOutlined, CopyOutlined,  EditOutlined,  MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined } from '@ant-design/icons';
 import { Tooltip} from 'antd';
 import { Space } from 'antd';
 import 'antd/dist/reset.css';
@@ -60,7 +60,7 @@ const selectTimezone = {
 };
 
 
-const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, selectedCampaigns, selectedAdsets}) => {
+const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, selectedCampaigns, selectedAdsets}) => {
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -85,6 +85,11 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
     const oneTimeFetch = useRef(true);
 
     const [apiStatus, setApiStatus ]= useState(false);
+
+    const fbCron = useRef('-');
+    const revenueCron = useRef('-');
+    const cronStatus = useRef('-');
+    const accountStatus = useRef('-');
 
     const memorizedColumnDef1 = useMemo(()=> columnDefs.current, [columnDefs.current]);
     const memorizedDailyData = useMemo(()=> dailyData?.filter((each) => {
@@ -188,6 +193,12 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting
+        // filter: 'agTextColumnFilter',      // Enable string filter
+        // floatingFilter: false,              // Optional: show quick filter below header
+        // suppressMenu: false,
+        // showRowGroup: 'adname',
+        // field: 'adname',
+        // suppressCellSelection: true,
 
         comparator: (campaignA, campaignB) => {
             if (!campaignA) return 1;
@@ -219,17 +230,21 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                 }
 
                 const firstColumnValue = params.node.key;  // campaign name
-                const campaignName = params.node.key;
+                // const campaignName = params.node.key;
+                const campaignName = params.node.allLeafChildren?.[0]?.data?.campaignname || "";
 
-                let campaignid, adsetid;
+
+                let campaignid, adsetid, adid;
 
                 if (params.node.group && params.node.childrenAfterGroup && params.node.childrenAfterGroup.length > 0) {
                     const firstChild = params.node.childrenAfterGroup[0].data;
                     campaignid = firstChild.campaignid;
                     adsetid = firstChild.adsetid;
+                    adid = firstChild.adid;
                 } else if (params.data) {
                     campaignid = params.data.campaignid;
                     adsetid = params.data.adsetid;
+                    adid = params.data.adid;
                 } else {
                     console.error('Missing campaignid or adsetid for campaign:', campaignName);
                     return (
@@ -278,9 +293,132 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
 
                 const [tooltipText, setTooltipText] = useState("Click to Copy");
                 const [isModalVisibles, setIsModalVisibles] = useState(false);
+
+                const [isAdidModalVisibles, setIsAdidModalVisibles] = useState(false);
+                const [selectedAdid, setSelectedAdid] = useState(null); // store adid when switch clicked
+                // const [switchOn, setSwitchOn] = useState(false); // control toggle state
+                const [switchStates, setSwitchStates] = useState({}); // { adid1: true, adid2: false }
+                const [nextChecked, setNextChecked] = useState(false); // what user clicked
+
                 const [comment, setComment] = useState(relatedComment || '');
                 // const [starred, setStarred] = useState(isStarred);
                 const [pinned, setPinned] = useState(getPinStatusForCampaign(campaignName));
+
+                 // Update switch state from AdLevel
+                //  useEffect(() => {
+                //     const matchedComment = campaignComments.find(
+                //     (item) =>
+                //         item.campaignid === campaignid &&
+                //         item.adsetid === adsetid &&
+                //         item.AdLevel?.ad_id === adid
+                //     );
+                
+                //     if (matchedComment?.AdLevel?.status) {
+                //         setSwitchOn(matchedComment.AdLevel.status === "ACTIVE");
+                //     } else {
+                //         // Default to ACTIVE if AdLevel doesn't exist
+                //         setSwitchOn(true);
+                //       }
+                // }, [campaignComments, campaignid, adsetid, adid]);
+
+                useEffect(() => {
+                    if (!adid) return;
+
+                    // Search by campaignid only, not adsetid
+                    const matchedComment = campaignComments.find(
+                        (item) =>
+                        item.campaignid === campaignid &&
+                        Array.isArray(item.AdLevel) &&
+                        item.AdLevel.some(ad => ad.ad_id === adid)
+                    );
+                  
+                    // const matchedComment = campaignComments.find(
+                    //   (item) =>
+                    //     item.campaignid === campaignid &&
+                    //     item.adsetid === adsetid &&
+                    //     Array.isArray(item.AdLevel) &&
+                    //     item.AdLevel.find(ad => ad.ad_id === adid)
+                    // );
+                  
+                    const adEntry = matchedComment?.AdLevel?.find(ad => ad.ad_id === adid);
+                    const isActive = adEntry?.status === "ACTIVE";
+                  
+                    if (matchedComment && adEntry) {
+                        setSwitchStates((prev) => ({
+                          ...prev,
+                          [adid]: isActive
+                        }));
+                    }else {
+                        // fallback to true (assume ACTIVE) if no comment in DB
+                        setSwitchStates((prev) => ({
+                          ...prev,
+                          [adid]: true
+                        }));
+                    }
+                }, [campaignComments, campaignid, adsetid, adid]);
+
+                const handlePauseClick = (adid, checked) => {
+                    setSelectedAdid(adid); 
+                    setNextChecked(checked); // user’s toggle intent
+                    setIsAdidModalVisibles(true);
+                };
+
+                const handlePauseOk = async () => {
+                    if (!selectedAdid) {
+                        console.warn("No ad selected.");
+                        return;
+                    }
+
+                    // update visual switch state for selected ad
+                    setSwitchStates((prev) => ({
+                        ...prev,
+                        [selectedAdid]: nextChecked
+                    }));
+
+                    // setSwitchOn(nextChecked); // update visual switch state
+                  
+                    try {
+                      const token = localStorage.getItem("token");
+                  
+                      const response = await apiClient.post(`/adStatusChange`,
+                        {
+                            status: nextChecked ? "ACTIVE" : "PAUSED",
+                            id: params.data?.identifier,             
+                            ad_id: selectedAdid,                              
+                            name: campaignName,
+                            accountNumber: newaccount,
+                            revenuePartner: params.data?.revenuePartner || "",
+                            campaign_id: campaignid,
+                            adset_id: adsetid,
+                            email: userdetails?.email,
+                        },
+                        {
+                          headers: {
+                            Authorization: token
+                          }
+                        }
+                      );
+                  
+                      if (response.status === 200 || response.status === 201) {
+                        functionCallForCommnets(newaccount)
+                        console.log(" Status updated on Facebook:", response.data.status, "Ad ID:", response.data.ad_id);
+                      } else {
+                        console.warn(" Backend returned unexpected status:", response.status);
+                      }
+                  
+                    } catch (error) {
+                      console.error(" API call to /adStatusChange failed:", error?.response?.data || error.message);
+                    }
+                  
+                    setIsAdidModalVisibles(false);
+                    setSelectedAdid(null);
+                };
+                                   
+                const handlePauseCancel = () => {
+                    setIsAdidModalVisibles(false);
+                    setSelectedAdid(null);
+                };
+
 
                 const copyToClipboard = () => {
                     navigator.clipboard.writeText(firstColumnValue)
@@ -487,6 +625,26 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
 
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                        <Switch 
+                            // checked={switchOn}
+                            checked={!!switchStates[adid]}
+                            onClick={(checked) => handlePauseClick(adid, checked)}
+                            size="small" 
+                            style={{
+                              backgroundColor: switchStates[adid] ? '#91C25F' : '#d9d9d9',
+                            }} 
+                        />
+                        <Modal
+                            title="Confirm Action"
+                            open={isAdidModalVisibles}
+                            onOk={handlePauseOk}
+                            onCancel={handlePauseCancel}
+                        >
+                            <p>
+                                Are you sure you want to turn <b>{nextChecked ? "ON" : "OFF"}</b> this ad?
+                            </p>
+                            <p>Ad ID: <strong>{selectedAdid}</strong></p>
+                        </Modal>
                         <PinIcon
                             campaignName={campaignName}
                             campaignid={campaignid}
@@ -494,7 +652,7 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                             // pinned={getPinStatusForCampaign(campaignName)}
                             pinned={pinned}
                         />
-                        <div style={{ marginLeft: '2px' }}>
+                        {/* <div style={{ marginLeft: '2px' }}>
                             {(() => {
                                 // Find the matching campaign in the Camapignlevelstatus array
                                 const campaignStatus = Camapignlevelstatus.find(statusObj => statusObj.name === campaignName);
@@ -539,7 +697,7 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                                     );
                                 }
                             })()}
-                        </div>
+                        </div> */}
                         {relatedComment ? (
                             <Tooltip
                                 title={relatedComment || 'No comment available'}
@@ -757,9 +915,28 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                             profitloss: "",
                             M_tq: parseFloat(eachData.M_tq).toFixed(2),
                             D_tq: parseFloat(eachData.D_tq).toFixed(2), 
+                            fbCron: eachData.fbCron,
+                            revenueCron: eachData.revenueCron,
+                            cronStatus: eachData.cronStatus,
+                            accountStatus: eachData.accountStatus
                         }
                     )
                 }) : null;
+
+                const getValidField = (field) => {
+                    for (const item of mainData) {
+                      if (item[field] && item[field].toLowerCase() !== 'failed') {
+                        return item[field];
+                      }
+                    }
+                    return '-';
+                  };
+                  
+                  fbCron.current = getValidField('fbCron');
+                  revenueCron.current = getValidField('revenueCron');
+                  cronStatus.current = getValidField('cronStatus');
+                  accountStatus.current = getValidField('accountStatus');
+                                
 
             const fullData = filteredData?.length > 0 ? [...filteredData] : [];
 
@@ -1090,26 +1267,45 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Timezone: {timezone.current}</Text>
                                         </Col>
-                                        {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600' }}>
-                                                Cron/Acc status: {cronStatus.current} /{' '}
-                                                <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
-                                                    {accountStatus.current}
-                                                </span>
-                                            </Text>
+                                       
+                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
+                                                < Tooltip
+                                                    title={
+                                                        <>
+                                                        {fbCron.current !== '-' && <div>FbAcc Status: {fbCron.current}</div>}
+                                                        {revenueCron.current !== '-' && <div>RevAcc Status: {revenueCron.current}</div>}
+                                                        {(cronStatus.current !== '-' || accountStatus.current !== '-') && (
+                                                            <Text style={{ fontWeight: '600', color: 'white' }}>
+                                                            Cron/Acc status: {cronStatus.current} /{' '}
+                                                            <span
+                                                                style={{
+                                                                color:
+                                                                    accountStatus.current === 'Active'
+                                                                    ? 'green'
+                                                                    : accountStatus.current === 'Inactive'
+                                                                    ? 'red'
+                                                                    : 'gray',
+                                                                fontWeight: 'bold',
+                                                                }}
+                                                            >
+                                                                {accountStatus.current}
+                                                            </span>
+                                                            </Text>
+                                                        )}
+                                                        </>
+                                                    }
+                                                >
+                                                    <InfoCircleOutlined
+                                                    style={{
+                                                        fontSize: '18px',
+                                                        cursor: 'pointer',
+                                                        marginRight: '10px',
+                                                        color: "#91C25F",
+                                                    }}
+                                                    className="black-icon-info"
+                                                    />
+                                                </Tooltip>
                                         </Col>
-                                        <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
-                                            <Tooltip
-                                            title={
-                                                <>
-                                                <div>FbAcc Status: {`${fbCron.current}`}</div>
-                                                <div>RevAcc Status: {`${revenueCron.current}`}</div>
-                                                </>
-                                            }
-                                            >
-                                                <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px' }} />
-                                            </Tooltip>
-                                        </Col> */}
                                         {/* <Col>
                                             <Tooltip 
                                                 title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 

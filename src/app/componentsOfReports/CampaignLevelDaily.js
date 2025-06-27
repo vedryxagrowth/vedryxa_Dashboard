@@ -5,7 +5,7 @@ import { Audio } from 'react-loader-spinner';
 import moment from 'moment-timezone';
 import React from 'react';
 import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch} from 'antd';
-import {  DownloadOutlined,  SmileOutlined, CopyOutlined,  EditOutlined,  MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined } from '@ant-design/icons';
+import { InfoCircleOutlined, DownloadOutlined,  SmileOutlined, CopyOutlined,  EditOutlined,  MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, LinkOutlined } from '@ant-design/icons';
 import { Tooltip} from 'antd';
 import { Space } from 'antd';
 import 'antd/dist/reset.css';
@@ -61,7 +61,7 @@ const selectTimezone = {
 };
 
 
-const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, showCampaignLevel, removeSelectedCampaigns, moveToNextTab}) => {
+const Daily = ({functionCallForCampaigns, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, showCampaignLevel, removeSelectedCampaigns, moveToNextTab}) => {
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -86,6 +86,18 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
     const oneTimeFetch = useRef(true);
 
     const [apiStatus, setApiStatus ]= useState(false);
+
+    // let fbCron = useRef();
+
+    // let revenueCron = useRef();
+
+    // let cronStatus = useRef();
+
+    // let accountStatus = useRef();
+    const fbCron = useRef('-');
+    const revenueCron = useRef('-');
+    const cronStatus = useRef('-');
+    const accountStatus = useRef('-');
 
     const memorizedColumnDef1 = useMemo(()=> columnDefs.current, [columnDefs.current]);
     console.log(memorizedColumnDef1,"1111");
@@ -274,9 +286,71 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
 
                 const [tooltipText, setTooltipText] = useState("Click to Copy");
                 const [isModalVisibles, setIsModalVisibles] = useState(false);
+                const [isCampaignModalVisibles, setIsCampaignModalVisibles] = useState(false);
+                const [selectedCampaign, setSelectedCampaign] = useState(null); // store adid when switch clicked
+                const [switchOn, setSwitchOn] = useState(false); // control toggle state
+                const [nextChecked, setNextChecked] = useState(false); // what user clicked
                 const [comment, setComment] = useState(relatedComment || '');
                 // const [starred, setStarred] = useState(isStarred);
                 const [pinned, setPinned] = useState(getPinStatusForCampaign(campaignName));
+
+                useEffect(() => {
+                    const campaignStatus = Camapignlevelstatus.find(
+                        statusObj => statusObj.campaign_id === campaignid
+                    );
+                    if (campaignStatus) {
+                        setSwitchOn(campaignStatus.status === "ACTIVE");
+                    }
+                }, [Camapignlevelstatus, campaignid]);
+
+                const handlePauseClick = (campaignid, checked) => {
+                    setSelectedCampaign(campaignid); 
+                    setNextChecked(checked); // user’s toggle intent
+                    setIsCampaignModalVisibles(true);
+                };
+
+                const handlePauseOk = async () => {
+                    setSwitchOn(nextChecked); // update visual switch state
+                  
+                    try {
+                      const token = localStorage.getItem("token");
+                  
+                      const response = await apiClient.post(`/campaignStatusChange`,
+                        {
+                          status: nextChecked ? "ACTIVE" : "PAUSED",
+                          id: params.data?.identifier,
+                          campaign_id: campaignid,
+                          accountNumber: newaccount,
+                          adset_id: adsetid,
+                          name: campaignName,
+                          email: userdetails?.email,
+                        },
+                        {
+                          headers: {
+                            Authorization: token
+                          }
+                        }
+                      );
+                  
+                      if (response.status === 200 || response.status === 201) {
+                        functionCallForCampaigns(newaccount);
+                        console.log(" Status updated on Facebook:", response.data.status, "Campaign ID:", response.data.campaign_id);
+                      } else {
+                        console.warn(" Backend returned unexpected status:", response.status);
+                      }
+                  
+                    } catch (error) {
+                      console.error(" API call to /adStatusChange failed:", error?.response?.data || error.message);
+                    }
+                  
+                    setIsCampaignModalVisibles(false);
+                    setSelectedCampaign(null);
+                };
+
+                const handlePauseCancel = () => {
+                    setIsCampaignModalVisibles(false);
+                    setSelectedCampaign(null);
+                };
 
                 const copyToClipboard = () => {
                     navigator.clipboard.writeText(firstColumnValue)
@@ -483,6 +557,25 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
 
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                         <Switch 
+                            checked={switchOn}
+                            onClick={(checked) => handlePauseClick(campaignid, checked)} 
+                            size="small" 
+                            style={{
+                              backgroundColor: switchOn ? '#91C25F' : '#d9d9d9',
+                            }} 
+                        />
+                        <Modal
+                            title="Confirm Action"
+                            open={isCampaignModalVisibles}
+                            onOk={handlePauseOk}
+                            onCancel={handlePauseCancel}
+                        >
+                            <p>
+                                Are you sure you want to turn <b>{nextChecked ? "ON" : "OFF"}</b> this campaign?
+                            </p>
+                            <p>campaign ID: <strong>{selectedCampaign}</strong></p>
+                        </Modal>
                         <PinIcon
                             campaignName={campaignName}
                             campaignid={campaignid}
@@ -490,7 +583,7 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                             // pinned={getPinStatusForCampaign(campaignName)}
                             pinned={pinned}
                         />
-                        <div style={{ marginLeft: '2px' }}>
+                        {/* <div style={{ marginLeft: '2px' }}>
                             {(() => {
                                 // Find the matching campaign in the Camapignlevelstatus array
                                 const campaignStatus = Camapignlevelstatus.find(statusObj => statusObj.name === campaignName);
@@ -535,7 +628,7 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                                     );
                                 }
                             })()}
-                        </div>
+                        </div> */}
                         {relatedComment ? (
                             <Tooltip
                                 title={relatedComment || 'No comment available'}
@@ -653,6 +746,22 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
             // const fetchData = await apiClient.get(`/${api}?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`);
             const fetchData = await apiClient.get(`/CampaignLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=Daily&network=${collectionName}`);
             const mainData = fetchData.data;
+
+            const getValidField = (field) => {
+                for (const item of mainData) {
+                  if (item[field] && item[field].toLowerCase() !== 'failed') {
+                    return item[field];
+                  }
+                }
+                return '-';
+              };
+              
+              fbCron.current = getValidField('fbCron');
+              revenueCron.current = getValidField('revenueCron');
+              cronStatus.current = getValidField('cronStatus');
+              accountStatus.current = getValidField('accountStatus');              
+              
+              
             timezone.current = mainData.length > 0  ? mainData[0].accountTimezone : "";
             let totalSpend = 0;
             let totalRevenue = 0;
@@ -742,9 +851,25 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                             profitloss: "",
                             M_tq: "",
                             D_tq: "",
+                            fbCron: eachData.fbCron,
+                            revenueCron: eachData.revenueCron, 
+                            accountStatus: eachData.accountStatus,
+                            cronStatus: eachData.cronStatus
                         }
                     )
                 }) : null;
+
+                // if (mainData.length > 0) {
+                //     fbCron.current = mainData[0].fbCron || "-";
+                //     revenueCron.current = mainData[0].revenueCron || "-";
+                //     cronStatus.current = mainData[0].cronStatus || "-";
+                //     accountStatus.current = mainData[0].accountStatus || "-";
+                // } else {
+                //     fbCron.current = "-";
+                //     revenueCron.current = "-";
+                //     cronStatus.current = "-";
+                //     accountStatus.current = "-";
+                // }
 
             const fullData = filteredData?.length > 0 ? [...filteredData] : [];
 
@@ -1080,26 +1205,66 @@ const Daily = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inpu
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Timezone: {timezone.current}</Text>
                                         </Col>
-                                        {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600' }}>
-                                                Cron/Acc status: {cronStatus.current} /{' '}
-                                                <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
-                                                    {accountStatus.current}
-                                                </span>
-                                            </Text>
-                                        </Col>
-                                        <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
+
+                                        {/* <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
                                             <Tooltip
-                                            title={
-                                                <>
-                                                <div>FbAcc Status: {`${fbCron.current}`}</div>
-                                                <div>RevAcc Status: {`${revenueCron.current}`}</div>
-                                                </>
-                                            }
+                                                title={
+                                                    <>
+                                                        <div>FbAcc Status: {`${fbCron.current}`}</div>
+                                                        <div>RevAcc Status: {`${revenueCron.current}`}</div>
+                                                        <Text style={{ fontWeight: '600', color: "white" }}>
+                                                            Cron/Acc status: {cronStatus.current} /{' '}
+                                                            <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
+                                                                {accountStatus.current}
+                                                            </span>
+                                                        </Text>
+                                                    </>
+                                                }
                                             >
-                                                <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px' }} />
+                                                <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color:"#91C25F" }} className="black-icon-info"/>
                                             </Tooltip>
                                         </Col> */}
+                                        <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
+                                            <Tooltip
+                                                title={
+                                                    <>
+                                                    {fbCron.current !== '-' && <div>FbAcc Status: {fbCron.current}</div>}
+                                                    {revenueCron.current !== '-' && <div>RevAcc Status: {revenueCron.current}</div>}
+                                                    {(cronStatus.current !== '-' || accountStatus.current !== '-') && (
+                                                        <Text style={{ fontWeight: '600', color: 'white' }}>
+                                                        Cron/Acc status: {cronStatus.current} /{' '}
+                                                        <span
+                                                            style={{
+                                                            color:
+                                                                accountStatus.current === 'Active'
+                                                                ? 'green'
+                                                                : accountStatus.current === 'Inactive'
+                                                                ? 'red'
+                                                                : 'gray',
+                                                            fontWeight: 'bold',
+                                                            }}
+                                                        >
+                                                            {accountStatus.current}
+                                                        </span>
+                                                        </Text>
+                                                    )}
+                                                    </>
+                                                }
+                                            >
+
+                                                <InfoCircleOutlined
+                                                style={{
+                                                    fontSize: '18px',
+                                                    cursor: 'pointer',
+                                                    marginRight: '10px',
+                                                    color: "#91C25F",
+                                                }}
+                                                className="black-icon-info"
+                                                />
+                                            </Tooltip>
+                                        </Col>
+
+
                                         {/* <Col>
                                             <Tooltip 
                                                 title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 

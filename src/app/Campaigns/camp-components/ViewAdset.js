@@ -22,11 +22,12 @@ import {
     Tabs,
     Upload,
     message,
-    theme,
 } from "antd";
 import TextArea from "antd/es/input/TextArea";
+import { useTokenContext } from "../../components/parent";
 import axios from "axios";
 import moment from "moment-timezone";
+// import dayjs from "dayjs";
 import dayjs from "dayjs";
 import { use } from "react";
 import { useEffect, useRef, useState } from "react";
@@ -35,16 +36,44 @@ const { Option } = Select;
 const { TabPane } = Tabs;
 
 export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
+    const { theme } = useTokenContext();
     const [form] = Form.useForm();
     const [formData, setFormData] = useState(null);
     const token = localStorage.getItem("token");
     console.log(viewadsetlevel);
     const defaultDate = viewadsetlevel?.start_time
-    ? moment(viewadsetlevel?.start_time) // Parse ISO date using Day.js
+    ? dayjs(viewadsetlevel?.start_time) // Parse ISO date using Day.js
     : null;
 
   const [date, setDate] = useState(defaultDate);
     console.log(date);
+
+    useEffect(() => {
+        if (viewadsetlevel) {
+        //   setSelectedPublishers(viewadsetlevel.publisher_platforms || []);
+        //   setSelectedPositions(viewadsetlevel.position || ["feed"]);
+          form.setFieldsValue({
+            positions: viewadsetlevel.position || ["feed"],
+            AdsetName: viewadsetlevel?.AdsetName,
+            optimization_goal: viewadsetlevel?.optimization_goal,
+            billing_event: viewadsetlevel?.billing_event,
+            DailyAdd_amount: viewadsetlevel?.Daily_amount ? (viewadsetlevel?.Daily_amount) / 100 : null,
+            // start_time: viewadsetlevel?.start_time,
+            action_source: viewadsetlevel?.action_source,
+            custom_event_type: viewadsetlevel?.custom_event_type,
+            pixel_id: viewadsetlevel?.pixel_id,
+            bid_amount: (viewadsetlevel?.bid_amount) / 100,
+            countries: viewadsetlevel?.countries,
+            Min_Age: viewadsetlevel?.Min_Age,
+            Max_Age: viewadsetlevel?.Max_Age,
+            Gender: viewadsetlevel?.Gender,
+            publisher_platforms: viewadsetlevel?.publisher_platforms,
+            device_platforms: viewadsetlevel?.device_platforms,
+            Language: viewadsetlevel?.locales,
+            placements: viewadsetlevel?.placements,
+          });
+        }
+      }, [viewadsetlevel, form]);
 
     const initialValue = {
         AdsetName: viewadsetlevel?.AdsetName,
@@ -79,7 +108,7 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                             label={<span style={{ color: "#B4B4B4" }}>Adset name</span>}
                             style={{ flex: "1 1 20%" }}
                         >
-                            <Input disabled style={{ width: "100%" }} />
+                            <Input disabled style={{ width: "100%" }} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
                         </Form.Item>
                         <Form.Item
                             name="optimization_goal"
@@ -94,6 +123,8 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                                     { value: "REACH", label: "Reach" },
                                     { value: "VALUE", label: "Value" },
                                 ]}
+                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             />
                         </Form.Item>
                         <Form.Item
@@ -107,6 +138,8 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                                     { value: "IMPRESSIONS", label: "Impressions" },
                                     { value: "VALUE", label: "Value" },
                                 ]}
+                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             />
                         </Form.Item>
                         <Form.Item
@@ -130,6 +163,8 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                                     { value: "app", label: "App" },
                                     { value: "phone_call", label: "Phone Call" },
                                 ]}
+                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             />
                         </Form.Item>
                         <Form.Item
@@ -145,6 +180,8 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                                     { value: "SEARCH", label: "Search" },
                                     { value: "CONTACT", label: "Contact" },
                                 ]}
+                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             />
                         </Form.Item>
                         <Form.Item
@@ -152,7 +189,7 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                             label={<span style={{ color: "#B4B4B4" }}>Pixel id</span>}
                             style={{ flex: "1 1 20%" }}
                         >
-                            <Input disabled style={{ width: "100%" }} />
+                            <Input disabled style={{ width: "100%" }} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
                         </Form.Item>
                         <Form.Item
                             name="DailyAdd_amount"
@@ -161,7 +198,7 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                             <Input disabled style={{ width: "100%" }}
                                 type="number"
                                 placeholder="$"
-
+                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                             />
                         </Form.Item>
                         <Form.Item
@@ -169,7 +206,7 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                             label={<span style={{ color: "#B4B4B4" }}>Bid amount</span>}
                             style={{ flex: "1 1 15%" }}
                         >
-                            <Input type="number" placeholder="$" disabled />
+                            <Input type="number" placeholder="$" disabled  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
                         </Form.Item>
                     </div>
                     <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "green" }}>Targeting</span>
@@ -201,6 +238,8 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                                     { value: "NZ", label: "New Zealand" },
                                     { value: "MX", label: "Mexico" }
                                 ]}
+                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             />
                         </Form.Item>
                         <Form.Item
@@ -216,6 +255,8 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                                     { value: "35", label: "35" },
                                     { value: "40", label: "40", disabled: true },
                                 ]}
+                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             />
                         </Form.Item>
                         <Form.Item
@@ -230,6 +271,8 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                                     { value: "65", label: "65+" },
                                     { value: "80", label: "80", disabled: true },
                                 ]}
+                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             />
                         </Form.Item>
                         <Form.Item
@@ -244,6 +287,8 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                                     { value: "1", label: "Male" },
                                     { value: "2", label: "Female" },
                                 ]}
+                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             />
                         </Form.Item>
                         <Form.Item
@@ -258,6 +303,8 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                                     { value: "Advance", label: "Advance" },
                                     { value: "manual", label: "Manual" }
                                 ]}
+                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             />
                         </Form.Item>
 
@@ -272,9 +319,13 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                                     <Select
                                         disabled
                                         options={[
-                                            { value: "facebook", label: "Facebook" },
-                                            { value: "instagram", label: "Instagram" },
+                                            { label: 'Facebook', value: 'facebook' },
+                                            { label: 'Instagram', value: 'instagram' },
+                                            { label: 'Messenger', value: 'messenger' },
+                                            { label: 'Audience Network', value: 'audience_network' }
                                         ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -289,16 +340,36 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                                         style={{ width: "100%" }}
                                         placeholder="Please select"
                                         options={[
-                                            { value: "feed", label: "Facebook Feed" },
-                                            { value: "marketplace", label: "Facebook Marketplace" },
-                                            { value: "video_feeds", label: "Facebook Video Feeds" },
-                                            { value: "search", label: "Facebook Search Results" },
-                                            { value: "explore", label: "Facebook Explore" },
-                                            { value: "right_hand_column", label: "Facebook Right Column" },
-                                            { value: "story", label: "Facebook Stories" },
-                                            { value: "instream_video", label: "Facebook In-Stream Videos" },
-                                            { value: "reels", label: "Facebook Reels" },
+                                            { key: "feed", label: "Facebook Feed" },
+                                            { key: "marketplace", label: "Facebook Marketplace" },
+                                            { key: "video_feeds", label: "Facebook Video Feeds" },
+                                            { key: "instream_video", label: "Facebook In-Stream Videos" },
+                                            { key: "facebook_reels", label: "Facebook Reels" },
+                                            { key: "profile_feed-f", label: "Facebook Profile Feed" },
+                                            { key: "search", label: "Facebook Search" },
+                                            { key: "story_f", label: "Facebook Stories" },
+                                            { key: "right_hand_column", label: "Facebook Right Column" },
+                                            { key: "instant_article", label: "Facebook Instant Articles" },
+                                            { key: "biz_disco_feed", label: "Facebook Business Explore" },
+                                          
+                                            { key: "stream", label: "Instagram Stream" },
+                                            { key: "story_i", label: "Instagram Stories" },
+                                            { key: "explore", label: "Instagram Explore" },
+                                            { key: "explore_home", label: "Instagram Explore Home" },
+                                            { key: "reels", label: "Instagram Reels" },
+                                            { key: "profile_feed-i", label: "Instagram Profile Feed" },
+                                            { key: "ig_search", label: "Instagram Search" },
+                                            { key: "profile_reels", label: "Instagram Profile Reels" },
+                                          
+                                            { key: "messenger_home", label: "Messenger Home" },
+                                            { key: "story_m", label: "Messenger Stories" },
+                                            { key: "sponsored_messages", label: "Messenger Sponsored Messages" },
+                                          
+                                            { key: "classic", label: "Audience Network Classic" },
+                                            { key: "rewarded_video", label: "Audience Network Rewarded Video" }
                                         ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -316,6 +387,8 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                                             { value: "mobile", label: "Mobile" },
                                             { value: "desktop", label: "Desktop" },
                                         ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                             </>

@@ -24,9 +24,12 @@ import {
   message,
   theme
 } from "antd";
+
+import { useTokenContext } from "../../components/parent";
 import TextArea from "antd/es/input/TextArea";
 import axios from "axios";
 import moment from "moment-timezone";
+import dayjs from "dayjs";
 import { useEffect, useRef, useState } from "react";
 const { Option } = Select;
 const { TabPane } = Tabs;
@@ -489,6 +492,7 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
   const [selectedPositions, setSelectedPositions] = useState(["feed"]);
   const [isManual, setIsManual] = useState(false);
   const [platform, setPlatform] = useState("facebook");
+  const { theme } = useTokenContext();
 
 
 
@@ -501,7 +505,24 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
       setSelectedPublishers(editadsetlevel.publisher_platforms || []);
       setSelectedPositions(editadsetlevel.position || ["feed"]);
       form.setFieldsValue({
-        positions: editadsetlevel.position || ["feed"]
+        positions: editadsetlevel.position || ["feed"],
+        AdsetName: editadsetlevel?.AdsetName,
+        optimization_goal: editadsetlevel?.optimization_goal,
+        billing_event: editadsetlevel?.billing_event,
+        DailyAdd_amount: editadsetlevel?.Daily_amount ? (editadsetlevel?.Daily_amount) / 100 : null,
+        // start_time: editadsetlevel?.start_time,
+        action_source: editadsetlevel?.action_source,
+        custom_event_type: editadsetlevel?.custom_event_type,
+        pixel_id: editadsetlevel?.pixel_id,
+        bid_amount: (editadsetlevel?.bid_amount) / 100,
+        countries: editadsetlevel?.countries,
+        Min_Age: editadsetlevel?.Min_Age,
+        Max_Age: editadsetlevel?.Max_Age,
+        Gender: editadsetlevel?.Gender,
+        publisher_platforms: editadsetlevel?.publisher_platforms,
+        device_platforms: editadsetlevel?.device_platforms,
+        Language: editadsetlevel?.locales,
+        placements: editadsetlevel?.placements,
       });
     }
   }, [editadsetlevel, form]);
@@ -583,7 +604,7 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
     setIsModalVisible(false);
     console.log('Modal cancel clicked');
   };
-  const currentDate = moment();
+  const currentDate = dayjs();
   var initialValue = {
     AdsetName: editadsetlevel?.AdsetName,
     optimization_goal: editadsetlevel?.optimization_goal,
@@ -672,6 +693,7 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
           layout="vertical"
           onFinish={handleSubmit}
           initialValues={initialValue}
+          className={theme === 'dark' ? 'form-dark' : 'form-light'}
         >
           <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
             <Form.Item
@@ -680,7 +702,7 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
               rules={[{ required: true, message: "Please select an option!" }]}
               style={{ flex: "1 1 20%" }}
             >
-              <Input />
+              <Input  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
             </Form.Item>
 
             <Form.Item
@@ -696,6 +718,8 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
                   { value: "REACH", label: "Reach" },
                   { value: "VALUE", label: "Value" }
                 ]}
+                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
               />
             </Form.Item>
 
@@ -710,6 +734,8 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
                   { value: "IMPRESSIONS", label: "Impressions" },
                   { value: "VALUE", label: "Value" }
                 ]}
+                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
               />
             </Form.Item>
 
@@ -720,7 +746,7 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
               style={{ flex: "1 1 15%" }}
               initialValue={currentDate}
             >
-              <DatePicker />
+              <DatePicker dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}/>
             </Form.Item>
 
             <Form.Item
@@ -736,6 +762,8 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
                   { value: "app", label: "App" },
                   { value: "phone_call", label: "Phone Call" }
                 ]}
+                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
               />
             </Form.Item>
 
@@ -752,6 +780,8 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
                   { value: "SEARCH", label: "Search" },
                   { value: "CONTACT", label: "Contact" }
                 ]}
+                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
               />
             </Form.Item>
 
@@ -761,7 +791,7 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
               rules={[{ required: true, message: "Please select an option!" }]}
               style={{ flex: "1 1 20%" }}
             >
-              <Input />
+              <Input  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
             </Form.Item>
 
             <Form.Item
@@ -769,7 +799,7 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
               label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
               style={{ flex: "1 1 15%" }}
             >
-              <Input type="number" placeholder="$" />
+              <Input type="number" placeholder="$"  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
             </Form.Item>
 
             {initialValue.bid_amount > 0 && (
@@ -798,6 +828,7 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
                       event.preventDefault();
                     }
                   }}
+                  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                 />
               </Form.Item>
             )}
@@ -834,6 +865,8 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
                   { value: "NZ", label: "New Zealand" },
                   { value: "MX", label: "Mexico" }
                 ]}
+                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
               />
             </Form.Item>
 
@@ -850,6 +883,8 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
                   { value: "35", label: "35" },
                   { value: "40", label: "40", disabled: true },
                 ]}
+                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
               />
             </Form.Item>
 
@@ -866,6 +901,8 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
                   { value: "65", label: "65+" },
                   { value: "80", label: "80", disabled: true },
                 ]}
+                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
               />
             </Form.Item>
 
@@ -881,6 +918,8 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
                   { value: "1", label: "Male" },
                   { value: "2", label: "Female" }
                 ]}
+                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
               />
             </Form.Item>
 
@@ -890,14 +929,18 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
               rules={[{ required: true, message: "Please select an option!" }]}
               style={{ flex: "1 1 20%" }}
             >
-              <Select mode="multiple" placeholder="Select Language" options={localesdata.map(option => ({ label: option.name, value: option.key }))} />
+              <Select mode="multiple" placeholder="Select Language" options={localesdata.map(option => ({ label: option.name, value: option.key }))} 
+                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}/>
             </Form.Item>
             <Form.Item
               label="Placements"
               name="placements"
               rules={[{ required: true, message: 'Please select a mode!' }]}
             >
-              <Select placeholder="Select a mode" onChange={handleModeChange}>
+              <Select placeholder="Select a mode" onChange={handleModeChange}
+                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}>
                 <Option value="Advance">Advance</Option>
                 <Option value="manual">Manual</Option>
 
@@ -912,7 +955,9 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
                   rules={[{ required: true, message: "Please select an option!" }]}
                   style={{ flex: "1 1 20%" }}
                 >
-                  <Select mode="multiple" placeholder="Select Platforms" options={publisherOptions?.map(option => ({ label: option.label, value: option.value }))} />
+                  <Select mode="multiple" placeholder="Select Platforms" options={publisherOptions?.map(option => ({ label: option.label, value: option.value }))} 
+                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}/>
                 </Form.Item>
 
                 <Form.Item
@@ -924,7 +969,9 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
                   <Select mode="multiple" placeholder="Select Positions" options={positionOptions[platform]?.map((position) => ({
                     label: position.label,
                     value: position.key
-                  }))} />
+                  }))} 
+                  dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                  className={theme === 'dark' ? 'dark-theme' : 'light-theme'}/>
                 </Form.Item>
 
                 <Form.Item
@@ -940,6 +987,8 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
                       { value: "mobile", label: "Mobile" },
                       { value: "desktop", label: "Desktop" }
                     ]}
+                    dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                   />
                 </Form.Item>
               </>
@@ -948,8 +997,8 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
 
           <Form.Item>
             <Space>
-              <Button type="primary" htmlType="submit">Submit</Button>
-              <Button onClick={handleClear}>Clear</Button>
+              <Button style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}} htmlType="submit">Submit</Button>
+              <Button className="dark-icon-button" onClick={handleClear}   style={{color: theme === "dark" ? "white" : "#000"}}>Clear</Button>
             </Space>
           </Form.Item>
         </Form>

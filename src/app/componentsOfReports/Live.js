@@ -62,7 +62,7 @@ const selectTimezone = {
     CEST: 'CESTDate'
 };
 
-const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle }) => {
+const LiveReports = ({functionCallForCommnets, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle }) => {
     console.log(columnDefs, "columnDefs");
     console.log("hello world");
     const {theme} = useTokenContext();
@@ -1529,6 +1529,8 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                                 removeSelectedCampaigns={removeSelectedCampaigns}
                                 moveToNextTab={moveToNextTab}
                                 // refreshTab = {refreshTab}
+                                functionCallForCommnets={functionCallForCommnets}
+                                functionCallForCampaigns={functionCallForCampaigns}
                             />
                         </Tabs.TabPane>
                         <Tabs.TabPane key="2">
@@ -1558,6 +1560,8 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                                 selectedCampaigns={selectedCampaigns}
                                 selectedAdsets={selectedAdsets}
                                 moveToNextTab={moveToNextTab}
+                                functionCallForCommnets={functionCallForCommnets}
+                                functionCallForCampaigns={functionCallForCampaigns}
                             />
                         </Tabs.TabPane>
                         <Tabs.TabPane key="3">
@@ -1584,6 +1588,8 @@ const LiveReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner
                                 tabStatus={"Live"}
                                 selectedCampaigns={selectedCampaigns}
                                 selectedAdsets={selectedAdsets}
+                                functionCallForCommnets={functionCallForCommnets}
+                                functionCallForCampaigns={functionCallForCampaigns}
                             />
                         </Tabs.TabPane>
                     </Tabs>

@@ -27,6 +27,7 @@ import {
     QuestionCircleOutlined,
     EditOutlined
 } from '@ant-design/icons';
+import { useTokenContext } from "../../components/parent";
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 
@@ -61,6 +62,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
     const [isImgEditorShown, setIsImgEditorShown] = useState(false);
     const [currentFile, setCurrentFile] = useState(null); // File to be edited
     const [editedImageUrl, setEditedImageUrl] = useState(null);
+    const { theme } = useTokenContext();
     console.log(network);
     console.log(dupdata, "duplicatedata")
     console.log(selectedFile, "selectedFileselectedFile")
@@ -600,6 +602,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                     layout="vertical"
                     onFinish={handleSubmit}
                     initialValues={initialValue}
+                    className={theme === 'dark' ? 'form-dark' : 'form-light'}
                 >
                     <div style={{ display: "flex", justifyContent: "space-between" }}>
                         <div style={{ flex: "70%", marginRight: "5%" }}>
@@ -614,6 +617,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                         },
                                     ]}
                                     style={{ flex: 1 }}
+                                    className="custom-dark-mode"
                                 >
                                     <Upload
                                         beforeUpload={handleBeforeUpload}
@@ -621,7 +625,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                         maxCount={1}
                                         accept="image/*, video/*"
                                     >
-                                        <Button icon={<UploadOutlined />}>Select File</Button>
+                                        <Button className="dark-icon-button" icon={<UploadOutlined/>}  style={{color: theme === "dark" ? "white" : "#000"}}>Select File</Button>
                                     </Upload>
                                 </Form.Item>
                                 <Form.Item
@@ -636,7 +640,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                     ]}
                                     style={{ flex: 3, marginLeft: "1%" }}
                                 >
-                                    <Input style={{ width: "45%" }} />
+                                    <Input style={{ width: "45%" }} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
                                 </Form.Item>
                             </div>
                             <Form.Item
@@ -653,7 +657,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                 <Input
                                     style={{ width: "60%" }}
                                     onChange={(e) => setAddName(e.target.value)}
-
+                                    className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                 />
                             </Form.Item>
                             <Form.Item
@@ -671,7 +675,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                     placeholder="Primary text"
                                     autoSize={{ minRows: 2, maxRows: 10 }}
                                     onChange={(e) => setPrimaryText(e.target.value)}
-
+                                    className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
 
                                 />
                             </Form.Item>
@@ -691,7 +695,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                     placeholder="Headline"
                                     autoSize={{ minRows: 2, maxRows: 10 }}
                                     onChange={(e) => setHeadline(e.target.value)}
-
+                                    className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                 />
                             </Form.Item>
 
@@ -710,7 +714,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                     placeholder="Description"
                                     autoSize={{ minRows: 2, maxRows: 10 }}
                                     onChange={(e) => setDescription(e.target.value)}
-
+                                    className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                 />
                             </Form.Item>
                             <Form.Item
@@ -741,6 +745,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                 autoSize={{ minRows: 5, maxRows: 15 }}
                                 onChange={(e) => setWebsiteURL(e.target.value)}
                                 value={websiteURL}
+                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                 />
                             </Form.Item>
                             <Form.Item
@@ -758,7 +763,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                     placeholder="Display Link"
                                     autoSize={{ minRows: 2, maxRows: 10 }}
                                     onChange={(e) => setCaption(e.target.value)}
-
+                                    className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                 />
                             </Form.Item>
                             {/* <Form.Item
@@ -876,7 +881,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                 //         // key={index}
                                 // >
                                 <div className="container-ad-preview">
-                                    <div className="ad-preview" style={{ width: "350px" }}>
+                                    <div className="ad-preview" style={{ width: "350px", backgroundColor: theme === "dark" && "#4d4c49" }}>
                                         <div className="ad-heading">
                                             <div className="img">
                                                 {selectedFile.type.startsWith('image/') ? (
@@ -899,7 +904,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                                 )}
                                             </div>
 
-                                            <div className="title">
+                                            <div className="title" style={{color : theme === "dark" && "white"}}>
                                                 <div className="main" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
                                                     {addName}
                                                 </div>           
@@ -920,20 +925,22 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                                 <MoreOutlined style={{ fontSize: "20px" }} />
                                             </div>
                                         </div>
-                                        <div className="ad-desc" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
+                                        <div className="ad-desc" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color : theme === "dark" && "white" }}>
                                             {primaryText}
                                         </div>
-                                        <div className="ad-image" style={{ width: '300px', height: '300px' }}>
+                                        <div className="ad-image" style={{ width: '100%', height: '300px' }}>
                                             {selectedFile.type.startsWith('image/') ? (
                                                 <img
                                                     src={editedImageUrl || URL.createObjectURL(selectedFile)}
                                                     alt="ad content"
-                                                    style={{ width: '300px', height: '200px', objectFit: 'cover' }}
+                                                    // style={{ width: '300px', height: '200px', objectFit: 'cover' }}
+                                                    style={{ maxWidth: '100%', maxHeight: '100%' }}
                                                 />
                                             ) : (
                                                 <video
                                                     controls
-                                                    style={{ width: '300px', height: '200px', objectFit: 'cover' }}
+                                                    // style={{ width: '300px', height: '200px', objectFit: 'cover' }}
+                                                    style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                                                 >
                                                     <source src={URL.createObjectURL(selectedFile)} type={selectedFile.type} />
                                                     Your browser does not support the video tag.
@@ -942,27 +949,27 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                         </div>
 
                                         <div className="ad-cta">
-                                            <div className="details">
+                                            <div className="details" style={{color : theme === "dark" && "white"}}>
                                                 <div className="link">{caption}</div>
                                                 <div className="title">{headline}</div>
                                                 <div className="desc">{description}</div>
                                             </div>
                                             <div className="ad-button">
-                                                <button type="button">Learn More</button>
+                                                <button style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}}>Learn More</button>
                                             </div>
                                         </div>
                                         <a href={websiteURL} target="_blank" rel="noopener noreferrer" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: '#0066cc', padding: '10px' }}>
                                             {websiteURL}
                                         </a>                                                <div className="icons">
-                                            <div className="like">
+                                            <div className="like" style={{color : theme === "dark" && "white"}}>
                                                 <LikeOutlined style={{ fontSize: "20px" }} />
                                                 Like
                                             </div>
-                                            <div className="comment">
+                                            <div className="comment" style={{color : theme === "dark" && "white"}}>
                                                 <CommentOutlined style={{ fontSize: "20px" }} />
                                                 Comment
                                             </div>
-                                            <div className="share">
+                                            <div className="share" style={{color : theme === "dark" && "white"}}>
                                                 <ShareAltOutlined style={{ fontSize: "20px" }} />
                                                 Share
                                             </div>
@@ -972,9 +979,9 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                 // {/* </Badge> */}
                             ) :
                                 <div className="container-ad-preview">
-                                    <div className="ad-preview" style={{ width: "350px" }}>
+                                    <div className="ad-preview" style={{ width: "350px", backgroundColor: theme === "dark" && "#4d4c49" }}>
                                         <div className="ad-heading">
-                                            <div className="filename" style={{ width: '40px', height: '40px' }}>
+                                            <div className="filename" style={{ width: '40px', height: '40px', backgroundColor: theme === "dark" ? "#7a7973" : "#333" , borderRadius:'50%', marginRight:'10px' }}>
                                                 {initialValue.fileType === 'image' ? (
                                                     <img
                                                         src={initialValue.filename}
@@ -996,8 +1003,8 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                                 )}
                                             </div>
 
-                                            <div className="title">
-                                                <div className="main">{"Facebook Page"}</div>
+                                            <div className="title" style={{color : theme === "dark" && "white"}}>
+                                                <div className="main" >{"Facebook Page"}</div>
                                                 <div className="sub">
                                                     {imagehash?.pageName ? (
                                                         <>
@@ -1016,7 +1023,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                                 <MoreOutlined style={{ fontSize: "20px" }} />
                                             </div>
                                         </div>
-                                        <div className="ad-desc">{"adMessage"}</div>
+                                        <div className="ad-desc" style={{color : theme === "dark" && "white"}}>{"adMessage"}</div>
                                         <div className="ad-image" style={{ width: '350px', height: '200px' }}>
                                             {initialValue.fileType === 'image' ? (
                                                 <img
@@ -1036,25 +1043,25 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                         </div>
 
                                         <div className="ad-cta">
-                                            <div className="details">
+                                            <div className="details" style={{color : theme === "dark" && "white"}}>
                                                 <div className="link">{"adCaption"}</div>
                                                 <div className="title">{"adName"}</div>
                                                 <div className="desc">{"adDesc"}</div>
                                             </div>
                                             <div className="ad-button">
-                                                <button type="button">Learn More</button>
+                                                <button style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}}>Learn More</button>
                                             </div>
                                         </div>
                                         <div className="icons">
-                                            <div className="like">
+                                            <div className="like"  style={{color : theme === "dark" && "white"}}>
                                                 <LikeOutlined style={{ fontSize: "20px" }} />
                                                 Like
                                             </div>
-                                            <div className="comment">
+                                            <div className="comment" style={{color : theme === "dark" && "white"}}>
                                                 <CommentOutlined style={{ fontSize: "20px" }} />
                                                 Comment
                                             </div>
-                                            <div className="share">
+                                            <div className="share" style={{color : theme === "dark" && "white"}}>
                                                 <ShareAltOutlined style={{ fontSize: "20px" }} />
                                                 Share
                                             </div>
@@ -1067,10 +1074,10 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                     </div>
                     <Form.Item>
                         <Space>
-                            <Button type="primary" htmlType="submit">
+                            <Button  style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}} htmlType="submit">
                                 Submit
                             </Button>
-                            <Button onClick={handleClear}>Clear</Button>
+                            <Button className="dark-icon-button"  style={{color: theme === "dark" ? "white" : "#000"}} onClick={handleClear}>Clear</Button>
                         </Space>
                     </Form.Item>
                 </Form>
@@ -1094,6 +1101,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                 footer={null}
                 width="80%" // Set width of the modal
                 bodyStyle={{ height: '50vh', overflowY: 'auto' }}
+                className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
             >
                 {getUrlBuilder(network)}
             </Modal>

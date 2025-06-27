@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Button,
     Card,
@@ -20,13 +20,34 @@ import {
     ShareAltOutlined,
     UploadOutlined,
 } from '@ant-design/icons';
+
+import { useTokenContext } from "../../components/parent";
 import TextArea from 'antd/es/input/TextArea';
 export default function Viewads({ selectedRow, viewdata }) {
     const [form] = Form.useForm();
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [formData, setFormData] = useState(null);
+    const { theme } = useTokenContext();
 
     // console.log(viewdata, "viewdata")
+
+    useEffect(() => {
+        if (viewdata) {
+        //   setSelectedPublishers(editadsetlevel.publisher_platforms || []);
+        //   setSelectedPositions(editadsetlevel.position || ["feed"]);
+          form.setFieldsValue({
+            AddName: viewdata?.AddName,
+            filename: viewdata?.filename,
+            page_id: viewdata?.page_id,
+            message: viewdata?.message,
+            headline: viewdata?.headline,
+            Description: viewdata?.Description,
+            Caption: viewdata?.Caption,
+            Website_URL: viewdata?.Website_URL,
+            urlParameters: viewdata?.urlParameters,
+          });
+        }
+      }, [viewdata, form]);
 
     const handleSubmit = () => {
         form
@@ -73,6 +94,7 @@ export default function Viewads({ selectedRow, viewdata }) {
                 layout="vertical"
                 onFinish={handleSubmit}
                 initialValues={initialValue}
+                className={theme === 'dark' ? 'form-dark' : 'form-light'}
             >
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
                     <div style={{ flex: "70%", marginRight: "5%" }}>
@@ -88,7 +110,7 @@ export default function Viewads({ selectedRow, viewdata }) {
                                 ]}
                                 style={{ flex: 3, marginLeft: "1%" }}
                             >
-                                <Input style={{ width: "45%" }} disabled />
+                                <Input style={{ width: "45%" }} disabled  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
                             </Form.Item>
                         </div>
                         <Form.Item
@@ -101,7 +123,7 @@ export default function Viewads({ selectedRow, viewdata }) {
                                 },
                             ]}
                         >
-                            <Input style={{ width: "60%" }} disabled />
+                            <Input style={{ width: "60%" }} disabled  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
                         </Form.Item>
                         <Form.Item
                             label="Primary text"
@@ -119,6 +141,7 @@ export default function Viewads({ selectedRow, viewdata }) {
                                 placeholder="Primary text"
                                 autoSize={{ minRows: 2, maxRows: 10 }}
                                 disabled
+                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                             />
                         </Form.Item>
 
@@ -138,6 +161,7 @@ export default function Viewads({ selectedRow, viewdata }) {
                                 placeholder="Headline"
                                 autoSize={{ minRows: 2, maxRows: 10 }}
                                 disabled
+                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                             />
                         </Form.Item>
 
@@ -157,6 +181,7 @@ export default function Viewads({ selectedRow, viewdata }) {
                                 placeholder="Description"
                                 autoSize={{ minRows: 2, maxRows: 10 }}
                                 disabled
+                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                             />
                         </Form.Item>
                         <Form.Item
@@ -175,6 +200,7 @@ export default function Viewads({ selectedRow, viewdata }) {
                                 placeholder="Caption"
                                 autoSize={{ minRows: 2, maxRows: 10 }}
                                 disabled
+                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                             />
                         </Form.Item>
                         <Form.Item
@@ -193,6 +219,7 @@ export default function Viewads({ selectedRow, viewdata }) {
                                 placeholder="Website_URL"
                                 autoSize={{ minRows: 5, maxRows: 15 }}
                                 disabled
+                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                             />
                         </Form.Item>
                         <Form.Item
@@ -204,6 +231,7 @@ export default function Viewads({ selectedRow, viewdata }) {
                                 placeholder="URL Parameters"
                                 autoSize={{ minRows: 5, maxRows: 15 }}
                                 disabled
+                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                             />
                         </Form.Item>
                     </div>
@@ -211,7 +239,7 @@ export default function Viewads({ selectedRow, viewdata }) {
                     <div style={{ flex: "30%" }}>
                         {viewdata?.filename && (
                             <div className="container-ad-preview">
-                                <div className="ad-preview">
+                                <div className="ad-preview" style={{  backgroundColor: theme === "dark" && "#333" }}>
                                     <div className="ad-heading">
                                         <div className="img">
                                             {viewdata?.filename?.toLowerCase().endsWith('.mp4') ? (
@@ -234,8 +262,8 @@ export default function Viewads({ selectedRow, viewdata }) {
                                         </div>
 
                                         <div className="title">
-                                            <div className="main">{"Facebook Page"}</div>
-                                            <div className="sub">
+                                            <div className="main" style={{color : theme === "dark" && "white"}}>{"Facebook Page"}</div>
+                                            <div className="sub" style={{color : theme === "dark" && "white"}}>
                                                 Sponsored <GlobalOutlined style={{ opacity: "0.6" }} />
                                             </div>
                                         </div>
@@ -246,12 +274,13 @@ export default function Viewads({ selectedRow, viewdata }) {
                                             <MoreOutlined style={{ fontSize: "20px" }} />
                                         </div>
                                     </div>
-                                    <div className="ad-desc">{"adMessage"}</div>
+                                    <div className="ad-desc" style={{color : theme === "dark" && "white"}}>{viewdata.message}</div>
                                     <div className="ad-image" style={{ width: '100%', height: '300px' }}>
                                         {viewdata.filename?.toLowerCase().endsWith('.mp4') ? (
                                             <video
                                                 controls
-                                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                // style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                style={{ maxWidth: '100%', maxHeight: '100%' }}
                                             >
                                                 <source src={viewdata.filename} type="video/mp4" />
                                                 Your browser does not support the video tag.
@@ -260,31 +289,32 @@ export default function Viewads({ selectedRow, viewdata }) {
                                             <img
                                                 src={viewdata.filename}
                                                 alt="ad content"
-                                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                // style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                style={{ maxWidth: '100%', maxHeight: '100%' }}
                                             />
                                         )}
                                     </div>
 
                                     <div className="ad-cta">
                                         <div className="details">
-                                            <div className="link">{"adCaption"}</div>
-                                            <div className="title">{"adName"}</div>
-                                            <div className="desc">{"adDesc"}</div>
+                                            <div className="link" style={{color : theme === "dark" && "white"}}>{viewdata.Caption}</div>
+                                            <div className="title" style={{color : theme === "dark" && "white"}}>{viewdata.AddName}</div>
+                                            <div className="desc" style={{color : theme === "dark" && "white"}}>{viewdata.Description}</div>
                                         </div>
                                         <div className="ad-button">
-                                            <button type="button">Learn More</button>
+                                            <button style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}}>Learn More</button>
                                         </div>
                                     </div>
                                     <div className="icons">
-                                        <div className="like">
+                                        <div className="like" style={{color : theme === "dark" && "white"}}>
                                             <LikeOutlined style={{ fontSize: "20px" }} />
                                             Like
                                         </div>
-                                        <div className="comment">
+                                        <div className="comment" style={{color : theme === "dark" && "white"}}>
                                             <CommentOutlined style={{ fontSize: "20px" }} />
                                             Comment
                                         </div>
-                                        <div className="share">
+                                        <div className="share" style={{color : theme === "dark" && "white"}}>
                                             <ShareAltOutlined style={{ fontSize: "20px" }} />
                                             Share
                                         </div>

@@ -1,8 +1,9 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import { Table, Tag, Button, Col, Card, Drawer, Dropdown, Flex, Input, Row, Select, Spin, Menu, Space, Modal, message, Switch, Tooltip, ConfigProvider, Skeleton } from 'antd';
-import { EditOutlined, EyeOutlined, SearchOutlined, CloseOutlined, SwapRightOutlined, PlusOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, ExclamationCircleFilled, ReloadOutlined, LinkOutlined, InfoCircleOutlined } from "@ant-design/icons";
+import { EditOutlined, EyeOutlined, SearchOutlined, CloseOutlined, SwapRightOutlined, PlusOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, ExclamationCircleFilled, ReloadOutlined, LinkOutlined, InfoCircleOutlined, DeleteOutlined, DownOutlined } from "@ant-design/icons";
 import CreateCampaignDrawer from './camp-components/create_camapaign';
+import CreateDraft from './camp-components/CreateDraft';
 import EditAllLevelDataDrawer from './camp-components/EditAllLevelData';
 import ViewDrawer from './camp-components/view-campaign';
 // import EditOnlyCampaignDrawer from './camp-components/EditCamp';
@@ -44,7 +45,9 @@ const App = () => {
     const [paginationSize, setPaginationSize] = useState(10);
     const [searchInput, setSearchInput] = useState("");
     const [filteredData, setFilteredData] = useState([]);
+    const [sendInputToApi, setSendInputToApi] = useState("");
     const [cdrawerVisible, setDrawerVisible] = useState(false);
+    const [createNewDraft, setCreateNewDraft] = useState(false);
     const [dupdrawerVisible, setdupDrawerVisible] = useState(false);
     const [campaignData, setCampaignData] = useState([]);
     const [viewDrawerVisible, setViewDrawerVisible] = useState(false);
@@ -58,6 +61,8 @@ const App = () => {
     const [EditcamapaignDrawerVisible, setEditcamapaignDrawerVisible] = useState(false);
     const [selectedEditCampaign, setselectedEditCampaign] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [draftsLoading, setDraftsLoading] = useState(true);
+    const [draftsData, setDraftsData] = useState([]);
     const [adsetsdrawerVisible, setadsetsDrawerVisible] = useState(false);
     const [adsetcampaigndata, setadsetcampaigndata] = useState(null)
     const [duplicatenewcampaigns, setduplicatenewcampaigns] = useState(null)
@@ -73,6 +78,10 @@ const App = () => {
     const yesterday = dayjs().subtract(0, 'day').format('YYYY-MM-DD');
     const [startDate, setStartDate] = useState(yesterday);
     const [endDate, setEndDate] = useState(yesterday);
+    const [selected, setSelected] = useState('Choose Option');
+    const [deleteDraftId, setDeleteDraftId] = useState("");
+    const [deleteModalVisible,setDeleteModalVisible] = useState(false);
+    const [selectedDraftToEdit, setSelecetedDraftToEdit] = useState({});
 
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
     console.log(selectedKey, "selectedKeyselectedKeyselectedKey")
@@ -88,6 +97,10 @@ const App = () => {
     ];
 
     const rangePresets = [
+        {
+            label: 'ALL',
+            value: [dayjs().startOf('year'), dayjs()],
+        },
         {
             label: 'Today',
             value: [dayjs(), dayjs()],
@@ -145,6 +158,10 @@ const App = () => {
         setRefrst((els) => !els)
     }
 
+    const changeDraftRefresh = () => {
+        setDraftsLoading(true);
+    }
+
     // console.log("localStorage", localStorage.getItem("token"))
     // var token = localStorage.getItem("token");
 
@@ -181,12 +198,18 @@ const App = () => {
         setDrawerVisible(true);
     };
 
+    const showCreateNewDraftDrawer = () => {
+        setCreateNewDraft(true);
+        setSelecetedDraftToEdit({}); // Reset selected draft to edit
+    }
+
     const onCloseDrawer = () => {
         setDrawerVisible(false);
         setadsetsDrawerVisible(false);
         setEditcamapaignDrawerVisible(false)
         setdupDrawerVisible(false)
         setViewEditAllLevelDataDrawerVisible(false);
+        setCreateNewDraft(false);
     };
 
     useEffect(() => {
@@ -253,15 +276,20 @@ const App = () => {
     //         setLoading(false);
     //     }
     // };
-    const fetchData = async (accountNumber = null, start = startDate, end = endDate) => {
+    const fetchData = async (accountNumber = null, start = startDate, end = endDate, search="") => {
         setLoading(true);
         setError(null);
         try {
             // Construct URL with optional startDate and endDate
+            //https://www.testapi.adsgoat.in
             let url = `https://www.testapi.adsgoat.in/api/getFormData?accountNumber=${accountNumber}&network=${selectedKey}`;
             if (start && end) {
                 url += `&startDate=${start}&endDate=${end}`;
             }
+            if(search){
+                url += `&searchInput=${search}`; // Append search input if provided
+            }
+            console.log("Fetching data from URL:", url);
 
             const response = await axios.get(url, {
                 headers: {
@@ -285,6 +313,31 @@ const App = () => {
             setLoading(false);
         }
     };
+
+    const fetchDrafts = async () => {
+
+        setDraftsLoading(true);
+        // setError(null);
+        try {
+            //https://www.testapi.adsgoat.in
+            const response = await axios.get(`https://www.testapi.adsgoat.in/api/drafts?email=${userdetails?.email}`, {
+                headers: {
+                    'Authorization': localStorage.getItem("token"),
+                }
+            });
+            const allDrafts = response?.data;
+
+            // Filter drafts based on selected value && accountNumber !== 'All'
+            // const filteredDraftsData = allDrafts.filter(draft => userdetails?.adAccounts[selectedKey]?.includes(draft.Account_Number));
+
+            setDraftsData(allDrafts);
+        } catch (error) {
+            console.error("Error fetching draft data:", error);
+            setError("Failed to fetch draft data.");
+        } finally {
+            setDraftsLoading(false);
+        }
+    }
 
     // Handle date range change
     const handleChange = (dates) => {
@@ -319,6 +372,11 @@ const App = () => {
             fetchData(selectedValue);
         }
     }, [refrst, selectedValue]);
+    useEffect(() => {
+        if (draftsLoading) {
+            fetchDrafts();
+        }
+    },[draftsLoading]);
     const handleRefresh = () => {
         if (selectedValue) {
             fetchData(selectedValue);
@@ -349,13 +407,27 @@ const App = () => {
     const handleSearchChange = (e) => {
         const searchValue = e.target.value.toLowerCase();
         setSearchInput(searchValue);
-        const filtered = campaignData.filter((item) =>
-            Object.values(item).some((field) =>
-                typeof field === 'string' && field.toLowerCase().includes(searchValue)
-            )
-        );
-        setFilteredData(filtered);
+        console.log("Search Input:", searchValue);
+        if(!searchValue){
+            setSendInputToApi("");
+            fetchData(selectedValue, startDate, endDate, searchValue)
+            console.log("Search Input is empty, resetting filtered data");
+        }
+        // const filtered = campaignData.filter((item) =>
+        //     Object.values(item).some((field) =>
+        //         typeof field === 'string' && field.toLowerCase().includes(searchValue)
+        //     )
+        // );
+        // setFilteredData(filtered);
     };
+    const handleSearchSubmit = () =>{
+        setSendInputToApi(searchInput);
+        fetchData(selectedValue, startDate, endDate, searchInput); // Fetch data with search input
+        console.log("Search Input:", searchInput);
+        console.log("Selected Input:", searchInput.length);
+    }
+
+
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [useaproval, setuseraproval] = useState(null)
 
@@ -419,6 +491,24 @@ const App = () => {
             // Handle error
         }
     };
+
+    const handleOkDeleteDraft = async () => {
+        try {
+            const response = await axios.delete(`https://www.testapi.adsgoat.in/api/drafts/${encodeURIComponent(userdetails.email)}/${deleteDraftId}`, {
+                headers: {
+                    'Authorization': localStorage.getItem("token"),
+                }
+            });
+            if (response.status === 200) {
+                message.success("Draft deleted successfully");
+                setDeleteModalVisible(false);
+                changeDraftRefresh();
+            }
+        }catch (error) {
+            console.error('Error deleting draft:', error);
+            message.error("Failed to delete draft");
+        }
+    }
 
     const handleCancel = () => {
         setIsModalVisible(false);
@@ -612,6 +702,7 @@ const App = () => {
                         onPressEnter={handleSave}
                         onBlur={handleSave}
                         autoFocus
+                        className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                     />
                 ) : (
                     value !== 0 && value !== '' && (
@@ -683,9 +774,9 @@ const App = () => {
                 <>
                     {/* Display green check or red close icon based on fbstatus */}
                     {record.fbstatus === 'Live' ? (
-                        <CheckCircleFilled style={{ color: 'green' }} />
+                        <CheckCircleFilled style={{ color: 'green' }} className='black-icon-active' />
                     ) : (
-                        <CloseCircleFilled style={{ color: 'red' }} />
+                        <CloseCircleFilled style={{ color: 'red' }}   className='black-icon-pause-1' />
                     )}
 
                     {/* Display link icon if reports field is true */}
@@ -822,6 +913,7 @@ const App = () => {
                     onChange={(checked) => onToggleStatus(record, checked)}
                     checkedChildren="ACTIVE"
                     unCheckedChildren="PAUSED"
+                    style={{ backgroundColor: record.Status === 'ACTIVE' && "#91C25F" }}
                 />
             )
         },
@@ -896,8 +988,8 @@ const App = () => {
                 if (record.Approval === 'Approved') {
                     return (
                         <div style={{display:'flex', alignItems:'center', justifyContent:'center'}}>
-                            <Button icon={<EyeOutlined />} onClick={() => handleViewClick(record)}></Button>
-                            <Button icon={<EditOutlined />} onClick={() => handleEditClickAllLevelData(record)}></Button> 
+                            <Button className="dark-icon-button" icon={<EyeOutlined />} onClick={() => handleViewClick(record)}></Button>
+                            <Button className="dark-icon-button" icon={<EditOutlined />} onClick={() => handleEditClickAllLevelData(record)} style={{marginLeft:'10px'}}></Button> 
                             {(record.adlevel_error || record.campaignlevel_error || record.adsetlevel_error) && (
                                 <Tooltip title={errorDisplay(record.campaignlevel_error,record.adsetlevel_error,record.adlevel_error)}>
                                     <InfoCircleOutlined style={{marginLeft:'10px', color:"red", fontSize:'15px'}}/>
@@ -916,19 +1008,20 @@ const App = () => {
 
                 return (
                     <Space size="middle">
-                        <Button icon={<EyeOutlined />} onClick={() => handleViewClick(record)}></Button>
-                        {record.Approval === 'PENDING_APPROVAL' && (
-                            <Button type="primary" onClick={() => handleApproval(record)}>Approve</Button>
-                        )}
+                        <Button className="dark-icon-button" icon={<EyeOutlined />} onClick={() => handleViewClick(record)}></Button>
                         {record.fbstatus !== 'Live' && (
                             // <Button icon={<EditOutlined />} onClick={() => handleEditOnlyClick(record)}></Button> 
-                            <Button icon={<EditOutlined />} onClick={() => handleEditClickAllLevelData(record)}></Button> 
+                            <Button className="dark-icon-button" icon={<EditOutlined />} onClick={() => handleEditClickAllLevelData(record)}></Button> 
+                        )}
+                        {record.Approval === 'PENDING_APPROVAL' && (
+                            <Button style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}} onClick={() => handleApproval(record)}>Approve</Button>
                         )}
                         <Modal
                             title="Confirm Approval"
                             visible={isModalVisible}
                             onOk={handleOk}
                             onCancel={handleCancel}
+                            className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                         >
                             <p>Are you sure you want to approve?</p>
                         </Modal>
@@ -939,19 +1032,55 @@ const App = () => {
 
     ];
     console.log(selectedKey);
-    const totalDailySpend = (searchInput ? filteredData : campaignData).reduce((sum, record) => {
+    // const totalDailySpend = (searchInput ? filteredData : campaignData).reduce((sum, record) => {
+    //     return sum + (record.Daily_amount || 0);
+    // }, 0) / 100;  // Assuming Daily_amount is in cents
+    const totalDailySpend = (campaignData).reduce((sum, record) => {
         return sum + (record.Daily_amount || 0);
     }, 0) / 100;  // Assuming Daily_amount is in cents
 
+    const onClickDeleteDraft = (id) => {
+        console.log(id, "draft id")
+        setDeleteModalVisible(true);
+        setDeleteDraftId(id);
+    }
+
+    const onClickEditDraft = (id) => {
+        setCreateNewDraft(true)
+        // setSelecetedDraftToEdit(draftsData.find(draft => draft.id === id));
+    }
+
+    const draftDropdownMenu = (
+        <Menu
+          items={draftsData.map((draft) => ({
+            key: draft.Draft_Name,
+            label: (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>{draft.Draft_Name}</span>
+                <span>
+                  <EditOutlined  onClick={()=>{
+                    setCreateNewDraft(true)
+                    setSelecetedDraftToEdit(draft);
+                  }} style={{ marginRight: 8 }} />
+                  <DeleteOutlined onClick={() => onClickDeleteDraft(draft.id)} />
+                  
+                </span>
+              </div>
+            )
+          }))}
+          onClick={(e) => setSelected(e.key)}
+        />
+    );
+
     return (
         <div>
-            <CreateCampaignDrawer visible={cdrawerVisible} accountis={createcamselectedacc} onClose={onCloseDrawer} changeRRefrst={changeRRefrst} network={selectedKey} />
+            <CreateCampaignDrawer visible={cdrawerVisible} accountis={createcamselectedacc} onClose={onCloseDrawer} changeRRefrst={changeRRefrst} network={selectedKey} draftsData={draftsData} />
 
             <EditAllLevelDataDrawer visible={viewEditAllLevelDataDrawerVisible} accountis={createcamselectedacc} onClose={onCloseDrawer} changeRRefrst={changeRRefrst} network={selectedKey} selectedRow={selectedEditAllLevelData} />
 
             <DuplicateCampaignDrawer visible={dupdrawerVisible} onClose={onCloseDrawer} selectedRow={duplicatenewcampaigns} changeRRefrst={changeRRefrst} network={selectedKey} />
 
-
+            <CreateDraft visible={createNewDraft} onClose={onCloseDrawer} changeRRefrst={changeDraftRefresh} selectedDraftToEdit={selectedDraftToEdit}/>
 
             <ViewDrawer
                 rowData={selectedRowData}
@@ -976,7 +1105,86 @@ const App = () => {
                 visible={EditcamapaignDrawerVisible}
                 onClose={() => setEditcamapaignDrawerVisible(false)}
             /> */}
-            <Card title="Campaigns" size="small">
+            <Card 
+                // title="Campaigns" 
+                title={<span style={{ color: theme === "dark" && "white" }}>Campaigns</span>}
+                size="small"
+                extra={
+                    // <Dropdown
+                    //         trigger={['click']}
+                    //         overlay={
+                    //             <Menu
+                    //                 onClick={(e) => setSelected(e.key)}
+                    //                 items={draftsData.map((option) => ({
+                    //                 key: option.Draft_Name,
+                    //                 label: (
+                    //                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    //                     <span>{option.Draft_Name}</span>
+                    //                     <span>
+                    //                         <EditOutlined style={{ marginRight: 8 }} />
+                    //                         <DeleteOutlined onClick={onClickDeleteDraft(option.id)} />
+                    //                     </span>
+                    //                     </div>
+                    //                 ),
+                    //                 }))}
+                    //             />
+                    //         }
+                    //     >
+                    //         {/* <Button style={{width:"150px"}}>Edit Drafts</Button> */}
+                    //         <Tooltip title={draftsData.length === 5 ? "You have exceed drafts Limit of 5" : ""}>
+                    //             <Button
+                    //                 onClick={(e) => {
+                    //                     if (draftsData.length === 5) {
+                    //                     // Read-only behavior: no action
+                    //                     e.preventDefault();
+                    //                     } else {
+                    //                     showCreateNewDraftDrawer();
+                    //                     }
+                    //                 }}
+                    //                 loading={draftsLoading}
+                    //                 style={{
+                    //                     backgroundColor: "#91C25F",
+                    //                     marginRight: '10px',
+                    //                     cursor: draftsData.length === 5 ? 'not-allowed' : 'pointer',
+                    //                     opacity: draftsData.length === 5 ? 0.5 : 1,
+                    //                     pointerEvents: 'auto' // ensure Dropdown can still trigger
+                    //                 }}
+                    //                 type="text"
+                    //             >
+                    //                 Create Draft
+                    //             </Button>
+                    //         </Tooltip>
+                    // </Dropdown>
+                    <Button.Group>
+                        {/* 🟢 Left: Create Draft */}
+                        <Tooltip
+                        title={draftsData.length === 5 ? "You have exceeded the draft limit of 5" : ""}
+                        placement="top"
+                        open={draftsData.length === 5 ? undefined : false}
+                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                        >
+                        <span>
+                            <Button
+                            type="primary"
+                            onClick={draftsData.length === 5 ? undefined : showCreateNewDraftDrawer}
+                            disabled={draftsData.length === 5}
+                            // style={{color: theme !== "dark" && draftsData.length === 5 ? "black" : "white" }}
+                            style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}}
+                            >
+                            Create Draft
+                            </Button>
+                        </span>
+                        </Tooltip>
+
+                        {/* 🟣 Right: Edit Dropdown */}
+                        <Dropdown overlay={draftDropdownMenu} trigger={['click']}>
+                        <Button style={{backgroundColor:'#91C25F', color: "#000", border: "#91C25F"}} icon={<DownOutlined  className="black-icon"/>} />
+                        </Dropdown>
+                    </Button.Group>
+                } 
+                // style={{ backgroundColor:'blue'}}
+            >
                 <Row justify="start" align="middle" gutter={[16, 16]}>
                     <Col span={3}>
                         <Select
@@ -985,6 +1193,8 @@ const App = () => {
                             style={{ width: '100%' }}
                             onChange={handleKeyChange}
                             value={selectedKey}
+                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                         >
                             {options.map(option => (
                                 <Option key={option.value} value={option.value}>{option.label}</Option>
@@ -1024,6 +1234,8 @@ const App = () => {
                             optionFilterProp="children"
                             filterOption={(input, option) => /^[0-9]*$/.test(input) && option?.value.toString().includes(input)}
                             onDropdownVisibleChange={(open) => setIsOpen(open)} // Track dropdown visibility
+                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                         >
                             {valueOptions.map(option => (
                                 <Select.Option key={option.value} value={option.value}>
@@ -1085,6 +1297,7 @@ const App = () => {
                                 defaultValue={[dayjs(), dayjs()]}
                                 format="YYYY-MM-DD"
                                 style={{ width: '100%' }}
+                                dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}
                             />
                         </ConfigProvider>
                     </Col>
@@ -1093,19 +1306,21 @@ const App = () => {
 
                         <Input
                             placeholder="Search..."
-                            suffix={<SearchOutlined />}
+                            suffix={<SearchOutlined onClick={handleSearchSubmit}/>}
                             value={searchInput}
                             onChange={handleSearchChange}
+                            onPressEnter={handleSearchSubmit}
+                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                         />
                     </Col>
                     {!restrictedEmails.includes(userdetails.email) && (
                         <Col>
-                            <Button type="primary" onClick={showDrawer} icon={<PlusOutlined />}>
+                            <Button onClick={showDrawer} icon={<PlusOutlined  className="black-icon"/>} style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}}>
                                 Create Campaign
                             </Button>
                         </Col>
                     )}
-                    <Button type="primary" onClick={handleRefresh} icon={<ReloadOutlined />}>
+                    <Button type="primary" onClick={handleRefresh} icon={<ReloadOutlined  className="black-icon"/>} style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}}>
                     </Button>
                     <Col span={4}>
                         <span style={{ fontWeight: 'bold', fontSize: '16px' }}>
@@ -1115,13 +1330,19 @@ const App = () => {
 
                 </Row>
             </Card>
-            <Table
+            {loading ? (
+                        <Skeleton active paragraph={{ rows: 12 }} style={{marginTop:'10px'}}/>
+                    ) :
+            (<Table
                 style={{ width: "100%" }}  // Ensures table takes full available width
+                className={`custom-dark-table ${theme === 'dark' ? 'dark-mode-pagination' : 'light-mode-pagination'}`}
                 columns={columns}
-                dataSource={
-                    searchInput
-                        ? filteredData.map((item, index) => ({ ...item, key: index })).reverse()
-                        : campaignData.map((item, index) => ({ ...item, key: index })).reverse()
+                // dataSource={
+                //     searchInput
+                //         ? filteredData.map((item, index) => ({ ...item, key: index })).reverse()
+                //         : campaignData.map((item, index) => ({ ...item, key: index })).reverse()
+                // }
+                dataSource={campaignData.map((item, index) => ({ ...item, key: index })).reverse()
                 }
                 pagination={{ pageSize: paginationSize }}
                 scroll={{
@@ -1133,27 +1354,28 @@ const App = () => {
                         <ExpandedRowContent
                             record={record}
                             changeRRefrst={changeRRefrst} // Ensure this prop is passed
+                            network={selectedKey} 
                         />
                     ),
                     rowExpandable: (record) => !!record,
                 }}
                 summary={() => {
-                    const dataSource = searchInput ? filteredData : campaignData;
-
+                    // const dataSource = searchInput ? filteredData : campaignData;
+                    const dataSource = campaignData;
                     // Calculate total daily budget
                     const totalDailyBudget = dataSource.reduce((sum, record) => {
                         return sum + (record.Daily_amount || 0);
                     }, 0);
 
                     return (
-                        <Table.Summary.Row >
+                        <Table.Summary.Row style={{backgroundColor: theme === "dark" && "#333", borderBottom: "0px"}}>
                             <Table.Summary.Cell colSpan={columns.length - 2} align="right">
-                                <strong>Total Daily Budget: ${(totalDailyBudget / 100).toFixed(2)}</strong>
+                                <strong style={{color: theme === "dark" ? "white" : "#000"}}>Total Daily Budget: ${(totalDailyBudget / 100).toFixed(2)}</strong>
                             </Table.Summary.Cell>
                         </Table.Summary.Row>
                     );
                 }}
-            />
+            />)}
 
 
             {!restrictedEmails.includes(userdetails.email) && (
@@ -1163,6 +1385,7 @@ const App = () => {
                     onClose={onCloseDrawer}
                     open={adsetsdrawerVisible}
                     width="90%" // Adjust width as needed
+                    style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
                 >
                     <Adsets selectedRow={adsetcampaigndata} onClose={onCloseDrawer} changeRRefrst={changeRRefrst} network={selectedKey} />
                 </Drawer>
@@ -1178,6 +1401,15 @@ const App = () => {
             >
                 <Adsets selectedRow={adsetcampaigndata} onClose={onCloseDrawer} changeRRefrst={changeRRefrst} />
             </Drawer> */}
+            <Modal
+                title="Confirm Approval"
+                visible={deleteModalVisible}
+                onOk={handleOkDeleteDraft}
+                onCancel={()=> setDeleteModalVisible(false)}
+                className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+            >
+                <p>Are you sure you want to delete this draft</p>
+            </Modal>
 
         </div>
 

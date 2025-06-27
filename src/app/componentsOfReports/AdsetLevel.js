@@ -56,7 +56,7 @@ const selectTimezone = {
     CEST: 'CESTDate'
 };
 
-const AdsetLevelReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedAdsets, showAdsetLevel, removeSelectedAdsets, selectedCampaigns, moveToNextTab}) => {
+const AdsetLevelReports = ({functionCallForCampaigns, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedAdsets, showAdsetLevel, removeSelectedAdsets, selectedCampaigns, moveToNextTab}) => {
     console.log(columnDefs, "columnDefs");
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
@@ -172,6 +172,11 @@ const AdsetLevelReports = ({startDate, endDate, newaccount, newtime, newRevenueP
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting
+        // filter: 'agTextColumnFilter',      // Enable string filter
+        // floatingFilter: false,              // Optional: show quick filter below header
+        // suppressMenu: false,
+        // showRowGroup: 'adsetname',
+        // field: 'adsetname',
 
         comparator: (campaignA, campaignB) => {
             if (!campaignA) return 1;
@@ -265,8 +270,103 @@ const AdsetLevelReports = ({startDate, endDate, newaccount, newtime, newRevenueP
 
                 const [tooltipText, setTooltipText] = useState("Click to Copy");
                 const [isModalVisibles, setIsModalVisibles] = useState(false);
+                const [isAdsetModalVisibles, setIsAdsetModalVisibles] = useState(false);
+                const [selectedAdset, setSelectedAdset] = useState(null); // store adid when switch clicked
+                // const [switchOn, setSwitchOn] = useState(false); // control toggle state
+                const [nextChecked, setNextChecked] = useState(false); // what user clicked
                 const [comment, setComment] = useState(relatedComment || '');
                 const [pinned, setPinned] = useState(getPinStatusForCampaign(campaignName));
+
+                // const commentForCampaign = campaignComments.find(
+                //     obj => obj.campaignid === campaignid
+                // );
+
+                // Default to ACTIVE if not defined
+                // const [switchOn, setSwitchOn] = useState(
+                //     commentForCampaign?.AdsetLevel
+                //     ? commentForCampaign.AdsetLevel.adset_id === adsetid &&
+                //         commentForCampaign.AdsetLevel.status === "ACTIVE"
+                //     : true // Default to ACTIVE if AdsetLevel not found
+                // );                
+                    
+                // useEffect(() => {
+                //     const updated = campaignComments.find(obj => obj.campaignid === campaignid);
+                //     const adsetMatch =
+                //       updated?.AdsetLevel?.adset_id === adsetid &&
+                //       updated?.AdsetLevel?.status === "ACTIVE";
+                  
+                //     // setSwitchOn(adsetMatch);
+                //     setSwitchOn(updated?.AdsetLevel ? adsetMatch : true);
+                // }, [campaignComments, campaignid, adsetid]);
+
+                const [switchOn, setSwitchOn] = useState(true); // default to ACTIVE
+
+                useEffect(() => {
+                const commentForCampaign = campaignComments.find(obj => obj.campaignid === campaignid);
+
+                let matchedAdset = null;
+
+                if (Array.isArray(commentForCampaign?.AdsetLevel)) {
+                    matchedAdset = commentForCampaign.AdsetLevel.find(a => a.adset_id === adsetid);
+                } else if (commentForCampaign?.AdsetLevel?.adset_id === adsetid) {
+                    matchedAdset = commentForCampaign.AdsetLevel;
+                }
+
+                const isActive = matchedAdset?.status === "ACTIVE";
+
+                setSwitchOn(matchedAdset ? isActive : true); // fallback to ACTIVE
+                }, [campaignComments, campaignid, adsetid]);
+
+                const handlePauseClick = (adsetid, checked) => {
+                    setSelectedAdset(adsetid); 
+                    setNextChecked(checked); // user’s toggle intent
+                    setIsAdsetModalVisibles(true);
+                };
+
+                const handlePauseOk = async () => {
+                    setSwitchOn(nextChecked); // update visual switch state
+                  
+                    try {
+                      const token = localStorage.getItem("token");
+                  
+                      const response = await apiClient.post(`/adsetStatusChange`,
+                        {
+                            status: nextChecked ? "ACTIVE" : "PAUSED",
+                            id: params.data?.identifier,             // Used if needed
+                            // ad_id: adid,                              // Required
+                            name: campaignName,
+                            accountNumber: newaccount,
+                            revenuePartner: params.data?.revenuePartner || "",
+                            campaign_id: campaignid,
+                            adset_id: adsetid,
+                            email: userdetails?.email,
+                        },
+                        {
+                          headers: {
+                            Authorization: token
+                          }
+                        }
+                      );
+                  
+                      if (response.status === 200 || response.status === 201) {
+                        functionCallForCommnets(newaccount);
+                        console.log(" Status updated on Facebook:", response.data.status, "Adset ID:", response.data.adset_id);
+                      } else {
+                        console.warn(" Backend returned unexpected status:", response.status);
+                      }
+                  
+                    } catch (error) {
+                      console.error(" API call to /adStatusChange failed:", error?.response?.data || error.message);
+                    }
+                  
+                    setIsAdsetModalVisibles(false);
+                    setSelectedAdset(null);
+                };  
+
+                const handlePauseCancel = () => {
+                    setIsAdsetModalVisibles(false);
+                    setSelectedAdset(null);
+                };
 
                 const copyToClipboard = () => {
                     navigator.clipboard.writeText(firstColumnValue)
@@ -476,14 +576,33 @@ const AdsetLevelReports = ({startDate, endDate, newaccount, newtime, newRevenueP
                 };
 
                 return (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}> 
+                        <Switch 
+                            checked={switchOn}
+                            onClick={(checked) => handlePauseClick(adsetid, checked)} 
+                            size="small" 
+                            style={{
+                              backgroundColor: switchOn ? '#91C25F' : '#d9d9d9',
+                            }} 
+                        />
+                        <Modal
+                            title="Confirm Action"
+                            open={isAdsetModalVisibles}
+                            onOk={handlePauseOk}
+                            onCancel={handlePauseCancel}
+                        >
+                            <p>
+                                Are you sure you want to turn <b>{nextChecked ? "ON" : "OFF"}</b> this adset?
+                            </p>
+                            <p>Adset ID: <strong>{selectedAdset}</strong></p>
+                        </Modal>
                         <PinIcon
                             campaignName={campaignName}
                             campaignid={campaignid}
                             adsetid={adsetid}
                             pinned={pinned}
                         />
-                        <div style={{ marginLeft: '2px' }}>
+                        {/* <div style={{ marginLeft: '2px' }}>
                             {(() => {
                                 // Find the matching campaign in the Camapignlevelstatus array
                                 const campaignStatus = Camapignlevelstatus.find(statusObj => statusObj.name === campaignName);
@@ -528,7 +647,7 @@ const AdsetLevelReports = ({startDate, endDate, newaccount, newtime, newRevenueP
                                     );
                                 }
                             })()}
-                        </div>
+                        </div> */}
                         {/* {relatedComment && (
                             <Tooltip title={(
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -768,9 +887,12 @@ const AdsetLevelReports = ({startDate, endDate, newaccount, newtime, newRevenueP
                             adname: "",
                             actions: '...',
                             from: "",
+                            to: "",
                             profitloss: "",
                             M_tq: "",
                             D_tq: "",
+                            fbCron: eachData.fbCron,
+                            revenueCron: eachData.revenueCron
                         }
                     )
                 })
