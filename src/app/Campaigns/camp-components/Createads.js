@@ -1631,7 +1631,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
       >
         <p>Display form data in modal</p>
         {/* {formData && (
-          <pre>{JSON.stringify(formData, null, 2)}</pre>
+          <pre>{JSON.stringify(formData, null, 2)}</pre> //
         )} */}
       </Modal>
       <Modal
