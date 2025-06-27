@@ -1457,6 +1457,7 @@ const MyTablePage = () => {
                                 width={600}  
                                 style={{ padding: '20px' }} 
                                 okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }} 
+                                className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             >
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     
@@ -1469,7 +1470,7 @@ const MyTablePage = () => {
                                         <Input placeholder="Enter your value here" defaultValue={campaignActualSpend.daily_budget ? parseFloat(campaignActualSpend.daily_budget)/100 : campaignActualSpend.lifetime_budget ? parseFloat(campaignActualSpend.lifetime_budget)/100 : (groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData))} onChange={onChangeBudgetValue} />
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                        <Typography.Text strong>Campaign ID:</Typography.Text>
+                                        <Typography.Text strong style={{color : theme === "dark" && "white"}}>Campaign ID:</Typography.Text>
                                         <p>{campaignActualSpend?.id}</p>
                                     </div>
                                 </div>
@@ -1991,6 +1992,7 @@ const MyTablePage = () => {
                                 width={600}  // Set a custom width for the modal
                                 style={{ padding: '20px' }}  // Adjust body padding
                                 okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }} 
+                                className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             >
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
@@ -2006,7 +2008,7 @@ const MyTablePage = () => {
 
                                     {/* Campaign ID */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                        <Typography.Text strong>Campaign ID:</Typography.Text>
+                                        <Typography.Text strong style={{color : theme === "dark" && "white"}}>Campaign ID:</Typography.Text>
                                         <p>{campaignActualSpend?.id}</p>
                                     </div>
                                 </div>
@@ -3696,6 +3698,7 @@ const MyTablePage = () => {
                       onCancel={() => setIsModalVisible(false)}
                       width={600}
                       okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
+                      className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                     >
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                         {/* <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -3710,7 +3713,7 @@ const MyTablePage = () => {
                         </div> */}
           
                         <div>
-                          <Typography.Text strong>
+                          <Typography.Text strong style={{color : theme === "dark" && "white"}}>
                             Budget Type:
                           </Typography.Text>{" "}
                           <span style={{ fontWeight: 'normal' }}>
@@ -3723,11 +3726,11 @@ const MyTablePage = () => {
                           type="number"
                           value={changeBudget}
                           onChange={(e) => onChangeBudget(e.target.value)}
-                          placeholder="Enter budget in USD"
+                          placeholder="Enter budget in USD"  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                         />
           
                         <div>
-                          <Typography.Text strong>Campaign ID:</Typography.Text>
+                          <Typography.Text strong style={{color : theme === "dark" && "white"}}>Campaign ID:</Typography.Text>
                           <p>{campaignActualSpend?.id}</p>
                         </div>
                       </div>
@@ -4398,6 +4401,7 @@ const MyTablePage = () => {
                                 width={600}  
                                 style={{ padding: '20px' }}
                                 okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }} 
+                                className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             >
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     
@@ -4410,7 +4414,7 @@ const MyTablePage = () => {
                                         <Input placeholder="Enter your value here" defaultValue={campaignActualSpend.daily_budget ? parseFloat(campaignActualSpend.daily_budget)/100 : campaignActualSpend.lifetime_budget ? parseFloat(campaignActualSpend.lifetime_budget)/100 : (groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData))} onChange={onChangeBudgetValue} />
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                        <Typography.Text strong>Campaign ID:</Typography.Text>
+                                        <Typography.Text strong style={{color : theme === "dark" && "white"}}>Campaign ID:</Typography.Text>
                                         <p>{campaignActualSpend?.id}</p>
                                     </div>
                                 </div>
@@ -5210,6 +5214,7 @@ const MyTablePage = () => {
                       onCancel={() => setIsModalVisible(false)}
                       width={600}
                       okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
+                      className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                     >
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                         {/* <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -5224,7 +5229,7 @@ const MyTablePage = () => {
                         </div> */}
           
                         <div>
-                          <Typography.Text strong>
+                          <Typography.Text strong style={{color : theme === "dark" && "white"}}>
                             Budget Type:
                           </Typography.Text>{" "}
                           <span style={{ fontWeight: 'normal' }}>
@@ -5237,11 +5242,11 @@ const MyTablePage = () => {
                           type="number"
                           value={changeBudget}
                           onChange={(e) => onChangeBudget(e.target.value)}
-                          placeholder="Enter budget in USD"
+                          placeholder="Enter budget in USD"  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                         />
           
                         <div>
-                          <Typography.Text strong>Campaign ID:</Typography.Text>
+                          <Typography.Text strong style={{color : theme === "dark" && "white"}}>Campaign ID:</Typography.Text>
                           <p>{campaignActualSpend?.id}</p>
                         </div>
                       </div>
@@ -6036,6 +6041,7 @@ const MyTablePage = () => {
                       onCancel={() => setIsModalVisible(false)}
                       width={600}
                       okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
+                      className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                     >
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                         {/* <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -6050,7 +6056,7 @@ const MyTablePage = () => {
                         </div> */}
           
                         <div>
-                          <Typography.Text strong>
+                          <Typography.Text strong style={{color : theme === "dark" && "white"}}>
                             Budget Type:
                           </Typography.Text>{" "}
                           <span style={{ fontWeight: 'normal' }}>
@@ -6063,11 +6069,11 @@ const MyTablePage = () => {
                           type="number"
                           value={changeBudget}
                           onChange={(e) => onChangeBudget(e.target.value)}
-                          placeholder="Enter budget in USD"
+                          placeholder="Enter budget in USD"  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                         />
           
                         <div>
-                          <Typography.Text strong>Campaign ID:</Typography.Text>
+                          <Typography.Text strong style={{color : theme === "dark" && "white"}}>Campaign ID:</Typography.Text>
                           <p>{campaignActualSpend?.id}</p>
                         </div>
                       </div>
@@ -6578,6 +6584,7 @@ const MyTablePage = () => {
                                 width={600}  // Set a custom width for the modal
                                 style={{ padding: '20px' }}  // Adjust body padding
                                 okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }} 
+                                className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             >
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
@@ -6593,7 +6600,7 @@ const MyTablePage = () => {
 
                                     {/* Campaign ID */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                        <Typography.Text strong>Campaign ID:</Typography.Text>
+                                        <Typography.Text strong style={{color : theme === "dark" && "white"}}>Campaign ID:</Typography.Text>
                                         <p>{campaignActualSpend?.id}</p>
                                     </div>
                                 </div>
@@ -7112,6 +7119,7 @@ const MyTablePage = () => {
                                 width={600}  // Set a custom width for the modal
                                 style={{ padding: '20px' }}  // Adjust body padding
                                 okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }} 
+                                className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             >
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
@@ -7127,7 +7135,7 @@ const MyTablePage = () => {
 
                                     {/* Campaign ID */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                        <Typography.Text strong>Campaign ID:</Typography.Text>
+                                        <Typography.Text strong style={{color : theme === "dark" && "white"}}>Campaign ID:</Typography.Text>
                                         <p>{campaignActualSpend?.id}</p>
                                     </div>
                                 </div>
@@ -7771,6 +7779,7 @@ const MyTablePage = () => {
                       onCancel={() => setIsModalVisible(false)}
                       width={600}
                       okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
+                      className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                     >
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                         {/* <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -7785,7 +7794,7 @@ const MyTablePage = () => {
                         </div> */}
           
                         <div>
-                          <Typography.Text strong>
+                          <Typography.Text strong style={{color : theme === "dark" && "white"}}>
                             Budget Type:
                           </Typography.Text>{" "}
                           <span style={{ fontWeight: 'normal' }}>
@@ -7798,11 +7807,11 @@ const MyTablePage = () => {
                           type="number"
                           value={changeBudget}
                           onChange={(e) => onChangeBudget(e.target.value)}
-                          placeholder="Enter budget in USD"
+                          placeholder="Enter budget in USD"  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                         />
           
                         <div>
-                          <Typography.Text strong>Campaign ID:</Typography.Text>
+                          <Typography.Text strong style={{color : theme === "dark" && "white"}}>Campaign ID:</Typography.Text>
                           <p>{campaignActualSpend?.id}</p>
                         </div>
                       </div>
@@ -8341,7 +8350,8 @@ const MyTablePage = () => {
                                 onCancel={handleCancel}
                                 width={600}  // Set a custom width for the modal
                                 style={{ padding: '20px' }}  // Adjust body padding
-                                okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }} 
+                                okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
+                                className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`} 
                             >
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
@@ -9943,6 +9953,7 @@ const MyTablePage = () => {
                 onCancel={handleCancel}
                 okText="Add"
                 cancelText="Cancel"
+                className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
             >
                 <Input value={newColumnName} placeholder='Enter Column Name' style={{ marginBottom: '10px' }} onChange={(e) => setNewColumnName(e.target.value)} />
                 <Input value={formula} placeholder='Enter Formula' style={{ marginBottom: '10px' }} onChange={(e) => setFormula(e.target.value)} />

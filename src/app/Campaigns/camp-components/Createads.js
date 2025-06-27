@@ -1379,7 +1379,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
                                                     key={index}
                                                 >
                                                     <div key={index} className="container-ad-preview">
-                                                        <div className="ad-preview" style={{ width: "350px" , backgroundColor: theme === "dark" && "#333"}}>
+                                                        <div className="ad-preview" style={{ width: "350px" , backgroundColor: theme === "dark" && "#4d4c49"}}>
                                                             <div className="ad-heading">
                                                                 <div className="img">
                                                                     {/* {file?.filename?.endsWith('.png') && console.log(file)} */}

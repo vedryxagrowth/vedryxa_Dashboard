@@ -17,6 +17,7 @@ import DActiveUrlBuilder from './urlbuilder/dactive';
 import CreativesDrawer from './creativesDrawer';
 import ImageUploadPage from '../../Creatives/page';
 import { NodeNextRequest } from 'next/dist/server/base-http/node';
+import { useTokenContext } from "../../components/parent";
 
 const FabricCanvas = dynamic(() => import('./Fabricanvas'), { ssr: false });
 
@@ -517,6 +518,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
     const [panels, setPanels] = useState([]); // State to manage dynamic panels
     const [levelWiseChanges, setLevelWiseChanges] = useState({});
     const [activePanelKey, setActivePanelKey] = useState(null);
+    const { theme } = useTokenContext();
 
 
     const handleModeChange = (value) => {
@@ -2076,13 +2078,14 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
             width="95%"
             open={visible}
             onClose={handleDrawerClose}
+            style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
         >
 
             <Spin spinning={loading}>
-                <Form layout="vertical" form={form} onFinish={onFinish} onValuesChange={handleFormChange} initialValues={initialValues}>
+                <Form layout="vertical" form={form} onFinish={onFinish} onValuesChange={handleFormChange} initialValues={initialValues} className={theme === 'dark' ? 'form-dark' : 'form-light'}>
                     <Collapse accordion activeKey={activeKey} // Bind active key state
-                        onChange={(key) => setActiveKey([key])}  >
-                        <Panel header="CAMPAIGN LEVEL" key="1">
+                        onChange={(key) => setActiveKey([key])} className={theme === 'dark' ? 'custom-collapse-dark' : 'custom-collapse-light'} >
+                        <Panel header="CAMPAIGN LEVEL" key="1" style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}>
                             <div style={{ display: "flex" }}>
                                 <Form.Item
                                     name={["Campaign", "Account_Number"]}
@@ -2094,7 +2097,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                         },
                                     ]}
                                     style={{ flex: 0.2 }}>
-                                    <Input value={accountNumber} onChange={Accountchange} />
+                                    <Input value={accountNumber} onChange={Accountchange}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                                 </Form.Item>
                                 <Form.Item
                                     name={["Campaign", "Name"]}
@@ -2108,6 +2111,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     style={{ flex: 0.25 }}>
                                     <Input onChange={handleNameChange}
                                         style={{ width: "100%", marginLeft: "3%" }}
+                                        className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2133,6 +2137,8 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
 
                                         ]}
                                         disabled={true} // Disable the select field
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2158,6 +2164,8 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             { value: "NONE", label: "None" }
 
                                         ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme-category' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2180,6 +2188,8 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                         ]}
                                         onChange={handleBidStrategyChange}
                                         disabled={true}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2205,6 +2215,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                 width: '200px',
                                                 boxSizing: 'border-box'
                                             }}
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                         />
                                     </Tooltip>
                                 </Form.Item> {/*pk*/}
@@ -2224,6 +2235,8 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             { value: "ACTIVE", label: "ACTIVE" },
                                             { value: "PAUSED", label: "PAUSED" },
                                         ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                             </div>
@@ -2243,7 +2256,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     ]}
                                     style={{ flex: '1 1 200px' }}
                                 >
-                                    <Input />
+                                    <Input   className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
                                 </Form.Item>
                                 <Form.Item
                                     name={["Adset", "optimization_goal"]}
@@ -2264,6 +2277,8 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             { value: "VALUE", label: "Value" }
                                         ]}
                                         disabled={true} 
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2283,6 +2298,8 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             { value: "VALUE", label: "Value" }
                                         ]}
                                         disabled={true} 
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2298,7 +2315,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     initialValue={currentDate}
                                 >
                                     <DatePicker showTime 
-                                    disabled={true} 
+                                    disabled={true}  dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}
     //                                 onChange={(value, dateString) => {
     //     console.log("Local Time:", dateString)
     //     console.log("UTC ISO:", moment(value).utc().format("YYYY-MM-DDTHH:mm:ssZ"))
@@ -2323,6 +2340,8 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             { value: "app", label: "App" },
                                             { value: "phone_call", label: "Phone Call" }
                                         ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2344,6 +2363,8 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             { value: "CONTACT", label: "Contact" },
                                         ]}
                                         disabled={true} 
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2359,7 +2380,8 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     style={{ flex: '1 1 200px' }}
                                 >
                                     <Input 
-                                    disabled={true} />
+                                    disabled={true}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
+                                    
                                 </Form.Item>
                                 {/*pk*/}
                                 <Form.Item
@@ -2384,6 +2406,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                 width: '200px',
                                                 boxSizing: 'border-box'
                                             }}
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                         />
                                     </Tooltip>
                                 </Form.Item>
@@ -2416,6 +2439,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                     event.preventDefault();
                                                 }
                                             }}
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                         />
                                     </Form.Item>
                                 )}
@@ -2454,6 +2478,8 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             { value: "NZ", label: "New Zealand" },
                                             { value: "MX", label: "Mexico" }
                                         ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2474,6 +2500,8 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             { value: "35", label: "35" },
                                             { value: "40", label: "40", disabled: true },
                                         ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2494,6 +2522,8 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             { value: "65", label: "65+" },
                                             { value: "80", label: "80", disabled: true },
                                         ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2513,6 +2543,8 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             { value: "1", label: "Male" },
                                             { value: "2", label: "Female" },
                                         ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2529,6 +2561,8 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                         filterOption={(input, option) =>
                                             option.children.toLowerCase().includes(input.toLowerCase())
                                         }
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     >
                                         {localesdata.map(option => (
                                             <Option key={option.key} value={option.key}>
@@ -2543,7 +2577,9 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     rules={[{ required: true, message: 'Please select a mode!' }]}
                                    
                                 >
-                                    <Select placeholder="Select a mode" onChange={handleModeChange}  disabled={true} >
+                                    <Select placeholder="Select a mode" onChange={handleModeChange}  disabled={true} 
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}>
                                         <Option value="Advance">Advance</Option>
                                         <Option value="manual">Manual</Option>
 
@@ -2563,6 +2599,8 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                 onChange={handlePublisherChange}
                                                 value={selectedPublishers}
                                                 disabled={true} 
+                                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                             >
                                                 {publisherOptions.map(option => (
                                                     <Option key={option.value} value={option.value}>
@@ -2583,6 +2621,8 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                 value={selectedPositions}
                                                 onChange={handlePositionChange}
                                                 disabled={true} 
+                                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                             >
                                                 {selectedPublishers.length > 0 && getPositionOptions()?.map(position => (
                                                     <Option key={`${position.key}_${position.label}`} value={position.key}>
@@ -2611,6 +2651,8 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                     { value: "desktop", label: "Desktop" }
                                                 ]}
                                                 disabled={true} 
+                                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                             />
                                         </Form.Item>
                                     </>
@@ -2636,6 +2678,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                     initialValue={panel.AddName || ""}
                                                     >
                                                         <Input
+                                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                                             value={panel.AddName}
                                                             onChange={(e) => {
                                                                 const newAddName = e.target.value;
@@ -2686,6 +2729,8 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                         }}
                                                         style={{ marginBottom: 16, width: "30%" }}
                                                         disabled={!(panel.selectedFiles.length === 0 && panel.selectedFilesFromCreatives.length === 0 && panel.selectedFilesFromMedia.length === 0)}
+                                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                                     >
                                                         <Option value="upload">Upload</Option>
                                                         <Option value="creative">Creative Library</Option>
@@ -2710,7 +2755,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                         },
                                                     ]}
                                                     >
-                                                    <div>
+                                                    <div className="custom-dark-mode"  >
                                                         {/* Upload Section */}
                                                         {panel.selectedOption === "upload" && (
                                                             <Upload
@@ -2810,6 +2855,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                                     panel.selectedFilesFromMedia.length === 0
                                                                     )
                                                                 }
+                                                                className="dark-icon-button"  style={{color: theme === "dark" ? "white" : "#000"}}
                                                                 >
                                                                 Select Files
                                                                 </Button>
@@ -2832,6 +2878,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                                 onClick={() =>
                                                                     onClickCreativesDrawer(panel.key)
                                                                 }
+                                                                className="dark-icon-button"  style={{color: theme === "dark" ? "white" : "#000"}}
                                                                 >
                                                                 Select Files
                                                                 </Button>
@@ -2872,6 +2919,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                                             textOverflow: "ellipsis",
                                                                             whiteSpace: "nowrap",
                                                                             paddingLeft: 8,
+                                                                            color: theme === 'dark' ? '#fff' : '#000',
                                                                         }}
                                                                         >
                                                                         {file.name}
@@ -3273,7 +3321,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             style={{ flex: 3, marginLeft: "1%", marginTop: "1%" }}
                                              // Disable the input field
                                     >
-                                            <Input style={{ width: "45%" }} disabled={true}/>
+                                            <Input style={{ width: "45%" }} disabled={true}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
                                     </Form.Item>
                                     {/* <Form.Item
                                         name="AddName"
@@ -3307,7 +3355,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             placeholder="Primary text"
                                             autoSize={{ minRows: 2, maxRows: 10 }}
                                             onChange={(e) => setPrimaryText(e.target.value)}
-
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
 
                                         />
                                     </Form.Item>
@@ -3344,7 +3392,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             placeholder="Headline"
                                             autoSize={{ minRows: 2, maxRows: 10 }}
                                             onChange={(e) => setHeadline(e.target.value)}
-
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                         />
                                     </Form.Item>
 
@@ -3363,7 +3411,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             placeholder="Description"
                                             autoSize={{ minRows: 2, maxRows: 10 }}
                                             onChange={(e) => setDescription(e.target.value)}
-
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                         />
                                     </Form.Item>
                                     <Form.Item
@@ -3393,7 +3441,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             placeholder="Website_URL"
                                             autoSize={{ minRows: 5, maxRows: 15 }}
                                             onChange={(e) => setWebsiteURL(e.target.value)}
-
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
 
                                         />
                                     </Form.Item>
@@ -3412,7 +3460,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             placeholder="Display Link"
                                             autoSize={{ minRows: 2, maxRows: 10 }}
                                             onChange={(e) => setCaption(e.target.value)}
-
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                         />
                                     </Form.Item>
                                     <Modal
@@ -3430,6 +3478,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                         footer={null}
                                         width="80%" // Set width of the modal
                                         bodyStyle={{ height: '50vh', overflowY: 'auto' }}
+                                        className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                                     >
                                         {getUrlBuilder(network)}
                                     </Modal>
@@ -3687,7 +3736,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
                             <Button
                                 type="primary"
-                                style={{ background: '#21c55d', minWidth: '200px' }}
+                                style={{ background: '#21c55d', minWidth: '200px', borderWidth: '0px' }}
                                 onClick={async () => {
                                 try {
                                     const values = await form.validateFields(); // Validates all form fields
@@ -3764,7 +3813,8 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                         title="Confirmation"
                         open={isModalVisible}
                         onOk={handleOk}
-                        onCancel={handleCancel}>
+                        onCancel={handleCancel}
+                        className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}>
                         <p>Are you sure you want to submit?</p>
                     </Modal>
                 </Form>
@@ -3775,6 +3825,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                     width="95%"
                     open={openCreativesDrawer}
                     onClose={() => setOpenCreativesDrawer(false)}
+                    style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
                 >
                     {/* <CreativesDrawer
                         selectedFilesData={selectedFilesData}

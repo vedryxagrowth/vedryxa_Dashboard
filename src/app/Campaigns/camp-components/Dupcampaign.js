@@ -2950,7 +2950,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                     key={index}
                                                 >
                                                     <div key={index} className="container-ad-preview">
-                                                        <div className="ad-preview" style={{ width: "350px", backgroundColor: theme === "dark" && "#333" }}>
+                                                        <div className="ad-preview" style={{ width: "350px", backgroundColor: theme === "dark" && "#4f4f4d" }}>
                                                             <div className="ad-heading">
                                                                 <div className="img">
                                                                     {/* {file?.filename?.endsWith('.png') && console.log(file)} */}
@@ -3167,7 +3167,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
                             <Button
                                 type="primary"
-                                style={{ background: '#21c55d', minWidth: '200px' }}
+                                style={{ background: '#21c55d', minWidth: '200px', borderWidth:'0px' }}
                                 onClick={async () => {
                                 try {
                                     const values = await form.validateFields(); // Validates all form fields
@@ -3255,6 +3255,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                     width="95%"
                     open={openCreativesDrawer}
                     onClose={() => setOpenCreativesDrawer(false)}
+                    style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
                 >
                     {/* <CreativesDrawer
                         selectedFilesData={selectedFilesData}

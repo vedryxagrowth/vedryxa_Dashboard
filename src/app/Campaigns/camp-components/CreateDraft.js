@@ -17,6 +17,7 @@ import DActiveUrlBuilder from './urlbuilder/dactive';
 import CreativesDrawer from './creativesDrawer';
 import ImageUploadPage from '../../Creatives/page';
 import { NodeNextRequest } from 'next/dist/server/base-http/node';
+import { useTokenContext } from "../../components/parent";
 
 const FabricCanvas = dynamic(() => import('./Fabricanvas'), { ssr: false });
 
@@ -510,7 +511,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
     const [selectedFilesFromCreatives, setSelectedFilesFromCreatives] = useState([]);
     const [selectedFilesFromMedia, setSelectedFilesFromMedia] = useState([]);
     const [openCreativesDrawer, setOpenCreativesDrawer] = useState(false);
-
+    const { theme } = useTokenContext();
 
     const handleModeChange = (value) => {
         setIsManual(value === "manual");
@@ -1774,10 +1775,11 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
             width="95%"
             open={visible}
             onClose={handleDrawerClose}
+            style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
         >
 
             <Spin spinning={loading}>
-                <Form layout="vertical" form={form} onFinish={onFinish} onValuesChange={handleFormChange} initialValues={initialValues}>
+                <Form layout="vertical" form={form} onFinish={onFinish} onValuesChange={handleFormChange} initialValues={initialValues} className={theme === 'dark' ? 'form-dark' : 'form-light'}>
                     <Form.Item
                         name="Draft_Name"
                         label={<span style={{ color: "#B4B4B4" }}>Draft Name</span>}
@@ -1788,12 +1790,12 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                             },
                         ]}
                         style={{ flex: 0.2 }}>
-                        <Input />
+                        <Input placeholder='Enter Draft Name'  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                     </Form.Item>
                     <Collapse accordion activeKey={activeKey} // Bind active key state
-                        onChange={(key) => setActiveKey([key])}  >
-                        <Panel header="CAMPAIGN LEVEL" key="1">
-                            <div style={{ display: "flex" }}>
+                        onChange={(key) => setActiveKey([key])} className={theme === 'dark' ? 'custom-collapse-dark' : 'custom-collapse-light'}  >
+                        <Panel header="CAMPAIGN LEVEL" key="1" style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}>
+                            <div style={{ display: "flex", backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000'}}>
                                 <Form.Item
                                     name="Account_Number"
                                     label={<span style={{ color: "#B4B4B4" }}>Account Number</span>}
@@ -1804,7 +1806,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                     //     },
                                     // ]}
                                     style={{ flex: 0.2 }}>
-                                    <Input value={accountNumber} onChange={Accountchange} />
+                                    <Input value={accountNumber} onChange={Accountchange}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                                 </Form.Item>
                                 <Form.Item
                                     name="Name"
@@ -1818,6 +1820,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                     style={{ flex: 0.25 }}>
                                     <Input onChange={handleNameChange}
                                         style={{ width: "100%", marginLeft: "3%" }}
+                                        className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -1842,6 +1845,8 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                             { value: "OUTCOME_APP_PROMOTION", label: "App promotion" }
 
                                         ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -1867,6 +1872,8 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                             { value: "NONE", label: "None" }
 
                                         ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme-category' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -1888,6 +1895,8 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                             { value: "LOWEST_COST_WITH_MIN_ROAS", label: "ROAS Goal" }
                                         ]}
                                         onChange={handleBidStrategyChange}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -1914,6 +1923,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                                 width: '200px',
                                                 boxSizing: 'border-box'
                                             }}
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                         />
                                     </Tooltip>
                                 </Form.Item> {/*pk*/}
@@ -1933,6 +1943,8 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                             { value: "ACTIVE", label: "ACTIVE" },
                                             { value: "PAUSED", label: "PAUSED" },
                                         ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                             </div>
@@ -1952,7 +1964,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                     // ]}
                                     style={{ flex: '1 1 200px' }}
                                 >
-                                    <Input />
+                                    <Input   className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
                                 </Form.Item>
                                 <Form.Item
                                     name="optimization_goal"
@@ -1972,6 +1984,8 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                             { value: "REACH", label: "Reach" },
                                             { value: "VALUE", label: "Value" }
                                         ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -1990,6 +2004,8 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                             { value: "IMPRESSIONS", label: "Impressions" },
                                             { value: "VALUE", label: "Value" }
                                         ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2029,6 +2045,8 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                             { value: "app", label: "App" },
                                             { value: "phone_call", label: "Phone Call" }
                                         ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2049,6 +2067,8 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                             { value: "SEARCH", label: "Search" },
                                             { value: "CONTACT", label: "Contact" },
                                         ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2063,7 +2083,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                     // ]}
                                     style={{ flex: '1 1 200px' }}
                                 >
-                                    <Input />
+                                    <Input   className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
                                 </Form.Item>
                                 {/*pk*/}
                                 <Form.Item
@@ -2089,6 +2109,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                                 width: '200px',
                                                 boxSizing: 'border-box'
                                             }}
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                         />
                                     </Tooltip>
                                 </Form.Item>
@@ -2129,6 +2150,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                                     event.preventDefault();
                                                 }
                                             }}
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                         />
 
                                     </Form.Item>
@@ -2168,6 +2190,8 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                             { value: "NZ", label: "New Zealand" },
                                             { value: "MX", label: "Mexico" }
                                         ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2188,6 +2212,8 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                             { value: "35", label: "35" },
                                             { value: "40", label: "40", disabled: true },
                                         ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2208,6 +2234,8 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                             { value: "65", label: "65+" },
                                             { value: "80", label: "80", disabled: true },
                                         ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2227,6 +2255,8 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                             { value: "1", label: "Male" },
                                             { value: "2", label: "Female" },
                                         ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2243,6 +2273,8 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                         filterOption={(input, option) =>
                                             option.children.toLowerCase().includes(input.toLowerCase())
                                         }
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     >
                                         {localesdata.map(option => (
                                             <Option key={option.key} value={option.key}>
@@ -2256,7 +2288,9 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                     name="placements"
                                     // rules={[{ required: true, message: 'Please select a mode!' }]}
                                 >
-                                    <Select placeholder="Select a mode" onChange={handleModeChange}>
+                                    <Select placeholder="Select a mode" onChange={handleModeChange}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}>
                                         <Option value="Advance">Advance</Option>
                                         <Option value="manual">Manual</Option>
 
@@ -2275,6 +2309,8 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                                 placeholder="Select Platforms"
                                                 onChange={handlePublisherChange}
                                                 value={selectedPublishers}
+                                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                             >
                                                 {publisherOptions.map(option => (
                                                     <Option key={option.value} value={option.value}>
@@ -2294,6 +2330,8 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                                 placeholder="Select Positions"
                                                 value={selectedPositions.map(pos => pos.value)}
                                                 onChange={handlePositionChange}
+                                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                             >
                                                 {selectedPublishers.length > 0 && getPositionOptions()?.map(position => (
                                                     <Option key={`${position.key}_${position.label}`} value={position.key}>
@@ -2321,6 +2359,8 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                                     { value: "mobile", label: "Mobile" },
                                                     { value: "desktop", label: "Desktop" }
                                                 ]}
+                                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                             />
                                         </Form.Item>
                                     </>
@@ -2345,6 +2385,8 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                                 form.validateFields(["MediaContent"]); // Revalidate when switching source
                                                 }}
                                                 style={{ marginBottom: 16 }}
+                                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                             >
                                                 <Option value="upload">Upload</Option>
                                                 <Option value="creative">Creative Library</Option>
@@ -2369,7 +2411,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                             >
                                                 <div>
                                                     {/* Upload UI */}
-                                                    <div style={{ display: selectedOption === "upload" ? "block" : "none" }}>
+                                                    <div  className="custom-dark-mode" style={{ display: selectedOption === "upload" ? "block" : "none" }}>
                                                         <Upload
                                                             beforeUpload={() => false}
                                                             onChange={(info) => {
@@ -2425,14 +2467,14 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                                             listType="picture"
                                                             accept="image/*, video/*"
                                                         >
-                                                            <Button icon={<UploadOutlined />}>Select Files</Button>
+                                                            <Button icon={<UploadOutlined />} className="dark-icon-button"  style={{color: theme === "dark" ? "white" : "#000"}}>Select Files</Button>
                                                         </Upload>
                                                     </div>
 
                                                     {/* Creative Library UI */}
                                                     {selectedOption === "creative" && (
                                                     <div>
-                                                        <Button icon={<UploadOutlined />} onClick={onClickCreativesDrawer}>
+                                                        <Button icon={<UploadOutlined />} onClick={onClickCreativesDrawer} className="dark-icon-button"  style={{color: theme === "dark" ? "white" : "#000"}}>
                                                         Select Files
                                                         </Button>
 
@@ -2473,6 +2515,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                                                     textOverflow: "ellipsis",
                                                                     whiteSpace: "nowrap",
                                                                     paddingLeft: 8,
+                                                                    color: theme === 'dark' ? '#fff' : '#000',
                                                                     }}
                                                                 >
                                                                     {file.name}
@@ -2517,7 +2560,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                             // ]}
                                             style={{ flex: 3, marginLeft: "1%" }}
                                         >
-                                            <Input style={{ width: "45%" }} />
+                                            <Input style={{ width: "45%" }}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                                         </Form.Item>
                                     </div>
                                     <Form.Item
@@ -2534,7 +2577,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                         <Input
                                             style={{ width: "60%" }}
                                             onChange={(e) => setAddName(e.target.value)}
-
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                         />
                                     </Form.Item>
                                     <Form.Item
@@ -2552,7 +2595,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                             placeholder="Primary text"
                                             autoSize={{ minRows: 2, maxRows: 10 }}
                                             onChange={(e) => setPrimaryText(e.target.value)}
-
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
 
                                         />
                                     </Form.Item>
@@ -2589,7 +2632,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                             placeholder="Headline"
                                             autoSize={{ minRows: 2, maxRows: 10 }}
                                             onChange={(e) => setHeadline(e.target.value)}
-
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                         />
                                     </Form.Item>
 
@@ -2608,7 +2651,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                             placeholder="Description"
                                             autoSize={{ minRows: 2, maxRows: 10 }}
                                             onChange={(e) => setDescription(e.target.value)}
-
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                         />
                                     </Form.Item>
                                     <Form.Item
@@ -2638,7 +2681,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                             placeholder="Website_URL"
                                             autoSize={{ minRows: 5, maxRows: 15 }}
                                             onChange={(e) => setWebsiteURL(e.target.value)}
-
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
 
                                         />
                                     </Form.Item>
@@ -2657,7 +2700,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                             placeholder="Display Link"
                                             autoSize={{ minRows: 2, maxRows: 10 }}
                                             onChange={(e) => setCaption(e.target.value)}
-
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                         />
                                     </Form.Item>
                                     <Modal
@@ -2675,6 +2718,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                         footer={null}
                                         width="80%" // Set width of the modal
                                         bodyStyle={{ height: '50vh', overflowY: 'auto' }}
+                                        className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                                     >
                                         {getUrlBuilder}
                                     </Modal>
@@ -2716,7 +2760,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                                     key={index}
                                                 >
                                                     <div key={index} className="container-ad-preview">
-                                                        <div className="ad-preview" style={{ width: "350px" }}>
+                                                        <div className="ad-preview" style={{ width: "350px", backgroundColor: theme === "dark" && "#4f4f4d" }}>
                                                             <div className="ad-heading">
                                                                 <div className="img">
                                                                     {/* {file?.filename?.endsWith('.png') && console.log(file)} */}
@@ -2763,7 +2807,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                                                 </div>
 
                                                                 <div className="title">
-                                                                    <div className="main" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
+                                                                    <div className="main" style={{ wordWrap: 'break-word', whiteSpace: 'normal',color : theme === "dark" && "white" }}>
                                                                         {addName}
                                                                         {/* </div>                                                            <div className="sub">
                                                                         Sponsored <GlobalOutlined style={{ opacity: "0.6" }} /> */}
@@ -2785,7 +2829,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                                                     <MoreOutlined style={{ fontSize: "20px" }} />
                                                                 </div>
                                                             </div>
-                                                            <div className="ad-desc" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
+                                                            <div className="ad-desc" style={{ wordWrap: 'break-word', whiteSpace: 'normal',color : theme === "dark" && "white" }}>
                                                                 {primaryText}
                                                             </div>
                                                             <div className="ad-image" style={{ width: '350px', height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -2831,26 +2875,26 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
 
                                                             <div className="ad-cta">
                                                                 <div className="details">
-                                                                    <div className="link">{caption}</div>
-                                                                    <div className="title">{headline}</div>
-                                                                    <div className="desc">{description}</div>
+                                                                    <div className="link" style={{color : theme === "dark" && "white"}}>{caption}</div>
+                                                                    <div className="title" style={{color : theme === "dark" && "white"}}>{headline}</div>
+                                                                    <div className="desc" style={{color : theme === "dark" && "white"}}>{description}</div>
                                                                 </div>
                                                                 <div className="ad-button">
-                                                                    <button type="button">Learn More</button>
+                                                                    <button style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}}>Learn More</button>
                                                                 </div>
                                                             </div>
                                                             <a href={websiteURL} target="_blank" rel="noopener noreferrer" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: '#0066cc', padding: '10px' }}>
                                                                 {websiteURL}
                                                             </a>                                                <div className="icons">
-                                                                <div className="like">
+                                                                <div className="like"  style={{color : theme === "dark" && "white"}}>
                                                                     <LikeOutlined style={{ fontSize: "20px" }} />
                                                                     Like
                                                                 </div>
-                                                                <div className="comment">
+                                                                <div className="comment" style={{color : theme === "dark" && "white"}}>
                                                                     <CommentOutlined style={{ fontSize: "20px" }} />
                                                                     Comment
                                                                 </div>
-                                                                <div className="share">
+                                                                <div className="share" style={{color : theme === "dark" && "white"}}>
                                                                     <ShareAltOutlined style={{ fontSize: "20px" }} />
                                                                     Share
                                                                 </div>
@@ -2990,7 +3034,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                             </div>
                         )}
                     </Form.Item> */}
-                    <Form.Item label=" "><Button type='primary' htmlType="submit" onClick={()=> {console.log(form, "form Values value")}}>Save</Button></Form.Item>
+                    <Form.Item label=" "><Button style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}} htmlType="submit" onClick={()=> {console.log(form, "form Values value")}}>Save</Button></Form.Item>
 
                     {isImgEditorShown && currentFile && (
                             <FabricCanvas
@@ -3013,7 +3057,8 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                         title="Confirmation"
                         open={isModalVisible}
                         onOk={handleOk}
-                        onCancel={handleCancel}>
+                        onCancel={handleCancel}
+                        className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}>
                         <p>Are you sure you want to submit?</p>
                     </Modal>
                 </Form>
@@ -3024,6 +3069,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                     width="95%"
                     open={openCreativesDrawer}
                     onClose={() => setOpenCreativesDrawer(false)}
+                    style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
                 >
                     {/* <CreativesDrawer
                         selectedFilesData={selectedFilesData}
