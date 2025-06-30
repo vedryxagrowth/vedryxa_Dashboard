@@ -13,7 +13,8 @@ import moment from 'moment-timezone';
 import ContactForm from './mail';
 import { BellFilled, EyeOutlined, GoogleOutlined, LockOutlined, PlusOutlined, UserOutlined, UploadOutlined, CalculatorOutlined,
   DoubleRightOutlined,
-  DoubleLeftOutlined,  } from '@ant-design/icons';
+  DoubleLeftOutlined,
+  BellOutlined,  } from '@ant-design/icons';
   import {
     HomeOutlined,
     PieChartOutlined,
@@ -26,7 +27,7 @@ import { BellFilled, EyeOutlined, GoogleOutlined, LockOutlined, PlusOutlined, Us
     // UserOutlined,
     LaptopOutlined
   } from '@ant-design/icons';
-import { Bell, Edit3Icon, Moon, Sun, StickyNote } from 'lucide-react';
+import { Bell, Edit3Icon, Moon, Sun, StickyNote, View, Eye } from 'lucide-react';
 import { getSession } from 'next-auth/react';
 import debounce from 'lodash.debounce';
 import soundFile from "../../../public/notification_sounds.mp3";
@@ -86,6 +87,118 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
   if(userdetails?.role === "Revenue_Partner"){
     onComplete();
   }
+  const [showAll, setShowAll] = useState(false);
+  const [expandedIndex, setExpandedIndex] = useState(null); // NEW STATE
+
+
+  const handleExpand = (index) => {
+    setExpandedIndex(expandedIndex === index ? null : index);
+  };
+  const items = [
+    { label: 'Connections', count: 3, color: 'orange' },
+    { label: 'Reports', count: 3, color: 'purple' },
+    { label: 'Exports', count: 1, color: 'cyan' },
+    { label: 'Resources', count: 42, color: 'red' },
+    { label: 'Miscellaneous', count: 1, color: 'green' },
+    { label: 'Connections', count: 3, color: 'orange' },
+    { label: 'Reports', count: 3, color: 'purple' },
+    { label: 'Exports', count: 1, color: 'cyan' },
+    { label: 'Resources', count: 42, color: 'red' },
+    { label: 'Miscellaneous', count: 1, color: 'green' },
+  ];
+
+  const displayedItems = showAll ? items : items.slice(0, 5);
+
+  const menu = (
+    <Menu
+      style={{
+        background: darkMode ? '#000' : '#fff',
+        color: darkMode ? '#fff' : '#000',
+        borderRadius: 8,
+        width: '250px',
+        paddingBottom: 0,
+      }}
+    >
+      <Menu.Item>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <span style={{ color: darkMode ? '#fff' :'#000' }}>EVENTS</span>
+          <strong style={{  color: darkMode ? '#fff' :'#000' }}>50 NEW</strong>
+        </div>
+      </Menu.Item>
+
+      <Menu.Divider style={{ borderColor: '#444' }} />
+
+      <Menu.Item style={{ padding: 0 }}>
+        <div
+          style={{
+            maxHeight: 240,
+            overflowY: 'auto',
+            background: darkMode ? '#555' : '#fff',
+          }}
+        >
+          {displayedItems.map(({ label, count, color }, index) => (
+            <div key={label + index}>
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleExpand(index);
+                }}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '8px 16px',
+                  color: darkMode ? '#fff' : '#000',
+                  cursor: 'pointer',
+                }}
+              >
+                {label}
+                <Badge count={count} style={{ backgroundColor: color,  color: darkMode ? '#fff' : '#000', }} />
+              </div>
+
+              {expandedIndex === index &&
+                ['Sub Item 1', 'Sub Item 2', 'Sub Item 3'].map((sub, subIdx) => (
+                  <div
+                    key={`sub-${index}-${subIdx}`}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '6px 15px 6px 20px',
+                      color: darkMode ? '#fff' : '#888',
+                      fontSize: '13px',
+                      alignItems: 'center'
+                    }}
+                  >
+                    <span>{sub}</span>
+                    <Eye style={{ fontSize: 12, color: darkMode ? '#fff' : '#888' }} />
+                  </div>
+                ))}
+            </div>
+          ))}
+        </div>
+      </Menu.Item>
+
+      <Menu.Divider style={{ borderColor: '#444' }} />
+
+      <Menu.Item  style={{ padding: 0 }}>
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowAll(!showAll);
+          }}
+          style={{
+            textAlign: 'center',
+            padding: '10px',
+            color: darkMode ? '#fff' : '#000',
+            cursor: 'pointer',
+          }}
+        >
+          <u>{showAll ? 'Show less' : 'See all events'}</u>
+        </div>
+      </Menu.Item>
+
+    </Menu>
+  );
 
   // Handle viewing and removing the notification after modal closes
   const handleViewNotification = async (notification) => {
@@ -687,9 +800,19 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
             />
           </div>
           <div className='navbar-1'>
+          <Dropdown overlay={menu} trigger={['click']} placement="bottomRight">
+      <span style={{ cursor: 'pointer' }}>
+        <Bell style={{ fontSize: 24 }} />
+      </span>
+    </Dropdown>
+
+
+
+
             {userdetails?.role !== "Revenue_Partner" && <div className="relative inline-block" ref={wrapperRef}>
               <div className="cursor-pointer" onClick={openNotificationsList}>
                 <Bell size={20} />
+              
                 {notifications.length > 0 && (
                   <Badge
                     style={{ color: 'red' }}

@@ -210,6 +210,7 @@ const TopBar1 = () => {
             <div className="relative inline-block" ref={wrapperRef}>
             <div className="cursor-pointer" onClick={toggleNotifications}>
             <Bell size={24} />
+            <Bell size={24} />
             <Badge className="Badge absolute -top-2 -right-2" variant="destructive">
                 {notifications.length}
             </Badge>

@@ -1771,7 +1771,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
 
     return (
         <Drawer
-            title="Create a new Draft"
+            title="Campaign New Strategy"
             width="95%"
             open={visible}
             onClose={handleDrawerClose}
