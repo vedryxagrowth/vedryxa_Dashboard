@@ -811,7 +811,7 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
 
             {userdetails?.role !== "Revenue_Partner" && <div className="relative inline-block" ref={wrapperRef}>
               <div className="cursor-pointer" onClick={openNotificationsList}>
-                <Bell size={20} />
+                {/* <Bell size={20} /> */}
               
                 {notifications.length > 0 && (
                   <Badge
