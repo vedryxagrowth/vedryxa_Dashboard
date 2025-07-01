@@ -2861,7 +2861,7 @@ body.dark-mode .black-icon-comment.anticon svg {
     min-height: 500px; /* Ensure grid takes up space */
   }
   .ag-grid-responsive {
-    height: 200px !important; /* Adjust height for mobile ---- */
+    height: 200px !important; /* Adjust height for mobile */
     overflow: auto !important; 
   }
   .upload-container-11 {
