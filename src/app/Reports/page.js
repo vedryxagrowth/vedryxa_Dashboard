@@ -87,6 +87,7 @@ const MyTablePage = () => {
         "D_tq",
         "from",
         "to",
+        "filteration",
         "profitloss",
         "spend",
         "revenue",
@@ -98,6 +99,7 @@ const MyTablePage = () => {
         "fbclicks",
         "impressions",
         "cpl",
+        "cpm",
         "ncpl",
         "rpc",
         "cpc",
@@ -567,6 +569,57 @@ const MyTablePage = () => {
         return 0;
     };
 
+    const getCpm = (params) => {
+        if (params.data !== undefined) {
+            const { impressions, spend } = params.data;
+
+            if (impressions !== 0) {
+                const CPL = (spend / impressions) * 1000;
+                if (CPL === Infinity) {
+                    return 0;
+                }
+                return Number(CPL.toFixed(2));
+
+            }
+        }
+        if (params.node.aggData !== undefined) {
+            const { impressions, spend } = params.node.aggData;
+            if (impressions !== 0) {
+                const CPL = (spend / impressions) * 1000;
+                if (CPL === Infinity) {
+                    return 0;
+                }
+                return Number(CPL.toFixed(2));
+            }
+        }
+
+        return 0;
+    };
+
+    const getFilteration = (params) => {
+
+        if (params.data !== undefined) {
+            const { fbleads, conversions } = params.data;
+            if (fbleads !== 0) {
+                const RPC = ((parseInt(fbleads)-parseInt(conversions)) / parseInt(fbleads))*100;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return `${Number(RPC.toFixed(2))}`;
+
+            }
+        }
+        if (params.node.aggData !== undefined) {
+            const { fbleads, conversions } = params.node.aggData;
+            if (fbleads !== 0) {
+                const RPC = ((parseInt(fbleads)-parseInt(conversions)) / parseInt(fbleads))*100;
+                return `${Number(RPC.toFixed(2))}`;
+            }
+        }
+
+        return 0;
+    }
+    
     const getCpcLc = (params) => {
         if (params.data !== undefined) {
             const { spend, fblinkclicks } = params.data;
@@ -1192,6 +1245,29 @@ const MyTablePage = () => {
             //     window.open(url, '_blank', 'noopener,noreferrer');
             // },
             // cellRenderer: campaignNameRenderer,
+        },
+        cpm: {
+            headerName: 'CPM',
+            field: 'cpm',
+            sortable: true,
+            minWidth: 90,
+            headerTooltip: '(Profit/Revenue)*100', filter: true,
+            valueGetter: getCpm,
+            hide: false,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',  
+        },
+        filteration: { 
+            headerName: "Filteration",
+            field: 'filteration',
+            width: 115,
+            valueGetter: getFilteration,
+            valueFormatter: params => `${params.value || 0}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            hide: true,
         },
         adsetname: {
             headerName: 'AdsetName', field: 'adsetname',
@@ -1864,6 +1940,29 @@ const MyTablePage = () => {
             //     window.open(url, '_blank', 'noopener,noreferrer');
             // },
             // cellRenderer: campaignNameRenderer,
+        },
+        cpm: {
+            headerName: 'CPM',
+            field: 'cpm',
+            sortable: true,
+            minWidth: 90,
+            headerTooltip: '(Profit/Revenue)*100', filter: true,
+            valueGetter: getCpm,
+            hide: false,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',  
+        },
+        filteration: { 
+            headerName: "Filteration",
+            field: 'filteration',
+            width: 115,
+            valueGetter: getFilteration,
+            valueFormatter: params => `${params.value || 0}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            hide: true,
         },
         actions: {
             headerName: 'Actions',
@@ -3431,6 +3530,29 @@ const MyTablePage = () => {
             hide: true,
             
         },
+        cpm: {
+            headerName: 'CPM',
+            field: 'cpm',
+            sortable: true,
+            minWidth: 90,
+            headerTooltip: '(Profit/Revenue)*100', filter: true,
+            valueGetter: getCpm,
+            hide: false,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',  
+        },
+        filteration: { 
+            headerName: "Filteration",
+            field: 'filteration',
+            width: 115,
+            valueGetter: getFilteration,
+            valueFormatter: params => `${params.value || 0}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            hide: true,
+        },
         // actions: {
         //     headerName: 'Actions',
         //     field: 'actions',
@@ -4262,6 +4384,29 @@ const MyTablePage = () => {
             hide: true,
             
         },
+        cpm: {
+            headerName: 'CPM',
+            field: 'cpm',
+            sortable: true,
+            minWidth: 90,
+            headerTooltip: '(Profit/Revenue)*100', filter: true,
+            valueGetter: getCpm,
+            hide: false,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',  
+        },
+        filteration: { 
+            headerName: "Filteration",
+            field: 'filteration',
+            width: 115,
+            valueGetter: getFilteration,
+            valueFormatter: params => `${params.value || 0}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            hide: true,
+        },
         actions: {
             headerName: 'Budget',
             field: 'actions',
@@ -4950,6 +5095,29 @@ const MyTablePage = () => {
             rowGroup: true,
             enableRowGroup: true,
             pinned: 'left',
+        },
+        cpm: {
+            headerName: 'CPM',
+            field: 'cpm',
+            sortable: true,
+            minWidth: 90,
+            headerTooltip: '(Profit/Revenue)*100', filter: true,
+            valueGetter: getCpm,
+            hide: false,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',  
+        },
+        filteration: { 
+            headerName: "Filteration",
+            field: 'filteration',
+            width: 115,
+            valueGetter: getFilteration,
+            valueFormatter: params => `${params.value || 0}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            hide: true,
         },
         // actions: {
         //     headerName: 'Actions',
@@ -5778,6 +5946,29 @@ const MyTablePage = () => {
             // },
             // cellRenderer: campaignNameRenderer,
         },
+        cpm: {
+            headerName: 'CPM',
+            field: 'cpm',
+            sortable: true,
+            minWidth: 90,
+            headerTooltip: '(Profit/Revenue)*100', filter: true,
+            valueGetter: getCpm,
+            hide: false,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',  
+        },
+        filteration: { 
+            headerName: "Filteration",
+            field: 'filteration',
+            width: 115,
+            valueGetter: getFilteration,
+            valueFormatter: params => `${params.value || 0}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            hide: false,
+        },
         // actions: {
         //     headerName: 'Actions',
         //     field: 'actions',
@@ -6455,6 +6646,29 @@ const MyTablePage = () => {
             // },
             // cellRenderer: campaignNameRenderer,
         },
+        cpm: {
+            headerName: 'CPM',
+            field: 'cpm',
+            sortable: true,
+            minWidth: 90,
+            headerTooltip: '(Profit/Revenue)*100', filter: true,
+            valueGetter: getCpm,
+            hide: false,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',  
+        },
+        filteration: { 
+            headerName: "Filteration",
+            field: 'filteration',
+            width: 115,
+            valueGetter: getFilteration,
+            valueFormatter: params => `${params.value || 0}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            hide: false,
+        },
         actions: {
             headerName: 'Budget',
             field: 'actions',
@@ -6989,6 +7203,29 @@ const MyTablePage = () => {
             },
             cellRenderer: campaignNameRenderer,
         },
+        cpm: {
+            headerName: 'CPM',
+            field: 'cpm',
+            sortable: true,
+            minWidth: 90,
+            headerTooltip: '(Profit/Revenue)*100', filter: true,
+            valueGetter: getCpm,
+            hide: false,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',  
+        },
+        filteration: { 
+            headerName: "Filteration",
+            field: 'filteration',
+            width: 115,
+            valueGetter: getFilteration,
+            valueFormatter: params => `${params.value || 0}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            hide: true,
+        },
         actions: {
             headerName: 'Actions',
             field: 'actions',
@@ -7516,6 +7753,29 @@ const MyTablePage = () => {
             enableRowGroup: true,
             width: 450,
             pinned: 'left',// Using the group cell renderer
+        },
+        cpm: {
+            headerName: 'CPM',
+            field: 'cpm',
+            sortable: true,
+            minWidth: 90,
+            headerTooltip: '(Profit/Revenue)*100', filter: true,
+            valueGetter: getCpm,
+            hide: false,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',  
+        },
+        filteration: { 
+            headerName: "Filteration",
+            field: 'filteration',
+            width: 115,
+            valueGetter: getFilteration,
+            valueFormatter: params => `${params.value || 0}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            hide: false,
         },
         // actions: {
         //     headerName: 'Actions',
@@ -8203,6 +8463,29 @@ const MyTablePage = () => {
             pinned: 'left',
             enableRowGroup: true,
             cellRenderer: campaignNameRenderer,
+        },
+        cpm: {
+            headerName: 'CPM',
+            field: 'cpm',
+            sortable: true,
+            minWidth: 90,
+            headerTooltip: '(Profit/Revenue)*100', filter: true,
+            valueGetter: getCpm,
+            hide: false,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',  
+        },
+        filteration: { 
+            headerName: "Filteration",
+            field: 'filteration',
+            width: 115,
+            valueGetter: getFilteration,
+            valueFormatter: params => `${params.value || 0}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            hide: true,
         },
         keyword: {
             headerName: 'Keywords',
