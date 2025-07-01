@@ -26,7 +26,7 @@ import jwt from 'jsonwebtoken';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import { notification } from 'antd';
-import io from 'socket.io-client';
+// import io from 'socket.io-client';
 import soundFile from "../../../public/notification_sounds.mp3";
 function getItem(label, key, icon) {
     return {
@@ -187,29 +187,29 @@ const Appbar = ({ children, usersDataForLogin }) => {
       setMoveForward(true);
     }
     // console.log(userdetails);
-    useEffect(() => {
-      // Connect to the WebSocket server (Backend WebSocket server URL)
-      const socket = io('http://localhost:3001');
+    // useEffect(() => {
+    //   // Connect to the WebSocket server (Backend WebSocket server URL)
+    //   const socket = io('http://localhost:3001');
   
-      // Create an audio object with the notification sound
-      const audio = new Audio(soundFile);  // Replace with your sound file URL
-      audio.play();
+    //   // Create an audio object with the notification sound
+    //   const audio = new Audio(soundFile);  // Replace with your sound file URL
+    //   audio.play();
   
-      // Listen for notification events from the server
-      socket.on('notification', (data) => {
-        console.log('Received notification:', data);
-        notification.open({
-          message: 'New Notification',
-          description: data.message,
-          duration: 3, // Duration in seconds for the popup
-        });
-      });
+    //   // Listen for notification events from the server
+    //   socket.on('notification', (data) => {
+    //     console.log('Received notification:', data);
+    //     notification.open({
+    //       message: 'New Notification',
+    //       description: data.message,
+    //       duration: 3, // Duration in seconds for the popup
+    //     });
+    //   });
   
-      // Cleanup WebSocket connection when the component is unmounted
-      return () => {
-        socket.disconnect();
-      };
-    }, []); // Empty dependency array to run only once when component mounts
+    //   // Cleanup WebSocket connection when the component is unmounted
+    //   return () => {
+    //     socket.disconnect();
+    //   };
+    // }, []); // Empty dependency array to run only once when component mounts
   
     useEffect(() => {
         const handleResize = () => {
