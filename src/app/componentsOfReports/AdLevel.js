@@ -100,7 +100,7 @@ const AdLevelReports = ({functionCallForCommnets, startDate, endDate, newaccount
 
     const memorizedColumnDef = useMemo(() => columnDefs, [columnDefs]);
     const memorizedRowData = useMemo(() => rowData ? rowData?.filter((each) => {
-        const normalizedCampaign = each.campaignname.trim().toLowerCase();
+        const normalizedCampaign = each.adname.trim().toLowerCase();
         const normalizedInput = inputValue.trim().toLowerCase();
         return (
             normalizedCampaign.startsWith(normalizedInput) ||

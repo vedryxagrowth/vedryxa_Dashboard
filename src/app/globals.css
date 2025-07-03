@@ -2953,7 +2953,7 @@ body.dark-mode .black-icon-comment.anticon svg {
 
 .dark-theme-category .ant-select-selection-item {
   background-color: #333 !important;  /* tag background */
-  color: white !important;            /* tag text */
+  color: white !important;            
   border: none !important;
 }
 
