@@ -35,7 +35,9 @@ const newtworkCollections = {
     "FB_Bodies": "Facebook_Bodies",
     "FB_Bodies1": "Facebook_Bodies1",
     "Newsbreak_DA": "Newsbreak_DomainActive",
-    "FB_Tonic1": "Facebook_Tonic1"
+    "FB_Tonic1": "Facebook_Tonic1",
+    "FB_Sedo": "Facebook_Sedo",
+    "FB_Inmobi": "Facebook_Inmobi",
 }
 const selectTimezone = {
     UTC: 'UTCDate',

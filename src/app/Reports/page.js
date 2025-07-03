@@ -42,6 +42,7 @@ const CampaignReports = React.lazy(() => import('../componentsOfReports/AllCampa
 const DAKeywordReports = React.lazy(() => import('../componentsOfReports/DAKeywords'));
 const System1KeywordReports = React.lazy(() => import('../componentsOfReports/System1Keywords'));
 const TonicKeywordReports = React.lazy(() => import('../componentsOfReports/Tonic1Keywords'));
+const InmobiKeywordReports = React.lazy(() => import('../componentsOfReports/InmobiKeywords'));
 const AgencyAndBMNameReports = React.lazy(() => import('../componentsOfReports/AgencyAndBMName'));
 const MnetDomainReports = React.lazy(() => import('../componentsOfReports/MnetDomainData'));
 const MnetLiveAdReports = React.lazy(() => import('../componentsOfReports/MnetAdLive'));
@@ -3856,10 +3857,10 @@ const MyTablePage = () => {
                                 (lifetime !== null && lifetime !== undefined && lifetime !== '');
               const hasBid = bid !== null && bid !== undefined && bid !== '';
           
-              let tooltipText = 'No Budget or Bid';
-              if (hasBudget && hasBid) tooltipText = 'Has both Budget and Bid';
-              else if (hasBudget) tooltipText = 'Only Budget';
-              else if (hasBid) tooltipText = 'Only Bid';
+              let tooltipText = 'No budget and bid';
+              if (hasBudget && hasBid) tooltipText = 'Budget and bid';
+              else if (hasBudget) tooltipText = 'Only budget';
+              else if (hasBid) tooltipText = 'Only bid';
           
               return (
                 <div>
@@ -3867,7 +3868,7 @@ const MyTablePage = () => {
                     <DollarOutlined
                       style={{
                         cursor: 'pointer',
-                        color: hasBudget && hasBid ? '#91C25F' : undefined,
+                        color: (hasBudget && hasBid) ? '#91C25F' :  '',
                       }}
                       onClick={onChangeSpendAndStatus}
                     />
@@ -3901,6 +3902,13 @@ const MyTablePage = () => {
                           placeholder="Enter budget in USD"
                           className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                         />
+
+                        <div>
+                          <Typography.Text strong style={{ color: theme === 'dark' && 'white' }}>
+                            Bid amount:
+                          </Typography.Text>{' '}
+                          
+                        </div>
           
                         <Input
                           type="number"
@@ -9895,6 +9903,7 @@ const MyTablePage = () => {
         ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
         ...(newRevenuePratner === "FB_System1" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : []),
         ...(newRevenuePratner === "FB_Tonic1" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
+        ...(newRevenuePratner === "FB_Inmobi" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : [])
         // ...(newRevenuePratner === "FB_Mnet" ? [{ key: '6', label: 'Ad-Live', content: 'Content for Domain data' }] : []),
         // ...(newRevenuePratner === "FB_Mnet" ? [{ key: '7', label: 'Ad-Daily', content: 'Content for Domain data' }] : []),
         // ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '6', label: 'Names-Live', content: 'Content for Names Live data' }] : []),
@@ -10322,6 +10331,30 @@ const MyTablePage = () => {
                         getMainMenuItems={getMainMenuItems}
                     />
                     </Tabs.TabPane>
+                )}
+
+                {newRevenuePratner === "FB_Inmobi" && (
+                    <Tabs.TabPane key="5">
+                        <InmobiKeywordReports 
+                            startDate={newStartDate} 
+                            endDate={newendDate} 
+                            newaccount={newaccount} 
+                            newtime={newtime} 
+                            newRevenuePratner={newRevenuePratner}  
+                            columnDefs={columnDefs4} 
+                            inputValue={inputValue} 
+                            newAccountName={newAccountName} 
+                            campaignComments={campaignComments} 
+                            Camapignlevelstatus={Camapignlevelstatus} 
+                            changeRRefrst={resetColumnStructure} 
+                            debouncedHandleColumnMove={debouncedHandleColumnMove} 
+                            userdetails={userdetails} 
+                            refreshComments={refreshComments}
+                            refreshpage={refreshContent}
+                            getMainMenuItems={getMainMenuItems}
+                        />
+                    </Tabs.TabPane>
+                    
                 )}
 
                 {/* {newRevenuePratner === "FB_Mnet" && (
