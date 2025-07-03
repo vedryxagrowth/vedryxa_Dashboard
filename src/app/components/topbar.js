@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Layout, Avatar, Dropdown, Button, Switch, Spin, Form, Input, Divider, Modal, Badge, Card, Upload, notification, Drawer , Menu, theme} from "antd";
 import React from "react";
 import { useRouter,  usePathname} from "next/navigation";
+import { io } from "socket.io-client";
 import axios from 'axios';
 const { Header } = Layout;
 import { useTokenContext } from './parent';
@@ -42,9 +43,13 @@ import { SlNotebook } from "react-icons/sl";
 import { LuNotebook } from "react-icons/lu";
 import { TfiWorld } from "react-icons/tfi";
 
-import { message } from 'antd';
+import { message, Popconfirm } from 'antd';
+
 
 import { useGlobalLoading } from "../layout";
+
+const socket = io("https://prodapis.adsgoat.in");
+
 
 const Topbar = ({onComplete, usersDataForLogin}) => {
   const { darkMode, toggleTheme } = useTokenContext();
@@ -67,6 +72,9 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
   const [visible, setVisible] = useState(false);
   const [drawerPosition, setDrawerPosition] = useState({ top: 0, left: 0, width: 0 });
   const containerRef = useRef(null);
+  const prevNotificationsRef = useRef([]);
+  const hasReceivedSocketUpdate = useRef(false);
+  const [api, contextHolder] = notification.useNotification();
   
   const [showIcons, setShowIcons] = useState(false);
   
@@ -94,18 +102,33 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
   const handleExpand = (index) => {
     setExpandedIndex(expandedIndex === index ? null : index);
   };
-  const items = [
-    { label: 'Connections', count: 3, color: 'orange' },
-    { label: 'Reports', count: 3, color: 'purple' },
-    { label: 'Exports', count: 1, color: 'cyan' },
-    { label: 'Resources', count: 42, color: 'red' },
-    { label: 'Miscellaneous', count: 1, color: 'green' },
-    { label: 'Connections', count: 3, color: 'orange' },
-    { label: 'Reports', count: 3, color: 'purple' },
-    { label: 'Exports', count: 1, color: 'cyan' },
-    { label: 'Resources', count: 42, color: 'red' },
-    { label: 'Miscellaneous', count: 1, color: 'green' },
-  ];
+  // const items = [
+  //   { label: 'Connections', count: 3, color: 'orange' },
+  //   { label: 'Reports', count: 3, color: 'purple' },
+  //   { label: 'Exports', count: 1, color: 'cyan' },
+  //   { label: 'Resources', count: 42, color: 'red' },
+  //   { label: 'Miscellaneous', count: 1, color: 'green' },
+  //   { label: 'Connections', count: 3, color: 'orange' },
+  //   { label: 'Reports', count: 3, color: 'purple' },
+  //   { label: 'Exports', count: 1, color: 'cyan' },
+  //   { label: 'Resources', count: 42, color: 'red' },
+  //   { label: 'Miscellaneous', count: 1, color: 'green' },
+  // ];
+
+  const onClickNotificationView = async(item, key, email) => {
+    const notificationData = await apiClient.put('/Notifications/Viewed', {email, key, item}, {
+      headers: {
+        Authorization: localStorage.getItem('token'),
+        accept: 'application/json',
+      }
+    })
+  }
+
+  const items = Object.entries(notifications).map(([key, value]) => ({
+    label: key,
+    count: value.length,
+    color: "orange"
+  }));
 
   const displayedItems = showAll ? items : items.slice(0, 5);
 
@@ -122,7 +145,10 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
       <Menu.Item>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <span style={{ color: darkMode ? '#fff' :'#000' }}>EVENTS</span>
-          <strong style={{  color: darkMode ? '#fff' :'#000' }}>50 NEW</strong>
+          <strong style={{  color: darkMode ? '#fff' :'#000' }}>{Object.values(notifications)
+            .filter(Array.isArray)
+            .flat().length} NEW
+          </strong>
         </div>
       </Menu.Item>
 
@@ -136,7 +162,7 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
             background: darkMode ? '#555' : '#fff',
           }}
         >
-          {displayedItems.map(({ label, count, color }, index) => (
+          {/* {displayedItems.map(({ label, count, color }, index) => (
             <div key={label + index}>
               <div
                 onClick={(e) => {
@@ -174,7 +200,55 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
                   </div>
                 ))}
             </div>
-          ))}
+          ))} */}
+          {displayedItems.map(({ label, count, color }, index) => (
+  <div key={label + index}>
+    <div
+      onClick={(e) => {
+        e.stopPropagation();
+        handleExpand(index);
+      }}
+      style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        padding: '8px 16px',
+        color: darkMode ? '#fff' : '#000',
+        cursor: 'pointer',
+      }}
+    >
+      {label}
+      <Badge count={count} style={{ backgroundColor: color, color: darkMode ? '#fff' : '#000' }} />
+    </div>
+
+    {expandedIndex === index &&
+      notifications[label]?.map((item, subIdx) => (
+        <div
+          key={`sub-${index}-${subIdx}`}
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '6px 15px 6px 20px',
+            color: darkMode ? '#fff' : '#888',
+            fontSize: '13px'
+          }}
+        >
+          <span>{item.message}</span>
+          {/* <Popconfirm
+            title="Delete Notification"
+            description="Are you sure to delete this task?"
+            onConfirm={confirm}
+            onCancel={cancel}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Eye style={{ fontSize: 12, color: darkMode ? '#fff' : '#888' }} onClick={()=> {console.log(item, label)}} />
+          </Popconfirm> */}
+          <Eye style={{ fontSize: 12, color: darkMode ? '#fff' : '#888' }} onClick={()=> {onClickNotificationView(item, label, userdetails?.email)}}/>
+        </div>
+      ))}
+  </div>
+))}
         </div>
       </Menu.Item>
 
@@ -250,7 +324,7 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
     }
   };
 
-  const isNotificationsFetched = useRef(false);
+  const isNotificationsFetched = useRef(true);
 
   // Fetch notifications function
   const fetchNotificationsWithRetry = async (retries = 3, delay = 1500) => {
@@ -263,6 +337,7 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
         }
         if (response.status === 200) {
           setNotifications(response.data.notifications);
+          prevNotificationsRef.current = response.data.notifications;
           onComplete();
           isNotificationsFetched.current = true;
         }
@@ -326,11 +401,11 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
     return () => window.removeEventListener("resize", updateDrawerPosition);
   }, [visible]);
 
-  useEffect(() => {
-    if (userdetails?.email && status === "authenticated" && userdetails?.role !== "Revenue_Partner") {
-      fetchNotificationsWithRetry();
-    }
-  }, [userdetails?.email]);
+  // useEffect(() => {
+  //   if (userdetails?.email && status === "authenticated" && userdetails?.role !== "Revenue_Partner") {
+  //     fetchNotificationsWithRetry();
+  //   }
+  // }, [userdetails?.email]);
 
 
   const openNotificationModal = () => {
@@ -377,7 +452,7 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
         setTitle('');
         setDescription('');
         setIsAddNotificationModalVisible(false);
-        fetchNotificationsWithRetry(); // Refetch notifications to update the list
+        // fetchNotificationsWithRetry(); // Refetch notifications to update the list
       } else {
         message.error('Failed to add notification');
       }
@@ -388,68 +463,67 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
   };
 
 
-  const renderNotifications = () => {
-    return notifications.map((notification, index) => (
-      <div
-        key={index}
-        style={{
-          padding: '5px 0',
-          borderBottom: '1px solid #f0f0f0',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          position: 'relative',
-          minHeight: 'auto',
-          // paddingRight: '50px', // Ensure space for the Eye icon
-        }}
-      >
-        <div>
-          <h3 style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '4px' }}>
-            {notification.title}
-          </h3>
+  // const renderNotifications = () => {
+  //   return notifications.map((notification, index) => (
+  //     <div
+  //       key={index}
+  //       style={{
+  //         padding: '5px 0',
+  //         borderBottom: '1px solid #f0f0f0',
+  //         display: 'flex',
+  //         flexDirection: 'column',
+  //         justifyContent: 'space-between',
+  //         position: 'relative',
+  //         minHeight: 'auto',
+  //       }}
+  //     >
+  //       <div>
+  //         <h3 style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '4px' }}>
+  //           {notification.title}
+  //         </h3>
 
-          <p
-            style={{
-              fontSize: '14px',
-              marginBottom: '20px',
-              color: darkMode ? '#fff' : '#555',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-            }}
-          >
-            {notification.description}
-          </p>
+  //         <p
+  //           style={{
+  //             fontSize: '14px',
+  //             marginBottom: '20px',
+  //             color: darkMode ? '#fff' : '#555',
+  //             overflow: 'hidden',
+  //             textOverflow: 'ellipsis',
+  //             display: '-webkit-box',
+  //             WebkitLineClamp: 2,
+  //             WebkitBoxOrient: 'vertical',
+  //           }}
+  //         >
+  //           {notification.description}
+  //         </p>
 
-        </div>
+  //       </div>
 
-        <EyeOutlined
-          style={{
-            position: 'absolute',
-            top: '10px',
-            right: '10px',
-            fontSize: '18px',
-            cursor: 'pointer',
-            color: '#1890ff',
-          }}
-          onClick={() => openViewNotificationModal(notification)}
-        />
+  //       <EyeOutlined
+  //         style={{
+  //           position: 'absolute',
+  //           top: '10px',
+  //           right: '10px',
+  //           fontSize: '18px',
+  //           cursor: 'pointer',
+  //           color: '#1890ff',
+  //         }}
+  //         onClick={() => openViewNotificationModal(notification)}
+  //       />
 
-        <div
-          style={{
-            fontSize: '12px',
-            color: '#888',
-            textAlign: 'right',
-            marginTop: '10px',
-          }}
-        >
-          {notification.date}
-        </div>
-      </div>
-    ));
-  };
+  //       <div
+  //         style={{
+  //           fontSize: '12px',
+  //           color: '#888',
+  //           textAlign: 'right',
+  //           marginTop: '10px',
+  //         }}
+  //       >
+  //         {notification.date}
+  //       </div>
+  //     </div>
+  //   ));
+  // };
 
 
   // Function to close the modals
@@ -599,6 +673,28 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
   //   }
   // };
 
+  const showAllAntdNotificationsSequentially = (notifications) => {
+    notifications.forEach((notif, index) => {
+      setTimeout(() => {
+        playNotificationSound(); // if needed
+        api.open({
+          key: `notify-${index}`,
+          message: notif._category, // 👈 category as title
+          description: notif.message,
+          placement: "topRight",
+          duration: 5,
+          pauseOnHover: true,
+          showProgress: true,
+        });
+      }, index * 500);
+    });
+  };
+  
+  const playNotificationSound = () => {
+    const audio = new Audio(soundFile); // Create an audio object with the sound file
+    audio.play().catch((err) => console.error("🔇 Sound error:", err));
+  };
+
   useEffect(() => {
     // shouldRetry = true; // Reset flag when `userdetails` changes
     // fetchUserAvatarWithRetry();
@@ -606,6 +702,75 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
       setAvatarUrl(userdetails?.profileImage);
     }
   }, [userdetails]);
+
+
+  useEffect(() => {
+    if (!session?.user?.email) return;
+  
+    // Register with backend
+    socket.emit("register", session.user.email);
+  
+    // Initial fetch to seed prev ref
+    fetchNotifications().then((initial) => {
+      console.log("🟢 Initial full notifications:", initial);
+      prevNotificationsRef.current = initial;
+    });
+  
+    const handleUpdate = async () => {
+      const newNotifications = await fetchNotifications();
+      const old = prevNotificationsRef.current || {};
+      const newlyAdded = [];
+  
+      console.log("📦 New full notifications:", newNotifications);
+      console.log("📁 Previous:", old);
+  
+      for (const category of Object.keys(newNotifications)) {
+        const newItems = newNotifications[category];
+        const oldItems = old[category] || [];
+  
+        const newInCategory = newItems.filter((n) => {
+          return !oldItems.some((o) => {
+            return n.id && o.id ? n.id === o.id : (
+              o.message === n.message &&
+              new Date(o.date).getTime() === new Date(n.date).getTime()
+            );
+          });
+        });
+  
+        newInCategory.forEach((item) =>
+          newlyAdded.push({ ...item, _category: category })
+        );
+      }
+  
+      console.log("🆕 Newly added:", newlyAdded);
+  
+      if (newlyAdded.length > 0) {
+        showAllAntdNotificationsSequentially(newlyAdded);
+      }
+  
+      prevNotificationsRef.current = newNotifications;
+    };
+  
+    socket.on("notifications_updated", handleUpdate);
+  
+    return () => {
+      socket.off("notifications_updated", handleUpdate);
+    };
+  }, [session?.user?.email]);
+  
+  // fetchNotifications always returns array
+  const fetchNotifications = async () => {
+    try {
+      const res = await apiClient.get(`/notifications/${session.user.email}`);
+      setNotifications(res.data); // Update state with fetched notifications
+      onComplete();
+      return res.data || {};
+    } catch (err) {
+      console.error("❌ Error fetching notifications:", err);
+      return [];
+    }
+  };
+  
   
   
 
@@ -743,6 +908,7 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
   const onClickWorlTime = () => {
     setOpenWorldTime(true);
   }
+  console.log("Notifications:", notifications);
 
   return (
     <div
@@ -757,6 +923,7 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
         height: '50px',
       }}
     >
+      {contextHolder}
       {/* Show logo only if the user is NOT authenticated */}
       {status !== 'authenticated' && status !== 'loading' && (
         <div>
@@ -800,26 +967,35 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
             />
           </div>
           <div className='navbar-1'>
-          <Dropdown overlay={menu} trigger={['click']} placement="bottomRight">
-      <span style={{ cursor: 'pointer' }}>
-        <Bell style={{ fontSize: 24 }} />
-      </span>
-    </Dropdown>
+            {/* <Dropdown overlay={menu} trigger={['click']} placement="bottomRight">
+              <span style={{ cursor: 'pointer' }}>
+                <Bell style={{ fontSize: 24 }} />
+              </span>
+            </Dropdown> */}
 
 
 
 
-            {userdetails?.role !== "Revenue_Partner" && <div className="relative inline-block" ref={wrapperRef}>
-              <div className="cursor-pointer" onClick={openNotificationsList}>
+            {userdetails?.role !== "Revenue_Partner" && <div className="relative inline-block" ref={wrapperRef}  style={{marginRight: "0px", paddingRight:'0px'}}>
+              <div className="cursor-pointer"  style={{marginRight: "0px", paddingRight:'0px'}}>
                 {/* <Bell size={20} /> */}
+                <Dropdown overlay={menu} trigger={['click']} placement="bottomRight">
+                  <span style={{ cursor: 'pointer' }}>
+                    <Bell style={{ fontSize: 24 }} />
+                  </span>
+                </Dropdown>
               
-                {notifications.length > 0 && (
+                {Object.values(notifications)
+  .filter(Array.isArray)
+  .flat().length > 0 && (
                   <Badge
                     style={{ color: 'red' }}
                     className="Badge absolute -top-2 -right-2"
                     variant="destructive"
                   >
-                    {notifications.length}
+                    {Object.values(notifications)
+                    .filter(Array.isArray)
+                    .flat().length}
                   </Badge>
                 )}
               </div>
@@ -884,15 +1060,24 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
             
 
             {userdetails?.role !== "Revenue_Partner" && showIcons && <div className="relative inline-block" ref={wrapperRef}>
-              <div className="cursor-pointer" onClick={openNotificationsList}>
-                <Bell size={20} style={{marginLeft:  '5px'}}/>
-                {notifications.length > 0 && (
+              <div className="cursor-pointer">
+                {/* <Bell size={20} style={{marginLeft:  '5px'}}/>  onClick={openNotificationsList}*/}
+                <Dropdown overlay={menu} trigger={['click']} placement="bottomRight">
+                  <span style={{ cursor: 'pointer' }}>
+                    <Bell style={{ fontSize: 24 }} />
+                  </span>
+                </Dropdown>
+                {Object.values(notifications)
+                    .filter(Array.isArray)
+                    .flat().length > 0 && (
                   <Badge
                     style={{ color: 'red' }}
                     className="Badge absolute -top-2 -right-2"
                     variant="destructive"
                   >
-                    {notifications.length}
+                    {Object.values(notifications)
+                    .filter(Array.isArray)
+                    .flat().length}
                   </Badge>
                 )}
               </div>
@@ -987,7 +1172,7 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
       </Modal>
 
       {/*Notifications Modal */}
-      <Modal
+      {/* <Modal
         visible={isNotificationModalVisible}
         width={`25%`}
         onCancel={onHandleNotificationCancel}
@@ -998,18 +1183,18 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
           margin: '0px',
         }}
         style={{
-          top: `${modalPosition.top + 70}px`,  // Set dynamically based on the icon's position
-          right: `${modalPosition.right + 1}rem`, // Align with the icon's right edge
+          top: `${modalPosition.top + 70}px`, 
+          right: `${modalPosition.right + 1}rem`,
           position: 'absolute',
           padding: '0px'
         }}
       >
-        {userdetails?.role === 'Admin' && <button style={{ marginRight: '10px', padding: '7px', borderRadius: '5px', backgroundColor: '#6495ED', border: 'none', color: 'white' }} onClick={openAddNotificationModal}>Add Notification</button>} {/* Only visible to admin */}
+        {userdetails?.role === 'Admin' && <button style={{ marginRight: '10px', padding: '7px', borderRadius: '5px', backgroundColor: '#6495ED', border: 'none', color: 'white' }} onClick={openAddNotificationModal}>Add Notification</button>}
 
         <div style={{ padding: '0px' }}>
           {renderNotifications()}
         </div>
-      </Modal>
+      </Modal> */}
 
 
 
