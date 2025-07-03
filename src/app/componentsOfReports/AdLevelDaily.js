@@ -93,7 +93,7 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
 
     const memorizedColumnDef1 = useMemo(()=> columnDefs.current, [columnDefs.current]);
     const memorizedDailyData = useMemo(()=> dailyData?.filter((each) => {
-        const normalizedCampaign = (each?.campaignname || "").trim().toLowerCase();
+        const normalizedCampaign = (each?.adname || "").trim().toLowerCase();
         const normalizedInput = inputValue.trim().toLowerCase();
         return (
             normalizedCampaign.startsWith(normalizedInput) ||
@@ -1241,7 +1241,7 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
                                     </div>
                                 </div>
                             ) : dailyData?.filter((each) => {
-                                const normalizedCampaign = (each?.campaignname || "").trim().toLowerCase();
+                                const normalizedCampaign = (each?.adname || "").trim().toLowerCase();
                                 const normalizedInput = inputValue.trim().toLowerCase();
                                 return (
                                     normalizedCampaign.startsWith(normalizedInput) ||
