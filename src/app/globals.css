@@ -891,7 +891,7 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 }
 .Badge{
   position: relative;
-    background-color: red;
+    background-color: orange;
     padding: 2px 5px;
     border-radius: 50%;
     color: white;
