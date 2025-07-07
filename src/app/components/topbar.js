@@ -2,9 +2,9 @@
 import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { SessionProvider, useSession, signIn, signOut } from 'next-auth/react';
 import Image from "next/image";
-import { Layout, Avatar, Dropdown, Button, Switch, Spin, Form, Input, Divider, Modal, Badge, Card, Upload, notification, Drawer , Menu, theme} from "antd";
+import { Layout, Avatar, Dropdown, Button, Switch, Spin, Form, Input, Divider, Modal, Badge, Card, Upload, notification, Drawer, Menu } from "antd";
 import React from "react";
-import { useRouter,  usePathname} from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { io } from "socket.io-client";
 import axios from 'axios';
 const { Header } = Layout;
@@ -12,22 +12,24 @@ import { useTokenContext } from './parent';
 import Draggable from "react-draggable";
 import moment from 'moment-timezone';
 import ContactForm from './mail';
-import { BellFilled, EyeOutlined, GoogleOutlined, LockOutlined, PlusOutlined, UserOutlined, UploadOutlined, CalculatorOutlined,
+import {
+  BellFilled, EyeOutlined, GoogleOutlined, LockOutlined, PlusOutlined, UserOutlined, UploadOutlined, CalculatorOutlined,
   DoubleRightOutlined,
   DoubleLeftOutlined,
-  BellOutlined,  } from '@ant-design/icons';
-  import {
-    HomeOutlined,
-    PieChartOutlined,
-    DesktopOutlined,
-    ContainerOutlined,
-    SettingOutlined,
-    // LockOutlined,
-    LogoutOutlined,
-    DatabaseOutlined,
-    // UserOutlined,
-    LaptopOutlined
-  } from '@ant-design/icons';
+  BellOutlined,
+} from '@ant-design/icons';
+import {
+  HomeOutlined,
+  PieChartOutlined,
+  DesktopOutlined,
+  ContainerOutlined,
+  SettingOutlined,
+  // LockOutlined,
+  LogoutOutlined,
+  DatabaseOutlined,
+  // UserOutlined,
+  LaptopOutlined
+} from '@ant-design/icons';
 import { Bell, Edit3Icon, Moon, Sun, StickyNote, View, Eye } from 'lucide-react';
 import { getSession } from 'next-auth/react';
 import debounce from 'lodash.debounce';
@@ -42,6 +44,8 @@ import { ImBook } from "react-icons/im";
 import { SlNotebook } from "react-icons/sl";
 import { LuNotebook } from "react-icons/lu";
 import { TfiWorld } from "react-icons/tfi";
+import { CloseOutlined } from '@ant-design/icons';
+
 
 import { message, Popconfirm } from 'antd';
 
@@ -50,8 +54,14 @@ import { useGlobalLoading } from "../layout";
 
 const socket = io("https://prodapis.adsgoat.in");
 
+// const socket = io("http://localhost:8000");
 
-const Topbar = ({onComplete, usersDataForLogin}) => {
+// const socket = io("https://prodapis.adsgoat.in", {
+//   transports: ["websocket"], // Forces websocket
+//   secure: true
+// });
+
+const Topbar = ({ onComplete, usersDataForLogin }) => {
   const { darkMode, toggleTheme } = useTokenContext();
   const router = useRouter();
   const pathname = usePathname();
@@ -75,10 +85,19 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
   const prevNotificationsRef = useRef([]);
   const hasReceivedSocketUpdate = useRef(false);
   const [api, contextHolder] = notification.useNotification();
-  
+  const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [expandedIndex, setExpandedIndex] = useState(null); // assuming you're already using this
+  const handleExpand = (index) => {
+    setExpandedIndex(index === expandedIndex ? null : index);
+  };
+   
+  const { theme } = useTokenContext();
+
+  const themeForNotifications = useRef(theme);
+
   const [showIcons, setShowIcons] = useState(false);
-  
-  
+
+
   const { apiClient } = useTokenContext();
 
   const notificationIconRef = useRef(null); // Ref for the notification icon
@@ -92,16 +111,11 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
   const toggleDrawer = () => setVisible((prev) => !prev);
 
   const tokenForAuth = localStorage.getItem('token');
-  if(userdetails?.role === "Revenue_Partner"){
+  if (userdetails?.role === "Revenue_Partner") {
     onComplete();
   }
   const [showAll, setShowAll] = useState(false);
-  const [expandedIndex, setExpandedIndex] = useState(null); // NEW STATE
 
-
-  const handleExpand = (index) => {
-    setExpandedIndex(expandedIndex === index ? null : index);
-  };
   // const items = [
   //   { label: 'Connections', count: 3, color: 'orange' },
   //   { label: 'Reports', count: 3, color: 'purple' },
@@ -115,14 +129,28 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
   //   { label: 'Miscellaneous', count: 1, color: 'green' },
   // ];
 
-  const onClickNotificationView = async(item, key, email) => {
-    const notificationData = await apiClient.put('/Notifications/Viewed', {email, key, item}, {
+  const onClickNotificationView = async (item, key, email) => {
+    const notificationData = await apiClient.put('/Notifications/Viewed', { email, key, item }, {
       headers: {
         Authorization: localStorage.getItem('token'),
         accept: 'application/json',
       }
     })
   }
+  const handleClearAll = async (e) => {
+  e.stopPropagation();
+  for (const [key, items] of Object.entries(notifications)) {
+    for (const item of items) {
+      await onClickNotificationView(item, key, userdetails?.email);
+    }
+  }
+  const cleared = {};
+  Object.keys(notifications).forEach((key) => {
+    cleared[key] = [];
+  });
+  setNotifications(cleared);
+};
+
 
   const items = Object.entries(notifications).map(([key, value]) => ({
     label: key,
@@ -132,34 +160,35 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
 
   const displayedItems = showAll ? items : items.slice(0, 5);
 
+
   const menu = (
     <Menu
       style={{
-        background: darkMode ? '#000' : '#fff',
         color: darkMode ? '#fff' : '#000',
         borderRadius: 8,
-        width: '250px',
+        width: '280px',
         paddingBottom: 0,
       }}
     >
       <Menu.Item>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <span style={{ color: darkMode ? '#fff' :'#000' }}>EVENTS</span>
-          <strong style={{  color: darkMode ? '#fff' :'#000' }}>{Object.values(notifications)
+          <span style={{ color: darkMode ? '#fff' : '#000' }}>Notifications</span>
+          {/* <strong style={{ color: darkMode ? '#fff' : '#000' }}>{Object.values(notifications)
             .filter(Array.isArray)
             .flat().length} NEW
-          </strong>
+          </strong> */}
+
         </div>
       </Menu.Item>
-
-      <Menu.Divider style={{ borderColor: '#444' }} />
-
+      <Menu.Divider style={{
+        borderTop: `1px solid ${darkMode ? '#808080' : '#ccc'}`,
+      }} />
       <Menu.Item style={{ padding: 0 }}>
         <div
           style={{
             maxHeight: 240,
             overflowY: 'auto',
-            background: darkMode ? '#555' : '#fff',
+            background: darkMode ? '#333' : '#fff',
           }}
         >
           {/* {displayedItems.map(({ label, count, color }, index) => (
@@ -202,39 +231,71 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
             </div>
           ))} */}
           {displayedItems.map(({ label, count, color }, index) => (
-  <div key={label + index}>
-    <div
-      onClick={(e) => {
-        e.stopPropagation();
-        handleExpand(index);
-      }}
-      style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        padding: '8px 16px',
-        color: darkMode ? '#fff' : '#000',
-        cursor: 'pointer',
-      }}
-    >
-      {label}
-      <Badge count={count} style={{ backgroundColor: color, color: darkMode ? '#fff' : '#000' }} />
-    </div>
+            <div key={label + index}>
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleExpand(index);
 
-    {expandedIndex === index &&
-      notifications[label]?.map((item, subIdx) => (
-        <div
-          key={`sub-${index}-${subIdx}`}
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '6px 15px 6px 20px',
-            color: darkMode ? '#fff' : '#888',
-            fontSize: '13px'
-          }}
-        >
-          <span>{item.message}</span>
-          {/* <Popconfirm
+                }}
+                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseLeave={() => setHoveredIndex(null)}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '8px 16px',
+                  color: darkMode ? '#fff' : '#000',
+                  cursor: 'pointer',
+                  color:
+                    expandedIndex === index || hoveredIndex === index
+                      ? '#91C25F'
+                      : darkMode
+                        ? '#fff'
+                        : '#000',
+                  textDecoration:
+                    expandedIndex === index
+                      ? 'underline'
+                      : 'none',
+                  transition: 'color 0.2s ease',
+                }}
+              >
+                {label}
+                <Badge count={count} style={{ backgroundColor: color, color: darkMode ? '#fff' : '#000' }} />
+              </div>
+
+              {expandedIndex === index &&
+                notifications[label]?.map((item, subIdx) => (
+                  <div
+                    key={`sub-${index}-${subIdx}`}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      padding: '12px 16px',
+                      marginBottom: '10px',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      color: darkMode ? '#fff' : '#444',
+                      minHeight: '80px',
+                    }}
+                  >
+
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', fontSize: '12px', }}>
+                      <span style={{fontSize:'12px'}}>{item.date}</span>
+                      <CloseOutlined
+                        style={{ marginLeft: 8, cursor: 'pointer', color: '#999', fontSize: '12px' }}
+                        onClick={(e) => {
+                          onClickNotificationView(item, label, userdetails?.email);
+                          e.stopPropagation();
+                          const updated = { ...notifications };
+                          updated[label] = updated[label].filter((_, i) => i !== subIdx);
+                          setNotifications(updated);
+                        }}
+                      />
+
+                    </div>
+
+                    {/* <span>{item.message}</span> */}
+                    {/* <Popconfirm
             title="Delete Notification"
             description="Are you sure to delete this task?"
             onConfirm={confirm}
@@ -244,17 +305,53 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
           >
             <Eye style={{ fontSize: 12, color: darkMode ? '#fff' : '#888' }} onClick={()=> {console.log(item, label)}} />
           </Popconfirm> */}
-          <Eye style={{ fontSize: 12, color: darkMode ? '#fff' : '#888' }} onClick={()=> {onClickNotificationView(item, label, userdetails?.email)}}/>
-        </div>
-      ))}
-  </div>
-))}
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}
+                    >
+
+                      <div style={{ fontSize: '12px', flex: 1, marginRight: '10px' }}>
+                        {item.message}
+                        <Divider
+                          style={{
+                            margin: '3px 0',
+                            borderColor: darkMode ? '#808080' : '#ccc',
+                          }}
+                        />
+                      </div>
+                      {/* <Eye
+                        style={{
+                          fontSize: '14px',
+                          cursor: 'pointer',
+                          color: darkMode ? '#fff' : '#555',
+                          flexShrink: 0,
+                        }}
+                        onClick={() => {
+                          onClickNotificationView(item, label, userdetails?.email);
+                        }}
+                      /> */}
+                    </div>
+                  </div>
+
+                  /* <span>{item.date}</span>
+                  <Eye style={{ fontSize: 12, color: darkMode ? '#fff' : '#888' }} onClick={() => { onClickNotificationView(item, label, userdetails?.email) }} />
+                </div> */
+
+
+                ))}
+            </div>
+          ))}
         </div>
       </Menu.Item>
 
-      <Menu.Divider style={{ borderColor: '#444' }} />
+      <Menu.Divider style={{
+        borderTop: `1px solid ${darkMode ? '#808080' : '#ccc'}`,
+      }} />
 
-      <Menu.Item  style={{ padding: 0 }}>
+      {/* <Menu.Item style={{ padding: 0 }}>
         <div
           onClick={(e) => {
             e.stopPropagation();
@@ -269,8 +366,51 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
         >
           <u>{showAll ? 'Show less' : 'See all events'}</u>
         </div>
-      </Menu.Item>
+      </Menu.Item> */}
+      <Menu.Item style={{ padding: 0 }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+            padding: '10px 16px',
+            color: darkMode ? '#fff' : '#000',
+          }}
+        >
+          {/* Left side – <u> text link */}
+          {/* <div
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowAll(!showAll);
+            }}
+            style={{
+              cursor: 'pointer',
+              fontWeight: 500,
+              color: '#91C25F',
+              textDecoration: 'underline',
+              fontSize: '14px',
+            }}
+          >
+            {showAll ? 'Show less' : 'See all '}
+          </div> */}
 
+          {/* Right side – Ant Design Button */}
+          <Button
+            type="primary"
+            style={{
+              backgroundColor: '#91C25F',
+              color: '#000',
+              border: 'none',
+              boxShadow: 'none',
+              height: '25px',
+              fontSize: '12px',
+            }}
+             onClick={handleClearAll}
+          >
+            Mark all as seen
+          </Button>
+        </div>
+      </Menu.Item>
     </Menu>
   );
 
@@ -332,7 +472,7 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
       try {
         // console.log(tokenForAuth);
         let response;
-        if(isNotificationsFetched.current === false){
+        if (isNotificationsFetched.current === false) {
           response = await apiClient.get(`/Notifications/get?email=${userdetails?.email}`);
         }
         if (response.status === 200) {
@@ -350,27 +490,27 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
         console.error('Error fetching notifications:', error); // Log error if no retries left or other status
       }
     };
-  
+
     // First attempt without delay
     await makeRequest(retries);
   };
   function getItem(label, key, icon) {
     return {
-        key,
-        icon,
-        label,
+      key,
+      icon,
+      label,
     };
   }
 
   const menuItems = [
-    getItem('Dashboard', '/Dashboard', <HomeOutlined className={pathname === '/Dashboard' && 'black-icon'}/>),
-    status === 'authenticated' && (usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Reports', '/Reports', <DatabaseOutlined  className={pathname === '/Reports' && 'black-icon'}/>)),
-    status === 'authenticated' &&(usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Creatives', '/Creatives', <PieChartOutlined  className={pathname === '/Creatives' && 'black-icon'}/>)),
-    status === 'authenticated' &&(usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Campaigns', '/Campaigns', <DesktopOutlined  className={pathname === '/Campaigns' && 'black-icon'}/>)),
+    getItem('Dashboard', '/Dashboard', <HomeOutlined className={pathname === '/Dashboard' && 'black-icon'} />),
+    status === 'authenticated' && (usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Reports', '/Reports', <DatabaseOutlined className={pathname === '/Reports' && 'black-icon'} />)),
+    status === 'authenticated' && (usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Creatives', '/Creatives', <PieChartOutlined className={pathname === '/Creatives' && 'black-icon'} />)),
+    status === 'authenticated' && (usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Campaigns', '/Campaigns', <DesktopOutlined className={pathname === '/Campaigns' && 'black-icon'} />)),
     // getItem('Users', '/Users', <ContainerOutlined />),
-    status === 'authenticated' &&(usersDataForLogin[0]?.role === 'Admin' && getItem('NewUser', '/NewUser', <UserOutlined  className={pathname === '/NewUser' && 'black-icon'}/>)),
-    status === 'authenticated' &&(usersDataForLogin[0]?.role === 'Admin' && getItem('Activities', '/Activities', <LaptopOutlined  className={pathname === '/Activities' && 'black-icon'}/>)),
-].filter(Boolean);
+    status === 'authenticated' && (usersDataForLogin[0]?.role === 'Admin' && getItem('NewUser', '/NewUser', <UserOutlined className={pathname === '/NewUser' && 'black-icon'} />)),
+    status === 'authenticated' && (usersDataForLogin[0]?.role === 'Admin' && getItem('Activities', '/Activities', <LaptopOutlined className={pathname === '/Activities' && 'black-icon'} />)),
+  ].filter(Boolean);
 
   useLayoutEffect(() => {
     if (visible && containerRef.current) {
@@ -384,6 +524,10 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
   }, [visible]);
 
   useEffect(() => {
+    themeForNotifications.current = theme; 
+  }, [theme]);
+
+  useEffect(() => {
     const updateDrawerPosition = () => {
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
@@ -394,9 +538,9 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
         });
       }
     };
-  
+
     if (visible) updateDrawerPosition();
-  
+
     window.addEventListener("resize", updateDrawerPosition);
     return () => window.removeEventListener("resize", updateDrawerPosition);
   }, [visible]);
@@ -685,11 +829,12 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
           duration: 5,
           pauseOnHover: true,
           showProgress: true,
+          className: themeForNotifications.current === "dark" ? "custom-dark-notification" : "",
         });
       }, index * 500);
     });
   };
-  
+
   const playNotificationSound = () => {
     const audio = new Audio(soundFile); // Create an audio object with the sound file
     audio.play().catch((err) => console.error("🔇 Sound error:", err));
@@ -698,36 +843,37 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
   useEffect(() => {
     // shouldRetry = true; // Reset flag when `userdetails` changes
     // fetchUserAvatarWithRetry();
-    if(userdetails?.profileImage){
+    if (userdetails?.profileImage) {
       setAvatarUrl(userdetails?.profileImage);
     }
   }, [userdetails]);
 
 
   useEffect(() => {
+    console.log("🔔 Setting up notifications...");
     if (!session?.user?.email) return;
-  
+
     // Register with backend
     socket.emit("register", session.user.email);
-  
+
     // Initial fetch to seed prev ref
     fetchNotifications().then((initial) => {
       console.log("🟢 Initial full notifications:", initial);
       prevNotificationsRef.current = initial;
     });
-  
+
     const handleUpdate = async () => {
       const newNotifications = await fetchNotifications();
       const old = prevNotificationsRef.current || {};
       const newlyAdded = [];
-  
+
       console.log("📦 New full notifications:", newNotifications);
       console.log("📁 Previous:", old);
-  
+
       for (const category of Object.keys(newNotifications)) {
         const newItems = newNotifications[category];
         const oldItems = old[category] || [];
-  
+
         const newInCategory = newItems.filter((n) => {
           return !oldItems.some((o) => {
             return n.id && o.id ? n.id === o.id : (
@@ -736,28 +882,29 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
             );
           });
         });
-  
+
         newInCategory.forEach((item) =>
           newlyAdded.push({ ...item, _category: category })
         );
       }
-  
+
       console.log("🆕 Newly added:", newlyAdded);
-  
+
       if (newlyAdded.length > 0) {
+        console.log("theme", theme);
         showAllAntdNotificationsSequentially(newlyAdded);
       }
-  
+
       prevNotificationsRef.current = newNotifications;
     };
-  
+
     socket.on("notifications_updated", handleUpdate);
-  
+
     return () => {
       socket.off("notifications_updated", handleUpdate);
     };
   }, [session?.user?.email]);
-  
+
   // fetchNotifications always returns array
   const fetchNotifications = async () => {
     try {
@@ -770,9 +917,9 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
       return [];
     }
   };
-  
-  
-  
+
+
+
 
 
   // Get the default avatar source based on gender
@@ -833,7 +980,7 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
       const formData = new FormData();
       formData.append('file', imageFile);
       console.log("FormData prepared for upload:", formData);
-  
+
       // Call your API here to upload the image
       fetch('https://www.testapi.adsgoat.in/upload', {
         method: 'POST',
@@ -844,13 +991,13 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
       })
         .then((response) => response.json())
         .then(async (data) => {
-  
+
           if (data.imageUrl) {
             console.log("Image successfully uploaded. Image URL:", data.imageUrl);
-  
+
             // Store the image URL in the database
             const response = await storeImageUrlInDb(data.imageUrl);
-  
+
             // Update the avatar and clear the preview
             if (response?.data?.success) {
               setAvatarUrl(data.imageUrl); // Update the avatar with the stored URL
@@ -871,7 +1018,7 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
       console.log("No image file to upload.");
     }
   };
-  
+
 
   // Upload properties for the file uploader
   const uploadProps = {
@@ -952,9 +1099,9 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
       >
         {/* Conditional rendering based on authentication and authorization status */}
         {isUserAuthorized ? (
-          <div style={{display:'flex', alignItems:'center', justifyContent:"space-between", width:'100%'}}>
-          <div>
-            <Image
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: "space-between", width: '100%' }}>
+            <div>
+              <Image
                 // src="/ssk1.png"
                 src={darkMode ? "/ssk2.png" : "/ssk1.png"}
                 width={70}   // Smaller logo when collapsed
@@ -964,10 +1111,10 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
                 style={{ margin: "0px 12px", width: "60%", height: "revert-layer", objectFit: "contain" }}
                 onClick={toggleDrawer}
                 className='logo'
-            />
-          </div>
-          <div className='navbar-1'>
-            {/* <Dropdown overlay={menu} trigger={['click']} placement="bottomRight">
+              />
+            </div>
+            <div className='navbar-1'>
+              {/* <Dropdown overlay={menu} trigger={['click']} placement="bottomRight">
               <span style={{ cursor: 'pointer' }}>
                 <Bell style={{ fontSize: 24 }} />
               </span>
@@ -976,157 +1123,165 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
 
 
 
-            {userdetails?.role !== "Revenue_Partner" && <div className="relative inline-block" ref={wrapperRef}  style={{marginRight: "0px", paddingRight:'0px'}}>
-              <div className="cursor-pointer"  style={{marginRight: "0px", paddingRight:'0px'}}>
-                {/* <Bell size={20} /> */}
-                <Dropdown overlay={menu} trigger={['click']} placement="bottomRight">
-                  <span style={{ cursor: 'pointer' }}>
-                    <Bell style={{ fontSize: 24 }} />
-                  </span>
-                </Dropdown>
-              
-                {Object.values(notifications)
-  .filter(Array.isArray)
-  .flat().length > 0 && (
-                  <Badge
-                    style={{ color: 'red' }}
-                    className="Badge absolute -top-2 -right-2"
-                    variant="destructive"
-                  >
-                    {Object.values(notifications)
-                    .filter(Array.isArray)
-                    .flat().length}
-                  </Badge>
-                )}
-              </div>
-            </div>}
+              {userdetails?.role !== "Revenue_Partner" && <div className="relative inline-block" ref={wrapperRef} style={{ marginRight: "0px", paddingRight: '0px' }}>
+                <div className="cursor-pointer" style={{ marginRight: "0px", paddingRight: '0px' }}>
+                  {/* <Bell size={20} /> */}
+                  <Dropdown overlay={menu} trigger={['click']} placement="bottomRight">
+                    <span style={{ cursor: 'pointer' }}>
+                      <Bell style={{ fontSize: 24 }} />
+                    </span>
+                  </Dropdown>
 
-            {userdetails?.role !== "Revenue_Partner" && <button  style={{padding: '0px', margin:'0px'}} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onChangeStickyNotes}>
-                <SlNotebook  size={20} style={{marginLeft: '10px'}}/>
-            </button>}
-
-            {userdetails?.role !== "Revenue_Partner" && <button style={{padding: '0px', margin:'0px'}} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickCalculator}>
-                <CalculatorOutlined style={{fontSize:'20px',padding: '0px', margin:'0px',marginLeft:  '10px' }}/>
-            </button>}
-            {userdetails?.role !== "Revenue_Partner" && <button style={{padding: '0px', margin:'0px', backgroundColor: theme === "dark" && 
-                  "green"}} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickWorlTime}>
-                <TfiWorld size={20} style={{marginLeft:  '10px'}} />
-            </button>}
-
-            <button
-              onClick={toggleTheme}
-              style={{padding: '0px', margin:'0px', marginLeft:  '10px' }}
-              className={`${darkMode ? 'dark-mode' : 'light-mode'}`}
-            >
-              {darkMode ? (
-                <Sun className="icon sun-icon" style={{ width: "20px", height: "20px" }}/>
-              ) : (
-                <Moon className="icon moon-icon" style={{ width: "20px", height: "20px", }} />
-              )}
-            </button>
-            <h2
-              style={{
-                color: darkMode ? '#fff' : '#000',
-                margin: 0,
-                fontSize: '17px',
-                transition: 'color 0.3s ease',
-                // display: width <= 500 ? 'none' : 'block', 
-                marginLeft:  '10px' ,
-              }}
-            >
-              Hi, {session?.user?.name || ''}
-            </h2>
-            <Dropdown
-              menu={{
-                items: dropdownItemsAuthenticated,
-              }}
-              placement="bottomLeft"
-              arrow={{ pointAtCenter: true }}
-            >
-              <Avatar
-                size={36}
-                src={avatarUrl || getDefaultAvatar()}
-                style={{
-                  background: darkMode ? '#333' : '#ebebeb',
-                  fontSize: '1.8em',
-                  transition: 'background 0.3s ease',
-                  marginLeft:  '10px',
-                }}
-              />
-            </Dropdown>
-          </div>
-          <div className='navbar-2'>
-            {!showIcons && <div><DoubleLeftOutlined onClick={()=> setShowIcons(true)} style={{fontSize:'10px',padding: '0px', margin:'0px'}}/></div>}
-            
-
-            {userdetails?.role !== "Revenue_Partner" && showIcons && <div className="relative inline-block" ref={wrapperRef}>
-              <div className="cursor-pointer">
-                {/* <Bell size={20} style={{marginLeft:  '5px'}}/>  onClick={openNotificationsList}*/}
-                <Dropdown overlay={menu} trigger={['click']} placement="bottomRight">
-                  <span style={{ cursor: 'pointer' }}>
-                    <Bell style={{ fontSize: 24 }} />
-                  </span>
-                </Dropdown>
-                {Object.values(notifications)
+                  {Object.values(notifications)
                     .filter(Array.isArray)
                     .flat().length > 0 && (
-                  <Badge
-                    style={{ color: 'red' }}
-                    className="Badge absolute -top-2 -right-2"
-                    variant="destructive"
-                  >
-                    {Object.values(notifications)
-                    .filter(Array.isArray)
-                    .flat().length}
-                  </Badge>
+                      <Badge
+                        style={{ color: 'red' }}
+                        className="Badge absolute -top-2 -right-2"
+                        variant="destructive"
+                      >
+                        {Object.values(notifications)
+                          .filter(Array.isArray)
+                          .flat().length}
+                      </Badge>
+                    )}
+                </div>
+              </div>}
+
+              {userdetails?.role !== "Revenue_Partner" && <button style={{ padding: '0px', margin: '0px',backgroundColor: theme === "dark" &&
+                  "transparent" }} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onChangeStickyNotes}>
+                <SlNotebook size={20} style={{ marginLeft: '10px' }} />
+              </button>}
+
+              {userdetails?.role !== "Revenue_Partner" && <button style={{ padding: '0px', margin: '0px',backgroundColor: theme === "dark" &&
+                  "transparent" }} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickCalculator}>
+                <CalculatorOutlined style={{ fontSize: '20px', padding: '0px', margin: '0px', marginLeft: '10px' }} />
+              </button>}
+              {userdetails?.role !== "Revenue_Partner" && <button style={{
+                padding: '0px', margin: '0px', 
+                backgroundColor: theme === "dark" &&
+                  "transparent"
+              }} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickWorlTime}>
+                <TfiWorld size={20} style={{ marginLeft: '10px' }} />
+              </button>}
+
+              <button
+                onClick={toggleTheme}
+                style={{ padding: '0px', margin: '0px', marginLeft: '10px',backgroundColor: theme === "dark" &&
+                  "transparent" }}
+                className={`${darkMode ? 'dark-mode' : 'light-mode'}`}
+              >
+                {darkMode ? (
+                  <Sun className="icon sun-icon" style={{ width: "20px", height: "20px" }} />
+                ) : (
+                  <Moon className="icon moon-icon" style={{ width: "20px", height: "20px", }} />
                 )}
-              </div>
-            </div>}
-
-            {userdetails?.role !== "Revenue_Partner" && showIcons && <button  style={{padding: '0px', margin:'0px'}} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onChangeStickyNotes}>
-                <SlNotebook  size={20} style={{marginLeft:  '5px'}}/>
-            </button>}
-
-            {userdetails?.role !== "Revenue_Partner" && showIcons && <button style={{padding: '0px', margin:'0px'}} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickCalculator}>
-                <CalculatorOutlined style={{fontSize:'20px',padding: '0px', margin:'0px',marginLeft:  '5px'}}/>
-            </button>}
-            {userdetails?.role !== "Revenue_Partner" && showIcons && <button style={{padding: '0px', margin:'0px', backgroundColor: theme === "dark" && 
-                  "green"}} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickWorlTime}>
-                <TfiWorld size={20} style={{marginLeft:  '5px'}} />
-            </button>}
-
-            {showIcons && <button
-              onClick={toggleTheme}
-              style={{padding: '0px', margin:'0px', marginLeft:  '5px'}}
-              className={`${darkMode ? 'dark-mode' : 'light-mode'}`}
-            >
-              {darkMode ? (
-                <Sun className="icon sun-icon" style={{ width: "20px", height: "20px" }}/>
-              ) : (
-                <Moon className="icon moon-icon" style={{ width: "20px", height: "20px", }} />
-              )}
-            </button>}
-            {showIcons && <div><DoubleRightOutlined onClick={()=> setShowIcons(false)} style={{fontSize:'10px',padding: '0px', margin:'0px', marginLeft:'5px'}}/></div>}
-            <Dropdown
-              menu={{
-                items: dropdownItemsAuthenticated,
-              }}
-              placement="bottomLeft"
-              arrow={{ pointAtCenter: true }}
-            >
-              <Avatar
-                size={36}
-                src={avatarUrl || getDefaultAvatar()}
+              </button>
+              <h2
                 style={{
-                  background: darkMode ? '#333' : '#ebebeb',
-                  fontSize: '1.8em',
-                  transition: 'background 0.3s ease',
-                  marginLeft:  '5px',
+                  color: darkMode ? '#fff' : '#000',
+                  margin: 0,
+                  fontSize: '17px',
+                  transition: 'color 0.3s ease',
+                  // display: width <= 500 ? 'none' : 'block', 
+                  marginLeft: '10px',
                 }}
-              />
-            </Dropdown>
+              >
+                Hi, {session?.user?.name || ''}
+              </h2>
+              <Dropdown
+                menu={{
+                  items: dropdownItemsAuthenticated,
+                }}
+                placement="bottomLeft"
+                arrow={{ pointAtCenter: true }}
+              >
+                <Avatar
+                  size={36}
+                  src={avatarUrl || getDefaultAvatar()}
+                  style={{
+                    background: darkMode ? '#333' : '#ebebeb',
+                    fontSize: '1.8em',
+                    transition: 'background 0.3s ease',
+                    marginLeft: '10px',
+                  }}
+                />
+              </Dropdown>
+            </div>
+            <div className='navbar-2'>
+              {!showIcons && <div><DoubleLeftOutlined onClick={() => setShowIcons(true)} style={{ fontSize: '10px', padding: '0px', margin: '0px' }} /></div>}
+
+
+              {userdetails?.role !== "Revenue_Partner" && showIcons && <div className="relative inline-block" ref={wrapperRef}>
+                <div className="cursor-pointer">
+                  {/* <Bell size={20} style={{marginLeft:  '5px'}}/>  onClick={openNotificationsList}*/}
+                  <Dropdown overlay={menu} trigger={['click']} placement="bottomRight">
+                    <span style={{ cursor: 'pointer' }}>
+                      <Bell style={{ fontSize: 24 }} />
+                    </span>
+                  </Dropdown>
+                  {Object.values(notifications)
+                    .filter(Array.isArray)
+                    .flat().length > 0 && (
+                      <Badge
+                        style={{ color: 'red' }}
+                        className="Badge absolute -top-2 -right-2"
+                        variant="destructive"
+                      >
+                        {Object.values(notifications)
+                          .filter(Array.isArray)
+                          .flat().length}
+                      </Badge>
+                    )}
+                </div>
+              </div>}
+
+              {userdetails?.role !== "Revenue_Partner" && showIcons && <button style={{ padding: '0px', margin: '0px' }} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onChangeStickyNotes}>
+                <SlNotebook size={20} style={{ marginLeft: '5px' }} />
+              </button>}
+
+              {userdetails?.role !== "Revenue_Partner" && showIcons && <button style={{ padding: '0px', margin: '0px' }} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickCalculator}>
+                <CalculatorOutlined style={{ fontSize: '20px', padding: '0px', margin: '0px', marginLeft: '5px' }} />
+              </button>}
+              {userdetails?.role !== "Revenue_Partner" && showIcons && <button style={{
+                padding: '0px', margin: '0px', backgroundColor: theme === "dark" &&
+                  "green"
+              }} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickWorlTime}>
+                <TfiWorld size={20} style={{ marginLeft: '5px' }} />
+              </button>}
+
+              {showIcons && <button
+                onClick={toggleTheme}
+                style={{ padding: '0px', margin: '0px', marginLeft: '5px' }}
+                className={`${darkMode ? 'dark-mode' : 'light-mode'}`}
+              >
+                {darkMode ? (
+                  <Sun className="icon sun-icon" style={{ width: "20px", height: "20px" }} />
+                ) : (
+                  <Moon className="icon moon-icon" style={{ width: "20px", height: "20px", }} />
+                )}
+              </button>}
+              {showIcons && <div><DoubleRightOutlined onClick={() => setShowIcons(false)} style={{ fontSize: '10px', padding: '0px', margin: '0px', marginLeft: '5px' }} /></div>}
+              <Dropdown
+                menu={{
+                  items: dropdownItemsAuthenticated,
+                }}
+                placement="bottomLeft"
+                arrow={{ pointAtCenter: true }}
+              >
+                <Avatar
+                  size={36}
+                  src={avatarUrl || getDefaultAvatar()}
+                  style={{
+                    background: darkMode ? '#333' : '#ebebeb',
+                    fontSize: '1.8em',
+                    transition: 'background 0.3s ease',
+                    marginLeft: '5px',
+                  }}
+                />
+              </Dropdown>
+            </div>
           </div>
-        </div>
         ) : (
           <Dropdown
             menu={{
@@ -1229,71 +1384,71 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
       </Modal>
 
 
-    <Modal
-      visible={isModalVisible}
-      width="50%"
-      onCancel={onHandleCancel}
-      footer={null}
-      style={{ textAlign: 'center', borderRadius: '8px', padding: '0px' }}
-    >
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', width: '100%' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', flexDirection: 'row', height: '12%', marginBottom: '10px' }}>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            {/* Display the image preview if exists */}
-            <img
-              src={previewImage || avatarUrl || getDefaultAvatar()} // Show the preview image or fallback to avatarUrl or default
-              alt="Avatar"
-              style={{ width: 110, height: 110, borderRadius: '50%', border: '2px solid #ccc' }}
-            />
-            
-            <Upload {...uploadProps}>
-              <Button style={{ marginTop: '10px' }} icon={<UploadOutlined />} loading={loading}>
-                {loading ? 'Uploading...' : 'Upload Image'}
+      <Modal
+        visible={isModalVisible}
+        width="50%"
+        onCancel={onHandleCancel}
+        footer={null}
+        style={{ textAlign: 'center', borderRadius: '8px', padding: '0px' }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', width: '100%' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', flexDirection: 'row', height: '12%', marginBottom: '10px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {/* Display the image preview if exists */}
+              <img
+                src={previewImage || avatarUrl || getDefaultAvatar()} // Show the preview image or fallback to avatarUrl or default
+                alt="Avatar"
+                style={{ width: 110, height: 110, borderRadius: '50%', border: '2px solid #ccc' }}
+              />
+
+              <Upload {...uploadProps}>
+                <Button style={{ marginTop: '10px' }} icon={<UploadOutlined />} loading={loading}>
+                  {loading ? 'Uploading...' : 'Upload Image'}
+                </Button>
+              </Upload>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'flex-start', padding: '0px' }}>
+              <p style={{ margin: '1px' }}><span style={{ fontWeight: 'bold' }}>ID:</span> {userdetails ? userdetails._id : ''}</p>
+              <p style={{ margin: '1px' }}><span style={{ fontWeight: 'bold' }}>EMAIL_ID:</span> {userdetails ? userdetails.email : 'No email'}</p>
+              <p style={{ margin: '1px' }}><span style={{ fontWeight: 'bold' }}>Name:</span> {userdetails ? userdetails.userName : 'Guest'}</p>
+            </div>
+          </div>
+
+          {/* Display the Confirm button to trigger upload */}
+          {previewImage && (
+            <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'flex-end' }}>
+              <Button onClick={handleConfirmUpload} type="primary">
+                Confirm & Upload Image
               </Button>
-            </Upload>
-          </div>
+            </div>
+          )}
 
-          <div style={{ display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'flex-start', padding: '0px' }}>
-            <p style={{ margin: '1px' }}><span style={{ fontWeight: 'bold' }}>ID:</span> {userdetails ? userdetails._id : ''}</p>
-            <p style={{ margin: '1px' }}><span style={{ fontWeight: 'bold' }}>EMAIL_ID:</span> {userdetails ? userdetails.email : 'No email'}</p>
-            <p style={{ margin: '1px' }}><span style={{ fontWeight: 'bold' }}>Name:</span> {userdetails ? userdetails.userName : 'Guest'}</p>
-          </div>
-        </div>
+          <hr style={{ border: '1px solid black', width: '100%' }} />
 
-        {/* Display the Confirm button to trigger upload */}
-        {previewImage && (
-          <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'flex-end' }}>
-            <Button onClick={handleConfirmUpload} type="primary">
-              Confirm & Upload Image
-            </Button>
-          </div>
-        )}
-
-        <hr style={{ border: '1px solid black', width: '100%' }} />
-
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-          <div style={{ maxHeight: '200px', width: '100%', overflowY: 'auto', padding: '10px', border: '1px solid #ccc', marginBottom: '20px' }}>
-            {/* Render Ad Accounts or any other content */}
-            {renderAdAccounts && renderAdAccounts()}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+            <div style={{ maxHeight: '200px', width: '100%', overflowY: 'auto', padding: '10px', border: '1px solid #ccc', marginBottom: '20px' }}>
+              {/* Render Ad Accounts or any other content */}
+              {renderAdAccounts && renderAdAccounts()}
+            </div>
           </div>
         </div>
-      </div>
-    </Modal>
-    {open && (
+      </Modal>
+      {open && (
         // <Draggable>
-          <div 
-            style={{
-              position: "absolute",
-              top: "20px", // or wherever you want it to start
-              right: "20px",
-              background: "white", // or transparent if you'd like
-              boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
-              borderRadius: "8px",
-              zIndex: 9999
-            }}
-          >
-            {/* A close button to hide it again */}
-            {/* <button 
+        <div
+          style={{
+            position: "absolute",
+            top: "20px", // or wherever you want it to start
+            right: "20px",
+            background: "white", // or transparent if you'd like
+            boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+            borderRadius: "8px",
+            zIndex: 9999
+          }}
+        >
+          {/* A close button to hide it again */}
+          {/* <button 
               onClick={() => setOpen(false)}
               style={{
                 background: "none",
@@ -1306,116 +1461,116 @@ const Topbar = ({onComplete, usersDataForLogin}) => {
               ✖
             </button> */}
 
-            {/* The actual sticky notes component */}
-            <StickyNotes userEmail={userdetails?.email} setOpen={setOpen} userdetails={userdetails} />
-          </div>
+          {/* The actual sticky notes component */}
+          <StickyNotes userEmail={userdetails?.email} setOpen={setOpen} userdetails={userdetails} />
+        </div>
         // </Draggable>
       )}
 
-      {openCalculator && 
+      {openCalculator &&
         (<div>
           <Calculator setOpenCalculator={setOpenCalculator} />
         </div>)
       }
-    {/* <Modal open={openWorldTime} width="100%" onCancel={()=> setOpenWorldTime(false)}>
+      {/* <Modal open={openWorldTime} width="100%" onCancel={()=> setOpenWorldTime(false)}>
       <div>
         <WorldTime setOpenWorldTime={setOpenWorldTime} />
       </div>
     </Modal> */}
-    <Drawer open={openWorldTime} width="95%" onClose={()=> setOpenWorldTime(false)}>
-      <div>
-        <WorldTime setOpenWorldTime={setOpenWorldTime} />
-      </div>
-    </Drawer>
-    {/* <Modal open={openCalculator} width="100%" onCancel={()=> setOpenCalculator(false)}>
+      <Drawer open={openWorldTime} width="95%" onClose={() => setOpenWorldTime(false)}>
+        <div>
+          <WorldTime setOpenWorldTime={setOpenWorldTime} />
+        </div>
+      </Drawer>
+      {/* <Modal open={openCalculator} width="100%" onCancel={()=> setOpenCalculator(false)}>
       <div>
         <Calculator setOpenCalculator={setOpenCalculator} />
       </div>
     </Modal> */}
-    <Drawer open={openCalculator} width="32%" onClose={()=> setOpenCalculator(false)}>
-      <div>
-        <Calculator setOpenCalculator={setOpenCalculator} />
-      </div>
-    </Drawer>
+      <Drawer open={openCalculator} width="32%" onClose={() => setOpenCalculator(false)}>
+        <div>
+          <Calculator setOpenCalculator={setOpenCalculator} />
+        </div>
+      </Drawer>
 
-    {visible && (
-          <div
+      {visible && (
+        <div
+          style={{
+            position: "fixed",
+            top: drawerPosition.top,
+            left: drawerPosition.left,
+            width: drawerPosition.width,
+            zIndex: 1000, // above page content
+            // display: width > 500 ? 'none' : 'block', // Hide on mobile
+          }}
+          className='mobile-navbar'
+        >
+          <Drawer
+            open={visible}
+            onClose={() => setVisible(false)}
+            placement="top"
+            height={50}
+            getContainer={false}
+            mask={false} // ❌ no AntD mask
+            motion={null}
+            closable={false}
+            title={null}
+            bodyStyle={{ padding: 0 }}
             style={{
               position: "fixed",
               top: drawerPosition.top,
               left: drawerPosition.left,
               width: drawerPosition.width,
-              zIndex: 1000, // above page content
-              // display: width > 500 ? 'none' : 'block', // Hide on mobile
+              height: 50,
+              margin: 0,
+              boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+              transition: "none",
+              // backgroundColor: theme === "dark" ? "#000" : "#fff",
             }}
-            className='mobile-navbar'
           >
-            <Drawer
-              open={visible}
-              onClose={() => setVisible(false)}
-              placement="top"
-              height={50}
-              getContainer={false}
-              mask={false} // ❌ no AntD mask
-              motion={null}
-              closable={false}
-              title={null}
-              bodyStyle={{ padding: 0 }}
+            {/* 🔥 Transparent full-page backdrop for outside click detection */}
+            <div
+              onClick={() => setVisible(false)}
               style={{
                 position: "fixed",
-                top: drawerPosition.top,
-                left: drawerPosition.left,
-                width: drawerPosition.width,
-                height: 50,
-                margin: 0,
-                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                transition: "none",
-                // backgroundColor: theme === "dark" ? "#000" : "#fff",
+                inset: 0,
+                zIndex: -1, // behind drawer content
+                background: "transparent", // fully transparent
+                pointerEvents: "none",
               }}
-            >
-              {/* 🔥 Transparent full-page backdrop for outside click detection */}
-              <div
-                onClick={() => setVisible(false)}
-                style={{
-                  position: "fixed",
-                  inset: 0,
-                  zIndex: -1, // behind drawer content
-                  background: "transparent", // fully transparent
-                  pointerEvents: "none",
-                }}
-              />
+            />
 
-              {/* 👇 Your actual content */}
-              <div style={{  zIndex: 1 }}>
+            {/* 👇 Your actual content */}
+            <div style={{ zIndex: 1 }}>
               <Menu
-                                mode="inline"
-                                selectedKeys={[pathname]}
-                                style={{
-                                    backgroundColor: darkMode ? '#333' : '#fff',
-                                    color: darkMode ? '#007BFF' : '#000',
-                                    // color: '#007BFF',
-                                    fontSize: '16px',
-                                    borderRight: 'none',
-                                    // marginTop: '10px',
-                                    width:'100%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                }}
-                                onClick={(e) => handleMenuItemClick(e.key)}
-                            >
-                                {menuItems.map(item => (
-                                    <Menu.Item key={item.key}   style={{ color: darkMode ? pathname === item.key ? "#000" : 'white' : '#000', fontWeight: "500", fontSize: "16px", display:'flex', alignItems:'center', justifyContent:'center', width:'100%', padding:'0px' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            {item.icon}
-                                        </div>
-                                    </Menu.Item>
-                                ))}
-                            </Menu>
-              </div>
-            </Drawer>
-          </div>
-        )}
-      
+                mode="inline"
+                selectedKeys={[pathname]}
+                style={{
+                  backgroundColor: darkMode ? '#333' : '#fff',
+                  color: darkMode ? '#007BFF' : '#000',
+                  // color: '#007BFF',
+                  fontSize: '16px',
+                  borderRight: 'none',
+                  // marginTop: '10px',
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+                onClick={(e) => handleMenuItemClick(e.key)}
+              >
+                {menuItems.map(item => (
+                  <Menu.Item key={item.key} style={{ color: darkMode ? pathname === item.key ? "#000" : 'white' : '#000', fontWeight: "500", fontSize: "16px", display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', padding: '0px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {item.icon}
+                    </div>
+                  </Menu.Item>
+                ))}
+              </Menu>
+            </div>
+          </Drawer>
+        </div>
+      )}
+
     </div>
   );
 };
@@ -1430,7 +1585,7 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
   const { setuserdetails } = useTokenContext();
   const { apiClient } = useTokenContext();
   const [topbarStatus, setTopbarStatus] = useState(false);
-  
+
   const isCalledRef = useRef(false);  // To ensure getUsersData API is called only once
 
   const debouncedRetry = debounce((fetchFunc, retries, resolve, reject) => {
@@ -1438,18 +1593,18 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
   }, 2000);
 
   const retryFetch = async (fetchFunc, retries = 3) => {
-      try {
-          return await fetchFunc();  // Try the API call
-      } catch (error) {
-          if (retries === 1) throw error;  // Throw error if no retries left
+    try {
+      return await fetchFunc();  // Try the API call
+    } catch (error) {
+      if (retries === 1) throw error;  // Throw error if no retries left
 
-          console.log(`Retrying... Attempts left: ${retries - 1}`);
-          
-          // Use debounce for a delay before retrying
-          return new Promise((resolve, reject) => {
-              debouncedRetry(fetchFunc, retries, resolve, reject);
-          });
-      }
+      console.log(`Retrying... Attempts left: ${retries - 1}`);
+
+      // Use debounce for a delay before retrying
+      return new Promise((resolve, reject) => {
+        debouncedRetry(fetchFunc, retries, resolve, reject);
+      });
+    }
   };
 
   useEffect(() => {
@@ -1466,7 +1621,7 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
           // console.log(usersDataForLogin);
           // Case Media_Buyer
           switch (usersDataForLogin[0].role) {
-            
+
             case 'Media_Buyer':
               const MediaBuyeradAccounts = usersDataForLogin[0].adAccounts;
               const MediaBuyerkeysOfAdAccounts = Object.keys(MediaBuyeradAccounts);
@@ -1488,26 +1643,26 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
               setuserdetails({ ...usersDataForLogin[0], adAccounts: MediaBuyernewObject });
               break;
 
-              case 'Revenue_Partner':
-                // const RevenuePartneradAccounts = usersDataForLogin[0].adAccounts;
-                // const RevenuePartnerkeysOfAdAccounts = Object.keys(RevenuePartneradAccounts);
-                // const RevenuePartnernewObject = {};
-                // console.log(RevenuePartnerkeysOfAdAccounts, "keys");
-  
-                // for (let item of RevenuePartnerkeysOfAdAccounts) {
-                //   if (RevenuePartneradAccounts[item][0] === "All") {
-                //     // Retry logic for Accounts API
-                //     const networkResponse = await retryFetch(() => axios.get(`https://prodapis.adsgoat.in/network/Accounts?network=${item}`));
-                //     RevenuePartnernewObject[item] = networkResponse.data;
-                //   } else {
-                //     const response = await retryFetch(() =>
-                //       axios.post('https://prodapis.adsgoat.in/getAccountNameandStatusofNetwork/', { updatedNetwork: RevenuePartneradAccounts[item] })
-                //     );
-                //     RevenuePartnernewObject[item] = response.data;
-                //   }
-                // }
-                setuserdetails({ ...usersDataForLogin[0]});
-                break;
+            case 'Revenue_Partner':
+              // const RevenuePartneradAccounts = usersDataForLogin[0].adAccounts;
+              // const RevenuePartnerkeysOfAdAccounts = Object.keys(RevenuePartneradAccounts);
+              // const RevenuePartnernewObject = {};
+              // console.log(RevenuePartnerkeysOfAdAccounts, "keys");
+
+              // for (let item of RevenuePartnerkeysOfAdAccounts) {
+              //   if (RevenuePartneradAccounts[item][0] === "All") {
+              //     // Retry logic for Accounts API
+              //     const networkResponse = await retryFetch(() => axios.get(`https://prodapis.adsgoat.in/network/Accounts?network=${item}`));
+              //     RevenuePartnernewObject[item] = networkResponse.data;
+              //   } else {
+              //     const response = await retryFetch(() =>
+              //       axios.post('https://prodapis.adsgoat.in/getAccountNameandStatusofNetwork/', { updatedNetwork: RevenuePartneradAccounts[item] })
+              //     );
+              //     RevenuePartnernewObject[item] = response.data;
+              //   }
+              // }
+              setuserdetails({ ...usersDataForLogin[0] });
+              break;
 
             // Case Special_User
             case 'Special_User':
@@ -1567,10 +1722,10 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
               setuserdetails(usersDataForLogin);
           }
         }
-        else{
+        else {
           setuserdetails(usersDataForLogin[0]);
         }
-        
+
       } catch (error) {
         console.error('Error during API call:', error);
       } finally {
@@ -1587,11 +1742,11 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
     }
   }, [sessionStatus, session]);
 
-  useEffect(()=>{
-    if(initialized && topbarStatus){
+  useEffect(() => {
+    if (initialized && topbarStatus) {
       onComplete();
     }
-  },[initialized, topbarStatus]);
+  }, [initialized, topbarStatus]);
 
 
   const toggleTheme = () => {
@@ -1606,14 +1761,14 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
     signIn('google'); // Use Next-auth for Google sign-in
   };
 
-  const handleTopbarCalling = () =>{
+  const handleTopbarCalling = () => {
     setTopbarStatus(true)
   }
 
   return (
     <>
-      <Topbar usersDataForLogin={usersDataForLogin} session={session} darkMode={darkMode} toggleTheme={toggleTheme} usersData={!loading && usersData} onComplete={handleTopbarCalling}/>
-      
+      <Topbar usersDataForLogin={usersDataForLogin} session={session} darkMode={darkMode} toggleTheme={toggleTheme} usersData={!loading && usersData} onComplete={handleTopbarCalling} />
+
       {sessionStatus == "authenticated" && usersData?.length === 0 && !loading ?
         null
         :

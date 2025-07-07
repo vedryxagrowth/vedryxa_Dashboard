@@ -61,7 +61,7 @@ const selectTimezone = {
 };
 
 
-const Daily = ({functionCallForCampaigns, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, showCampaignLevel, removeSelectedCampaigns, moveToNextTab}) => {
+const Daily = ({functionCallForCampaigns, context, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, showCampaignLevel, removeSelectedCampaigns, moveToNextTab}) => {
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -1281,6 +1281,7 @@ const Daily = ({functionCallForCampaigns, functionCallForCommnets, startDate, en
                                     </Row>
                                     <AgGridReact
                                         ref={gridRef1}
+                                        context={context}
                                         // rowSelection="multiple"
                                         groupSelectsChildren={true} // ✅ Selects all children when a group is selected
                                         suppressRowClickSelection={true} // ✅ Prevents selection on row click, only via checkbox
