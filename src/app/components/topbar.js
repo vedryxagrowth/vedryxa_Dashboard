@@ -52,14 +52,14 @@ import { message, Popconfirm } from 'antd';
 
 import { useGlobalLoading } from "../layout";
 
-const socket = io("https://prodapis.adsgoat.in");
+// const socket = io("https://prodapis.adsgoat.in");
 
 // const socket = io("http://localhost:8000");
 
-// const socket = io("https://prodapis.adsgoat.in", {
-//   transports: ["websocket"], // Forces websocket
-//   secure: true
-// });
+const socket = io("https://prodapis.adsgoat.in", {
+  transports: ["websocket"], // Forces websocket
+  secure: true
+});
 
 const Topbar = ({ onComplete, usersDataForLogin }) => {
   const { darkMode, toggleTheme } = useTokenContext();
