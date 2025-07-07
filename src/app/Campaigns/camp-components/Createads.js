@@ -1015,7 +1015,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
                                                     {/* Creative Library UI */}
                                                     {selectedOption === "creative" && (
                                                     <div>
-                                                        <Button className="dark-icon-button" icon={<UploadOutlined />} onClick={onClickCreativesDrawer}  disabled={selectedFiles.length > 0 && true}>
+                                                        <Button className="dark-icon-button"  style={{color: theme === "dark" ? "white" : "#000"}} icon={<UploadOutlined />} onClick={onClickCreativesDrawer}  disabled={selectedFiles.length > 0 && true}>
                                                           Select Files
                                                         </Button>
 

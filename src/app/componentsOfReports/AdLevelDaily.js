@@ -41,7 +41,8 @@ const newtworkCollections = {
     "FB_Bodies1": "Facebook_Bodies1",
     "Newsbreak_DA": "Newsbreak_DomainActive",
     "FB_Tonic1": "Facebook_Tonic1",
-    "FB_Sedo": "Facebook_Sedo"
+    "FB_Sedo": "Facebook_Sedo",
+    "FB_Inmobi": "Facebook_Inmobi",
 }
 const selectTimezone = {
     UTC: 'UTCDate',
@@ -93,7 +94,7 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
 
     const memorizedColumnDef1 = useMemo(()=> columnDefs.current, [columnDefs.current]);
     const memorizedDailyData = useMemo(()=> dailyData?.filter((each) => {
-        const normalizedCampaign = (each?.campaignname || "").trim().toLowerCase();
+        const normalizedCampaign = (each?.adname || "").trim().toLowerCase();
         const normalizedInput = inputValue.trim().toLowerCase();
         return (
             normalizedCampaign.startsWith(normalizedInput) ||
@@ -1241,7 +1242,7 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
                                     </div>
                                 </div>
                             ) : dailyData?.filter((each) => {
-                                const normalizedCampaign = (each?.campaignname || "").trim().toLowerCase();
+                                const normalizedCampaign = (each?.adname || "").trim().toLowerCase();
                                 const normalizedInput = inputValue.trim().toLowerCase();
                                 return (
                                     normalizedCampaign.startsWith(normalizedInput) ||

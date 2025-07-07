@@ -891,7 +891,7 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 }
 .Badge{
   position: relative;
-    background-color: red;
+    background-color: orange;
     padding: 2px 5px;
     border-radius: 50%;
     color: white;
@@ -2953,7 +2953,7 @@ body.dark-mode .black-icon-comment.anticon svg {
 
 .dark-theme-category .ant-select-selection-item {
   background-color: #333 !important;  /* tag background */
-  color: white !important;            /* tag text */
+  color: white !important;            
   border: none !important;
 }
 
@@ -2961,4 +2961,26 @@ body.dark-mode .black-icon-comment.anticon svg {
 .dark-theme-category .ant-select-arrow,
 .dark-theme-category .ant-select-clear {
   color: white !important;
+}
+
+.custom-dark-notification {
+  background-color: #1f1f1f !important;  /* Dark background */
+  color: #ffffff !important;            /* White text */
+  border: 1px solid #333 !important;
+}
+
+.custom-dark-notification .ant-notification-notice-message,
+.custom-dark-notification .ant-notification-notice-description {
+  color: #ffffff !important;  /* Force white text for message/description */
+}
+
+.custom-light-notification {
+  background-color: #ffffff !important;  /* Dark background */
+  color: #1f1f1f !important;            /* White text */
+  border: 1px solid #333 !important;
+}
+
+.custom-light-notification .ant-notification-notice-message,
+.custom-light-notification .ant-notification-notice-description {
+  color: #1f1f1f !important;  
 }

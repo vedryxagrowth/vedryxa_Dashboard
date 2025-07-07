@@ -7,7 +7,7 @@ import axios from 'axios';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
 import { Carousel, Input, Button, Row, Col, Typography, Modal, message, ConfigProvider, Switch, Flex, Spin, Tabs, Skeleton } from 'antd';
-import { EditOutlined, SearchOutlined, ReloadOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
+import { WarningOutlined, DollarOutlined, EditOutlined, SearchOutlined, ReloadOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
 import { Tooltip, Popover } from 'antd';
 import StickyBox from 'react-sticky-box';
 import { Select } from 'antd';
@@ -42,6 +42,7 @@ const CampaignReports = React.lazy(() => import('../componentsOfReports/AllCampa
 const DAKeywordReports = React.lazy(() => import('../componentsOfReports/DAKeywords'));
 const System1KeywordReports = React.lazy(() => import('../componentsOfReports/System1Keywords'));
 const TonicKeywordReports = React.lazy(() => import('../componentsOfReports/Tonic1Keywords'));
+const InmobiKeywordReports = React.lazy(() => import('../componentsOfReports/InmobiKeywords'));
 const AgencyAndBMNameReports = React.lazy(() => import('../componentsOfReports/AgencyAndBMName'));
 const MnetDomainReports = React.lazy(() => import('../componentsOfReports/MnetDomainData'));
 const MnetLiveAdReports = React.lazy(() => import('../componentsOfReports/MnetAdLive'));
@@ -87,6 +88,7 @@ const MyTablePage = () => {
         "D_tq",
         "from",
         "to",
+        "filteration",
         "profitloss",
         "spend",
         "revenue",
@@ -98,6 +100,7 @@ const MyTablePage = () => {
         "fbclicks",
         "impressions",
         "cpl",
+        "cpm",
         "ncpl",
         "rpc",
         "cpc",
@@ -301,6 +304,62 @@ const MyTablePage = () => {
 
     // const [campaignNamesDActiveDailyLoading, setCampaignNamesDActiveDailyLoading] = useState(false);
 
+    const [allCampaignData, setAllCampaignData] = useState([]);
+    const [campaignRefreshTrigger, setCampaignRefreshTrigger] = useState(0);
+    
+    useEffect(() => {
+        const fetchAllCampaigns = async () => {
+            try {
+                const res = await apiClient.get(`/get/AllCampaignsWithAdsets?accountNumber=${newaccount}`);
+                const enrichedAdsetRows = res.data.flatMap(campaign =>
+                    (campaign.adsets || []).map(adset => ({
+                      ...adset,
+                      campaignid: campaign.campaign_id,
+                      campaignname: campaign.name,
+                      accountNumber: campaign.accountNumber,
+                      revenuePartner: campaign.revenuePartner,
+                      campaign_budget: campaign.campaign_budget,
+                      campaign_status: campaign.status,
+                      start: campaign.start,
+                      end: campaign.end
+                    }))
+                  );
+                  setAllCampaignData(enrichedAdsetRows);
+            } catch (err) {
+                console.error("Failed to fetch all campaigns", err);
+            }
+        };
+    
+        fetchAllCampaigns();
+    }, [newaccount]);
+    
+    useEffect(() => {
+        if (campaignRefreshTrigger === 0) return;
+        const fetchUpdatedCampaign = async () => {
+            try {
+                const res = await apiClient.get(`/get/AllCampaignsWithAdsets?accountNumber=${newaccount}`);
+                const enrichedAdsetRows = res.data.flatMap(campaign =>
+                    (campaign.adsets || []).map(adset => ({
+                      ...adset,
+                      campaignid: campaign.campaign_id,
+                      campaignname: campaign.name,
+                      accountNumber: campaign.accountNumber,
+                      revenuePartner: campaign.revenuePartner,
+                      campaign_budget: campaign.campaign_budget,
+                      campaign_status: campaign.status,
+                      start: campaign.start,
+                      end: campaign.end
+                    }))
+                  );
+                  setAllCampaignData(enrichedAdsetRows);
+            } catch (err) {
+                console.error("Failed to refetch updated campaigns", err);
+            }
+        };
+        fetchUpdatedCampaign();
+    }, [campaignRefreshTrigger]);
+       
+    
     const showModal = () => {
         setIsModalOpen(true);
     };
@@ -567,6 +626,57 @@ const MyTablePage = () => {
         return 0;
     };
 
+    const getCpm = (params) => {
+        if (params.data !== undefined) {
+            const { impressions, spend } = params.data;
+
+            if (impressions !== 0) {
+                const CPL = (spend / impressions) * 1000;
+                if (CPL === Infinity) {
+                    return 0;
+                }
+                return Number(CPL.toFixed(2));
+
+            }
+        }
+        if (params.node.aggData !== undefined) {
+            const { impressions, spend } = params.node.aggData;
+            if (impressions !== 0) {
+                const CPL = (spend / impressions) * 1000;
+                if (CPL === Infinity) {
+                    return 0;
+                }
+                return Number(CPL.toFixed(2));
+            }
+        }
+
+        return 0;
+    };
+
+    const getFilteration = (params) => {
+
+        if (params.data !== undefined) {
+            const { fbleads, conversions } = params.data;
+            if (fbleads !== 0) {
+                const RPC = ((parseInt(fbleads)-parseInt(conversions)) / parseInt(fbleads))*100;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return `${Number(RPC.toFixed(2))}`;
+
+            }
+        }
+        if (params.node.aggData !== undefined) {
+            const { fbleads, conversions } = params.node.aggData;
+            if (fbleads !== 0) {
+                const RPC = ((parseInt(fbleads)-parseInt(conversions)) / parseInt(fbleads))*100;
+                return `${Number(RPC.toFixed(2))}`;
+            }
+        }
+
+        return 0;
+    }
+    
     const getCpcLc = (params) => {
         if (params.data !== undefined) {
             const { spend, fblinkclicks } = params.data;
@@ -1192,6 +1302,29 @@ const MyTablePage = () => {
             //     window.open(url, '_blank', 'noopener,noreferrer');
             // },
             // cellRenderer: campaignNameRenderer,
+        },
+        cpm: {
+            headerName: 'CPM',
+            field: 'cpm',
+            sortable: true,
+            minWidth: 90,
+            headerTooltip: '(Profit/Revenue)*100', filter: true,
+            valueGetter: getCpm,
+            hide: false,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',  
+        },
+        filteration: { 
+            headerName: "Filteration",
+            field: 'filteration',
+            width: 115,
+            valueGetter: getFilteration,
+            valueFormatter: params => `${params.value || 0}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            hide: true,
         },
         adsetname: {
             headerName: 'AdsetName', field: 'adsetname',
@@ -1864,6 +1997,29 @@ const MyTablePage = () => {
             //     window.open(url, '_blank', 'noopener,noreferrer');
             // },
             // cellRenderer: campaignNameRenderer,
+        },
+        cpm: {
+            headerName: 'CPM',
+            field: 'cpm',
+            sortable: true,
+            minWidth: 90,
+            headerTooltip: '(Profit/Revenue)*100', filter: true,
+            valueGetter: getCpm,
+            hide: false,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',  
+        },
+        filteration: { 
+            headerName: "Filteration",
+            field: 'filteration',
+            width: 115,
+            valueGetter: getFilteration,
+            valueFormatter: params => `${params.value || 0}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            hide: true,
         },
         actions: {
             headerName: 'Actions',
@@ -3431,6 +3587,29 @@ const MyTablePage = () => {
             hide: true,
             
         },
+        cpm: {
+            headerName: 'CPM',
+            field: 'cpm',
+            sortable: true,
+            minWidth: 90,
+            headerTooltip: '(Profit/Revenue)*100', filter: true,
+            valueGetter: getCpm,
+            hide: false,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',  
+        },
+        filteration: { 
+            headerName: "Filteration",
+            field: 'filteration',
+            width: 115,
+            valueGetter: getFilteration,
+            valueFormatter: params => `${params.value || 0}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            hide: true,
+        },
         // actions: {
         //     headerName: 'Actions',
         //     field: 'actions',
@@ -3489,7 +3668,7 @@ const MyTablePage = () => {
         //             }
         //             // if(groupedData.length > 0) {
                         
-        //             //     const getCampaignActualSpend = await apiClient.get(`http://localhost:8000/get/ActualCampaginSpend?campaignId=${campaignId}`);
+        //             //     const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
         //             //     if (getCampaignActualSpend.status === 200){
         //             //         setCampaignActualSpend(getCampaignActualSpend.data);
         //             //     }
@@ -3602,97 +3781,177 @@ const MyTablePage = () => {
             suppressMenu: true,
             hide: !isYesterday(),
             cellRenderer: (params) => {
+                const {
+                    allCampaignData,
+                    setCampaignRefreshTrigger,
+                    changeRRefrst,
+                    newaccount,
+                    userdetails,
+                    theme
+                  } = params.context;
+
               const [isModalVisible, setIsModalVisible] = useState(false);
               const [groupedData, setGroupedData] = useState([]);
               const [changeBudget, onChangeBudget] = useState();
-              const [campaignStatus, setCampaignStatus] = useState(true);
-              const [campaignActualSpend, setCampaignActualSpend] = useState({});
+              const [bidAmount, setBidAmount] = useState();
               const [adsetId, setAdsetId] = useState(null);
-
-              if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) {
-                return null; // hide edit icon in footer
+              const [adsetInfo, setAdsetInfo] = useState(null);
+            //   const [, forceRerender] = useState(0);
+          
+              const isGroupRow = !!params?.node?.groupData;
+              let campaignId = null;
+              let initialAdsetId = null;
+          
+              if (isGroupRow) {
+                const children = params?.node?.allLeafChildren || [];
+                campaignId = children[0]?.data?.campaignid;
+                initialAdsetId = children[0]?.data?.adsetid;
+              } else {
+                campaignId = params?.data?.campaignid;
+                initialAdsetId = params?.data?.adsetid;
               }
           
+              const campaignname = isGroupRow
+                ? params?.node?.key
+                : params?.data?.campaignname;
+
+                console.log("campaignId ar:", campaignId);
+          
+                useEffect(() => {
+                    if (!campaignId || !initialAdsetId || !Array.isArray(allCampaignData)) return;
+                    // const matchedCampaign = allCampaignData.find(c => c.campaign_id === campaignId);
+                    // const matchedAdset = matchedCampaign?.adsets?.find(ad => ad.adset_id === initialAdsetId);
+                    const matchedAdset = allCampaignData.find(
+                        (adset) => adset.campaignid === campaignId && adset.adset_id === initialAdsetId
+                      );
+                    if (matchedAdset) {
+                      setAdsetInfo(matchedAdset);
+                    }
+                }, [campaignId, initialAdsetId, allCampaignData]);
+          
               const onChangeSpendAndStatus = async () => {
-                if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return;
-          
-                const allLeafChildren = params.node?.allLeafChildren || [];
-                const grouped = allLeafChildren.map(node => node.data) || [];
-          
-                setGroupedData(grouped);
-          
-                const campaignId = grouped?.[0]?.campaignid;
-                const adsetId = grouped?.[0]?.adsetid;
-                // console.log("adsetid:", adsetId);
-                setAdsetId(adsetId); 
-                const campaignname = grouped?.[0]?.campaignname;
-          
-                if (!campaignId || !campaignname) {
-                  message.error("Campaign info missing");
-                  return;
-                }
-          
                 try {
-                  const [commentsRes, fbRes] = await Promise.all([
-                    apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${campaignname}`),
-                    apiClient.get(`/get/ActualAdsetSpend?adsetId=${adsetId}`),
-                  ]);
+                  const grouped = params?.node?.allLeafChildren?.map(node => node.data) || [];
+                  const clickedAdsetId = grouped?.[0]?.adsetid || initialAdsetId;
+                //   const clickedCampaignId = grouped?.[0]?.campaignid || campaignId;
           
-                  if (commentsRes.status === 200 && commentsRes.data.length !== 0) {
-                    setCampaignStatus(commentsRes.data.status ?? false);
-                    setGroupedData(commentsRes.data);
-                  }
+                  setGroupedData(grouped);
+                  setAdsetId(clickedAdsetId);
           
-                  if (fbRes.status === 200) {
-                    setCampaignActualSpend(fbRes.data);
-                    const budget = parseFloat(fbRes.data.daily_budget || fbRes.data.lifetime_budget || 0) / 100;
+                  const campaign = params.context.allCampaignData.find(c => c.campaign_id === campaignId);
+
+                  const adset = allCampaignData.find(
+                    (adset) => adset.campaignid === campaignId && adset.adset_id === clickedAdsetId
+                  );
+          
+                  if (adset) {
+                    const budget = parseFloat(adset?.budget?.daily_budget || adset?.budget?.lifetime_budget || 0) / 100;
                     onChangeBudget(budget);
+                    setBidAmount(adset?.bid_amount / 100);
+                    setAdsetInfo(adset);
+                    setIsModalVisible(true);
+                  } else {
+                    message.error("Adset not found in backend response.");
                   }
           
-                  setIsModalVisible(true);
+                //   setIsModalVisible(true);
                 } catch (err) {
-                  console.error(err);
-                  message.error("Failed to fetch campaign budget");
+                  console.error("❌ Failed to fetch adset:", err);
+                  message.error("Failed to fetch adset data");
                 }
               };
+
+              if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) {
+                return null;
+              }
           
-              const handleOk = async () => {
+            const handleOk = async () => {
                 setIsModalVisible(false);
-          
-                const isArray = Array.isArray(groupedData);
-                const campaignId = isArray ? groupedData?.[0]?.campaignid : groupedData?.campaignid;
-                const campaignname = isArray ? groupedData?.[0]?.campaignname : groupedData?.campaignname;                
-          
+                const campaignname = groupedData?.[0]?.campaignname;
+              
                 const payload = {
                   adsetId,
-                  budget: parseFloat(changeBudget) * 100,
                   accountNumber: newaccount,
                   campaignname,
-                  updatedby: userdetails?.email,
+                  updatedby: userdetails?.email
                 };
-          
-                if (!payload.adsetId) {
-                    message.error("Adset ID missing. Cannot update budget.");
-                    return;
+              
+                if (
+                    changeBudget !== undefined &&
+                    changeBudget !== '' &&
+                    !isNaN(changeBudget) &&
+                    parseFloat(changeBudget) > 0 // <- this is critical
+                ) {
+                    payload.budget = parseFloat(changeBudget) * 100;
                 }
-
+              
+                if (
+                    bidAmount !== undefined &&
+                    bidAmount !== '' &&
+                    !isNaN(bidAmount) &&
+                    parseFloat(bidAmount) * 100 >= 1
+                ) {
+                    payload.bidAmount = parseFloat(bidAmount) * 100;
+                }
+              
+                const hasBudget = Object.prototype.hasOwnProperty.call(payload, 'budget');
+                const hasBidAmount = Object.prototype.hasOwnProperty.call(payload, 'bidAmount');
+                
+                if (!hasBudget && !hasBidAmount) {
+                  message.warning("Please enter Budget and/or Bid Amount before submitting.");
+                  return;
+                }                
+             
+              
                 try {
                   await apiClient.post('/update/adset/budget', payload);
-                  message.success("Budget Updated Successfully");
+                  message.success("Adset Budget and/or Bid Updated");
+                  setCampaignRefreshTrigger(prev => prev + 1); // ✅ Refresh campaign + adset data
+
                   changeRRefrst();
                 } catch (err) {
                   console.error(err);
-                  message.error("Failed to update budget");
+                  message.error("Failed to update adset");
                 }
               };
+              
+              const rawData = isGroupRow ? params?.node?.allLeafChildren?.[0]?.data : params?.data;
+
+              const daily = adsetInfo?.budget?.daily_budget ?? rawData?.budget?.daily_budget;
+              const lifetime = adsetInfo?.budget?.lifetime_budget ?? rawData?.budget?.lifetime_budget;
+              const bid = adsetInfo?.bid_amount ?? rawData?.bid_amount;
+              
+              const hasBudget = (daily !== null && daily !== undefined && daily !== '') ||
+                                (lifetime !== null && lifetime !== undefined && lifetime !== '');
+              const hasBid = bid !== null && bid !== undefined && bid !== '';              
+          
+              
+              let tooltipText = 'Ad Set Budget & Bid are NOT available';
+              let iconColor = '#FF4D4F'; // Red (default: none available)
+          
+              if (hasBudget && hasBid) {
+                tooltipText = 'Ad Set Budget & Bid are available';
+                iconColor = '#91C25F'; // Green
+              } else if (hasBudget || hasBid) {
+                tooltipText = hasBudget ? 'Ad Set exists with Budget but no Bid' : 'Ad Set exists with Bid but no Budget';
+                iconColor = '#FFBF00'; // Yellow
+              }
           
               return (
                 <div>
-                  <EditOutlined style={{ cursor: 'pointer' }} onClick={onChangeSpendAndStatus} />
+                  <Tooltip title={tooltipText}>
+                    <DollarOutlined
+                      style={{
+                        cursor: 'pointer',
+                        color: iconColor,
+                      }}
+                      onClick={onChangeSpendAndStatus}
+                    />
+                  </Tooltip>
+          
                   {isModalVisible && (
                     <Modal
-                    //   title={groupedData?.[0]?.campaignname || 'Edit Campaign Budget'}
-                      title={Array.isArray(groupedData) ? groupedData?.[0]?.campaignname : groupedData?.campaignname}
+                      title={groupedData?.[0]?.campaignname || 'Edit Adset'}
                       open={isModalVisible}
                       onOk={handleOk}
                       onCancel={() => setIsModalVisible(false)}
@@ -3701,24 +3960,13 @@ const MyTablePage = () => {
                       className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                     >
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                        {/* <div style={{ display: 'flex', alignItems: 'center' }}>
-                          <Typography.Text strong style={{ paddingRight: '20px' }}>
-                            Campaign Status: Activate/Pause
-                          </Typography.Text>
-                          <Switch
-                            checked={campaignStatus}
-                            style={{ backgroundColor: campaignStatus && "#91C25F" }}
-                            onChange={() => setCampaignStatus(prev => !prev)}
-                          />
-                        </div> */}
-          
                         <div>
-                          <Typography.Text strong style={{color : theme === "dark" && "white"}}>
+                          <Typography.Text strong style={{ color: theme === 'dark' && 'white' }}>
                             Budget Type:
-                          </Typography.Text>{" "}
+                          </Typography.Text>{' '}
                           <span style={{ fontWeight: 'normal' }}>
-                            {campaignActualSpend.daily_budget ? "Daily" :
-                              campaignActualSpend.lifetime_budget ? "Lifetime" : "Unknown"}
+                            {adsetInfo?.budget?.daily_budget ? 'Daily' :
+                              adsetInfo?.budget?.lifetime_budget ? 'Lifetime' : 'Unknown'}
                           </span>
                         </div>
           
@@ -3726,12 +3974,23 @@ const MyTablePage = () => {
                           type="number"
                           value={changeBudget}
                           onChange={(e) => onChangeBudget(e.target.value)}
-                          placeholder="Enter budget in USD"  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                          placeholder="Enter budget in USD"
+                          className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                        />
+          
+                        <Input
+                          type="number"
+                          value={bidAmount}
+                          onChange={(e) => setBidAmount(e.target.value)}
+                          placeholder="Enter bid amount"
+                          className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                         />
           
                         <div>
-                          <Typography.Text strong style={{color : theme === "dark" && "white"}}>Campaign ID:</Typography.Text>
-                          <p>{campaignActualSpend?.id}</p>
+                          <Typography.Text strong style={{ color: theme === 'dark' && 'white' }}>
+                            Adset ID:
+                          </Typography.Text>
+                          <p>{adsetId}</p>
                         </div>
                       </div>
                     </Modal>
@@ -3739,7 +3998,7 @@ const MyTablePage = () => {
                 </div>
               );
             },
-        },
+        }, 
         adsetname: {
             headerName: 'AdsetName',
             field: 'adsetname',
@@ -4262,6 +4521,29 @@ const MyTablePage = () => {
             hide: true,
             
         },
+        cpm: {
+            headerName: 'CPM',
+            field: 'cpm',
+            sortable: true,
+            minWidth: 90,
+            headerTooltip: '(Profit/Revenue)*100', filter: true,
+            valueGetter: getCpm,
+            hide: false,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',  
+        },
+        filteration: { 
+            headerName: "Filteration",
+            field: 'filteration',
+            width: 115,
+            valueGetter: getFilteration,
+            valueFormatter: params => `${params.value || 0}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            hide: true,
+        },
         actions: {
             headerName: 'Budget',
             field: 'actions',
@@ -4321,7 +4603,7 @@ const MyTablePage = () => {
                     }
                     // if(groupedData.length > 0) {
                         
-                    //     const getCampaignActualSpend = await apiClient.get(`http://localhost:8000/get/ActualCampaginSpend?campaignId=${campaignId}`);
+                    //     const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
                     //     if (getCampaignActualSpend.status === 200){
                     //         setCampaignActualSpend(getCampaignActualSpend.data);
                     //     }
@@ -4951,6 +5233,29 @@ const MyTablePage = () => {
             enableRowGroup: true,
             pinned: 'left',
         },
+        cpm: {
+            headerName: 'CPM',
+            field: 'cpm',
+            sortable: true,
+            minWidth: 90,
+            headerTooltip: '(Profit/Revenue)*100', filter: true,
+            valueGetter: getCpm,
+            hide: false,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',  
+        },
+        filteration: { 
+            headerName: "Filteration",
+            field: 'filteration',
+            width: 115,
+            valueGetter: getFilteration,
+            valueFormatter: params => `${params.value || 0}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            hide: true,
+        },
         // actions: {
         //     headerName: 'Actions',
         //     field: 'actions',
@@ -5009,7 +5314,7 @@ const MyTablePage = () => {
         //             }
         //             // if(groupedData.length > 0) {
                         
-        //             //     const getCampaignActualSpend = await apiClient.get(`http://localhost:8000/get/ActualCampaginSpend?campaignId=${campaignId}`);
+        //             //     const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
         //             //     if (getCampaignActualSpend.status === 200){
         //             //         setCampaignActualSpend(getCampaignActualSpend.data);
         //             //     }
@@ -5122,140 +5427,148 @@ const MyTablePage = () => {
             suppressMenu: true,
             hide: !isYesterday(),
             cellRenderer: (params) => {
-              const [isModalVisible, setIsModalVisible] = useState(false);
-              const [groupedData, setGroupedData] = useState([]);
-              const [changeBudget, onChangeBudget] = useState();
-              const [campaignStatus, setCampaignStatus] = useState(true);
-              const [campaignActualSpend, setCampaignActualSpend] = useState({});
+                const [isModalVisible, setIsModalVisible] = useState(false);
+                const [groupedData, setGroupedData] = useState([]);
+                const [changeBudget, onChangeBudget] = useState();
+                const [campaignActualSpend, setCampaignActualSpend] = useState({});
+        
+                const isGroupRow = !!params?.node?.groupData;
+                let campaignId = isGroupRow ? params?.node?.allLeafChildren?.[0]?.data?.campaignid : params?.data?.campaignid;
+                const campaignname = isGroupRow ? params?.node?.key : params?.data?.campaignname;
+        
+                useEffect(() => {
+                    if (!campaignId || !Array.isArray(allCampaignData)) return;
+                    const matchedCampaign = allCampaignData.find(c => c.campaignid === campaignId);
+                    if (matchedCampaign) {
+                        setCampaignActualSpend(matchedCampaign);
+                    }
+                }, [campaignId, allCampaignData]);
+        
+                const onChangeSpendAndStatus = () => {
+                    if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return;
+                    const allLeafChildren = params.node?.allLeafChildren || [];
+                    const grouped = allLeafChildren.map(node => node.data) || [];
+                    setGroupedData(grouped);
+        
+                    if (!campaignId || !campaignname) {
+                        message.error("Campaign info missing");
+                        return;
+                    }
+        
+                    // const budget = parseFloat(
+                    //     campaignActualSpend?.campaign_budget?.daily_budget ||
+                    //     campaignActualSpend?.campaign_budget?.lifetime_budget || 0
+                    // ) / 100;
+                    // onChangeBudget(budget);
+                    // const matchedCampaign = allCampaignData.find(c => c.campaignid === campaignId);
+                    const matchedCampaign = params.context.allCampaignData.find(c => c.campaignid === campaignId);
 
-              if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) {
-                return null; // hide edit icon in footer
-              }
-          
-              const onChangeSpendAndStatus = async () => {
-                if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return;
-          
-                const allLeafChildren = params.node?.allLeafChildren || [];
-                const grouped = allLeafChildren.map(node => node.data) || [];
-          
-                setGroupedData(grouped);
-          
-                const campaignId = grouped?.[0]?.campaignid;
-                const campaignname = grouped?.[0]?.campaignname;
-          
-                if (!campaignId || !campaignname) {
-                  message.error("Campaign info missing");
-                  return;
-                }
-          
-                try {
-                  const [commentsRes, fbRes] = await Promise.all([
-                    apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${campaignname}`),
-                    apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`),
-                  ]);
-          
-                  if (commentsRes.status === 200 && commentsRes.data.length !== 0) {
-                    setCampaignStatus(commentsRes.data.status ?? false);
-                    setGroupedData(commentsRes.data);
-                  }
-          
-                  if (fbRes.status === 200) {
-                    setCampaignActualSpend(fbRes.data);
-                    const budget = parseFloat(fbRes.data.daily_budget || fbRes.data.lifetime_budget || 0) / 100;
-                    onChangeBudget(budget);
-                  }
-          
-                  setIsModalVisible(true);
-                } catch (err) {
-                  console.error(err);
-                  message.error("Failed to fetch campaign budget");
-                }
-              };
-          
-              const handleOk = async () => {
-                setIsModalVisible(false);
-          
-                const isArray = Array.isArray(groupedData);
-                const campaignId = isArray ? groupedData?.[0]?.campaignid : groupedData?.campaignid;
-                const campaignname = isArray ? groupedData?.[0]?.campaignname : groupedData?.campaignname;                
-          
-                const payload = {
-                  campaignId,
-                  budget: parseFloat(changeBudget) * 100,
-                  accountNumber: newaccount,
-                  campaignname,
-                  updatedby: userdetails?.email,
+                    if (matchedCampaign) {
+                        const budget = parseFloat(
+                            matchedCampaign?.campaign_budget?.daily_budget ||
+                            matchedCampaign?.campaign_budget?.lifetime_budget ||
+                            0
+                        ) / 100;
+                
+                        onChangeBudget(budget);
+                        setCampaignActualSpend(matchedCampaign); // ✅ critical
+                    } else {
+                        onChangeBudget(undefined);
+                        setCampaignActualSpend({});
+                    }
+
+                    setIsModalVisible(true);
                 };
-          
-                if (!payload.campaignId) {
-                    message.error("Campaign ID missing. Cannot update budget.");
-                    return;
-                }
-
-                try {
-                  await apiClient.post('/update/campaign/budget', payload);
-                  message.success("Budget Updated Successfully");
-                  changeRRefrst();
-                } catch (err) {
-                  console.error(err);
-                  message.error("Failed to update budget");
-                }
-              };
-          
-              return (
-                <div>
-                  <EditOutlined style={{ cursor: 'pointer' }} onClick={onChangeSpendAndStatus} />
-                  {isModalVisible && (
-                    <Modal
-                    //   title={groupedData?.[0]?.campaignname || 'Edit Campaign Budget'}
-                      title={Array.isArray(groupedData) ? groupedData?.[0]?.campaignname : groupedData?.campaignname}
-                      open={isModalVisible}
-                      onOk={handleOk}
-                      onCancel={() => setIsModalVisible(false)}
-                      width={600}
-                      okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
-                      className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
-                    >
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                        {/* <div style={{ display: 'flex', alignItems: 'center' }}>
-                          <Typography.Text strong style={{ paddingRight: '20px' }}>
-                            Campaign Status: Activate/Pause
-                          </Typography.Text>
-                          <Switch
-                            checked={campaignStatus}
-                            style={{ backgroundColor: campaignStatus && "#91C25F" }}
-                            onChange={() => setCampaignStatus(prev => !prev)}
-                          />
-                        </div> */}
-          
-                        <div>
-                          <Typography.Text strong style={{color : theme === "dark" && "white"}}>
-                            Budget Type:
-                          </Typography.Text>{" "}
-                          <span style={{ fontWeight: 'normal' }}>
-                            {campaignActualSpend.daily_budget ? "Daily" :
-                              campaignActualSpend.lifetime_budget ? "Lifetime" : "Unknown"}
-                          </span>
-                        </div>
-          
-                        <Input
-                          type="number"
-                          value={changeBudget}
-                          onChange={(e) => onChangeBudget(e.target.value)}
-                          placeholder="Enter budget in USD"  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                        />
-          
-                        <div>
-                          <Typography.Text strong style={{color : theme === "dark" && "white"}}>Campaign ID:</Typography.Text>
-                          <p>{campaignActualSpend?.id}</p>
-                        </div>
-                      </div>
-                    </Modal>
-                  )}
-                </div>
-              );
+        
+                const handleOk = async () => {
+                    setIsModalVisible(false);
+                    const isArray = Array.isArray(groupedData);
+                    const campaignIdFinal = isArray ? groupedData?.[0]?.campaignid : groupedData?.campaignid;
+                    const campaignnameFinal = isArray ? groupedData?.[0]?.campaignname : groupedData?.campaignname;
+        
+                    const payload = {
+                        campaignId: campaignIdFinal,
+                        budget: parseFloat(changeBudget) * 100,
+                        accountNumber: newaccount,
+                        campaignname: campaignnameFinal,
+                        updatedby: userdetails?.email,
+                    };
+        
+                    if (!payload.campaignId) {
+                        message.error("Campaign ID missing. Cannot update budget.");
+                        return;
+                    }
+        
+                    try {
+                        await apiClient.post('/update/campaign/budget', payload);
+                        message.success("Budget Updated Successfully");
+                        // setCampaignRefreshTrigger(prev => prev + 1);
+                        // changeRRefrst();
+                        params.context.setCampaignRefreshTrigger(prev => prev + 1);
+                        params.context.changeRRefrst();
+                    } catch (err) {
+                        console.error(err);
+                        message.error("Failed to update budget");
+                    }
+                };
+        
+                if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return null;
+        
+                return (
+                    <div>
+                        {campaignActualSpend?.campaign_budget &&
+                        (campaignActualSpend?.campaign_budget?.daily_budget != null ||
+                        campaignActualSpend?.campaign_budget?.lifetime_budget != null) ? (
+                            <DollarOutlined
+                                style={{ cursor: 'pointer' }}
+                                onClick={onChangeSpendAndStatus}
+                            />
+                        ) : (
+                            <Tooltip title="No budget set for this campaign">
+                                <WarningOutlined style={{ color: '#FAAD14', fontSize: 16 }} />
+                            </Tooltip>
+                        )}
+        
+                        {isModalVisible && (
+                            <Modal
+                                title={Array.isArray(groupedData) ? groupedData?.[0]?.campaignname : groupedData?.campaignname}
+                                open={isModalVisible}
+                                onOk={handleOk}
+                                onCancel={() => setIsModalVisible(false)}
+                                width={600}
+                                okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
+                                className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+                            >
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                    <div>
+                                        <Typography.Text strong style={{ color: theme === "dark" && "white" }}>
+                                            Budget Type:
+                                        </Typography.Text>{" "}
+                                        <span style={{ fontWeight: 'normal' }}>
+                                            {campaignActualSpend?.campaign_budget?.daily_budget !== null ? "Daily" :
+                                            campaignActualSpend?.campaign_budget?.lifetime_budget !== null ? "Lifetime" : "Unknown"}
+                                        </span>
+                                    </div>
+        
+                                    <Input
+                                        type="number"
+                                        value={changeBudget}
+                                        onChange={(e) => onChangeBudget(e.target.value)}
+                                        placeholder="Enter budget in USD"
+                                        className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                    />
+        
+                                    <div>
+                                        <Typography.Text strong style={{ color: theme === "dark" && "white" }}>Campaign ID:</Typography.Text>
+                                        <p>{campaignId}</p>
+                                    </div>
+                                </div>
+                            </Modal>
+                        )}
+                    </div>
+                );
             },
-        }, 
+        },
         adsetname: {
             headerName: 'AdsetName',
             field: 'adsetname',
@@ -5778,6 +6091,29 @@ const MyTablePage = () => {
             // },
             // cellRenderer: campaignNameRenderer,
         },
+        cpm: {
+            headerName: 'CPM',
+            field: 'cpm',
+            sortable: true,
+            minWidth: 90,
+            headerTooltip: '(Profit/Revenue)*100', filter: true,
+            valueGetter: getCpm,
+            hide: false,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',  
+        },
+        filteration: { 
+            headerName: "Filteration",
+            field: 'filteration',
+            width: 115,
+            valueGetter: getFilteration,
+            valueFormatter: params => `${params.value || 0}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            hide: false,
+        },
         // actions: {
         //     headerName: 'Actions',
         //     field: 'actions',
@@ -5945,97 +6281,177 @@ const MyTablePage = () => {
             suppressMenu: true,
             hide: !isYesterday(),
             cellRenderer: (params) => {
+                const {
+                    allCampaignData,
+                    setCampaignRefreshTrigger,
+                    changeRRefrst,
+                    newaccount,
+                    userdetails,
+                    theme
+                  } = params.context;
+
               const [isModalVisible, setIsModalVisible] = useState(false);
               const [groupedData, setGroupedData] = useState([]);
               const [changeBudget, onChangeBudget] = useState();
-              const [campaignStatus, setCampaignStatus] = useState(true);
-              const [campaignActualSpend, setCampaignActualSpend] = useState({});
+              const [bidAmount, setBidAmount] = useState();
               const [adsetId, setAdsetId] = useState(null);
-
-              if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) {
-                return null; // hide edit icon in footer
+              const [adsetInfo, setAdsetInfo] = useState(null);
+            //   const [, forceRerender] = useState(0);
+          
+              const isGroupRow = !!params?.node?.groupData;
+              let campaignId = null;
+              let initialAdsetId = null;
+          
+              if (isGroupRow) {
+                const children = params?.node?.allLeafChildren || [];
+                campaignId = children[0]?.data?.campaignid;
+                initialAdsetId = children[0]?.data?.adsetid;
+              } else {
+                campaignId = params?.data?.campaignid;
+                initialAdsetId = params?.data?.adsetid;
               }
           
+              const campaignname = isGroupRow
+                ? params?.node?.key
+                : params?.data?.campaignname;
+
+                console.log("campaignId ar:", campaignId);
+          
+                useEffect(() => {
+                    if (!campaignId || !initialAdsetId || !Array.isArray(allCampaignData)) return;
+                    // const matchedCampaign = allCampaignData.find(c => c.campaign_id === campaignId);
+                    // const matchedAdset = matchedCampaign?.adsets?.find(ad => ad.adset_id === initialAdsetId);
+                    const matchedAdset = allCampaignData.find(
+                        (adset) => adset.campaignid === campaignId && adset.adset_id === initialAdsetId
+                      );
+                    if (matchedAdset) {
+                      setAdsetInfo(matchedAdset);
+                    }
+                }, [campaignId, initialAdsetId, allCampaignData]);
+          
               const onChangeSpendAndStatus = async () => {
-                if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return;
-          
-                const allLeafChildren = params.node?.allLeafChildren || [];
-                const grouped = allLeafChildren.map(node => node.data) || [];
-          
-                setGroupedData(grouped);
-          
-                const campaignId = grouped?.[0]?.campaignid;
-                const adsetId = grouped?.[0]?.adsetid;
-                // console.log("adsetid:", adsetId);
-                setAdsetId(adsetId); 
-                const campaignname = grouped?.[0]?.campaignname;
-          
-                if (!campaignId || !campaignname) {
-                  message.error("Campaign info missing");
-                  return;
-                }
-          
                 try {
-                  const [commentsRes, fbRes] = await Promise.all([
-                    apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${campaignname}`),
-                    apiClient.get(`/get/ActualAdsetSpend?adsetId=${adsetId}`),
-                  ]);
+                  const grouped = params?.node?.allLeafChildren?.map(node => node.data) || [];
+                  const clickedAdsetId = grouped?.[0]?.adsetid || initialAdsetId;
+                //   const clickedCampaignId = grouped?.[0]?.campaignid || campaignId;
           
-                  if (commentsRes.status === 200 && commentsRes.data.length !== 0) {
-                    setCampaignStatus(commentsRes.data.status ?? false);
-                    setGroupedData(commentsRes.data);
-                  }
+                  setGroupedData(grouped);
+                  setAdsetId(clickedAdsetId);
           
-                  if (fbRes.status === 200) {
-                    setCampaignActualSpend(fbRes.data);
-                    const budget = parseFloat(fbRes.data.daily_budget || fbRes.data.lifetime_budget || 0) / 100;
+                  const campaign = params.context.allCampaignData.find(c => c.campaign_id === campaignId);
+
+                  const adset = allCampaignData.find(
+                    (adset) => adset.campaignid === campaignId && adset.adset_id === clickedAdsetId
+                  );
+          
+                  if (adset) {
+                    const budget = parseFloat(adset?.budget?.daily_budget || adset?.budget?.lifetime_budget || 0) / 100;
                     onChangeBudget(budget);
+                    setBidAmount(adset?.bid_amount / 100);
+                    setAdsetInfo(adset);
+                    setIsModalVisible(true);
+                  } else {
+                    message.error("Adset not found in backend response.");
                   }
           
-                  setIsModalVisible(true);
+                //   setIsModalVisible(true);
                 } catch (err) {
-                  console.error(err);
-                  message.error("Failed to fetch campaign budget");
+                  console.error("❌ Failed to fetch adset:", err);
+                  message.error("Failed to fetch adset data");
                 }
               };
+
+              if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) {
+                return null;
+              }
           
-              const handleOk = async () => {
+            const handleOk = async () => {
                 setIsModalVisible(false);
-          
-                const isArray = Array.isArray(groupedData);
-                const campaignId = isArray ? groupedData?.[0]?.campaignid : groupedData?.campaignid;
-                const campaignname = isArray ? groupedData?.[0]?.campaignname : groupedData?.campaignname;                
-          
+                const campaignname = groupedData?.[0]?.campaignname;
+              
                 const payload = {
                   adsetId,
-                  budget: parseFloat(changeBudget) * 100,
                   accountNumber: newaccount,
                   campaignname,
-                  updatedby: userdetails?.email,
+                  updatedby: userdetails?.email
                 };
-          
-                if (!payload.adsetId) {
-                    message.error("Adset ID missing. Cannot update budget.");
-                    return;
+              
+                if (
+                    changeBudget !== undefined &&
+                    changeBudget !== '' &&
+                    !isNaN(changeBudget) &&
+                    parseFloat(changeBudget) > 0 // <- this is critical
+                ) {
+                    payload.budget = parseFloat(changeBudget) * 100;
                 }
-
+              
+                if (
+                    bidAmount !== undefined &&
+                    bidAmount !== '' &&
+                    !isNaN(bidAmount) &&
+                    parseFloat(bidAmount) * 100 >= 1
+                ) {
+                    payload.bidAmount = parseFloat(bidAmount) * 100;
+                }
+              
+                const hasBudget = Object.prototype.hasOwnProperty.call(payload, 'budget');
+                const hasBidAmount = Object.prototype.hasOwnProperty.call(payload, 'bidAmount');
+                
+                if (!hasBudget && !hasBidAmount) {
+                  message.warning("Please enter Budget and/or Bid Amount before submitting.");
+                  return;
+                }                
+             
+              
                 try {
                   await apiClient.post('/update/adset/budget', payload);
-                  message.success("Budget Updated Successfully");
+                  message.success("Adset Budget and/or Bid Updated");
+                  setCampaignRefreshTrigger(prev => prev + 1); // ✅ Refresh campaign + adset data
+
                   changeRRefrst();
                 } catch (err) {
                   console.error(err);
-                  message.error("Failed to update budget");
+                  message.error("Failed to update adset");
                 }
               };
+              
+              const rawData = isGroupRow ? params?.node?.allLeafChildren?.[0]?.data : params?.data;
+
+              const daily = adsetInfo?.budget?.daily_budget ?? rawData?.budget?.daily_budget;
+              const lifetime = adsetInfo?.budget?.lifetime_budget ?? rawData?.budget?.lifetime_budget;
+              const bid = adsetInfo?.bid_amount ?? rawData?.bid_amount;
+              
+              const hasBudget = (daily !== null && daily !== undefined && daily !== '') ||
+                                (lifetime !== null && lifetime !== undefined && lifetime !== '');
+              const hasBid = bid !== null && bid !== undefined && bid !== '';              
+          
+              
+              let tooltipText = 'Ad Set Budget & Bid are NOT available';
+              let iconColor = '#FF4D4F'; // Red (default: none available)
+          
+              if (hasBudget && hasBid) {
+                tooltipText = 'Ad Set Budget & Bid are available';
+                iconColor = '#91C25F'; // Green
+              } else if (hasBudget || hasBid) {
+                tooltipText = hasBudget ? 'Ad Set exists with Budget but no Bid' : 'Ad Set exists with Bid but no Budget';
+                iconColor = '#FFBF00'; // Yellow
+              }
           
               return (
                 <div>
-                  <EditOutlined style={{ cursor: 'pointer' }} onClick={onChangeSpendAndStatus} />
+                  <Tooltip title={tooltipText}>
+                    <DollarOutlined
+                      style={{
+                        cursor: 'pointer',
+                        color: iconColor,
+                      }}
+                      onClick={onChangeSpendAndStatus}
+                    />
+                  </Tooltip>
+          
                   {isModalVisible && (
                     <Modal
-                    //   title={groupedData?.[0]?.campaignname || 'Edit Campaign Budget'}
-                      title={Array.isArray(groupedData) ? groupedData?.[0]?.campaignname : groupedData?.campaignname}
+                      title={groupedData?.[0]?.campaignname || 'Edit Adset'}
                       open={isModalVisible}
                       onOk={handleOk}
                       onCancel={() => setIsModalVisible(false)}
@@ -6044,24 +6460,13 @@ const MyTablePage = () => {
                       className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                     >
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                        {/* <div style={{ display: 'flex', alignItems: 'center' }}>
-                          <Typography.Text strong style={{ paddingRight: '20px' }}>
-                            Campaign Status: Activate/Pause
-                          </Typography.Text>
-                          <Switch
-                            checked={campaignStatus}
-                            style={{ backgroundColor: campaignStatus && "#91C25F" }}
-                            onChange={() => setCampaignStatus(prev => !prev)}
-                          />
-                        </div> */}
-          
                         <div>
-                          <Typography.Text strong style={{color : theme === "dark" && "white"}}>
+                          <Typography.Text strong style={{ color: theme === 'dark' && 'white' }}>
                             Budget Type:
-                          </Typography.Text>{" "}
+                          </Typography.Text>{' '}
                           <span style={{ fontWeight: 'normal' }}>
-                            {campaignActualSpend.daily_budget ? "Daily" :
-                              campaignActualSpend.lifetime_budget ? "Lifetime" : "Unknown"}
+                            {adsetInfo?.budget?.daily_budget ? 'Daily' :
+                              adsetInfo?.budget?.lifetime_budget ? 'Lifetime' : 'Unknown'}
                           </span>
                         </div>
           
@@ -6069,12 +6474,23 @@ const MyTablePage = () => {
                           type="number"
                           value={changeBudget}
                           onChange={(e) => onChangeBudget(e.target.value)}
-                          placeholder="Enter budget in USD"  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                          placeholder="Enter budget in USD"
+                          className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                        />
+          
+                        <Input
+                          type="number"
+                          value={bidAmount}
+                          onChange={(e) => setBidAmount(e.target.value)}
+                          placeholder="Enter bid amount"
+                          className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                         />
           
                         <div>
-                          <Typography.Text strong style={{color : theme === "dark" && "white"}}>Campaign ID:</Typography.Text>
-                          <p>{campaignActualSpend?.id}</p>
+                          <Typography.Text strong style={{ color: theme === 'dark' && 'white' }}>
+                            Adset ID:
+                          </Typography.Text>
+                          <p>{adsetId}</p>
                         </div>
                       </div>
                     </Modal>
@@ -6082,7 +6498,7 @@ const MyTablePage = () => {
                 </div>
               );
             },
-        },
+        }, 
         adsetname: {
             headerName: 'AdsetName', field: 'adsetname',
             // resizeble: true,
@@ -6454,6 +6870,29 @@ const MyTablePage = () => {
             //     window.open(url, '_blank', 'noopener,noreferrer');
             // },
             // cellRenderer: campaignNameRenderer,
+        },
+        cpm: {
+            headerName: 'CPM',
+            field: 'cpm',
+            sortable: true,
+            minWidth: 90,
+            headerTooltip: '(Profit/Revenue)*100', filter: true,
+            valueGetter: getCpm,
+            hide: false,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',  
+        },
+        filteration: { 
+            headerName: "Filteration",
+            field: 'filteration',
+            width: 115,
+            valueGetter: getFilteration,
+            valueFormatter: params => `${params.value || 0}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            hide: false,
         },
         actions: {
             headerName: 'Budget',
@@ -6989,6 +7428,29 @@ const MyTablePage = () => {
             },
             cellRenderer: campaignNameRenderer,
         },
+        cpm: {
+            headerName: 'CPM',
+            field: 'cpm',
+            sortable: true,
+            minWidth: 90,
+            headerTooltip: '(Profit/Revenue)*100', filter: true,
+            valueGetter: getCpm,
+            hide: false,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',  
+        },
+        filteration: { 
+            headerName: "Filteration",
+            field: 'filteration',
+            width: 115,
+            valueGetter: getFilteration,
+            valueFormatter: params => `${params.value || 0}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            hide: true,
+        },
         actions: {
             headerName: 'Actions',
             field: 'actions',
@@ -7517,6 +7979,29 @@ const MyTablePage = () => {
             width: 450,
             pinned: 'left',// Using the group cell renderer
         },
+        cpm: {
+            headerName: 'CPM',
+            field: 'cpm',
+            sortable: true,
+            minWidth: 90,
+            headerTooltip: '(Profit/Revenue)*100', filter: true,
+            valueGetter: getCpm,
+            hide: false,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',  
+        },
+        filteration: { 
+            headerName: "Filteration",
+            field: 'filteration',
+            width: 115,
+            valueGetter: getFilteration,
+            valueFormatter: params => `${params.value || 0}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            hide: false,
+        },
         // actions: {
         //     headerName: 'Actions',
         //     field: 'actions',
@@ -7687,140 +8172,148 @@ const MyTablePage = () => {
             suppressMenu: true,
             hide: !isYesterday(),
             cellRenderer: (params) => {
-              const [isModalVisible, setIsModalVisible] = useState(false);
-              const [groupedData, setGroupedData] = useState([]);
-              const [changeBudget, onChangeBudget] = useState();
-              const [campaignStatus, setCampaignStatus] = useState(true);
-              const [campaignActualSpend, setCampaignActualSpend] = useState({});
+                const [isModalVisible, setIsModalVisible] = useState(false);
+                const [groupedData, setGroupedData] = useState([]);
+                const [changeBudget, onChangeBudget] = useState();
+                const [campaignActualSpend, setCampaignActualSpend] = useState({});
+        
+                const isGroupRow = !!params?.node?.groupData;
+                let campaignId = isGroupRow ? params?.node?.allLeafChildren?.[0]?.data?.campaignid : params?.data?.campaignid;
+                const campaignname = isGroupRow ? params?.node?.key : params?.data?.campaignname;
+        
+                useEffect(() => {
+                    if (!campaignId || !Array.isArray(allCampaignData)) return;
+                    const matchedCampaign = allCampaignData.find(c => c.campaignid === campaignId);
+                    if (matchedCampaign) {
+                        setCampaignActualSpend(matchedCampaign);
+                    }
+                }, [campaignId, allCampaignData]);
+        
+                const onChangeSpendAndStatus = () => {
+                    if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return;
+                    const allLeafChildren = params.node?.allLeafChildren || [];
+                    const grouped = allLeafChildren.map(node => node.data) || [];
+                    setGroupedData(grouped);
+        
+                    if (!campaignId || !campaignname) {
+                        message.error("Campaign info missing");
+                        return;
+                    }
+        
+                    // const budget = parseFloat(
+                    //     campaignActualSpend?.campaign_budget?.daily_budget ||
+                    //     campaignActualSpend?.campaign_budget?.lifetime_budget || 0
+                    // ) / 100;
+                    // onChangeBudget(budget);
+                    // const matchedCampaign = allCampaignData.find(c => c.campaignid === campaignId);
+                    const matchedCampaign = params.context.allCampaignData.find(c => c.campaignid === campaignId);
 
-              if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) {
-                return null; // hide edit icon in footer
-              }
-          
-              const onChangeSpendAndStatus = async () => {
-                if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return;
-          
-                const allLeafChildren = params.node?.allLeafChildren || [];
-                const grouped = allLeafChildren.map(node => node.data) || [];
-          
-                setGroupedData(grouped);
-          
-                const campaignId = grouped?.[0]?.campaignid;
-                const campaignname = grouped?.[0]?.campaignname;
-          
-                if (!campaignId || !campaignname) {
-                  message.error("Campaign info missing");
-                  return;
-                }
-          
-                try {
-                  const [commentsRes, fbRes] = await Promise.all([
-                    apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${campaignname}`),
-                    apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`),
-                  ]);
-          
-                  if (commentsRes.status === 200 && commentsRes.data.length !== 0) {
-                    setCampaignStatus(commentsRes.data.status ?? false);
-                    setGroupedData(commentsRes.data);
-                  }
-          
-                  if (fbRes.status === 200) {
-                    setCampaignActualSpend(fbRes.data);
-                    const budget = parseFloat(fbRes.data.daily_budget || fbRes.data.lifetime_budget || 0) / 100;
-                    onChangeBudget(budget);
-                  }
-          
-                  setIsModalVisible(true);
-                } catch (err) {
-                  console.error(err);
-                  message.error("Failed to fetch campaign budget");
-                }
-              };
-          
-              const handleOk = async () => {
-                setIsModalVisible(false);
-          
-                const isArray = Array.isArray(groupedData);
-                const campaignId = isArray ? groupedData?.[0]?.campaignid : groupedData?.campaignid;
-                const campaignname = isArray ? groupedData?.[0]?.campaignname : groupedData?.campaignname;                
-          
-                const payload = {
-                  campaignId,
-                  budget: parseFloat(changeBudget) * 100,
-                  accountNumber: newaccount,
-                  campaignname,
-                  updatedby: userdetails?.email,
+                    if (matchedCampaign) {
+                        const budget = parseFloat(
+                            matchedCampaign?.campaign_budget?.daily_budget ||
+                            matchedCampaign?.campaign_budget?.lifetime_budget ||
+                            0
+                        ) / 100;
+                
+                        onChangeBudget(budget);
+                        setCampaignActualSpend(matchedCampaign); // ✅ critical
+                    } else {
+                        onChangeBudget(undefined);
+                        setCampaignActualSpend({});
+                    }
+
+                    setIsModalVisible(true);
                 };
-          
-                if (!payload.campaignId) {
-                    message.error("Campaign ID missing. Cannot update budget.");
-                    return;
-                }
-
-                try {
-                  await apiClient.post('/update/campaign/budget', payload);
-                  message.success("Budget Updated Successfully");
-                  changeRRefrst();
-                } catch (err) {
-                  console.error(err);
-                  message.error("Failed to update budget");
-                }
-              };
-          
-              return (
-                <div>
-                  <EditOutlined style={{ cursor: 'pointer' }} onClick={onChangeSpendAndStatus} />
-                  {isModalVisible && (
-                    <Modal
-                    //   title={groupedData?.[0]?.campaignname || 'Edit Campaign Budget'}
-                      title={Array.isArray(groupedData) ? groupedData?.[0]?.campaignname : groupedData?.campaignname}
-                      open={isModalVisible}
-                      onOk={handleOk}
-                      onCancel={() => setIsModalVisible(false)}
-                      width={600}
-                      okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
-                      className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
-                    >
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                        {/* <div style={{ display: 'flex', alignItems: 'center' }}>
-                          <Typography.Text strong style={{ paddingRight: '20px' }}>
-                            Campaign Status: Activate/Pause
-                          </Typography.Text>
-                          <Switch
-                            checked={campaignStatus}
-                            style={{ backgroundColor: campaignStatus && "#91C25F" }}
-                            onChange={() => setCampaignStatus(prev => !prev)}
-                          />
-                        </div> */}
-          
-                        <div>
-                          <Typography.Text strong style={{color : theme === "dark" && "white"}}>
-                            Budget Type:
-                          </Typography.Text>{" "}
-                          <span style={{ fontWeight: 'normal' }}>
-                            {campaignActualSpend.daily_budget ? "Daily" :
-                              campaignActualSpend.lifetime_budget ? "Lifetime" : "Unknown"}
-                          </span>
-                        </div>
-          
-                        <Input
-                          type="number"
-                          value={changeBudget}
-                          onChange={(e) => onChangeBudget(e.target.value)}
-                          placeholder="Enter budget in USD"  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                        />
-          
-                        <div>
-                          <Typography.Text strong style={{color : theme === "dark" && "white"}}>Campaign ID:</Typography.Text>
-                          <p>{campaignActualSpend?.id}</p>
-                        </div>
-                      </div>
-                    </Modal>
-                  )}
-                </div>
-              );
+        
+                const handleOk = async () => {
+                    setIsModalVisible(false);
+                    const isArray = Array.isArray(groupedData);
+                    const campaignIdFinal = isArray ? groupedData?.[0]?.campaignid : groupedData?.campaignid;
+                    const campaignnameFinal = isArray ? groupedData?.[0]?.campaignname : groupedData?.campaignname;
+        
+                    const payload = {
+                        campaignId: campaignIdFinal,
+                        budget: parseFloat(changeBudget) * 100,
+                        accountNumber: newaccount,
+                        campaignname: campaignnameFinal,
+                        updatedby: userdetails?.email,
+                    };
+        
+                    if (!payload.campaignId) {
+                        message.error("Campaign ID missing. Cannot update budget.");
+                        return;
+                    }
+        
+                    try {
+                        await apiClient.post('/update/campaign/budget', payload);
+                        message.success("Budget Updated Successfully");
+                        // setCampaignRefreshTrigger(prev => prev + 1);
+                        // changeRRefrst();
+                        params.context.setCampaignRefreshTrigger(prev => prev + 1);
+                        params.context.changeRRefrst();
+                    } catch (err) {
+                        console.error(err);
+                        message.error("Failed to update budget");
+                    }
+                };
+        
+                if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return null;
+        
+                return (
+                    <div>
+                        {campaignActualSpend?.campaign_budget &&
+                        (campaignActualSpend?.campaign_budget?.daily_budget != null ||
+                        campaignActualSpend?.campaign_budget?.lifetime_budget != null) ? (
+                            <DollarOutlined
+                                style={{ cursor: 'pointer' }}
+                                onClick={onChangeSpendAndStatus}
+                            />
+                        ) : (
+                            <Tooltip title="No budget set for this campaign">
+                                <WarningOutlined style={{ color: '#FAAD14', fontSize: 16 }} />
+                            </Tooltip>
+                        )}
+        
+                        {isModalVisible && (
+                            <Modal
+                                title={Array.isArray(groupedData) ? groupedData?.[0]?.campaignname : groupedData?.campaignname}
+                                open={isModalVisible}
+                                onOk={handleOk}
+                                onCancel={() => setIsModalVisible(false)}
+                                width={600}
+                                okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
+                                className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+                            >
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                    <div>
+                                        <Typography.Text strong style={{ color: theme === "dark" && "white" }}>
+                                            Budget Type:
+                                        </Typography.Text>{" "}
+                                        <span style={{ fontWeight: 'normal' }}>
+                                            {campaignActualSpend?.campaign_budget?.daily_budget !== null ? "Daily" :
+                                            campaignActualSpend?.campaign_budget?.lifetime_budget !== null ? "Lifetime" : "Unknown"}
+                                        </span>
+                                    </div>
+        
+                                    <Input
+                                        type="number"
+                                        value={changeBudget}
+                                        onChange={(e) => onChangeBudget(e.target.value)}
+                                        placeholder="Enter budget in USD"
+                                        className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                    />
+        
+                                    <div>
+                                        <Typography.Text strong style={{ color: theme === "dark" && "white" }}>Campaign ID:</Typography.Text>
+                                        <p>{campaignId}</p>
+                                    </div>
+                                </div>
+                            </Modal>
+                        )}
+                    </div>
+                );
             },
-        }, 
+        },
         adsetname: {
             headerName: 'AdsetName', field: 'adsetname',
             sortable: true,
@@ -8203,6 +8696,29 @@ const MyTablePage = () => {
             pinned: 'left',
             enableRowGroup: true,
             cellRenderer: campaignNameRenderer,
+        },
+        cpm: {
+            headerName: 'CPM',
+            field: 'cpm',
+            sortable: true,
+            minWidth: 90,
+            headerTooltip: '(Profit/Revenue)*100', filter: true,
+            valueGetter: getCpm,
+            hide: false,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',  
+        },
+        filteration: { 
+            headerName: "Filteration",
+            field: 'filteration',
+            width: 115,
+            valueGetter: getFilteration,
+            valueFormatter: params => `${params.value || 0}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            hide: true,
         },
         keyword: {
             headerName: 'Keywords',
@@ -9462,6 +9978,7 @@ const MyTablePage = () => {
         ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
         ...(newRevenuePratner === "FB_System1" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : []),
         ...(newRevenuePratner === "FB_Tonic1" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
+        ...(newRevenuePratner === "FB_Inmobi" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : [])
         // ...(newRevenuePratner === "FB_Mnet" ? [{ key: '6', label: 'Ad-Live', content: 'Content for Domain data' }] : []),
         // ...(newRevenuePratner === "FB_Mnet" ? [{ key: '7', label: 'Ad-Daily', content: 'Content for Domain data' }] : []),
         // ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '6', label: 'Names-Live', content: 'Content for Names Live data' }] : []),
@@ -9729,6 +10246,14 @@ const MyTablePage = () => {
                     theme={theme}
                     functionCallForCommnets={functionCallForCommnets}
                     functionCallForCampaigns={functionCallForCampaigns}
+                    context={{
+                        allCampaignData,
+                        setCampaignRefreshTrigger,
+                        changeRRefrst,
+                        newaccount,
+                        userdetails,
+                        theme,
+                    }}
                     />
                 {/* )} */}
                 </Tabs.TabPane>
@@ -9757,6 +10282,14 @@ const MyTablePage = () => {
                     handleChangeToggle={handleChangeToggle}
                     functionCallForCommnets={functionCallForCommnets}
                     functionCallForCampaigns={functionCallForCampaigns}
+                    context={{
+                        allCampaignData,
+                        setCampaignRefreshTrigger,
+                        changeRRefrst,
+                        newaccount,
+                        userdetails,
+                        theme,
+                    }}
                     />
                 </Tabs.TabPane>
 
@@ -9889,6 +10422,30 @@ const MyTablePage = () => {
                         getMainMenuItems={getMainMenuItems}
                     />
                     </Tabs.TabPane>
+                )}
+
+                {newRevenuePratner === "FB_Inmobi" && (
+                    <Tabs.TabPane key="5">
+                        <InmobiKeywordReports 
+                            startDate={newStartDate} 
+                            endDate={newendDate} 
+                            newaccount={newaccount} 
+                            newtime={newtime} 
+                            newRevenuePratner={newRevenuePratner}  
+                            columnDefs={columnDefs4} 
+                            inputValue={inputValue} 
+                            newAccountName={newAccountName} 
+                            campaignComments={campaignComments} 
+                            Camapignlevelstatus={Camapignlevelstatus} 
+                            changeRRefrst={resetColumnStructure} 
+                            debouncedHandleColumnMove={debouncedHandleColumnMove} 
+                            userdetails={userdetails} 
+                            refreshComments={refreshComments}
+                            refreshpage={refreshContent}
+                            getMainMenuItems={getMainMenuItems}
+                        />
+                    </Tabs.TabPane>
+                    
                 )}
 
                 {/* {newRevenuePratner === "FB_Mnet" && (

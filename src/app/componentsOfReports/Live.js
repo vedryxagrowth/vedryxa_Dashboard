@@ -62,7 +62,7 @@ const selectTimezone = {
     CEST: 'CESTDate'
 };
 
-const LiveReports = ({functionCallForCommnets, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle }) => {
+const LiveReports = ({functionCallForCommnets, context, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle }) => {
     console.log(columnDefs, "columnDefs");
     console.log("hello world");
     const {theme} = useTokenContext();
@@ -1531,6 +1531,7 @@ const LiveReports = ({functionCallForCommnets, functionCallForCampaigns, startDa
                                 // refreshTab = {refreshTab}
                                 functionCallForCommnets={functionCallForCommnets}
                                 functionCallForCampaigns={functionCallForCampaigns}
+                                context={context}
                             />
                         </Tabs.TabPane>
                         <Tabs.TabPane key="2">
@@ -1562,6 +1563,7 @@ const LiveReports = ({functionCallForCommnets, functionCallForCampaigns, startDa
                                 moveToNextTab={moveToNextTab}
                                 functionCallForCommnets={functionCallForCommnets}
                                 functionCallForCampaigns={functionCallForCampaigns}
+                                context={context}
                             />
                         </Tabs.TabPane>
                         <Tabs.TabPane key="3">

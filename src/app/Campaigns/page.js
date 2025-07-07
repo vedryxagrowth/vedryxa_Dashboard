@@ -917,6 +917,39 @@ const App = () => {
                 />
             )
         },
+        // {
+        //     title: "Approve",
+        //     dataIndex: "Approval",
+        //     key: "Approval",
+        //     width: '7%',
+        //     align: 'center',
+        //     render: (text, record) => {
+        //         console.log(record, "recordeddata")
+        //         let color = 'black';
+        //         let displayText = text;
+        //         if (text === "PENDING_APPROVAL") {
+        //             color = 'red';
+        //             displayText = 'Pending'; 
+        //         } else if (text === "Approved") {
+        //             color = 'green';
+        //         }
+
+        //         const approvedBy = record?.Approvedby || "N/A"; // Replace 'Approved' with actual field name if needed
+
+        //         return (
+        //             <div>
+        //                 <span style={{ color }}>{`${text}`}</span>
+        //                 {text === "Approved" && (
+        //                     <>
+        //                         <br />
+        //                         <small style={{ color: 'gray' }}> {approvedBy}</small>
+        //                     </>
+        //                 )}
+        //             </div>
+        //         );
+        //     },
+        // },
+
         {
             title: "Approve",
             dataIndex: "Approval",
@@ -924,47 +957,36 @@ const App = () => {
             width: '7%',
             align: 'center',
             render: (text, record) => {
-                console.log(record, "recordeddata")
-                let color = 'black';
-                if (text === "PENDING_APPROVAL") {
-                    color = 'red';
-                } else if (text === "Approved") {
-                    color = 'green';
-                }
-
-                // Accessing the Approved by field from the record
-                const approvedBy = record?.Approvedby || "N/A"; // Replace 'Approved' with actual field name if needed
-
-                return (
-                    <div>
-                        <span style={{ color }}>{`${text}`}</span>
-                        {text === "Approved" && (
-                            <>
-                                <br />
-                                <small style={{ color: 'gray' }}> {approvedBy}</small>
-                            </>
-                        )}
-                    </div>
-                );
+              console.log(record, "recordeddata");
+              
+              let color = 'black';
+              let displayText = text;
+          
+              // Modify color and text based on status
+              if (text === "PENDING_APPROVAL") {
+                color = 'red';
+                displayText = 'Pending'; // Show 'Pending' text instead of the original value
+              } else if (text === "Approved") {
+                color = 'green';
+              }
+          
+              // Accessing the Approved by field from the record
+              const approvedBy = record?.Approvedby || "N/A"; // Replace 'Approved' with actual field name if needed
+          
+              return (
+                <div>
+                  <span style={{ color }}>{`${displayText}`}</span>
+                  {text === "Approved" && (
+                    <>
+                      <br />
+                      <small style={{ color: 'gray' }}> {approvedBy}</small>
+                    </>
+                  )}
+                </div>
+              );
             },
-        },
-
-        // {
-        //     title: "Approval status",
-        //     dataIndex: "Approval",
-        //     key: "Approval",
-        //     width: '10%',
-        //     align: 'center',
-        //     render: (text) => {
-        //         let color = 'black';
-        //         if (text === "PENDING_APPROVAL") {
-        //             color = 'red';
-        //         } else if (text === "Approved") {
-        //             color = 'green';
-        //         }
-        //         return <span style={{ color }}>{text}</span>;
-        //     },
-        // },
+          }
+,          
         {
             title: '',
             dataIndex: 'Action',
@@ -1050,28 +1072,86 @@ const App = () => {
         // setSelecetedDraftToEdit(draftsData.find(draft => draft.id === id));
     }
 
+    // const draftDropdownMenu = (
+    //     <Menu
+    //       items={draftsData.map((draft) => ({
+    //         key: draft.Draft_Name,
+    //         label: (
+    //           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    //             <span>{draft.Draft_Name}</span>
+    //             <span>
+    //               <EditOutlined  onClick={()=>{
+    //                 setCreateNewDraft(true)
+    //                 setSelecetedDraftToEdit(draft);
+    //               }} style={{ marginRight: 8 }} />
+    //               <DeleteOutlined onClick={() => onClickDeleteDraft(draft.id)} />
+                  
+    //             </span>
+    //           </div>
+    //         )
+    //       }))}
+    //       onClick={(e) => setSelected(e.key)}
+    //     />
+    // );
     const draftDropdownMenu = (
         <Menu
           items={draftsData.map((draft) => ({
             key: draft.Draft_Name,
             label: (
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span>{draft.Draft_Name}</span>
-                <span>
-                  <EditOutlined  onClick={()=>{
-                    setCreateNewDraft(true)
-                    setSelecetedDraftToEdit(draft);
-                  }} style={{ marginRight: 8 }} />
-                  <DeleteOutlined onClick={() => onClickDeleteDraft(draft.id)} />
-                  
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '10px',
+                borderBottom: '1px solid #f0f0f0',
+                backgroundColor: theme === 'dark' ? '#2f2f2f' : '#fff',
+                color: theme === 'dark' ? '#fff' : '#333',
+                borderRadius: '4px',
+              }}>
+                <span style={{
+                  fontWeight: 'bold',
+                  fontSize: '14px',
+                  color: theme === 'dark' ? '#fff' : '#333',
+                }}>
+                  {draft.Draft_Name}
+                </span>
+                <span style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                }}>
+                  <Tooltip title="Edit">
+                    <EditOutlined
+                      onClick={() => {
+                        setCreateNewDraft(true);
+                        setSelecetedDraftToEdit(draft);
+                      }}
+                      style={{
+                        marginRight: 10,
+                        color: theme === 'dark' ? '#fff' : '#007bff',
+                        fontSize: '16px',
+                        cursor: 'pointer',
+                        transition: 'color 0.3s ease',
+                      }}
+                    />
+                  </Tooltip>
+                  <Tooltip title="Delete">
+                    <DeleteOutlined
+                      onClick={() => onClickDeleteDraft(draft.id)}
+                      style={{
+                        color: theme === 'dark' ? '#fff' : '#ff4d4f',
+                        fontSize: '16px',
+                        cursor: 'pointer',
+                        transition: 'color 0.3s ease',
+                      }}
+                    />
+                  </Tooltip>
                 </span>
               </div>
-            )
+            ),
           }))}
           onClick={(e) => setSelected(e.key)}
         />
-    );
-
+      );
     return (
         <div>
             <CreateCampaignDrawer visible={cdrawerVisible} accountis={createcamselectedacc} onClose={onCloseDrawer} changeRRefrst={changeRRefrst} network={selectedKey} draftsData={draftsData} />
@@ -1110,78 +1190,55 @@ const App = () => {
                 title={<span style={{ color: theme === "dark" && "white" }}>Campaigns</span>}
                 size="small"
                 extra={
-                    // <Dropdown
-                    //         trigger={['click']}
-                    //         overlay={
-                    //             <Menu
-                    //                 onClick={(e) => setSelected(e.key)}
-                    //                 items={draftsData.map((option) => ({
-                    //                 key: option.Draft_Name,
-                    //                 label: (
-                    //                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    //                     <span>{option.Draft_Name}</span>
-                    //                     <span>
-                    //                         <EditOutlined style={{ marginRight: 8 }} />
-                    //                         <DeleteOutlined onClick={onClickDeleteDraft(option.id)} />
-                    //                     </span>
-                    //                     </div>
-                    //                 ),
-                    //                 }))}
-                    //             />
-                    //         }
-                    //     >
-                    //         {/* <Button style={{width:"150px"}}>Edit Drafts</Button> */}
-                    //         <Tooltip title={draftsData.length === 5 ? "You have exceed drafts Limit of 5" : ""}>
-                    //             <Button
-                    //                 onClick={(e) => {
-                    //                     if (draftsData.length === 5) {
-                    //                     // Read-only behavior: no action
-                    //                     e.preventDefault();
-                    //                     } else {
-                    //                     showCreateNewDraftDrawer();
-                    //                     }
-                    //                 }}
-                    //                 loading={draftsLoading}
-                    //                 style={{
-                    //                     backgroundColor: "#91C25F",
-                    //                     marginRight: '10px',
-                    //                     cursor: draftsData.length === 5 ? 'not-allowed' : 'pointer',
-                    //                     opacity: draftsData.length === 5 ? 0.5 : 1,
-                    //                     pointerEvents: 'auto' // ensure Dropdown can still trigger
-                    //                 }}
-                    //                 type="text"
-                    //             >
-                    //                 Create Draft
-                    //             </Button>
-                    //         </Tooltip>
-                    // </Dropdown>
-                    <Button.Group>
-                        {/* 🟢 Left: Create Draft */}
-                        <Tooltip
-                        title={draftsData.length === 5 ? "You have exceeded the draft limit of 5" : ""}
-                        placement="top"
-                        open={draftsData.length === 5 ? undefined : false}
-                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                   
+                    <Button.Group style={{ marginTop: 10 }}>
+                    {/* 🟢 Left: Create Draft */}
+                    <Tooltip
+                      title={draftsData.length === 5 ? "You have exceeded the draft limit of 5" : "Create a new draft"}
+                      placement="top"
+                      open={draftsData.length === 5 ? undefined : false}
+                      overlayStyle={{ backgroundColor: "#333", color: "#fff" }}  // Tooltip styling
+                      className={theme === 'dark' ? 'custom-tooltip-dark' : 'custom-tooltip-light'}
+                    >
+                      <span>
+                        <Button
+                          type="primary"
+                          onClick={draftsData.length === 5 ? undefined : showCreateNewDraftDrawer}
+                          disabled={draftsData.length === 5}
+                          style={{
+                            backgroundColor: draftsData.length === 5 ? '#cccccc' : '#91C25F',
+                            color: draftsData.length === 5 ? '#7a7a7a' : '#000',
+                            borderColor: '#91C25F',
+                            borderWidth: "0px",
+                            fontWeight: 'bold',
+                            boxShadow: draftsData.length === 5 ? 'none' : '0px 4px 10px rgba(0, 0, 0, 0.15)',
+                            transition: 'background-color 0.3s ease',
+                            marginRight: '3px', // Adds space between the buttons
+                          }}
+                          className={theme === 'dark' ? 'dark-theme-btn' : 'light-theme-btn'}
                         >
-                        <span>
-                            <Button
-                            type="primary"
-                            onClick={draftsData.length === 5 ? undefined : showCreateNewDraftDrawer}
-                            disabled={draftsData.length === 5}
-                            // style={{color: theme !== "dark" && draftsData.length === 5 ? "black" : "white" }}
-                            style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}}
-                            >
-                            Create Draft
-                            </Button>
-                        </span>
-                        </Tooltip>
-
-                        {/* 🟣 Right: Edit Dropdown */}
-                        <Dropdown overlay={draftDropdownMenu} trigger={['click']}>
-                        <Button style={{backgroundColor:'#91C25F', color: "#000", border: "#91C25F"}} icon={<DownOutlined  className="black-icon"/>} />
-                        </Dropdown>
-                    </Button.Group>
+                          Create Draft
+                        </Button>
+                      </span>
+                    </Tooltip>
+                  
+                    {/* 🟣 Right: Dropdown Button (Separate from Create Draft Button) */}
+                    <Dropdown overlay={draftDropdownMenu} trigger={['click']}>
+                      <Button 
+                        style={{
+                          backgroundColor: '#91C25F', 
+                          color: "#000", 
+                          border: "none", 
+                          borderRadius: '4px', 
+                          padding: '5px 10px',
+                          boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+                          transition: 'background-color 0.3s ease'
+                        }} 
+                        icon={<DownOutlined className="black-icon" />}
+                      />
+                    </Dropdown>
+                  </Button.Group>
+                  
                 } 
                 // style={{ backgroundColor:'blue'}}
             >
@@ -1330,11 +1387,11 @@ const App = () => {
 
                 </Row>
             </Card>
-            {loading ? (
+            {/* {loading ? (
                         <Skeleton active paragraph={{ rows: 12 }} style={{marginTop:'10px'}}/>
                     ) :
             (<Table
-                style={{ width: "100%" }}  // Ensures table takes full available width
+                style={{ width: "100%",height:"100%" }}  // Ensures table takes full available width
                 className={`custom-dark-table ${theme === 'dark' ? 'dark-mode-pagination' : 'light-mode-pagination'}`}
                 columns={columns}
                 // dataSource={
@@ -1375,7 +1432,62 @@ const App = () => {
                         </Table.Summary.Row>
                     );
                 }}
-            />)}
+            />)} */}
+         
+
+         {loading ? (
+    <Skeleton active paragraph={{ rows: 12 }} style={{ marginTop: '10px' }} />
+) : (
+    <Table
+        style={{
+            width: "100%",
+            height: "calc(100vh - 300px)", // Full height minus header/footer space
+            minHeight: "100%", // Ensures minimum height is filled even with fewer rows
+            tableLayout: "fixed", // Ensures proper layout of the table with defined width
+        }}
+        className={`custom-dark-table ${theme === 'dark' ? 'dark-mode-pagination' : 'light-mode-pagination'}`}
+        columns={columns}
+        dataSource={campaignData.map((item, index) => ({
+            ...item,
+            key: index
+        })).reverse()}
+        pagination={{ pageSize: paginationSize }}
+        scroll={{
+            x: 'max-content', // Enable horizontal scroll if needed
+             y: 'calc(63vh)'
+        }}
+        expandable={{
+            expandedRowRender: (record) => (
+                <ExpandedRowContent
+                    record={record}
+                    changeRRefrst={changeRRefrst}
+                    network={selectedKey}
+                />
+            ),
+            rowExpandable: (record) => !!record
+        }}
+        // summary={() => {
+        //     const totalDailyBudget = campaignData.reduce((sum, record) => {
+        //         return sum + (record.Daily_amount || 0);
+        //     }, 0);
+
+        //     return (
+        //         <Table.Summary.Row
+        //             style={{
+        //                 backgroundColor: theme === "dark" ? "#333" : "#f5f5f5",
+        //                 borderBottom: "0px"
+        //             }}
+        //         >
+        //             <Table.Summary.Cell colSpan={columns.length - 2} align="right">
+        //                 <strong style={{ color: theme === "dark" ? "#fff" : "#000" }}>
+        //                     Total Daily Budget: ${(totalDailyBudget / 100).toFixed(2)}
+        //                 </strong>
+        //             </Table.Summary.Cell>
+        //         </Table.Summary.Row>
+        //     );
+        // }}
+    />
+)}
 
 
             {!restrictedEmails.includes(userdetails.email) && (
