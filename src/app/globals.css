@@ -2982,5 +2982,5 @@ body.dark-mode .black-icon-comment.anticon svg {
 
 .custom-light-notification .ant-notification-notice-message,
 .custom-light-notification .ant-notification-notice-description {
-  color: #1f1f1f !important;  /* Force white text for message/description */
+  color: #1f1f1f !important;  
 }
