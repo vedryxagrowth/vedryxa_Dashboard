@@ -62,7 +62,7 @@ const selectTimezone = {
 };
 
 
-const Daily = ({functionCallForCampaigns, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle}) => {
+const Daily = ({functionCallForCampaigns, context, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle}) => {
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -1179,6 +1179,7 @@ const Daily = ({functionCallForCampaigns, functionCallForCommnets, startDate, en
                                 moveToNextTab={moveToNextTab}
                                 functionCallForCommnets={functionCallForCommnets}
                                 functionCallForCampaigns={functionCallForCampaigns}
+                                context={context}
                             />
                         </Tabs.TabPane>
                         <Tabs.TabPane key="2">
@@ -1210,6 +1211,7 @@ const Daily = ({functionCallForCampaigns, functionCallForCommnets, startDate, en
                                 moveToNextTab={moveToNextTab}
                                 functionCallForCommnets={functionCallForCommnets}
                                 functionCallForCampaigns={functionCallForCampaigns}
+                                context={context}
                             />
                         </Tabs.TabPane>
                         <Tabs.TabPane key="3">

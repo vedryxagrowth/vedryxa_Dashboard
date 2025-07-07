@@ -61,7 +61,7 @@ const selectTimezone = {
 };
 
 
-const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, selectedAdsets, showAdsetLevel, removeSelectedAdsets, selectedCampaigns, moveToNextTab}) => {
+const Daily = ({functionCallForCommnets,context, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, selectedAdsets, showAdsetLevel, removeSelectedAdsets, selectedCampaigns, moveToNextTab}) => {
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -1277,6 +1277,7 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
                                     </Row>
                                     <AgGridReact
                                         ref={gridRef1}
+                                        context={context}
                                         rowData={memorizedDailyData}
                                         columnDefs={memorizedColumnDef1}
                                         onCellClicked={onCellClicked}

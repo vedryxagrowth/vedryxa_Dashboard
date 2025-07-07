@@ -56,7 +56,7 @@ const selectTimezone = {
     CEST: 'CESTDate'
 };
 
-const AdsetLevelReports = ({functionCallForCampaigns, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedAdsets, showAdsetLevel, removeSelectedAdsets, selectedCampaigns, moveToNextTab}) => {
+const AdsetLevelReports = ({functionCallForCampaigns, context, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedAdsets, showAdsetLevel, removeSelectedAdsets, selectedCampaigns, moveToNextTab}) => {
     console.log(columnDefs, "columnDefs");
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
@@ -1663,6 +1663,7 @@ const AdsetLevelReports = ({functionCallForCampaigns, functionCallForCommnets, s
 
                                 <AgGridReact
                                     ref={gridRef}
+                                    context={context}
                                     rowData={memorizedRowData}
                                     rowSelection='multiple'
                                     groupSelectsChildren={true} // ✅ Selects all children when a group is selected

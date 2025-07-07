@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { SessionProvider, useSession, signIn, signOut } from 'next-auth/react';
 import Image from "next/image";
-import { Layout, Avatar, Dropdown, Button, Switch, Spin, Form, Input, Divider, Modal, Badge, Card, Upload, notification, Drawer, Menu, theme } from "antd";
+import { Layout, Avatar, Dropdown, Button, Switch, Spin, Form, Input, Divider, Modal, Badge, Card, Upload, notification, Drawer, Menu } from "antd";
 import React from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { io } from "socket.io-client";
@@ -54,7 +54,12 @@ import { useGlobalLoading } from "../layout";
 
 const socket = io("https://prodapis.adsgoat.in");
 
+// const socket = io("http://localhost:8000");
 
+// const socket = io("https://prodapis.adsgoat.in", {
+//   transports: ["websocket"], // Forces websocket
+//   secure: true
+// });
 
 const Topbar = ({ onComplete, usersDataForLogin }) => {
   const { darkMode, toggleTheme } = useTokenContext();
@@ -85,8 +90,10 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
   const handleExpand = (index) => {
     setExpandedIndex(index === expandedIndex ? null : index);
   };
+   
+  const { theme } = useTokenContext();
 
-
+  const themeForNotifications = useRef(theme);
 
   const [showIcons, setShowIcons] = useState(false);
 
@@ -159,7 +166,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
       style={{
         color: darkMode ? '#fff' : '#000',
         borderRadius: 8,
-        width: '300px',
+        width: '280px',
         paddingBottom: 0,
       }}
     >
@@ -273,9 +280,9 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                   >
 
                     <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', fontSize: '12px', }}>
-                      <span>{item.date}</span>
+                      <span style={{fontSize:'12px'}}>{item.date}</span>
                       <CloseOutlined
-                        style={{ marginLeft: 8, cursor: 'pointer', color: '#999', fontSize: '16px' }}
+                        style={{ marginLeft: 8, cursor: 'pointer', color: '#999', fontSize: '12px' }}
                         onClick={(e) => {
                           onClickNotificationView(item, label, userdetails?.email);
                           e.stopPropagation();
@@ -306,7 +313,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                       }}
                     >
 
-                      <div style={{ fontSize: '14px', flex: 1, marginRight: '10px' }}>
+                      <div style={{ fontSize: '12px', flex: 1, marginRight: '10px' }}>
                         {item.message}
                         <Divider
                           style={{
@@ -364,14 +371,14 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
         <div
           style={{
             display: 'flex',
-            justifyContent: 'space-between',
+            justifyContent: 'flex-end',
             alignItems: 'center',
             padding: '10px 16px',
             color: darkMode ? '#fff' : '#000',
           }}
         >
           {/* Left side – <u> text link */}
-          <div
+          {/* <div
             onClick={(e) => {
               e.stopPropagation();
               setShowAll(!showAll);
@@ -385,18 +392,18 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
             }}
           >
             {showAll ? 'Show less' : 'See all '}
-            {/* <u>{showAll ? 'Show less' : 'See all events'}</u> */}
-          </div>
+          </div> */}
 
           {/* Right side – Ant Design Button */}
           <Button
             type="primary"
             style={{
               backgroundColor: '#91C25F',
-              color: '#fff',
+              color: '#000',
               border: 'none',
               boxShadow: 'none',
-              height: '30px',
+              height: '25px',
+              fontSize: '12px',
             }}
              onClick={handleClearAll}
           >
@@ -515,6 +522,10 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
       });
     }
   }, [visible]);
+
+  useEffect(() => {
+    themeForNotifications.current = theme; 
+  }, [theme]);
 
   useEffect(() => {
     const updateDrawerPosition = () => {
@@ -818,6 +829,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
           duration: 5,
           pauseOnHover: true,
           showProgress: true,
+          className: themeForNotifications.current === "dark" ? "custom-dark-notification" : "",
         });
       }, index * 500);
     });
@@ -838,6 +850,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
 
 
   useEffect(() => {
+    console.log("🔔 Setting up notifications...");
     if (!session?.user?.email) return;
 
     // Register with backend
@@ -878,6 +891,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
       console.log("🆕 Newly added:", newlyAdded);
 
       if (newlyAdded.length > 0) {
+        console.log("theme", theme);
         showAllAntdNotificationsSequentially(newlyAdded);
       }
 
@@ -1134,23 +1148,27 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                 </div>
               </div>}
 
-              {userdetails?.role !== "Revenue_Partner" && <button style={{ padding: '0px', margin: '0px' }} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onChangeStickyNotes}>
+              {userdetails?.role !== "Revenue_Partner" && <button style={{ padding: '0px', margin: '0px',backgroundColor: theme === "dark" &&
+                  "transparent" }} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onChangeStickyNotes}>
                 <SlNotebook size={20} style={{ marginLeft: '10px' }} />
               </button>}
 
-              {userdetails?.role !== "Revenue_Partner" && <button style={{ padding: '0px', margin: '0px' }} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickCalculator}>
+              {userdetails?.role !== "Revenue_Partner" && <button style={{ padding: '0px', margin: '0px',backgroundColor: theme === "dark" &&
+                  "transparent" }} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickCalculator}>
                 <CalculatorOutlined style={{ fontSize: '20px', padding: '0px', margin: '0px', marginLeft: '10px' }} />
               </button>}
               {userdetails?.role !== "Revenue_Partner" && <button style={{
-                padding: '0px', margin: '0px', backgroundColor: theme === "dark" &&
-                  "green"
+                padding: '0px', margin: '0px', 
+                backgroundColor: theme === "dark" &&
+                  "transparent"
               }} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickWorlTime}>
                 <TfiWorld size={20} style={{ marginLeft: '10px' }} />
               </button>}
 
               <button
                 onClick={toggleTheme}
-                style={{ padding: '0px', margin: '0px', marginLeft: '10px' }}
+                style={{ padding: '0px', margin: '0px', marginLeft: '10px',backgroundColor: theme === "dark" &&
+                  "transparent" }}
                 className={`${darkMode ? 'dark-mode' : 'light-mode'}`}
               >
                 {darkMode ? (
