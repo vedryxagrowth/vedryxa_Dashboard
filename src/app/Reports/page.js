@@ -3843,14 +3843,14 @@ const MyTablePage = () => {
                 const hasBidAmount = Object.prototype.hasOwnProperty.call(payload, 'bidAmount');
                 
                 if (!hasBudget && !hasBidAmount) {
-                  message.warning("Please enter Budget and/or Bid Amount before submitting.");
+                  message.warning("Please enter budget and/or bid amount before submitting.");
                   return;
                 }                
              
               
                 try {
                   await apiClient.post('/update/adset/budget', payload);
-                  message.success("Adset Budget and/or Bid Updated");
+                  message.success("Adset budget and/or bid updated");
                   changeRRefrst();
                 } catch (err) {
                   console.error(err);
@@ -3867,14 +3867,14 @@ const MyTablePage = () => {
               const hasBid = bid !== null && bid !== undefined && bid !== '';
           
               
-              let tooltipText = 'Ad Set Budget & Bid are NOT available';
+              let tooltipText = 'Ad set budget & bid are not available';
               let iconColor = '#FF4D4F'; // Red (default: none available)
           
               if (hasBudget && hasBid) {
-                tooltipText = 'Ad Set Budget & Bid are available';
+                tooltipText = 'Ad set budget & bid are available';
                 iconColor = '#91C25F'; // Green
               } else if (hasBudget || hasBid) {
-                tooltipText = hasBudget ? 'Ad Set exists with Budget but no Bid' : 'Ad Set exists with Bid but no Budget';
+                tooltipText = hasBudget ? 'Ad set exists with budget but no bid' : 'Ad set exists with bid but no budget';
                 iconColor = '#FFBF00'; // Yellow
               }
           
@@ -5466,9 +5466,9 @@ const MyTablePage = () => {
                     onClick={onChangeSpendAndStatus}
                 />
                 ) : (
-                <Tooltip title="No budget set for this campaign">
+                // <Tooltip title="No budget set for this campaign">
                     <WarningOutlined style={{ color: '#FAAD14', fontSize: 16 }} />
-                </Tooltip>
+                // </Tooltip>
                 )}
 
                   {isModalVisible && (
@@ -6332,7 +6332,7 @@ const MyTablePage = () => {
               
                 try {
                   await apiClient.post('/update/adset/budget', payload);
-                  message.success("Adset Budget and/or Bid Updated");
+                  message.success("Adset budget and/or bid updated");
                   changeRRefrst();
                 } catch (err) {
                   console.error(err);
@@ -6349,14 +6349,14 @@ const MyTablePage = () => {
               const hasBid = bid !== null && bid !== undefined && bid !== '';
           
               
-              let tooltipText = 'Ad Set Budget & Bid are NOT available';
+              let tooltipText = 'Ad set budget & bid are not available';
               let iconColor = '#FF4D4F'; // Red (default: none available)
           
               if (hasBudget && hasBid) {
-                tooltipText = 'Ad Set Budget & Bid are available';
+                tooltipText = 'Ad set budget & bid are available';
                 iconColor = '#91C25F'; // Green
               } else if (hasBudget || hasBid) {
-                tooltipText = hasBudget ? 'Ad Set exists with Budget but no Bid' : 'Ad Set exists with Bid but no Budget';
+                tooltipText = hasBudget ? 'Ad set exists with budget but no bid' : 'Ad set exists with bid but no budget';
                 iconColor = '#FFBF00'; // Yellow
               }
           
@@ -8193,9 +8193,9 @@ const MyTablePage = () => {
                     onClick={onChangeSpendAndStatus}
                 />
                 ) : (
-                <Tooltip title="No budget set for this campaign">
+                // <Tooltip title="No budget set for this campaign">
                     <WarningOutlined style={{ color: '#FAAD14', fontSize: 16 }} />
-                </Tooltip>
+                // </Tooltip>
                 )}
 
                   {isModalVisible && (
