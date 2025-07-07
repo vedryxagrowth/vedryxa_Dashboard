@@ -7,7 +7,7 @@ import axios from 'axios';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
 import { Carousel, Input, Button, Row, Col, Typography, Modal, message, ConfigProvider, Switch, Flex, Spin, Tabs, Skeleton } from 'antd';
-import { DollarOutlined, EditOutlined, SearchOutlined, ReloadOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
+import { WarningOutlined, DollarOutlined, EditOutlined, SearchOutlined, ReloadOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
 import { Tooltip, Popover } from 'antd';
 import StickyBox from 'react-sticky-box';
 import { Select } from 'antd';
@@ -304,6 +304,22 @@ const MyTablePage = () => {
 
     // const [campaignNamesDActiveDailyLoading, setCampaignNamesDActiveDailyLoading] = useState(false);
 
+    const [allCampaignData, setAllCampaignData] = useState([]);
+
+    useEffect(() => {
+        const fetchAllCampaigns = async () => {
+            try {
+            const res = await apiClient.get(`/get/AllCampaignsWithAdsets?accountNumber=${newaccount}`);
+            setAllCampaignData(res.data);
+            } catch (err) {
+            console.error("Failed to fetch all campaigns", err);
+            }
+        };
+    
+        fetchAllCampaigns();
+    }, [newaccount]);
+       
+    
     const showModal = () => {
         setIsModalOpen(true);
     };
@@ -3731,7 +3747,7 @@ const MyTablePage = () => {
               const [bidAmount, setBidAmount] = useState();
               const [adsetId, setAdsetId] = useState(null);
               const [adsetInfo, setAdsetInfo] = useState(null);
-              const [, forceRerender] = useState(0);
+            //   const [, forceRerender] = useState(0);
           
               const isGroupRow = !!params?.node?.groupData;
               let campaignId = null;
@@ -3752,45 +3768,38 @@ const MyTablePage = () => {
 
                 console.log("campaignId ar:", campaignId);
           
-              useEffect(() => {
-                const fetchAdset = async () => {
-                  try {
-                    if (!campaignId || !initialAdsetId) return;
-                    const res = await apiClient.get(`/get/CampaignWithAdsets?campaignId=${campaignId}`);
-                    const found = res?.data?.adsets?.find(ad => ad.adset_id === initialAdsetId);
-                    if (found) {
-                      setAdsetInfo(found);
-                      forceRerender(prev => prev + 1);
+                useEffect(() => {
+                    if (!campaignId || !initialAdsetId || !Array.isArray(allCampaignData)) return;
+                    const matchedCampaign = allCampaignData.find(c => c.campaign_id === campaignId);
+                    const matchedAdset = matchedCampaign?.adsets?.find(ad => ad.adset_id === initialAdsetId);
+                    if (matchedAdset) {
+                      setAdsetInfo(matchedAdset);
                     }
-                  } catch (err) {
-                    console.error("Error fetching adset info", err);
-                  }
-                };
-          
-                fetchAdset();
-              }, [campaignId, initialAdsetId]);
+                }, [campaignId, initialAdsetId, allCampaignData]);
           
               const onChangeSpendAndStatus = async () => {
                 try {
                   const grouped = params?.node?.allLeafChildren?.map(node => node.data) || [];
                   const clickedAdsetId = grouped?.[0]?.adsetid || initialAdsetId;
-                  const clickedCampaignId = grouped?.[0]?.campaignid || campaignId;
+                //   const clickedCampaignId = grouped?.[0]?.campaignid || campaignId;
           
                   setGroupedData(grouped);
                   setAdsetId(clickedAdsetId);
           
-                  const res = await apiClient.get(`/get/CampaignWithAdsets?campaignId=${clickedCampaignId}`);
-                  const adset = res.data?.adsets?.find(ad => ad.adset_id === clickedAdsetId);
+                    const campaign = allCampaignData.find(c => c.campaign_id === campaignId);
+                    const adset = campaign?.adsets?.find(ad => ad.adset_id === clickedAdsetId);
           
                   if (adset) {
                     const budget = parseFloat(adset?.budget?.daily_budget || adset?.budget?.lifetime_budget || 0) / 100;
                     onChangeBudget(budget);
                     setBidAmount(adset?.bid_amount / 100);
+                    setAdsetInfo(adset);
+                    setIsModalVisible(true);
                   } else {
                     message.error("Adset not found in backend response.");
                   }
           
-                  setIsModalVisible(true);
+                //   setIsModalVisible(true);
                 } catch (err) {
                   console.error("❌ Failed to fetch adset:", err);
                   message.error("Failed to fetch adset data");
@@ -3834,14 +3843,14 @@ const MyTablePage = () => {
                 const hasBidAmount = Object.prototype.hasOwnProperty.call(payload, 'bidAmount');
                 
                 if (!hasBudget && !hasBidAmount) {
-                  message.warning("Please enter Budget and/or Bid Amount before submitting.");
+                  message.warning("Please enter budget and/or bid amount before submitting.");
                   return;
                 }                
              
               
                 try {
                   await apiClient.post('/update/adset/budget', payload);
-                  message.success("Adset Budget and/or Bid Updated");
+                  message.success("Adset budget and/or bid updated");
                   changeRRefrst();
                 } catch (err) {
                   console.error(err);
@@ -3857,10 +3866,17 @@ const MyTablePage = () => {
                                 (lifetime !== null && lifetime !== undefined && lifetime !== '');
               const hasBid = bid !== null && bid !== undefined && bid !== '';
           
-              let tooltipText = 'No budget and bid';
-              if (hasBudget && hasBid) tooltipText = 'Budget and bid';
-              else if (hasBudget) tooltipText = 'Only budget';
-              else if (hasBid) tooltipText = 'Only bid';
+              
+              let tooltipText = 'Ad set budget & bid are not available';
+              let iconColor = '#FF4D4F'; // Red (default: none available)
+          
+              if (hasBudget && hasBid) {
+                tooltipText = 'Ad set budget & bid are available';
+                iconColor = '#91C25F'; // Green
+              } else if (hasBudget || hasBid) {
+                tooltipText = hasBudget ? 'Ad set exists with budget but no bid' : 'Ad set exists with bid but no budget';
+                iconColor = '#FFBF00'; // Yellow
+              }
           
               return (
                 <div>
@@ -3868,7 +3884,7 @@ const MyTablePage = () => {
                     <DollarOutlined
                       style={{
                         cursor: 'pointer',
-                        color: (hasBudget && hasBid) ? '#91C25F' :  '',
+                        color: iconColor,
                       }}
                       onClick={onChangeSpendAndStatus}
                     />
@@ -3902,13 +3918,6 @@ const MyTablePage = () => {
                           placeholder="Enter budget in USD"
                           className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                         />
-
-                        <div>
-                          <Typography.Text strong style={{ color: theme === 'dark' && 'white' }}>
-                            Bid amount:
-                          </Typography.Text>{' '}
-                          
-                        </div>
           
                         <Input
                           type="number"
@@ -5384,21 +5393,13 @@ const MyTablePage = () => {
             console.log("📌 Campaign Name:", campaignname);
               
           
-              useEffect(() => {
-                const fetchBudget = async () => {
-                  if (!campaignId) return;
-                  try {
-                    const res = await apiClient.get(`/get/CampaignWithAdsets?campaignId=${campaignId}`);
-                    if (res.status === 200) {
-                      setCampaignActualSpend(res.data);
-                    }
-                  } catch (err) {
-                    console.error("Failed to prefetch budget", err);
-                  }
-                };
-          
-                fetchBudget();
-              }, [campaignId]);
+            useEffect(() => {
+                if (!campaignId || !Array.isArray(allCampaignData)) return;
+                const matchedCampaign = allCampaignData.find(c => c.campaign_id === campaignId);
+                if (matchedCampaign) {
+                  setCampaignActualSpend(matchedCampaign);
+                }
+            }, [campaignId, allCampaignData]);              
           
               const onChangeSpendAndStatus = () => {
                 if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return;
@@ -5457,16 +5458,19 @@ const MyTablePage = () => {
           
               return (
                 <div>
-                  { campaignActualSpend?.campaign_budget &&
-                    (campaignActualSpend?.campaign_budget?.daily_budget != null ||
-                    campaignActualSpend?.campaign_budget?.lifetime_budget != null) ? (
-                    <DollarOutlined
-                      style={{ cursor: 'pointer', }}
-                      onClick={onChangeSpendAndStatus}
-                    />
-                  ) : (
-                    <span style={{ color: '#999' }}>_</span>
-                  )}
+                {campaignActualSpend?.campaign_budget &&
+                (campaignActualSpend?.campaign_budget?.daily_budget != null ||
+                campaignActualSpend?.campaign_budget?.lifetime_budget != null) ? (
+                <DollarOutlined
+                    style={{ cursor: 'pointer' }}
+                    onClick={onChangeSpendAndStatus}
+                />
+                ) : (
+                // <Tooltip title="No budget set for this campaign">
+                    <WarningOutlined style={{ color: '#FAAD14', fontSize: 16 }} />
+                // </Tooltip>
+                )}
+
                   {isModalVisible && (
                     <Modal
                       title={Array.isArray(groupedData) ? groupedData?.[0]?.campaignname : groupedData?.campaignname}
@@ -6225,7 +6229,7 @@ const MyTablePage = () => {
               const [bidAmount, setBidAmount] = useState();
               const [adsetId, setAdsetId] = useState(null);
               const [adsetInfo, setAdsetInfo] = useState(null);
-              const [, forceRerender] = useState(0);
+            //   const [, forceRerender] = useState(0);
           
               const isGroupRow = !!params?.node?.groupData;
               let campaignId = null;
@@ -6246,45 +6250,38 @@ const MyTablePage = () => {
 
                 console.log("campaignId ar:", campaignId);
           
-              useEffect(() => {
-                const fetchAdset = async () => {
-                  try {
-                    if (!campaignId || !initialAdsetId) return;
-                    const res = await apiClient.get(`/get/CampaignWithAdsets?campaignId=${campaignId}`);
-                    const found = res?.data?.adsets?.find(ad => ad.adset_id === initialAdsetId);
-                    if (found) {
-                      setAdsetInfo(found);
-                      forceRerender(prev => prev + 1);
+                useEffect(() => {
+                    if (!campaignId || !initialAdsetId || !Array.isArray(allCampaignData)) return;
+                    const matchedCampaign = allCampaignData.find(c => c.campaign_id === campaignId);
+                    const matchedAdset = matchedCampaign?.adsets?.find(ad => ad.adset_id === initialAdsetId);
+                    if (matchedAdset) {
+                      setAdsetInfo(matchedAdset);
                     }
-                  } catch (err) {
-                    console.error("Error fetching adset info", err);
-                  }
-                };
-          
-                fetchAdset();
-              }, [campaignId, initialAdsetId]);
+                }, [campaignId, initialAdsetId, allCampaignData]);
           
               const onChangeSpendAndStatus = async () => {
                 try {
                   const grouped = params?.node?.allLeafChildren?.map(node => node.data) || [];
                   const clickedAdsetId = grouped?.[0]?.adsetid || initialAdsetId;
-                  const clickedCampaignId = grouped?.[0]?.campaignid || campaignId;
+                //   const clickedCampaignId = grouped?.[0]?.campaignid || campaignId;
           
                   setGroupedData(grouped);
                   setAdsetId(clickedAdsetId);
           
-                  const res = await apiClient.get(`/get/CampaignWithAdsets?campaignId=${clickedCampaignId}`);
-                  const adset = res.data?.adsets?.find(ad => ad.adset_id === clickedAdsetId);
+                    const campaign = allCampaignData.find(c => c.campaign_id === campaignId);
+                    const adset = campaign?.adsets?.find(ad => ad.adset_id === clickedAdsetId);
           
                   if (adset) {
                     const budget = parseFloat(adset?.budget?.daily_budget || adset?.budget?.lifetime_budget || 0) / 100;
                     onChangeBudget(budget);
                     setBidAmount(adset?.bid_amount / 100);
+                    setAdsetInfo(adset);
+                    setIsModalVisible(true);
                   } else {
                     message.error("Adset not found in backend response.");
                   }
           
-                  setIsModalVisible(true);
+                //   setIsModalVisible(true);
                 } catch (err) {
                   console.error("❌ Failed to fetch adset:", err);
                   message.error("Failed to fetch adset data");
@@ -6335,7 +6332,7 @@ const MyTablePage = () => {
               
                 try {
                   await apiClient.post('/update/adset/budget', payload);
-                  message.success("Adset Budget and/or Bid Updated");
+                  message.success("Adset budget and/or bid updated");
                   changeRRefrst();
                 } catch (err) {
                   console.error(err);
@@ -6351,10 +6348,17 @@ const MyTablePage = () => {
                                 (lifetime !== null && lifetime !== undefined && lifetime !== '');
               const hasBid = bid !== null && bid !== undefined && bid !== '';
           
-              let tooltipText = 'No Budget or Bid';
-              if (hasBudget && hasBid) tooltipText = 'Has both Budget and Bid';
-              else if (hasBudget) tooltipText = 'Only Budget';
-              else if (hasBid) tooltipText = 'Only Bid';
+              
+              let tooltipText = 'Ad set budget & bid are not available';
+              let iconColor = '#FF4D4F'; // Red (default: none available)
+          
+              if (hasBudget && hasBid) {
+                tooltipText = 'Ad set budget & bid are available';
+                iconColor = '#91C25F'; // Green
+              } else if (hasBudget || hasBid) {
+                tooltipText = hasBudget ? 'Ad set exists with budget but no bid' : 'Ad set exists with bid but no budget';
+                iconColor = '#FFBF00'; // Yellow
+              }
           
               return (
                 <div>
@@ -6362,7 +6366,7 @@ const MyTablePage = () => {
                     <DollarOutlined
                       style={{
                         cursor: 'pointer',
-                        color: hasBudget && hasBid ? '#91C25F' : undefined,
+                        color: iconColor,
                       }}
                       onClick={onChangeSpendAndStatus}
                     />
@@ -8116,21 +8120,13 @@ const MyTablePage = () => {
             console.log("📌 Campaign Name:", campaignname);
               
           
-              useEffect(() => {
-                const fetchBudget = async () => {
-                  if (!campaignId) return;
-                  try {
-                    const res = await apiClient.get(`/get/CampaignWithAdsets?campaignId=${campaignId}`);
-                    if (res.status === 200) {
-                      setCampaignActualSpend(res.data);
-                    }
-                  } catch (err) {
-                    console.error("Failed to prefetch budget", err);
-                  }
-                };
-          
-                fetchBudget();
-              }, [campaignId]);
+            useEffect(() => {
+                if (!campaignId || !Array.isArray(allCampaignData)) return;
+                const matchedCampaign = allCampaignData.find(c => c.campaign_id === campaignId);
+                if (matchedCampaign) {
+                  setCampaignActualSpend(matchedCampaign);
+                }
+            }, [campaignId, allCampaignData]);              
           
               const onChangeSpendAndStatus = () => {
                 if (params?.node?.rowPinned === 'bottom' || params?.node?.footer) return;
@@ -8189,16 +8185,19 @@ const MyTablePage = () => {
           
               return (
                 <div>
-                  { campaignActualSpend?.campaign_budget &&
-                    (campaignActualSpend?.campaign_budget?.daily_budget != null ||
-                    campaignActualSpend?.campaign_budget?.lifetime_budget != null) ? (
-                    <DollarOutlined
-                      style={{ cursor: 'pointer', }}
-                      onClick={onChangeSpendAndStatus}
-                    />
-                  ) : (
-                    <span style={{ color: '#999' }}>_</span>
-                  )}
+                {campaignActualSpend?.campaign_budget &&
+                (campaignActualSpend?.campaign_budget?.daily_budget != null ||
+                campaignActualSpend?.campaign_budget?.lifetime_budget != null) ? (
+                <DollarOutlined
+                    style={{ cursor: 'pointer' }}
+                    onClick={onChangeSpendAndStatus}
+                />
+                ) : (
+                // <Tooltip title="No budget set for this campaign">
+                    <WarningOutlined style={{ color: '#FAAD14', fontSize: 16 }} />
+                // </Tooltip>
+                )}
+
                   {isModalVisible && (
                     <Modal
                       title={Array.isArray(groupedData) ? groupedData?.[0]?.campaignname : groupedData?.campaignname}
