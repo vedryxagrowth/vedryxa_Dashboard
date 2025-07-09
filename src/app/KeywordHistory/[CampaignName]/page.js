@@ -1,0 +1,2110 @@
+"use client"
+import React from 'react';
+import axios from 'axios';
+import { useEffect, useState, useRef, useCallback } from 'react';
+import { AgGridReact } from 'ag-grid-react';
+import { Audio } from 'react-loader-spinner';
+import moment from 'moment-timezone';
+import 'ag-grid-enterprise';
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-alpine.css';
+import { useTokenContext } from "../../components/parent"
+import { Line } from 'react-chartjs-2';
+import { Chart, registerables } from 'chart.js';
+import { Spin, Row, Col, Select, Input, Button, Modal, message, Switch, Tooltip, Skeleton } from 'antd';
+import { ReloadOutlined, EditOutlined, BarChartOutlined } from '@ant-design/icons';
+Chart.register(...registerables);
+import debounce from 'lodash.debounce';
+
+const datasetColorMap = {
+    Spend: 'rgba(75, 192, 192, 1)',
+    Revenue: 'rgba(54, 162, 235, 1)',
+    RPC: 'rgba(255, 99, 132, 1)',
+    CPL: 'rgba(255, 159, 64, 1)',
+    Profit: 'rgba(255, 206, 86, 1)',
+    Margin: 'rgba(153, 102, 255, 1)',
+  };
+
+export default function CampaignAndAccount({ params }) {
+
+    const { userdetails } = useTokenContext();
+
+    const { apiClient } = useTokenContext();
+
+    const gridRef = useRef();
+
+    const [searchText, setSearchText] = useState("");
+
+    const [selectedCells, setSelectedCells] = useState([]);
+    const [firstSelectedCell, setFirstSelectedCell] = useState(null);
+
+    // console.log(userdetails, "userDetails");
+
+    const user = userdetails?.email;
+
+    const [isGraphVisible, setIsGraphVisible] = useState(() => {
+        const stored = localStorage.getItem('isGraphVisible');
+        return stored ? JSON.parse(stored) : false
+    });
+
+    const [columns, setColumns] = useState([]);
+    const [comment, setComment] = useState("");
+
+    const [isModalVisibles, setIsModalVisibles] = useState(false);
+    
+    const [campaignComments, setCampaignComments] = useState([]);
+    const [campaignid, setCampaignId] = useState("");
+    const [adsetid, setAdsetID] = useState("");
+
+    const [columnDefs, setColumnStructure] = useState([]);
+
+    const [isLoading, setLoading] = useState(true);
+    const [dailyData, setdailyData] = useState([]);
+    const [chartData, setChartData] = useState({ dates: [], spend: [], revenue: [], profit: [], margin: [] });
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText(decodedString).then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1500); // Reset after 1.5 seconds
+        });
+    };
+    const { theme } = useTokenContext();
+    const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
+    const [darkMode, setDarkMode] = useState(false);
+    const paramsData = ((params.CampaignName).split("-"));
+    let decodedString = decodeURIComponent(paramsData[0]);
+    decodedString = decodedString.replace(/\*/g, "/").replace(/\^/g, "-");
+    const accountNumber = paramsData[1];
+    const timeZone = paramsData[2];
+    const network = paramsData[3]
+    console.log(decodedString, "decode");
+    console.log(accountNumber);
+    console.log(timeZone);
+    const selectTimezone = {
+        UTC: 'UTCDate',
+        EEST: 'EESTDate',
+        EDT: 'EDTDate',
+        CST: 'CSTDate',
+        PDT: 'PDTDate',
+        IST: 'ISTDate',
+        BST: 'BSTDate',
+        GMT: 'GMTDate',
+        MST: 'MSTDate',
+        CDT: 'CDTDate',
+        AST: 'ASTDate',
+        DST: 'DSTDate',
+        CEST: 'CESTDate'
+    };
+
+    const [hiddenKeys, setHiddenKeys] = useState([
+        'Spend', 'Revenue', 'RPC', 'CPL', 'Margin', // ❌ Only "Profit" shown by default
+      ]);
+    
+      const toggleLegend = (label) => {
+        setHiddenKeys(prev =>
+          prev.includes(label) ? prev.filter(k => k !== label) : [...prev, label]
+        );
+      };
+    
+      const datasets = Object.keys(datasetColorMap).map(label => ({
+        label,
+        data: chartData[label.toLowerCase()],
+        borderColor: datasetColorMap[label],
+        // backgroundColor: datasetColorMap[label].replace('1)', '0.2)'),
+        // fill: true,
+        hidden: hiddenKeys.includes(label),
+        tension: 0.3,
+        pointRadius: 5,
+        pointHoverRadius: 8,
+        pointBackgroundColor: datasetColorMap[label],
+        pointHoverBackgroundColor: datasetColorMap[label],
+      }));
+
+    const getMargin = (params) => {
+        if (params.data !== undefined) {
+            const { revenue, spend } = params.data;
+
+            if (revenue !== "0.00" || revenue !== undefined) {
+                const RPC = ((revenue - spend) / revenue) * 100;
+                if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
+                    return `0`;
+                }
+                return `${Math.round(RPC * 100) / 100}`;
+
+            }
+        }
+        if (params.node.aggData !== undefined) {
+            const { revenue, spend } = params.node.aggData;
+            if (revenue !== "0.00" || revenue !== undefined) {
+                const RPC = ((revenue - spend) / revenue) * 100;
+                if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
+                    return `0`;
+                }
+                return `${Math.round(RPC * 100) / 100}`;
+
+            }
+        }
+
+        return 0;
+    }
+
+    const getCpl = (params) => {
+        if (params.data !== undefined) {
+            const { fbleads, spend } = params.data;
+
+            if (fbleads !== 0) {
+                const CPL = spend / fbleads;
+                if (CPL === Infinity) {
+                    return 0;
+                }
+                return Number(CPL.toFixed(2));
+
+            }
+        }
+        if (params.node.aggData !== undefined) {
+            const { fbleads, spend } = params.node.aggData;
+            if (fbleads !== 0) {
+                const CPL = spend / fbleads;
+                return Number(CPL.toFixed(2));
+            }
+        }
+
+        return 0;
+    };
+
+    const getRpc = (params) => {
+        if (params.data !== undefined) {
+            const { revenue, conversions } = params.data;
+            if (conversions !== 0) {
+                const RPC = revenue / conversions;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return Number(RPC.toFixed(2));
+
+            }
+        }
+        if (params.node.aggData !== undefined) {
+            const { revenue, conversions } = params.node.aggData;
+            if (conversions !== 0) {
+                const RPC = revenue / conversions;
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        return 0;
+    }
+
+    const getCtr = (params) => {
+        if (params.data !== undefined) {
+            const { impressions, fbclicks } = params.data;
+            if (impressions !== 0) {
+                const RPC = (fbclicks / impressions) * 100;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return `${Number(RPC.toFixed(2))}`;
+
+            }
+        }
+        if (params.node.aggData !== undefined) {
+            const { impressions, fbclicks } = params.node.aggData;
+            if (impressions !== 0) {
+                const RPC = (fbclicks / impressions) * 100;
+                return `${Number(RPC.toFixed(2))}`;
+            }
+        }
+
+        return 0;
+    }
+
+    const getFilteration = (params) => {
+        if (params.data !== undefined) {
+            const { fbLeads, conversions } = params.data;
+            if (fbLeads !== 0) {
+                const RPC = ((parseInt(fbLeads)-parseInt(conversions)) / parseInt(fbLeads))*100;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return Number(RPC.toFixed(2));
+
+            }
+        }
+        if (params.node.aggData !== undefined) {
+            const { fbLeads, conversions } = params.node.aggData;
+            if (fbLeads !== 0) {
+                const RPC = ((parseInt(fbLeads)-parseInt(conversions)) / parseInt(fbLeads))*100;
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        return 0;
+    }
+
+    const getCpcLc = (params) => {
+        if (params.data !== undefined) {
+            const { spend, fblinkclicks } = params.data;
+            if (fblinkclicks !== 0) {
+                const RPC = spend / fblinkclicks;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return Number(RPC.toFixed(2));
+
+            }
+        }
+        if (params.node.aggData !== undefined) {
+            const { spend, fblinkclicks } = params.node.aggData;
+            if (fblinkclicks !== 0) {
+                const RPC = spend / fblinkclicks;
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        return 0;
+    }
+
+    const getDev = (params) => {
+        const rpc = getRpc(params);
+        if (params.data !== undefined) {
+            const { fbleads } = params.data;
+
+            if (fbleads !== 0) {
+                const CPL = rpc * fbleads;
+                if (CPL === Infinity) {
+                    return 0;
+                }
+                return CPL;
+
+            }
+        }
+        if (params.node.aggData !== undefined) {
+            const { fbleads } = params.node.aggData;
+            if (fbleads !== 0) {
+                const CPL = rpc * fbleads;
+                return CPL;
+            }
+        }
+
+        return 0;
+
+    }
+
+    const getFmargin = (params) => {
+        const revenue = getDev(params);
+        if (params.data !== undefined) {
+            const { profit } = params.data;
+            if (revenue !== 0) {
+                const RPC = (profit / revenue) * 100;
+                if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
+                    return 0;
+                }
+                return `${Number(RPC.toFixed(2))}`;
+
+            }
+        }
+        if (params.node.aggData !== undefined) {
+            const { profit } = params.node.aggData;
+            if (revenue !== 0) {
+                const RPC = (profit / revenue) * 100;
+                return `${Number(RPC.toFixed(2))}`;
+            }
+        }
+
+        return 0;
+    }
+
+
+    const getNcpl = (params) => {
+        if (params.data !== undefined) {
+            const { spend, conversions } = params.data;
+            if (conversions !== 0) {
+                const RPC = spend / conversions;
+                if (RPC === Infinity || isNaN(RPC)) {
+                    return 0;
+                }
+                return Number(RPC.toFixed(2));
+
+            }
+        }
+        if (params.node.aggData !== undefined) {
+            const { spend, conversions } = params.node.aggData;
+            if (conversions !== 0) {
+                const RPC = spend / conversions;
+                return Number(RPC.toFixed(2));
+            }
+        }
+
+        return 0;
+    }
+
+
+
+    const getROI = (params) => {
+        if (params.data !== undefined) {
+            const { revenue, spend } = params.data;
+
+            if (revenue !== "0.00" || revenue !== undefined) {
+                const RPC = ((revenue - spend) / spend) * 100;
+                if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
+                    return `0`;
+                }
+                return `${Math.round(RPC * 100) / 100}`;
+
+            }
+        }
+        if (params.node.aggData !== undefined) {
+            const { revenue, spend } = params.node.aggData;
+            if (revenue !== "0.00" || revenue !== undefined) {
+                const RPC = ((revenue - spend) / spend) * 100;
+                if (RPC === Infinity || isNaN(RPC) || RPC === -Infinity) {
+                    return `0`;
+                }
+                return `${Math.round(RPC * 100) / 100}`;
+
+            }
+        }
+
+        return 0;
+    }
+
+    const agFunc = (params) => {
+        let sum = 0;
+        params.values.forEach((value) => (sum += parseFloat(value)));
+        return sum;
+    }
+
+    const getColumnDefs = (order) => {
+        return order?.map(colKey => columnDefsObject[colKey]);
+    };
+
+    const columnStructure = [
+        "M_tq",
+        "D_tq",
+        "adname",
+        "date_n",
+        "date_f",
+        "hour_n",
+        "hour_f",
+        "date",
+        "campaignname",
+        "adsetname",
+        "spend",
+        "revenue",
+        "profit",
+        "margin",
+        "rpc",
+        "cpl",
+        "ncpl",
+        "fbleads",
+        "filteration",
+        "conversions",
+        "fmargin",
+        "roi",
+        "cpc",
+        "fbclicks",
+        "impressions",
+        "ctr",
+        "fblinkclicks",
+        "cpclinkclicks",
+        ];
+
+    const handleColumnMove = async (params, gridId) => {
+        const columnState = params.api.getColumnState();
+        // console.log('Column moved in grid:', gridId);
+        const fieldOrder = columnState.map(col => col.colId);
+        // console.log(fieldOrder);
+        const newFieldOrder = fieldOrder.filter(item => item !== 'ag-Grid-AutoColumn-adsetnname' && item !== 'ag-Grid-AutoColumn' && columnStructure.includes(item));
+
+        // localStorage.setItem('columnState', JSON.stringify(newFieldOrder));
+        // updatingColumnsStructure(newFieldOrder);
+        // console.log(newFieldOrder);
+        setColumnStructure(getColumnDefs(["keyword",...newFieldOrder]));
+        // console.log(newFieldOrder);
+        setColumns(["keyword",...newFieldOrder]);
+        await apiClient.post(`/api/updateHistoryPageStructure?email=${userdetails?.email}`, {updateDataArray: newFieldOrder});
+        // console.log(`Updating columns structure for grid: ${gridId}`);
+    };
+
+    const debouncedHandleColumnMove = useCallback(debounce((params, gridId) => handleColumnMove(params, gridId), 600), []);
+
+    const onGridReady = (params, gridId, gridRef) => {
+        gridRef.current = params;
+        params.api.applyColumnState({ state: columnDefs, applyOrder: true });
+        params.api.addEventListener('dragStopped', (e) => debouncedHandleColumnMove(e, gridId));
+    };
+
+
+
+    const dateOptions = [
+        "All",
+        "Today",
+        "Yesterday",
+        "Last 7 Days",
+        "Last 15 Days",
+        "Last 20 Days",
+        "Last 25 Days",
+        "Last 30 Days",
+        "Last 60 Days",
+        "Last 90 Days",
+        "This Month",
+        "Last Month",
+    ];
+    
+    const [selectedValue, setSelectedValue] = useState("All");
+    const [filteredData, setFilteredData] = useState(dailyData);
+
+    const [domainFixedFooter, setDomainFixedFooter] = useState([]);
+    
+    const handleChange = (value) => {
+        setSelectedValue(value);
+    
+        const today = moment();
+        const startOfMonth = moment().startOf("month");
+        const endOfMonth = moment().endOf("month");
+        const startOfLastMonth = moment().subtract(1, "month").startOf("month");
+        const endOfLastMonth = moment().subtract(1, "month").endOf("month");
+    
+        const dynamicDaysFilter = (days) =>
+            dailyData.filter((item) =>
+            moment(item.date).isBetween(
+              moment().subtract(days, "days"),
+              today,
+              undefined,
+              "[]"
+            )
+          );
+    
+        const filterLogic = {
+          All: () => dailyData,
+          Today: () => dailyData.filter((item) => item.date === today.format("YYYY-MM-DD")),
+          Yesterday: () =>
+            dailyData.filter(
+              (item) =>
+                item.date === today.clone().subtract(1, "days").format("YYYY-MM-DD")
+            ),
+          "Last 7 Days": () => dynamicDaysFilter(7),
+          "Last 15 Days": () => dynamicDaysFilter(15),
+          "Last 20 Days": () => dynamicDaysFilter(20),
+          "Last 25 Days": () => dynamicDaysFilter(25),
+          "Last 30 Days": () => dynamicDaysFilter(30),
+          "Last 60 Days": () => dynamicDaysFilter(60),
+          "Last 90 Days": () => dynamicDaysFilter(90),
+          "This Month": () =>
+            dailyData.filter((item) =>
+              moment(item.date).isBetween(startOfMonth, endOfMonth, undefined, "[]")
+            ),
+          "Last Month": () =>
+            dailyData.filter((item) =>
+              moment(item.date).isBetween(
+                startOfLastMonth,
+                endOfLastMonth,
+                undefined,
+                "[]"
+              )
+            ),
+        };
+    
+        const filtered = filterLogic[value] ? filterLogic[value]() : data;
+        setFilteredData(filtered);
+    };
+
+    const token = localStorage.getItem("token")
+
+    const functionCallForCommnets = async (accountNumber) => {
+        try{
+            const commentFetch = await apiClient.get(`/Comments/${accountNumber}`);
+            const campaignComments = commentFetch.data; // Set comments only if fetched successfully
+            setCampaignComments(campaignComments);
+            if(campaignComments.length > 0){
+                const comment = campaignComments.find(comment => comment.campaignname === decodedString);
+                console.log(comment, "comment");
+                console.log(comment?.comment, "comment");
+                setComment(comment?.comment ? comment?.comment : "");
+            }
+            
+        }catch(err){
+            setComment("");
+        }   
+    };
+
+    const functionCallForUserColumnStructure = async () => {
+        const fetchData = await apiClient.get(`/api/singleUserData?email=${user}`);
+        // const data = await fetchData.json();
+        const mainData = fetchData.data;
+        console.log(mainData.historyStructure, "historyStructure");
+        const filteredData = ["keyword", ...(mainData.historyStructure.filter((each) => each !== "actions" ))];
+        console.log(filteredData);
+        setColumns(filteredData);
+        setColumnStructure(getColumnDefs(filteredData));
+        // setRowStructure(mainData.rows); 
+    }
+
+    const getHistoryData = async () => {
+        // const fetchData = await fetch(`http://localhost:8000/MnetCampaignDailyHistory?accountNumber=${accountNumber}&timezone=${timeZone}&campaignName=${decodedString}`);
+        // const data = await fetchData.json();
+        // const mainData = await data;
+        const fetchData = await apiClient.get(`/KeywordHistory?campaignName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}&network=Facebook_TonicRsoc_Keywords`);
+        // console.log(`https://prodapis.adsgoat.in/LiveAdsetHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`, "url");
+        const url = `http://localhost:8000/MnetLiveCampaignHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}`
+
+        const mainData = fetchData.data;
+        console.log(mainData);
+        setCampaignId(mainData[0].campaign_id);
+        setAdsetID(mainData[0].adset_id);
+        const specifiedTimeZone = selectTimezone[timeZone];
+        // const sortedArray = mainData?.sort((a, b) => new Date(a[specifiedTimeZone]) - new Date(b[specifiedTimeZone]));
+        // console.log(sortedArray, "sort");
+        const filteredData = mainData && mainData.length > 0 ?
+            mainData.map(eachData => {
+                const Revenue = eachData.estimated_revenue !== undefined ? (eachData.estimated_revenue) : 0;
+                const profit = Math.round((Revenue - eachData.spend) * 100) / 100;
+                const margin = Revenue !== 0 ? `${Math.round((((Revenue - eachData.spend) / eachData.estimated_revenue) * 100) * 100) / 100}%` : '0%'
+                let rpc = eachData.conversions !== 0 ? (Math.round((Revenue / eachData.conversions) * 100) / 100) : 0;
+                const revenue = ((eachData.estimated_revenue - eachData.spend) / (eachData.fbLeads * rpc)) * 100;
+                let fMargin = revenue !== 0 ? Math.round(((profit / revenue) * 100) * 100) / 100 : 0;
+                const cpl = eachData.fbLeads !== 0 ? Math.round((eachData.spend / eachData.fbLeads) * 100) / 100 : 0;
+                let ncpl = eachData.conversions !== 0 ? Math.round((eachData.spend / eachData.conversions) * 100) / 100 : 0;
+                const roi = eachData.spend !== 0 ? `${Math.round((((Revenue - eachData.spend) / eachData.spend) * 100) * 100) / 100}%` : '0%';
+                const ctr = eachData.impressions !== 0 ? `${Math.round(((eachData.fbClicks / eachData.impressions) * 100) * 100) / 100}%` : '0%';
+                const mainRvenue = ((Math.round(Revenue * 100) / 100)).toString();
+                const conversions = eachData.conversions !== undefined && eachData.conversions !== null ? eachData.conversions : '0';
+                rpc = !isNaN(rpc) ? rpc : 0;
+                ncpl = !isNaN(ncpl) ? ncpl : 0;
+                fMargin = !isNaN(fMargin) ? `${fMargin}%` : '0%';
+
+                const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
+                const spend = parseFloat(eachData.spend);
+                const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0 ? 0 : Math.round((spend / fbLClicks)*100)/100;
+
+                return (
+                    {
+                        campaignname: eachData.campaign_name,
+                        date: eachData[specifiedTimeZone],
+                        hour_f: eachData[specifiedTimeZone],
+                        hour_n: eachData[specifiedTimeZone],
+                        date_f: eachData[specifiedTimeZone],
+                        date_n: eachData[specifiedTimeZone],
+                        adsetname: eachData.adsetName,
+                        adname: "",
+                        spend: (eachData.spend).toString(),
+                        revenue: mainRvenue,
+                        profit: profit.toString(),
+                        margin: margin,
+                        rpc: rpc.toString(),
+                        cpl: cpl.toString(),
+                        ncpl: ncpl.toString(),
+                        roi: roi,
+                        cpc: (eachData.cpc).toString(),
+                        cpclinkclicks: cpcLinkClicks.toString(),
+                        fbleads: (eachData.fbLeads).toString(),
+                        filteration: parseInt(eachData.fbLeads) !== 0 ? Math.round((((parseInt(eachData.fbLeads)-parseInt(eachData.conversions))/parseInt(eachData.fbLeads))*100)*100)/100 : 0,
+                        fbclicks: (eachData.fbClicks).toString(),
+                        fblinkclicks: (eachData.fbLinkClicks).toString(),
+                        impressions: (eachData.impressions).toString(),
+                        conversions: conversions.toString(),
+                        fmargin: fMargin,
+                        ctr: ctr,
+                        adsetId: eachData.adset_id,
+                        campaignId: eachData.campaign_id,
+                        M_tq: "",
+                        D_tq: "",
+                        keyword: eachData.keyword ? eachData.keyword : "",
+                    }
+                )
+            })
+            : null;
+        setLoading(false);
+        const newFilterData = filteredData.sort((a, b) => new Date(a.date) - new Date(b.date));
+        setdailyData(newFilterData);
+        setFilteredData(newFilterData);
+        const dates = newFilterData.map(d => d.date);
+        const spend = newFilterData.map(d => d.spend);
+        const revenue = newFilterData.map(d => d.revenue);
+        const profit = newFilterData.map(d => d.profit);
+        const rpc = newFilterData.map(d => d.rpc);
+        const cpl = newFilterData.map(d => d.cpl);
+
+        const margin = newFilterData.map(d => parseFloat(d.margin));
+
+        setChartData({ dates, spend, revenue, profit, margin, rpc, cpl });
+        
+    }
+
+    useEffect(()=>{
+        setDomainFixedFooter([
+            {
+                adsetName: 'Total',
+                spend: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend || 0), 0).toFixed(2),
+                revenue: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue || 0), 0).toFixed(2),
+                profit: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit || 0), 0).toFixed(2),
+                margin: `${(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)}%`,
+                filteration: `${(((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0) - filteredData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0)) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0)) * 100).toFixed(2)}`,
+                rpc: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.rpc), 0) / filteredData?.length,
+                cpl: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpl), 0) / filteredData?.length,
+                ncpl: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.ncpl), 0) / filteredData?.length,
+                fbleads: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0),
+                conversions: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0),
+                fmargin: `${(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100).toFixed(2)}%`,
+                roi: `${(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) - filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0)) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.spend), 0) * 100}%`,
+                cpc: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpc), 0) / filteredData?.length,
+                fbclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0),
+                cpclinkclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks), 0) / filteredData?.length,
+                fblinkclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0),
+                impressions: filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0),
+                ctr: `${(filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)}%`,
+                // tq: filteredData?.length
+                // ? Math.round(
+                //     filteredData.reduce((acc, curr) =>
+                //         acc + (curr.tq !== undefined && !isNaN(curr.tq) ? Number(curr.tq) : 0), 0
+                // ) * 100) / 100
+                // : 0,
+            }
+        ]);
+    },[filteredData])
+
+    const debouncedFunctionCallForUserColumnStructure = debounce(async () => {
+        await functionCallForUserColumnStructure();
+      }, 100);
+      
+      const debouncedFunctionCall = debounce(async () => {
+        await getHistoryData();
+      }, 100);
+
+    useEffect(() => {
+       
+            const functionCall = async () => {
+                await functionCallForCommnets(accountNumber);
+                await debouncedFunctionCallForUserColumnStructure();
+                await debouncedFunctionCall();
+            }
+            functionCall();
+        // }
+    }, []);
+
+    // useEffect(() => {
+    //     const fetchData = async () => {
+    //         try {
+    //             const response = await apiClient.get('/abc');
+    //             console.log('API Response:', response.data);
+    //         } catch (error) {
+    //             console.error('Error fetching data:', error);
+    //         }
+    //     };
+    //     console.log("Axios me");
+    //     fetchData();
+    // }, []);
+    
+
+    const defaultComparator = (valueA, valueB) => {
+        if (valueA == null && valueB == null) return 0;
+        if (valueA == null) return -1;
+        if (valueB == null) return 1;
+
+        const numA = parseFloat(valueA);
+        const numB = parseFloat(valueB);
+        if (!isNaN(numA) && !isNaN(numB)) {
+            return numA - numB;
+        }
+        return valueA.localeCompare(valueB);
+    };
+
+    const defaultColDef = {
+        comparator: defaultComparator, // Use the universal comparator for sorting
+        sortable: true,  // Enable sorting for all columns
+        filter: true,    // Enable filtering for all columns
+    };
+
+    useEffect(() => {
+        if(columns.length > 0){
+            setColumnStructure(getColumnDefs(columns));
+        }   
+    }, [columns]);
+
+    const autoGroupColumnDefKeyword = {
+        headerName: 'Keyword',
+        minWidth: 300,
+        pinned: 'left',
+        sortable: true, // Enable sorting
+
+        comparator: (campaignA, campaignB) => {
+            if (!campaignA) return 1;
+            if (!campaignB) return -1;
+
+            // Function to get the 'pinned' status of a campaign
+            const getPinStatusForCampaign = (campaignName) => {
+                const relatedComment = campaignComments.find(comment => comment.campaignname === campaignName);
+                return relatedComment ? relatedComment.pinned : false;
+            };
+
+            // Prioritize pinned campaigns first (pinned campaigns should come to the top)
+            const isPinnedA = getPinStatusForCampaign(campaignA);
+            const isPinnedB = getPinStatusForCampaign(campaignB);
+
+            if (isPinnedA !== isPinnedB) {
+                return isPinnedA ? -1 : 1;  // Pinned campaigns should come first
+            }
+
+            // If both campaigns have the same pinned status, fallback to alphabetical sorting
+            return campaignA.localeCompare(campaignB);
+        },
+
+        cellRenderer: "agGroupCellRenderer", // ✅ Use AG Grid's built-in renderer
+        cellRendererParams: {
+            // checkbox: true,
+            suppressCount: false,
+            innerRenderer: (params) => {
+                if (params.node.footer) {
+                    return 'Total';
+                }
+                // console.log(params.value, "value");
+
+                const firstColumnValue = params.node.key;  // campaign name
+                const campaignName = params.node.key;
+
+                
+
+                return (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                        
+                        
+                        <Tooltip title={firstColumnValue}>
+                            <span
+                               
+                                style={{ cursor: 'pointer' }} 
+                            >
+                                {firstColumnValue}
+                            </span>
+                        </Tooltip>
+                    </div>
+                );
+            }
+        },
+        processCellForClipboard: (params) => {
+            if (params.node.group) {
+                console.log("Processing group column for copy..."); // Debugging log
+    
+                // ✅ Fix: Ensure `params.node.parent` exists before accessing its properties
+                if (!params.node.parent || !params.node.parent.childrenAfterGroup) {
+                    return params.node.key;
+                }
+    
+                // ✅ Only copy group name for the first row in the group
+                return params.node.rowIndex === params.node.parent.childrenAfterGroup[0]?.rowIndex
+                    ? params.node.key
+                    : ""; // Prevent duplicate copies
+            }
+            return params.value; // Normal copy behavior for regular cells
+        }
+    };
+
+    // const columnDefsObject = {
+    //     campaignname: {
+    //         headerName: 'CampaignName', field: 'campaignName',
+    //         // rowGroup: true,
+    //         // filter: true,
+    //         // hide: true,
+    //         // resizable: true,
+    //         // enableRowGroup: true,
+    //         // groupDisplayType: 'group',
+    //         width: 400,
+    //     },
+    //     date: { headerName: 'Date', field: 'date', width: 120, sort: 'asc',
+    //     comparator: (valueA, valueB) => {
+    //         if (valueA == null && valueB == null) return 0;
+    //         if (valueA == null) return -1;
+    //         if (valueB == null) return 1;
+
+    //         const dateA = new Date(valueA);
+    //         const dateB = new Date(valueB);
+
+    //         // Compare valid dates
+    //         if (!isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) {
+    //             return dateA - dateB;
+    //         }
+
+    //         // Fallback for invalid dates (compare as strings)
+    //         return valueA.toString().localeCompare(valueB.toString());
+    //     }
+    //      },
+    //     spend: {
+    //         headerName: 'Spend', field: 'spend', width: 120,
+    //         aggFunc: agFunc,
+    //         valueFormatter: params => params.value ? Math.round(params.value * 100) / 100 : '',
+            
+    //     },
+    //     revenue: {
+    //         headerName: 'Revenue', field: 'revenue', width: 120,
+    //         aggFunc: agFunc,
+    //         valueFormatter: params => params.value ? Math.round(params.value * 100) / 100 : '',
+            
+    //     },
+    //     profit: {
+    //         headerName: 'Profit', field: 'profit', width: 120, cellClassRules: {
+    //             'font-red': p => p.value < 0
+    //         },
+    //         aggFunc: agFunc,
+    //         valueFormatter: params => params.value ? Math.round(params.value * 100) / 100 : '',
+            
+    //     },
+    //     margin: {
+    //         headerName: 'Margin', field: 'margin', valueGetter: getMargin, width: 120,
+            
+    //         valueFormatter: (params) => `${params.value}%`,
+
+    //     },
+    //     rpc: { headerName: 'Rpc', field: 'rpc', valueGetter: getRpc, width: 120,
+            
+    //      },
+    //     cpl: { headerName: 'Cpl', field: 'cpl', valueGetter: getCpl, width: 120,
+            
+    //      },
+    //     ncpl: { headerName: 'Ncpl', field: 'ncpl', valueGetter: getNcpl, width: 120,
+            
+    //      },
+    //     fbleads: { headerName: 'FbLeads', field: 'fbleads', width: 150, aggFunc: agFunc,
+            
+    //      },
+    //     conversions: { headerName: 'Conversions', field: 'conversions', width: 150, aggFunc: agFunc,
+            
+    //      },
+    //     fmargin: { headerName: 'Fmargin', field: 'fmargin', valueGetter: getFmargin,
+            
+    //         valueFormatter: (params) => `${params.value}%`,
+    //      },
+    //     roi: { headerName: 'ROI', field: 'roi', valueGetter: getROI, width: 120,
+            
+    //         valueFormatter: (params) => `${params.value}%`,
+    //      },
+    //     cpc: {
+    //         headerName: 'cpc', width: 120, field: 'cpc',
+    //         aggFunc: (params) => {
+    //             const sum = params.values.reduce((sum, value) => sum + parseFloat(value), 0);
+    //             return sum / params.values.length;
+    //         },
+    //         valueFormatter: params => params.value !== undefined ? Math.round(params.value * 100) / 100 : '',
+            
+
+    //     },
+    //     fbclicks: { headerName: 'FbClicks', field: 'fbclicks', width: 150, aggFunc: agFunc, 
+    //     comparator: (valueA, valueB) => {
+    //         // Default comparator for handling null or undefined values
+    //         if (valueA == null) return -1;
+    //         if (valueB == null) return 1;
+    //         return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
+    //     },
+    //     },
+    //     impressions: { headerName: 'Impressions', field: 'impressions', width: 150, aggFunc: agFunc, 
+    //     comparator: (valueA, valueB) => {
+    //         // Default comparator for handling null or undefined values
+    //         if (valueA == null) return -1;
+    //         if (valueB == null) return 1;
+    //         return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
+    //     },
+    //     },
+    //     ctr: { headerName: 'Ctr', field: 'ctr', valueGetter: getCtr,
+            
+    //         valueFormatter: (params) => `${params.value}%`,
+    //      },
+    //     adsetname: {
+    //         headerName: 'AdsetName', field: 'adsetName',
+    //         // resizeble: true,
+    //         // sortable: true,
+    //         width: 500,
+    //         // hide: true,
+    //         // // resizable:false,
+    //         // rowGroup: true,
+    //         // filter: true,
+    //         // pinned: 'left',
+    //         // enableRowGroup: true,
+    //         // autoHeight: true, 
+            
+    //     },
+    //     adsetid: { headerName: 'AdsetId', field: 'adsetId',
+        
+    //      },
+    //     campaignid: { headerName: 'CampaignId', field: 'campaignId',
+        
+    //      }
+    // };
+    const getTooltipValue = (params) => {
+        return comment ? `${comment}` : null; // Show comment only if it's not empty
+    };
+
+    const columnDefsObject = {
+        keyword:{
+            headerName: 'keyword',
+            field: 'keyword',
+            // rowGroup: true,
+            // filter: true,
+            resizable: true,
+            sortable: true,
+            hide: true,
+            rowGroup: true,
+            enableRowGroup: true,
+
+            // aggFunc: 'sum',
+            // valueFormatter: (params) => {
+            //     const val = Number(params.value);
+            //     return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            // },             
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            // aggFunc: liveSpender,
+            // hide: true,
+        },
+        M_tq: {
+            headerName: 'M_TQ',
+            field: 'M_tq',
+            // aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },             
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            // aggFunc: liveSpender,
+            hide: true,
+        },
+        D_tq: {
+            headerName: 'D_TQ',
+            field: 'D_tq',
+            // aggFunc: 'sum',
+            // valueFormatter: currencyFormatter, 
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            // aggFunc: liveSpender,
+            hide: true,
+        }, 
+        campaignname : {headerName:'CampaignName', field:'campaignname',
+            // rowGroup: true,
+            // filter: true,
+            hide: true,
+            // resizable: true,
+            // enableRowGroup: true,
+            // groupDisplayType: 'group',
+            width: 300,
+        cellStyle: { whiteSpace: "normal", lineHeight: "1.5" }, // Enables text wrapping
+        autoHeight: true,
+        suppressMenu: true,
+        menuTabs: [],
+        headerClass: 'hide-menu',
+        // tooltipValueGetter: getTooltipValue,
+        cellRenderer: (params) => {
+            if (params.value && params.value.includes("Copied!")) {
+                return (
+                    <span>
+                        {params.value.replace("Copied!", "")}
+                        <span style={{ color: "green", fontWeight: "bold" }}>Copied!</span>
+                    </span>
+                );
+            }
+            return params.value;
+        }
+        },
+        adsetname: { headerName: 'Adset-Name', field: 'adsetname',
+        // resizeble: true,
+        // sortable: true,
+        width: 300,
+        cellStyle: { whiteSpace: "normal", lineHeight: "1.5" }, // Enables text wrapping
+        autoHeight: true,
+        suppressMenu: true,
+        menuTabs: [],
+        headerClass: 'hide-menu',
+        // cellRenderer: (params) => {
+        //     if (params.value && params.value.includes("Copied!")) {
+        //         return (
+        //             <span>
+        //                 {params.value.replace("Copied!", "")}
+        //                 <span style={{ color: "green", fontWeight: "bold" }}>Copied!</span>
+        //             </span>
+        //         );
+        //     }
+        //     return params.value;
+        // }
+        hide: true,
+        // // resizable:false,
+        // rowGroup: true,
+        // filter: true,
+        // pinned: 'left',
+        // enableRowGroup: true,
+        // autoHeight: true, 
+        },
+        adname : { headerName: 'Ad-Name', field: 'adname',
+            // resizeble: true,
+            // sortable: true,
+            width: 300,
+            cellStyle: { whiteSpace: "normal", lineHeight: "1.5" }, // Enables text wrapping
+            autoHeight: true,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            cellRenderer: (params) => {
+              if (params.value && params.value.includes("Copied!")) {
+                  return (
+                      <span>
+                          {params.value.replace("Copied!", "")}
+                          <span style={{ color: "green", fontWeight: "bold" }}>Copied!</span>
+                      </span>
+                  );
+              }
+              return params.value;
+            },
+            hide: true, 
+        },
+        date : { headerName: 'Date', field: 'date', width: 160, sort: 'desc',
+        comparator: (valueA, valueB) => {
+            if (valueA == null && valueB == null) return 0;
+            if (valueA == null) return -1;
+            if (valueB == null) return 1;
+  
+            const dateA = new Date(valueA);
+            const dateB = new Date(valueB);
+  
+            // Compare valid dates
+            if (!isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) {
+                return dateA - dateB;
+            }
+  
+            // Fallback for invalid dates (compare as strings)
+            return valueA.toString().localeCompare(valueB.toString());
+        },
+        
+        cellStyle: {
+            fontWeight: 'bold', // Makes the cell text bold
+        },
+        valueFormatter: (params) => {
+            // If the row is grouped or pinned, return the original value (or empty for pinned rows)
+            if (params.node.group) {
+                return "";
+            }
+            if (params.node.rowPinned) {
+                return ''; // Return an empty value for pinnedBottomRowData
+            }
+            // Format the value for leaf nodes
+            return `${params.value} (${moment(params.value).format('ddd')})`;
+        },
+        suppressMenu: true,
+        menuTabs: [],
+        headerClass: 'hide-menu',
+         },
+        hour_f : { headerName: 'Date', field: 'hour_f', width: 160, sort: 'asc',
+         comparator: (valueA, valueB) => {
+             if (valueA == null && valueB == null) return 0;
+             if (valueA == null) return -1;
+             if (valueB == null) return 1;
+   
+             const dateA = new Date(valueA);
+             const dateB = new Date(valueB);
+   
+             // Compare valid dates
+             if (!isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) {
+                 return dateA - dateB;
+             }
+   
+             // Fallback for invalid dates (compare as strings)
+             return valueA.toString().localeCompare(valueB.toString());
+         },
+         
+         cellStyle: {
+             fontWeight: 'bold', // Makes the cell text bold
+         },
+         valueFormatter: (params) => {
+             // If the row is grouped or pinned, return the original value (or empty for pinned rows)
+             if (params.node.group) {
+                 return "";
+             }
+             if (params.node.rowPinned) {
+                 return ''; // Return an empty value for pinnedBottomRowData
+             }
+             // Format the value for leaf nodes
+             return `${params.value} (${moment(params.value).format('ddd')})`;
+         },
+         suppressMenu: true,
+         menuTabs: [],
+         headerClass: 'hide-menu',
+         hide: true
+        },
+        hour_n : { headerName: 'Date', field: 'hour_n', width: 160, sort: 'asc',
+          comparator: (valueA, valueB) => {
+              if (valueA == null && valueB == null) return 0;
+              if (valueA == null) return -1;
+              if (valueB == null) return 1;
+    
+              const dateA = new Date(valueA);
+              const dateB = new Date(valueB);
+    
+              // Compare valid dates
+              if (!isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) {
+                  return dateA - dateB;
+              }
+    
+              // Fallback for invalid dates (compare as strings)
+              return valueA.toString().localeCompare(valueB.toString());
+          },
+          
+          cellStyle: {
+              fontWeight: 'bold', // Makes the cell text bold
+          },
+          valueFormatter: (params) => {
+              // If the row is grouped or pinned, return the original value (or empty for pinned rows)
+              if (params.node.group) {
+                  return "";
+              }
+              if (params.node.rowPinned) {
+                  return ''; // Return an empty value for pinnedBottomRowData
+              }
+              // Format the value for leaf nodes
+              return `${params.value} (${moment(params.value).format('ddd')})`;
+          },
+          suppressMenu: true,
+          menuTabs: [],
+          headerClass: 'hide-menu',
+          hide: true
+        },
+        date_f : { headerName: 'Date', field: 'date_f', width: 160, sort: 'asc',
+           comparator: (valueA, valueB) => {
+               if (valueA == null && valueB == null) return 0;
+               if (valueA == null) return -1;
+               if (valueB == null) return 1;
+     
+               const dateA = new Date(valueA);
+               const dateB = new Date(valueB);
+     
+               // Compare valid dates
+               if (!isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) {
+                   return dateA - dateB;
+               }
+     
+               // Fallback for invalid dates (compare as strings)
+               return valueA.toString().localeCompare(valueB.toString());
+           },
+           
+           cellStyle: {
+               fontWeight: 'bold', // Makes the cell text bold
+           },
+           valueFormatter: (params) => {
+               // If the row is grouped or pinned, return the original value (or empty for pinned rows)
+               if (params.node.group) {
+                   return "";
+               }
+               if (params.node.rowPinned) {
+                   return ''; // Return an empty value for pinnedBottomRowData
+               }
+               // Format the value for leaf nodes
+               return `${params.value} (${moment(params.value).format('ddd')})`;
+           },
+           suppressMenu: true,
+           menuTabs: [],
+           headerClass: 'hide-menu',
+           hide: true
+        },
+        date_n : { headerName: 'Date', field: 'date_n', width: 160, sort: 'asc',
+            comparator: (valueA, valueB) => {
+                if (valueA == null && valueB == null) return 0;
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+      
+                const dateA = new Date(valueA);
+                const dateB = new Date(valueB);
+      
+                // Compare valid dates
+                if (!isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) {
+                    return dateA - dateB;
+                }
+      
+                // Fallback for invalid dates (compare as strings)
+                return valueA.toString().localeCompare(valueB.toString());
+            },
+            
+            cellStyle: {
+                fontWeight: 'bold', // Makes the cell text bold
+            },
+            valueFormatter: (params) => {
+                // If the row is grouped or pinned, return the original value (or empty for pinned rows)
+                if (params.node.group) {
+                    return "";
+                }
+                if (params.node.rowPinned) {
+                    return ''; // Return an empty value for pinnedBottomRowData
+                }
+                // Format the value for leaf nodes
+                return `${params.value} (${moment(params.value).format('ddd')})`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            hide: true
+        },
+        spend: { headerName: 'Spend', field: 'spend', width: 105,
+            aggFunc: agFunc, 
+            valueFormatter: params => params.value ? Math.round(params.value*100)/100 : '',
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            valueFormatter: (params) => `$${params.value}`,
+        },
+        revenue: { headerName: 'Revenue', field: 'revenue', width: 105,
+            aggFunc: agFunc,
+            valueFormatter: params => params.value ? Math.round(params.value*100)/100 : '', 
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            valueFormatter: (params) => `$${params.value}`,
+        },
+        profit: { headerName: 'Profit', field: 'profit', width: 100, 
+            cellClassRules:{
+            'font-red': p => p.value < 0,
+            'font-green': params => params.value > 0,
+          
+            },
+            aggFunc: agFunc,
+            valueFormatter: params => params.value ? Math.round(params.value*100)/100 : '',
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            valueFormatter: (params) => `$${params.value}`,
+            headerToolTip: 'Profit = Revenue - Spend',
+        },
+        margin: { headerName: 'Margin', field: 'margin', valueGetter: getMargin,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            width: 105,
+            valueFormatter: (params) => `${params.value}%`,
+            headerToolTip: 'Margin = ((Revenue - Spend) / Revenue) * 100',
+            
+        },
+        rpc: { headerName: 'RPC', field: 'rpc', valueGetter: getRpc,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            headerToolTip: 'RPC = Revenue / Conversions',
+            width: 85,
+            cellStyle: { fontWeight: 'bold' }},
+        cpl:{ headerName: 'CPL', field: 'cpl', valueGetter: getCpl,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            headerToolTip: 'CPL = Spend / FBLeads',
+            width: 85,},
+        ncpl:{ headerName: 'NCPL', field: 'ncpl', valueGetter: getNcpl,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            headerToolTip: 'NCPL = Spend / Conversions',
+            width: 95},
+        fbleads:{ headerName: 'Leads', field: 'fbleads', width: 100, aggFunc: agFunc,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', 
+          },
+        // { headerName: "Filteration", field:'filterarion', width: 120,  valueGetter: getFilteration},
+        filteration:{ headerName: "Filteration", field:'filteration', width: 115, 
+            valueFormatter: params => params.value ? `${params.value}%` : '0%',
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
+        conversions:{ headerName: 'Conv', field: 'conversions', width: 90, aggFunc: agFunc, 
+            suppressMenu: true,
+            menuTabs: [],
+            headerToolTip: 'Conversions',
+            headerClass: 'hide-menu',  },
+        fmargin:{ headerName: 'FMargin', field: 'fmargin', valueGetter: getFmargin,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            valueFormatter: (params) => `${params.value}%`,
+            headerToolTip: 'FMargin = (Profit / Revenue) * 100',
+            width: 110},
+        roi:{ headerName: 'ROI', field: 'roi', valueGetter: getROI,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            valueFormatter: (params) => `${params.value}%`,
+            headerToolTip: 'ROI = ((Revenue - Spend) / Spend) * 100',
+            width: 90},
+        cpc:{ headerName: 'CPC', field: 'cpc',
+            aggFunc: (params) => {
+                const sum = params.values.reduce((sum, value) => sum + parseFloat(value), 0);
+                return sum / params.values.length;
+            },
+            valueFormatter: params => params.value !== undefined ? Math.round(params.value*100)/100 : '',
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            width: 90,
+            headerToolTip: 'CPC = Spend / FBClicks',
+  
+        },
+        cpclinkclicks: {
+            headerName: 'CPC_LC',
+            field: 'cpclinkclicks',
+            // aggFunc: cpcSpender,
+            valueGetter:getCpcLc,
+            minWidth: 80,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "CPC = Spend / FBLinkClicks",
+            
+        },
+        fbclicks:{ headerName: 'FBClicks', field: 'fbclicks', width: 110, aggFunc: agFunc, 
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', },
+        fblinkclicks:{ headerName: 'FB_LC', field: 'fblinkclicks', width: 110, aggFunc: agFunc, 
+                suppressMenu: true,
+                menuTabs: [],
+                headerClass: 'hide-menu', },
+        impressions: { headerName: 'IMP', field: 'impressions', width: 80, aggFunc: agFunc,
+            suppressMenu: true,
+            menuTabs: [],
+            headerToolTip: 'Impressions',
+            headerClass: 'hide-menu',   },
+        ctr: { headerName: 'CTR', field: 'ctr', valueGetter: getCtr,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            headerToolTip: 'CTR = (FBClicks / Impressions) * 100',
+        width: 90},
+        
+        // { headerName: 'AdsetId', field: 'adsetId' },
+        // {headerName: "CampaignId", field:'campaignId'}
+    };
+
+    const onCellKeyDown = (params) => {
+        if (params.event.ctrlKey && params.event.key === "c") {
+            params.event.preventDefault(); // Prevent default copy behavior
+    
+            // ✅ Ensure `selectedCells` is not empty
+            if (!selectedCells.length) return;
+    
+            // ✅ Prepare data to copy: Rows separated by \n, Columns by \t
+            const copiedText = selectedCells
+                .map(({ rowIndex, columns }) => {
+                    if (!columns || !Array.isArray(columns)) {
+                        // ✅ Handle case where only one cell is selected
+                        const singleColId = selectedCells[0]?.colId; 
+                        const row = params.api.getDisplayedRowAtIndex(rowIndex);
+                        return row && singleColId ? params.api.getValue(singleColId, row) : "";
+                    }
+                    
+                    // ✅ Multi-cell copying logic
+                    return columns
+                        .map((colId) => {
+                            const row = params.api.getDisplayedRowAtIndex(rowIndex);
+                            return row ? params.api.getValue(colId, row) : "";
+                        })
+                        .join("\t");
+                })
+                .join("\n"); // Each row on a new line
+    
+            // ✅ Copy text to clipboard
+            navigator.clipboard.writeText(copiedText).then(() => {
+                console.log("Copied to clipboard:", copiedText);
+            }).catch((err) => {
+                console.error("Clipboard copy failed:", err);
+            });
+    
+            // ✅ Trigger AG Grid’s built-in copy effect (blinking dark blue selection)
+            params.api.copySelectedRangeToClipboard();
+        }
+    };
+
+    const getRandomColor = () => {
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    };
+      
+    const colorMap = {};
+      
+    const getColorForValue = (value) => {
+        if (!colorMap[value]) {
+          colorMap[value] = getRandomColor(); // Generate and assign a color
+        }
+        return colorMap[value]; // Return the assigned color
+    };
+
+    const onCellClicked = (params) => {
+        if (params.column.getColId() === "campaignname" && params.value) { 
+            // Copy the cell value to clipboard
+            navigator.clipboard.writeText(params.value).then(() => {
+                const originalValue = params.value; // Store original value
+                const copiedText = `${originalValue} Copied!`; // Append "Copied!" to the text
+    
+                // Temporarily update the cell content
+                params.node.setDataValue("campaignname", copiedText);
+    
+                // Revert back to original value after 1.5 seconds
+                setTimeout(() => {
+                    params.node.setDataValue("campaignname", originalValue);
+                }, 1500);
+            }).catch(err => console.error("Copy failed:", err));
+        }
+        // ✅ Ensure first selected cell gets highlighted
+        if (params.event?.shiftKey || params.event?.ctrlKey) {
+            // Add to selection when Shift/Ctrl is pressed
+            setSelectedCells((prev) => [...prev, { rowIndex: params.node.rowIndex, colId: params.column.getId() }]);
+        } else {
+            // Single click selects only one cell
+            setFirstSelectedCell({ rowIndex: params.node.rowIndex, colId: params.column.getId() });
+            setSelectedCells([{ rowIndex: params.node.rowIndex, colId: params.column.getId() }]);
+        }
+    };
+    
+    
+
+    // AG Grid options
+    const gridOptions = {
+        onCellClicked,
+    };
+
+    // Initialize AG Grid after DOM is loaded
+    document.addEventListener("DOMContentLoaded", function () {
+        const gridDiv = document.querySelector("#myGrid");
+        new agGrid.Grid(gridDiv, gridOptions);
+    });
+
+    const handleReload = () => {
+        setLoading(true);
+        const functionCall = async () => {
+            await functionCallForCommnets(accountNumber);
+            await debouncedFunctionCallForUserColumnStructure();
+            await debouncedFunctionCall();
+        }
+        functionCall();
+    };
+
+    // console.log(filteredData);
+    // console.log(dailyData);
+    // console.log(columnDefs);
+
+    const sendNewCommentToAPI = async (logData) => {
+        try {
+            const response = await apiClient.post('/Comments', {
+                commentsdatas: logData,
+            });
+            // console.log('Response from server:', response.data);
+        } catch (error) {
+            console.error('Error sending data to server:', error);
+        }
+    };
+
+    const sendEditedCommentToAPI = async () => {
+        try {
+            console.log("comment:")
+            const response = await apiClient.post('/Comments/edit', {
+                campaignname: decodedString,
+                comment: comment,
+                Account: accountNumber,
+                adsetid: adsetid,
+                campaignid: campaignid,
+                status: true
+
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error sending edited comment to server:', error);
+            throw error;
+        }
+    };
+
+    const handleOks = async () => {
+        try {
+            const logData = {
+                Account: accountNumber,
+                usercommit: userdetails?.email,
+                campaignname: decodedString,
+                comment: comment,
+                campaignid: campaignid,
+                adsetid: adsetid
+            };
+
+            
+            // Check if comment already exists
+            const relatedComment = campaignComments.find(
+                (cmt) => cmt.campaignname === decodedString && cmt.Account === accountNumber
+            );
+
+            if (relatedComment) {
+                await sendEditedCommentToAPI(logData);
+            } else {
+                await sendNewCommentToAPI(logData);
+            }
+
+            // if (relatedComment) {
+            //     await sendEditedCommentToAPI(logData);
+            //     refreshComments(account);
+            //     message.success("Comment updated successfully!");
+            // } else {
+            //     await sendNewCommentToAPI(logData);
+            //     refreshComments(account);
+            //     message.success("New comment added successfully!");
+            // }
+
+            // const updatedComments = relatedComment
+            //     ? campaignComments.map(cmt => (cmt.campaignname === firstColumnValue ? { ...cmt, comment } : cmt))
+            //     : [...campaignComments, logData];
+            // setCampaignComments(updatedComments);
+
+            // changeRRefrst();
+            // ✅ Update local state immediately
+            const updatedComments = [...campaignComments];
+            const index = updatedComments.findIndex(c => c.campaignname === decodedString && c.Account === accountNumber);
+            if (index !== -1) {
+                updatedComments[index] = {
+                    ...updatedComments[index],
+                    comment: comment,
+                    editedTime: new Date().toISOString(), // optional: update time
+                };
+            } else {
+                updatedComments.push({
+                    campaignname: decodedString,
+                    Account: accountNumber,
+                    comment: comment,
+                    editedTime: new Date().toISOString(),
+                });
+            }
+            setCampaignComments(updatedComments);
+            setComment(comment); 
+            message.success("Comment saved!");
+            setIsModalVisibles(false);
+        } catch (error) {
+            console.error('Error while submitting comment:', error);
+            message.error("Error while submitting the comment.");
+        }
+    };
+
+    const handleDelete = async () => {
+        try {
+            // Prepare the payload for the API call
+            const payload = {
+                campaignname: decodedString,
+                Account: accountNumber,
+                adsetid: adsetid,
+                campaignid: campaignid,
+            };
+            // console.log(payload);
+    
+            // Call the backend API to delete the comment
+            const response = await apiClient.post('/Comments/delete', payload);
+    
+            if (response.status === 200) {
+                // Remove the comment from the local state
+                // const updatedComments = campaignComments.filter(
+                //     (comment) => comment.campaignname !== firstColumnValue
+                // );
+                // refreshComments(account);
+    
+                // // Update the state with the updated comments
+                // setCampaignComments(updatedComments);
+    
+                // // Refresh the table or any other UI component
+                // // changeRRefrst();
+
+                // Update local state immediately
+                const updatedComments = campaignComments.filter(
+                    (comment) => !(comment.campaignname === decodedString && comment.Account === accountNumber)
+                );
+                setCampaignComments(updatedComments);
+                setComment(""); // clear comment in UI
+    
+                message.success('Comment deleted successfully!');
+                setIsModalVisibles(false); // Close the popup
+            } else {
+                message.error('Failed to delete the comment. Please try again.-1');
+            }
+        } catch (error) {
+            console.error('Error deleting the comment:', error);
+            message.error('Failed to delete the comment. Please try again.');
+        }
+    };
+
+    const getEditedUserAndTime = (campaignName, newaccount) => {
+        const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
+        return relatedStatus ? relatedStatus : null;
+    };
+
+    const handleCancels = () => {
+        setIsModalVisibles(false);
+    };
+    const editUserANdTime = getEditedUserAndTime(decodedString, accountNumber);
+
+    const onClickBarChart = () => {
+        setIsGraphVisible(prev => {
+            const newValue = !prev;
+            localStorage.setItem('isGraphVisible', JSON.stringify(newValue));
+            return newValue
+        });
+    }
+
+    return (
+        <Row style={{display:'flex', flexDirection:'column'}}>
+            <Col style={{width:'100%', display:'flex', alignItems:'center'}}>
+                <div style={{width:'100%'}}>
+                    <h3 style={{textAlign:'center'}}>{decodedString}</h3>
+                </div>
+                <div style={{width:'120px'}}>
+                    <p>Timezone: <span style={{fontWeight:'bold'}}>{timeZone}</span></p>
+                </div>    
+            </Col>
+            <Col style={{display: 'flex', justifyContent: 'flex-end'}}>
+                <Switch checked={isGraphVisible} style={{fontSize:"20px", paddingTop:'5px', marginRight:'10px', backgroundColor: isGraphVisible ? '#91C25F' : undefined}} onClick={onClickBarChart}/>
+            </Col> 
+            {/* <h1>{params.campaignAndAccount}hi</h1> */}
+            {isGraphVisible && (
+                 <Col style={{ height: '400px', marginBottom: '10px' }}> {/* Container with fixed height */}
+                 {chartData.dates.length === 0 ? (<div style={{width:'100%', height:'100%', display:'flex', justifyContent:'center', alignItems:'center'}}>
+                    {/* <Spin size="large" /> */}
+                    <div style={{ padding: '24px' }}>
+                        <Skeleton active paragraph={{ rows: 20 }} />
+                    </div>
+                    </div>):
+                   (
+                    <div>
+                        {/* ✅ Custom Checkbox-Style Legend */}
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '12px', justifyContent:'center' }}>
+                            {Object.keys(datasetColorMap).map(label => {
+                            const isVisible = !hiddenKeys.includes(label);
+                            return (
+                                <div
+                                key={label}
+                                onClick={() => toggleLegend(label)}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    cursor: 'pointer',
+                                    gap: '6px',
+                                    fontSize: '13px',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                }}
+                                >
+                                <div
+                                    style={{
+                                    width: '16px',
+                                    height: '16px',
+                                    borderRadius: '4px',
+                                    backgroundColor: datasetColorMap[label],
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: '#fff',
+                                    fontWeight: 'bold',
+                                    fontSize: '11px',
+                                    }}
+                                >
+                                    {isVisible ? '✔' : ''}
+                                </div>
+                                {label}
+                                </div>
+                            );
+                            })}
+                        </div>
+                        <Row style={{ height: '400px', marginTop: '20px' }}>
+                            <Line
+                            data={{
+                                labels: chartData.dates || [],
+                                datasets,
+                            }}
+                            options={{
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: true,
+                                    displayColors: true,
+                                    boxWidth: 15,
+                                    boxHeight: 15,
+                                    callbacks: {
+                                    label: function (tooltipItem) {
+                                        const index = tooltipItem.dataIndex;
+                                        const dataset = tooltipItem.dataset;
+                                        const value = dataset.data[index];
+                                        const datasetLabel = dataset.label || '';
+                                        return `${datasetLabel}: ${value}`;
+                                    },
+                                    },
+                                },
+                                },
+                                scales: {
+                                x: {
+                                    ticks: {
+                                    padding: 30,
+                                    color: (context) => {
+                                        const index = context.index;
+                                        const label = chartData?.dates?.[index];
+                                        return getColorForValue(label);
+                                    },
+                                    },
+                                    grid: {
+                                    color: theme === 'dark' ? '#444' : '#e0e0e0',
+                                    },
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                    callback: value => value.toFixed(2),
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    },
+                                    grid: {
+                                    color: theme === 'dark' ? '#444' : '#e0e0e0',
+                                    },
+                                },
+                                },
+                            }}
+                            height={350}
+                            />
+                        </Row>
+
+                        
+                    </div>
+                     
+                   )}
+               </Col>
+            )}
+            <Col style={{ display: 'flex', width: '100%', marginLeft: '2%' }}>
+                {/* Top 5 Dates with RPC */}
+                <div style={{ width: '20%' }}>
+                    <h3>Top 5 Dates with RPC</h3>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                            <tr>
+                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Date</th>
+                                <th style={{ border: '1px solid #ddd', padding: '2px' }}>RPC</th>
+                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>WeekDay</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {chartData.dates
+                                .map((date, index) => ({
+                                    date: date.split(" ")[0], // Get the date part only
+                                    rpc: chartData.rpc[index],
+                                }))
+                                .sort((a, b) => b.rpc - a.rpc) // Sort by RPC descending
+                                .slice(0, 5) // Take top 5 dates
+                                .map((item, index) => (
+                                    <tr key={index}>
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.date}</td>
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.rpc}</td>
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{moment(item.date).format('dddd')}</td>
+                                    </tr>
+                                ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Top 5 Dates with Margin */}
+                <div style={{ marginLeft: "1%", width: '20%' }}>
+                    <h3>Top 5 Dates with Margin</h3>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                            <tr>
+                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Date</th>
+                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Margin</th>
+                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>WeekDay</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {chartData.dates
+                                .map((date, index) => ({
+                                    date: date.split(" ")[0], // Get the date part only
+                                    margin: chartData.margin[index],
+                                }))
+                                .sort((a, b) => b.margin - a.margin) // Sort by Margin descending
+                                .slice(0, 5) // Take top 5 dates
+                                .map((item, index) => (
+                                    <tr key={index}>
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.date}</td>
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.margin}</td>
+                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{moment(item.date).format('dddd')}</td>
+                                    </tr>
+                                ))}
+                        </tbody>
+                    </table>
+                </div>
+            </Col>
+            <Col style={{display:'flex', justifyContent:'space-between', marginTop: '10px'}}>
+                <Col style={{display:'flex', justifyContent:"space-between", alignItems:'center'}}>
+                    <Input
+                        type="text"
+                        placeholder="Search table..."
+                        value={searchText}
+                        onChange={(e) => setSearchText(e.target.value)}
+                        className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                        style={{ width: "200px", padding: "3px",backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
+                    />
+                    <Button 
+                        type="default" 
+                        icon={<ReloadOutlined  className='black-icon'/>} 
+                        style={{ height: "30px", marginLeft: "10px", backgroundColor: '#91C25F', border: 'none' }} 
+                        onClick={handleReload}  // Call refresh function when clicked
+                    />
+                    {/* <p style={{marginLeft:"10px"}}>{comment}</p> */}
+                    <EditOutlined 
+                        onClick={() => setIsModalVisibles(true)} 
+                        style={{ 
+                            marginLeft: '15px', 
+                            color: comment ? 'blue' : 'gray', 
+                            cursor: 'pointer' 
+                        }} 
+                        title={comment ? 'Edit Comment' : 'Add Comment'}
+                    />
+                    <div style={{ width: '100%' }}>
+                        <Tooltip
+                            title={copied ? 'Copied!' : 'Click to copy'}
+                            // color={copied ? 'green' : undefined}
+                        >
+                            <h3
+                            style={{ textAlign: 'center', cursor: 'pointer' }}
+                            onClick={handleCopy}
+                            >
+                            {decodedString}
+                            </h3>
+                        </Tooltip>
+                    </div>
+                    {comment && (
+                        <Tooltip title={comment}>
+                            <p
+                            style={{
+                                marginLeft: '5px',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                maxWidth: '300px',
+                                cursor: 'pointer',
+                                marginBottom: '5px',
+                            }}
+                            >
+                            ({comment})
+                            </p>
+                        </Tooltip>
+                    )}
+                </Col>
+                <Select
+                    placeholder="Select a range"
+                    value={selectedValue}
+                    onChange={handleChange}
+                    style={{ width: "200px" }}
+                    dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                    allowClear
+                >
+                    {dateOptions.map((option, index) => (
+                    <Option key={index} value={option}>
+                        {option}
+                    </Option>
+                    ))}
+                </Select>
+            </Col>
+            <Col>
+            {isLoading === true ? (
+                <div className="loader-container ag-container">
+                    <div className="ag-grid-Loader">
+                        <Audio
+                            height="80"
+                            width="80"
+                            radius="9"
+                            color="green"
+                            ariaLabel="loading"
+                            wrapperStyle
+                            wrapperClass
+                        />
+                    </div>
+                </div>
+            ) :  (
+                // <div className="ag-theme-alpine ag-container" >
+                <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
+                        <AgGridReact
+                            rowData={filteredData}
+                            columnDefs={columnDefs}
+                            quickFilterText={searchText}
+                            defaultColDef={defaultColDef}
+                            pinnedBottomRowData={domainFixedFooter}
+                            onCellClicked={onCellClicked}
+                            autoGroupColumnDef={autoGroupColumnDefKeyword}
+                            gridOptions={{
+                                ensureDomOrder: false,
+                                suppressRowClickSelection: true,
+                                suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                groupSelectsChildren: true, // ✅ Ensures child rows are selected properly
+                            }}
+                            onGridReady={(params) => onGridReady(params, 'grid1', gridRef)}
+                            tooltipShowDelay={0} // Show tooltip instantly
+                            pagination={true}
+                            getRowStyle={(params) => {
+                                if (params.node.rowPinned) {
+                                    return {
+                                        fontWeight: 'bold',
+                                        backgroundColor: darkMode ? '#000' : '#fff',
+                                        color: darkMode ? '#fff' : '#000',
+                                    };
+                                }
+                                return null;
+                            }}
+                            onCellKeyDown={onCellKeyDown}
+                            getCellStyle={(params) => {
+                                const isSelected = selectedCells.some(
+                                    (cell) => cell.rowIndex === params.node.rowIndex && cell.colId === params.column.getId()
+                                );
+                        
+                                // ✅ Ensure first selected cell is highlighted
+                                const isFirstSelected = firstSelectedCell &&
+                                    firstSelectedCell.rowIndex === params.node.rowIndex &&
+                                    firstSelectedCell.colId === params.column.getId();
+                        
+                                return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
+                            }}
+                            groupDisplayType="multipleColumns"
+                            suppressAggFuncInHeader={true}
+                            groupSuppressBlankHeader={true}
+                            onFilterChanged={(params) => {
+                                const api = params.api;
+                                const filteredData = [];
+                                api.forEachNodeAfterFilterAndSort((node) => {
+                                    if (!node.rowPinned) {
+                                        filteredData.push(node.data);
+                                    }
+                                });
+
+                                const fieldValueFilter = (field, value) =>
+                                    filteredData.filter((item) => item[field] && item[field] === value);
+
+                                const updatedFooter = [
+                                    {
+                                        adsetName: 'Total',
+                                        spend: filteredData.reduce((acc, curr) => acc + parseFloat(curr.spend || 0), 0).toFixed(2),
+                                        revenue: filteredData.reduce((acc, curr) => acc + parseFloat(curr.revenue || 0), 0).toFixed(2),
+                                        profit: filteredData.reduce((acc, curr) => acc + parseFloat(curr.profit || 0), 0).toFixed(2),
+                                        margin: `${(
+                                            (filteredData.reduce((acc, curr) => acc + parseFloat(curr.profit || 0), 0) /
+                                                filteredData.reduce((acc, curr) => acc + parseFloat(curr.revenue || 0), 0)) *
+                                            100
+                                        ).toFixed(2)}%`,
+                                        filteration: `${(((filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0) - filteredData?.reduce((acc, curr) => acc + parseFloat(curr.conversions), 0)) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr.fbleads), 0)) * 100).toFixed(2)}`,
+                                        rpc: (
+                                            filteredData.reduce((acc, curr) => acc + parseFloat(curr.rpc || 0), 0) / filteredData.length || 0
+                                        ).toFixed(2),
+                                        cpl: (
+                                            filteredData.reduce((acc, curr) => acc + parseFloat(curr.cpl || 0), 0) / filteredData.length || 0
+                                        ).toFixed(2),
+                                        ncpl: (
+                                            filteredData.reduce((acc, curr) => acc + parseFloat(curr.ncpl || 0), 0) / filteredData.length || 0
+                                        ).toFixed(2),
+                                        fbleads: filteredData.reduce((acc, curr) => acc + parseFloat(curr.fbleads || 0), 0),
+                                        conversions: filteredData.reduce((acc, curr) => acc + parseFloat(curr.conversions || 0), 0),
+                                        fmargin: `${(
+                                            (filteredData.reduce((acc, curr) => acc + parseFloat(curr.profit || 0), 0) /
+                                                filteredData.reduce((acc, curr) => acc + parseFloat(curr.spend || 0), 0)) *
+                                            100
+                                        ).toFixed(2)}%`,
+                                        roi: `${(
+                                            ((filteredData.reduce((acc, curr) => acc + parseFloat(curr.revenue || 0), 0) -
+                                                filteredData.reduce((acc, curr) => acc + parseFloat(curr.spend || 0), 0)) /
+                                                filteredData.reduce((acc, curr) => acc + parseFloat(curr.spend || 0), 0)) *
+                                            100
+                                        ).toFixed(2)}%`,
+                                        cpc: (
+                                            filteredData.reduce((acc, curr) => acc + parseFloat(curr.cpc || 0), 0) / filteredData.length || 0
+                                        ).toFixed(2),
+                                        fbclicks: filteredData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks || 0), 0),
+                                        cpclinkclicks: (
+                                            filteredData.reduce((acc, curr) => acc + parseFloat(curr.cpclinkclicks || 0), 0) / filteredData.length || 0
+                                        ).toFixed(2),
+                                        fblinkclicks: filteredData.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks || 0), 0),
+                                        impressions: filteredData.reduce((acc, curr) => acc + parseFloat(curr.impressions || 0), 0),
+                                        ctr: `${(
+                                            (filteredData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks || 0), 0) /
+                                                filteredData.reduce((acc, curr) => acc + parseFloat(curr.impressions || 0), 0)) *
+                                            100
+                                        ).toFixed(2)}%`,
+                                        // tq: parseFloat(
+                                        //     filteredData.reduce((acc, curr) => {
+                                        //       const tqValue = Number(curr?.tq);
+                                        //       return acc + (isNaN(tqValue) ? 0 : tqValue);
+                                        //     }, 0).toFixed(2)
+                                        // ),
+                                    },
+                                ];
+
+                                // setFilteredData(filteredData);
+                                setDomainFixedFooter(updatedFooter);
+
+                                // Example field-based filtering logic
+                                const specificFieldData = fieldValueFilter('status', 'Active'); // Replace 'status' and 'Active' with your field and value
+                                console.log('Filtered by status (Active):', specificFieldData);
+                            }}
+                        />
+                </div>
+            )}
+            </Col>
+            <Modal
+                             title={
+                                    decodedString
+                            }
+                            className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+                            visible={isModalVisibles}
+                            onOk={handleOks} // Default Ok button functionality
+                            onCancel={handleCancels} // Default Cancel button functionality
+                            footer={[
+                                <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+                                    <div style={{display:'flex', flexDirection:"column"}}>
+                                        <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                            Last Edited Time:
+                                        </span>
+                                        <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                            {editUserANdTime ? editUserANdTime?.editedTime : ""}
+                                        </span>
+
+                                    </div>
+                                    <div>
+                                    <Button
+                                        key="delete"
+                                        type="danger"
+                                        onClick={handleDelete}
+                                        style={{ marginRight: 'auto', border: "1px solid black" }} // Push Delete button to the far left
+                                    >
+                                        Delete
+                                    </Button>
+                                    <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
+                                        Cancel
+                                    </Button>
+                                    <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#91C25F"}}>
+                                        Ok
+                                    </Button>
+                                    </div>
+                                </div>
+                            ]}
+                        >
+                            <Input.TextArea
+                                placeholder="Enter your comments here"
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                                style={{color: theme === "dark" ? "white" : "black"}}
+                                backgroundColor= {theme === "dark" ? "#1e1e1e" : "white"}   // background color
+                                borderColor={ theme === "dark" ? "#555" : "#d9d9d9" }
+                            />
+                        </Modal>
+        </Row>
+    )
+}

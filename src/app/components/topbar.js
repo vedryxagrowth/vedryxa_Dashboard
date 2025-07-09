@@ -851,10 +851,10 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
 
   useEffect(() => {
     console.log("🔔 Setting up notifications...");
-    if (!session?.user?.email) return;
+    if (!userdetails?.email) return;
 
     // Register with backend
-    socket.emit("register", session.user.email);
+    socket.emit("register", userdetails.email);
 
     // Initial fetch to seed prev ref
     fetchNotifications().then((initial) => {
@@ -903,7 +903,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
     return () => {
       socket.off("notifications_updated", handleUpdate);
     };
-  }, [session?.user?.email]);
+  }, [userdetails?.email]);
 
   // fetchNotifications always returns array
   const fetchNotifications = async () => {
