@@ -29,6 +29,7 @@ const DynamicEditAccountAccess = dynamic(() => import('./users-components/edit-a
 const DynamicEditNetworkAccess = dynamic(() => import('./users-components/edit-network'));
 const DynamicEditUrlBuilder = dynamic(() => import('./users-components/edit-urlbulder'));
 const DynamicRequestComponent = dynamic(() => import('../CronDashboard/crons'));
+const UploadComponent = dynamic(() => import('./users-components/updates_notifications'));
 
 const roles = ['All', 'Media_Buyer', 'Admin', 'Manager', 'Special_User', "Revenue_Partner"];
 const accountStatus = ['All', 'Active', 'InActive'];
@@ -1807,6 +1808,14 @@ const UsersTable = () => {
                             </div>
                         </div>
                     </Card>
+                </div>
+
+                <div className="h-screen overflow-hidden bg-gray-50 flex items-center justify-center">
+                    <div className="w-full max-w-2xl px-4 h-full flex items-center justify-center">
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 max-h-[90vh] overflow-auto w-full">
+                        <UploadComponent ref={uploadRef} isLoading={false} />
+                        </div>
+                    </div>
                 </div>
                
             </Carousel>
