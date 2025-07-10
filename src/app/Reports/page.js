@@ -34,6 +34,7 @@ const newtworkCollections = {
     "FB_Tonic1": "Facebook_Tonic1",
     "FB_Sedo": "Facebook_Sedo",
     "FB_Inmobi": "Facebook_Inmobi",
+    "FB_TonicRsoc":"Facebook_TonicRsoc"
 }
 
 const LiveReports = React.lazy(() => import('../componentsOfReports/Live'));
@@ -42,6 +43,7 @@ const CampaignReports = React.lazy(() => import('../componentsOfReports/AllCampa
 const DAKeywordReports = React.lazy(() => import('../componentsOfReports/DAKeywords'));
 const System1KeywordReports = React.lazy(() => import('../componentsOfReports/System1Keywords'));
 const TonicKeywordReports = React.lazy(() => import('../componentsOfReports/Tonic1Keywords'));
+const TonicRsocKeywordReports = React.lazy(() => import('../componentsOfReports/TonicRsocKeywords'));
 const InmobiKeywordReports = React.lazy(() => import('../componentsOfReports/InmobiKeywords'));
 const AgencyAndBMNameReports = React.lazy(() => import('../componentsOfReports/AgencyAndBMName'));
 const MnetDomainReports = React.lazy(() => import('../componentsOfReports/MnetDomainData'));
@@ -9630,7 +9632,7 @@ const MyTablePage = () => {
         const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
         setNetworksData(accountsAccess);
         setRevenuePartner(value);
-        value === "FB_Rsoc" || value === "FB_Tonic" || value === "FB_DomainActive" || value === "FB_Tonic1" ? setTime('PDT') : setTime('UTC')
+        value === "FB_Rsoc" || value === "FB_Tonic" || value === "FB_DomainActive" || value === "FB_Tonic1" || value === "FB_TonicRsoc" ? setTime('PDT') : setTime('UTC')
     }
     const onChangeSelect = (value) => {
         setAccount(value);
@@ -9978,7 +9980,9 @@ const MyTablePage = () => {
         ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
         ...(newRevenuePratner === "FB_System1" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : []),
         ...(newRevenuePratner === "FB_Tonic1" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
-        ...(newRevenuePratner === "FB_Inmobi" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : [])
+        ...(newRevenuePratner === "FB_Inmobi" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
+        ...(newRevenuePratner === "FB_TonicRsoc" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
+        
         // ...(newRevenuePratner === "FB_Mnet" ? [{ key: '6', label: 'Ad-Live', content: 'Content for Domain data' }] : []),
         // ...(newRevenuePratner === "FB_Mnet" ? [{ key: '7', label: 'Ad-Daily', content: 'Content for Domain data' }] : []),
         // ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '6', label: 'Names-Live', content: 'Content for Names Live data' }] : []),
@@ -10383,6 +10387,29 @@ const MyTablePage = () => {
                 {newRevenuePratner === "FB_Tonic1" && (
                     <Tabs.TabPane key="5">
                     <TonicKeywordReports 
+                        startDate={newStartDate} 
+                        endDate={newendDate} 
+                        newaccount={newaccount} 
+                        newtime={newtime} 
+                        newRevenuePratner={newRevenuePratner}  
+                        columnDefs={columnDefs4} 
+                        inputValue={inputValue} 
+                        newAccountName={newAccountName} 
+                        campaignComments={campaignComments} 
+                        Camapignlevelstatus={Camapignlevelstatus} 
+                        changeRRefrst={resetColumnStructure} 
+                        debouncedHandleColumnMove={debouncedHandleColumnMove} 
+                        userdetails={userdetails} 
+                        refreshComments={refreshComments}
+                        refreshpage={refreshContent}
+                        getMainMenuItems={getMainMenuItems}
+                    />
+                    </Tabs.TabPane>
+                )}
+
+                {newRevenuePratner === "FB_TonicRsoc" && (
+                    <Tabs.TabPane key="5">
+                    <TonicRsocKeywordReports 
                         startDate={newStartDate} 
                         endDate={newendDate} 
                         newaccount={newaccount} 
