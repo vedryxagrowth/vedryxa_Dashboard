@@ -1310,7 +1310,7 @@ const MyTablePage = () => {
             field: 'cpm',
             sortable: true,
             minWidth: 90,
-            headerTooltip: '(Profit/Revenue)*100', filter: true,
+            headerTooltip: '(Spend/Impressions)*1000', filter: true,
             valueGetter: getCpm,
             hide: false,
             suppressMenu: true,
@@ -2005,7 +2005,7 @@ const MyTablePage = () => {
             field: 'cpm',
             sortable: true,
             minWidth: 90,
-            headerTooltip: '(Profit/Revenue)*100', filter: true,
+            headerTooltip: '(Spend/Impressions)*1000', filter: true,
             valueGetter: getCpm,
             hide: false,
             suppressMenu: true,
@@ -3594,7 +3594,7 @@ const MyTablePage = () => {
             field: 'cpm',
             sortable: true,
             minWidth: 90,
-            headerTooltip: '(Profit/Revenue)*100', filter: true,
+            headerTooltip: '(Spend/Impressions)*1000', filter: true,
             valueGetter: getCpm,
             hide: false,
             suppressMenu: true,
@@ -4523,12 +4523,19 @@ const MyTablePage = () => {
             hide: true,
             
         },
+        keyword: {
+            headerName: 'Keyword',
+            field: 'keyword',
+            resizable: true,
+            sortable: true,
+            // hide: false,    
+        },
         cpm: {
             headerName: 'CPM',
             field: 'cpm',
             sortable: true,
             minWidth: 90,
-            headerTooltip: '(Profit/Revenue)*100', filter: true,
+            headerTooltip: '(Spend/Impressions)*1000', filter: true,
             valueGetter: getCpm,
             hide: false,
             suppressMenu: true,
@@ -5240,7 +5247,7 @@ const MyTablePage = () => {
             field: 'cpm',
             sortable: true,
             minWidth: 90,
-            headerTooltip: '(Profit/Revenue)*100', filter: true,
+            headerTooltip: '(Spend/Impressions)*1000', filter: true,
             valueGetter: getCpm,
             hide: false,
             suppressMenu: true,
@@ -6098,7 +6105,7 @@ const MyTablePage = () => {
             field: 'cpm',
             sortable: true,
             minWidth: 90,
-            headerTooltip: '(Profit/Revenue)*100', filter: true,
+            headerTooltip: '(Spend/Impressions)*1000', filter: true,
             valueGetter: getCpm,
             hide: false,
             suppressMenu: true,
@@ -6873,12 +6880,19 @@ const MyTablePage = () => {
             // },
             // cellRenderer: campaignNameRenderer,
         },
+        keyword: {
+            headerName: 'Keyword',
+            field: 'keyword',
+            resizable: true,
+            sortable: true,
+            // hide: false,    
+        },         
         cpm: {
             headerName: 'CPM',
             field: 'cpm',
             sortable: true,
             minWidth: 90,
-            headerTooltip: '(Profit/Revenue)*100', filter: true,
+            headerTooltip: '(Spend/Impressions)*1000', filter: true,
             valueGetter: getCpm,
             hide: false,
             suppressMenu: true,
@@ -7093,7 +7107,7 @@ const MyTablePage = () => {
             // sortable: true,
             // minWidth: 200,
             // filter: 'agSetColumnFilter',
-            hide: true,
+            // hide: true,
             // filterParams: {
             //     comparator: (a, b) => a.localeCompare(b),
             //     suppressAndOrCondition: true,
@@ -7435,7 +7449,7 @@ const MyTablePage = () => {
             field: 'cpm',
             sortable: true,
             minWidth: 90,
-            headerTooltip: '(Profit/Revenue)*100', filter: true,
+            headerTooltip: '(Spend/Impressions)*1000', filter: true,
             valueGetter: getCpm,
             hide: false,
             suppressMenu: true,
@@ -7986,7 +8000,7 @@ const MyTablePage = () => {
             field: 'cpm',
             sortable: true,
             minWidth: 90,
-            headerTooltip: '(Profit/Revenue)*100', filter: true,
+            headerTooltip: '(Spend/Impressions)*1000', filter: true,
             valueGetter: getCpm,
             hide: false,
             suppressMenu: true,
@@ -9437,9 +9451,9 @@ const MyTablePage = () => {
             columnDefs3.current = getColumnDefs3(mainData);
             columnDefs4.current = getColumnDefs4(mainData);
             columnDefsAdsetLevel.current = getColumnDefsAdsetLevel(mainData);
-            columnDefsAdLevel.current = getColumnDefsAdLevel(mainData);
+            columnDefsAdLevel.current = getColumnDefsAdLevel([...(newRevenuePratner === "FB_TonicRsoc" ? ["keyword"] : []),...(mainData)]);
             columnDefsAdsetLevelDaily.current = (getColumnDefsAdsetLevelDaily(mainData));
-            columnDefsAdLevelDaily.current = (getColumnDefsAdLevelDaily(mainData));
+            columnDefsAdLevelDaily.current = (getColumnDefsAdLevelDaily([...(newRevenuePratner === "FB_TonicRsoc" ? ["keyword"] : []),...(mainData)]));
             // Ensure that 'adid' is included in the column structure
             let updatedColumnStructure = mainData;
             if (!updatedColumnStructure.includes('adid')) {
@@ -9507,9 +9521,9 @@ const MyTablePage = () => {
           columnDefs3.current = getColumnDefs3(mainData.columnStructure);
           columnDefs4.current = getColumnDefs4(mainData.columnStructure);
           columnDefsAdsetLevel.current = (getColumnDefsAdsetLevel(mainData.columnStructure));
-          columnDefsAdLevel.current = (getColumnDefsAdLevel(mainData.columnStructure));
+          columnDefsAdLevel.current = (getColumnDefsAdLevel([...(newRevenuePratner === "FB_TonicRsoc" ? ["keyword"] : []),...(mainData.columnStructure)]));
           columnDefsAdsetLevelDaily.current = (getColumnDefsAdsetLevelDaily(mainData.columnStructure));
-          columnDefsAdLevelDaily.current = (getColumnDefsAdLevelDaily(mainData.columnStructure));
+          columnDefsAdLevelDaily.current = (getColumnDefsAdLevelDaily([...(newRevenuePratner === "FB_TonicRsoc" ? ["keyword"] : []),...(mainData.columnStructure)]));
           // Ensure that 'adid' is included in the column structure
           let updatedColumnStructure = mainData.columnStructure;
           if (!updatedColumnStructure.includes('adid')) {

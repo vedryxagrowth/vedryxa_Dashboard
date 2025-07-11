@@ -135,6 +135,12 @@
       "static/chunks/9976.fd124b26ddff7d3b.js"
     ]
   },
+  "app\\NewUser\\page.js -> ./users-components/updates_notifications": {
+    "id": 71645,
+    "files": [
+      "static/chunks/1645.2111cb2ebcc32619.js"
+    ]
+  },
   "app\\Reports\\page.js -> ../componentsOfReports/AgencyAndBMName": {
     "id": 10663,
     "files": [
@@ -245,7 +251,7 @@
     "id": 15825,
     "files": [
       "static/chunks/8110-ba448725de411535.js",
-      "static/chunks/5825.03c7f2b466d3a893.js"
+      "static/chunks/5825.495df33b6450fce4.js"
     ]
   },
   "app\\componentsOfReports\\Daily.js -> ./AdsetLevelDaily": {
@@ -266,7 +272,7 @@
     "id": 54630,
     "files": [
       "static/chunks/8110-ba448725de411535.js",
-      "static/chunks/4630.91a106dc3dea514d.js"
+      "static/chunks/4630.67e3e3c1eac47a33.js"
     ]
   },
   "app\\componentsOfReports\\Live.js -> ./AdsetLevel": {

@@ -2984,3 +2984,146 @@ body.dark-mode .black-icon-comment.anticon svg {
 .custom-light-notification .ant-notification-notice-description {
   color: #1f1f1f !important;  
 }
+
+
+
+
+/*Updates notification styles*/
+.upload-form-wrapper {
+  --bg: #f9fafb;
+  --text: #111827;
+  --form-bg: #ffffff;
+  --border: #e5e7eb;
+  --input-bg: #ffffff;
+  --input-border: #d1d5db;
+  --placeholder: #9ca3af;
+  --button-bg: #91C25F;
+  --button-hover: #84cd3b;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg);
+  height: 100vh; /* This ensures it takes full screen height */
+}
+
+body.dark .upload-form-wrapper {
+  --bg: #0f172a;
+  --text: #f9fafb;
+  --form-bg: #191919;
+  --border: #334155;
+  --input-bg: #0e1012;
+  --input-border: #475569;
+  --placeholder: #94a3b8;
+  --button-bg: #91C25F;
+  --button-hover: #84cd3b;
+}
+
+.upload-form-wrapper .form-container {
+  max-width: 600px;
+  /* max-height: 500px; */
+  width: 100%;
+  height: 90%;
+  /* margin: 60px auto; */
+  background-color: var(--form-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.upload-form-wrapper .form-title {
+  font-size: 24px;
+  text-align: center;
+  font-weight: 700;
+  margin-bottom: 10px;
+  margin-top: 2px;
+  color: var(--text);
+}
+
+.upload-form-wrapper .form-group {
+  margin-bottom: 1.2rem;
+}
+
+.upload-form-wrapper label {
+  display: flex;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.upload-form-wrapper input[type="text"],
+.upload-form-wrapper textarea {
+  width: 100%;
+  padding: 6px 9px;
+  border: 1px solid var(--input-border);
+  border-radius: 6px;
+  background-color: var(--input-bg);
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.upload-form-wrapper input::placeholder,
+.upload-form-wrapper textarea::placeholder {
+  color: var(--placeholder);
+}
+
+.upload-form-wrapper textarea {
+  resize: vertical;
+  min-height: 50px;
+}
+
+.upload-form-wrapper .image-upload-box {
+  border: 2px dashed var(--input-border);
+  padding: 15px;
+  text-align: center;
+  border-radius: 6px;
+  background-color: var(--input-bg);
+  cursor: pointer;
+  transition: background-color 0.2s;
+  color: var(--text);
+}
+
+.upload-form-wrapper .image-upload-box:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.upload-form-wrapper button {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background-color: var(--button-bg);
+  color: #111827;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.upload-form-wrapper button:hover {
+  background-color: var(--button-hover);
+}
+
+
+/* Dropdown menu style for dark mode */
+.custom-dropdown-dark {
+  background-color: #0e1012 !important;
+  color: #f9fafb !important;
+}
+
+.custom-dropdown-dark .ant-select-item-option {
+  color: #f9fafb;
+}
+
+.custom-dropdown-dark .ant-select-item-option-active {
+  background-color: #1f2937;
+}
+
+.custom-select-dark .ant-select-selector {
+  background-color: #0e1012 !important;
+  border-color: #475569 !important;
+  color: #f9fafb !important;
+}
+

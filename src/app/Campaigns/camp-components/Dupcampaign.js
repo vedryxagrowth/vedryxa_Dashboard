@@ -2059,7 +2059,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                         />
                                     </Form.Item>
-                                    <Form.Item
+                                    {/* <Form.Item
                                         name="pixel_id"
                                         initialValue={pixelids}
                                         label={<span style={{ color: "#B4B4B4" }}>Pixel id</span>}
@@ -2074,6 +2074,39 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             style={{ width: "100%" }}
                                             className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                         />
+                                    </Form.Item> */}
+                                    <Form.Item
+                                        name="pixel_id"
+                                        initialValue={
+                                            typeof imagehash?.pixelID === 'object'
+                                            ? imagehash.pixelID.Universal
+                                            : imagehash?.pixelID
+                                        }
+                                        label={<span style={{ color: "#B4B4B4" }}>Pixel id</span>}
+                                        rules={[
+                                            {
+                                            required: true,
+                                            message: "Please select an option!",
+                                            },
+                                        ]}
+                                        style={{ flex: '1 1 200px' }}
+                                        >
+                                        {typeof imagehash?.pixelID === 'object' ? (
+                                            <Select
+                                            defaultValue={imagehash?.pixelID?.Universal}
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                            >
+                                            {Object.entries(imagehash.pixelID).map(([label, value]) => (
+                                                <Select.Option key={value} value={value}>
+                                                {`${label} - ${value}`}
+                                                </Select.Option>
+                                            ))}
+                                            </Select>
+                                        ) : (
+                                            <Input
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                            />
+                                        )}
                                     </Form.Item>
                                     {/*pk*/}
                                     <Form.Item

@@ -314,7 +314,37 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                     >
 
                       <div style={{ fontSize: '12px', flex: 1, marginRight: '10px' }}>
-                        {item.message}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          <div style={{ fontWeight: 'bold', fontSize: '16px' }}>{item.title}</div>
+                          <div style={{ fontSize: '14px', color: '#333' }}>{item.message}</div>
+                          {/* {item.imageUrl && (
+                            <img
+                              src={item.imageUrl}
+                              alt="Update"
+                              style={{
+                                width: '100%',
+                                height: '150px',
+                                objectFit: 'cover',
+                                borderRadius: '6px',
+                                marginBottom: '5px'
+                              }}
+                            />
+                          )} */}
+                          {item.imageUrl?.includes('.mp4') ? (
+                            <video
+                              controls
+                              src={item.imageUrl}
+                              style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: '8px' }}
+                            />
+                          ) : (
+                            <img
+                              src={item.imageUrl}
+                              alt="Notification"
+                              style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: '8px' }}
+                            />
+                          )}
+                        </div>
+ 
                         <Divider
                           style={{
                             margin: '3px 0',
