@@ -2999,6 +2999,12 @@ body.dark-mode .black-icon-comment.anticon svg {
   --placeholder: #9ca3af;
   --button-bg: #91C25F;
   --button-hover: #84cd3b;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg);
+  height: 100vh; /* This ensures it takes full screen height */
 }
 
 body.dark .upload-form-wrapper {
@@ -3015,12 +3021,14 @@ body.dark .upload-form-wrapper {
 
 .upload-form-wrapper .form-container {
   max-width: 600px;
-  height: 100%;
-  margin: 60px auto;
+  /* max-height: 500px; */
+  width: 100%;
+  height: 90%;
+  /* margin: 60px auto; */
   background-color: var(--form-bg);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 60px;
+  padding: 20px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
@@ -3028,8 +3036,8 @@ body.dark .upload-form-wrapper {
   font-size: 24px;
   text-align: center;
   font-weight: 700;
-  margin-bottom: 50px;
-  margin-top: 0;
+  margin-bottom: 10px;
+  margin-top: 2px;
 }
 
 .upload-form-wrapper .form-group {
@@ -3038,7 +3046,7 @@ body.dark .upload-form-wrapper {
 
 .upload-form-wrapper label {
   display: flex;
-  margin-bottom: 8px;
+  margin-bottom: 5px;
   font-weight: 500;
   color: var(--text);
 }
@@ -3046,7 +3054,7 @@ body.dark .upload-form-wrapper {
 .upload-form-wrapper input[type="text"],
 .upload-form-wrapper textarea {
   width: 100%;
-  padding: 10px 12px;
+  padding: 6px 9px;
   border: 1px solid var(--input-border);
   border-radius: 6px;
   background-color: var(--input-bg);
@@ -3061,12 +3069,12 @@ body.dark .upload-form-wrapper {
 
 .upload-form-wrapper textarea {
   resize: vertical;
-  min-height: 80px;
+  min-height: 50px;
 }
 
 .upload-form-wrapper .image-upload-box {
   border: 2px dashed var(--input-border);
-  padding: 1rem;
+  padding: 15px;
   text-align: center;
   border-radius: 6px;
   background-color: var(--input-bg);
@@ -3082,7 +3090,7 @@ body.dark .upload-form-wrapper {
 .upload-form-wrapper button {
   display: block;
   width: 100%;
-  padding: 12px;
+  padding: 10px;
   background-color: var(--button-bg);
   color: #111827;
   font-size: 1rem;

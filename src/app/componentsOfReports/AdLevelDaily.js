@@ -801,24 +801,43 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
             console.log(adsets, "adsets");
             const collectionName = newRevenuePratner === "FB_DomainActive" ? "Facebook_DActive_Names" : newtworkCollections[newRevenuePratner];
             // const fetchData = await apiClient.get(`/${api}?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`);
-            const fetchData = await apiClient.post(`/AdLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=Daily&network=Facebook_Mnet_AD`, { adsetids : adsets, campaignids : campaigns });
+            const fetchData = await apiClient.post(`http://localhost:8000/AdLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=Daily&network=Facebook_Mnet_AD`, { adsetids : adsets, campaignids : campaigns });
             const mainData = fetchData.data;
+            console.log("MainData:", mainData);
             timezone.current = mainData.length > 0  ? mainData[0].accountTimezone : "";
 
-            const deviceTqMap = new Map();
+            let deviceTqMap = new Map();
 
             // Organize data by ad_id + date
-            mainData.forEach(item => {
-                const key = `${item.ad_id}_${item[selectTimezone[newtime]]}`;
-                if (!deviceTqMap.has(key)) {
-                    deviceTqMap.set(key, {});
-                }
-                const entry = deviceTqMap.get(key);
-                if (item.device === "Mobile") entry.M_tq = item.tq;
-                if (item.device === "Desktop") entry.D_tq = item.tq;
-                deviceTqMap.set(key, { ...entry, ...item });
-            });
-
+            if(newRevenuePratner === "FB_TonicRsoc"){
+                mainData.forEach(item => {
+                    const key = `${item.ad_id}_${item[selectTimezone[newtime]]}_${item.keyword}`;
+                    if (!deviceTqMap.has(key)) {
+                        deviceTqMap.set(key, {});
+                    }
+                    // if(newRevenuePratner === "FB_Mnet"){
+                        const entry = deviceTqMap.get(key);
+                            // if (item.device === "Mobile" ) entry.M_tq = item.tq;
+                            // if (item.device === "Desktop" ) entry.D_tq = item.tq;
+                        deviceTqMap.set(key, { ...entry, ...item });
+                    // }
+                });
+            }else{
+                mainData.forEach(item => {
+                    const key = `${item.ad_id}_${item[selectTimezone[newtime]]}`;
+                    if (!deviceTqMap.has(key)) {
+                        deviceTqMap.set(key, {});
+                    }
+                    // if(newRevenuePratner === "FB_Mnet"){
+                        const entry = deviceTqMap.get(key);
+                        if (item.device === "Mobile" ) entry.M_tq = item.tq;
+                        if (item.device === "Desktop" ) entry.D_tq = item.tq;
+                        deviceTqMap.set(key, { ...entry, ...item });
+                    // }
+                });
+            }
+                     
+            
             const mergedData = Array.from(deviceTqMap.values()).map(entry => {
                 return {
                     ...entry,
@@ -826,6 +845,125 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
                     D_tq: entry.D_tq !== undefined ? entry.D_tq : 0,
                 };
             });
+
+            console.log(mergedData);
+
+            // 
+
+            function groupByAccountNumber(data, specifiedDateKey) {
+                return data?.reduce((acc, obj) => {
+                    const accountKey = obj.accountNumber;
+                    const dateKey = obj[`${specifiedDateKey}Date`]; // dynamically access the specified date field
+            
+                    // Create a combined key for grouping by both accountNumber and dynamically passed date field
+                    const key = `${accountKey}_${dateKey}`;
+            
+                    // Find if the combined key already exists in the accumulator array
+                    let entry = acc.find(item => item.key === key);
+            
+                    if (!entry) {
+                        // If not found, create a new entry for this date
+                        acc.push({
+                            // date: dateKey,
+                            accountNumber: obj.accountNumber,
+                            specifiedDate: obj.specifiedDate,
+                            spend: obj.spend ? parseFloat(obj.spend) : 0,
+                            estimated_revenue: obj.estimated_revenue ? parseFloat(obj.estimated_revenue) : 0,
+                            fbLeads: obj.fbLeads ? parseInt(obj.fbLeads) : 0,
+                            conversions: obj.conversions ? parseInt(obj.conversions) : 0,
+                            revenuePartner: obj.revenuePartner,
+                            mediaBuyerName: obj.MediaBuyerName,
+                            holder: obj.Holder,
+                        });
+                    } else {
+                        // If found, sum the respective fields
+                        entry.spend += obj.spend !== null && obj.spend !== undefined ? parseFloat(obj.spend) : 0;
+                        entry.estimated_revenue += obj.estimated_revenue !== null && obj.estimated_revenue !== undefined ? parseFloat(obj.estimated_revenue) : 0;
+                        entry.fbLeads += obj.fbLeads !== null && obj.fbLeads !== undefined ? parseInt(obj.fbLeads) : 0;
+                        entry.conversions += obj.conversions !== null && obj.conversions !== undefined ? parseInt(obj.conversions) : 0;
+                    }
+            
+                    return acc;
+                }, []).map(dateEntry => {
+                    // Calculate profit after grouping
+                    dateEntry.profit = dateEntry.estimated_revenue - dateEntry.spend;
+                    return dateEntry;
+                });
+            }
+
+
+
+            
+            // let keywordKey = "";
+
+            // mainData.forEach(item => {
+            //     const date = item[selectTimezone[newtime]];
+            //     const adId = item.ad_id;
+            
+            //     if (item.revenuePartner === "Tonic_Rsoc") {
+            //         keywordKey =
+            //             item.keyword && item.keyword.trim() !== "" && item.keyword !== "no"
+            //                 ? item.keyword.trim()
+            //                 : "no";  // ⬅️ group null/empty as "no"
+            //     }            
+            
+            //     const key = item.revenuePartner === "Tonic_Rsoc"
+            //     ? `${adId}_${date}_${keywordKey}`
+            //     : item.revenuePartner === "MEDIA_DOT_NET"
+            //     ? `${adId}_${date}_${item.device}`
+            //     : `${adId}_${date}`;
+            
+            //     const entry = deviceTqMap.get(key) || {
+            //         spend: 0,
+            //         estimated_revenue: 0,
+            //         fbLeads: 0,
+            //         fbClicks: 0,
+            //         fbLinkClicks: 0,
+            //         conversions: 0,
+            //         impressions: 0,
+            //         ad_clicks: 0,
+            //         cpcSum: 0,
+            //         tqSum: 0,
+            //         count: 0,
+            //         M_tq: 0,
+            //         D_tq: 0,
+            //         ...item
+            //     };
+            
+            //     // Device-specific tq
+            //     if (item.revenuePartner === "MEDIA_DOT_NET") {
+            //         if (item.device === "Mobile") entry.M_tq = item.tq;
+            //         if (item.device === "Desktop") entry.D_tq = item.tq;
+            //     }
+            
+            //     // Aggregate
+            //     entry.spend += parseFloat(item.spend || 0);
+            //     entry.estimated_revenue += parseFloat(item.estimated_revenue || 0);
+            //     entry.fbLeads += parseInt(item.fbLeads || 0);
+            //     entry.fbClicks += parseInt(item.fbClicks || 0);
+            //     entry.fbLinkClicks += parseInt(item.fbLinkClicks || 0);
+            //     entry.conversions += parseInt(item.conversions || 0);
+            //     entry.impressions += parseInt(item.impressions || 0);
+            //     entry.ad_clicks += parseInt(item.ad_clicks || 0);
+            //     entry.cpcSum += parseFloat(item.cpc || 0);
+            //     entry.tqSum += parseFloat(item.tq || 0);
+            //     entry.count += 1;
+            
+            //     deviceTqMap.set(key, entry);
+            // });
+
+            // const mergedData = Array.from(deviceTqMap.values()).map(entry => ({
+            //     ...entry,
+            //     M_tq: entry.M_tq || 0,
+            //     D_tq: entry.D_tq || 0,
+            //     spend: entry.spend.toFixed(2),
+            //     estimated_revenue: entry.estimated_revenue.toFixed(2),
+            //     cpc: entry.count ? parseFloat((entry.cpcSum / entry.count).toFixed(2)) : 0,
+            //     tq: entry.count ? parseFloat((entry.tqSum / entry.count).toFixed(2)) : 0
+            // }));
+
+            
+                                    
 
             console.log("hi");
             let totalSpend = 0;
@@ -920,10 +1058,13 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
                             fbCron: eachData.fbCron,
                             revenueCron: eachData.revenueCron,
                             cronStatus: eachData.cronStatus,
-                            accountStatus: eachData.accountStatus
+                            accountStatus: eachData.accountStatus,
+                            keyword: eachData.keyword || '',
                         }
                     )
                 }) : null;
+
+                console.log("returnedData:", filteredData);
 
                 const getValidField = (field) => {
                     for (const item of mainData) {

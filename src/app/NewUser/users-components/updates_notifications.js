@@ -107,33 +107,58 @@ const UploadComponent = forwardRef(({ onSubmit, isLoading = false }, ref) => {
     }
   };
 
-  const handleImageChange = (file) => {
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      setErrors(prev => ({ ...prev, image: 'Please select a valid image file' }));
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      setErrors(prev => ({ ...prev, image: 'Image size must be less than 5MB' }));
-      return;
-    }
+//   const handleImageChange = (file) => {
+//     if (!file) return;
+//     if (!file.type.startsWith('image/')) {
+//       setErrors(prev => ({ ...prev, image: 'Please select a valid image file' }));
+//       return;
+//     }
+//     if (file.size > 5 * 1024 * 1024) {
+//       setErrors(prev => ({ ...prev, image: 'Image size must be less than 5MB' }));
+//       return;
+//     }
 
-    setFormData(prev => ({ ...prev, image: file }));
-    const reader = new FileReader();
-    reader.onload = (e) => setImagePreview(e.target?.result);
-    reader.readAsDataURL(file);
-    setErrors(prev => ({ ...prev, image: undefined }));
-  };
+//     setFormData(prev => ({ ...prev, image: file }));
+//     const reader = new FileReader();
+//     reader.onload = (e) => setImagePreview(e.target?.result);
+//     reader.readAsDataURL(file);
+//     setErrors(prev => ({ ...prev, image: undefined }));
+//   };
 
+    const handleMediaChange = (file) => {
+        if (!file) return;
+    
+        const isImage = file.type.startsWith('image/');
+        const isVideo = file.type.startsWith('video/');
+    
+        if (!isImage && !isVideo) {
+        setErrors(prev => ({ ...prev, image: 'Please select a valid image or video file' }));
+        return;
+        }
+    
+        if (file.size > 20 * 1024 * 1024) { // Optional: limit to 20MB
+        setErrors(prev => ({ ...prev, image: 'File size must be less than 20MB' }));
+        return;
+        }
+    
+        setFormData(prev => ({ ...prev, image: file }));
+    
+        const reader = new FileReader();
+        reader.onload = (e) => setImagePreview(e.target?.result);
+        reader.readAsDataURL(file);
+    
+        setErrors(prev => ({ ...prev, image: undefined }));
+    };
+  
   const handleFileSelect = (e) => {
     const file = e.target.files?.[0] || null;
-    handleImageChange(file);
+    handleMediaChange(file);
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
     setIsDragOver(false);
-    handleImageChange(e.dataTransfer.files[0]);
+    handleMediaChange(e.dataTransfer.files[0]);
   };
 
   const handleDragOver = (e) => {
@@ -222,7 +247,7 @@ const UploadComponent = forwardRef(({ onSubmit, isLoading = false }, ref) => {
                 <p>PNG, JPG, GIF up to 5MB</p>
               </div>
             )}
-            {imagePreview && (
+            {/* {imagePreview && (
               <div className="image-preview-wrapper">
                 <img src={imagePreview} alt="Preview" className="image-preview" />
                 <div className="image-info">
@@ -237,7 +262,33 @@ const UploadComponent = forwardRef(({ onSubmit, isLoading = false }, ref) => {
                   </button>
                 </div>
               </div>
+            )} */}
+            {imagePreview && (
+                <div className="image-preview-wrapper">
+                    {formData.image?.type.startsWith('image/') ? (
+                    <img src={imagePreview} alt="Preview" className="image-preview" />
+                    ) : (
+                    <video
+                        controls
+                        src={imagePreview}
+                        className="image-preview"
+                        style={{ maxHeight: '200px', objectFit: 'cover' }}
+                    />
+                    )}
+                    <div className="image-info">
+                    <span>{formData.image?.name}</span>
+                    <span>({Math.round((formData.image?.size || 0) / 1024)} KB)</span>
+                    <button
+                        type="button"
+                        className="remove-image-btn"
+                        onClick={removeImage}
+                    >
+                        Remove
+                    </button>
+                    </div>
+                </div>
             )}
+
             {errors.image && <span className="form-error">{errors.image}</span>}
           </div>
 
