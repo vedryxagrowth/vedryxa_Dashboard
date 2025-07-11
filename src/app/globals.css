@@ -3038,6 +3038,7 @@ body.dark .upload-form-wrapper {
   font-weight: 700;
   margin-bottom: 10px;
   margin-top: 2px;
+  color: var(--text);
 }
 
 .upload-form-wrapper .form-group {
@@ -3104,3 +3105,27 @@ body.dark .upload-form-wrapper {
 .upload-form-wrapper button:hover {
   background-color: var(--button-hover);
 }
+
+
+/* Dropdown menu style for dark mode */
+.custom-dropdown-dark {
+  background-color: #0e1012 !important;
+  color: #f9fafb !important;
+}
+
+/* Selected item and hover style */
+.custom-dropdown-dark .ant-select-item-option {
+  color: #f9fafb;
+}
+
+.custom-dropdown-dark .ant-select-item-option-active {
+  background-color: #1f2937;
+}
+
+/* Input box inside the Select for dark mode */
+.custom-select-dark .ant-select-selector {
+  background-color: #0e1012 !important;
+  border-color: #475569 !important;
+  color: #f9fafb !important;
+}
+

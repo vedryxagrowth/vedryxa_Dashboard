@@ -20,7 +20,7 @@ const UploadComponent = forwardRef(({ onSubmit, isLoading = false }, ref) => {
   const [imagePreview, setImagePreview] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef(null);
-  const { userdetails } = useTokenContext();
+  const { userdetails, theme } = useTokenContext();
 
   useEffect(() => {
     if (userdetails?.adAccounts) {
@@ -80,7 +80,7 @@ const UploadComponent = forwardRef(({ onSubmit, isLoading = false }, ref) => {
             formDataToSend.append('image', formData.image);
           }
 
-          const res = await fetch('http://localhost:8000/api/notifications/update', {
+          const res = await fetch('/api/notifications/update', {
             method: 'POST',
             body: formDataToSend
           });
@@ -184,7 +184,7 @@ const UploadComponent = forwardRef(({ onSubmit, isLoading = false }, ref) => {
   return (
     <div className="upload-form-wrapper full-screen-wrapper">
       <div className="form-container">
-        <h1 className="form-title">Upload Form</h1>
+        <h1 className="form-title">Notification</h1>
         <form onSubmit={handleSubmit} className="form">
           <div className="form-group">
             <label htmlFor="title">Title</label>
@@ -217,6 +217,8 @@ const UploadComponent = forwardRef(({ onSubmit, isLoading = false }, ref) => {
                     onChange={handleNetworkChange}
                     placeholder="Select Network"
                     style={{ width: '100%' }}
+                    className={theme === 'dark' ? 'custom-select-dark' : ''}
+                    dropdownClassName={theme === 'dark' ? 'custom-dropdown-dark' : ''}
                 >
                     {networkOptions.map((option) => (
                     <Option key={option.value} value={option.value}>
@@ -244,7 +246,7 @@ const UploadComponent = forwardRef(({ onSubmit, isLoading = false }, ref) => {
                   style={{ display: 'none' }}
                 />
                 <p>Click to upload or drag and drop</p>
-                <p>PNG, JPG, GIF up to 5MB</p>
+                <p>PNG, JPG, GIF </p>
               </div>
             )}
             {/* {imagePreview && (

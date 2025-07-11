@@ -801,7 +801,7 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
             console.log(adsets, "adsets");
             const collectionName = newRevenuePratner === "FB_DomainActive" ? "Facebook_DActive_Names" : newtworkCollections[newRevenuePratner];
             // const fetchData = await apiClient.get(`/${api}?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`);
-            const fetchData = await apiClient.post(`http://localhost:8000/AdLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=Daily&network=Facebook_Mnet_AD`, { adsetids : adsets, campaignids : campaigns });
+            const fetchData = await apiClient.post(`/AdLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=Daily&network=Facebook_Mnet_AD`, { adsetids : adsets, campaignids : campaigns });
             const mainData = fetchData.data;
             console.log("MainData:", mainData);
             timezone.current = mainData.length > 0  ? mainData[0].accountTimezone : "";

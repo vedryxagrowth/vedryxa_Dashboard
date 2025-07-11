@@ -1,6 +1,6 @@
 {
-  "/NewUser/page": "app/NewUser/page.js",
-  "/Reports/page": "app/Reports/page.js",
+  "/DailyAndCampaignHistory/AdHistory/[AdName]/page": "app/DailyAndCampaignHistory/AdHistory/[AdName]/page.js",
   "/Campaigns/page": "app/Campaigns/page.js",
-  "/DailyAndCampaignHistory/AdHistory/[AdName]/page": "app/DailyAndCampaignHistory/AdHistory/[AdName]/page.js"
+  "/NewUser/page": "app/NewUser/page.js",
+  "/Reports/page": "app/Reports/page.js"
 }
