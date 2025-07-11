@@ -3122,7 +3122,6 @@ body.dark .upload-form-wrapper {
   background-color: #1f2937;
 }
 
-/* Input box inside the Select for dark mode */
 .custom-select-dark .ant-select-selector {
   background-color: #0e1012 !important;
   border-color: #475569 !important;
