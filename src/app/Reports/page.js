@@ -308,6 +308,7 @@ const MyTablePage = () => {
 
     const [allCampaignData, setAllCampaignData] = useState([]);
     const [campaignRefreshTrigger, setCampaignRefreshTrigger] = useState(0);
+    const [hovered, setHovered] = useState(false);
     
     useEffect(() => {
         const fetchAllCampaigns = async () => {
@@ -4731,18 +4732,7 @@ const MyTablePage = () => {
         },
         adname: {
             headerName: 'AdName', field: 'adname',
-            // resizeble: true,
-            // sortable: true,
-            // width: 300,
-            // rowGroup: true, 
-            // rowGroupIndex: 1, // Level 2
-            // hide: true,
-            // filter: 'agSetColumnFilter',
-            // filterParams: {
-            //     comparator: (a, b) => a.localeCompare(b),
-            //     suppressAndOrCondition: true,
-            // }, 
-            // showRowGroup: 'adname',
+       
             width: 500,
             hide: true,
             rowGroup: true,
@@ -4763,25 +4753,7 @@ const MyTablePage = () => {
             // suppressMenu: true,    // Suppress the column menu
             
         },
-        // from: {
-        //     headerName: 'Start',
-        //     field: 'from',
-        //     minWidth: 110,
-        //     valueGetter: (params) => {
-        //       if (params.node.group) {
-        //         const campaignName =
-        //           params.node.groupData?.campaignname || params.node.key;
-        //         return moment(campaignMap.get(campaignName), "YYYY-MM-DD").format("DD-MM-YYYY") || 'Unknown';
-        //       }
-        //       return '';
-        //     },
-        //     cellClassRules: {
-        //       'hide-leaf-cell': (params) => !params.node.group,
-        //     },
-        //     suppressMenu: true,
-        //     menuTabs: [],
-        //     headerClass: 'hide-menu', // Add a custom class
-        // },
+     
         
         from: {
             headerName: 'Start',
@@ -5265,166 +5237,8 @@ const MyTablePage = () => {
             headerClass: 'hide-menu',
             hide: true,
         },
-        // actions: {
-        //     headerName: 'Actions',
-        //     field: 'actions',
-        //     minWidth: 90,
-        //     // sortable: true,
-        //     // filter: true,
-        //     sortable: false,    // Ensure sorting is disabled
-        //     filter: false,      // Ensure filtering is disabled
-        //     enableSorting: false,  // Disable sorting at the column level
-        //     enableFilter: false,
-        //     suppressMenu: true,    // Suppress the column menu
-        //     menuTabs: [],
-        //     hide: !isYesterday(),
-        //     cellRenderer: (params) => {
-        //         const [isModalVisible, setIsModalVisible] = useState(false);
-        //         const [groupedData, setGroupedData] = useState([]);
-        //         const [newgroupedData, setNewGroupedData] = useState([]);
-        //         const [changeBudget, onChangeBudget] = useState();
-        //         const [campaignStatus, setCampaignStatus] = useState(true);
-        //         const [campaignActualSpend, setCampaignActualSpend] = useState({});
-
-        //         const onChangeSpendAndStatus = async () => {
-        //             if (params?.node?.rowPinned === 'bottom') {
-        //                 return ""; // Return empty string to remove "..."
-        //             }
-        //             if (params?.node?.footer) {
-        //                 return ""; // Prevent modal from opening for group footer rows
-        //             }
-        //             const allLeafChildren = params.node?.allLeafChildren || [];
-
-        //             // Fetch all the rows under the current group
-        //             const groupedData = allLeafChildren.map(node => node.data) || [];
-        //             setNewGroupedData(groupedData);
-        //             const campaignId = groupedData[0]?.campaignid;
-        //             // console.log(groupedData, "groupedData");
-
-        //             // Only show the modal if there is data (groupedData length is greater than 0)
-        //             if (groupedData.length > 0) {
-        //                 const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
-        //                 const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
-        //                 if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
-                            
-        //                     setGroupedData(getCampaignResponse.data);
-        //                     setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
-        //                     onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
-        //                 }
-        //                 if(getCampaignActualSpend.status === 200){
-        //                     // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
-        //                     setCampaignActualSpend(getCampaignActualSpend.data);
-        //                 }
-        //                 else {
-        //                     setGroupedData(groupedData);
-        //                 }
-        //                 // Set the grouped data for the modal
-        //                 setIsModalVisible(true); // Show the modal for non-footer rows
-        //             }
-        //             // if(groupedData.length > 0) {
-                        
-        //             //     const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
-        //             //     if (getCampaignActualSpend.status === 200){
-        //             //         setCampaignActualSpend(getCampaignActualSpend.data);
-        //             //     }
-        //             // }
-        //         };
-
-        //         const handleOk = async () => {
-        //             setIsModalVisible(false); // Close the modal
-        //             const object = {
-        //                 campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname : groupedData[0]?.campaignname,
-        //                 adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
-        //                 campaignid: !Array.isArray(groupedData) ? groupedData?.campaignid : groupedData[0]?.campaignid,
-        //                 usercommit: userdetails?.email,
-        //                 accountNumber: newaccount,
-        //                 budget: changeBudget * 100,
-        //                 status: campaignStatus
-        //             };
-        //             // console.log(object);
-        //             const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
-        //             const responseData = requestResponse.data;
-        //             // console.log(responseData, "response");
-        //             message.success("Budget and Status Updated");
-        //             changeRRefrst();
-        //         };
-
-        //         const handleCancel = () => {
-        //             setIsModalVisible(false);
-        //             // console.log(changeBudget); // Close the modal
-        //         };
-
-        //         const getTotalSpend = (data) => {
-        //             if (!data || data.length === 0) return 0;
-        //             const total = data.reduce((total, item) => {
-        //                 return total + (parseFloat(item?.spend) || 0);
-        //             }, 0);
-        //             // console.log(total, "total");
-        //             return Math.round(total * 100) / 100; // Round to 2 decimal places
-        //         };
-
-        //         const onChangeBudgetValue = event => {
-        //             onChangeBudget(event.target.value)
-        //         }
-
-        //         const onChangeCampaignStatus = async () => {
-        //             const apiEndpoint = campaignStatus
-        //                 ? '/campaignStatusPause/' // Pause campaign
-        //                 : '/campaignStatusActive/'; // Activate campaign
-                
-        //             try {
-        //                 const response = await apiClient.post(apiEndpoint, 
-        //                     { campaignId: groupedData[0]?.campaignid }
-        //                 );
-        //                 if (response.status === 200) {
-        //                     message.success(`Campaign ${groupedData[0]?.campaignid} status updated to ${campaignStatus ? 'Paused' : 'Active'}`);
-        //                     setCampaignStatus((prev) => !prev); // Toggle the status
-        //                 } else {
-        //                     message.error('Failed to update campaign status.');
-        //                 }
-        //             } catch (error) {
-        //                 console.error('Error updating campaign status:', error);
-        //                 message.error('Error updating campaign status.');
-        //             }
-        //         };
-        //         // console.log()
-
-        //         return (
-        //             <div>
-        //                 <div onClick={onChangeSpendAndStatus}>
-        //                     <span>{params.value || "..."}</span> 
-        //                 </div>
-        //                 {isModalVisible && (
-        //                     <Modal
-        //                         title={groupedData?.length > 0 && groupedData?.length !== 1 ? groupedData[0]?.campaignname : groupedData?.campaignname}
-        //                         visible={isModalVisible}
-        //                         onOk={handleOk}
-        //                         onCancel={handleCancel}
-        //                         width={600}  
-        //                         style={{ padding: '20px' }}
-        //                         okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }} 
-        //                     >
-        //                         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                                    
-        //                             <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-        //                                 <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-        //                                 <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#91C25F"}} onChange={onChangeCampaignStatus} />
-        //                             </div>
-        //                             <div style={{ display: 'flex', flexDirection: 'column' }}>
-        //                                 <Typography.Text strong style={{ marginBottom: '10px' }}>Budget: <span style={{fontWeight:'normal'}}>{campaignActualSpend.daily_budget ? "Daily" : campaignActualSpend.lifetime_budget ? "Lifetime" : "Adset"}</span></Typography.Text>
-        //                                 <Input placeholder="Enter your value here" defaultValue={campaignActualSpend.daily_budget ? parseFloat(campaignActualSpend.daily_budget)/100 : campaignActualSpend.lifetime_budget ? parseFloat(campaignActualSpend.lifetime_budget)/100 : (groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData))} onChange={onChangeBudgetValue} />
-        //                             </div>
-        //                             <div style={{ display: 'flex', flexDirection: 'column' }}>
-        //                                 <Typography.Text strong>Campaign ID:</Typography.Text>
-        //                                 <p>{campaignActualSpend?.id}</p>
-        //                             </div>
-        //                         </div>
-        //                     </Modal>
-        //                 )}
-        //             </div>
-        //         );
-        //     },
-        // },
+       
+        
         actions: {
             headerName: 'Budget',
             field: 'actions',
@@ -5464,12 +5278,7 @@ const MyTablePage = () => {
                         return;
                     }
         
-                    // const budget = parseFloat(
-                    //     campaignActualSpend?.campaign_budget?.daily_budget ||
-                    //     campaignActualSpend?.campaign_budget?.lifetime_budget || 0
-                    // ) / 100;
-                    // onChangeBudget(budget);
-                    // const matchedCampaign = allCampaignData.find(c => c.campaignid === campaignId);
+                    
                     const matchedCampaign = params.context.allCampaignData.find(c => c.campaignid === campaignId);
 
                     if (matchedCampaign) {
@@ -10023,7 +9832,15 @@ const MyTablePage = () => {
     };
 
     const renderCarouselNav = () => (
-        <StickyBox offsetTop={64} offsetBottom={20} style={{ zIndex: 1, padding: '0px', margin: '0px', paddingLeft: '12px' }}>
+        <StickyBox offsetTop={64} offsetBottom={20} style={{ zIndex: 1, padding: '0px', marginLeft: '10px', paddingLeft: '12px',
+            borderRadius: 12,
+            backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+            padding: 1,
+            boxShadow:
+              theme === 'dark'
+                ? '0 1px 3px rgba(0,0,0,0.6)'
+                : '0 1px 6px rgba(0,0,0,0.08)',}}>
+            
             <Tabs
                 activeKey={activeTab}
                 onChange={handleCarouselChange}
@@ -10053,7 +9870,7 @@ const MyTablePage = () => {
     return (
         <div className='reports-container'>
             {/* className='select-container' */}
-            <Space direction="vertical" style={{ width: '100%', padding: "1%" }}>
+            {/* <Space direction="vertical" style={{ width: '100%', padding: "1%" }}>
                 <Row gutter={[16, 16]}>
                     <Col xs={24} sm={12} md={6} lg={5} xl={4} xxl={3}>
                         <Select
@@ -10062,7 +9879,7 @@ const MyTablePage = () => {
                             onChange={onChangeSelectRevenue}
                             style={{
                                 width: '100%',
-                                backgroundColor: theme === 'dark' && '#333', // Background color
+                                backgroundColor: theme === 'dark' && '#333', 
                                 color: theme === 'dark' && '#fff',
                             }}
                             placeholder="Select Network"
@@ -10080,8 +9897,8 @@ const MyTablePage = () => {
                     <Col xs={24} sm={12} md={8} lg={6} xl={5} xxl={4} style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}>
                         <Select
                             showSearch
-                            onChange={handleChange1} // Handle value selection
-                            dropdownClassName={theme === 'dark' ? "custom-dropdown" : ''} // Apply dark theme if needed
+                            onChange={handleChange1} 
+                            dropdownClassName={theme === 'dark' ? "custom-dropdown" : ''} 
                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             style={{
                                 width: '100%',
@@ -10089,13 +9906,13 @@ const MyTablePage = () => {
                                 whiteSpace: 'nowrap',
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis'
-                            }} // Prevent overflow with ellipsis
+                            }} 
                             placeholder="Select Account"
                             optionFilterProp="value"
-                            value={accountNumberToPass ? accountNumberToPass : selectedValue}  // Set selected value
+                            value={accountNumberToPass ? accountNumberToPass : selectedValue}  
                             defaultValue={accountNumberFromDashboard ? accountNumberFromDashboard : (storedData ? storedData?.account : (networksData[0].accountNumber))}
-                            options={accountsAccess.map((item) => createOption(item))} // Create options dynamically
-                            onDropdownVisibleChange={handleDropdownVisibleChange} // Toggle dropdown state
+                            options={accountsAccess.map((item) => createOption(item))} 
+                            onDropdownVisibleChange={handleDropdownVisibleChange} 
                         />
                     </Col>
                     <Col xs={24} sm={24} md={15} lg={6} className=' Dashboard-Details-1'>
@@ -10167,27 +9984,137 @@ const MyTablePage = () => {
                     </Col>
 
                     <Col xs={12} sm={12} md={2}>
-                        <Button className='submit-button' type='primary' style={{ backgroundColor: '#91C25F', border: 'solid 0px', color: 'black', fontWeight: '600' }} onClick={onClickButton} block>
-                            Submit
-                        </Button>
+                       
+                        <Button
+  className='submit-button'
+  type='primary'
+  onClick={onClickButton}
+  block
+  onMouseEnter={() => setHovered(true)}
+  onMouseLeave={() => setHovered(false)}
+  style={{
+    backgroundColor: hovered ? '#91C25F' : 'transparent',
+    border: '2px solid green',
+    color: 'black',
+    fontWeight: '600',
+    transition: 'all 0.1s ease-in-out',
+  }}
+>
+  Apply
+</Button>
                     </Col>
                 </Row>
-            </Space>
+            </Space> */}
+            <Space direction="horizontal" style={{ width: '100%', flexWrap: 'wrap', gap: '8px' }}>
+  <Select
+    showSearch
+    onChange={onChangeSelectRevenue}
+    placeholder="Select Network"
+    defaultValue={networkFromDashboard ?? storedData?.revenuePratner ?? networks[0]}
+    dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+    style={{
+      width: '160px',
+      backgroundColor: theme === 'dark' ? '#333' : undefined,
+      color: theme === 'dark' ? '#fff' : undefined,
+    }}
+    optionFilterProp="label"
+    options={networks.map(item => ({ value: item, label: item }))}
+  />
+
+  {/* Account Selector */}
+  <Select
+    showSearch
+    onChange={handleChange1}
+    placeholder="Select Account"
+    value={accountNumberToPass ?? selectedValue}
+    defaultValue={
+      accountNumberFromDashboard ??
+      storedData?.account ??
+      networksData[0]?.accountNumber
+    }
+    dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+    style={{
+      width: '230px',
+      whiteSpace: 'nowrap',
+      color: theme === 'dark' ? 'white' : undefined,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+    }}
+    optionFilterProp="value"
+    options={accountsAccess.map(createOption)}
+    onDropdownVisibleChange={handleDropdownVisibleChange}
+  />
+
+  {/* Date Range */}
+  <ConfigProvider
+    locale={locale}
+    theme={{
+      token: {
+        colorPrimary: '#91C25F',
+        colorTextLightSolid: '#000',
+      },
+    }}
+  >
+    <RangePicker
+      presets={rangePresets}
+      onChange={handleChange}
+      disabledDate={disabledDate}
+      defaultValue={defaultDates}
+      format="YYYY-MM-DD"
+      style={{
+        width: '240px',
+        backgroundColor: theme === 'dark' ? '#555' : undefined,
+        color: theme === 'dark' ? 'white' : undefined,
+      }}
+      dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}
+    />
+  </ConfigProvider>
+
+  {/* Timezone Selector */}
+  <Select
+    showSearch
+    onChange={onChangeTime}
+    placeholder="Timezone"
+    dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+    style={{ width: '100px' }}
+    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+    optionFilterProp="label"
+    value={time}
+    options={timezones.map(item => ({ value: item, label: item }))}
+  />
+
+  {/* Apply Button */}
+  <Button
+    type='primary'
+    onClick={onClickButton}
+    onMouseEnter={() => setHovered(true)}
+    onMouseLeave={() => setHovered(false)}
+    style={{
+      backgroundColor: hovered ? '#91C25F' : 'transparent',
+      border: '2px solid green',
+      color: 'black',
+      fontWeight: '600',
+      padding: '0 16px',
+      height: '32px',
+      transition: 'all 0.15s ease-in-out',
+    }}
+  >
+    Apply
+  </Button>
+</Space>
+
             <div style={{ padding: '0px', margin: '0px' }}>
                 <Row gutter={8} style={{ marginTop: '16px', display: 'flex', justifyContent: 'space-between' }}> 
                     {renderCarouselNav()}
-                    <div style={{display: 'flex', marginRight: '15px'}}>
-                        {/* <Row gutter={8} style={{ marginTop: '16px' }}>  */}
-                            {/* <Col>
-                                <Switch style={{marginTop:'5px'}}/>
-                            </Col> */}
+                    {/* <div style={{display: 'flex', marginRight: '15px'}}>
+                      
                             <Col>
                                 <Input
                                 placeholder="Search keyword"
                                 value={inputValue}
                                 onChange={handleChangeInput}
                                 onBlur={handleBlur}
-                                // onPressEnter={handleChangeInput}
                                 className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                 style={{ width: '225px', borderRadius: '5px', height:'30px', backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
                                 />
@@ -10201,7 +10128,6 @@ const MyTablePage = () => {
                                     height:'30px'
                                 }}
                                 icon={<SearchOutlined  className="black-icon"/>}
-                                // onClick={handleChangeInput}
                                 />
                             </Col>
                             <Col>
@@ -10219,8 +10145,7 @@ const MyTablePage = () => {
                                     />
                                 </Tooltip>
                             </Col>
-                        {/* </Row> */}
-                    </div>
+                    </div> */}
                 </Row>
             </div>
             {!moveForward ? 
