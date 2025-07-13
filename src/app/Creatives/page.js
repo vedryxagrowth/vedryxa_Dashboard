@@ -1254,7 +1254,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns, network, Account_Num
             />
 
             <h1 style={{fontSize:'20px', color: theme === 'dark' ? '#ffffff' : '#384551'}}>Creative Library</h1>
-            <Row justify="start" align="middle" gutter={[16, 16]}>
+            <Row justify="start" align="middle" gutter={[2, 4]}>
                 <Col xs={10} md={4} span={3}>
                         <Select
                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
@@ -1281,7 +1281,7 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns, network, Account_Num
                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                         showSearch
                         placeholder="Select Accounts"
-                        style={{ width: '90%', border: '1px solid #37474F', borderRadius: '6px' }}
+                        style={{ width: '100%', border: '1px solid #37474F', borderRadius: '6px' }}
                         onChange={handleValueChange}
                         disabled={!selectedKey}
                         value={selectedValue}
@@ -1397,26 +1397,41 @@ const ImageUploadPage = ({selectedFilesData, fromCampaigns, network, Account_Num
                                 )}
                             </Button>  
                         ) : 
-                    <Button onClick={showDrawer} className={theme === 'dark' ? 'dark-theme' : 'light-theme'} icon={<PlusOutlined className="black-icon" />} style={{ display: 'flex', border:'none', justifyContent: 'center', maxWidth: '160px', backgroundColor: '#91C25F', color: theme === 'dark' ? 'black' : undefined  }}>
+                        <Button
+                        onClick={showDrawer}
+                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                        icon={<PlusOutlined className="black-icon" />}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'center',
+                          border: '1px solid green',
+                          maxWidth: '160px',
+                          backgroundColor: 'transparent',
+                          color: theme === 'dark' ? 'black' : undefined,
+                          transition: 'background 0.3s',
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#91C25F'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                      >
                         New Campaign
                         {checkboxSelected.length > 0 && (
-                            <Badge
-                                style={{ 
-                                    color: 'red', 
-                                    position: 'absolute', // 🔹 Keeps it from affecting button width
-                                    top: '-5px', 
-                                    right: '-5px', 
-                                    fontSize: '12px', 
-                                    padding: '2px 6px', 
-                                    borderRadius: '50%' // 🔹 Makes it circular }}
-                                }}
-                                className="Badge"
-                                variant="destructive"
-                            >
-                                {checkboxSelected.length}
-                            </Badge>
+                          <Badge
+                            style={{
+                              color: 'red',
+                              position: 'absolute',
+                              top: '-5px',
+                              right: '-5px',
+                              fontSize: '12px',
+                              padding: '2px 6px',
+                              borderRadius: '50%'
+                            }}
+                            className="Badge"
+                            variant="destructive"
+                          >
+                            {checkboxSelected.length}
+                          </Badge>
                         )}
-                    </Button>    
+                      </Button>
                     }               
                 </Col>                
             </Row>
