@@ -900,6 +900,7 @@ const AdLevelReports = ({functionCallForCommnets, startDate, endDate, newaccount
                             profitloss: "",
                             M_tq: "",
                             D_tq: "",
+                            keyword: eachData.keyword,
                         }
                     )
                 })
