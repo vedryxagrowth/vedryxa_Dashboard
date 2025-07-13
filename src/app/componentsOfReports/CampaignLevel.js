@@ -1262,6 +1262,7 @@ const CampaignLevelReports = ({functionCallForCommnets, context, functionCallFor
             />
         </StickyBox>
     );
+    
 
     const uniqueByCampaignId = (arr) => {
         const map = new Map();

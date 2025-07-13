@@ -426,6 +426,7 @@ body {
   color: black;
 }
 
+
 /* Specific styling for total footer if needed */
 .ag-theme-alpine .ag-row.ag-footer.ag-row-level-0 { /* Assuming level 0 is the total footer */
   background-color: darkblue;

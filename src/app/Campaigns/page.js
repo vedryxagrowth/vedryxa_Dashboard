@@ -747,312 +747,447 @@ const App = () => {
         "FB_Bodies1": "Facebook_Bodies1",
         "Newsbreak_DA": "Newsbreak_DomainActive"
     }
+
     const columns = [
-        // {
-        //     title: '',
-        //     dataIndex: 'fbstatus',
-        //     key: 'fbstatus',
-        //     width: '5%',  // Adjust width
-        //     align: 'center',
-        //     render: (text, record) => (
-        //         <>
-        //             {record.fbstatus === 'Live' ? (
-        //                 <CheckCircleFilled style={{ color: 'green' }} />
-        //             ) : (
-        //                 <CloseCircleFilled style={{ color: 'red' }} />
-        //             )}
-        //         </>
-        //     ),
-        // },
         {
-            title: 'Status',
-            dataIndex: 'fbstatus',
-            key: 'fbstatus',
-            width: '10%',  // Adjust width
-            align: 'center',
-            render: (text, record) => (
-                <>
-                    {/* Display green check or red close icon based on fbstatus */}
-                    {record.fbstatus === 'Live' ? (
-                        <CheckCircleFilled style={{ color: 'green' }} className='black-icon-active' />
-                    ) : (
-                        <CloseCircleFilled style={{ color: 'red' }}   className='black-icon-pause-1' />
-                    )}
-
-                    {/* Display link icon if reports field is true */}
-                    {record.reports === true && (
-                        <LinkOutlined
-                            style={{ color: 'blue', marginLeft: '8px', cursor: 'pointer' }}
-                            onClick={() =>
-                                window.open(
-                                    `/LiveHistory/LiveCampaignHistory/${record?.campaign_name}-${record?.Account_Number}-UTC-${newtworkCollections[selectedKey]}`,
-                                    '_blank', // Opens in a new tab
-                                    'noopener,noreferrer' // Security and performance considerations
-                                )
-                            }
-                        />
-                    )}
-                </>
-            ),
-        },
-
-        {
-            title: "Campaign Name",
-            dataIndex: "campaign_name",
-            key: "campaign_name",
-            width: '20%', // Adjust width
-            align: 'left',  // Left align to keep names readable
-            render: (text, record) => (
-
-                <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-                    <span onClick={() => handleCampaignNameClick(record)}>{text}</span>
-                    {!restrictedEmails.includes(userdetails.email) && (
-                        <span style={{
-                            width: '24px',
-                            height: '24px',
-                            borderRadius: '50%',
-                            // backgroundColor: '#e6f7ff',
-                            backgroundColor: theme === "dark" ? "#333" : "white",
-                            marginLeft: '5px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                        }}>
-                            <Tooltip title="Clone">
-                                <CopyOutlined style={{ color: 'red' }} onClick={() => duplicatenewcampaign(record)} />
-                            </Tooltip>
-                        </span>
-                    )}
-                </div>
-            ),
+          title: 'Status',
+          dataIndex: 'fbstatus',
+          key: 'fbstatus',
+          width: 120,
+          align: 'center',
+          render: (text, record) => (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+              {record.fbstatus === 'Live' ? (
+                <CheckCircleFilled style={{ color: 'green', fontSize: 16 }} />
+              ) : (
+                <CloseCircleFilled style={{ color: 'red', fontSize: 16 }} />
+              )}
+              <Switch
+                checked={record.Status === 'ACTIVE'}
+                onChange={(checked) => onToggleStatus(record, checked)}
+                checkedChildren="✓"
+                unCheckedChildren="✗"
+                size="default"
+                style={{ backgroundColor: record.Status === 'ACTIVE' ? '#91C25F' : undefined, minWidth: 40, height: 22 }}
+              />
+            </div>
+          ),
         },
         {
-            title: "Account Number",
-            dataIndex: "Account_Number",
-            key: "Account_Number",
-            width: '15%',  // Adjust width
-            align: 'center',  // Center align since it's numeric
-            render: (text, record) => (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    {/* Account Number */}
-                    <div>{record.Account_Number}</div>
-
-                    {/* Approved, Rejected, Pending - stacked vertically */}
-                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2px' }}>
-                        {/* Approved */}
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: '15px' }}>
-                            <Tooltip title="Approved">
-                                <span style={{ color: 'green', fontWeight: 'bold' }}>{record.approvedCount}</span>
-                            </Tooltip>
-                        </div>
-
-                        {/* Rejected */}
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: '15px' }}>
-                            <Tooltip title="Rejected">
-                                <span style={{ color: 'red', fontWeight: 'bold' }}>{record.rejectedCount}</span>
-                            </Tooltip>
-                        </div>
-
-                        {/* Pending */}
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                            <Tooltip title="Pending">
-                                <span className="blinking" style={{ color: 'orange', fontWeight: 'bold' }}>{record.pendingCount}</span>
-                            </Tooltip>
-                        </div>
-                    </div>
-                </div>
-            ),
+          title: 'Campaign Name',
+          dataIndex: 'campaign_name',
+          key: 'campaign_name',
+          width: 320,
+          align: 'left',
+          render: (text, record) => (
+            <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+              <span onClick={() => handleCampaignNameClick(record)}>{text}</span>
+              {record.reports && (
+                <span style={{ width: 24, height: 24, borderRadius: '50%', backgroundColor: theme === 'dark' ? '#333' : 'white', marginLeft: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Tooltip title="View Report">
+                    <LinkOutlined
+                      style={{ color: 'blue', fontSize: 14 }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open(`/LiveHistory/LiveCampaignHistory/${record?.campaign_name}-${record?.Account_Number}-UTC-${newtworkCollections[selectedKey]}`, '_blank', 'noopener,noreferrer');
+                      }}
+                    />
+                  </Tooltip>
+                </span>
+              )}
+            </div>
+          ),
         },
         {
-            title: "Created Date",
-            dataIndex: "createdDate",
-            key: "createdDate",
-            width: '10%',  // Adjust width
-            align: 'center',
-        },
-
-        {
-            title: "Created By",
-            dataIndex: "createdby",
-            key: "createdby",
-            width: '12%',  // Adjust width
-            align: 'center',
-        },
-        {
-            title: "Budget",
-            dataIndex: "Daily_amount",
-            key: "Daily_amount",
-            width: '10%',  // Adjust width
-            align: 'center',
-            render: (Daily_amount, record) => (
-                <>
-                    {loading ? (
-                        <Spin />
-                    ) : (
-                        record?.Daily_amount !== undefined && (
-                            <EditableField
-                                value={record.Daily_amount / 100}
-                                record={record}
-                                dataIndex="Daily_amount"
-                                updateTableRow={updateTablebudget}
-                            />
-                        )
-                    )}
-                </>
-            ),
+          title: 'Actions',
+          key: 'actions',
+          width: 180,
+          align: 'center',
+          render: (text, record) => (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+              <Tooltip title="View Details">
+                <Button icon={<EyeOutlined />} onClick={() => handleViewClick(record)} style={{ border: `1px solid ${theme === 'dark' ? '#555' : '#d9d9d9'}`, borderRadius: '6px', padding: '4px 8px', backgroundColor: theme === 'dark' ? '#1e1e1e' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }} />
+              </Tooltip>
+              <Tooltip title="Edit Campaign">
+                <Button icon={<EditOutlined />} onClick={() => handleEditClickAllLevelData(record)} style={{ border: `1px solid ${theme === 'dark' ? '#555' : '#d9d9d9'}`, borderRadius: '6px', padding: '4px 8px', backgroundColor: theme === 'dark' ? '#1e1e1e' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }} />
+              </Tooltip>
+              {!restrictedEmails.includes(userdetails.email) && (
+                <Tooltip title="Clone Campaign">
+                  <Button icon={<CopyOutlined style={{ color: 'red' }} />} onClick={() => duplicatenewcampaign(record)} style={{ border: `1px solid ${theme === 'dark' ? '#555' : '#d9d9d9'}`, borderRadius: '6px', padding: '4px 8px', backgroundColor: theme === 'dark' ? '#1e1e1e' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }} />
+                </Tooltip>
+              )}
+            </div>
+          ),
         },
         {
-            title: "Status",
-            dataIndex: "Status",
-            key: "Status",
-            width: '10%',
-            align: "center",
-            render: (text, record) => (
-                <Switch
-                    checked={record.Status === 'ACTIVE'}
-                    onChange={(checked) => onToggleStatus(record, checked)}
-                    checkedChildren="ACTIVE"
-                    unCheckedChildren="PAUSED"
-                    style={{ backgroundColor: record.Status === 'ACTIVE' && "#91C25F" }}
-                />
-            )
+          title: 'Budget',
+          dataIndex: 'Daily_amount',
+          key: 'Daily_amount',
+          width: 100,
+          align: 'center',
+          render: (Daily_amount, record) => loading ? <Spin /> : record?.Daily_amount !== undefined && (<EditableField value={record.Daily_amount / 100} record={record} dataIndex="Daily_amount" updateTableRow={updateTablebudget} />),
         },
-        // {
-        //     title: "Approve",
-        //     dataIndex: "Approval",
-        //     key: "Approval",
-        //     width: '7%',
-        //     align: 'center',
-        //     render: (text, record) => {
-        //         console.log(record, "recordeddata")
-        //         let color = 'black';
-        //         let displayText = text;
-        //         if (text === "PENDING_APPROVAL") {
-        //             color = 'red';
-        //             displayText = 'Pending'; 
-        //         } else if (text === "Approved") {
-        //             color = 'green';
-        //         }
-
-        //         const approvedBy = record?.Approvedby || "N/A"; // Replace 'Approved' with actual field name if needed
-
-        //         return (
-        //             <div>
-        //                 <span style={{ color }}>{`${text}`}</span>
-        //                 {text === "Approved" && (
-        //                     <>
-        //                         <br />
-        //                         <small style={{ color: 'gray' }}> {approvedBy}</small>
-        //                     </>
-        //                 )}
-        //             </div>
-        //         );
-        //     },
-        // },
-
         {
-            title: "Approve",
-            dataIndex: "Approval",
-            key: "Approval",
-            width: '7%',
-            align: 'center',
-            render: (text, record) => {
-              console.log(record, "recordeddata");
-              
-              let color = 'black';
-              let displayText = text;
-          
-              // Modify color and text based on status
-              if (text === "PENDING_APPROVAL") {
-                color = 'red';
-                displayText = 'Pending'; // Show 'Pending' text instead of the original value
-              } else if (text === "Approved") {
-                color = 'green';
-              }
-          
-              // Accessing the Approved by field from the record
-              const approvedBy = record?.Approvedby || "N/A"; // Replace 'Approved' with actual field name if needed
-          
-              return (
-                <div>
-                  <span style={{ color }}>{`${displayText}`}</span>
-                  {text === "Approved" && (
-                    <>
-                      <br />
-                      <small style={{ color: 'gray' }}> {approvedBy}</small>
-                    </>
-                  )}
-                </div>
-              );
-            },
-          }
-,          
+          title: 'Account Number',
+          dataIndex: 'Account_Number',
+          key: 'Account_Number',
+          width: 160,
+          align: 'center',
+          render: (text, record) => (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <div>{record.Account_Number}</div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 2 }}>
+                <Tooltip title="Approved"><span style={{ color: 'green', fontWeight: 'bold', marginRight: 10 }}>{record.approvedCount}</span></Tooltip>
+                <Tooltip title="Rejected"><span style={{ color: 'red', fontWeight: 'bold', marginRight: 10 }}>{record.rejectedCount}</span></Tooltip>
+                <Tooltip title="Pending"><span className="blinking" style={{ color: 'orange', fontWeight: 'bold' }}>{record.pendingCount}</span></Tooltip>
+              </div>
+            </div>
+          ),
+        },
         {
-            title: '',
-            dataIndex: 'Action',
-            align: "center",
-            render: (_, record) => {
-                console.log('Record in Action column:', record);
-                console.log(campaignData, "campaigns data");
-                // console.log('fbstatus:', record.fbstatus);
-
-                const errorDisplay = (campaign, adset, ad) => {
-                    if (campaign) {
-                        return "Campaign Level Error: \n" + campaign;
-                    } else if (adset) {
-                        return "Adset Level Error: \n" + adset;
-                    } else if (ad) {
-                        return "Ad Level Error: \n" + ad;
-                    }
-                    return null;
-                };
-
-                if (record.Approval === 'Approved') {
-                    return (
-                        <div style={{display:'flex', alignItems:'center', justifyContent:'center'}}>
-                            <Button className="dark-icon-button" icon={<EyeOutlined />} onClick={() => handleViewClick(record)}></Button>
-                            <Button className="dark-icon-button" icon={<EditOutlined />} onClick={() => handleEditClickAllLevelData(record)} style={{marginLeft:'10px'}}></Button> 
-                            {(record.adlevel_error || record.campaignlevel_error || record.adsetlevel_error) && (
-                                <Tooltip title={errorDisplay(record.campaignlevel_error,record.adsetlevel_error,record.adlevel_error)}>
-                                    <InfoCircleOutlined style={{marginLeft:'10px', color:"red", fontSize:'15px'}}/>
-                                </Tooltip>
-                            ) }
-                        </div>
-                    )
-                } 
-                // console.log('Record Status:', record?.fbstatus);
-                // if (record.fbstatus === 'Live'){
-                //     console.log('Record in Action column:', record);
-                //     return (
-                //         <Button icon={<EditOutlined />} onClick={() => handleEditOnlyClick(record)}></Button> 
-                //     )
-                // }
-
-                return (
-                    <Space size="middle">
-                        <Button className="dark-icon-button" icon={<EyeOutlined />} onClick={() => handleViewClick(record)}></Button>
-                        {record.fbstatus !== 'Live' && (
-                            // <Button icon={<EditOutlined />} onClick={() => handleEditOnlyClick(record)}></Button> 
-                            <Button className="dark-icon-button" icon={<EditOutlined />} onClick={() => handleEditClickAllLevelData(record)}></Button> 
-                        )}
-                        {record.Approval === 'PENDING_APPROVAL' && (
-                            <Button style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}} onClick={() => handleApproval(record)}>Approve</Button>
-                        )}
-                        <Modal
-                            title="Confirm Approval"
-                            visible={isModalVisible}
-                            onOk={handleOk}
-                            onCancel={handleCancel}
-                            className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
-                        >
-                            <p>Are you sure you want to approve?</p>
-                        </Modal>
-                    </Space>
-                );
+          title: 'Date',
+          dataIndex: 'createdDate',
+          key: 'createdDate',
+          width: 100,
+          align: 'center',
+        },
+        {
+          title: 'Created By',
+          dataIndex: 'createdby',
+          key: 'createdby',
+          width: 100,
+          align: 'center',
+        },
+        {
+          title: 'Approved',
+          dataIndex: 'Approval',
+          key: 'Approval',
+          width: 100,
+          align: 'center',
+          render: (text, record) => {
+            let color = 'black';
+            let displayText = text;
+            if (text === 'PENDING_APPROVAL') {
+              color = 'red';
+              displayText = 'Pending';
+            } else if (text === 'Approved') {
+              color = 'green';
             }
-        }
+            const approvedBy = record?.Approvedby || 'N/A';
+            return (
+              <div>
+                <span style={{ color }}>{displayText}</span>
+                {text === 'Approved' && <><br /><small style={{ color: 'gray' }}>{approvedBy}</small></>}
+              </div>
+            );
+          },
+        },
+        {
+            title: 'Permission',
+            dataIndex: 'Approval',
+            key: 'permission',
+            width: 120,
+            align: 'center',
+            render: (text, record) => (
+              <>
+                {record.Approval === 'PENDING_APPROVAL' && (
+                  <>
+                    <Button
+                      style={{
+                        backgroundColor: '#91C25F',
+                        color: "#000",
+                        borderColor: '#91C25F',
+                        borderWidth: "0px"
+                      }}
+                      onClick={() => handleApproval(record)} // This sets useaproval and opens modal
+                    >
+                      Approve
+                    </Button>
+          
+                    {/* Show Modal only for selected record */}
+                    {useaproval?.identifier === record.identifier && (
+                      <Modal
+                        title="Confirm Approval"
+                        open={isModalVisible}
+                        onOk={handleOk}
+                        onCancel={() => setIsModalVisible(false)}
+                        className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+                      >
+                        <p>Are you sure you want to approve?</p>
+                      </Modal>
+                    )}
+                  </>
+                )}
+              </>
+            )
+          }
+          
+          
+          
+      ];
+      
+      
+      
+      
+//     const columns = [
+     
+//         {
+//             title: 'Status',
+//             dataIndex: 'fbstatus',
+//             key: 'fbstatus',
+//             width: '10%',  // Adjust width
+//             align: 'center',
+//             render: (text, record) => (
+//                 <>
+//                     {/* Display green check or red close icon based on fbstatus */}
+//                     {record.fbstatus === 'Live' ? (
+//                         <CheckCircleFilled style={{ color: 'green' }} className='black-icon-active' />
+//                     ) : (
+//                         <CloseCircleFilled style={{ color: 'red' }}   className='black-icon-pause-1' />
+//                     )}
 
-    ];
+//                     {/* Display link icon if reports field is true */}
+//                     {record.reports === true && (
+//                         <LinkOutlined
+//                             style={{ color: 'blue', marginLeft: '8px', cursor: 'pointer' }}
+//                             onClick={() =>
+//                                 window.open(
+//                                     `/LiveHistory/LiveCampaignHistory/${record?.campaign_name}-${record?.Account_Number}-UTC-${newtworkCollections[selectedKey]}`,
+//                                     '_blank', // Opens in a new tab
+//                                     'noopener,noreferrer' // Security and performance considerations
+//                                 )
+//                             }
+//                         />
+//                     )}
+//                 </>
+//             ),
+//         },
+
+//         {
+//             title: "Campaign Name",
+//             dataIndex: "campaign_name",
+//             key: "campaign_name",
+//             width: '20%', // Adjust width
+//             align: 'left',  // Left align to keep names readable
+//             render: (text, record) => (
+
+//                 <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+//                     <span onClick={() => handleCampaignNameClick(record)}>{text}</span>
+//                     {!restrictedEmails.includes(userdetails.email) && (
+//                         <span style={{
+//                             width: '24px',
+//                             height: '24px',
+//                             borderRadius: '50%',
+//                             // backgroundColor: '#e6f7ff',
+//                             backgroundColor: theme === "dark" ? "#333" : "white",
+//                             marginLeft: '5px',
+//                             display: 'flex',
+//                             alignItems: 'center',
+//                             justifyContent: 'center'
+//                         }}>
+//                             <Tooltip title="Clone">
+//                                 <CopyOutlined style={{ color: 'red' }} onClick={() => duplicatenewcampaign(record)} />
+//                             </Tooltip>
+//                         </span>
+//                     )}
+//                 </div>
+//             ),
+//         },
+//         {
+//             title: "Account Number",
+//             dataIndex: "Account_Number",
+//             key: "Account_Number",
+//             width: '15%',  // Adjust width
+//             align: 'center',  // Center align since it's numeric
+//             render: (text, record) => (
+//                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+//                     {/* Account Number */}
+//                     <div>{record.Account_Number}</div>
+
+//                     {/* Approved, Rejected, Pending - stacked vertically */}
+//                     <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2px' }}>
+//                         {/* Approved */}
+//                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: '15px' }}>
+//                             <Tooltip title="Approved">
+//                                 <span style={{ color: 'green', fontWeight: 'bold' }}>{record.approvedCount}</span>
+//                             </Tooltip>
+//                         </div>
+
+//                         {/* Rejected */}
+//                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: '15px' }}>
+//                             <Tooltip title="Rejected">
+//                                 <span style={{ color: 'red', fontWeight: 'bold' }}>{record.rejectedCount}</span>
+//                             </Tooltip>
+//                         </div>
+
+//                         {/* Pending */}
+//                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+//                             <Tooltip title="Pending">
+//                                 <span className="blinking" style={{ color: 'orange', fontWeight: 'bold' }}>{record.pendingCount}</span>
+//                             </Tooltip>
+//                         </div>
+//                     </div>
+//                 </div>
+//             ),
+//         },
+//         {
+//             title: "Created Date",
+//             dataIndex: "createdDate",
+//             key: "createdDate",
+//             width: '10%',  // Adjust width
+//             align: 'center',
+//         },
+
+//         {
+//             title: "Created By",
+//             dataIndex: "createdby",
+//             key: "createdby",
+//             width: '12%',  // Adjust width
+//             align: 'center',
+//         },
+//         {
+//             title: "Budget",
+//             dataIndex: "Daily_amount",
+//             key: "Daily_amount",
+//             width: '10%',  // Adjust width
+//             align: 'center',
+//             render: (Daily_amount, record) => (
+//                 <>
+//                     {loading ? (
+//                         <Spin />
+//                     ) : (
+//                         record?.Daily_amount !== undefined && (
+//                             <EditableField
+//                                 value={record.Daily_amount / 100}
+//                                 record={record}
+//                                 dataIndex="Daily_amount"
+//                                 updateTableRow={updateTablebudget}
+//                             />
+//                         )
+//                     )}
+//                 </>
+//             ),
+//         },
+//         {
+//             title: "Status",
+//             dataIndex: "Status",
+//             key: "Status",
+//             width: '10%',
+//             align: "center",
+//             render: (text, record) => (
+//                 <Switch
+//                     checked={record.Status === 'ACTIVE'}
+//                     onChange={(checked) => onToggleStatus(record, checked)}
+//                     checkedChildren="ACTIVE"
+//                     unCheckedChildren="PAUSED"
+//                     style={{ backgroundColor: record.Status === 'ACTIVE' && "#91C25F" }}
+//                 />
+//             )
+//         },
+       
+//         {
+//             title: "Approve",
+//             dataIndex: "Approval",
+//             key: "Approval",
+//             width: '7%',
+//             align: 'center',
+//             render: (text, record) => {
+//               console.log(record, "recordeddata");
+              
+//               let color = 'black';
+//               let displayText = text;
+          
+//               // Modify color and text based on status
+//               if (text === "PENDING_APPROVAL") {
+//                 color = 'red';
+//                 displayText = 'Pending'; // Show 'Pending' text instead of the original value
+//               } else if (text === "Approved") {
+//                 color = 'green';
+//               }
+          
+//               // Accessing the Approved by field from the record
+//               const approvedBy = record?.Approvedby || "N/A"; // Replace 'Approved' with actual field name if needed
+          
+//               return (
+//                 <div>
+//                   <span style={{ color }}>{`${displayText}`}</span>
+//                   {text === "Approved" && (
+//                     <>
+//                       <br />
+//                       <small style={{ color: 'gray' }}> {approvedBy}</small>
+//                     </>
+//                   )}
+//                 </div>
+//               );
+//             },
+//           }
+// ,          
+//         {
+//             title: '',
+//             dataIndex: 'Action',
+//             align: "center",
+//             render: (_, record) => {
+//                 console.log('Record in Action column:', record);
+//                 console.log(campaignData, "campaigns data");
+//                 // console.log('fbstatus:', record.fbstatus);
+
+//                 const errorDisplay = (campaign, adset, ad) => {
+//                     if (campaign) {
+//                         return "Campaign Level Error: \n" + campaign;
+//                     } else if (adset) {
+//                         return "Adset Level Error: \n" + adset;
+//                     } else if (ad) {
+//                         return "Ad Level Error: \n" + ad;
+//                     }
+//                     return null;
+//                 };
+
+//                 if (record.Approval === 'Approved') {
+//                     return (
+//                         <div style={{display:'flex', alignItems:'center', justifyContent:'center'}}>
+//                             <Button className="dark-icon-button" icon={<EyeOutlined />} onClick={() => handleViewClick(record)}></Button>
+//                             <Button className="dark-icon-button" icon={<EditOutlined />} onClick={() => handleEditClickAllLevelData(record)} style={{marginLeft:'10px'}}></Button> 
+//                             {(record.adlevel_error || record.campaignlevel_error || record.adsetlevel_error) && (
+//                                 <Tooltip title={errorDisplay(record.campaignlevel_error,record.adsetlevel_error,record.adlevel_error)}>
+//                                     <InfoCircleOutlined style={{marginLeft:'10px', color:"red", fontSize:'15px'}}/>
+//                                 </Tooltip>
+//                             ) }
+//                         </div>
+//                     )
+//                 } 
+//                 // console.log('Record Status:', record?.fbstatus);
+//                 // if (record.fbstatus === 'Live'){
+//                 //     console.log('Record in Action column:', record);
+//                 //     return (
+//                 //         <Button icon={<EditOutlined />} onClick={() => handleEditOnlyClick(record)}></Button> 
+//                 //     )
+//                 // }
+
+//                 return (
+//                     <Space size="middle">
+//                         <Button className="dark-icon-button" icon={<EyeOutlined />} onClick={() => handleViewClick(record)}></Button>
+//                         {record.fbstatus !== 'Live' && (
+//                             // <Button icon={<EditOutlined />} onClick={() => handleEditOnlyClick(record)}></Button> 
+//                             <Button className="dark-icon-button" icon={<EditOutlined />} onClick={() => handleEditClickAllLevelData(record)}></Button> 
+//                         )}
+//                         {record.Approval === 'PENDING_APPROVAL' && (
+//                             <Button style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}} onClick={() => handleApproval(record)}>Approve</Button>
+//                         )}
+//                         <Modal
+//                             title="Confirm Approval"
+//                             visible={isModalVisible}
+//                             onOk={handleOk}
+//                             onCancel={handleCancel}
+//                             className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+//                         >
+//                             <p>Are you sure you want to approve?</p>
+//                         </Modal>
+//                     </Space>
+//                 );
+//             }
+//         }
+
+//     ];
     console.log(selectedKey);
     // const totalDailySpend = (searchInput ? filteredData : campaignData).reduce((sum, record) => {
     //     return sum + (record.Daily_amount || 0);
@@ -1185,10 +1320,31 @@ const App = () => {
                 visible={EditcamapaignDrawerVisible}
                 onClose={() => setEditcamapaignDrawerVisible(false)}
             /> */}
-            <Card 
+            <Card  style={{marginBottom:"10px",boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)', // subtle shadow
+    borderRadius: '10px'}}
+    headStyle={{
+        borderBottom: 'none', // ❌ removes the bottom line
+        paddingBottom: 0, // Optional: tighter spacing
+      }}
                 // title="Campaigns" 
-                title={<span style={{ color: theme === "dark" && "white" }}>Campaigns</span>}
-                size="small"
+                title={
+                    <div>
+                      <div style={{ 
+                        fontSize: 18, 
+                        fontWeight: 600, 
+                        color: theme === 'dark' ? '#fff' : '#1c1e21', 
+                        lineHeight: '30px' 
+                      }}>
+                        Campaigns
+                      </div>
+                      <div style={{ 
+                        fontSize: 12, 
+                        color: theme === 'dark' ? '#b0b3b8' : '#65676b' 
+                      }}>
+                        Create, manage, and optimize your advertising campaigns
+                      </div>
+                    </div>
+                  }                size="small"
                 extra={
                    
                     <Button.Group style={{ marginTop: 10 }}>
@@ -1258,28 +1414,7 @@ const App = () => {
                             ))}
                         </Select>
                     </Col>
-                    {/* <Col span={4}>
-
-                        <Select
-                            showSearch
-                            placeholder="Select Account"
-                            style={{ width: '100%' }}
-                            onChange={handleValueChange}
-                            disabled={!selectedKey}
-                            value={selectedValue}
-                            optionFilterProp="children" // Use this to filter on the option label
-                            filterOption={(input, option) => {
-                                // Only allow numbers as input and filter options by their value
-                                return /^[0-9]*$/.test(input) && option?.value.toString().includes(input);
-                            }}
-                        >
-                            {valueOptions.map(option => (
-                                <Option key={option.value} value={option.value}>
-                                    {option.label}
-                                </Option>
-                            ))}
-                        </Select>
-                    </Col> */}
+                   
                     <Col span={4}>
                         <Select
                             showSearch
@@ -1370,123 +1505,154 @@ const App = () => {
                             className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                         />
                     </Col>
-                    {!restrictedEmails.includes(userdetails.email) && (
-                        <Col>
-                            <Button onClick={showDrawer} icon={<PlusOutlined  className="black-icon"/>} style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}}>
-                                Create Campaign
-                            </Button>
-                        </Col>
-                    )}
-                    <Button type="primary" onClick={handleRefresh} icon={<ReloadOutlined  className="black-icon"/>} style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}}>
-                    </Button>
-                    <Col span={4}>
-                        <span style={{ fontWeight: 'bold', fontSize: '16px' }}>
-                            Total Daily Spend: ${totalDailySpend.toFixed(2)}
-                        </span>
-                    </Col>
+                    <Col span={9}>
+  <div
+    style={{
+      display: 'flex',
+      justifyContent: 'flex-end',
+      alignItems: 'center',
+      gap: '12px',
+      flexWrap: 'wrap',
+      width: '100%',
+    }}
+  >
+    {!restrictedEmails.includes(userdetails.email) && (
+      <Button
+        onClick={showDrawer}
+        icon={<PlusOutlined className="black-icon" />}
+        style={{
+          backgroundColor: '#91C25F',
+          color: '#000',
+          border: 'none',
+        }}
+      >
+        Create Campaign
+      </Button>
+    )}
+
+    <Button
+      type="primary"
+      onClick={handleRefresh}
+      icon={<ReloadOutlined className="black-icon" />}
+      style={{
+        backgroundColor: '#91C25F',
+        color: '#000',
+        border: 'none',
+      }}
+    />
+
+<span
+  style={{
+    backgroundColor: theme === 'dark' ? '#1f1f1f' : '#e6f7ff',
+    padding: '6px 14px',
+    borderRadius: '8px',
+    fontWeight: '600',
+    fontSize: '15px',
+    color: theme === 'dark' ? '#91C25F' : '#1890ff',
+    border: `1px solid ${theme === 'dark' ? '#333' : '#91C25F'}`,
+  }}
+>
+  Total Daily Spend: ${totalDailySpend.toFixed(2)}
+</span>
+
+  </div>
+</Col>
+
 
                 </Row>
             </Card>
-            {/* {loading ? (
-                        <Skeleton active paragraph={{ rows: 12 }} style={{marginTop:'10px'}}/>
-                    ) :
-            (<Table
-                style={{ width: "100%",height:"100%" }}  // Ensures table takes full available width
-                className={`custom-dark-table ${theme === 'dark' ? 'dark-mode-pagination' : 'light-mode-pagination'}`}
-                columns={columns}
-                // dataSource={
-                //     searchInput
-                //         ? filteredData.map((item, index) => ({ ...item, key: index })).reverse()
-                //         : campaignData.map((item, index) => ({ ...item, key: index })).reverse()
-                // }
-                dataSource={campaignData.map((item, index) => ({ ...item, key: index })).reverse()
-                }
-                pagination={{ pageSize: paginationSize }}
-                scroll={{
-                    x: 'max-content',  // Enable horizontal scroll if needed
-                    y: 'calc(87vh - 200px)',  // Vertical scroll for overflow
-                }}
-                expandable={{
-                    expandedRowRender: (record) => (
-                        <ExpandedRowContent
-                            record={record}
-                            changeRRefrst={changeRRefrst} // Ensure this prop is passed
-                            network={selectedKey} 
-                        />
-                    ),
-                    rowExpandable: (record) => !!record,
-                }}
-                summary={() => {
-                    // const dataSource = searchInput ? filteredData : campaignData;
-                    const dataSource = campaignData;
-                    // Calculate total daily budget
-                    const totalDailyBudget = dataSource.reduce((sum, record) => {
-                        return sum + (record.Daily_amount || 0);
-                    }, 0);
-
-                    return (
-                        <Table.Summary.Row style={{backgroundColor: theme === "dark" && "#333", borderBottom: "0px"}}>
-                            <Table.Summary.Cell colSpan={columns.length - 2} align="right">
-                                <strong style={{color: theme === "dark" ? "white" : "#000"}}>Total Daily Budget: ${(totalDailyBudget / 100).toFixed(2)}</strong>
-                            </Table.Summary.Cell>
-                        </Table.Summary.Row>
-                    );
-                }}
-            />)} */}
-         
-
+           
+        
          {loading ? (
     <Skeleton active paragraph={{ rows: 12 }} style={{ marginTop: '10px' }} />
 ) : (
+    // <Table
+    //     style={{
+    //         width: "100%",
+    //         height: "calc(100vh - 300px)", // Full height minus header/footer space
+    //         minHeight: "100%", // Ensures minimum height is filled even with fewer rows
+    //         tableLayout: "fixed", // Ensures proper layout of the table with defined width
+    //     }}
+    //     className={`custom-dark-table ${theme === 'dark' ? 'dark-mode-pagination' : 'light-mode-pagination'}`}
+    //     columns={columns}
+    //     dataSource={campaignData.map((item, index) => ({
+    //         ...item,
+    //         key: index
+    //     })).reverse()}
+    //     pagination={{ pageSize: paginationSize }}
+    //     scroll={{
+    //         x: 'max-content', // Enable horizontal scroll if needed
+    //          y: 'calc(63vh)'
+    //     }}
+    //     expandable={{
+    //         expandedRowRender: (record) => (
+    //             <ExpandedRowContent
+    //                 record={record}
+    //                 changeRRefrst={changeRRefrst}
+    //                 network={selectedKey}
+    //             />
+    //         ),
+    //         rowExpandable: (record) => !!record
+    //     }}
+        
+    // />
     <Table
-        style={{
-            width: "100%",
-            height: "calc(100vh - 300px)", // Full height minus header/footer space
-            minHeight: "100%", // Ensures minimum height is filled even with fewer rows
-            tableLayout: "fixed", // Ensures proper layout of the table with defined width
-        }}
-        className={`custom-dark-table ${theme === 'dark' ? 'dark-mode-pagination' : 'light-mode-pagination'}`}
-        columns={columns}
-        dataSource={campaignData.map((item, index) => ({
-            ...item,
-            key: index
-        })).reverse()}
-        pagination={{ pageSize: paginationSize }}
-        scroll={{
-            x: 'max-content', // Enable horizontal scroll if needed
-             y: 'calc(63vh)'
-        }}
-        expandable={{
-            expandedRowRender: (record) => (
-                <ExpandedRowContent
-                    record={record}
-                    changeRRefrst={changeRRefrst}
-                    network={selectedKey}
-                />
-            ),
-            rowExpandable: (record) => !!record
-        }}
-        // summary={() => {
-        //     const totalDailyBudget = campaignData.reduce((sum, record) => {
-        //         return sum + (record.Daily_amount || 0);
-        //     }, 0);
+  style={{
+    width: '100%',
+    height: 'calc(100vh - 300px)',
+    minHeight: '100%',
+    tableLayout: 'fixed',
+  }}
+  className={`custom-dark-table ${theme === 'dark' ? 'dark-mode-pagination' : 'light-mode-pagination'}`}
+  columns={columns}
+  dataSource={campaignData.map((item, index) => ({
+    ...item,
+    key: index,
+  })).reverse()}
+  pagination={{ pageSize: paginationSize }}
+  scroll={{
+    x: 'max-content',
+    y: 'calc(63vh)',
+  }}
+  expandable={{
+    expandedRowRender: (record) => (
+      <ExpandedRowContent
+        record={record}
+        changeRRefrst={changeRRefrst}
+        network={selectedKey}
+      />
+    ),
+    rowExpandable: (record) => !!record,
+  }}
+  rowClassName={() => 'custom-row'}
+  rowKey="key"
+  components={{
+    body: {
+      row: (props) => (
+        <tr
+          {...props}
+          style={{
+            ...props.style,
+            height: '32px',
+          }}
+        />
+      ),
+      cell: (props) => (
+        <td
+          {...props}
+          style={{
+            ...props.style,
+            paddingTop: '6px',
+            paddingBottom: '6px',
+            fontSize: '13px',
+          }}
+        />
+      ),
+    },
+  }}
+/>
 
-        //     return (
-        //         <Table.Summary.Row
-        //             style={{
-        //                 backgroundColor: theme === "dark" ? "#333" : "#f5f5f5",
-        //                 borderBottom: "0px"
-        //             }}
-        //         >
-        //             <Table.Summary.Cell colSpan={columns.length - 2} align="right">
-        //                 <strong style={{ color: theme === "dark" ? "#fff" : "#000" }}>
-        //                     Total Daily Budget: ${(totalDailyBudget / 100).toFixed(2)}
-        //                 </strong>
-        //             </Table.Summary.Cell>
-        //         </Table.Summary.Row>
-        //     );
-        // }}
-    />
+
 )}
 
 
