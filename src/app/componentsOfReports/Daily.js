@@ -993,7 +993,7 @@ const Daily = ({functionCallForCampaigns, context, functionCallForCommnets, star
             navigator.clipboard.writeText(copiedText).then(() => {
                 console.log("Copied to clipboard:", copiedText);
             }).catch((err) => {
-                console.error("Clipboard copy failed:", err);
+                console.error("Clipboard . copy failed:", err);
             });
     
             // ✅ Trigger AG Grid’s built-in copy effect (blinking dark blue selection)
