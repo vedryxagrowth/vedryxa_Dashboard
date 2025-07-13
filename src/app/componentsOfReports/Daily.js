@@ -995,7 +995,7 @@ const Daily = ({functionCallForCampaigns, context, functionCallForCommnets, star
             navigator.clipboard.writeText(copiedText).then(() => {
                 console.log("Copied to clipboard:", copiedText);
             }).catch((err) => {
-                console.error("Clipboard copy failed:", err);
+                console.error("Clipboard . copy failed:", err);
             });
     
             // ✅ Trigger AG Grid’s built-in copy effect (blinking dark blue selection)
@@ -1224,7 +1224,7 @@ const Daily = ({functionCallForCampaigns, context, functionCallForCommnets, star
                 )}
               </div>
             ),
-            content: <div>{`Content for Adset data (${selectedAdsets.length} selected)`}</div>,
+            content: <div>{`Content for Adset data (${selectedAdsets.length} selected).`}</div>,
           },
           {
             key: '3',

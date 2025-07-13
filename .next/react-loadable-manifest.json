@@ -79,11 +79,17 @@
     "id": 97264,
     "files": [
       "static/chunks/2626716e-b496a3b36b79551a.js",
+<<<<<<< HEAD
+      "static/chunks/1601-030d9ceda075f055.js",
+      "static/chunks/8651-3dcec4e9c89c2070.js",
+      "static/chunks/6630-8943532739bcf06c.js",
+=======
       "static/chunks/1601-aedc2a567265cc8b.js",
       "static/chunks/8651-3dcec4e9c89c2070.js",
       "static/chunks/6630-88b8943435243052.js",
+>>>>>>> DevUi
       "static/chunks/1652-8f4494bcbc4d4d86.js",
-      "static/chunks/51.65774069a943dddb.js"
+      "static/chunks/51.55342424084f77ca.js"
     ]
   },
   "app\\NewUser\\page.js -> ../CronDashboard/crons": {
@@ -96,42 +102,66 @@
   "app\\NewUser\\page.js -> ./users-components/add-newaccount": {
     "id": 72834,
     "files": [
+<<<<<<< HEAD
+      "static/chunks/1601-030d9ceda075f055.js",
+=======
       "static/chunks/1601-aedc2a567265cc8b.js",
+>>>>>>> DevUi
       "static/chunks/2834.45e1caffc0b76690.js"
     ]
   },
   "app\\NewUser\\page.js -> ./users-components/create-newuser": {
     "id": 18718,
     "files": [
+<<<<<<< HEAD
+      "static/chunks/1601-030d9ceda075f055.js",
+=======
       "static/chunks/1601-aedc2a567265cc8b.js",
+>>>>>>> DevUi
       "static/chunks/8718.5bff9313242f769e.js"
     ]
   },
   "app\\NewUser\\page.js -> ./users-components/edit-accountaccess": {
     "id": 88081,
     "files": [
+<<<<<<< HEAD
+      "static/chunks/1601-030d9ceda075f055.js",
+=======
       "static/chunks/1601-aedc2a567265cc8b.js",
+>>>>>>> DevUi
       "static/chunks/8081.d820e94c944530d0.js"
     ]
   },
   "app\\NewUser\\page.js -> ./users-components/edit-network": {
     "id": 1474,
     "files": [
+<<<<<<< HEAD
+      "static/chunks/1601-030d9ceda075f055.js",
+=======
       "static/chunks/1601-aedc2a567265cc8b.js",
+>>>>>>> DevUi
       "static/chunks/1474.c46e95b649f91efd.js"
     ]
   },
   "app\\NewUser\\page.js -> ./users-components/edit-urlbulder": {
     "id": 83881,
     "files": [
+<<<<<<< HEAD
+      "static/chunks/1601-030d9ceda075f055.js",
+=======
       "static/chunks/1601-aedc2a567265cc8b.js",
+>>>>>>> DevUi
       "static/chunks/3881.505a3495a421a616.js"
     ]
   },
   "app\\NewUser\\page.js -> ./users-components/edit-usersaccess": {
     "id": 39976,
     "files": [
+<<<<<<< HEAD
+      "static/chunks/1601-030d9ceda075f055.js",
+=======
       "static/chunks/1601-aedc2a567265cc8b.js",
+>>>>>>> DevUi
       "static/chunks/9976.fd124b26ddff7d3b.js"
     ]
   },
@@ -156,8 +186,12 @@
       "static/chunks/160b575a-393707cfbe900b39.js",
       "static/chunks/225-9f1be4e1a6c8bfc5.js",
       "static/chunks/8110-ba448725de411535.js",
+<<<<<<< HEAD
+      "static/chunks/3397.92481c271e503a05.js"
+=======
       "static/chunks/8408.f43d87d5d61ff9eb.js",
       "static/chunks/6458.c4bde03577cea6c0.js"
+>>>>>>> DevUi
     ]
   },
   "app\\Reports\\page.js -> ../componentsOfReports/DAKeywords": {
@@ -166,7 +200,11 @@
       "static/chunks/160b575a-393707cfbe900b39.js",
       "static/chunks/225-9f1be4e1a6c8bfc5.js",
       "static/chunks/8110-ba448725de411535.js",
+<<<<<<< HEAD
+      "static/chunks/4411.f65037f0c084a27f.js"
+=======
       "static/chunks/4411.e7eadeee762c728d.js"
+>>>>>>> DevUi
     ]
   },
   "app\\Reports\\page.js -> ../componentsOfReports/Daily": {
@@ -175,9 +213,13 @@
       "static/chunks/160b575a-393707cfbe900b39.js",
       "static/chunks/8e1d74a4.1f7a3b27cf17c7de.js",
       "static/chunks/225-9f1be4e1a6c8bfc5.js",
+<<<<<<< HEAD
+      "static/chunks/1541.cb4994be6de40aaa.js"
+=======
       "static/chunks/3705-236f16420032bd22.js",
       "static/chunks/4220.5d79e5a60e9d9638.js",
       "static/chunks/1541.44f9efac57a1bea8.js"
+>>>>>>> DevUi
     ]
   },
   "app\\Reports\\page.js -> ../componentsOfReports/InmobiKeywords": {
@@ -186,7 +228,7 @@
       "static/chunks/160b575a-393707cfbe900b39.js",
       "static/chunks/225-9f1be4e1a6c8bfc5.js",
       "static/chunks/8110-ba448725de411535.js",
-      "static/chunks/2100.2628238081397e07.js"
+      "static/chunks/2100.52a0fe9de14b24aa.js"
     ]
   },
   "app\\Reports\\page.js -> ../componentsOfReports/Live": {
@@ -195,10 +237,14 @@
       "static/chunks/160b575a-393707cfbe900b39.js",
       "static/chunks/8e1d74a4.1f7a3b27cf17c7de.js",
       "static/chunks/225-9f1be4e1a6c8bfc5.js",
+<<<<<<< HEAD
+      "static/chunks/4887.b4a39b53ff4f04a5.js"
+=======
       "static/chunks/3705-236f16420032bd22.js",
       "static/chunks/4220.5d79e5a60e9d9638.js",
       "static/chunks/8851.c9f702a13f8fd9b1.js",
       "static/chunks/4887.83bdd913f1c394db.js"
+>>>>>>> DevUi
     ]
   },
   "app\\Reports\\page.js -> ../componentsOfReports/MnetAdDaily": {
@@ -207,7 +253,11 @@
       "static/chunks/160b575a-393707cfbe900b39.js",
       "static/chunks/225-9f1be4e1a6c8bfc5.js",
       "static/chunks/8110-ba448725de411535.js",
+<<<<<<< HEAD
+      "static/chunks/4521.b5ce194820417852.js"
+=======
       "static/chunks/4521.9b2e570f3ca99b20.js"
+>>>>>>> DevUi
     ]
   },
   "app\\Reports\\page.js -> ../componentsOfReports/MnetAdLive": {
@@ -216,8 +266,12 @@
       "static/chunks/160b575a-393707cfbe900b39.js",
       "static/chunks/225-9f1be4e1a6c8bfc5.js",
       "static/chunks/8110-ba448725de411535.js",
+<<<<<<< HEAD
+      "static/chunks/4203.a4aa3061f3ca0dbb.js"
+=======
       "static/chunks/5617.711c03efddbb31e6.js",
       "static/chunks/4203.825dca133f423643.js"
+>>>>>>> DevUi
     ]
   },
   "app\\Reports\\page.js -> ../componentsOfReports/MnetDomainData": {
@@ -235,7 +289,11 @@
       "static/chunks/160b575a-393707cfbe900b39.js",
       "static/chunks/225-9f1be4e1a6c8bfc5.js",
       "static/chunks/8110-ba448725de411535.js",
+<<<<<<< HEAD
+      "static/chunks/5439.82a256b763e08ec4.js"
+=======
       "static/chunks/5439.df50e29e35192bea.js"
+>>>>>>> DevUi
     ]
   },
   "app\\Reports\\page.js -> ../componentsOfReports/Tonic1Keywords": {
@@ -244,7 +302,7 @@
       "static/chunks/160b575a-393707cfbe900b39.js",
       "static/chunks/225-9f1be4e1a6c8bfc5.js",
       "static/chunks/8110-ba448725de411535.js",
-      "static/chunks/1459.22bd77f6aab5693e.js"
+      "static/chunks/1459.9bb487500039480e.js"
     ]
   },
   "app\\Reports\\page.js -> ../componentsOfReports/TonicRsocKeywords": {
@@ -253,49 +311,49 @@
       "static/chunks/160b575a-393707cfbe900b39.js",
       "static/chunks/225-9f1be4e1a6c8bfc5.js",
       "static/chunks/8110-ba448725de411535.js",
-      "static/chunks/4903.93fb1d75ee6e1fda.js"
+      "static/chunks/4903.9c9e00b5f8dc3be2.js"
     ]
   },
   "app\\componentsOfReports\\Daily.js -> ./AdLevelDaily": {
     "id": 15825,
     "files": [
       "static/chunks/8110-ba448725de411535.js",
-      "static/chunks/5825.495df33b6450fce4.js"
+      "static/chunks/5825.6db3812752b77d4b.js"
     ]
   },
   "app\\componentsOfReports\\Daily.js -> ./AdsetLevelDaily": {
     "id": 99369,
     "files": [
       "static/chunks/8110-ba448725de411535.js",
-      "static/chunks/9369.dd22030c93af5ea9.js"
+      "static/chunks/9369.e36428b8e9068a90.js"
     ]
   },
   "app\\componentsOfReports\\Daily.js -> ./CampaignLevelDaily": {
     "id": 11997,
     "files": [
       "static/chunks/8110-ba448725de411535.js",
-      "static/chunks/1997.7a4f55bb884eda25.js"
+      "static/chunks/1997.0d6222e3e64e2030.js"
     ]
   },
   "app\\componentsOfReports\\Live.js -> ./AdLevel": {
     "id": 54630,
     "files": [
       "static/chunks/8110-ba448725de411535.js",
-      "static/chunks/4630.67e3e3c1eac47a33.js"
+      "static/chunks/4630.3737a1347a8d6d8a.js"
     ]
   },
   "app\\componentsOfReports\\Live.js -> ./AdsetLevel": {
     "id": 29941,
     "files": [
       "static/chunks/8110-ba448725de411535.js",
-      "static/chunks/9941.1d589fe5222d6d01.js"
+      "static/chunks/9941.daff61aaefc03a6f.js"
     ]
   },
   "app\\componentsOfReports\\Live.js -> ./CampaignLevel": {
     "id": 60781,
     "files": [
       "static/chunks/8110-ba448725de411535.js",
-      "static/chunks/781.bd969b005639b3b5.js"
+      "static/chunks/781.4042df5c8a454481.js"
     ]
   }
 }
