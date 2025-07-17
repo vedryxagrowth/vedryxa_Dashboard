@@ -1256,13 +1256,13 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
             <div
                 style={{
                     // backgroundColor: theme === 'dark' ? 'black' : '#f5f5f5', // or any color
-                    padding: '10px',
+                    // padding: '10px',
                     // borderRadius: '8px',
                     // border: '1px solid #ccc',
                     marginBottom: '10px',
                 }}
             >
-
+                {/* 
                 <Row justify="start" align="middle" gutter={[2, 4]}>
                     <Col xs={10} md={4}>
                         <Select
@@ -1286,12 +1286,12 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                             )}
                         </Select>
                     </Col>
-                    <Col xs={10} md={5} style={{ marginLeft: '-38px' }}>
+                    <Col xs={10} md={5} style={{ marginLeft:'-30px' }}>
                         <Select
                             className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                             showSearch
                             placeholder="Select Accounts"
-                            style={{ width: '80%' }}
+                            style={{ width: '80%',marginRight:'5px' }}
                             onChange={handleValueChange}
                             disabled={!selectedKey}
                             value={selectedValue}
@@ -1353,7 +1353,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                             )}
                         </Select>
                     </Col>
-                    <Col xs={14} md={5} span={4} style={{ marginLeft: '-47px' }} className="Dashboard-Details-1">
+                    <Col xs={14} md={5} span={4} style={{ marginLeft: '-40px' }} className="Dashboard-Details-1">
                         <ConfigProvider
                             theme={{
                                 token: {
@@ -1370,7 +1370,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                 format="YYYY-MM-DD"
                                 allowClear={true}
                                 // className="Dashboard-Details-1"
-                                style={{ width: '90%' }}
+                                style={{ width: '90%',marginRight:'5px' }}
                                 dropdownClassName={`${theme === 'dark' ? 'Dashboard-Details-1 dark-theme-dropdown' : 'Dashboard-Details-1'} custom-green-calendar`}
 
                             />
@@ -1457,7 +1457,161 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                             </Button>
                         }
                     </Col>
+                </Row> */}
+                <Row justify="start" align="middle" gutter={[8, 0]}>  {/* Adjusting the horizontal gap to 15px */}
+                    <Col>
+                        <Select
+                            className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
+                            showSearch
+                            placeholder="Select Projects"
+                            style={{ width: '160px' }}
+                            onChange={handleKeyChange}
+                            value={selectedKey}
+                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                        >
+                            {options.length > 0 ? (
+                                options.map(option => (
+                                    <Option key={option.value} value={option.value}>
+                                        {option.label}
+                                    </Option>
+                                ))
+                            ) : (
+                                <Option disabled></Option>
+                            )}
+                        </Select>
+                    </Col>
+
+                    <Col>
+                        <Select
+                            className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
+                            showSearch
+                            placeholder="Select Accounts"
+                            style={{ width: '230px' }}
+                            onChange={handleValueChange}
+                            disabled={!selectedKey}
+                            value={selectedValue}
+                            selectedAccountNumber={selectedAccountNumber}
+                            optionLabelProp="value"
+                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                        >
+                            {valueOptions.length > 0 ? (
+                                valueOptions.map(option => (
+                                    <Select.Option key={option.value} value={option.value}>
+                                        <div style={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            width: '100%',
+                                            padding: '5px 0',
+                                            overflow: 'hidden',
+
+                                        }}>
+                                            <div style={{
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                maxWidth: '70%',
+                                            }}>
+                                                <p style={{
+                                                    margin: '0px',
+                                                    fontWeight: 'bold',
+                                                    overflow: 'hidden',
+                                                    whiteSpace: 'nowrap',
+                                                    textOverflow: 'ellipsis'
+                                                }}>
+                                                    {option.label}
+                                                </p>
+                                                {option.accountName && (
+                                                    <p style={{
+                                                        margin: '0px',
+                                                        fontSize: '12px',
+                                                        color: 'gray',
+                                                        overflow: 'hidden',
+                                                        whiteSpace: 'nowrap',
+                                                        textOverflow: 'ellipsis'
+                                                    }}>
+                                                        {option.accountName}
+                                                    </p>
+                                                )}
+                                            </div>
+                                            <span style={{ marginLeft: '10px', flexShrink: 0 }}>
+                                                {option.status === "Active" ? (
+                                                    <CheckCircleFilled style={{ color: 'green', fontSize: '15px' }} />
+                                                ) : (
+                                                    <CloseCircleFilled style={{ color: 'red', fontSize: '15px' }} />
+                                                )}
+                                            </span>
+                                        </div>
+                                    </Select.Option>
+                                ))
+                            ) : (
+                                <Select.Option disabled></Select.Option>
+                            )}
+                        </Select>
+                    </Col>
+
+                    <Col>
+                        <ConfigProvider
+                            theme={{
+                                token: {
+                                    colorPrimary: '#91C25F',
+                                    colorTextLightSolid: '#000',
+                                },
+                            }}>
+                            <RangePicker
+                                className="green-border-picker"
+                                presets={rangePresets}
+                                onChange={handleChange}
+                                disabledDate={disabledDate}
+                                defaultValue={[dayjs().subtract(7, 'day'), dayjs().subtract(1, 'day')]}
+                                format="YYYY-MM-DD"
+                                allowClear={true}
+                                style={{ width: '240px' }}
+                                dropdownClassName={`${theme === 'dark' ? 'Dashboard-Details-1 dark-theme-dropdown' : 'Dashboard-Details-1'} custom-green-calendar`}
+                            />
+                        </ConfigProvider>
+                    </Col>
+
+                    <Col>
+                        <Button
+                            onClick={showDrawer}
+                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                            icon={<PlusOutlined style={{ color: theme === 'dark' ? '#ffffff' : 'black' }} />}
+                            style={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                border: '1px solid #4caf50',
+                                maxWidth: '160px',
+                                backgroundColor: 'transparent',
+                                color: theme === 'dark' ? '#ffffff' : 'black',
+                                transition: 'background 0.3s',
+                                
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#91C25F'}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                        >
+                            New campaign
+                            {checkboxSelected.length > 0 && (
+                                <Badge
+                                    style={{
+                                        color: 'red',
+                                        position: 'absolute',
+                                        top: '-5px',
+                                        right: '-5px',
+                                        fontSize: '12px',
+                                        padding: '2px 6px',
+                                        borderRadius: '50%'
+                                    }}
+                                    className="Badge"
+                                    variant="destructive"
+                                >
+                                    {checkboxSelected.length}
+                                </Badge>
+                            )}
+                        </Button>
+                    </Col>
                 </Row>
+
+
 
                 {/* URL Input for Image */}
                 <div className='upload-container-11'>

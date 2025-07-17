@@ -1157,7 +1157,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                 <div className="cursor-pointer" style={{ paddingRight: '0px' }}>
                   {/* <Bell size={20} /> */}
                   <Dropdown overlay={menu} trigger={['click']} placement="bottomRight">
-                    <span style={{ cursor: 'pointer',marginLeft: '10px' }}>
+                    <span style={{ cursor: 'pointer' }}>
                       <Bell style={{ fontSize: 24 }} />
                     </span>
                   </Dropdown>
@@ -1182,7 +1182,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                 padding: '0px', margin: '0px', backgroundColor: theme === "dark" &&
                   "transparent"
               }} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onChangeStickyNotes}>
-                <SlNotebook size={20} style={{ marginLeft: '-12px' }} />
+                <SlNotebook size={20} style={{marginLeft:'5px'}}/>
               </button>}
 
               {userdetails?.role !== "Revenue_Partner" && <button style={{
