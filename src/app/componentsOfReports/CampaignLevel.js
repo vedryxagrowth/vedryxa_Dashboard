@@ -552,13 +552,14 @@ const CampaignLevelReports = ({functionCallForCommnets, context, functionCallFor
                         <Modal
                             title="Confirm Action"
                             open={isCampaignModalVisibles}
+                            className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             onOk={handlePauseOk}
                             onCancel={handlePauseCancel}
                         >
                             <p>
-                                Are you sure you want to turn <b>{nextChecked ? "ON" : "OFF"}</b> this campaign?
+                                Are you sure you want to turn {nextChecked ? "ON" : "OFF"} this campaign?
                             </p>
-                            <p>campaign ID: <strong>{selectedCampaign}</strong></p>
+                            <p>campaign ID: {selectedCampaign}</p>
                         </Modal>
                         <PinIcon
                             campaignName={campaignName}
@@ -694,10 +695,10 @@ const CampaignLevelReports = ({functionCallForCommnets, context, functionCallFor
                             footer={[
                                 <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
                                     <div style={{display:'flex', flexDirection:"column"}}>
-                                        <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                        <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", }}>
                                             Last Edited Time:
                                         </span>
-                                        <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                        <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", }}>
                                             {editUserANdTime ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A") : ""}
                                         </span>
 
@@ -707,7 +708,7 @@ const CampaignLevelReports = ({functionCallForCommnets, context, functionCallFor
                                         key="delete"
                                         type="danger"
                                         onClick={handleDelete}
-                                        style={{ marginRight: 'auto', border: "1px solid black" }} // Push Delete button to the far left
+                                        style={{ marginRight: 'auto', border: "1px solid #e3e3da" }} // Push Delete button to the far left
                                     >
                                         Delete
                                     </Button>
@@ -1538,26 +1539,42 @@ const CampaignLevelReports = ({functionCallForCommnets, context, functionCallFor
                                 </div>
                             </div>
                         ) : rowData?.length > 0 ? (
-                            <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
+                            // <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
 
-                                <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d" }}>
+                
+
+                                <div
+                                    className={`ag-theme-alpine ag-container ${gridThemeClass}`}
+                                    style={{
+                                        width: '100%',
+                                        // borderRadius: 12,
+                                        backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+                                        padding: 10,
+                                        height: 'auto',
+                                        boxShadow:
+                                        theme === 'dark'
+                                            ? '0 1px 3px rgba(0,0,0,0.6)'
+                                            : '0 1px 6px rgba(0,0,0,0.08)',
+                                    }}
+                                >
+                                    <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d" }}>
                                     <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
                                         <Space align="center">
                                             <div className="blinking-circle-1"></div>
-                                            <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600', color: theme === "dark" && "white" }}>Live</Text>
+                                            <Text style={{ paddingLeft: '3px', fontSize: '15px', color: theme === "dark" && "white" }}>Live</Text>
                                         </Space>
                                     </Col>
                                     <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                        <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Acc: {newaccount}</Text>
+                                        <Text style={{ color: theme === "dark" && "white" }}>Acc: {newaccount}</Text>
                                     </Col>
                                     <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                        <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>AccName: {newAccountName}</Text>
+                                        <Text style={{ color: theme === "dark" && "white" }}>Acc name: {newAccountName}</Text>
                                     </Col>
                                     <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                        <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Timezone: {timezone.current}</Text>
+                                        <Text style={{ color: theme === "dark" && "white" }}>Time zone: {timezone.current}</Text>
                                     </Col>
                                     <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                        <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>F/N Hour: {maxHour.current}:00 / {maxNetworkHour.current}:00</Text>
+                                        <Text style={{ color: theme === "dark" && "white" }}>F/N hour: {maxHour.current}:00 / {maxNetworkHour.current}:00</Text>
                                     </Col>
                                     {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                         <Text style={{ fontWeight: '600' }}>
@@ -1571,9 +1588,9 @@ const CampaignLevelReports = ({functionCallForCommnets, context, functionCallFor
                                         <Tooltip
                                         title={
                                             <>
-                                                <div>FbAcc Status: {`${fbCron.current}`}</div>
-                                                <div>RevAcc Status: {`${revenueCron.current}`}</div>
-                                                <Text style={{ fontWeight: '600', color: "white" }}>
+                                                <div>FbAcc status: {`${fbCron.current}`}</div>
+                                                <div>RevAcc status: {`${revenueCron.current}`}</div>
+                                                <Text style={{ color: "white" }}>
                                                     Cron/Acc status: {cronStatus.current} /{' '}
                                                     <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
                                                         {accountStatus.current}
@@ -1599,9 +1616,9 @@ const CampaignLevelReports = ({functionCallForCommnets, context, functionCallFor
                                         </Tooltip>
                                     </Col>
                                 </Row>
-
-                                <AgGridReact
+                                     <AgGridReact
                                     ref={gridRef}
+                                    className='custom-grid'
                                     context={context}
                                     rowData={memorizedRowData}
                                     rowSelection='multiple'
@@ -1644,7 +1661,7 @@ const CampaignLevelReports = ({functionCallForCommnets, context, functionCallFor
                                         if (params.node.rowPinned) {
                                             
                                             return {
-                                                fontWeight: "bold",
+                                                // fontWeight: "bold",
                                                 backgroundColor: theme === "dark" ? "#1a1918" : "#fff", // Dark mode or light mode
                                                 color: theme === "dark" ? "#fff" : "#000",
                                             };
@@ -1715,9 +1732,12 @@ const CampaignLevelReports = ({functionCallForCommnets, context, functionCallFor
 
                                         setLiveFixedFooter(updatedFooter);
                                     }}
-                                />
+                                    />
+                                </div>
 
-                            </div>
+                               
+
+                            // </div>
                         ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
                             {apiStatus === true ? 
                             <Result

@@ -21,6 +21,7 @@ import { Filter1Outlined, RoundaboutLeftOutlined, SettingsOutlined } from '@mui/
 const CampaignLevelReports = React.lazy(() => import('./CampaignLevelDaily'));
 const AdsetLevelReports = React.lazy(() => import('./AdsetLevelDaily'));
 const AdLevelReports = React.lazy(() => import('./AdLevelDaily'));
+const SearchFilters = React.lazy(() => import('./SearchFilters')); 
 
 const contentStyle = {
     margin: "10px",
@@ -64,7 +65,7 @@ const selectTimezone = {
 };
 
 
-const Daily = ({functionCallForCampaigns, context, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle}) => {
+const Daily = ({handleChangeInput, handleBlur, onClickRefresh, functionCallForCampaigns, context, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle}) => {
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -1165,6 +1166,7 @@ const Daily = ({functionCallForCampaigns, context, functionCallForCommnets, star
           backgroundColor: isActive ? (theme === 'dark' ? '#1e1e1e' : '#fff') : (theme === 'dark' ? '#2a2a2a' : '#f0f2f5'),
           color: isActive ? (theme === 'dark' ? '#fff' : '#000') : (theme === 'dark' ? '#aaa' : '#6b7280'),
           boxShadow: isActive ? '0 0 0 1px #91C25F inset' : 'none',
+          fontWeight: isActive ? 'normal' : 'bold', 
         });
       
         return [
@@ -1303,7 +1305,7 @@ const Daily = ({functionCallForCampaigns, context, functionCallForCommnets, star
             </Col>
       
             <Col>
-              <Space size={2}>
+              {/* <Space size={2}>
                 <Input
                   placeholder="Search campaigns..."
                   prefix={<SearchOutlined />}
@@ -1348,41 +1350,47 @@ const Daily = ({functionCallForCampaigns, context, functionCallForCommnets, star
                 </Dropdown>
       
                 <Tooltip title="🍳 This feature is cooking—almost ready to serve 😜">
-  <Button
-    type="default"
-    icon={<FaRobot style={{ fontSize: 20 }} />}
-    disabled
-    style={{
-      borderRadius: 8,
-      background: theme === 'dark' ? 'rgba(82,196,26,0.06)' : '#f0fdf4',
-      border: '1px solid #95de64',
-      color: theme === 'dark' ? '#52c41a' : '#389e0d',
-      fontWeight: 500,
-      cursor: 'not-allowed',
-    }}
-  >
-    AI Assistant
-  </Button>
-</Tooltip>
+                    <Button
+                        type="default"
+                        icon={<FaRobot style={{ fontSize: 20 }} />}
+                        disabled
+                        style={{
+                        borderRadius: 8,
+                        background: theme === 'dark' ? 'rgba(82,196,26,0.06)' : '#f0fdf4',
+                        border: '1px solid #95de64',
+                        color: theme === 'dark' ? '#52c41a' : '#389e0d',
+                        fontWeight: 500,
+                        cursor: 'not-allowed',
+                        }}
+                    >
+                        AI Assistant
+                    </Button>
+                </Tooltip>
 
-<Tooltip title="🍳 This feature is cooking—almost ready to serve 😜">
-  <Button
-    type="default"
-    icon={<SettingOutlined />}
-    disabled
-    style={{
-      borderRadius: 8,
-      background: theme === 'dark' ? 'rgba(24,144,255,0.06)' : '#e6f7ff',
-      border: '1px solid #91d5ff',
-      color: theme === 'dark' ? '#69c0ff' : '#1d39c4',
-      fontWeight: 500,
-      cursor: 'not-allowed',
-    }}
-  >
-    Rules
-  </Button>
-</Tooltip>
-              </Space>
+                <Tooltip title="🍳 This feature is cooking—almost ready to serve 😜">
+                <Button
+                    type="default"
+                    icon={<SettingOutlined />}
+                    disabled
+                    style={{
+                    borderRadius: 8,
+                    background: theme === 'dark' ? 'rgba(24,144,255,0.06)' : '#e6f7ff',
+                    border: '1px solid #91d5ff',
+                    color: theme === 'dark' ? '#69c0ff' : '#1d39c4',
+                    fontWeight: 500,
+                    cursor: 'not-allowed',
+                    }}
+                >
+                    Rules
+                </Button>
+                </Tooltip>
+              </Space> */}
+               <SearchFilters
+                    theme={theme}
+                    handleChangeInput={handleChangeInput}
+                    handleBlur={handleBlur}
+                    onClickRefresh={onClickRefresh}
+                />
             </Col>
           </Row>
         </StickyBox>
@@ -1391,7 +1399,7 @@ const Daily = ({functionCallForCampaigns, context, functionCallForCommnets, star
       
     return(
         <div>
-                    <div>
+                    <div className={`top-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}>
                         {renderCarouselNav()}
                     </div>
                     <Tabs activeKey={activeTab} onChange={handleTabChange} renderTabBar={() => <></>}>

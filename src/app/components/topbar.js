@@ -317,20 +317,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                           <div style={{ fontWeight: 'bold', fontSize: '16px' }}>{item.title}</div>
                           <div style={{ fontSize: '14px', color: '#333' }}>{item.message}</div>
-                          {/* {item.imageUrl && (
-                            <img
-                              src={item.imageUrl}
-                              alt="Update"
-                              style={{
-                                width: '100%',
-                                height: '150px',
-                                objectFit: 'cover',
-                                borderRadius: '6px',
-                                marginBottom: '5px'
-                              }}
-                            />
-                          )} */}
-                          {item.imageUrl?.includes('.mp4') ? (
+                          {/* {item.imageUrl?.includes('.mp4') ? (
                             <video
                               controls
                               src={item.imageUrl}
@@ -342,7 +329,32 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                               alt="Notification"
                               style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: '8px' }}
                             />
-                          )}
+                          )} */}
+                            {item.imageUrl && ( // check if imageUrl exists before rendering
+                              item.imageUrl.includes('.mp4') ? (
+                                <video
+                                  controls
+                                  src={item.imageUrl}
+                                  style={{
+                                    width: '100%',
+                                    height: '200px',
+                                    objectFit: 'cover',
+                                    borderRadius: '8px',
+                                  }}
+                                />
+                              ) : (
+                                <img
+                                  src={item.imageUrl}
+                                  alt="Notification"
+                                  style={{
+                                    width: '100%',
+                                    height: '200px',
+                                    objectFit: 'cover',
+                                    borderRadius: '8px',
+                                  }}
+                                />
+                              )
+                            )}
                         </div>
  
                         <Divider

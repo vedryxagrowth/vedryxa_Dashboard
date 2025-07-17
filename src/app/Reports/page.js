@@ -6,8 +6,8 @@ import React from 'react';
 import axios from 'axios';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
-import { Carousel, Input, Button, Row, Col, Typography, Modal, message, ConfigProvider, Switch, Flex, Spin, Tabs, Skeleton } from 'antd';
-import { WarningOutlined, DollarOutlined, EditOutlined, SearchOutlined, ReloadOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
+import { Carousel, Input, Button, Row, Col, Typography, Modal, message, ConfigProvider, Switch, Flex, Spin, Tabs, Skeleton,Dropdown, Menu } from 'antd';
+import { SettingOutlined, DownOutlined, FilterOutlined, WarningOutlined, DollarOutlined, EditOutlined, SearchOutlined, ReloadOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
 import { Tooltip, Popover } from 'antd';
 import StickyBox from 'react-sticky-box';
 import { Select } from 'antd';
@@ -20,6 +20,7 @@ import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import locale from 'antd/es/date-picker/locale/en_US';
 import { useTokenContext } from '../components/parent';
+import { FaRobot } from 'react-icons/fa';
 const newtworkCollections = {
     "FB_Mnet": "Facebook_Mnet",
     "FB_MnetBing": "Facebook_MnetBing",
@@ -3962,11 +3963,11 @@ const MyTablePage = () => {
                       okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
                       className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                     >
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                        <div>
-                          <Typography.Text strong style={{ color: theme === 'dark' && 'white' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                        <div style={{display: 'flex'}}>
+                          <p>
                             Budget Type:
-                          </Typography.Text>{' '}
+                          </p>{' '}
                           <span style={{ fontWeight: 'normal' }}>
                             {adsetInfo?.budget?.daily_budget ? 'Daily' :
                               adsetInfo?.budget?.lifetime_budget ? 'Lifetime' : 'Unknown'}
@@ -3989,10 +3990,10 @@ const MyTablePage = () => {
                           className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                         />
           
-                        <div>
-                          <Typography.Text strong style={{ color: theme === 'dark' && 'white' }}>
+                        <div style={{display: 'flex'}}>
+                          <p>
                             Adset ID:
-                          </Typography.Text>
+                          </p>
                           <p>{adsetId}</p>
                         </div>
                       </div>
@@ -5358,10 +5359,10 @@ const MyTablePage = () => {
                                 className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             >
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                                    <div>
-                                        <Typography.Text strong style={{ color: theme === "dark" && "white" }}>
+                                    <div style={{display: 'flex',}}>
+                                        <p>
                                             Budget Type:
-                                        </Typography.Text>{" "}
+                                        </p>{" "}
                                         <span style={{ fontWeight: 'normal' }}>
                                             {campaignActualSpend?.campaign_budget?.daily_budget !== null ? "Daily" :
                                             campaignActualSpend?.campaign_budget?.lifetime_budget !== null ? "Lifetime" : "Unknown"}
@@ -5376,8 +5377,8 @@ const MyTablePage = () => {
                                         className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                     />
         
-                                    <div>
-                                        <Typography.Text strong style={{ color: theme === "dark" && "white" }}>Campaign ID:</Typography.Text>
+                                    <div style={{display: 'flex'}}>
+                                        <p>Campaign ID: </p>
                                         <p>{campaignId}</p>
                                     </div>
                                 </div>
@@ -6269,48 +6270,48 @@ const MyTablePage = () => {
           
                   {isModalVisible && (
                     <Modal
-                      title={groupedData?.[0]?.campaignname || 'Edit Adset'}
-                      open={isModalVisible}
-                      onOk={handleOk}
-                      onCancel={() => setIsModalVisible(false)}
-                      width={600}
-                      okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
-                      className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+                        title={groupedData?.[0]?.campaignname || 'Edit Adset'}
+                        open={isModalVisible}
+                        onOk={handleOk}
+                        onCancel={() => setIsModalVisible(false)}
+                        width={600}
+                        okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
+                        className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                     >
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                        <div>
-                          <Typography.Text strong style={{ color: theme === 'dark' && 'white' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                        <div style={{display: 'flex'}}>
+                            <p>
                             Budget Type:
-                          </Typography.Text>{' '}
-                          <span style={{ fontWeight: 'normal' }}>
+                            </p>{' '}
+                            <span style={{ fontWeight: 'normal' }}>
                             {adsetInfo?.budget?.daily_budget ? 'Daily' :
-                              adsetInfo?.budget?.lifetime_budget ? 'Lifetime' : 'Unknown'}
-                          </span>
+                                adsetInfo?.budget?.lifetime_budget ? 'Lifetime' : 'Unknown'}
+                            </span>
                         </div>
-          
+            
                         <Input
-                          type="number"
-                          value={changeBudget}
-                          onChange={(e) => onChangeBudget(e.target.value)}
-                          placeholder="Enter budget in USD"
-                          className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                            type="number"
+                            value={changeBudget}
+                            onChange={(e) => onChangeBudget(e.target.value)}
+                            placeholder="Enter budget in USD"
+                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                         />
-          
+            
                         <Input
-                          type="number"
-                          value={bidAmount}
-                          onChange={(e) => setBidAmount(e.target.value)}
-                          placeholder="Enter bid amount"
-                          className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                            type="number"
+                            value={bidAmount}
+                            onChange={(e) => setBidAmount(e.target.value)}
+                            placeholder="Enter bid amount"
+                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                         />
-          
-                        <div>
-                          <Typography.Text strong style={{ color: theme === 'dark' && 'white' }}>
+            
+                        <div style={{display: 'flex'}}>
+                            <p>
                             Adset ID:
-                          </Typography.Text>
-                          <p>{adsetId}</p>
+                            </p>
+                            <p>{adsetId}</p>
                         </div>
-                      </div>
+                        </div>
                     </Modal>
                   )}
                 </div>
@@ -8110,10 +8111,10 @@ const MyTablePage = () => {
                                 className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             >
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                                    <div>
-                                        <Typography.Text strong style={{ color: theme === "dark" && "white" }}>
+                                    <div style={{display: 'flex',}}>
+                                        <p>
                                             Budget Type:
-                                        </Typography.Text>{" "}
+                                        </p>{" "}
                                         <span style={{ fontWeight: 'normal' }}>
                                             {campaignActualSpend?.campaign_budget?.daily_budget !== null ? "Daily" :
                                             campaignActualSpend?.campaign_budget?.lifetime_budget !== null ? "Lifetime" : "Unknown"}
@@ -8128,8 +8129,8 @@ const MyTablePage = () => {
                                         className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                     />
         
-                                    <div>
-                                        <Typography.Text strong style={{ color: theme === "dark" && "white" }}>Campaign ID:</Typography.Text>
+                                    <div style={{display: 'flex'}}>
+                                        <p>Campaign ID: </p>
                                         <p>{campaignId}</p>
                                     </div>
                                 </div>
@@ -9748,7 +9749,7 @@ const MyTablePage = () => {
                             <p style={{
                                 margin: '0px',
                                 padding: '0px',
-                                fontWeight: 'bold',
+                                // fontWeight: 'bold',
                                 whiteSpace: 'nowrap',
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis'
@@ -10006,105 +10007,112 @@ const MyTablePage = () => {
                 </Row>
             </Space> */}
             <Space direction="horizontal" style={{ width: '100%', flexWrap: 'wrap', gap: '8px' }}>
-  <Select
-    showSearch
-    onChange={onChangeSelectRevenue}
-    placeholder="Select Network"
-    defaultValue={networkFromDashboard ?? storedData?.revenuePratner ?? networks[0]}
-    dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
-    style={{
-      width: '160px',
-      backgroundColor: theme === 'dark' ? '#333' : undefined,
-      color: theme === 'dark' ? '#fff' : undefined,
-    }}
-    optionFilterProp="label"
-    options={networks.map(item => ({ value: item, label: item }))}
-  />
+                <Select
+                    showSearch
+                    onChange={onChangeSelectRevenue}
+                    placeholder="Select Network"
+                    defaultValue={networkFromDashboard ?? storedData?.revenuePratner ?? networks[0]}
+                    dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+                    style={{
+                        width: '160px',
+                        backgroundColor: theme === 'dark' ? '#333' : undefined,
+                        color: theme === 'dark' ? '#fff' : undefined,
+                        border: '1px solid #91C25F',
+                        borderRadius: '6px'
+                    }}
+                    optionFilterProp="label"
+                    options={networks.map(item => ({ value: item, label: item }))}
+                />
 
-  {/* Account Selector */}
-  <Select
-    showSearch
-    onChange={handleChange1}
-    placeholder="Select Account"
-    value={accountNumberToPass ?? selectedValue}
-    defaultValue={
-      accountNumberFromDashboard ??
-      storedData?.account ??
-      networksData[0]?.accountNumber
-    }
-    dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
-    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-    style={{
-      width: '230px',
-      whiteSpace: 'nowrap',
-      color: theme === 'dark' ? 'white' : undefined,
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-    }}
-    optionFilterProp="value"
-    options={accountsAccess.map(createOption)}
-    onDropdownVisibleChange={handleDropdownVisibleChange}
-  />
+                {/* Account Selector */}
+                <Select
+                    showSearch
+                    onChange={handleChange1}
+                    placeholder="Select Account"
+                    value={accountNumberToPass ?? selectedValue}
+                    defaultValue={
+                    accountNumberFromDashboard ??
+                    storedData?.account ??
+                    networksData[0]?.accountNumber
+                    }
+                    dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                    style={{
+                        width: '230px',
+                        whiteSpace: 'nowrap',
+                        color: theme === 'dark' ? 'white' : undefined,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        border: '1px solid #91C25F',
+                        borderRadius: '6px',
+                    }}
+                    optionFilterProp="value"
+                    options={accountsAccess.map(createOption)}
+                    onDropdownVisibleChange={handleDropdownVisibleChange}
+                />
 
-  {/* Date Range */}
-  <ConfigProvider
-    locale={locale}
-    theme={{
-      token: {
-        colorPrimary: '#91C25F',
-        colorTextLightSolid: '#000',
-      },
-    }}
-  >
-    <RangePicker
-      presets={rangePresets}
-      onChange={handleChange}
-      disabledDate={disabledDate}
-      defaultValue={defaultDates}
-      format="YYYY-MM-DD"
-      style={{
-        width: '240px',
-        backgroundColor: theme === 'dark' ? '#555' : undefined,
-        color: theme === 'dark' ? 'white' : undefined,
-      }}
-      dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}
-    />
-  </ConfigProvider>
+                {/* Date Range */}
+                <ConfigProvider
+                    locale={locale}
+                    theme={{
+                    token: {
+                        colorPrimary: '#91C25F',
+                        colorTextLightSolid: '#000',
+                    },
+                    }}
+                >
+                    <RangePicker
+                    presets={rangePresets}
+                    onChange={handleChange}
+                    disabledDate={disabledDate}
+                    defaultValue={defaultDates}
+                    format="YYYY-MM-DD"
+                    style={{
+                        width: '240px',
+                        backgroundColor: theme === 'dark' ? '#555' : undefined,
+                        color: theme === 'dark' ? 'white' : undefined,
+                        border: '1px solid #91C25F',
+                        borderRadius: '6px'
+                    }}
+                    dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}
+                    />
+                </ConfigProvider>
 
-  {/* Timezone Selector */}
-  <Select
-    showSearch
-    onChange={onChangeTime}
-    placeholder="Timezone"
-    dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
-    style={{ width: '100px' }}
-    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-    optionFilterProp="label"
-    value={time}
-    options={timezones.map(item => ({ value: item, label: item }))}
-  />
+                {/* Timezone Selector */}
+                <Select
+                    showSearch
+                    onChange={onChangeTime}
+                    placeholder="Timezone"
+                    dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+                    style={{ width: '100px', border: '1px solid #91C25F', borderRadius: '6px' }}
+                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                    optionFilterProp="label"
+                    value={time}
+                    options={timezones.map(item => ({ value: item, label: item }))}
+                />
 
-  {/* Apply Button */}
-  <Button
-    type='primary'
-    onClick={onClickButton}
-    onMouseEnter={() => setHovered(true)}
-    onMouseLeave={() => setHovered(false)}
-    style={{
-      backgroundColor: hovered ? '#91C25F' : 'transparent',
-      border: '2px solid green',
-      color: 'black',
-      fontWeight: '600',
-      padding: '0 16px',
-      height: '32px',
-      transition: 'all 0.15s ease-in-out',
-    }}
-  >
-    Apply
-  </Button>
-</Space>
+                {/* Apply Button */}
+                <Button
+                    type='primary'
+                    onClick={onClickButton}
+                    onMouseEnter={() => setHovered(true)}
+                    onMouseLeave={() => setHovered(false)}
+                    style={{
+                        backgroundColor: hovered ? '#91C25F' : 'transparent',
+                        border: '1px solid #91C25F',
+                        borderRadius: '6px',
+                        color: theme === 'dark' ? '#ffffff' : '#000000',
+                        // fontWeight: '600',
+                        padding: '0 16px',
+                        height: '32px',
+                        transition: 'all 0.15s ease-in-out',
+                    }}
+                >
+                    Apply
+                </Button>
+            </Space>
 
-            <div style={{ padding: '0px', margin: '0px' }}>
+            <div style={{ padding: '0px', marginLeft: '0px' }}>
                 <Row gutter={8} style={{ marginTop: '16px', display: 'flex', justifyContent: 'space-between' }}> 
                     {renderCarouselNav()}
                     {/* <div style={{display: 'flex', marginRight: '15px'}}>
@@ -10146,6 +10154,111 @@ const MyTablePage = () => {
                                 </Tooltip>
                             </Col>
                     </div> */}
+                    {activeTab === '3' && (
+                         <Col>
+                         <Space size={2} style={{marginRight: '10px'}}> 
+                             <Input
+                                 placeholder="Search campaigns"
+                                 prefix={<SearchOutlined />}
+                                 onChange={handleChangeInput}
+                                 onBlur={handleBlur}
+                                 allowClear
+                                 className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                 style={{
+                                     borderRadius: 8,
+                                     border: '1px solid #91C25F',
+                                     // background: theme === 'dark' ? '#2a2a2a' : '#fff',
+                                     // border: `1px solid ${theme === 'dark' ? '#444' : '#d9d9d9'}`,
+                                     color: theme === 'dark' ? '#fff' : '#000',
+                                     fontWeight: 500,
+                                     width: 170,
+                                     marginRight: '5px'
+                                 }}
+                             />           
+                             <Dropdown
+                                 overlay={
+                                     <Menu
+                                     items={[
+                                         { key: 'active', label: 'Active' },
+                                         { key: 'pause', label: 'Paused' },
+                                     ]}
+                                     />
+                                 }
+                                 trigger={['click']}
+                             >
+                                 <Button
+                                     type="default"
+                                     style={{
+                                     borderRadius: 8,
+                                     background: theme === 'dark' ? 'rgba(82,196,26,0.12)' : '#f6ffed',
+                                     border: '1px solid #52c41a',
+                                     color: theme === 'dark' ? '#95de64' : '#389e0d',
+                                     fontWeight: 500,
+                                     marginRight: '5px'
+                                     }}
+                                 >
+                                     <Space size={2}>
+                                     <FilterOutlined />
+                                     Filters
+                                     <DownOutlined style={{ fontSize: 10 }} />
+                                     </Space>
+                                 </Button>
+                             </Dropdown>
+                 
+                             <Tooltip title={`🍳 This feature is cooking—almost ready to serve 😜`}>
+                                 <Button
+                                     type="default"
+                                     icon={<FaRobot style={{ fontSize: 20 }} />}
+                                     disabled
+                                     style={{
+                                     borderRadius: 8,
+                                     background: theme === 'dark' ? 'rgba(82,196,26,0.06)' : '#f0fdf4',
+                                     border: '1px solid #95de64',
+                                     color: theme === 'dark' ? '#52c41a' : '#389e0d',
+                                     fontWeight: 500,
+                                     cursor: 'not-allowed',
+                                     marginRight: '5px'
+                                     }}
+                                 >
+                                     AI Assistant
+                                 </Button>
+                             </Tooltip>
+ 
+                             <Tooltip title={`🍳 This feature is cooking—almost ready to serve 😜`}>
+                                 <Button
+                                     type="default"
+                                     icon={<SettingOutlined />}
+                                     disabled
+                                     style={{
+                                     borderRadius: 8,
+                                     background: theme === 'dark' ? 'rgba(24,144,255,0.06)' : '#e6f7ff',
+                                     border: '1px solid #91d5ff',
+                                     color: theme === 'dark' ? '#69c0ff' : '#1d39c4',
+                                     fontWeight: 500,
+                                     cursor: 'not-allowed',
+                                     marginRight: '5px'
+                                     }}
+                                 >
+                                     Rules
+                                 </Button>
+                             </Tooltip>
+ 
+                             <Tooltip title="Click to Refresh Tables">
+                                 <Button
+                                         type="primary"
+                                         style={{
+                                         backgroundColor: '#91C25F',
+                                         border: 'solid 0px',
+                                         color: 'black',
+                                         height:'30px'
+                                     }}
+                                     icon={<ReloadOutlined  className="black-icon" />}
+                                     onClick={onClickRefresh}
+                                 />               
+                             </Tooltip>
+                         </Space>
+                     </Col>
+                    )}
                 </Row>
             </div>
             {!moveForward ? 
@@ -10197,6 +10310,9 @@ const MyTablePage = () => {
                         userdetails,
                         theme,
                     }}
+                    handleChangeInput={handleChangeInput}
+                    handleBlur={handleBlur}
+                    onClickRefresh={onClickRefresh}
                     />
                 {/* )} */}
                 </Tabs.TabPane>
@@ -10233,6 +10349,10 @@ const MyTablePage = () => {
                         userdetails,
                         theme,
                     }}
+                    theme={theme}
+                    handleChangeInput={handleChangeInput}
+                    handleBlur={handleBlur}
+                    onClickRefresh={onClickRefresh}
                     />
                 </Tabs.TabPane>
 
@@ -10257,6 +10377,10 @@ const MyTablePage = () => {
                     getMainMenuItems={getMainMenuItems}
                     toggleStatus={checked}
                     handleChangeToggle={handleChangeToggle}
+                    theme={theme}
+                    handleChangeInput={handleChangeInput}
+                    handleBlur={handleBlur}
+                    onClickRefresh={onClickRefresh}
                     />
                 </Tabs.TabPane>
 

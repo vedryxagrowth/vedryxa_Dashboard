@@ -422,7 +422,7 @@ const UsersTable = () => {
                     <Col flex="1 1 auto">
                         <Switch
                             checked={record.Status === 'Active'}
-                            style={{backgroundColor: record.Status === 'Active' && "#c0f788"}}
+                            style={{backgroundColor: record.Status === 'Active' && "#91C25F"}}
                             onChange={(checked) => handleNetworkStatusChange(record.revenuePartner, checked)}
                         />
                     </Col>
@@ -625,7 +625,7 @@ const UsersTable = () => {
                     <Col flex="1 1 auto">
                         <Switch
                             checked={record.status === 'Active'}
-                            style={{backgroundColor: record.status === 'Active' && "#c0f788"}}
+                            style={{backgroundColor: record.status === 'Active' && "#91C25F"}}
                             onChange={(checked) => handleStatusChange(record.accountNumber, checked)}
                         />
                     </Col>
@@ -1411,7 +1411,7 @@ const UsersTable = () => {
                                             <span style={{ color: "#B4B4B4", display: 'block' }}>Search</span>
                                             <div style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
                                                     <>
-                                                        <Button  style={{backgroundColor: theme === "dark" ? "#555": "#fff", border: '1px solid #37474F', borderRadius: '6px',}} icon={<SearchOutlined  style={{color: theme === "dark" ? "#fff": "#333"}} />} />
+                                                        <Button  style={{backgroundColor: theme === "dark" ? "#555": "#fff", border: '1px solid green', borderRadius: '6px',}} icon={<SearchOutlined  style={{color: theme === "dark" ? "#fff": "#333"}} />} />
                                                         <Input
                                                             placeholder="Search here"
                                                             autoFocus
@@ -1420,7 +1420,7 @@ const UsersTable = () => {
                                                             onBlur={handleBlur} 
                                                             className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                                             // style={{ width: '100%', border: '1px solid #37474F', borderRadius: '6px', marginLeft: '8px', backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555',borderColor: theme === 'dark' ? '#444444' : '#d9d9d9'  }}
-                                                            style={{ width: '100%', marginLeft: '8px' }}
+                                                            style={{ width: '100%', marginLeft: '8px', border: '1px solid green', }}
                                                         />
                                                     </>
                                             </div>
@@ -1430,7 +1430,7 @@ const UsersTable = () => {
                                             <Select
                                                 onChange={onChangeRole}
                                                 defaultValue="All"
-                                                style={{ width: "100%", marginTop: '8px', border: '1px solid #37474F', borderRadius: '6px',
+                                                style={{ width: "100%", marginTop: '8px', border: '1px solid green', borderRadius: '6px',
                                                 }}
                                                 className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                                 dropdownClassName={theme === 'dark' && "custom-dropdown"}
@@ -1444,7 +1444,7 @@ const UsersTable = () => {
                                             <span style={{ color: "#B4B4B4", display: 'block' }}>Category</span>
                                             <Select
                                                 defaultValue="All"
-                                                style={{ width: "100%", marginTop: '8px', border: '1px solid #37474F', borderRadius: '6px',
+                                                style={{ width: "100%", marginTop: '8px', border: '1px solid green', borderRadius: '6px',
                                                 }}
                                                 className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                                 dropdownClassName={theme === 'dark' && "custom-dropdown"}
@@ -1459,7 +1459,7 @@ const UsersTable = () => {
                                     </Row>
                                 </Col>
                                 <Col xs={24} sm={12} md={3}>
-                                    <div style={{marginLeft: '0px', fontWeight: 'bold', color: theme === 'dark' ? '#fff' : '#333' }}>
+                                    <div style={{marginLeft: '0px', color: theme === 'dark' ? '#fff' : '#333' }}>
                                         Total.No Of Records {filteredData.length}
                                     </div>
                                 </Col>
@@ -1522,7 +1522,7 @@ const UsersTable = () => {
                                         <Col xs={24} sm={12} md={8}>
                                             <span style={{ color: "#B4B4B4", display: 'block' }}>Search</span>
                                             <div style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
-                                                <Button  style={{backgroundColor: theme === "dark" ? "#555": "#fff", border: '1px solid #37474F', borderRadius: '6px',}} icon={<SearchOutlined  style={{color: theme === "dark" ? "#fff": "#333"}} />} onClick={handleSearchClick1} />
+                                                <Button  style={{backgroundColor: theme === "dark" ? "#555": "#fff", border: '1px solid green', borderRadius: '6px',}} icon={<SearchOutlined  style={{color: theme === "dark" ? "#fff": "#333"}} />} onClick={handleSearchClick1} />
                                                 <Input
                                                     placeholder="Search here"
                                                     autoFocus={isSearchingAccount}  // Only autofocus when searching
@@ -1530,7 +1530,8 @@ const UsersTable = () => {
                                                     onChange={handleaccountSearchChange}
                                                     onBlur={handleBlur1} 
                                                     className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                                                    style={{ width: '100%', border: '1px solid #37474F', borderRadius: '6px', marginLeft: '8px', backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555',borderColor: theme === 'dark' ? '#444444' : '#d9d9d9'  }} 
+                                                    // style={{ width: '100%', border: '1px solid green', borderRadius: '6px', marginLeft: '8px', backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555',borderColor: theme === 'dark' ? '#444444' : '#d9d9d9'  }} 
+                                                    style={{ width: '100%', marginLeft: '8px', border: '1px solid green', }}
                                                 />
                                             </div>
                                         </Col>
@@ -1539,7 +1540,7 @@ const UsersTable = () => {
                                             <Select
                                                 onChange={onChangeNetwork}
                                                 defaultValue="All"
-                                                style={{ width: "100%", marginTop: '8px', border: '1px solid #37474F', borderRadius: '6px',
+                                                style={{ width: "100%", marginTop: '8px', border: '1px solid green', borderRadius: '6px',
                                                 }}
                                                 className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                                 dropdownClassName={theme === 'dark' && "custom-dropdown"}
@@ -1554,7 +1555,7 @@ const UsersTable = () => {
                                             <Select
                                                 onChange={onChangeStatus}
                                                 defaultValue="All"
-                                                style={{ width: "100%", marginTop: '8px', border: '1px solid #37474F', borderRadius: '6px',
+                                                style={{ width: "100%", marginTop: '8px', border: '1px solid green', borderRadius: '6px',
                                                 }}
                                                 className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                                 dropdownClassName={theme === 'dark' && "custom-dropdown"}
@@ -1567,7 +1568,7 @@ const UsersTable = () => {
                                     </Row>
                                 </Col>
                                 <Col xs={24} sm={12} md={3}>
-                                    <div style={{marginLeft: '0px', fontWeight: 'bold', color: theme === 'dark' ? '#fff' : '#333' }}>
+                                    <div style={{marginLeft: '0px', color: theme === 'dark' ? '#fff' : '#333' }}>
                                         Total.No Of Records {accFilteredData.length}
                                     </div>
                                 </Col>
@@ -1623,7 +1624,7 @@ const UsersTable = () => {
                                         <Col xs={24} sm={12} md={8}>
                                             <span style={{ color: "#B4B4B4", display: 'block' }}>Search</span>
                                             <div style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
-                                                <Button  style={{backgroundColor: theme === "dark" ? "#555": "#fff", borderColor: "", border: '1px solid #37474F', borderRadius: '6px',}} icon={<SearchOutlined  style={{color: theme === "dark" ? "#fff": "#333"}} />} onClick={handleSearchNetwork} />
+                                                <Button  style={{backgroundColor: theme === "dark" ? "#555": "#fff", borderColor: "", border: '1px solid green', borderRadius: '6px',}} icon={<SearchOutlined  style={{color: theme === "dark" ? "#fff": "#333"}} />} onClick={handleSearchNetwork} />
                                                 <Input
                                                     placeholder="Search here"
                                                     autoFocus={isSearchingNetwork}  // Only autofocus when searching
@@ -1632,7 +1633,7 @@ const UsersTable = () => {
                                                     onBlur={handleBlur2} 
                                                     className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                                     // style={{ width: '100%', marginLeft: '8px', backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555',borderColor: theme === 'dark' ? '#444444' : '#37474F'}}
-                                                    style={{ width: '100%', marginLeft: '8px' }} 
+                                                    style={{ width: '100%', marginLeft: '8px', border: '1px solid green', }} 
                                                 />
                                             </div>
                                         </Col>
@@ -1642,7 +1643,7 @@ const UsersTable = () => {
                                                 onChange={onChangeNetwork}
                                                 dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                                 defaultValue="All"
-                                                style={{ width: "100%", marginTop: '8px', border: '1px solid #37474F', borderRadius: '6px',
+                                                style={{ width: "100%", marginTop: '8px', border: '1px solid green', borderRadius: '6px',
                                                 }}
                                                 className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                                 options={availableNetworks.map((item) => ({
@@ -1657,7 +1658,7 @@ const UsersTable = () => {
                                                 onChange={onChangeStatus}
                                                 dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                                 defaultValue="All"
-                                                style={{ width: "100%", marginTop: '8px', border: '1px solid #37474F', borderRadius: '6px',
+                                                style={{ width: "100%", marginTop: '8px', border: '1px solid green', borderRadius: '6px',
                                                 }}
                                                 className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                                 options={networkStatus.map((item) => ({
@@ -1669,7 +1670,7 @@ const UsersTable = () => {
                                     </Row>
                                 </Col>
                                 <Col xs={24} sm={12} md={3}>
-                                    <div style={{marginLeft: '0px', fontWeight: 'bold', color: theme === 'dark' ? '#fff' : '#333' }}>
+                                    <div style={{marginLeft: '0px', color: theme === 'dark' ? '#fff' : '#333' }}>
                                         Total.No Of Records {networkFilteredData.length}
                                     </div>
                                 </Col>
@@ -1723,13 +1724,14 @@ const UsersTable = () => {
                                         <Col xs={24} sm={12} md={8}>
                                             <span style={{ color: "#B4B4B4", display: 'block' }}>Search</span>
                                             <div style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
-                                                <Button  style={{backgroundColor: theme === "dark" ? "#555": "#fff", border: '1px solid #37474F', borderRadius: '6px',}} icon={<SearchOutlined  style={{color: theme === "dark" ? "#fff": "#333"}} />} onClick={handleSearchClick1} />
+                                                <Button  style={{backgroundColor: theme === "dark" ? "#555": "#fff", border: '1px solid green', borderRadius: '6px',}} icon={<SearchOutlined  style={{color: theme === "dark" ? "#fff": "#333"}} />} onClick={handleSearchClick1} />
                                                 <Input
                                                     placeholder="Search here"
                                                     autoFocus={isSearchingAccount}  // Only autofocus when searching
                                                     value={newSearchInput} 
                                                     className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                                                    style={{ width: '100%', border: '1px solid #37474F', borderRadius: '6px', marginLeft: '8px', backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555',borderColor: theme === 'dark' ? '#444444' : '#d9d9d9'  }} 
+                                                    // style={{ width: '100%', border: '1px solid green', borderRadius: '6px', marginLeft: '8px', backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555',borderColor: theme === 'dark' ? '#444444' : '#d9d9d9'  }} 
+                                                    style={{ width: '100%', marginLeft: '8px', border: '1px solid green', }}
                                                 />
                                             </div>
                                         </Col>
@@ -1737,7 +1739,7 @@ const UsersTable = () => {
                                             <span style={{ color: "#B4B4B4", display: 'block' }}>Network</span>
                                             <Select
                                                 defaultValue="All"
-                                                style={{ width: "100%", marginTop: '8px', border: '1px solid #37474F', borderRadius: '6px',
+                                                style={{ width: "100%", marginTop: '8px', border: '1px solid green', borderRadius: '6px',
                                                 }}
                                                 className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                                 dropdownClassName={theme === 'dark' && "custom-dropdown"}
@@ -1792,6 +1794,7 @@ const UsersTable = () => {
                         <Modal
                             title="URL Builder"
                             visible={isModalVisibleForURLBuilder}
+                            className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             onCancel={handleCancelForURLBuilder}
                             footer={null}
                             width="80%" // Set width of the modal

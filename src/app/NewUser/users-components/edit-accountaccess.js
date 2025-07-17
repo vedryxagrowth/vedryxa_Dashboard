@@ -278,6 +278,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
 
       <Modal
         title="Confirmation"
+        className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
         open={isModalVisible}
         onOk={() => {
           form.submit();

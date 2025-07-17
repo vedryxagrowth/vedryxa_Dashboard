@@ -64,10 +64,12 @@ const UploadComponent = forwardRef(({ onSubmit, isLoading = false }, ref) => {
     if (!validateForm()) return;
 
     Modal.confirm({
-      title: 'Confirm Submission',
+    //   title: 'Confirm Submission',
       content: 'Are you sure you want to submit this notification?',
       okText: 'Yes',
       cancelText: 'No',
+      icon: null,
+      className: theme === 'dark' ? 'dark-confirm-modal' : '',
       onOk: async () => {
         try {
           const formDataToSend = new FormData();
