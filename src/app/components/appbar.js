@@ -356,7 +356,7 @@ const Appbar = ({ children, usersDataForLogin }) => {
                     ) : (
                         <Image
                             // src="/RR1.png"
-                            src={darkMode ? "/logodark.png" : "/logo.png"}
+                            src={darkMode ? "/logodark.png" : "/logolight.png"}
                             width={150}  // Larger logo when expanded
                             height={65}
                             priority={true}
@@ -378,6 +378,7 @@ const Appbar = ({ children, usersDataForLogin }) => {
                                 : 'transparent',
                             fontWeight: "500", fontSize: "16px" 
                           }}
+                           title=""
                         >
                             {item.label}
                         </Menu.Item>
@@ -427,7 +428,7 @@ const Appbar = ({ children, usersDataForLogin }) => {
                       </div>
 
                       {/* Footer always at bottom of 86vh */}
-                      <div style={{ marginTop: '30px', marginLeft: '15px', marginBottom:'5px' }}>
+                      <div style={{  marginLeft: '15px', marginBottom:'-60px' }}>
                         <h4 style={{ fontWeight: "200", margin: 0 }}>
                           Copyright © {dayjs().format('YYYY')} All rights reserved | vyaktimetrics
                         </h4>

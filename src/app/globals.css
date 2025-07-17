@@ -122,12 +122,13 @@ a {
 
 .ad-button button {
   font-size: 14px;
-  font-weight: 400;
-  border-radius: 10px;
-  border: none;
+  border-radius: 20px;
   padding: 6px 12px;
   white-space: nowrap;
   cursor: pointer;
+  background-color: #91C25F;
+  border: 1px solid #4caf50;
+  margin-bottom:'5px';
 }
 .icons {
   display: flex;
@@ -1206,17 +1207,26 @@ body.dark-mode .black-icon-comment.anticon svg {
 
 @media (max-width: 500px) {
   .custom-input-dark{
-    width: 310px !important; /* Adjust width for smaller screens */
+    width: 310px !important;
     /* margin-bottom: 10px; */
     /* margin-top: 10px; */
   }
   .custom-input-light{
-    width: 310px !important; /* Adjust width for smaller screens */
+    width: 310px !important; 
     /* margin-bottom: 10px; */
     /* margin-top: 10px; */
   }
 }
-  
+.custom-input-dark:hover {
+  border-color: #4caf50 !important; 
+ 
+}
+
+
+.custom-input-light:hover {
+  border-color: #4caf50 !important; 
+ ;
+}
 
 .custom-input-light::placeholder {
   color: #888 !important;
@@ -3201,7 +3211,7 @@ body.dark .upload-form-wrapper {
   font-weight: normal !important;
 }
 
-/* Override default OK button in modal */
+
 .ant-modal .ant-btn-primary {
   background-color: #91C25F !important;
   border-color: #91C25F !important;
@@ -3216,9 +3226,6 @@ body.dark .upload-form-wrapper {
 .dark-confirm-modal .ant-modal-confirm .ant-modal-title {
   color: #ffffff !important;
 }
-/*  */
-
-
 
 
 

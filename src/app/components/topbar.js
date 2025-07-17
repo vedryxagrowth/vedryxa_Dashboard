@@ -2102,7 +2102,7 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
             </div>
           </div>
           <img
-            src="/logo.png"
+            src="/logolight.png"
             alt="Logo"
             style={{
               position: 'absolute',
