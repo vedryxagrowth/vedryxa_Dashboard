@@ -421,7 +421,7 @@ const ExpandedRowContent = ({ record, changeRRefrst, network}) => {
                 <Createnewads data={viewCampaignData} visible={newadsDrawerVisible} onClose={onCloseDrawer} rerenders={changeRRefrst} adsData={viewCampaignData?.addlevel} network={network} />
             </Drawer>
             <Drawer
-                title="Edit Ad"
+                title="Edit ad"
                 width={"100%"}
                 onClose={() => {
                     setIsDrawerVisible(false);   // Close the drawer

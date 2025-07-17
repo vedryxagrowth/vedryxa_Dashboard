@@ -357,13 +357,13 @@ const Editads = ({ viewCampaignData, changeRRefrst, editdata, onClose }) => {
   const [fileList, setFileList] = useState(
     initialMedia
       ? [
-          {
-            uid: "-1", // Unique ID for the default file
-            name: initialMedia.split("/").pop(), // Extract filename from URL
-            status: "done", // Mark as already uploaded
-            url: initialMedia, // Default image/video URL
-          },
-        ]
+        {
+          uid: "-1", // Unique ID for the default file
+          name: initialMedia.split("/").pop(), // Extract filename from URL
+          status: "done", // Mark as already uploaded
+          url: initialMedia, // Default image/video URL
+        },
+      ]
       : []
   );
   const { theme } = useTokenContext();
@@ -530,9 +530,10 @@ const Editads = ({ viewCampaignData, changeRRefrst, editdata, onClose }) => {
 
         // const mediaData = await customRequest(imageshow, imagehash, onSuccess, onError);
 
-        let newAddData = {id: uuidv4(), ...formData, filename: editdata?.filename, imag_hash: editdata?.imag_hash};
-        if(editdata?.videoid){
-          newAddData = {...newAddData,
+        let newAddData = { id: uuidv4(), ...formData, filename: editdata?.filename, imag_hash: editdata?.imag_hash };
+        if (editdata?.videoid) {
+          newAddData = {
+            ...newAddData,
             videoid: editdata?.videoid,
             thambnailurl: editdata?.thambnailurl,
           }
@@ -645,13 +646,13 @@ const Editads = ({ viewCampaignData, changeRRefrst, editdata, onClose }) => {
           ...editdata, // Include other form values
           MediaContent: editdata?.filename
             ? [
-                {
-                  uid: "-1", // Unique identifier for the default file
-                  name: editdata.filename.split("/").pop(), // Extract filename from URL
-                  status: "done", // Mark the file as uploaded
-                  url: editdata.filename, // URL of the default file
-                },
-              ]
+              {
+                uid: "-1", // Unique identifier for the default file
+                name: editdata.filename.split("/").pop(), // Extract filename from URL
+                status: "done", // Mark the file as uploaded
+                url: editdata.filename, // URL of the default file
+              },
+            ]
             : [], // Initialize with an empty array if no default file
         }}
         onValuesChange={(changedValues) => {
@@ -665,13 +666,13 @@ const Editads = ({ viewCampaignData, changeRRefrst, editdata, onClose }) => {
       >
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <div style={{ flex: '70%', marginRight: '5%' }}>
-            <Form.Item name="page_id" label="Page ID" rules={[{ required: true, message: 'Please enter a Page ID' }]}>
-              <Input  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
+            <Form.Item name="page_id" label={<span style={{ color: "#B4B4B4" }}>Page id</span>} rules={[{ required: true, message: 'Please enter a Page ID' }]}>
+              <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
             </Form.Item>
 
             <Form.Item
               name="MediaContent"
-              label="Upload Media"
+              label={<span style={{ color: "#B4B4B4" }}>Upload media</span>}
               rules={[{ required: true, message: "Please upload a file!" }]}
               valuePropName="fileList"
               getValueFromEvent={(e) => e?.fileList || []}
@@ -688,13 +689,13 @@ const Editads = ({ viewCampaignData, changeRRefrst, editdata, onClose }) => {
                 defaultFileList={
                   editdata?.filename
                     ? [
-                        {
-                          uid: "-1",
-                          name: editdata.filename.split("/").pop(),
-                          status: "done",
-                          url: editdata.filename,
-                        },
-                      ]
+                      {
+                        uid: "-1",
+                        name: editdata.filename.split("/").pop(),
+                        status: "done",
+                        url: editdata.filename,
+                      },
+                    ]
                     : []
                 }
                 showUploadList={{
@@ -711,28 +712,28 @@ const Editads = ({ viewCampaignData, changeRRefrst, editdata, onClose }) => {
             </Form.Item>
 
 
-            <Form.Item name="AddName" label="Add Name" rules={[{ required: true, message: 'Please enter an ad name!' }]}>
-              <Input onChange={(e) => setAddName(e.target.value)}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
+            <Form.Item name="AddName" label={<span style={{ color: "#B4B4B4" }}>Ad name</span>} rules={[{ required: true, message: 'Please enter an ad name!' }]}>
+              <Input onChange={(e) => setAddName(e.target.value)} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
             </Form.Item>
 
-            <Form.Item name="message" label="Primary Text" rules={[{ required: true, message: 'Please enter a message!' }]}>
-              <TextArea placeholder="Primary Text" autoSize={{ minRows: 2, maxRows: 10 }} onChange={(e) => setPrimaryText(e.target.value)}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
+            <Form.Item name="message" label={<span style={{ color: "#B4B4B4" }}>Primary text</span>} rules={[{ required: true, message: 'Please enter a message!' }]}>
+              <TextArea placeholder="Primary Text" autoSize={{ minRows: 2, maxRows: 10 }} onChange={(e) => setPrimaryText(e.target.value)} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
             </Form.Item>
 
-            <Form.Item name="Caption" label="Caption" rules={[{ required: true, message: 'Please enter a caption!' }]}>
-              <TextArea placeholder="Caption" autoSize={{ minRows: 2, maxRows: 10 }} onChange={(e) => setCaption(e.target.value)}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
+            <Form.Item name="Caption" label={<span style={{ color: "#B4B4B4" }}>Caption</span>} rules={[{ required: true, message: 'Please enter a caption!' }]}>
+              <TextArea placeholder="Caption" autoSize={{ minRows: 2, maxRows: 10 }} onChange={(e) => setCaption(e.target.value)} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
             </Form.Item>
 
-            <Form.Item name="headline" label="Headline" rules={[{ required: true, message: 'Please enter a headline!' }]}>
-              <TextArea placeholder="Headline" autoSize={{ minRows: 2, maxRows: 10 }} onChange={(e) => setHeadline(e.target.value)}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
+            <Form.Item name="headline" label={<span style={{ color: "#B4B4B4" }}>Headline</span>} rules={[{ required: true, message: 'Please enter a headline!' }]}>
+              <TextArea placeholder="Headline" autoSize={{ minRows: 2, maxRows: 10 }} onChange={(e) => setHeadline(e.target.value)} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
             </Form.Item>
 
-            <Form.Item name="Description" label="Description" rules={[{ required: true, message: 'Please enter a description!' }]}>
-              <TextArea placeholder="Description" autoSize={{ minRows: 2, maxRows: 10 }} onChange={(e) => setDescription(e.target.value)}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
+            <Form.Item name="Description" label={<span style={{ color: "#B4B4B4" }}>Description</span>} rules={[{ required: true, message: 'Please enter a description!' }]}>
+              <TextArea placeholder="Description" autoSize={{ minRows: 2, maxRows: 10 }} onChange={(e) => setDescription(e.target.value)} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
             </Form.Item>
 
-            <Form.Item name="Website_URL" label="Website URL" rules={[{ required: true, message: 'Please enter a website URL!' }]}>
-              <TextArea placeholder="Website URL" autoSize={{ minRows: 2, maxRows: 10 }} onChange={(e) => setWebsiteURL(e.target.value)}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
+            <Form.Item name="Website_URL" label={<span style={{ color: "#B4B4B4" }}>Website URL</span>} rules={[{ required: true, message: 'Please enter a website URL!' }]}>
+              <TextArea placeholder="Website URL" autoSize={{ minRows: 2, maxRows: 10 }} onChange={(e) => setWebsiteURL(e.target.value)} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
             </Form.Item>
           </div>
 
@@ -796,7 +797,7 @@ const Editads = ({ viewCampaignData, changeRRefrst, editdata, onClose }) => {
                   </Tooltip>
                 </div>
 
-                <div style={{ fontSize: '14px', color: '#333', marginBottom: '10px' }}>
+                <div style={{ fontSize: '14px',color: theme === 'dark' ? '#fff' : '333', marginBottom: '10px' }}>
                   {primaryText || 'Default primary text...'}
                 </div>
               </div>
@@ -831,20 +832,20 @@ const Editads = ({ viewCampaignData, changeRRefrst, editdata, onClose }) => {
                 )}
               </div>
 
-              <div style={{ padding: '10px 16px' }}>
-                <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#333' }}>{headline || 'Default headline'}</div>
-                <div style={{ fontSize: '14px', color: '#333', marginBottom: '10px' }}>{description || 'Default description'}</div>
-                <div style={{ fontSize: '12px', color: '#888', marginBottom: '10px' }}>{caption || 'Default caption'}</div>
+              <div style={{ padding: '10px 13px' }}>
+                <div style={{ fontSize: '16px', fontWeight: 'bold', color: theme === 'dark' ? '#fff' : '333', marginBottom: '5px' }}>{headline || 'Default headline'}</div>
+                <div style={{ fontSize: '14px', color: theme === 'dark' ? '#fff' : '333', marginBottom: '5px' }}>{description || 'Default description'}</div>
+                <div style={{ fontSize: '12px',color: theme === 'dark' ? '#fff' : '333' , marginBottom: '5px' }}>{caption || 'Default caption'}</div>
 
                 <div className="ad-button">
-                  <button type="button">Learn More</button>
+                  <button type="button">Learn more</button>
                 </div>
-                <a href={websiteURL} target="_blank" rel="noopener noreferrer" style={{ color: '#0066cc', padding: '10px' }}>
+                <a href={websiteURL} target="_blank" rel="noopener noreferrer" style={{ color: '#0066cc',margin:'5px' }}>
                   {websiteURL || 'https://default-url.com'}
                 </a>
               </div>
 
-              <div className="icons" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px', padding: '0 16px' }}>
+              <div className="icons" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px', padding: '0 16px',marginBottom:'10px' }}>
                 <div className="like">
                   <LikeOutlined style={{ fontSize: '20px', marginRight: '5px' }} />
                   Like
@@ -864,10 +865,10 @@ const Editads = ({ viewCampaignData, changeRRefrst, editdata, onClose }) => {
 
         <Form.Item>
           <Space>
-            <Button type="primary" htmlType="submit">
+            <Button htmlType="submit" style={{ backgroundColor: '#91C25F', border: '1px solid #4caf50' }}>
               Submit
             </Button>
-            <Button onClick={() => form.resetFields()}>Clear</Button>
+            <Button style={{ backgroundColor: 'transparent', border: '1px solid #4caf50', color: theme === 'dark' ? '#fff' : '333' }} onClick={() => form.resetFields()}>Clear</Button>
           </Space>
         </Form.Item>
       </Form>
