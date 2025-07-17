@@ -1128,7 +1128,7 @@ const MnetLiveAdHistory = ({params}) => {
         // const fetchData = await fetch(`http://localhost:8000/${network}?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}`);
         // const data = await fetchData.json();
         // const mainData = await data;
-        const fetchData = await apiClient.get(`/LiveAdHistory?adName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}&network=Facebook_Mnet_AD}`);
+        const fetchData = await apiClient.get(`/LiveAdHistory?adName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}&network=Facebook_Mnet_AD`);
         
         const mainData = fetchData?.data?.filter(obj => !("ad_clicks" in obj));
         console.log(mainData[0]);
