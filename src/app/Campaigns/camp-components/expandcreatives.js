@@ -292,11 +292,12 @@ const ExpandedRowContent = ({ record, changeRRefrst, network}) => {
                                             border: "none",
                                             cursor: "pointer",
                                             flexShrink: 0,
+                                            marginBottom:'5px'
                                         }}
                                         // style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}}
                                         onClick={() => console.log('Learn More clicked:', item)}
                                     >
-                                        Learn More
+                                        Learn more
                                     </button>
                                 </div>
 
@@ -339,9 +340,9 @@ const ExpandedRowContent = ({ record, changeRRefrst, network}) => {
 
                                     {/* Approve/Reject buttons (only if the user is not a media buyer and the item is not approved or rejected) */}
                                     {(!isMediaBuyer && item.status !== "Approved" && item.status !== "Rejected") && (
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                                            <Button style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px", marginRight: 'auto'}} onClick={() => handleApprove(item)}>Approve</Button>
-                                            <Button type='primary' danger style={{ marginLeft: 'auto' }} onClick={() => handleRejectClick(item)}>Reject</Button>
+                                        <div style={{ display: 'flex',justifyContent: "space-evenly", width: '100%' }}>
+                                            <Button style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px",margin:'18px'}} onClick={() => handleApprove(item)}>Approve</Button>
+                                            <Button type='primary' danger style={{ margin:'18px', borderColor: ' #ff6666' }} onClick={() => handleRejectClick(item)}>Reject</Button>
                                         </div>
                                     )}
 
@@ -397,7 +398,7 @@ const ExpandedRowContent = ({ record, changeRRefrst, network}) => {
                                 // }}
                                 style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px",padding: '8px 16px',borderRadius: '8px',}}
                             >
-                                Create Ads
+                                Create ads
                             </Button>
                         </Card>
                     </Col>
@@ -409,19 +410,19 @@ const ExpandedRowContent = ({ record, changeRRefrst, network}) => {
                 </Button>
             </div> */}
             <Drawer
-                title="Create Ads"
+                title="Create ads"
                 placement="right"
                 // closable={false}
                 onClose={onCloseDrawer}
                 open={newadsDrawerVisible}
-                width="90%" // Adjust width as needed
+                width="100%" // Adjust width as needed
                 style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
             >
                 <Createnewads data={viewCampaignData} visible={newadsDrawerVisible} onClose={onCloseDrawer} rerenders={changeRRefrst} adsData={viewCampaignData?.addlevel} network={network} />
             </Drawer>
             <Drawer
                 title="Edit Ad"
-                width={"70%"}
+                width={"100%"}
                 onClose={() => {
                     setIsDrawerVisible(false);   // Close the drawer
                     setSelectedItem(null);       // Reset the selected item to avoid showing old data
@@ -438,7 +439,7 @@ const ExpandedRowContent = ({ record, changeRRefrst, network}) => {
 
             {/* Rejection Modal */}
             <Modal
-                title="Reject Ad"
+                title="Reject ad"
                 visible={isRejectModalVisible}
                 onOk={handleConfirmReject}
                 onCancel={handleCancelReject}

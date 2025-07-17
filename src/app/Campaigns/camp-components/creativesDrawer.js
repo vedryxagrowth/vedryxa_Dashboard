@@ -1046,7 +1046,7 @@ const CreativesDrawer = ({selectedFilesData}) => {
                 selectedAccountNumber={selectedAccountNumber}
             /> */}
 
-            <h1>Image Upload and Edit</h1>
+            <h1>Image upload and edit</h1>
             <Row justify="start" align="middle" gutter={[16, 16]}>
                 {/* <Col span={3}>
                         <Select
@@ -1131,7 +1131,7 @@ const CreativesDrawer = ({selectedFilesData}) => {
                         )}
                     </Select>                       
                 </Col> */}
-                <Col span={5}>
+                <Col span={14}>
                     <ConfigProvider>
                         <RangePicker
                             presets={rangePresets}
@@ -1204,7 +1204,7 @@ const CreativesDrawer = ({selectedFilesData}) => {
                     // accept=".png,.jpg,.jpeg,.mp4,.mov"
                     accept="image/*, video/*" 
                 >
-                    <Button style={{marginLeft: '10px', border:'none'}} icon={<UploadOutlined />}>Select Files</Button>
+                    <Button style={{marginLeft: '10px', border:'none'}} icon={<UploadOutlined />}>Select files</Button>
                 </Upload>
             </div>
             <div style={{ 

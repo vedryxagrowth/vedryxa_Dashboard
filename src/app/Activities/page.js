@@ -46,13 +46,13 @@ const UserTable = () => {
       onFilter: (value, record) => record.name === value,
     },
     {
-      title: "Last Timestamp",
+      title: "Last timestamp",
       dataIndex: "timestamp",
       key: "timestamp",
       sorter: (a, b) => new Date(b.timestamp) - new Date(a.timestamp),
     },
     {
-      title: "IP Address",
+      title: "IP address",
       dataIndex: "ip",
       key: "ip",
       sorter: (a, b) => a.ip.localeCompare(b.ip),
@@ -112,7 +112,7 @@ const UserTable = () => {
       },
     },
     {
-      title: "Last Location",
+      title: "Last location",
       dataIndex: "location",
       key: "location",
       sorter: (a, b) =>
@@ -142,7 +142,7 @@ const UserTable = () => {
           : "Unknown",
     },
     {
-      title: "Last Device Type",
+      title: "Last device type",
       dataIndex: ["device", "type"],
       key: "deviceType",
       sorter: (a, b) =>
@@ -230,8 +230,8 @@ const UserTable = () => {
                           )
                         }
                       >
-                        <strong>IP Address:</strong>{" "}
-                        <span style={{backgroundColor: theme === "dark" ? "#06B6D4" : "yellow"}}>{activity.ip || "Unknown"}</span>
+                        <strong>IP address:</strong>{" "}
+                        <span style={{backgroundColor: theme === "dark" ? " #91C25F" : "#91C25F"}}>{activity.ip || "Unknown"}</span>
                       </Tooltip>
                     </p>
                     <p>
@@ -242,10 +242,10 @@ const UserTable = () => {
                       {activity.location?.zip || "Unknown"})
                     </p>
                     <p>
-                      <strong style={{backgroundColor:theme === "dark" ? "#127a78" : "yellow"}}>Device:</strong> {activity.device?.type || "Unknown"}
+                      <strong style={{backgroundColor:theme === "dark" ? "#91C25F" : " #91C25F"}}>Device:</strong> {activity.device?.type || "Unknown"}
                     </p>
                     <p>
-                      <strong>User Agent:</strong>{" "}
+                      <strong>User agent:</strong>{" "}
                       {activity.userAgent || "Unknown"}
                     </p>
                   </Card>

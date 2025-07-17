@@ -1806,7 +1806,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
             title={
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span>Create a new campaign</span>
-                    <Select value={newSelectedRef.current} placeholder="Select Draft" style={{ width: 150 }} onChange={onChangeDraft}
+                    <Select value={newSelectedRef.current} placeholder="Select draft" style={{ width: 150 }} onChange={onChangeDraft}
                                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}>
                         {draftsData.map((draft) => (
@@ -1818,7 +1818,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                     </Select>
                 </div>
             }
-            width="95%"
+            width="100%"
             open={visible}
             onClose={handleDrawerClose}
             style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
@@ -1832,7 +1832,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                             <div style={{ display: "flex", backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000'}}>
                                 <Form.Item
                                     name="Account_Number"
-                                    label={<span style={{ color: "#B4B4B4" }}>Account Number</span>}
+                                    label={<span style={{ color: "#B4B4B4" }}>Account number</span>}
                                     rules={[
                                         {
                                             required: true,
@@ -1974,7 +1974,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         variant="filled"
                                         options={[
                                             { value: "ACTIVE", label: "ACTIVE" },
-                                            { value: "PAUSED", label: "PAUSED" },
+                                            { value: "PAUSED", label: "PAUSE" },
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
@@ -2182,7 +2182,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 {showBidAmount && (
                                     <Form.Item
                                         name="bid_amount"
-                                        label={<span style={{ color: "#B4B4B4" }}>Cost per Result Goal</span>}
+                                        label={<span style={{ color: "#B4B4B4" }}>Cost per result goal</span>}
                                         rules={[
                                             {
                                                 required: true,
@@ -2216,13 +2216,13 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                                     event.preventDefault();
                                                 }
                                             }}
-                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                          className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                         />
 
                                     </Form.Item>
                                 )}
                             </div>
-                            <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "green" }}>Targeting</span>
+                            <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "#91C25F" }}>Targeting</span>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
                                 <Form.Item
                                     name="countries"
@@ -2262,7 +2262,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 </Form.Item>
                                 <Form.Item
                                     name="Min_Age"
-                                    label={<span style={{ color: "#B4B4B4" }}>Min Age</span>}
+                                    label={<span style={{ color: "#B4B4B4" }}>Min age</span>}
                                     rules={[
                                         {
                                             required: true,
@@ -2284,7 +2284,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 </Form.Item>
                                 <Form.Item
                                     name="Max_Age"
-                                    label={<span style={{ color: "#B4B4B4" }}>Max Age</span>}
+                                    label={<span style={{ color: "#B4B4B4" }}>Max age</span>}
                                     rules={[
                                         {
                                             required: true,
@@ -2350,7 +2350,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     </Select>
                                 </Form.Item>
                                 <Form.Item
-                                    label="Placements"
+                                   label={<span style={{ color: "#B4B4B4" }}>Placements</span>}
                                     name="placements"
                                     rules={[{ required: true, message: 'Please select a mode!' }]}
                                 >
@@ -2440,7 +2440,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     <div style={{ display: 'flex', gap: '16px' }}>
                                     <div style={{display:'flex', flexDirection:'column'}}>
                                         <Form.Item
-                                            label={<span style={{ color: "#B4B4B4" }}>Select Source</span>}
+                                            label={<span style={{ color: "#B4B4B4" }}>Select source</span>}
                                             style={{ flex: 1 }}
                                             >
                                             <Select
@@ -2454,7 +2454,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                                 className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                             >
                                                 <Option value="upload">Upload</Option>
-                                                <Option value="creative">Creative Library</Option>
+                                                <Option value="creative">Creative library</Option>
                                             </Select>
                                             </Form.Item>
 
@@ -2532,7 +2532,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                                             listType="picture"
                                                             accept="image/*, video/*"
                                                         >
-                                                            <Button icon={<UploadOutlined />} className="dark-icon-button"  style={{color: theme === "dark" ? "white" : "#000"}}>Select Files</Button>
+                                                            <Button icon={<UploadOutlined />} className="dark-icon-button"  style={{color: theme === "dark" ? "white" : "#000"}}>Select files</Button>
                                                         </Upload>
                                                     </div>
 
@@ -2540,7 +2540,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                                     {selectedOption === "creative" && (
                                                     <div>
                                                         <Button icon={<UploadOutlined />} onClick={onClickCreativesDrawer} className="dark-icon-button"  style={{color: theme === "dark" ? "white" : "#000"}}>
-                                                        Select Files
+                                                        Select files
                                                         </Button>
 
                                                         {selectedFilesFromCreatives?.length > 0 && (
@@ -2631,7 +2631,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     <Form.Item
                                         name="AddName"
                                         initialValue={campaignName}
-                                        label={<span style={{ color: "#B4B4B4" }}>Add name</span>}
+                                        label={<span style={{ color: "#B4B4B4" }}>Ad name</span>}
                                         rules={[
                                             {
                                                 required: true,
@@ -2646,7 +2646,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         />
                                     </Form.Item>
                                     <Form.Item
-                                        label="Primary text"
+                                         label={<span style={{ color: "#B4B4B4" }}>Primary text</span>}
                                         name="message"
                                         rules={[
                                             {
@@ -2683,7 +2683,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         />
                                     </Form.Item> */}
                                     <Form.Item
-                                        label="Headline"
+                                         label={<span style={{ color: "#B4B4B4" }}>Headline</span>}
                                         name="headline"
                                         rules={[
                                             {
@@ -2702,7 +2702,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     </Form.Item>
 
                                     <Form.Item
-                                        label="Description"
+                                          label={<span style={{ color: "#B4B4B4" }}>Description</span>}
                                         name="Description"
                                         rules={[
                                             {
@@ -2723,7 +2723,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         label={
                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', paddingRight: '50px' }}>
-                                                    <span>Website_URL</span>
+                                                    <span style={{ color: "#B4B4B4" }}>Website_URL</span>
                                                     <Tooltip title="This is a required field">
                                                         <QuestionCircleOutlined style={{ marginLeft: 4, cursor: 'pointer' }} />
                                                     </Tooltip>
@@ -2751,7 +2751,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         />
                                     </Form.Item>
                                     <Form.Item
-                                        label="Display Link"
+                                         label={<span style={{ color: "#B4B4B4" }}>Display link</span>}
                                         name="Caption"
                                         rules={[
                                             {
@@ -3136,7 +3136,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
             </Spin>
             {openCreativesDrawer && (
                 <Drawer
-                    title="Select Creatives"
+                    title="Select creatives"
                     width="95%"
                     open={openCreativesDrawer}
                     onClose={() => setOpenCreativesDrawer(false)}

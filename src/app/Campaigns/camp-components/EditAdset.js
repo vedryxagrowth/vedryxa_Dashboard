@@ -741,7 +741,7 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
 
             <Form.Item
               name="DatePicker"
-              label={<span style={{ color: "#B4B4B4" }}>Start Time</span>}
+              label={<span style={{ color: "#B4B4B4" }}>Start time</span>}
               rules={[{ required: true, message: 'Please input!' }]}
               style={{ flex: "1 1 15%" }}
               initialValue={currentDate}
@@ -805,7 +805,7 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
             {initialValue.bid_amount > 0 && (
               <Form.Item
                 name="bid_amount"
-                label={<span style={{ color: "#B4B4B4" }}>Cost Per Result Goal</span>}
+                label={<span style={{ color: "#B4B4B4" }}>Cost per result goal</span>}
                 rules={[
                   { required: true, message: "Please enter a bid amount!" },
                   {
@@ -835,7 +835,7 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
 
           </div>
 
-          <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "green" }}>Targeting</span>
+          <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "#91C25F" }}>Targeting</span>
 
           <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
             <Form.Item
@@ -872,7 +872,7 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
 
             <Form.Item
               name="Min_Age"
-              label={<span style={{ color: "#B4B4B4" }}>Min Age</span>}
+              label={<span style={{ color: "#B4B4B4" }}>Min age</span>}
               rules={[{ required: true, message: "Please select an option!" }]}
               style={{ flex: "1 1 10%" }}
             >
@@ -890,7 +890,7 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
 
             <Form.Item
               name="Max_Age"
-              label={<span style={{ color: "#B4B4B4" }}>Max Age</span>}
+              label={<span style={{ color: "#B4B4B4" }}>Max age</span>}
               rules={[{ required: true, message: "Please select an option!" }]}
               style={{ flex: "1 1 10%" }}
             >
@@ -934,7 +934,7 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}/>
             </Form.Item>
             <Form.Item
-              label="Placements"
+              label={<span style={{ color: "#B4B4B4" }}>Placements</span>}
               name="placements"
               rules={[{ required: true, message: 'Please select a mode!' }]}
             >

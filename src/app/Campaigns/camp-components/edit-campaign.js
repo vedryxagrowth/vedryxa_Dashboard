@@ -258,7 +258,7 @@ const EditCampaignDrawer = ({ rowData, visible, onClose }) => {
     return (
         <Drawer
             title="Edit campaign campaign"
-            width="95%"
+            width="100%"
             open={visible}
             onClose={onClose}
         >
@@ -397,7 +397,7 @@ const EditCampaignDrawer = ({ rowData, visible, onClose }) => {
                                         variant="filled"
                                         options={[
                                             { value: "ACTIVE", label: "ACTIVE" },
-                                            { value: "PAUSED", label: "PAUSED" },
+                                            { value: "PAUSED", label: "PAUSE" },
 
                                         ]}
                                     />
@@ -551,7 +551,7 @@ const EditCampaignDrawer = ({ rowData, visible, onClose }) => {
 
 
                             </div>
-                            <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "green" }}>Targeting</span>
+                            <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "#91C25F" }}>Targeting</span>
                             <div style={{ display: "flex" }}>
                                 <Form.Item
                                     name="countries"

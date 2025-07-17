@@ -915,7 +915,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
                 </Form.Item> */}
                 <div style={{display:'flex', flexDirection:'column'}}>
                                         <Form.Item
-                                            label={<span style={{ color: "#B4B4B4" }}>Select Source</span>}
+                                            label={<span style={{ color: "#B4B4B4" }}>Select source</span>}
                                             style={{ flex: 1 }}
                                             >
                                             <Select
@@ -930,7 +930,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
                                                 className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                             >
                                                 <Option value="upload">Upload</Option>
-                                                <Option value="creative">Creative Library</Option>
+                                                <Option value="creative">Creative library</Option>
                                             </Select>
                                             </Form.Item>
 
@@ -1008,7 +1008,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
                                                             listType="picture"
                                                             accept="image/*, video/*"
                                                         >
-                                                            <Button icon={<UploadOutlined /> }  disabled={selectedFiles.length > 0 && true}  className="dark-icon-button"  style={{color: theme === "dark" ? "white" : "#000"}}>Select Files</Button>
+                                                            <Button icon={<UploadOutlined /> }  disabled={selectedFiles.length > 0 && true}  className="dark-icon-button"  style={{color: theme === "dark" ? "white" : "#000"}}>Select files</Button>
                                                         </Upload>
                                                     </div>
 
@@ -1016,7 +1016,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
                                                     {selectedOption === "creative" && (
                                                     <div>
                                                         <Button className="dark-icon-button"  style={{color: theme === "dark" ? "white" : "#000"}} icon={<UploadOutlined />} onClick={onClickCreativesDrawer}  disabled={selectedFiles.length > 0 && true}>
-                                                          Select Files
+                                                          Select files
                                                         </Button>
 
                                                         {selectedFilesFromCreatives?.length > 0 && (
@@ -1105,7 +1105,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
               </div>
               <Form.Item
                 name="AddName"
-                label={<span style={{ color: "#B4B4B4" }}>Add name</span>}
+                label={<span style={{ color: "#B4B4B4" }}>Ad name</span>}
                 rules={[
                   {
                     required: true,
@@ -1120,7 +1120,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
                 />
               </Form.Item>
               <Form.Item
-                label="Primary text"
+                label={<span style={{ color: "#B4B4B4" }}>Primary text</span>}
                 name="message"
                 rules={[
                   {
@@ -1141,7 +1141,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
               
 
               <Form.Item
-                label="Headline"
+                label={<span style={{ color: "#B4B4B4" }}>Headline</span>}
                 name="headline"
                 rules={[
                   {
@@ -1160,7 +1160,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
               </Form.Item>
 
               <Form.Item
-                label="Description"
+                label={<span style={{ color: "#B4B4B4" }}>Description</span>}
                 name="Description"
                 rules={[
                   {
@@ -1181,7 +1181,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
                 label={
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                     <div style={{ display: 'flex', alignItems: 'center', paddingRight: '50px' }}>
-                        <span>Website_URL</span>
+                        <span style={{ color: "#B4B4B4" }}>Website_URL</span>
                         <Tooltip title="This is a required field">
                           <QuestionCircleOutlined style={{ marginLeft: 4, cursor: 'pointer' }} />
                         </Tooltip>
@@ -1209,7 +1209,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
                 />
               </Form.Item>
               <Form.Item
-                label="Display Link"
+                label={<span style={{ color: "#B4B4B4" }}>Display link</span>}
                 name="Caption"
                 rules={[
                   {
@@ -1599,8 +1599,8 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
       </Spin>
       {openCreativesDrawer && (
                 <Drawer
-                    title="Select Creatives"
-                    width="95%"
+                    title="Select creatives"
+                    width="100%"
                     open={openCreativesDrawer}
                     onClose={() => setOpenCreativesDrawer(false)}
                     style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
@@ -1624,7 +1624,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
         // </div>
       )}
       <Modal
-        title="Form Data"
+        title="Form data"
         visible={isModalVisible}
         onOk={handleModalOk}
         onCancel={handleModalCancel}
@@ -1635,14 +1635,14 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
         )} */}
       </Modal>
       <Modal
-        title="URL Builder"
+        title="URL builder"
         visible={isModalVisibleForURLBuilder}
         onCancel={handleCancelForURLBuilder}
                                         
         footer={null}
         width="80%" // Set width of the modal
         bodyStyle={{ height: '50vh', overflowY: 'auto' }}
-        className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+         className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
       >
         {getUrlBuilder}
       </Modal>
