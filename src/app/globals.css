@@ -3230,3 +3230,50 @@ body.dark .upload-form-wrapper {
 
 
 
+/* Prevent blue color on hover/focus for Input */
+.custom-input-dark, .custom-input-light {
+  border-color: #91C25F !important; /* Retain your custom border color */
+}
+
+.custom-input-dark:focus, .custom-input-light:focus,
+.custom-input-dark:hover, .custom-input-light:hover {
+  border-color: #91C25F !important; /* Retain your custom border color */
+  outline: none !important; /* Remove the default blue outline */
+  box-shadow: none !important; /* Remove any box shadow caused by focus */
+}
+
+/* Prevent blue color on hover/focus for Select */
+.dark-theme, .light-theme {
+  border-color: #91C25F !important; /* Retain your custom border color */
+}
+
+.dark-theme:focus, .light-theme:focus,
+.dark-theme:hover, .light-theme:hover {
+  border-color: #91C25F !important; /* Retain your custom border color */
+  outline: none !important; /* Remove the default blue outline */
+  box-shadow: none !important; /* Remove any box shadow caused by focus */
+}
+
+/* Target the input inside the Select to remove default focus ring */
+.ant-select-selector:focus, .ant-select-selector:hover {
+  border-color: #91C25F !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Ensuring dropdown border color stays the same */
+.custom-dropdown {
+  border-color: #91C25F !important;
+}
+
+/* Optional: Remove the default focus ring on all elements globally */
+input:focus, select:focus, .custom-input-dark:focus, .custom-input-light:focus, .dark-theme:focus, .light-theme:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+
+
+
+
+
