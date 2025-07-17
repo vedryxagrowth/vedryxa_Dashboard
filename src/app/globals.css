@@ -537,7 +537,7 @@ body.dark-mode .startview svg {
   color: gold !important;
 }
 body.dark-mode .Message svg {
-  color: blue !important;
+  color: #4CAF50 !important;
 }
 
 body.light-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-picker-outlined {
@@ -1231,7 +1231,7 @@ body.dark-mode .black-icon-comment.anticon svg {
   outline: none !important;  
 } */
 .custom-input-light .ant-input:focus {
-  border-color: #37474F !important;
+  border-color: #91C25F !important;
   box-shadow: none !important;
   outline: none !important;
 }

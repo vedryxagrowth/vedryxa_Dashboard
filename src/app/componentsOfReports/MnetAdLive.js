@@ -569,7 +569,7 @@ const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenueP
                                     <EditOutlined onClick={handleEditClick} style={{ marginLeft: '10px', color: 'blue', cursor: 'pointer' }} />
                                 </div>
                             )}>
-                                <MessageOutlined  className= {theme === "dark" ? "black-icon-comment" : 'Message'} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
+                                <MessageOutlined  className= {theme === "dark" ? "black-icon-comment" : 'Message'} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: '#4CAF50' }} />
                                 <Tooltip title={tooltipText}></Tooltip>
                             </Tooltip>
                         )}

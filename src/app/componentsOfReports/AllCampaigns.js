@@ -542,7 +542,7 @@ const AllCampaigns = ({handleChangeInput, handleBlur, onClickRefresh, startDate,
                                 cursor: 'pointer',
                                 marginLeft: '10px',
                                 marginRight: '10px',
-                                color: 'blue'
+                                color: '#4CAF50'
                                 }}
                                 onClick={handleEditClick} // Open modal directly on click
                             />

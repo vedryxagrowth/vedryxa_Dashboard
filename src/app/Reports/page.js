@@ -10159,7 +10159,7 @@ const MyTablePage = () => {
                          <Space size={2} style={{marginRight: '10px'}}> 
                              <Input
                                  placeholder="Search campaigns"
-                                 prefix={<SearchOutlined />}
+                                //  prefix={<SearchOutlined />}
                                  onChange={handleChangeInput}
                                  onBlur={handleBlur}
                                  allowClear

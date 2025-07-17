@@ -697,7 +697,7 @@ const AdLevelReports = ({functionCallForCommnets, startDate, endDate, newaccount
                                         cursor: 'pointer',
                                         marginLeft: '10px',
                                         marginRight: '10px',
-                                        color: 'blue'
+                                        color: '#4CAF50'
                                     }}
                                     onClick={handleEditClick} // Open modal directly on click
                                 />
@@ -1688,7 +1688,7 @@ const AdLevelReports = ({functionCallForCommnets, startDate, endDate, newaccount
                                             firstSelectedCell.rowIndex === params.node.rowIndex &&
                                             firstSelectedCell.colId === params.column.getId();
                                 
-                                        return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
+                                        // return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
                                     }}
                                     onFilterChanged={(params) => {
                                         const api = params.api;
