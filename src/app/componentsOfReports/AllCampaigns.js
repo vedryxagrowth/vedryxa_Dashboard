@@ -14,6 +14,9 @@ import 'ag-grid-enterprise';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { useTokenContext } from '../components/parent';
+
+const SearchFilters = React.lazy(() => import('./SearchFilters')); 
+
 const contentStyle = {
     margin: "10px",
     // height: '800px',
@@ -56,7 +59,7 @@ const selectTimezone = {
 };
 
 
-const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, fetchData, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle}) => {
+const AllCampaigns = ({handleChangeInput, handleBlur, onClickRefresh, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, fetchData, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle}) => {
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -583,7 +586,7 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                                         key="delete"
                                         type="danger"
                                         onClick={handleDelete}
-                                        style={{ marginRight: 'auto', border: "1px solid black" }} // Push Delete button to the far left
+                                        style={{ marginRight: 'auto', border: "1px solid #e3e3da" }} // Push Delete button to the far left
                                     >
                                         Delete
                                     </Button>
@@ -1162,22 +1165,35 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                                     normalizedCampaign.endsWith(normalizedInput)
                                 );
                             })?.length > 0 ? (
-                                <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
+                                <div 
+                                    className={`ag-theme-alpine ag-container ${gridThemeClass}`}
+                                    style={{
+                                        width: '100%',
+                                        // borderRadius: 12,
+                                        backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+                                        padding: 10,
+                                        height: '100%',
+                                        boxShadow:
+                                        theme === 'dark'
+                                            ? '0 1px 3px rgba(0,0,0,0.6)'
+                                            : '0 1px 6px rgba(0,0,0,0.08)',
+                                    }}
+                                >
                                     <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d" }}>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
                                             <Space align="center" className='daily-container' style={{ width: '150px' }}>
                                                 <div class="blinking-circle-3"></div>
-                                                <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600', width: '100px', color: theme === "dark" && "white" }}>Campaigns</Text>
+                                                <Text style={{ paddingLeft: '3px', fontSize: '15px', width: '100px', color: theme === "dark" && "white" }}>Campaigns</Text>
                                             </Space>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Acc: {newaccount}</Text>
+                                            <Text style={{ color: theme === "dark" && "white" }}>Acc: {newaccount}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>AccName: {newAccountName}</Text>
+                                            <Text style={{ color: theme === "dark" && "white" }}>Acc name: {newAccountName}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Timezone: {timezone.current}</Text>
+                                            <Text style={{ color: theme === "dark" && "white" }}>Time zone: {timezone.current}</Text>
                                         </Col>
                                         {/* <Col>
                                             <Tooltip 
@@ -1197,6 +1213,7 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                                     <div style={{ height: '100%' }}>
                                         <AgGridReact
                                             ref={gridRef2}
+                                            className='custom-grid'
                                             rowData={memorizedCampaignsData}
                                             columnDefs={memorizedColumnDef2}
                                             onCellClicked={onCellClickedAllCampaigns}
@@ -1237,7 +1254,7 @@ const AllCampaigns = ({startDate, endDate, newaccount, newtime, newRevenuePratne
                                             getRowStyle={params => {
                                                 if (params.node.rowPinned) {
                                                     return {
-                                                        fontWeight: 'bold',
+                                                        // fontWeight: 'bold',
                                                         // backgroundColor: theme === "dark" ? '#000' : '#fff', // Apply theme dynamically
                                                         // color: theme === "dark" ? '#fff' : '#000',           // Apply theme dynamically
                                                     };

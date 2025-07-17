@@ -342,12 +342,13 @@ const Newaddaccounts = ({ visible, onClose }) => {
                         <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
                     </Form.Item>
                     <Form.Item>
-                        <Button type="primary" onClick={showModal}>Submit</Button>
+                        <Button style={{backgroundColor:'#91C25F'}} onClick={showModal}>Submit</Button>
                     </Form.Item>
                 </Form>
             </Drawer>
             <Modal
                 title="Confirmation"
+                className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                 open={isModalVisible}
                 onOk={() => {
                     form.submit();

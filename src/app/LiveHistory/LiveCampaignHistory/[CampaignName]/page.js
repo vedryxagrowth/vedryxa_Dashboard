@@ -1850,7 +1850,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                         <h3 style={{ textAlign: 'center' }}>{decodedString}</h3>
                     </div>
                     <div style={{ width: '120px' }}>
-                        <p>Timezone: <span style={{ fontWeight: 'bold' }}>{timeZone}</span></p>
+                        <p>Timezone: <span>{timeZone}</span></p>
                     </div>
 
                 </Col>}
@@ -1866,7 +1866,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                     </div>
                     </div>) : (
                     <div>
-                        {/* ✅ Custom Checkbox-Style Legend */}
+                        {/* Custom Checkbox-Style Legend */}
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '12px', justifyContent:'center' }}>
                             {Object.keys(datasetColorMap).map(label => {
                             const isVisible = !hiddenKeys.includes(label);
@@ -1893,7 +1893,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     color: '#fff',
-                                    fontWeight: 'bold',
+                                    // fontWeight: 'bold',
                                     fontSize: '11px',
                                     }}
                                 >
@@ -1970,12 +1970,12 @@ const MnetLiveCampaignHistory = ({ params }) => {
             <Col style={{ display: 'flex', width: '100%', marginLeft: '2%' }}>
                 {/* Left Table: Top 5 RPC Today */}
                 <div style={{ marginLeft: "1%", width: '20%' }}>
-                    <h3>Top 5 Rpc Today</h3>
+                    <p>Top 5 Rpc Today</p>
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr>
-                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Hour</th>
-                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Rpc</th>
+                                <th style={{fontWeight: 'normal', border: '1px solid #ddd', padding: '3px' }}>Hour</th>
+                                <th style={{fontWeight: 'normal', border: '1px solid #ddd', padding: '3px' }}>Rpc</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1987,20 +1987,20 @@ const MnetLiveCampaignHistory = ({ params }) => {
                                 .slice(0, 5) // Take top 5
                                 .map((item, index) => (
                                     <tr key={index}>
-                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.hour}</td> {/* Access item.hour */}
-                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.rpc}</td>
+                                        <td style={{fontWeight: 'normal', border: '1px solid #ddd', padding: '8px' }}>{item.hour}</td> {/* Access item.hour */}
+                                        <td style={{fontWeight: 'normal', border: '1px solid #ddd', padding: '8px' }}>{item.rpc}</td>
                                     </tr>
                                 ))}
                         </tbody>
                     </table>
                 </div>
                 <div style={{ marginLeft: "1%", width: '20%' }}>
-                    <h3>Top 5 Margin Today</h3>
+                    <p>Top 5 Margin Today</p>
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr>
-                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Hour</th>
-                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Margin</th>
+                                <th style={{fontWeight: 'normal', border: '1px solid #ddd', padding: '3px' }}>Hour</th>
+                                <th style={{fontWeight: 'normal', border: '1px solid #ddd', padding: '3px' }}>Margin</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -2012,8 +2012,8 @@ const MnetLiveCampaignHistory = ({ params }) => {
                                 .slice(0, 5) // Take top 5
                                 .map((item, index) => (
                                     <tr key={index}>
-                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.hour}</td> {/* Access item.hour */}
-                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.margin}</td>
+                                        <td style={{fontWeight: 'normal', border: '1px solid #ddd', padding: '8px' }}>{item.hour}</td> {/* Access item.hour */}
+                                        <td style={{fontWeight: 'normal', border: '1px solid #ddd', padding: '8px' }}>{item.margin}</td>
                                     </tr>
                                 ))}
                         </tbody>
@@ -2021,13 +2021,13 @@ const MnetLiveCampaignHistory = ({ params }) => {
                 </div>
 
                 <div style={{ marginLeft: "1%", width: '25%' }}>
-                    <h3>Top 5 Repeated Hours with RPC (Last 10 Days)</h3>
+                    <p>Top 5 Repeated Hours with RPC (Last 10 Days)</p>
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr>
-                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Hour</th>
-                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>RPC</th>
-                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Times Repeated</th>
+                                <th style={{fontWeight: 'normal', border: '1px solid #ddd', padding: '3px' }}>Hour</th>
+                                <th style={{fontWeight: 'normal', border: '1px solid #ddd', padding: '3px' }}>RPC</th>
+                                <th style={{fontWeight: 'normal', border: '1px solid #ddd', padding: '3px' }}>Times Repeated</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -2037,8 +2037,8 @@ const MnetLiveCampaignHistory = ({ params }) => {
 
                                 return (
                                     <tr key={index}>
-                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.hour}:00</td>
-                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>
+                                        <td style={{fontWeight: 'normal', border: '1px solid #ddd', padding: '8px' }}>{item.hour}:00</td>
+                                        <td style={{fontWeight: 'normal', border: '1px solid #ddd', padding: '8px' }}>
                                             {count > 0 ? (totalRpc / count).toFixed(2) : 'N/A'}  {/* Avoid division by zero */}
                                         </td>
                                         <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.count}</td>
@@ -2049,13 +2049,13 @@ const MnetLiveCampaignHistory = ({ params }) => {
                     </table>
                 </div>
                 <div style={{ marginLeft: "1%", width: '25%' }}>
-                    <h3>Top 5 Repeated Hours Margin (Last 10 Days)</h3>
+                    <p>Top 5 Repeated Hours Margin (Last 10 Days)</p>
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr>
-                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Hour</th>
-                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Average Margin</th>
-                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Times Repeated</th>
+                                <th style={{fontWeight: 'normal', border: '1px solid #ddd', padding: '3px' }}>Hour</th>
+                                <th style={{fontWeight: 'normal', border: '1px solid #ddd', padding: '3px' }}>Average Margin</th>
+                                <th style={{fontWeight: 'normal', border: '1px solid #ddd', padding: '3px' }}>Times Repeated</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -2065,8 +2065,8 @@ const MnetLiveCampaignHistory = ({ params }) => {
 
                                 return (
                                     <tr key={index}>
-                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.hour}:00</td>
-                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>
+                                        <td style={{fontWeight: 'normal', border: '1px solid #ddd', padding: '8px' }}>{item.hour}:00</td>
+                                        <td style={{fontWeight: 'normal', border: '1px solid #ddd', padding: '8px' }}>
                                             {count > 0 ? (totalMargin / count).toFixed(2) : 'N/A'}  {/* Avoid division by zero */}
                                         </td>
                                         <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.count}</td>
@@ -2082,7 +2082,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
 
 
             </Col>
-            <Col style={{display:'flex', justifyContent:'space-between', marginTop: '10px'}}>
+            <Col style={{display:'flex', justifyContent:'space-between', marginTop: '10px', marginBottom: '0px'}}>
                 <Col style={{display:'flex', justifyContent:"space-between", alignItems:'center'}}>
                     <Input
                         type="text"
@@ -2090,12 +2090,12 @@ const MnetLiveCampaignHistory = ({ params }) => {
                         value={searchText}
                         onChange={(e) => setSearchText(e.target.value)}
                         className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                        style={{ width: "200px", padding: "3px", backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
+                        style={{height: "30px", border: '1px solid #91C25F', width: "170px", padding: "3px", backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
                     />
                     <Button 
                         type="default" 
                         icon={<ReloadOutlined  className='black-icon'/>} 
-                        style={{ height: "30px", marginLeft: "10px", backgroundColor: '#91C25F', border: 'none' }} 
+                        style={{width:'43px', height: "30px", marginLeft: "10px", backgroundColor: '#91C25F', border: 'solid 0px' }} 
                         onClick={handleReload}  // Call refresh function when clicked
                     />
                     {/* <p style={{marginLeft:"10px"}}>{comment}</p> */}
@@ -2110,7 +2110,8 @@ const MnetLiveCampaignHistory = ({ params }) => {
                         style={{ 
                             marginLeft: '15px', 
                             color: comment ? 'blue' : 'gray', 
-                            cursor: 'pointer' 
+                            cursor: 'pointer',
+                            fontSize: '20px',
                         }} 
                         title={comment ? 'Edit Comment' : 'Add Comment'}
                     />
@@ -2119,12 +2120,12 @@ const MnetLiveCampaignHistory = ({ params }) => {
                             title={copied ? 'Copied!' : 'Click to copy'}
                             // color={copied ? 'green' : undefined}
                         >
-                            <h3
-                            style={{ textAlign: 'center', cursor: 'pointer' }}
+                            <p
+                            style={{ textAlign: 'center', cursor: 'pointer', }}
                             onClick={handleCopy}
                             >
                             {decodedString}
-                            </h3>
+                            </p>
                         </Tooltip>
                     </div>
                     {comment && (
@@ -2149,7 +2150,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                     placeholder="Select a range"
                     value={selectedValue}
                     onChange={handleChange}
-                    style={{ width: "200px" }}
+                    style={{ width: "200px", border: '1px solid #91C25F', borderRadius: '8px', marginTop: '3px' }}
                     dropdownClassName={theme === 'dark' && "custom-dropdown"}
                     allowClear
                 >
@@ -2181,6 +2182,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                     <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
                         <AgGridReact
                             rowData={filteredData}
+                            className='custom-grid'
                             columnDefs={columnDefs}
                             quickFilterText={searchText}
                             defaultColDef={defaultColDef}
@@ -2203,7 +2205,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                             getRowStyle={(params) => {
                                 if (params.node.rowPinned) {
                                     return {
-                                        fontWeight: 'bold',
+                                        // fontWeight: 'bold',
                                         backgroundColor: theme === 'dark' ? '#000' : '#fff',
                                         color: theme === 'dark' ? '#fff' : '#000',
                                     };
@@ -2316,7 +2318,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                                         key="delete"
                                         type="danger"
                                         onClick={handleDelete}
-                                        style={{ marginRight: 'auto', border: "1px solid black" }} // Push Delete button to the far left
+                                        style={{ marginRight: 'auto', border: "1px solid #e3e3da" }} // Push Delete button to the far left
                                     >
                                         Delete
                                     </Button>
