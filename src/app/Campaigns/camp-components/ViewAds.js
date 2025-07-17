@@ -115,7 +115,7 @@ export default function Viewads({ selectedRow, viewdata }) {
                         </div>
                         <Form.Item
                             name="AddName"
-                            label={<span style={{ color: "#B4B4B4" }}>Add name</span>}
+                            label={<span style={{ color: "#B4B4B4" }}>Ad name</span>}
                             rules={[
                                 {
                                     required: true,
@@ -126,7 +126,7 @@ export default function Viewads({ selectedRow, viewdata }) {
                             <Input style={{ width: "60%" }} disabled  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
                         </Form.Item>
                         <Form.Item
-                            label="Primary text"
+                            label={<span style={{ color: "#B4B4B4" }}>Primary text</span>}
                             name="message"
                             rules={[
                                 {
@@ -146,7 +146,7 @@ export default function Viewads({ selectedRow, viewdata }) {
                         </Form.Item>
 
                         <Form.Item
-                            label="Headline"
+                            label={<span style={{ color: "#B4B4B4" }}>Headline</span>}
                             name="headline"
                             rules={[
                                 {
@@ -166,7 +166,7 @@ export default function Viewads({ selectedRow, viewdata }) {
                         </Form.Item>
 
                         <Form.Item
-                            label="Description"
+                            label={<span style={{ color: "#B4B4B4" }}>Description</span>}
                             name="Description"
                             rules={[
                                 {
@@ -185,7 +185,7 @@ export default function Viewads({ selectedRow, viewdata }) {
                             />
                         </Form.Item>
                         <Form.Item
-                            label="Caption"
+                            label={<span style={{ color: "#B4B4B4" }}>Caption</span>}
                             name="Caption"
                             rules={[
                                 {
@@ -204,7 +204,7 @@ export default function Viewads({ selectedRow, viewdata }) {
                             />
                         </Form.Item>
                         <Form.Item
-                            label="Website_URL"
+                            label={<span style={{ color: "#B4B4B4" }}>Website_URL</span>}
                             name="Website_URL"
                             rules={[
                                 {
@@ -223,7 +223,7 @@ export default function Viewads({ selectedRow, viewdata }) {
                             />
                         </Form.Item>
                         <Form.Item
-                            label="URL Parameters"
+                            label={<span style={{ color: "#B4B4B4" }}>URL parameters</span>}
                             name="urlParameters"
                             tooltip="This is a required field"
                         >

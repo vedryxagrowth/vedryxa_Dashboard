@@ -159,7 +159,7 @@ const ViewDrawer = ({ rowData, visible, onClose }) => {
         <Drawer
             title={`View Campaign Details ----> ${viewCampaignData?.Account_Number} / ${viewCampaignData?.campaign_name}`} open={visible} // Changed from open to visible
             onClose={onClose}
-            width="95%"
+            width="100%"
             style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
         >
             {rowData.Approval == "PENDING_APPROVAL" ?
@@ -178,41 +178,41 @@ const ViewDrawer = ({ rowData, visible, onClose }) => {
             <Flex>
                 <div style={{ flexGrow: 1 }}>
 
-                    <Card style={{ width: "100%", margin: "20px 0" }}>
+                    <Card style={{ width: "100%", margin: "20px 0",border:'1px solid #4caf50' }}>
                         <Row gutter={[16, 16]} wrap={false} justify="space-between">
                             <Col flex="auto" style={{ maxWidth: '150px' }}>
                                 <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Name</Text>
-                                <Title level={4} style={{ margin: "2px 0", color: theme === "dark" && "#edece8" }}>
+                                <Title level={4} style={{fontSize:'13px',fontWeight:'normal', margin: "2px 0", color: theme === "dark" && "#edece8" }}>
                                     {viewCampaignData?.camapaignlevel?.Name}
                                 </Title>
                             </Col>
                             <Col flex="auto" style={{ maxWidth: '150px' }}>
                                 <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Objectives</Text>
-                                <Title level={5} style={{ margin: "2px 0", color: theme === "dark" && "#edece8" }}>
+                                <Title level={5} style={{fontSize:'13px',fontWeight:'normal',margin: "2px 0", color: theme === "dark" && "#edece8" }}>
                                     {viewCampaignData?.camapaignlevel?.Objectives}
                                 </Title>
                             </Col>
                             <Col flex="auto" style={{ maxWidth: '150px' }}>
-                                <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Special Categories</Text>
-                                <Title level={5} style={{ margin: "2px 0", color: theme === "dark" && "#edece8" }}>
+                                <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Special categories</Text>
+                                <Title level={5} style={{fontSize:'13px',fontWeight:'normal', margin: "2px 0", color: theme === "dark" && "#edece8" }}>
                                     {viewCampaignData?.camapaignlevel?.Special_categories && Array.isArray(viewCampaignData?.camapaignlevel?.Special_categories) ? viewCampaignData?.camapaignlevel?.Special_categories?.join(", ") : viewCampaignData?.camapaignlevel?.Special_categories}
                                 </Title>
                             </Col>
                             <Col flex="auto" style={{ maxWidth: '150px' }}>
-                                <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Bid Strategy</Text>
-                                <Title level={5} style={{ margin: "2px 0", color: theme === "dark" && "#edece8" }}>
+                                <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Bid strategy</Text>
+                                <Title level={5} style={{fontSize:'13px',fontWeight:'normal', margin: "2px 0", color: theme === "dark" && "#edece8" }}>
                                     {viewCampaignData?.camapaignlevel?.Bid_strategy}
                                 </Title>
                             </Col>
                             <Col flex="auto" style={{ maxWidth: '150px' }}>
-                                <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Daily Budget</Text>
-                                <Title level={5} style={{ margin: "2px 0", color: theme === "dark" && "#edece8" }}>
+                                <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Daily budget</Text>
+                                <Title level={5} style={{ fontSize:'13px',fontWeight:'normal',margin: "2px 0", color: theme === "dark" && "#edece8" }}>
                                     {(viewCampaignData?.camapaignlevel?.Daily_amount) / 100}
                                 </Title>
                             </Col>
                             <Col flex="auto" style={{ maxWidth: '150px' }}>
                                 <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Status</Text>
-                                <Title level={5} style={{ margin: "2px 0" , color: theme === "dark" && "#edece8"}}>
+                                <Title level={5} style={{ fontSize:'13px',fontWeight:'normal', margin: "2px 0" , color: theme === "dark" && "#edece8"}}>
                                     {viewCampaignData?.camapaignlevel?.Status}
                                 </Title>
                             </Col>
@@ -310,35 +310,35 @@ const ViewDrawer = ({ rowData, visible, onClose }) => {
                             </div>
                         </div>
                     </Card> */}
-                    <Card style={{ width: "100%", margin: "20px 0" }}>
+                    <Card style={{ width: "100%", margin: "20px 0" ,border:'1px solid #4caf50'}}>
                         <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
                             <div style={{ flex: "1 1 200px", minWidth: "200px" }}>
-                                <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Adset Name</Text>
-                                <Title level={4} style={{ margin: "2px 0", color: theme === "dark" && "#edece8" }}>
+                                <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Adset name</Text>
+                                <Title level={4} style={{fontSize:'13px',fontWeight:'normal', margin: "2px 0", color: theme === "dark" && "#edece8" }}>
                                     {viewCampaignData?.adsetlevel?.AdsetName}
                                 </Title>
                             </div>
                             <div style={{ flex: "1 1 200px", minWidth: "200px" }}>
-                                <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Optimization Goal</Text>
-                                <Title level={5} style={{ margin: "2px 0", color: theme === "dark" && "#edece8" }}>
+                                <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Optimization goal</Text>
+                                <Title level={5} style={{fontSize:'13px',fontWeight:'normal', margin: "2px 0", color: theme === "dark" && "#edece8" }}>
                                     {viewCampaignData?.adsetlevel?.optimization_goal}
                                 </Title>
                             </div>
                             <div style={{ flex: "1 1 200px", minWidth: "200px" }}>
-                                <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Billing Event</Text>
-                                <Title level={5} style={{ margin: "2px 0", color: theme === "dark" && "#edece8" }}>
+                                <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Billing event</Text>
+                                <Title level={5} style={{fontSize:'13px',fontWeight:'normal', margin: "2px 0", color: theme === "dark" && "#edece8" }}>
                                     {viewCampaignData?.adsetlevel?.billing_event}
                                 </Title>
                             </div>
                             <div style={{ flex: "1 1 200px", minWidth: "200px" }}>
-                                <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Action Source</Text>
-                                <Title level={5} style={{ margin: "2px 0", color: theme === "dark" && "#edece8" }}>
+                                <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Action source</Text>
+                                <Title level={5} style={{fontSize:'13px',fontWeight:'normal', margin: "2px 0", color: theme === "dark" && "#edece8" }}>
                                     {viewCampaignData?.adsetlevel?.action_source}
                                 </Title>
                             </div>
                             <div style={{ flex: "1 1 200px", minWidth: "200px" }}>
-                                <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Custom Event Type</Text>
-                                <Title level={5} style={{ margin: "2px 0", color: theme === "dark" && "#edece8" }}>
+                                <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Custom event type</Text>
+                                <Title level={5} style={{fontSize:'13px',fontWeight:'normal', margin: "2px 0", color: theme === "dark" && "#edece8" }}>
                                     {viewCampaignData?.adsetlevel?.custom_event_type}
                                 </Title>
                             </div>
@@ -349,8 +349,8 @@ const ViewDrawer = ({ rowData, visible, onClose }) => {
                                 </Title>
                             </div> */}
                             <div style={{ flex: "1 1 200px", minWidth: "200px" }}>
-                                <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Bid Amount</Text>
-                                <Title level={5} style={{ margin: "2px 0", color: theme === "dark" && "#edece8" }}>
+                                <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Bid amount</Text>
+                                <Title level={5} style={{fontSize:'13px',fontWeight:'normal', margin: "2px 0", color: theme === "dark" && "#edece8" }}>
                                     {viewCampaignData?.adsetlevel?.bid_amount ? (viewCampaignData?.adsetlevel?.bid_amount/100) : 0}
                                 </Title>
                             </div>
@@ -365,25 +365,25 @@ const ViewDrawer = ({ rowData, visible, onClose }) => {
                             </div> */}
                             <div style={{ flex: "1 1 200px", minWidth: "200px" }}>
                                 <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Countries</Text>
-                                <Title level={5} style={{ margin: "2px 0", color: theme === "dark" && "#edece8" }}>
+                                <Title level={5} style={{fontSize:'13px',fontWeight:'normal', margin: "2px 0", color: theme === "dark" && "#edece8" }}>
                                     {viewCampaignData?.adsetlevel?.countries}
                                 </Title>
                             </div>
                             <div style={{ flex: "1 1 200px", minWidth: "200px" }}>
                                 <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Age</Text>
-                                <Title level={5} style={{ margin: "2px 0", color: theme === "dark" && "#edece8" }}>
+                                <Title level={5} style={{fontSize:'13px',fontWeight:'normal', margin: "2px 0", color: theme === "dark" && "#edece8" }}>
                                     {viewCampaignData?.adsetlevel?.Min_Age}-{viewCampaignData?.adsetlevel?.Max_Age}
                                 </Title>
                             </div>
                             <div style={{ flex: "1 1 200px", minWidth: "200px" }}>
                                 <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Gender</Text>
-                                <Title level={5} style={{ margin: "2px 0", color: theme === "dark" && "#edece8" }}>
+                                <Title level={5} style={{fontSize:'13px',fontWeight:'normal' ,margin: "2px 0", color: theme === "dark" && "#edece8" }}>
                                     {viewCampaignData?.adsetlevel?.Gender === 1 ? "Male" : viewCampaignData?.adsetlevel?.Gender === 2 ? "Female" : viewCampaignData?.adsetlevel?.Gender === 0 ? "All" : ""}
                                 </Title>
                             </div>
                             <div style={{ flex: "1 1 200px", minWidth: "200px" }}>
                                 <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Placements</Text>
-                                <Title level={5} style={{ margin: "2px 0", color: theme === "dark" && "#edece8" }}>
+                                <Title level={5} style={{fontSize:'13px',fontWeight:'normal', margin: "2px 0", color: theme === "dark" && "#edece8" }}>
                                     {viewCampaignData?.adsetlevel?.placements
                                     ? viewCampaignData.adsetlevel.placements.charAt(0).toUpperCase() + viewCampaignData.adsetlevel.placements.slice(1)
                                     : 'N/A'}
@@ -392,8 +392,8 @@ const ViewDrawer = ({ rowData, visible, onClose }) => {
                             {viewCampaignData?.adsetlevel?.placements === "manual" &&
                                 <div style={{ display: "flex", flexWrap: "wrap", gap: "16px", marginTop: "20px" }}>
                                     <div style={{ flex: "1 1 200px", minWidth: "200px" }}>
-                                        <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Publisher Platforms</Text>
-                                        <Title level={5} style={{ margin: "2px 0", color: theme === "dark" && "#edece8" }}>
+                                        <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Publisher platforms</Text>
+                                        <Title level={5} style={{fontSize:'13px',fontWeight:'normal', margin: "2px 0", color: theme === "dark" && "#edece8" }}>
                                             {viewCampaignData?.adsetlevel?.publisher_platforms
                                             ?.map(item =>
                                                 item
@@ -406,7 +406,7 @@ const ViewDrawer = ({ rowData, visible, onClose }) => {
                                     </div>
                                     <div style={{ flex: "1 1 200px", minWidth: "200px" }}>
                                         <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Positions</Text>
-                                        <Title level={5} style={{ margin: "2px 0", color: theme === "dark" && "#edece8" }}>
+                                        <Title level={5} style={{fontSize:'13px',fontWeight:'normal', margin: "2px 0", color: theme === "dark" && "#edece8" }}>
                                             {viewCampaignData?.adsetlevel?.position
                                             ?.map(posKey => {
                                                 const match = allPositions.find(option => option.key === posKey);
@@ -416,30 +416,30 @@ const ViewDrawer = ({ rowData, visible, onClose }) => {
                                         </Title>
                                     </div>
                                     <div style={{ flex: "1 1 200px", minWidth: "200px" }}>
-                                        <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Device Platforms</Text>
-                                        <Title level={5} style={{ margin: "2px 0", color: theme === "dark" && "#edece8" }}>
+                                        <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Device platforms</Text>
+                                        <Title level={5} style={{fontSize:'13px',fontWeight:'normal', margin: "2px 0", color: theme === "dark" && "#edece8" }}>
                                             {viewCampaignData?.adsetlevel?.device_platforms
                                             ?.map(item => item.charAt(0).toUpperCase() + item.slice(1))
                                             .join(', ') || 'N/A'}
                                         </Title>
                                     </div>
                                     <div style={{ flex: "1 1 200px", minWidth: "200px" }}>
-                                        <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Buying Type</Text>
-                                        <Title level={5} style={{ margin: "2px 0", color: theme === "dark" && "#edece8" }}>
+                                        <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Buying type</Text>
+                                        <Title level={5} style={{fontSize:'13px',fontWeight:'normal', margin: "2px 0", color: theme === "dark" && "#edece8" }}>
                                             {viewCampaignData?.adsetlevel?.buying_type}
                                         </Title>
                                     </div>
                                     <div style={{ flex: "1 1 200px", minWidth: "200px" }}>
                                         <Text type="secondary"></Text>
-                                        <Title level={5} style={{ margin: "2px 0", color: theme === "dark" && "#edece8" }}>
+                                        <Title level={5} style={{fontSize:'13px',fontWeight:'normal', margin: "2px 0", color: theme === "dark" && "#edece8" }}>
                                             
                                         </Title>
                                     </div>
                                 </div>
                             }
                             {viewCampaignData?.adsetlevel?.placements !== "manual" &&<div style={{ flex: "1 1 200px", minWidth: "200px" }}>
-                                <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Buying Type</Text>
-                                <Title level={5} style={{ margin: "2px 0", color: theme === "dark" && "#edece8" }}>
+                                <Text type="secondary" style={{color: theme === "dark" && "#bfbfbf"}}>Buying type</Text>
+                                <Title level={5} style={{fontSize:'13px',fontWeight:'normal', margin: "2px 0", color: theme === "dark" && "#edece8" }}>
                                     {viewCampaignData?.adsetlevel?.buying_type}
                                 </Title>
                             </div>}
@@ -458,6 +458,7 @@ const ViewDrawer = ({ rowData, visible, onClose }) => {
                                         borderRadius: '8px',
                                         overflow: 'hidden',
                                         boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                                        border:'1px solid #4caf50'
                                     }}
                                     bodyStyle={{ padding: '0' }}
                                 >
@@ -499,7 +500,7 @@ const ViewDrawer = ({ rowData, visible, onClose }) => {
                                                     Sponsored <GlobalOutlined style={{ opacity: "0.6", marginLeft: "4px" }} />
                                                 </div>
                                             </div>
-                                            <Tooltip title="More Options">
+                                            <Tooltip title="More options">
                                                 <MoreOutlined style={{ fontSize: '16px', cursor: 'pointer' }} />
                                             </Tooltip>
                                         </div>
@@ -553,9 +554,9 @@ const ViewDrawer = ({ rowData, visible, onClose }) => {
                                                     flexShrink: 0,
                                                     backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"
                                                 }}
-                                                onClick={() => console.log('Learn More clicked:', item)}
+                                                onClick={() => console.log('Learn more clicked:', item)}
                                             >
-                                                Learn More
+                                                Learn more
                                             </button>
                                         </div>
 
@@ -619,7 +620,7 @@ const ViewDrawer = ({ rowData, visible, onClose }) => {
                     )}
 
                     <Modal
-                        title="Approval Confirmation"
+                        title="Approval confirmation"
                         open={isModalVisible}
                         onOk={handleOk}
                         onCancel={() => setIsModalVisible(false)}

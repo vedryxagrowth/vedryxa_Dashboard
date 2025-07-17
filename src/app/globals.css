@@ -695,6 +695,7 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 .custom-dropdown .ant-select-item-option-active {
   background-color: #2b2b2b !important; /* Light black color */
   color: white !important;
+  
 }
 
 /* Scrollbar styling for the custom dropdown */
@@ -1310,14 +1311,14 @@ body.dark-mode .black-icon-comment.anticon svg {
 .custom-dark-table.dark-mode-pagination .ant-table-thead > tr > th {
   background-color: #000000 !important; /* Olive green for dark mode */
   color: white !important;
-  font-weight: 600;
+  font-weight: normal !important;
   border-bottom: 1px solid #4e5f3f;
 }
 
 .custom-dark-table.light-mode-pagination .ant-table-thead > tr > th {
   background-color: #E5E9EF !important; /* Light green for light mode */
   color: black !important;
-  font-weight: 600;
+  font-weight: normal !important;
   border-bottom: 1px solid #ccc;
 }
 
@@ -3108,7 +3109,7 @@ body.dark .upload-form-wrapper {
 }
 
 
-/* Dropdown menu style for dark mode */
+
 .custom-dropdown-dark {
   background-color: #0e1012 !important;
   color: #f9fafb !important;
@@ -3127,4 +3128,54 @@ body.dark .upload-form-wrapper {
   border-color: #475569 !important;
   color: #f9fafb !important;
 }
+.custom-grid .ag-header-cell-label {
+ font-weight: normal !important;
+}
+
+.green-border-select.ant-select > .ant-select-selector {
+  border: 1px solid #4caf50 !important;
+  border-radius: 6px !important;
+}
+
+.green-border-picker.ant-picker {
+  border: 1px solid #4caf50 !important;
+  border-radius: 6px;
+}
+.green-border-picker.ant-picker:hover,
+.green-border-picker.ant-picker-focused {
+  border-color: #4caf50 !important;
+  box-shadow: 0 0 0 2px rgba(145, 194, 95, 0.2);
+}
+
+.custom-green-calendar .ant-picker-cell-range-start .ant-picker-cell-inner,
+.custom-green-calendar .ant-picker-cell-range-end .ant-picker-cell-inner,
+.custom-green-calendar .ant-picker-cell-selected .ant-picker-cell-inner {
+  background-color: #91C25F !important;
+  color: white !important;
+}
+
+
+.custom-green-calendar .ant-picker-cell-in-range::before {
+  background-color: rgba(145, 194, 95, 0.4) !important;
+}
+
+
+.custom-green-calendar .ant-picker-cell-today .ant-picker-cell-inner::before {
+  border: 1px solid #91C25F !important;
+}
+
+.ant-modal .ant-btn-primary {
+  background-color: #91C25F !important;
+  border-color: #91C25F !important;
+}
+
+.delete-icon{
+  color:'red'
+}
+.custom-dollar-icon svg {
+  fill: #1890ff !important;
+  margin-right: 5px;
+ 
+}
+
 

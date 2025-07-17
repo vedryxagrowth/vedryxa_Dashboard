@@ -144,7 +144,7 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                         </Form.Item>
                         <Form.Item
                             name="DatePicker"
-                            label={<span style={{ color: "#B4B4B4" }}>Start Time</span>}
+                            label={<span style={{ color: "#B4B4B4" }}>Start time</span>}
                             style={{ flex: "1 1 15%" }}
                             initialValue={date}
                         >
@@ -209,7 +209,7 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                             <Input type="number" placeholder="$" disabled  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
                         </Form.Item>
                     </div>
-                    <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "green" }}>Targeting</span>
+                    <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "#91C25F" }}>Targeting</span>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
                         <Form.Item
                             name="countries"
@@ -244,7 +244,7 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                         </Form.Item>
                         <Form.Item
                             name="Min_Age"
-                            label={<span style={{ color: "#B4B4B4" }}>Min Age</span>}
+                            label={<span style={{ color: "#B4B4B4" }}>Min age</span>}
                             style={{ flex: "1 1 10%" }}
                         >
                             <Select
@@ -261,7 +261,7 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                         </Form.Item>
                         <Form.Item
                             name="Max_Age"
-                            label={<span style={{ color: "#B4B4B4", flex: "1 1 10%" }}>Max Age</span>}
+                            label={<span style={{ color: "#B4B4B4", flex: "1 1 10%" }}>Max age</span>}
                         >
                             <Select
                                 disabled

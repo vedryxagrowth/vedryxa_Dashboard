@@ -100,7 +100,7 @@ const EditCampaignDrawer1 = ({ rowData, visible, onClose, changeRRefrst}) => {
     return (
         <Drawer
             title={EditCampaignData?.camapaignlevel?.Name}
-            width="95%"
+            width="100%"
             open={visible}
             onClose={onClose}
         >
@@ -226,7 +226,7 @@ const EditCampaignDrawer1 = ({ rowData, visible, onClose, changeRRefrst}) => {
                                     <Select
                                         options={[
                                             { value: "ACTIVE", label: "ACTIVE" },
-                                            { value: "PAUSED", label: "PAUSED" },
+                                            { value: "PAUSED", label: "PAUSE" },
                                         ]}
                                     />
                                 </Form.Item>

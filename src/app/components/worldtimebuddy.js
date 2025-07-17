@@ -541,6 +541,7 @@ import {
   RightOutlined,
 } from "@ant-design/icons"
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd"
+import { useTokenContext } from "./parent";
 
 const { Text } = Typography
 const { useToken } = theme
@@ -625,6 +626,7 @@ export default function WorldTimeBuddy() {
   const [currentDate, setCurrentDate] = useState(DateTime.now())
   const [hoveredHourIndex, setHoveredHourIndex] = useState(null)
   const scrollRef = useRef()
+  const { theme } = useTokenContext();
 
   useEffect(() => {
     const interval = setInterval(() => setCurrentDate(DateTime.now()), 60000)
@@ -668,54 +670,70 @@ export default function WorldTimeBuddy() {
 
   return (
     <div style={{ padding: 16, maxWidth: 1400, margin: "0 auto" }}>
-      <h1 style={{ textAlign: "center", fontSize: 28, fontWeight: 600, marginBottom: 24 }}>🌐 Global Clockwise</h1>
+      <h1 style={{ textAlign: "center", fontSize: 20, fontWeight: 600, marginBottom: 24, color: theme === 'dark' ? '#fff' : '#000' }}>🌐 Global clockwise</h1>
       <Row gutter={[12, 12]} align="middle" style={{ marginBottom: 16 }}>
         <Col flex="auto">
-        
+
           <Select
-  showSearch
-  filterOption={(input, option) => {
-    const label = option?.label?.toLowerCase?.() || ""
-    const value = option?.value?.toLowerCase?.() || ""
-    return (
-      label.includes(input.toLowerCase()) ||
-      value.includes(input.toLowerCase())
-    )
-  }}
-  placeholder="Select timezone"
-  style={{ width: "100%" }}
-  onChange={addTimezone}
-  options={timezones
-    .filter((tz) => !selectedTimezones.includes(tz.zone))
-    .map((tz) => ({
-      value: tz.zone,
-      label: `${tz.city}, ${tz.country} (${tz.abbr})`,
-    }))}
-  />
+            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+            showSearch
+            filterOption={(input, option) => {
+              const label = option?.label?.toLowerCase?.() || ""
+              const value = option?.value?.toLowerCase?.() || ""
+              return (
+                label.includes(input.toLowerCase()) ||
+                value.includes(input.toLowerCase())
+              )
+            }}
+            placeholder="Select timezone"
+            style={{ width: "100%" }}
+            onChange={addTimezone}
+            options={timezones
+              .filter((tz) => !selectedTimezones.includes(tz.zone))
+              .map((tz) => ({
+                value: tz.zone,
+                label: `${tz.city}, ${tz.country} (${tz.abbr})`,
+              }))}
+          />
 
         </Col>
         <Col>
           <Space>
-            <Button icon={<LeftOutlined />} onClick={goToPreviousDay} />
-            <Text>{currentDate.toFormat("ccc, LLL d")}</Text>
-            <Button icon={<RightOutlined />} onClick={goToNextDay} />
+            <Button style={{
+              backgroundColor: theme === 'dark' ? '#333' : '#fff',
+              color: theme === 'dark' ? '#fff' : '#333',
+              border: '1px solid #91C25F'
+            }} icon={<LeftOutlined />} onClick={goToPreviousDay} />
+            <Text style={{ color: theme === 'dark' ? '#fff' : '#000' }}>{currentDate.toFormat("ccc, LLL d")}</Text>
+            <Button style={{
+              backgroundColor: theme === 'dark' ? '#333' : '#fff',
+              color: theme === 'dark' ? '#91C25F' : '#2f4f2f',
+              border: '1px solid #91C25F'
+            }} icon={<RightOutlined />} onClick={goToNextDay} />
           </Space>
         </Col>
         <Col>
           <Tooltip title="Settings">
-            <Button icon={<SettingOutlined />} />
+            <Button icon={<SettingOutlined />} style={{
+              backgroundColor: '#91C25F',
+              border: '1px solid #91C25F'
+            }} />
           </Tooltip>
         </Col>
         <Col>
           <Tooltip title="Copy Shareable Link">
-            <Button icon={<LinkOutlined />} />
+            <Button icon={<LinkOutlined />} style={{
+              backgroundColor: '#91C25F',
+              border: '1px solid #91C25F'
+            }} />
           </Tooltip>
         </Col>
       </Row>
 
-      <Card bodyStyle={{ padding: 0, overflow: "auto" }}>
+      <Card bodyStyle={{ padding: 0, overflow: "auto" }} >
         <div style={{ display: "flex" }} ref={scrollRef}>
-          <div style={{ width: 380, background: "#f7f7f7", borderRight: `1px solid ${token.colorBorderSecondary}` }}>
+          <div style={{ width: 380, background: theme === 'dark' ? '#333' : '#f7f7f7', borderRight: `1px solid ${token.colorBorderSecondary}` }}>
             <div style={{ height: 0 }}></div>
             <DragDropContext onDragEnd={onDragEnd}>
               <Droppable droppableId="zones">
@@ -739,24 +757,28 @@ export default function WorldTimeBuddy() {
                                 height: 60,
                                 paddingLeft: 8,
                                 borderBottom: `1px solid ${token.colorBorderSecondary}`,
-                                background: "#fff",
+                                background: theme === 'dark' ? '#555' : '#fff',
                                 borderRadius: 4,
                                 marginBottom: 4,
                                 cursor: "grab",
                               }}
                             >
                               <div style={{ width: 50, textAlign: "right", paddingRight: 8 }}>
-                                <Text type="secondary">{offset}</Text>
+                                <Text style={{ color: theme === 'dark' ? '#ccc' : '#555' }}>{offset}</Text>
                               </div>
                               <div>
-                                <Text strong>{info.city}</Text> <Text type="secondary">{info.abbr}</Text>
+                                <Text style={{ fontWeight: 500, color: theme === 'dark' ? '#fff' : '#000' }}>{info.city}</Text>
+                                <Text style={{ color: theme === 'dark' ? '#aaa' : '#888', marginLeft: 4 }}>{info.abbr}</Text>
                                 <br />
-                                <Text type="secondary" style={{ fontSize: 12 }}>{info.country}</Text>
+                                <Text style={{ fontSize: 12, color: theme === 'dark' ? '#aaa' : '#666' }}>{info.country}</Text>
                               </div>
+
                               <div style={{ marginLeft: "auto", paddingRight: 8 }}>
-                                <Text>{zonedTime.toFormat("h:mm a")}</Text>
+                                <Text style={{ color: theme === 'dark' ? '#fff' : '#000' }}>{zonedTime.toFormat("h:mm a")}</Text>
                                 <br />
-                                <Text type="secondary" style={{ fontSize: 12 }}>{zonedTime.toFormat("ccc, LLL d")}</Text>
+                                <Text style={{ fontSize: 12, color: theme === 'dark' ? '#aaa' : '#888' }}>
+                                  {zonedTime.toFormat("ccc, LLL d")}
+                                </Text>
                               </div>
                               <Button
                                 type="text"
@@ -778,7 +800,7 @@ export default function WorldTimeBuddy() {
             </DragDropContext>
           </div>
 
-          <div style={{ overflowX: "auto", width: "100%", background: "#fff" }}>
+          <div style={{ overflowX: "auto", width: "100%", background:theme === 'dark' ? '#555' : '#fff'}}>
             <div>
               {selectedTimezones.map((zone) => {
                 const zonedStart = currentDate.startOf("day").setZone(zone)
@@ -796,7 +818,7 @@ export default function WorldTimeBuddy() {
                   }
                 })
                 return (
-                  <div key={zone} style={{ display: "flex", height: 60, gap: 2, borderBottom: `1px solid ${token.colorBorderSecondary}`, marginBottom: 6 }}> 
+                  <div key={zone} style={{ display: "flex", height: 60, gap: 2, borderBottom: `1px solid ${token.colorBorderSecondary}`, marginBottom: 6 }}>
                     {hours.map((h, i) => (
                       <div
                         key={i}
@@ -837,11 +859,11 @@ export default function WorldTimeBuddy() {
           </div>
         </div>
       </Card>
-      <div style={{ marginTop: '50px', marginLeft: '15px', marginBottom:'10px' }}>
+      {/* <div style={{ marginTop: '50px', marginLeft: '15px', marginBottom: '10px', color: theme === 'dark' ? '#fff' : '#000' }}>
         <h4 style={{ fontWeight: "200", margin: 0 }}>
           Copyright © {dayjs().format('YYYY')} All rights reserved | vyaktimetrics
         </h4>
-      </div>
+      </div> */}
     </div>
   )
 }

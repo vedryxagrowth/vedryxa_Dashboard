@@ -11,7 +11,12 @@ import {
     DoubleLeftOutlined,
     DatabaseOutlined,
     UserOutlined,
-    LaptopOutlined
+    LaptopOutlined,
+    DashboardOutlined,
+    BarChartOutlined,
+    PictureOutlined,
+    LineChartOutlined,
+    AppstoreOutlined
 } from '@ant-design/icons';
 import { Layout, Menu, Button, theme, message, Spin, Skeleton } from 'antd';
 import React, { useState, useEffect } from "react";
@@ -28,11 +33,12 @@ import dayjs from 'dayjs';
 import { notification } from 'antd';
 // import io from 'socket.io-client';
 import soundFile from "../../../public/notification_sounds.mp3";
-function getItem(label, key, icon) {
+function getItem(label, key, icon, text) {
     return {
         key,
         icon,
         label,
+        text
     };
 }
 
@@ -224,14 +230,15 @@ const Appbar = ({ children, usersDataForLogin }) => {
         };
     }, []);
     const menuItems = [
-        getItem('Dashboard', '/Dashboard', <HomeOutlined className={pathname === '/Dashboard' && 'black-icon'}/>),
-        usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Reports', '/Reports', <DatabaseOutlined  className={pathname === '/Reports' && 'black-icon'}/>),
-        usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Creatives', '/Creatives', <PieChartOutlined  className={pathname === '/Creatives' && 'black-icon'}/>),
-        usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Campaigns', '/Campaigns', <DesktopOutlined  className={pathname === '/Campaigns' && 'black-icon'}/>),
+        getItem('Dashboard', '/Dashboard', <AppstoreOutlined className={pathname === '/Dashboard' && 'black-icon'}/>, 'Dashboard'),
+        usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Reports', '/Reports', <BarChartOutlined  className={pathname === '/Reports' && 'black-icon'}/>, 'Reports'),
+        usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Creatives', '/Creatives', <PictureOutlined  className={pathname === '/Creatives' && 'black-icon'}/>, 'Creatives'),
+        usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Campaigns', '/Campaigns', <LineChartOutlined  className={pathname === '/Campaigns' && 'black-icon'}/>, 'Campaigns'),
         // getItem('Users', '/Users', <ContainerOutlined />),
-        usersDataForLogin[0]?.role === 'Admin' && getItem('NewUser', '/NewUser', <UserOutlined  className={pathname === '/NewUser' && 'black-icon'}/>),
-        usersDataForLogin[0]?.role === 'Admin' && getItem('Activities', '/Activities', <LaptopOutlined  className={pathname === '/Activities' && 'black-icon'}/>),
+        usersDataForLogin[0]?.role === 'Admin' && getItem('User Role', '/NewUser', <UserOutlined  className={pathname === '/NewUser' && 'black-icon'}/>, 'NewUser'),
+        usersDataForLogin[0]?.role === 'Admin' && getItem('User History', '/Activities', <LaptopOutlined  className={pathname === '/Activities' && 'black-icon'}/>, 'Activities'),
     ].filter(Boolean);
+    console.log(`menuitems:${menuItems} ,${pathname}`)
 
     const toggleCollapsed = () => {
         setCollapsed(!collapsed);
@@ -246,14 +253,14 @@ const Appbar = ({ children, usersDataForLogin }) => {
       {!isUserActivitiesComplete ? (
         <UserLocationFinder onComplete={handleUserActivitiesComplete} />
       ) : (
-        <Layout style={{ minHeight: height, backgroundColor: darkMode ? '#333' : '#fff' }}>
+        <Layout style={{ minHeight: height, backgroundColor: darkMode ? '#3f3e3eff' : '#fff' }}>
             <Sider
                 collapsible
                 collapsed={collapsed}
                 trigger={null}
                 width={220}
                 style={{
-                    backgroundColor: darkMode ? '#333' : '#fff',
+                    backgroundColor: darkMode ? '#3f3e3eff' : '#fff',
                     color: darkMode ? '#fff' : '#000',
                     borderRadius: '5px',
                     overflow: 'hidden',
@@ -317,7 +324,7 @@ const Appbar = ({ children, usersDataForLogin }) => {
                     mode="inline"
                     selectedKeys={[pathname]}
                     style={{
-                        backgroundColor: darkMode ? '#333' : '#fff',
+                        backgroundColor: darkMode ? ' #3f3e3eff': '#fff',
                         color: darkMode ? '#007BFF' : '#000',
                         // color: '#007BFF',
                         fontSize: '16px',
@@ -339,24 +346,25 @@ const Appbar = ({ children, usersDataForLogin }) => {
                     {collapsed ? (
                         <Image
                             // src="/ssk1.png"
-                            src={darkMode ? "/ssk2.png" : "/ssk1.png"}
+                            src={darkMode ? "/dark.png" : "/light.png"}
                             width={100}   // Smaller logo when collapsed
-                            height={50}
+                            height={70}
                             priority={true}
                             alt="Collapsed Logo"
-                            style={{ margin: "0px 12px", width: "60%", height: "revert-layer", objectFit: "contain" }}
+                            style={{ margin: "-10px 11px", width: "70%", height: "revert-layer" }}
                         />
                     ) : (
                         <Image
                             // src="/RR1.png"
-                            src={darkMode ? "/4.png" : "/RR1.png"}
+                            src={darkMode ? "/logodark.png" : "/logo.png"}
                             width={150}  // Larger logo when expanded
-                            height={60}
+                            height={65}
                             priority={true}
                             alt="Expanded Logo"
                             style={{ margin: "0px 20px", objectFit: "cover" }}
                         />
                     )}
+                    
                     {menuItems.map(item => (
                         <Menu.Item key={item.key} icon={item.icon}  
                           style={{ 
@@ -365,7 +373,7 @@ const Appbar = ({ children, usersDataForLogin }) => {
                             color: darkMode ? item.label === pathname.split("/")[1] ? "#000" : '#ffffff' : '#000', 
                             // backgroundColor: darkMode ? item.label === pathname.split("/")[1] ? "#91C25F" : 'transparent' : '#91C25F',
                             backgroundColor:
-                            item.label === pathname.split("/")[1]
+                            item.text === pathname.split("/")[1]
                                 ? '#91C25F'
                                 : 'transparent',
                             fontWeight: "500", fontSize: "16px" 

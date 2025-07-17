@@ -173,18 +173,18 @@ export default function Createads({ selectedRow, network }) {
     console.log(record.Addid, "Adid");
     console.log(selectedRow?.camapaignlevel?.access_token, "access_token");
     const response = await axios.post(
-      `https://www.testapi.adsgoat.in/api/adlevel`,  
+      `https://www.testapi.adsgoat.in/api/adlevel`,
       {
         status: checked ? "ACTIVE" : "PAUSED",
-        id:selectedRow.identifier,
+        id: selectedRow.identifier,
         ad_id: record.Addid
       }, {
-        headers: {
-          Authorization: token,
-        }
+      headers: {
+        Authorization: token,
       }
+    }
     );
-    if(response.status === 200){
+    if (response.status === 200) {
       rerenders();
     };
     // updateAdStatus(record.Addid, checked ? "ACTIVE" : "PAUSED", selectedRow?.camapaignlevel?.access_token)
@@ -193,14 +193,14 @@ export default function Createads({ selectedRow, network }) {
 
   const columns = [
     {
-      title: 'AddName',
+      title: 'Ad name',
       dataIndex: 'AddName',
       key: 'AddName',
       render: (_, record) => (
 
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <span>{record.AddName}</span>
-          <span style={{ width: '50px', height: '50px', borderRadius: '50%', backgroundColor: theme === "dark" ? "#333" : '#e6f7ff' , margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: '5px' }}>
+          <span style={{ width: '50px', height: '50px', borderRadius: '50%', backgroundColor: theme === "dark" ? "#333" : '#e6f7ff', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: '5px' }}>
             <Tooltip title="Clone">
               <CopyOutlined style={{ color: theme === "dark" ? "white" : 'red' }} onClick={() => duplicatenewads(record)} />
             </Tooltip>
@@ -210,7 +210,7 @@ export default function Createads({ selectedRow, network }) {
       ),
     },
     {
-      title: 'Account_Number',
+      title: 'Account number',
       dataIndex: 'Account_Number',
       key: 'Account_Number',
       render: (text, record) => (
@@ -218,7 +218,7 @@ export default function Createads({ selectedRow, network }) {
       ),
     },
     {
-      title: 'Approval_Status',
+      title: 'Approval status',
       dataIndex: 'status',
       // key: 'status',
       render: (text, record) => (
@@ -230,17 +230,17 @@ export default function Createads({ selectedRow, network }) {
       dataIndex: 'Ad_Status',
       render: (text, record) => (
         <Switch
-            checked={record.Ad_Status === 'ACTIVE'}
-            onChange={(checked) => onToggleStatus(record, checked)}
-            checkedChildren="ACTIVE"
-            unCheckedChildren="PAUSED"
-            style={{ backgroundColor: record.Ad_Status === 'ACTIVE' && "#91C25F" }}
-            disabled={
-              !(
-                ovrallcampdetal?.fbstatus === 'Live' &&
-                ovrallcampdetal?.camapaignlevel?.Status === 'ACTIVE'
-              )
-            }
+          checked={record.Ad_Status === 'ACTIVE'}
+          onChange={(checked) => onToggleStatus(record, checked)}
+          checkedChildren="ACTIVE"
+          unCheckedChildren="PAUSED"
+          style={{ backgroundColor: record.Ad_Status === 'ACTIVE' && "#91C25F" }}
+          disabled={
+            !(
+              ovrallcampdetal?.fbstatus === 'Live' &&
+              ovrallcampdetal?.camapaignlevel?.Status === 'ACTIVE'
+            )
+          }
         />
       )
     },
@@ -250,8 +250,8 @@ export default function Createads({ selectedRow, network }) {
       render: (_, record) => (
         <Space>
           {/* <Button icon={<EditOutlined />} onClick={() => handleadsEdit(record)}>Edit</Button> */}
-          <Button className="dark-icon-button" icon={<EyeOutlined />} onClick={() => handleadsView(record)} style={{color: theme === "dark" ? "white" : "#000"}}>View</Button>
-          <Button  style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}} onClick={() => handleadsdelete(record)}>Delete</Button>
+          <Button className="dark-icon-button" icon={<EyeOutlined />} onClick={() => handleadsView(record)} style={{ color: theme === "dark" ? "white" : "#000" }}>View</Button>
+          <Button style={{ backgroundColor: '#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px" }} onClick={() => handleadsdelete(record)}>Delete</Button>
         </Space>
       ),
     },
@@ -266,7 +266,7 @@ export default function Createads({ selectedRow, network }) {
               <span style={{ color: 'red', cursor: 'pointer' }}>Error</span>
             </Tooltip>
           ) : (
-            <span>No Error</span>
+            <span>No error</span>
           )}
         </>
       ),
@@ -279,32 +279,44 @@ export default function Createads({ selectedRow, network }) {
       <Flex justify="space-between" align="center">
         <Title
           level={3}
-          style={{ margin: "0 0 10px 0", color: theme === "dark" ? "white" : "#1677ff" }}>
-          Total Ads
+          style={{ margin: "0 0 10px 0", color: theme === "dark" ? "#1677ff" : "#1677ff",fontSize:'18px' }}>
+          Total ads
         </Title>
         <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <Button  style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px", marginRight: '10px'}} onClick={createnewads}>
-            Create Ads
+          <Button style={{ backgroundColor: '#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px", marginRight: '10px' }} onClick={createnewads}>
+            Create ads
           </Button>
         </div>
 
       </Flex>
-      <Row style={{ columnGap: "10px" }} align={"bottom"}>
-        <Col span={7}>
+      <Row align="middle" gutter={10}>
+        <Col>
           <Input
-            placeholder="Search..."
+            placeholder="Search ads"
             variant="filled"
             suffix={<SearchOutlined />}
             className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+            style={{
+              width: '170px',
+              marginLeft: '12px',
+              border: '1px solid green',
+              marginBottom: '10px'
+            }}
           // value={searchInput}
           // onChange={handleSearchChange}
           />
         </Col>
         <Col span={4}>
-          {<span style={{ color: "#B4B4B4" }}>Status</span>}
+          {/* {<span style={{ color: "#B4B4B4" }}>Status</span>} */}
           <Select
             // defaultValue="All"
-            style={{ width: "100%" }}
+            style={{
+              width: '180px',
+              border: '1px solid green',
+              borderRadius: '5px',
+              marginBottom: '10px'
+            }}
+            placeholder="Select status"
             dropdownClassName={theme === 'dark' && "custom-dropdown"}
             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
             // onChange={handleSelectChange}
@@ -317,14 +329,14 @@ export default function Createads({ selectedRow, network }) {
           />
         </Col>
       </Row>
-      <Table dataSource={data} columns={columns} rowKey={(record, index) => index} className={`custom-dark-table ${theme === 'dark' ? 'dark-mode-pagination' : 'light-mode-pagination'}`}/>
+      <Table dataSource={data} columns={columns} rowKey={(record, index) => index} className={`custom-dark-table ${theme === 'dark' ? 'dark-mode-pagination' : 'light-mode-pagination'}`} />
       <Drawer
-        title="Create Ads"
+        title="Create ads"
         placement="right"
         // closable={false}
         onClose={onCloseDrawer}
         open={newadsDrawerVisible}
-        width="90%" // Adjust width as needed
+        width="100%" // Adjust width as needed
         style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
       >
         <Createnewads data={selectedRow} visible={visibleNewAdset} onClose={onCloseDrawer} rerenders={rerenders} network={network} adsData={data} />
@@ -336,7 +348,7 @@ export default function Createads({ selectedRow, network }) {
         // closable={false}
         onClose={onCloseDrawer}
         open={duplicateDrawerVisible}
-        width="90%" // Adjust width as needed
+        width="100%" // Adjust width as needed
         style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
       >
         <Duplicatenewads data={selectedRow} dupdata={duplicatedata} onClose={onCloseDrawer} rerenders={rerenders} network={network} visible={visibleDuplicateAdd} adsData={data} />
@@ -348,7 +360,7 @@ export default function Createads({ selectedRow, network }) {
         // closable={false} 
         onClose={onCloseDrawer}
         open={editadsDrawerVisible}
-        width="90%" // Adjust width as needed
+        width="100%" // Adjust width as needed
         style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
       >
         <Editads selectedRow={selectedRow} editdata={editadsdata} />
@@ -360,7 +372,7 @@ export default function Createads({ selectedRow, network }) {
         // closable={false}
         onClose={onCloseDrawer}
         open={viewadsDrawerVisible}
-        width="90%" // Adjust width as needed
+        width="100%" // Adjust width as needed
         style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
       >
         <Viewads selectedRow={selectedRow} viewdata={viewadsdata} />

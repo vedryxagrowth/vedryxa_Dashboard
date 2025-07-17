@@ -90,7 +90,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
   const handleExpand = (index) => {
     setExpandedIndex(index === expandedIndex ? null : index);
   };
-   
+
   const { theme } = useTokenContext();
 
   const themeForNotifications = useRef(theme);
@@ -138,18 +138,18 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
     })
   }
   const handleClearAll = async (e) => {
-  e.stopPropagation();
-  for (const [key, items] of Object.entries(notifications)) {
-    for (const item of items) {
-      await onClickNotificationView(item, key, userdetails?.email);
+    e.stopPropagation();
+    for (const [key, items] of Object.entries(notifications)) {
+      for (const item of items) {
+        await onClickNotificationView(item, key, userdetails?.email);
+      }
     }
-  }
-  const cleared = {};
-  Object.keys(notifications).forEach((key) => {
-    cleared[key] = [];
-  });
-  setNotifications(cleared);
-};
+    const cleared = {};
+    Object.keys(notifications).forEach((key) => {
+      cleared[key] = [];
+    });
+    setNotifications(cleared);
+  };
 
 
   const items = Object.entries(notifications).map(([key, value]) => ({
@@ -280,7 +280,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                   >
 
                     <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', fontSize: '12px', }}>
-                      <span style={{fontSize:'12px'}}>{item.date}</span>
+                      <span style={{ fontSize: '12px' }}>{item.date}</span>
                       <CloseOutlined
                         style={{ marginLeft: 8, cursor: 'pointer', color: '#999', fontSize: '12px' }}
                         onClick={(e) => {
@@ -344,7 +344,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                             />
                           )}
                         </div>
- 
+
                         <Divider
                           style={{
                             margin: '3px 0',
@@ -435,7 +435,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
               height: '25px',
               fontSize: '12px',
             }}
-             onClick={handleClearAll}
+            onClick={handleClearAll}
           >
             Mark all as seen
           </Button>
@@ -554,7 +554,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
   }, [visible]);
 
   useEffect(() => {
-    themeForNotifications.current = theme; 
+    themeForNotifications.current = theme;
   }, [theme]);
 
   useEffect(() => {
@@ -753,7 +753,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
     {
       key: '1',
       label: (
-        <a onClick={openProfileModal} style={{ padding: '5px' }}>
+        <a onClick={openProfileModal} >
           Profile
         </a>
       ),
@@ -768,7 +768,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
             router.push('/api/auth/signout');
           }}
         >
-          Sign Out
+          Sign out
         </a>
       ),
     },
@@ -1154,10 +1154,10 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
 
 
               {userdetails?.role !== "Revenue_Partner" && <div className="relative inline-block" ref={wrapperRef} style={{ marginRight: "0px", paddingRight: '0px' }}>
-                <div className="cursor-pointer" style={{ marginRight: "0px", paddingRight: '0px' }}>
+                <div className="cursor-pointer" style={{ paddingRight: '0px' }}>
                   {/* <Bell size={20} /> */}
                   <Dropdown overlay={menu} trigger={['click']} placement="bottomRight">
-                    <span style={{ cursor: 'pointer' }}>
+                    <span style={{ cursor: 'pointer',marginLeft: '10px' }}>
                       <Bell style={{ fontSize: 24 }} />
                     </span>
                   </Dropdown>
@@ -1178,17 +1178,21 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                 </div>
               </div>}
 
-              {userdetails?.role !== "Revenue_Partner" && <button style={{ padding: '0px', margin: '0px',backgroundColor: theme === "dark" &&
-                  "transparent" }} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onChangeStickyNotes}>
-                <SlNotebook size={20} style={{ marginLeft: '10px' }} />
+              {userdetails?.role !== "Revenue_Partner" && <button style={{
+                padding: '0px', margin: '0px', backgroundColor: theme === "dark" &&
+                  "transparent"
+              }} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onChangeStickyNotes}>
+                <SlNotebook size={20} style={{ marginLeft: '-12px' }} />
               </button>}
 
-              {userdetails?.role !== "Revenue_Partner" && <button style={{ padding: '0px', margin: '0px',backgroundColor: theme === "dark" &&
-                  "transparent" }} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickCalculator}>
+              {userdetails?.role !== "Revenue_Partner" && <button style={{
+                padding: '0px', margin: '0px', backgroundColor: theme === "dark" &&
+                  "transparent"
+              }} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickCalculator}>
                 <CalculatorOutlined style={{ fontSize: '20px', padding: '0px', margin: '0px', marginLeft: '10px' }} />
               </button>}
               {userdetails?.role !== "Revenue_Partner" && <button style={{
-                padding: '0px', margin: '0px', 
+                padding: '0px', margin: '0px',
                 backgroundColor: theme === "dark" &&
                   "transparent"
               }} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onClickWorlTime}>
@@ -1197,8 +1201,10 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
 
               <button
                 onClick={toggleTheme}
-                style={{ padding: '0px', margin: '0px', marginLeft: '10px',backgroundColor: theme === "dark" &&
-                  "transparent" }}
+                style={{
+                  padding: '0px', margin: '0px', marginLeft: '10px', backgroundColor: theme === "dark" &&
+                    "transparent"
+                }}
                 className={`${darkMode ? 'dark-mode' : 'light-mode'}`}
               >
                 {darkMode ? (
@@ -1230,7 +1236,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                   size={36}
                   src={avatarUrl || getDefaultAvatar()}
                   style={{
-                    background: darkMode ? '#333' : '#ebebeb',
+                    background: darkMode ? '#6e6b6b' : '#ebebeb',
                     fontSize: '1.8em',
                     transition: 'background 0.3s ease',
                     marginLeft: '10px',
@@ -1432,7 +1438,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
               />
 
               <Upload {...uploadProps}>
-                <Button style={{ marginTop: '10px' }} icon={<UploadOutlined />} loading={loading}>
+                <Button style={{ marginTop: '10px',backgroundColor:'#91C25F',border:'#91C25F' }} icon={<UploadOutlined className="black-icon" />} loading={loading}>
                   {loading ? 'Uploading...' : 'Upload Image'}
                 </Button>
               </Upload>
@@ -1507,7 +1513,8 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
         <WorldTime setOpenWorldTime={setOpenWorldTime} />
       </div>
     </Modal> */}
-      <Drawer open={openWorldTime} width="95%" onClose={() => setOpenWorldTime(false)}>
+      <Drawer open={openWorldTime} width="95%" onClose={() => setOpenWorldTime(false)}style={{
+        backgroundColor: theme === 'dark' ? '#333' : '#fff'}}>
         <div>
           <WorldTime setOpenWorldTime={setOpenWorldTime} />
         </div>
@@ -1517,7 +1524,8 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
         <Calculator setOpenCalculator={setOpenCalculator} />
       </div>
     </Modal> */}
-      <Drawer open={openCalculator} width="32%" onClose={() => setOpenCalculator(false)}>
+      <Drawer open={openCalculator} width="32%" onClose={() => setOpenCalculator(false)} style={{
+        backgroundColor: theme === 'dark' ? '#333' : '#fff'}}>
         <div>
           <Calculator setOpenCalculator={setOpenCalculator} />
         </div>
@@ -1795,307 +1803,307 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
     setTopbarStatus(true)
   }
 
-//   return (
-//     <>
-//       <Topbar usersDataForLogin={usersDataForLogin} session={session} darkMode={darkMode} toggleTheme={toggleTheme} usersData={!loading && usersData} onComplete={handleTopbarCalling} />
+  //   return (
+  //     <>
+  //       <Topbar usersDataForLogin={usersDataForLogin} session={session} darkMode={darkMode} toggleTheme={toggleTheme} usersData={!loading && usersData} onComplete={handleTopbarCalling} />
 
-//       {sessionStatus == "authenticated" && usersData?.length === 0 && !loading ?
-//         null
-//         :
-//         (sessionStatus !== "authenticated" ? (
-//           <div
-//             style={{
-//               display: 'flex',
-//               height: '100vh',
-//             }}
-//           >
-//             {/* Left side: Image */}
-//             <div
-//               style={{
-//                 flex: 1,
-//                 position: 'relative',
-//                 height: "80%",
-//                 width: "100%",
-//                 marginLeft: "0.8%"
-//               }}
-//             >
-//               <img
-//                 style={{
-//                   width: '100%',
-//                   height: 'auto',
-//                   maxHeight: '90vh',
-//                 }}
-//                 src="/hope.png"
-//                 alt="img"
-//               />
-//             </div>
+  //       {sessionStatus == "authenticated" && usersData?.length === 0 && !loading ?
+  //         null
+  //         :
+  //         (sessionStatus !== "authenticated" ? (
+  //           <div
+  //             style={{
+  //               display: 'flex',
+  //               height: '100vh',
+  //             }}
+  //           >
+  //             {/* Left side: Image */}
+  //             <div
+  //               style={{
+  //                 flex: 1,
+  //                 position: 'relative',
+  //                 height: "80%",
+  //                 width: "100%",
+  //                 marginLeft: "0.8%"
+  //               }}
+  //             >
+  //               <img
+  //                 style={{
+  //                   width: '100%',
+  //                   height: 'auto',
+  //                   maxHeight: '90vh',
+  //                 }}
+  //                 src="/hope.png"
+  //                 alt="img"
+  //               />
+  //             </div>
 
-//             {/* Right side: Form */}
-//             {/* <div
-//               style={{
-//                 flex: 1,
-//                 display: 'flex',
-//                 // alignItems: 'center',
-//                 justifyContent: 'flex-end',
-//                 padding: '20px',
-//                 backgroundColor: darkMode ? '#333' : '#fff',
-//               }}
-//             > */}
-//             <div
-//               style={{
-//                 marginTop: "5%",
-//                 marginRight: "2%",
-//                 maxWidth: '400px',
-//                 height: "60%",
-//                 width: '100%',
-//                 padding: '20px',
-//                 backgroundColor: darkMode ? '#333' : '#fff',
-//                 borderRadius: '8px',
-//                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-//               }}
-//             >
-//               <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Login</h2>
+  //             {/* Right side: Form */}
+  //             {/* <div
+  //               style={{
+  //                 flex: 1,
+  //                 display: 'flex',
+  //                 // alignItems: 'center',
+  //                 justifyContent: 'flex-end',
+  //                 padding: '20px',
+  //                 backgroundColor: darkMode ? '#333' : '#fff',
+  //               }}
+  //             > */}
+  //             <div
+  //               style={{
+  //                 marginTop: "5%",
+  //                 marginRight: "2%",
+  //                 maxWidth: '400px',
+  //                 height: "60%",
+  //                 width: '100%',
+  //                 padding: '20px',
+  //                 backgroundColor: darkMode ? '#333' : '#fff',
+  //                 borderRadius: '8px',
+  //                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+  //               }}
+  //             >
+  //               <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Login</h2>
 
-//               <Button
-//                 type="primary"
-//                 icon={<GoogleOutlined />}
-//                 onClick={handleGoogleSignIn}
-//                 style={{
-//                   width: '100%',
-//                   marginBottom: '20px',
-//                 }}
-//               >
-//                 Sign in with Google
-//               </Button>
+  //               <Button
+  //                 type="primary"
+  //                 icon={<GoogleOutlined />}
+  //                 onClick={handleGoogleSignIn}
+  //                 style={{
+  //                   width: '100%',
+  //                   marginBottom: '20px',
+  //                 }}
+  //               >
+  //                 Sign in with Google
+  //               </Button>
 
-//               <Divider>Or</Divider>
+  //               <Divider>Or</Divider>
 
-//               <Form name="login_form" onFinish={onFinish}>
-//                 <Form.Item
-//                   name="username"
-//                   rules={[{ required: true, message: 'Please input your Username!' }]}
-//                 >
-//                   <Input
-//                     prefix={<UserOutlined />}
-//                     placeholder="Username"
-//                     style={{ padding: '10px' }}
-//                   />
-//                 </Form.Item>
+  //               <Form name="login_form" onFinish={onFinish}>
+  //                 <Form.Item
+  //                   name="username"
+  //                   rules={[{ required: true, message: 'Please input your Username!' }]}
+  //                 >
+  //                   <Input
+  //                     prefix={<UserOutlined />}
+  //                     placeholder="Username"
+  //                     style={{ padding: '10px' }}
+  //                   />
+  //                 </Form.Item>
 
-//                 <Form.Item
-//                   name="password"
-//                   rules={[{ required: true, message: 'Please input your Password!' }]}
-//                 >
-//                   <Input.Password
-//                     prefix={<LockOutlined />}
-//                     placeholder="Password"
-//                     style={{ padding: '10px' }}
-//                   />
-//                 </Form.Item>
+  //                 <Form.Item
+  //                   name="password"
+  //                   rules={[{ required: true, message: 'Please input your Password!' }]}
+  //                 >
+  //                   <Input.Password
+  //                     prefix={<LockOutlined />}
+  //                     placeholder="Password"
+  //                     style={{ padding: '10px' }}
+  //                   />
+  //                 </Form.Item>
 
-//                 <Form.Item>
-//                   <Button
-//                     type="primary"
-//                     htmlType="submit"
-//                     style={{
-//                       width: '100%',
-//                       padding: '10px',
-//                     }}
-//                   >
-//                     Login
-//                   </Button>
-//                 </Form.Item>
-//               </Form>
-//             </div>
-//             {/* </div> */}
-//           </div>
-//         ) :
-//           <p style={{ height: '0px', margin: '0px', padding: '0px' }}></p>
-//         )
-//       }
+  //                 <Form.Item>
+  //                   <Button
+  //                     type="primary"
+  //                     htmlType="submit"
+  //                     style={{
+  //                       width: '100%',
+  //                       padding: '10px',
+  //                     }}
+  //                   >
+  //                     Login
+  //                   </Button>
+  //                 </Form.Item>
+  //               </Form>
+  //             </div>
+  //             {/* </div> */}
+  //           </div>
+  //         ) :
+  //           <p style={{ height: '0px', margin: '0px', padding: '0px' }}></p>
+  //         )
+  //       }
 
-//     </>
-//   );
-// };
+  //     </>
+  //   );
+  // };
 
-// export default LayoutWrapper;
-return (
-  <>
-  { sessionStatus === "authenticated"  && (
-     <Topbar
-        usersDataForLogin={usersDataForLogin}
-        session={session}
-        darkMode={darkMode}
-        toggleTheme={toggleTheme}
-        usersData={!loading && usersData}
-        onComplete={handleTopbarCalling}
-      />
-    )}
-    {sessionStatus !== "authenticated" && (
-      <div
-        style={{
-          background: "#edfaf3",
-          height: "100vh",
-          overflow: "hidden",
-          position: "relative",
-          display: 'flex',
-          padding: '20px',
-          boxSizing: 'border-box',
-        }}
-      >
+  // export default LayoutWrapper;
+  return (
+    <>
+      {sessionStatus === "authenticated" && (
+        <Topbar
+          usersDataForLogin={usersDataForLogin}
+          session={session}
+          darkMode={darkMode}
+          toggleTheme={toggleTheme}
+          usersData={!loading && usersData}
+          onComplete={handleTopbarCalling}
+        />
+      )}
+      {sessionStatus !== "authenticated" && (
         <div
           style={{
-            flex: 1,
+            background: "#edfaf3",
+            height: "100vh",
+            overflow: "hidden",
+            position: "relative",
             display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
+            padding: '20px',
+            boxSizing: 'border-box',
           }}
         >
-          <img
-            src="/robot.png"
-            alt="Robot"
+          <div
             style={{
-              width: '100%',
+              flex: 1,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <img
+              src="/robot.png"
+              alt="Robot"
+              style={{
+                width: '100%',
+                height: '100%',
+                marginTop: '80px',
+                marginLeft: '40px',
+                objectFit: 'contain',
+              }}
+            />
+          </div>
+          <div
+            style={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              maxWidth: '500px',
               height: '100%',
-              marginTop: '80px',
-              marginLeft: '40px',
-              objectFit: 'contain',
+            }}
+          >
+            <div
+              style={{
+                width: '100%',
+                maxWidth: '340px',
+                padding: '16px',
+                backgroundColor: '#FFFFFF',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.06)',
+                boxSizing: 'border-box',
+              }}
+            >
+              <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+                <h2 style={{ margin: '10px', color: '#1B1F23', fontSize: '18px' }}>Welcome Back</h2>
+                <p style={{ color: '#6B7280', fontSize: '13px', marginTop: '10px' }}>
+                  Sign in to your Vyaktimetrics dashboard
+                </p>
+              </div>
+              <Button
+                onClick={handleGoogleSignIn}
+                style={{
+                  width: '100%',
+                  backgroundColor: '#FFFFFF',
+                  border: '1px solid #E0E0E0',
+                  marginTop: '15px',
+                  height: '36px',
+                  fontWeight: 500,
+                  fontSize: '14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                }}
+              >
+                <img src="/google-logo.png" alt="Google" style={{ width: '18px', height: '18px' }} />
+                Continue with Google
+              </Button>
+
+              <Divider style={{ margin: '12px 0', color: '#9CA3AF' }}>or</Divider>
+
+              <Form name="login_form" onFinish={onFinish} layout="vertical" requiredMark={false}>
+                <Form.Item
+                  label="Email"
+                  name="username"
+                  style={{ marginBottom: '12px' }}
+                  rules={[{ required: true, message: 'Please input your email!' }]}
+                >
+                  <Input
+                    prefix={<UserOutlined />}
+                    placeholder="Enter your email"
+                    style={{ padding: '8px', fontSize: '14px', borderColor: '#E0E0E0' }}
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  label="Password"
+                  name="password"
+                  style={{ marginBottom: '10px' }}
+                  rules={[{ required: true, message: 'Please input your password!' }]}
+                >
+                  <Input.Password
+                    prefix={<LockOutlined />}
+                    placeholder="Enter your password"
+                    style={{ padding: '8px', fontSize: '14px', borderColor: '#E0E0E0' }}
+                  />
+                </Form.Item>
+
+                <div style={{ textAlign: 'right', marginBottom: '15px' }}>
+                  <a style={{ color: '#4CAF50', fontSize: '12px' }}>
+                    Forgot password?
+                  </a>
+                </div>
+
+                <Form.Item style={{ marginBottom: '0' }}>
+                  <Button
+                    htmlType="submit"
+                    style={{
+                      width: '100%',
+                      backgroundColor: '#4CAF50',
+                      borderColor: '#4CAF50',
+                      height: '36px',
+                      fontWeight: 'bold',
+                      fontSize: '14px',
+                    }}
+                  >
+                    Sign In
+                  </Button>
+                </Form.Item>
+              </Form>
+
+              <div style={{ textAlign: 'center', fontSize: '13px', marginTop: '18px' }}>
+                Don’t have an account?{' '}
+                <a style={{ color: '#4CAF50' }}>
+                  Contact your administrator
+                </a>
+              </div>
+            </div>
+
+            <div
+              style={{
+                marginTop: '10px',
+                textAlign: 'center',
+                fontSize: '13px',
+                color: '#1B1F23',
+              }}
+            >
+              Secure enterprise-grade authentication
+            </div>
+          </div>
+          <img
+            src="/logo.png"
+            alt="Logo"
+            style={{
+              position: 'absolute',
+              top: '-50px',
+              left: '10px',
+              width: '180px',
+              height: 'auto',
             }}
           />
         </div>
-        <div
-          style={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            maxWidth: '500px',
-            height: '100%',
-          }}
-        >
-          <div
-            style={{
-              width: '100%',
-              maxWidth: '340px',
-              padding: '16px',
-              backgroundColor: '#FFFFFF',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.06)',
-              boxSizing: 'border-box',
-            }}
-          >
-            <div style={{ textAlign: 'center', marginBottom: '10px' }}>
-              <h2 style={{ margin: '10px', color: '#1B1F23', fontSize: '18px' }}>Welcome Back</h2>
-              <p style={{ color: '#6B7280', fontSize: '13px', marginTop: '10px' }}>
-                Sign in to your Vyaktimetrics dashboard
-              </p>
-            </div>
-             <Button
-              onClick={handleGoogleSignIn}
-              style={{
-                width: '100%',
-                backgroundColor: '#FFFFFF',
-                border: '1px solid #E0E0E0',
-                marginTop: '15px',
-                height: '36px',
-                fontWeight: 500,
-                fontSize: '14px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-              }}
-            >
-           <img src="/google-logo.png" alt="Google" style={{ width: '18px', height: '18px' }} />
-              Continue with Google
-            </Button>
-
-            <Divider style={{ margin: '12px 0', color: '#9CA3AF' }}>or</Divider>
-
-            <Form name="login_form" onFinish={onFinish} layout="vertical" requiredMark={false}>
-              <Form.Item
-                label="Email"
-                name="username"
-                style={{ marginBottom: '12px' }}
-                rules={[{ required: true, message: 'Please input your email!' }]}
-              >
-                <Input
-                  prefix={<UserOutlined />}
-                  placeholder="Enter your email"
-                  style={{ padding: '8px', fontSize: '14px', borderColor: '#E0E0E0' }}
-                />
-              </Form.Item>
-
-              <Form.Item
-                label="Password"
-                name="password"
-                style={{ marginBottom: '10px' }}
-                rules={[{ required: true, message: 'Please input your password!' }]}
-              >
-                <Input.Password
-                  prefix={<LockOutlined />}
-                  placeholder="Enter your password"
-                  style={{ padding: '8px', fontSize: '14px', borderColor: '#E0E0E0' }}
-                />
-              </Form.Item>
-
-              <div style={{ textAlign: 'right', marginBottom: '15px' }}>
-                <a  style={{ color: '#4CAF50', fontSize: '12px' }}>
-                  Forgot password?
-                </a>
-              </div>
-
-              <Form.Item style={{ marginBottom: '0' }}>
-                <Button
-                  htmlType="submit"
-                  style={{
-                    width: '100%',
-                    backgroundColor: '#4CAF50',
-                    borderColor: '#4CAF50',
-                    height: '36px',
-                    fontWeight: 'bold',
-                    fontSize: '14px',
-                  }}
-                >
-                  Sign In
-                </Button>
-              </Form.Item>
-            </Form>
-
-            <div style={{ textAlign: 'center', fontSize: '13px', marginTop: '18px' }}>
-              Don’t have an account?{' '}
-              <a style={{ color: '#4CAF50' }}>
-                Contact your administrator
-              </a>
-            </div>
-          </div>
-
-          <div
-            style={{
-              marginTop: '10px',
-              textAlign: 'center',
-              fontSize: '13px',
-              color: '#1B1F23',
-            }}
-          >
-            Secure enterprise-grade authentication
-          </div>
-        </div>
-        <img
-          src="/logo.png"
-          alt="Logo"
-          style={{
-            position: 'absolute',
-            top: '-50px',
-            left: '10px',
-            width: '180px',
-            height: 'auto',
-          }}
-        />
-      </div>
-    )}
-  </>
-);
+      )}
+    </>
+  );
 };
 export default LayoutWrapper;
 
