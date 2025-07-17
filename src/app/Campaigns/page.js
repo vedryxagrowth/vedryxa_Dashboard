@@ -755,7 +755,7 @@ const App = () => {
       title: 'Status',
       dataIndex: 'fbstatus',
       key: 'fbstatus',
-      width: 100,
+      width: 120,
       align: 'center',
       render: (text, record) => (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
@@ -779,7 +779,7 @@ const App = () => {
       title: 'Campaign name',
       dataIndex: 'campaign_name',
       key: 'campaign_name',
-      width: 300,
+      width: 320,
       align: 'center',
       render: (text, record) => (
         <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
@@ -1575,8 +1575,8 @@ const App = () => {
                   fontSize: '15px',
                   color: theme === 'dark' ? '#1890ff' : '#1890ff',
                   border: `1px solid ${theme === 'dark' ? '#4caf50' : '#4caf50'}`,
-                  marginRight:'-55px'
-                  
+                  marginRight: '-55px'
+
                 }}
               >
                 Total daily spend: ${totalDailySpend.toFixed(2)}
@@ -1629,8 +1629,8 @@ const App = () => {
             height: 'calc(100vh - 300px)',
             // minHeight: '100%',
             tableLayout: 'fixed',
-            
-        
+
+
           }}
           className={`custom-dark-table ${theme === 'dark' ? 'dark-mode-pagination' : 'light-mode-pagination'}`}
           columns={columns}
@@ -1640,7 +1640,7 @@ const App = () => {
           })).reverse()}
           pagination={{ pageSize: paginationSize }}
           scroll={{
-            x: 'max-content',
+            x: 'auto',
             y: 'calc(63vh)',
           }}
           expandable={{
