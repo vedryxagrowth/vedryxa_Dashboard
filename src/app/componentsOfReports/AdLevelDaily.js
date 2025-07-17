@@ -639,13 +639,14 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
                         <Modal
                             title="Confirm Action"
                             open={isAdidModalVisibles}
+                            className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             onOk={handlePauseOk}
                             onCancel={handlePauseCancel}
                         >
                             <p>
-                                Are you sure you want to turn <b>{nextChecked ? "ON" : "OFF"}</b> this ad?
+                                Are you sure you want to turn {nextChecked ? "ON" : "OFF"} this ad?
                             </p>
-                            <p>Ad ID: <strong>{selectedAdid}</strong></p>
+                            <p>Ad ID: {selectedAdid}</p>
                         </Modal>
                         <PinIcon
                             campaignName={campaignName}
@@ -750,10 +751,10 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
                             footer={[
                                 <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
                                     <div style={{display:'flex', flexDirection:"column"}}>
-                                        <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                        <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", }}>
                                             Last Edited Time:
                                         </span>
-                                        <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                        <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", }}>
                                             {editUserANdTime ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A") : ""}
                                         </span>
 
@@ -763,7 +764,7 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
                                         key="delete"
                                         type="danger"
                                         onClick={handleDelete}
-                                        style={{ marginRight: 'auto', border: "1px solid black" }} // Push Delete button to the far left
+                                        style={{ marginRight: 'auto', border: "1px solid #e3e3da" }} // Push Delete button to the far left
                                     >
                                         Delete
                                     </Button>
@@ -1393,30 +1394,43 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
                                 );
                             }
                             )?.length > 0 ? (
-                                <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
+                                <div 
+                                    className={`ag-theme-alpine ag-container ${gridThemeClass}`}
+                                    style={{
+                                        width: '100%',
+                                        // borderRadius: 12,
+                                        backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+                                        padding: 10,
+                                        height: 'auto',
+                                        boxShadow:
+                                        theme === 'dark'
+                                            ? '0 1px 3px rgba(0,0,0,0.6)'
+                                            : '0 1px 6px rgba(0,0,0,0.08)',
+                                    }}
+                                >
                                     <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d", }}>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
                                             <Space align="center" className='daily-contaier'>
                                                 <div className="blinking-circle"></div>
-                                                <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600', color: theme === "dark" && "white" }}>Daily</Text>
+                                                <Text style={{ paddingLeft: '3px', fontSize: '15px', color: theme === "dark" && "white" }}>Daily</Text>
                                             </Space>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Acc: {newaccount}</Text>
+                                            <Text style={{ color: theme === "dark" && "white" }}>Acc: {newaccount}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>AccName: {newAccountName}</Text>
+                                            <Text style={{ color: theme === "dark" && "white" }}>Acc name: {newAccountName}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Timezone: {timezone.current}</Text>
+                                            <Text style={{ color: theme === "dark" && "white" }}>Time zone: {timezone.current}</Text>
                                         </Col>
                                        
                                          <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
                                                 < Tooltip
                                                     title={
                                                         <>
-                                                        {fbCron.current !== '-' && <div>FbAcc Status: {fbCron.current}</div>}
-                                                        {revenueCron.current !== '-' && <div>RevAcc Status: {revenueCron.current}</div>}
+                                                        {fbCron.current !== '-' && <div>FbAcc status: {fbCron.current}</div>}
+                                                        {revenueCron.current !== '-' && <div>RevAcc status: {revenueCron.current}</div>}
                                                         {(cronStatus.current !== '-' || accountStatus.current !== '-') && (
                                                             <Text style={{ fontWeight: '600', color: 'white' }}>
                                                             Cron/Acc status: {cronStatus.current} /{' '}
@@ -1465,6 +1479,7 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
                                     </Row>
                                     <AgGridReact
                                         ref={gridRef1}
+                                        className='custom-grid'
                                         rowData={memorizedDailyData}
                                         columnDefs={memorizedColumnDef1}
                                         onCellClicked={onCellClicked}
@@ -1501,7 +1516,7 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
                                         getRowStyle={params => {
                                             if (params.node.rowPinned) {
                                                 return {
-                                                    fontWeight: 'bold',
+                                                    // fontWeight: 'bold',
                                                     backgroundColor: theme === "dark" ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
                                                     color: theme === "dark" ? '#fff' : '#000',           // Text color should contrast with the background
                                                 };

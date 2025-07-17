@@ -1064,7 +1064,6 @@ const Dashboard = () => {
     const [submitted, setSubmitted] = useState(false);
     const [domainWiseData, setDomainWiseData] = useState([]);
     const { apiClient } = useTokenContext();
-    const [hovered, setHovered] = useState(false);
 
 
     // const [collectionName, setCollectionName] = useState([]);
@@ -2827,7 +2826,7 @@ const Dashboard = () => {
                 }))}
                 className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
                 style={{
-                    // backgroundColor:  'transparent',
+                    backgroundColor:  'transparent',
                     padding: '0',
                     marginBottom: '0',
                 }}

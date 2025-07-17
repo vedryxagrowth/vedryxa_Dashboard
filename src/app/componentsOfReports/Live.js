@@ -21,6 +21,7 @@ import { FaRobot } from 'react-icons/fa';
 const CampaignLevelReports = React.lazy(() => import('./CampaignLevel'));
 const AdsetLevelReports = React.lazy(() => import('./AdsetLevel'));
 const AdLevelReports = React.lazy(() => import('./AdLevel'));
+const SearchFilters = React.lazy(() => import('./SearchFilters'));
 const contentStyle = {
     margin: "10px",
     // height: '800px',
@@ -64,7 +65,7 @@ const selectTimezone = {
     CEST: 'CESTDate'
 };
 
-const LiveReports = ({functionCallForCommnets, context, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle }) => {
+const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCallForCommnets, context, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle }) => {
     console.log(columnDefs, "columnDefs");
     console.log("hello world");
     const {theme} = useTokenContext();
@@ -79,6 +80,7 @@ const LiveReports = ({functionCallForCommnets, context, functionCallForCampaigns
 
     const [apiStatus, setApiStatus] = useState(false);
     
+    // const [inputValue, setInputValue] = useState('');
 
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -1270,6 +1272,7 @@ const LiveReports = ({functionCallForCommnets, context, functionCallForCampaigns
           backgroundColor: isActive ? (theme === 'dark' ? '#1e1e1e' : '#fff') : (theme === 'dark' ? '#2a2a2a' : '#f0f2f5'),
           color: isActive ? (theme === 'dark' ? '#fff' : '#000') : (theme === 'dark' ? '#aaa' : '#6b7280'),
           boxShadow: isActive ? '0 0 0 1px #91C25F inset' : 'none',
+          fontWeight: isActive ? 'normal' : 'bold', 
         });
       
         return [
@@ -1398,7 +1401,13 @@ const LiveReports = ({functionCallForCommnets, context, functionCallForCampaigns
             </Col>
       
             <Col>
-              <Space size={2}>
+                <SearchFilters
+                    theme={theme}
+                    handleChangeInput={handleChangeInput}
+                    handleBlur={handleBlur}
+                    onClickRefresh={onClickRefresh}
+                />
+              {/* <Space size={2}>
                 <Input
                   placeholder="Search campaigns..."
                   prefix={<SearchOutlined />}
@@ -1443,42 +1452,42 @@ const LiveReports = ({functionCallForCommnets, context, functionCallForCampaigns
                 </Dropdown>
       
                 <Tooltip title={`🍳 This feature is cooking—almost ready to serve 😜`}>
-  <Button
-    type="default"
-    icon={<FaRobot style={{ fontSize: 20 }} />}
-    disabled
-    style={{
-      borderRadius: 8,
-      background: theme === 'dark' ? 'rgba(82,196,26,0.06)' : '#f0fdf4',
-      border: '1px solid #95de64',
-      color: theme === 'dark' ? '#52c41a' : '#389e0d',
-      fontWeight: 500,
-      cursor: 'not-allowed',
-    }}
-  >
-    AI Assistant
-  </Button>
-</Tooltip>
+                    <Button
+                        type="default"
+                        icon={<FaRobot style={{ fontSize: 20 }} />}
+                        disabled
+                        style={{
+                        borderRadius: 8,
+                        background: theme === 'dark' ? 'rgba(82,196,26,0.06)' : '#f0fdf4',
+                        border: '1px solid #95de64',
+                        color: theme === 'dark' ? '#52c41a' : '#389e0d',
+                        fontWeight: 500,
+                        cursor: 'not-allowed',
+                        }}
+                    >
+                        AI Assistant
+                    </Button>
+                </Tooltip>
 
-<Tooltip title={`🍳 This feature is cooking—almost ready to serve 😜`}>
-  <Button
-    type="default"
-    icon={<SettingOutlined />}
-    disabled
-    style={{
-      borderRadius: 8,
-      background: theme === 'dark' ? 'rgba(24,144,255,0.06)' : '#e6f7ff',
-      border: '1px solid #91d5ff',
-      color: theme === 'dark' ? '#69c0ff' : '#1d39c4',
-      fontWeight: 500,
-      cursor: 'not-allowed',
-    }}
-  >
-    Rules
-  </Button>
-</Tooltip>
-              </Space>
-            </Col>
+                <Tooltip title={`🍳 This feature is cooking—almost ready to serve 😜`}>
+                <Button
+                    type="default"
+                    icon={<SettingOutlined />}
+                    disabled
+                    style={{
+                    borderRadius: 8,
+                    background: theme === 'dark' ? 'rgba(24,144,255,0.06)' : '#e6f7ff',
+                    border: '1px solid #91d5ff',
+                    color: theme === 'dark' ? '#69c0ff' : '#1d39c4',
+                    fontWeight: 500,
+                    cursor: 'not-allowed',
+                    }}
+                >
+                    Rules
+                </Button>
+                </Tooltip>
+              </Space> */}
+            </Col> 
           </Row>
         </StickyBox>
       );
@@ -1714,7 +1723,7 @@ const LiveReports = ({functionCallForCommnets, context, functionCallForCampaigns
 
     return (
             <div>
-                    <div>
+                    <div className={`top-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}>
                         {renderCarouselNav()}
                     </div>
                     <Tabs activeKey={activeTab} onChange={handleTabChange} renderTabBar={() => <></>}>

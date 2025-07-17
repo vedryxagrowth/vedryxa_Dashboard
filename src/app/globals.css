@@ -250,22 +250,22 @@ body {
   align-items: center;
 }
 .blinking-circle {
-  width: 20px;
-  height: 18px;
+  width: 13px;
+  height: 13px;
   background-color: green;
   border-radius: 50%;
   animation: blink 1s infinite;
 }
 .blinking-circle-1 {
-  width: 18px;
-  height: 18px;
+  width: 13px;
+  height: 13px;
   background-color:red;
   border-radius: 50%;
   animation: blink 1s infinite;
 }
 .blinking-circle-3{
-  width: 18px;
-  height: 18px;
+  width: 13px;
+  height: 13px;
   background-color:rgb(18, 47, 110);
   border-radius: 50%;
   animation: blink 1s infinite;
@@ -423,7 +423,7 @@ body {
 
 .ag-theme-alpine .ag-row.ag-footer {
   background-color: lightblue;
-  color: black;
+  color: #000;
 }
 
 
@@ -1194,7 +1194,7 @@ body.dark-mode .black-icon-comment.anticon svg {
 }
 
 .custom-input-dark {
-  background-color: #5d5b5b !important;  /* Input background */
+  background-color: #333 !important;  /* Input background */
   color: #fff !important;                /* Input text color */
 }
 .custom-input-dark::placeholder {
@@ -1256,12 +1256,28 @@ body.dark-mode .black-icon-comment.anticon svg {
 /* Ink bar */
 .custom-tabs.dark-mode-tabs .ant-tabs-ink-bar {
   background-color: #91C25F !important;
+  /* width: fit-content !important; */
 }
 .custom-tabs.light-mode-tabs .ant-tabs-ink-bar {
-  background-color: #52c41a !important;
+  background-color: #91C25F !important;
 }
 .custom-tabs.dark-mode-tabs .ant-tabs-nav::before {
   border-bottom: 1px solid transparent !important;
+}
+
+.top-tabs.dark-mode-tabs .ant-tabs-ink-bar {
+  background-color: #91C25F !important;
+  width: fit-content !important;
+}
+
+.top-tabs.light-mode-tabs .ant-tabs-ink-bar {
+  background-color: #91C25F !important;
+  width: fit-content !important;
+}
+
+/* Hide the horizontal bottom border under the tab bar */
+.ant-tabs-nav::before {
+  display: none !important;
 }
 
 /* Light theme tab bar (optional, for clarity) */
@@ -3010,8 +3026,8 @@ body.dark-mode .black-icon-comment.anticon svg {
 }
 
 body.dark .upload-form-wrapper {
-  --bg: #0f172a;
-  --text: #f9fafb;
+  --bg: #262326;
+  --text: #191a1b;
   --form-bg: #191919;
   --border: #334155;
   --input-bg: #0e1012;
@@ -3177,5 +3193,33 @@ body.dark .upload-form-wrapper {
   margin-right: 5px;
  
 }
+
+
+
+
+.custom-grid .ag-header-cell-label {
+  font-weight: normal !important;
+}
+
+/* Override default OK button in modal */
+.ant-modal .ant-btn-primary {
+  background-color: #91C25F !important;
+  border-color: #91C25F !important;
+}
+
+
+
+.dark-confirm-modal .ant-modal-confirm-content {
+  color: #ffffff;
+}
+
+.dark-confirm-modal .ant-modal-confirm .ant-modal-title {
+  color: #ffffff !important;
+}
+/*  */
+
+
+
+
 
 
