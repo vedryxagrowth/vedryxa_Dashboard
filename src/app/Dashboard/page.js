@@ -31,6 +31,7 @@ const revenuePartnerNames = {
     "Sedo": "FB_Sedo"
 };
 
+
 const newtworkCollections = {
     "FB_Mnet": "Facebook_Mnet",
     "FB_MnetBing": "Facebook_MnetBing",
@@ -182,6 +183,7 @@ const RevenuePartnerDashboard = () => {
     const [timeZone, setTimeZone] = useState('UTC');
     const networks = Object.keys(userdetails?.adAccounts);
     const [revenuePratner, setRevenuePartner] = useState(networks);
+
 
 
     const last7Days = dayjs().subtract(7, 'days').format('YYYY-MM-DD');
@@ -684,6 +686,7 @@ const RevenuePartnerDashboard = () => {
         },
     };
 
+
     return (
         <div style={{ width: '100%', margin: '0px', padding: '0px' }}>
             <Space direction="vertical" style={{ width: '100%', paddingBottom: "1%" }}>
@@ -765,7 +768,7 @@ const RevenuePartnerDashboard = () => {
                         />
                     </Col>
                     <Col xs={12} sm={12} md={2}>
-                        <Button onClick={onClickSubmit} style={{ backgroundColor: '#91C25F', color: "black", fontWeight: '600',border:' 1px solid #4caf50' }}>
+                        <Button onClick={onClickSubmit} style={{ backgroundColor: '#91C25F', color: "black", fontWeight: '600', border: ' 1px solid #4caf50' }}>
                             Submit
                         </Button>
                     </Col>
@@ -1017,6 +1020,7 @@ const Dashboard = () => {
     const [agencyNameReport, setAgencyNameReport] = useState([]);
 
     const [byAccountNumber, setByAccountNumber] = useState([]);
+     const [hovered, setHovered] = useState(false);
 
     const onChangeTime = (value) => {
         setSkeletonLoading(true);
@@ -2826,7 +2830,7 @@ const Dashboard = () => {
                 }))}
                 className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
                 style={{
-                    backgroundColor:  'transparent',
+                    backgroundColor: 'transparent',
                     padding: '0',
                     marginBottom: '0',
                 }}
@@ -3034,7 +3038,7 @@ const Dashboard = () => {
             enableRowGroup: true,
         },
         {
-            field: "accountNumber", minWidth: 180,headerName: 'Account number',
+            field: "accountNumber", minWidth: 180, headerName: 'Account number',
             resizable: true,
             sortable: true,
             hide: true, // Hide column as it's grouped
@@ -3109,7 +3113,7 @@ const Dashboard = () => {
     ]);
     const [columnDefs4] = useState([
         {
-            field: 'BMName', minWidth: 200, suppressAutoSize: true,headerName: 'BM name',
+            field: 'BMName', minWidth: 200, suppressAutoSize: true, headerName: 'BM name',
             resizable: true,
             sortable: true,
             hide: true, // Hide column as it's grouped
@@ -3120,7 +3124,7 @@ const Dashboard = () => {
             headerClass: 'hide-menu',
         },
         {
-            field: "AgencyName", minWidth: 180,headerName: 'Agency name',
+            field: "AgencyName", minWidth: 180, headerName: 'Agency name',
             resizable: true,
             sortable: true,
             suppressMenu: true,
@@ -3502,13 +3506,13 @@ const Dashboard = () => {
                                                     renderExtraFooter={() => (
                                                         <div style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '8px', paddingTop: '5px', paddingBottom: '5px' }}>
                                                             <Button
-                                                                style={{ marginRight: '8px' ,border:' 1px solid #4caf50'}} // Adds spacing between buttons
+                                                                style={{ marginRight: '8px', border: ' 1px solid #4caf50' }} // Adds spacing between buttons
                                                                 onClick={onClickCloseButton} // Close the picker
                                                             >
                                                                 Close
                                                             </Button>
                                                             <Button
-                                                                style={{ backgroundColor: '#91C25F' ,border:' 1px solid #4caf50' }}
+                                                                style={{ backgroundColor: '#91C25F', border: ' 1px solid #4caf50' }}
                                                                 onClick={handleSubmit}
                                                             >
                                                                 Submit
@@ -3610,7 +3614,7 @@ const Dashboard = () => {
                                                 showSearch
                                                 onSearch={handleSearchChange}  // Update searchValue dynamically
                                                 style={{ width: '100%' }}
-                                            className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
+                                                className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                                 placeholder="Select accounts"
                                                 dropdownClassName={theme === 'dark' && 'custom-dropdown'}
                                                 value={[]} // This should be updated to reflect selectedItems based on the selected categories
@@ -3629,7 +3633,7 @@ const Dashboard = () => {
                                                 style={{
                                                     width: '100%',
                                                 }}
-                                              className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
+                                                className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                                 placeholder="Select timezone"
                                                 dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                                 optionFilterProp="label"
@@ -3652,7 +3656,7 @@ const Dashboard = () => {
                                                 }}
                                             >
                                                 <RangePicker
-                                                className="green-border-picker"
+                                                    className="green-border-picker"
                                                     presets={rangePresets}
                                                     value={selectedDates}
                                                     onCalendarChange={handleChangeDates}
@@ -3670,13 +3674,13 @@ const Dashboard = () => {
                                                     renderExtraFooter={() => (
                                                         <div style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '8px', paddingTop: '5px', paddingBottom: '5px' }}>
                                                             <Button
-                                                                style={{ marginRight: '8px',border:' 1px solid #4caf50' }} // Adds spacing between buttons
+                                                                style={{ marginRight: '8px', border: ' 1px solid #4caf50' }} // Adds spacing between buttons
                                                                 onClick={onClickCloseButton} // Close the picker
                                                             >
                                                                 Close
                                                             </Button>
                                                             <Button
-                                                                style={{ backgroundColor: '#91C25F',border:' 1px solid #4caf50' }}
+                                                                style={{ backgroundColor: '#91C25F', border: ' 1px solid #4caf50' }}
                                                                 onClick={handleSubmit}
                                                             >
                                                                 Submit
@@ -4545,7 +4549,7 @@ const Dashboard = () => {
 
                                                 <Tabs.TabPane key="2">
                                                     <AgGridReact
-                                                    className="custom-grid"
+                                                        className="custom-grid"
                                                         rowData={rowData?.filter((each) => each.profit < 0)}
                                                         columnDefs={columnDefs1}
                                                         defaultColDef={{
