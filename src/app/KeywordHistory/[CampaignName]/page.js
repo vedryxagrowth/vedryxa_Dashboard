@@ -50,6 +50,8 @@ export default function CampaignAndAccount({ params }) {
     const [columns, setColumns] = useState([]);
     const [comment, setComment] = useState("");
 
+    const [hovered, setHovered] = useState(false);
+
     const [isModalVisibles, setIsModalVisibles] = useState(false);
     
     const [campaignComments, setCampaignComments] = useState([]);

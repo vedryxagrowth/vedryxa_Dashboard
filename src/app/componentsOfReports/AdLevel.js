@@ -1559,17 +1559,17 @@ const AdLevelReports = ({functionCallForCommnets, startDate, endDate, newaccount
                         ) : rowData?.length > 0 ? (
                             <div 
                                 className={`ag-theme-alpine ag-container ${gridThemeClass}`}
-                                style={{
-                                    width: '100%',
-                                    // borderRadius: 12,
-                                    backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
-                                    padding: 10,
-                                    height: 'auto',
-                                    boxShadow:
-                                    theme === 'dark'
-                                        ? '0 1px 3px rgba(0,0,0,0.6)'
-                                        : '0 1px 6px rgba(0,0,0,0.08)',
-                                }}
+                                // style={{
+                                //     width: '100%',
+                                //     // borderRadius: 12,
+                                //     backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+                                //     padding: 10,
+                                //     height: '100%',
+                                //     boxShadow:
+                                //     theme === 'dark'
+                                //         ? '0 1px 3px rgba(0,0,0,0.6)'
+                                //         : '0 1px 6px rgba(0,0,0,0.08)',
+                                // }}
                             >
 
                                 <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d" }}>
@@ -1631,7 +1631,7 @@ const AdLevelReports = ({functionCallForCommnets, startDate, endDate, newaccount
                                         </Tooltip>
                                     </Col>
                                 </Row>
-
+                                <div className='table-container'>
                                 <AgGridReact
                                     ref={gridRef}
                                     className='custom-grid'
@@ -1688,7 +1688,7 @@ const AdLevelReports = ({functionCallForCommnets, startDate, endDate, newaccount
                                             firstSelectedCell.rowIndex === params.node.rowIndex &&
                                             firstSelectedCell.colId === params.column.getId();
                                 
-                                        // return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
+                                        return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
                                     }}
                                     onFilterChanged={(params) => {
                                         const api = params.api;
@@ -1743,6 +1743,8 @@ const AdLevelReports = ({functionCallForCommnets, startDate, endDate, newaccount
                                         setLiveFixedFooter(updatedFooter);
                                     }}
                                 />
+                                </div>
+                               
 
                             </div>
                         ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
