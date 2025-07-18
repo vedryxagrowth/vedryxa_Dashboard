@@ -9,7 +9,7 @@ const SearchFilters = ({ theme, handleChangeInput, handleBlur, onClickRefresh })
     <Col>
     <Space size={2} style={{marginRight: '10px'}}> 
         <Input
-            placeholder="Search campaigns"
+            placeholder="Search..."
             // prefix={<SearchOutlined />}
             onChange={handleChangeInput}
             onBlur={handleBlur}

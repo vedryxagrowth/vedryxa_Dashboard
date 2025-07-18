@@ -10,8 +10,8 @@ import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
-import { Spin, Row, Col, Select, Input, Button, Skeleton, Switch } from 'antd';
-import { ReloadOutlined } from '@ant-design/icons';
+import { Spin, Row, Col, Select, Input, Button, Skeleton, Tooltip, Switch, Modal } from 'antd';
+import { ReloadOutlined, BarChartOutlined, EditOutlined } from '@ant-design/icons';
 Chart.register(...registerables);
 import debounce from 'lodash.debounce';
 
@@ -81,6 +81,16 @@ const MnetLiveAdHistory = ({params}) => {
 
     const timeZoneToDisplay = useRef();
 
+    const [hovered, setHovered] = useState(false);
+
+    const [comment, setComment] = useState("");
+
+    const [campaignComments, setCampaignComments] = useState([]);
+
+    const [copied, setCopied] = useState(false);
+
+    const [isModalVisibles, setIsModalVisibles] = useState(false);
+
     const [hiddenKeys, setHiddenKeys] = useState([
         'Spend', 'Revenue', 'RPC', 'CPL', 'Margin', // ❌ Only "Profit" shown by default
       ]);
@@ -90,6 +100,13 @@ const MnetLiveAdHistory = ({params}) => {
           prev.includes(label) ? prev.filter(k => k !== label) : [...prev, label]
         );
       };
+
+      const handleCopy = () => {
+        navigator.clipboard.writeText(decodedString).then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1500); // Reset after 1.5 seconds
+        });
+        };
     
       const datasets = Object.keys(datasetColorMap).map(label => ({
         label,
@@ -104,6 +121,15 @@ const MnetLiveAdHistory = ({params}) => {
         pointBackgroundColor: datasetColorMap[label],
         pointHoverBackgroundColor: datasetColorMap[label],
       }));
+
+        const paramsData = ((params.AdName).split("-"));
+        let decodedString = decodeURIComponent(paramsData[0]);
+        decodedString = decodedString.replace(/\*/g, "/").replace(/\^/g, "-");
+        const accountNumber = paramsData[1];
+        const timeZone = paramsData[2];
+        timeZoneToDisplay.current = timeZone;
+        // console.log(paramsData[3], "network");
+        let network = paramsData[3];
 
     const columnStructure = [
         "date_n",
@@ -696,7 +722,7 @@ const MnetLiveAdHistory = ({params}) => {
                     return (
                         <span>
                             {params.value.replace("Copied!", "")}
-                            <span style={{ color: "green", fontWeight: "bold" }}>Copied!</span>
+                            <span style={{ color: "#91C25F", fontWeight: "bold" }}>Copied!</span>
                         </span>
                     );
                 }
@@ -725,7 +751,7 @@ const MnetLiveAdHistory = ({params}) => {
                     return (
                         <span>
                             {params.value.replace("Copied!", "")}
-                            <span style={{ color: "green", fontWeight: "bold" }}>Copied!</span>
+                            <span style={{ color: "#91C25F", fontWeight: "bold" }}>Copied!</span>
                         </span>
                     );
                 }
@@ -1101,6 +1127,23 @@ const MnetLiveAdHistory = ({params}) => {
     
     const token = localStorage.getItem("token")
 
+    const functionCallForCommnets = async (accountNumber) => {
+        try{
+            const commentFetch = await apiClient.get(`/Comments/${accountNumber}`);
+            const campaignComments = commentFetch.data; // Set comments only if fetched successfully
+            setCampaignComments(campaignComments);
+            if(campaignComments.length > 0){
+                const comment = campaignComments.find(comment => comment.campaignname === decodedString);
+                console.log(comment, "comment");
+                console.log(comment?.comment, "comment");
+                setComment(comment?.comment ? comment?.comment : "");
+            }
+            
+        }catch(err){
+            setComment("");
+        }   
+    };
+
     const functionCallForUserColumnStructure = async() => {
         const fetchData = await apiClient.get(`https://prodapis.adsgoat.in/api/singleUserData?email=${user}`);
         // const data = await fetchData.json();
@@ -1114,14 +1157,14 @@ const MnetLiveAdHistory = ({params}) => {
 
     
     const functionCall = async() =>{
-        const paramsData = ((params.AdName).split("-"));
-        let decodedString = decodeURIComponent(paramsData[0]);
-        decodedString = decodedString.replace(/\*/g, "/").replace(/\^/g, "-");
-        const accountNumber = paramsData[1];
-        const timeZone = paramsData[2];
-        timeZoneToDisplay.current = timeZone;
-        // console.log(paramsData[3], "network");
-        let network = paramsData[3];
+        // const paramsData = ((params.AdName).split("-"));
+        // let decodedString = decodeURIComponent(paramsData[0]);
+        // decodedString = decodedString.replace(/\*/g, "/").replace(/\^/g, "-");
+        // const accountNumber = paramsData[1];
+        // const timeZone = paramsData[2];
+        // timeZoneToDisplay.current = timeZone;
+        // // console.log(paramsData[3], "network");
+        // let network = paramsData[3];
         setDebounc(decodedString);
         
         console.log(decodedString, "decode");
@@ -1359,6 +1402,7 @@ const MnetLiveAdHistory = ({params}) => {
       useEffect(() => {
         if (userdetails?.adAccounts) {
           const mainFunctionCall = async () => {
+            await functionCallForCommnets(accountNumber)
             await debouncedFunctionCallForUserColumnStructure();
             await debouncedFunctionCall();
           };
@@ -1456,6 +1500,145 @@ const MnetLiveAdHistory = ({params}) => {
 
     console.log(columnDefs);
 
+    const sendEditedCommentToAPI = async () => {
+        try {
+            console.log("comment:")
+            const response = await apiClient.post('/Comments/edit', {
+                campaignname: decodedString,
+                comment: comment,
+                Account: accountNumber,
+                adsetid: adsetid,
+                campaignid: campaignid,
+                status: true
+
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error sending edited comment to server:', error);
+            throw error;
+        }
+    };
+
+    const handleOks = async () => {
+        try {
+            const logData = {
+                Account: accountNumber,
+                usercommit: userdetails?.email,
+                campaignname: decodedString,
+                comment: comment,
+                campaignid: campaignid,
+                adsetid: adsetid
+            };
+
+            
+            // Check if comment already exists
+            const relatedComment = campaignComments.find(
+                (cmt) => cmt.campaignname === decodedString && cmt.Account === accountNumber
+            );
+
+            if (relatedComment) {
+                await sendEditedCommentToAPI(logData);
+            } else {
+                await sendNewCommentToAPI(logData);
+            }
+
+            // if (relatedComment) {
+            //     await sendEditedCommentToAPI(logData);
+            //     refreshComments(account);
+            //     message.success("Comment updated successfully!");
+            // } else {
+            //     await sendNewCommentToAPI(logData);
+            //     refreshComments(account);
+            //     message.success("New comment added successfully!");
+            // }
+
+            // const updatedComments = relatedComment
+            //     ? campaignComments.map(cmt => (cmt.campaignname === firstColumnValue ? { ...cmt, comment } : cmt))
+            //     : [...campaignComments, logData];
+            // setCampaignComments(updatedComments);
+
+            // changeRRefrst();
+            // ✅ Update local state immediately
+            const updatedComments = [...campaignComments];
+            const index = updatedComments.findIndex(c => c.campaignname === decodedString && c.Account === accountNumber);
+            if (index !== -1) {
+                updatedComments[index] = {
+                    ...updatedComments[index],
+                    comment: comment,
+                    editedTime: new Date().toISOString(), // optional: update time
+                };
+            } else {
+                updatedComments.push({
+                    campaignname: decodedString,
+                    Account: accountNumber,
+                    comment: comment,
+                    editedTime: new Date().toISOString(),
+                });
+            }
+            setCampaignComments(updatedComments);
+            setComment(comment); 
+            message.success("Comment saved!");
+            setIsModalVisibles(false);
+        } catch (error) {
+            console.error('Error while submitting comment:', error);
+            message.error("Error while submitting the comment.");
+        }
+    };
+
+    const handleDelete = async () => {
+        try {
+            // Prepare the payload for the API call
+            const payload = {
+                campaignname: decodedString,
+                Account: accountNumber,
+                adsetid: adsetid,
+                campaignid: campaignid,
+            };
+            // console.log(payload);
+    
+            // Call the backend API to delete the comment
+            const response = await apiClient.post('/Comments/delete', payload);
+    
+            if (response.status === 200) {
+                // Remove the comment from the local state
+                // const updatedComments = campaignComments.filter(
+                //     (comment) => comment.campaignname !== firstColumnValue
+                // );
+                // refreshComments(account);
+    
+                // // Update the state with the updated comments
+                // setCampaignComments(updatedComments);
+    
+                // // Refresh the table or any other UI component
+                // // changeRRefrst();
+                //Update local state immediately
+                const updatedComments = campaignComments.filter(
+                    (comment) => !(comment.campaignname === decodedString && comment.Account === accountNumber)
+                );
+                setCampaignComments(updatedComments);
+                setComment(""); // clear comment in UI
+        
+                message.success('Comment deleted successfully!');
+                setIsModalVisibles(false); 
+            } else {
+                message.error('Failed to delete the comment. Please try again.-1');
+            }
+        } catch (error) {
+            console.error('Error deleting the comment:', error);
+            message.error('Failed to delete the comment. Please try again.');
+        }
+    };
+
+    const getEditedUserAndTime = (campaignName, newaccount) => {
+        const relatedStatus = campaignComments.find(comment => comment.campaignname === campaignName && comment.Account === newaccount);
+        return relatedStatus ? relatedStatus : null;
+    };
+
+    const handleCancels = () => {
+        setIsModalVisibles(false);
+    };
+    const editUserANdTime = getEditedUserAndTime(decodedString, accountNumber);
+
     const onClickBarChart = () => {
         setIsGraphVisible(prev => {
             const newValue = !prev;
@@ -1467,6 +1650,7 @@ const MnetLiveAdHistory = ({params}) => {
     const handleReload = () => {
         setLoading(true);
         const mainFunctionCall = async () => {
+            await functionCallForCommnets(accountNumber)
             await debouncedFunctionCallForUserColumnStructure();
             await debouncedFunctionCall();
         };
@@ -1476,7 +1660,7 @@ const MnetLiveAdHistory = ({params}) => {
     return (
         <Row style={{display:'flex', flexDirection:'column'}}>
             {isLoading === false && 
-                <Col style={{width:'100%', display:'flex', alignItems:'center'}}>
+                <Col style={{width:'100%', display:'flex', justifyContent:'flex-end', alignItems:'center'}}>
                     {/* <div style={{width:'100%'}}>
                         <h3 style={{textAlign:'center'}}>{decode}</h3>
                     </div> */}
@@ -1487,289 +1671,346 @@ const MnetLiveAdHistory = ({params}) => {
                 </Col>
             }
              <Col style={{display: 'flex', justifyContent: 'flex-end'}}>
-                <Switch checked={isGraphVisible} style={{fontSize:"20px", paddingTop:'5px', marginRight:'10px', backgroundColor: isGraphVisible ? '#91C25F' : undefined}} onClick={onClickBarChart}/>
+                {/* <Switch checked={isGraphVisible} style={{fontSize:"20px", paddingTop:'5px', marginRight:'10px', backgroundColor: isGraphVisible ? '#91C25F' : undefined}} onClick={onClickBarChart}/> */}
+                <Button
+                    type="default"
+                    icon={<BarChartOutlined />}
+                    onClick={onClickBarChart}
+                    checked={isGraphVisible} 
+                    onMouseEnter={() => setHovered(true)}
+                    onMouseLeave={() => setHovered(false)}
+                    style={{
+                        border: '3px solid #91C25F',
+                        color: isGraphVisible || hovered ? '#fff' : '#555',
+                        backgroundColor: isGraphVisible || hovered ? '#91C25F' : 'transparent',
+                        borderRadius: '999px',
+                        fontWeight: 500,
+                        padding: '0 12px',
+                        height: '32px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        transition: 'all 0.2s ease-in-out',
+                    }}
+                >
+                    Chart
+                </Button>
             </Col> 
             {isGraphVisible && (
-                 <Col style={{ height: '400px', marginBottom: '10px' }}> {/* Container with fixed height */}
-                 {chartData.dates.length === 0 ? (<div style={{width:'100%', height:'100%', display:'flex', justifyContent:'center', alignItems:'center'}}>
-                     {/* <Spin size="large" /> */}
-                     <div style={{ padding: '24px' }}>
-                         <Skeleton active paragraph={{ rows: 20 }} />
-                     </div>
-                     </div>):(
-                         <div>
-                             {/* ✅ Custom Checkbox-Style Legend */}
-                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '12px', justifyContent:'center' }}>
-                                 {Object.keys(datasetColorMap).map(label => {
-                                 const isVisible = !hiddenKeys.includes(label);
-                                 return (
-                                     <div
-                                     key={label}
-                                     onClick={() => toggleLegend(label)}
-                                     style={{
-                                         display: 'flex',
-                                         alignItems: 'center',
-                                         cursor: 'pointer',
-                                         gap: '6px',
-                                         fontSize: '13px',
-                                         color: theme === 'dark' ? '#fff' : '#000',
-                                     }}
-                                     >
-                                     <div
-                                         style={{
-                                         width: '16px',
-                                         height: '16px',
-                                         borderRadius: '4px',
-                                         backgroundColor: datasetColorMap[label],
-                                         display: 'flex',
-                                         alignItems: 'center',
-                                         justifyContent: 'center',
-                                         color: '#fff',
-                                         // fontWeight: 'bold',
-                                         fontSize: '11px',
-                                         }}
-                                     >
-                                         {isVisible ? '✔' : ''}
-                                     </div>
-                                     {label}
-                                     </div>
-                                 );
-                                 })}
-                             </div>
-                             <Row style={{ height: '400px', marginTop: '20px' }}>
-                                 <Line
-                                 data={{
-                                     labels: chartData.dates || [],
-                                     datasets,
-                                 }}
-                                 options={{
-                                     responsive: true,
-                                     maintainAspectRatio: false,
-                                     plugins: {
-                                     legend: { display: false },
-                                     tooltip: {
-                                         mode: 'index',
-                                         intersect: true,
-                                         displayColors: true,
-                                         boxWidth: 15,
-                                         boxHeight: 15,
-                                         callbacks: {
-                                         label: function (tooltipItem) {
-                                             const index = tooltipItem.dataIndex;
-                                             const dataset = tooltipItem.dataset;
-                                             const value = dataset.data[index];
-                                             const datasetLabel = dataset.label || '';
-                                             return `${datasetLabel}: ${value}`;
-                                         },
-                                         },
-                                     },
-                                     },
-                                     scales: {
-                                     x: {
-                                         ticks: {
-                                         padding: 30,
-                                         color: (context) => {
-                                             const index = context.index;
-                                             const label = chartData?.dates?.[index];
-                                             return getColorForValue(label);
-                                         },
-                                         },
-                                         grid: {
-                                         color: theme === 'dark' ? '#444' : '#e0e0e0',
-                                         },
-                                     },
-                                     y: {
-                                         beginAtZero: true,
-                                         ticks: {
-                                         callback: value => value.toFixed(2),
-                                         color: theme === 'dark' ? '#fff' : '#000',
-                                         },
-                                         grid: {
-                                         color: theme === 'dark' ? '#444' : '#e0e0e0',
-                                         },
-                                     },
-                                     },
-                                 }}
-                                 height={350}
-                                 />
-                             </Row>
- 
-                             
-                         </div>
-                     )}
-             </Col>
+                <div
+                   style={{
+                       width: '100%',
+                       borderRadius: 12,
+                       backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+                       padding: 15,
+                       height: 'auto',
+                       boxShadow:
+                       theme === 'dark'
+                           ? '0 1px 3px rgba(0,0,0,0.6)'
+                           : '0 1px 6px rgba(0,0,0,0.08)',
+                   }}
+                >
+                    <Col style={{ height: '400px', marginBottom: '10px' }}> {/* Container with fixed height */}
+                        {chartData.dates.length === 0 ? (<div style={{width:'100%', height:'100%', display:'flex', justifyContent:'center', alignItems:'center'}}>
+                        {/* <Spin size="large" /> */}
+                        <div style={{ padding: '24px' }}>
+                            <Skeleton active paragraph={{ rows: 20 }} />
+                        </div>
+                            </div>):(
+                            <div>
+                                {/* ✅ Custom Checkbox-Style Legend */}
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '12px', justifyContent:'center' }}>
+                                    {Object.keys(datasetColorMap).map(label => {
+                                    const isVisible = !hiddenKeys.includes(label);
+                                    return (
+                                        <div
+                                        key={label}
+                                        onClick={() => toggleLegend(label)}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            cursor: 'pointer',
+                                            gap: '6px',
+                                            fontSize: '13px',
+                                            color: theme === 'dark' ? '#fff' : '#000',
+                                        }}
+                                        >
+                                        <div
+                                            style={{
+                                            width: '16px',
+                                            height: '16px',
+                                            borderRadius: '4px',
+                                            backgroundColor: datasetColorMap[label],
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: '#fff',
+                                            // fontWeight: 'bold',
+                                            fontSize: '11px',
+                                            }}
+                                        >
+                                            {isVisible ? '✔' : ''}
+                                        </div>
+                                        {label}
+                                        </div>
+                                    );
+                                    })}
+                                </div>
+                                <Row style={{ height: '400px', marginTop: '20px' }}>
+                                    <Line
+                                    data={{
+                                        labels: chartData.dates || [],
+                                        datasets,
+                                    }}
+                                    options={{
+                                        responsive: true,
+                                        maintainAspectRatio: false,
+                                        plugins: {
+                                        legend: { display: false },
+                                        tooltip: {
+                                            mode: 'index',
+                                            intersect: true,
+                                            displayColors: true,
+                                            boxWidth: 15,
+                                            boxHeight: 15,
+                                            callbacks: {
+                                            label: function (tooltipItem) {
+                                                const index = tooltipItem.dataIndex;
+                                                const dataset = tooltipItem.dataset;
+                                                const value = dataset.data[index];
+                                                const datasetLabel = dataset.label || '';
+                                                return `${datasetLabel}: ${value}`;
+                                            },
+                                            },
+                                        },
+                                        },
+                                        scales: {
+                                        x: {
+                                            ticks: {
+                                            padding: 30,
+                                            color: (context) => {
+                                                const index = context.index;
+                                                const label = chartData?.dates?.[index];
+                                                return getColorForValue(label);
+                                            },
+                                            },
+                                            grid: {
+                                            color: theme === 'dark' ? '#444' : '#e0e0e0',
+                                            },
+                                        },
+                                        y: {
+                                            beginAtZero: true,
+                                            ticks: {
+                                            callback: value => value.toFixed(2),
+                                            color: theme === 'dark' ? '#fff' : '#000',
+                                            },
+                                            grid: {
+                                            color: theme === 'dark' ? '#444' : '#e0e0e0',
+                                            },
+                                        },
+                                        },
+                                    }}
+                                    height={350}
+                                    />
+                                </Row>
+    
+                                
+                            </div>
+                        )}
+                    </Col>
+                </div>
+                
             )}
            
-            <Col style={{ display: 'flex', width: '100%', marginLeft: '2%' }}>
-                {/* Left Table: Top 5 RPC Today */}
-                <div style={{ marginLeft: "1%", width: '20%' }}>
-                    <p>Top 5 Rpc Today</p>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead>
-                        <tr>
-                            <th style={{fontWeight:'normal', border: '1px solid #ddd', padding: '3px' }}>Hour</th>
-                            <th style={{fontWeight:'normal', border: '1px solid #ddd', padding: '3px' }}>Rpc</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {chartData.rpcDate
-                            .filter(item => 
-                            item.date === moment.tz('UTC').format('YYYY-MM-DD') // Today's date
-                            )
-                            .sort((a, b) => b.rpc - a.rpc) // Sort by Margin descending
-                            .slice(0, 5) // Take top 5
-                            .map((item, index) => (
-                            <tr key={index}>
-                                <td style={{fontWeight:'normal', border: '1px solid #ddd', padding: '8px' }}>{item.hour}</td> {/* Access item.hour */}
-                                <td style={{fontWeight:'normal', border: '1px solid #ddd', padding: '8px' }}>{item.rpc}</td>
-                            </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-                <div style={{ marginLeft: "1%", width: '20%' }}>
-                    <p>Top 5 Margin Today</p>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead>
-                        <tr>
-                            <th style={{fontWeight:'normal', border: '1px solid #ddd', padding: '3px' }}>Hour</th>
-                            <th style={{fontWeight:'normal', border: '1px solid #ddd', padding: '3px' }}>Margin</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {chartData.hoursDate
-                            .filter(item => 
-                            item.date === moment.tz('UTC').format('YYYY-MM-DD') // Today's date
-                            )
-                            .sort((a, b) => b.margin - a.margin) // Sort by Margin descending
-                            .slice(0, 5) // Take top 5
-                            .map((item, index) => (
-                            <tr key={index}>
-                                <td style={{fontWeight:'normal', border: '1px solid #ddd', padding: '8px' }}>{item.hour}</td> {/* Access item.hour */}
-                                <td style={{fontWeight:'normal', border: '1px solid #ddd', padding: '8px' }}>{item.margin}</td>
-                            </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-
-                <div style={{ marginLeft: "1%", width: '25%' }}>
-                    <p>Top 5 Repeated Hours with RPC (Last 10 Days)</p>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead>
+                <Col style={{ display: 'flex', width: '100%', marginLeft: '0%' }}>
+                    {/* Left Table: Top 5 RPC Today */}
+                    <div style={{ marginLeft: "1%", width: '20%' }}>
+                        <p>Top 5 Rpc Today</p>
+                        <table style={{ width: '100%', borderCollapse: 'collapse',  border: '2px solid #888' }}>
+                            <thead>
                             <tr>
-                                <th style={{fontWeight:'normal', border: '1px solid #ddd', padding: '3px' }}>Hour</th>
-                                <th style={{fontWeight:'normal', border: '1px solid #ddd', padding: '3px' }}>RPC</th>
-                                <th style={{fontWeight:'normal', border: '1px solid #ddd', padding: '3px' }}>Times Repeated</th>
+                                <th style={{fontWeight:'normal', border: '1px solid #888', padding: '3px' }}>Hour</th>
+                                <th style={{fontWeight:'normal', border: '1px solid #888', padding: '3px' }}>Rpc</th>
                             </tr>
-                        </thead>
-                        <tbody>
-                        {chartData.sortedData.map((item, index) => {
-                            const totalRpc = item.totalRpc || 0;  // Default to 0 if totalRpc is undefined or null
-                            const count = item.count || 1;        // Default to 1 if count is undefined or 0 to avoid division by zero
-
-                            return (
+                            </thead>
+                            <tbody>
+                            {chartData.rpcDate
+                                .filter(item => 
+                                item.date === moment.tz('UTC').format('YYYY-MM-DD') // Today's date
+                                )
+                                .sort((a, b) => b.rpc - a.rpc) // Sort by Margin descending
+                                .slice(0, 5) // Take top 5
+                                .map((item, index) => (
                                 <tr key={index}>
-                                    <td style={{fontWeight:'normal', border: '1px solid #ddd', padding: '8px' }}>{item.hour}:00</td>
-                                    <td style={{fontWeight:'normal', border: '1px solid #ddd', padding: '8px' }}>
-                                        {count > 0 ? (totalRpc / count).toFixed(2) : 'N/A'}  {/* Avoid division by zero */}
-                                    </td>
-                                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.count}</td>
+                                    <td style={{fontWeight:'normal', border: '1px solid #888', padding: '8px' }}>{item.hour}</td> {/* Access item.hour */}
+                                    <td style={{fontWeight:'normal', border: '1px solid #888', padding: '8px' }}>{item.rpc}</td>
                                 </tr>
-                            );
-                        })}
-                        </tbody>
-                    </table>
-                </div>
-                <div style={{ marginLeft: "1%", width: '25%' }}>
-                    <p>Top 5 Repeated Hours Margin (Last 10 Days)</p>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style={{ marginLeft: "1%", width: '20%' }}>
+                        <p>Top 5 Margin Today</p>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
+                            <thead>
                             <tr>
-                                <th style={{fontWeight:'normal', border: '1px solid #ddd', padding: '3px' }}>Hour</th>
-                                <th style={{fontWeight:'normal', border: '1px solid #ddd', padding: '3px' }}>Average Margin</th>
-                                <th style={{fontWeight:'normal', border: '1px solid #ddd', padding: '3px' }}>Times Repeated</th>
+                                <th style={{fontWeight:'normal', border: '1px solid #888', padding: '3px' }}>Hour</th>
+                                <th style={{fontWeight:'normal', border: '1px solid #888', padding: '3px' }}>Margin</th>
                             </tr>
-                        </thead>
-                        <tbody>
-                        {chartData.sortedMarginData.map((item, index) => {
-                            const totalMargin = item.totalMargin || 0;  // Default to 0 if totalMargin is undefined or null
-                            const count = item.count || 1;        // Default to 1 if count is undefined or 0 to avoid division by zero
-
-                            return (
+                            </thead>
+                            <tbody>
+                            {chartData.hoursDate
+                                .filter(item => 
+                                item.date === moment.tz('UTC').format('YYYY-MM-DD') // Today's date
+                                )
+                                .sort((a, b) => b.margin - a.margin) // Sort by Margin descending
+                                .slice(0, 5) // Take top 5
+                                .map((item, index) => (
                                 <tr key={index}>
-                                    <td style={{fontWeight:'normal', border: '1px solid #ddd', padding: '8px' }}>{item.hour}:00</td>
-                                    <td style={{fontWeight:'normal', border: '1px solid #ddd', padding: '8px' }}>
-                                        {count > 0 ? (totalMargin / count).toFixed(2) : 'N/A'}  {/* Avoid division by zero */}
-                                    </td>
-                                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.count}</td>
+                                    <td style={{fontWeight:'normal', border: '1px solid #888', padding: '8px' }}>{item.hour}</td> {/* Access item.hour */}
+                                    <td style={{fontWeight:'normal', border: '1px solid #888', padding: '8px' }}>{item.margin}</td>
                                 </tr>
-                            );
-                        })}
-                        </tbody>
-                    </table>
-                    
-                </div>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
 
+                    <div style={{ marginLeft: "1%", width: '25%' }}>
+                        <p>Top 5 Repeated Hours with RPC (Last 10 Days)</p>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
+                            <thead>
+                                <tr>
+                                    <th style={{fontWeight:'normal', border: '1px solid #888', padding: '3px' }}>Hour</th>
+                                    <th style={{fontWeight:'normal', border: '1px solid #888', padding: '3px' }}>RPC</th>
+                                    <th style={{fontWeight:'normal', border: '1px solid #888', padding: '3px' }}>Times Repeated</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {chartData.sortedData.map((item, index) => {
+                                const totalRpc = item.totalRpc || 0;  // Default to 0 if totalRpc is undefined or null
+                                const count = item.count || 1;        // Default to 1 if count is undefined or 0 to avoid division by zero
 
+                                return (
+                                    <tr key={index}>
+                                        <td style={{fontWeight:'normal', border: '1px solid #888', padding: '8px' }}>{item.hour}:00</td>
+                                        <td style={{fontWeight:'normal', border: '1px solid #888', padding: '8px' }}>
+                                            {count > 0 ? (totalRpc / count).toFixed(2) : 'N/A'}  {/* Avoid division by zero */}
+                                        </td>
+                                        <td style={{ border: '1px solid #888', padding: '8px' }}>{item.count}</td>
+                                    </tr>
+                                );
+                            })}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style={{ marginLeft: "1%", width: '25%' }}>
+                        <p>Top 5 Repeated Hours Margin (Last 10 Days)</p>
+                        <table style={{ width: '100%', borderCollapse: 'collapse',  border: '2px solid #888' }}>
+                            <thead>
+                                <tr>
+                                    <th style={{fontWeight:'normal', border: '1px solid #888', padding: '3px' }}>Hour</th>
+                                    <th style={{fontWeight:'normal', border: '1px solid #888', padding: '3px' }}>Average Margin</th>
+                                    <th style={{fontWeight:'normal', border: '1px solid #888', padding: '3px' }}>Times Repeated</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {chartData.sortedMarginData.map((item, index) => {
+                                const totalMargin = item.totalMargin || 0;  // Default to 0 if totalMargin is undefined or null
+                                const count = item.count || 1;        // Default to 1 if count is undefined or 0 to avoid division by zero
 
+                                return (
+                                    <tr key={index}>
+                                        <td style={{fontWeight:'normal', border: '1px solid #888', padding: '8px' }}>{item.hour}:00</td>
+                                        <td style={{fontWeight:'normal', border: '1px solid #888', padding: '8px' }}>
+                                            {count > 0 ? (totalMargin / count).toFixed(2) : 'N/A'}  {/* Avoid division by zero */}
+                                        </td>
+                                        <td style={{ border: '1px solid #888', padding: '8px' }}>{item.count}</td>
+                                    </tr>
+                                );
+                            })}
+                            </tbody>
+                        </table>
+                        
+                    </div>
 
-            </Col>
-            <Col style={{display:'flex', justifyContent:'space-between', marginTop: '10px'}}>
-                <Col>
-                                {/* style={{
-                                    borderRadius: 8,
-                                    border: '1px solid #91C25F',
-                                    // background: theme === 'dark' ? '#2a2a2a' : '#fff',
-                                    // border: `1px solid ${theme === 'dark' ? '#444' : '#d9d9d9'}`,
-                                    color: theme === 'dark' ? '#fff' : '#000',
-                                    fontWeight: 500,
-                                    width: 170,
-                                }}
-
-                                <Button
-                                        type="primary"
-                                        style={{
-                                        backgroundColor: '#91C25F',
-                                        border: 'solid 0px',
-                                        color: 'black',
-                                        height:'30px'
-                                    }}
-                                    icon={<ReloadOutlined  className="black-icon" />}
-                                    onClick={onClickRefresh}
-                                /> */}
-                  
-                    
                 </Col>
-                <Select
-                    placeholder="Select a range"
-                    value={selectedValue}
-                    onChange={handleChange}
-                    style={{ width: "200px", border: '1px solid #91C25F', borderRadius: '8px', marginBottom: '5px' }}
-                    dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                    allowClear
-                >
-                    {dateOptions.map((option, index) => (
-                    <Option key={index} value={option}>
-                        {option}
-                    </Option>
-                    ))}
-                </Select>
-                <Input
-                        type="text"
-                        placeholder="Search table..."
-                        value={searchText}
-                        onChange={(e) => setSearchText(e.target.value)}
-                        className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                        style={{border: '1px solid #91C25F', width: "170px", padding: "3px",backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
-                    />
-                <Button 
-                        type="default" 
-                        icon={<ReloadOutlined  className='black-icon'/>} 
-                        style={{ height: "30px", marginLeft: "10px", backgroundColor: '#91C25F', border: 'solid 0px' }} 
-                        onClick={handleReload}  // Call refresh function when clicked
-                    />
-            </Col>
+                <Col style={{display:'flex', justifyContent:'flex-end', marginTop: '10px'}}>
+                    {/* <Col>
+                                    style={{
+                                        borderRadius: 8,
+                                        border: '1px solid #91C25F',
+                                        // background: theme === 'dark' ? '#2a2a2a' : '#fff',
+                                        // border: `1px solid ${theme === 'dark' ? '#444' : '#d9d9d9'}`,
+                                        color: theme === 'dark' ? '#fff' : '#000',
+                                        fontWeight: 500,
+                                        width: 170,
+                                    }}
+
+                                    <Button
+                                            type="primary"
+                                            style={{
+                                            backgroundColor: '#91C25F',
+                                            border: 'solid 0px',
+                                            color: 'black',
+                                            height:'30px'
+                                        }}
+                                        icon={<ReloadOutlined  className="black-icon" />}
+                                        onClick={onClickRefresh}
+                                    />
+                    
+                        
+                    </Col> */}
+                    <Col style={{display:'flex', justifyContent:"space-between", alignItems:'center', marginBottom:'5px'}}>
+                        <Select
+                            placeholder="Select a range"
+                            value={selectedValue}
+                            onChange={handleChange}
+                            style={{ width: "170px", border: '1px solid #91C25F', borderRadius: '8px', color: theme === 'dark' ? '#fff' : '#000',}}
+                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                            allowClear
+                        >
+                            {dateOptions.map((option, index) => (
+                            <Option key={index} value={option}>
+                                {option}
+                            </Option>
+                            ))}
+                        </Select>
+                        <Input
+                            type="text"
+                            placeholder="Search date"
+                            value={searchText}
+                            onChange={(e) => setSearchText(e.target.value)}
+                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                            // style={{marginLeft: "5px", border: '1px solid #91C25F', width: "170px", padding: "3px",backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
+                            style={{
+                                borderRadius: 8,
+                                border: '1px solid #91C25F',
+                                marginLeft: "5px",
+                                color: theme === 'dark' ? '#fff' : '#000',
+                                backgroundColor: theme === 'dark' ? '#000' : '#fff',
+                                fontWeight: 500,
+                                width: 170,
+                            }}
+                        />
+                        <Button 
+                            type="default" 
+                            icon={<ReloadOutlined  className='black-icon'/>} 
+                            style={{width: '43px', height: "33px", marginLeft: "5px", backgroundColor: '#91C25F', border: 'solid 0px' }} 
+                            onClick={handleReload}  // Call refresh function when clicked
+                        />
+                        <EditOutlined 
+                            onClick={() => setIsModalVisibles(true)} 
+                            style={{ 
+                                marginLeft: '3px', 
+                                marginRight: '3px', 
+                                color: comment ? '#91C25F' : 'gray', 
+                                cursor: 'pointer',
+                                fontSize: '27px',
+                            }} 
+                            title={comment ? 'Edit Comment' : 'Add Comment'}
+                        />
+                    </Col>
+                </Col>
             <Col>
             {isLoading === true ? (
                 <div className="loader-container ag-container">
@@ -1778,7 +2019,7 @@ const MnetLiveAdHistory = ({params}) => {
                         height="80"
                         width="80"
                         radius="9"
-                        color="green"
+                        color="#91C25F"
                         ariaLabel="loading"
                         wrapperStyle
                         wrapperClass
@@ -1786,122 +2027,214 @@ const MnetLiveAdHistory = ({params}) => {
                     </div>
                 </div>
             ) : (
-                // <div className="ag-theme-alpine ag-container" >
-                <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
-                    <AgGridReact
-                        rowData={filteredData}
-                        className='custom-grid'
-                        columnDefs={columnDefs}
-                        quickFilterText={searchText}
-                        defaultColDef={defaultColDef}
-                        pinnedBottomRowData={domainFixedFooter}
-                        onCellClicked={onCellClicked}
-                        gridOptions={{
-                            ensureDomOrder: false,
-                            suppressRowClickSelection: true,
-                            suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                            enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                            groupSelectsChildren: true, // ✅ Ensures child rows are selected properly
-                        }}
-                        onGridReady={(params) => onGridReady(params, 'grid1', gridRef)}
-                        pagination={true} // Enable pagination
-                        // paginationPageSize={5} // Set rows per page
-                        // paginationNumberFormatter={(params) => `${params.value}`}
-                        getRowStyle={(params) => {
-                            if (params.node.rowPinned) {
-                                return {
-                                    fontWeight: 'bold',
-                                    backgroundColor: theme === 'dark' ? '#000' : '#fff',
-                                    color: theme === 'dark' ? '#fff' : '#000',
-                                };
-                            }
-                            return null;
-                        }}
+                <div
+                    style={{
+                        width: '100%',
+                        borderRadius: 12,
+                        backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+                        padding: 10,
+                        height: 'auto',
+                        boxShadow:
+                        theme === 'dark'
+                            ? '0 1px 3px rgba(0,0,0,0.6)'
+                            : '0 1px 6px rgba(0,0,0,0.08)',
+                    }}
+                >
+                    <Col>
+                        <div style={{ width: '100%', display:'flex', }}>
+                            <Tooltip
+                                title={copied ? 'Copied!' : 'Click to copy'}
+                                // color={copied ? 'green' : undefined}
+                            >
+                                <p
+                                style={{ cursor: 'pointer', marginRight:'5px' }}
+                                onClick={handleCopy}
+                                >
+                                {decodedString}
+                                </p>
+                            </Tooltip>
+                            {comment && (
+                                <Tooltip title={comment}>
+                                    <p
+                                        style={{
+                                            // marginLeft: '0px',
+                                            whiteSpace: 'nowrap',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            maxWidth: '300px',
+                                            cursor: 'pointer',
+                                            marginBottom: '15px',
+                                        }}
+                                    >
+                                        ({comment})
+                                    </p>
+                                </Tooltip>
+                            )}
+                        </div>
+                    </Col>
 
-                        getCellStyle={(params) => {
-                            const isSelected = selectedCells.some(
-                                (cell) => cell.rowIndex === params.node.rowIndex && cell.colId === params.column.getId()
-                            );
-                    
-                            // ✅ Ensure first selected cell is highlighted
-                            const isFirstSelected = firstSelectedCell &&
-                                firstSelectedCell.rowIndex === params.node.rowIndex &&
-                                firstSelectedCell.colId === params.column.getId();
-                    
-                            return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
-                        }}
-                        groupDisplayType="multipleColumns"
-                        suppressAggFuncInHeader={true}
-                        groupSuppressBlankHeader={true}
-                        onCellKeyDown={onCellKeyDown}
-                        onFilterChanged={(params) => {
-                            const api = params.api;
-                            const filteredData = [];
-                            api.forEachNodeAfterFilterAndSort((node) => {
-                                if (!node.rowPinned) {
-                                    filteredData.push(node.data);
+                    <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
+                        <AgGridReact
+                            rowData={filteredData}
+                            className='custom-grid'
+                            columnDefs={columnDefs}
+                            quickFilterText={searchText}
+                            defaultColDef={defaultColDef}
+                            pinnedBottomRowData={domainFixedFooter}
+                            onCellClicked={onCellClicked}
+                            gridOptions={{
+                                ensureDomOrder: false,
+                                suppressRowClickSelection: true,
+                                suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
+                                enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
+                                groupSelectsChildren: true, // ✅ Ensures child rows are selected properly
+                            }}
+                            onGridReady={(params) => onGridReady(params, 'grid1', gridRef)}
+                            pagination={true} // Enable pagination
+                            // paginationPageSize={5} // Set rows per page
+                            // paginationNumberFormatter={(params) => `${params.value}`}
+                            getRowStyle={(params) => {
+                                if (params.node.rowPinned) {
+                                    return {
+                                        fontWeight: 'bold',
+                                        backgroundColor: theme === 'dark' ? '#000' : '#fff',
+                                        color: theme === 'dark' ? '#fff' : '#000',
+                                    };
                                 }
-                            });
+                                return null;
+                            }}
 
-                            const totalRevenue = filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0) || 0;
-                            const totalProfit = filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0) || 0;
-                            const totalSpend = filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0) || 0;
+                            getCellStyle={(params) => {
+                                const isSelected = selectedCells.some(
+                                    (cell) => cell.rowIndex === params.node.rowIndex && cell.colId === params.column.getId()
+                                );
+                        
+                                // ✅ Ensure first selected cell is highlighted
+                                const isFirstSelected = firstSelectedCell &&
+                                    firstSelectedCell.rowIndex === params.node.rowIndex &&
+                                    firstSelectedCell.colId === params.column.getId();
+                        
+                                return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
+                            }}
+                            groupDisplayType="multipleColumns"
+                            suppressAggFuncInHeader={true}
+                            groupSuppressBlankHeader={true}
+                            onCellKeyDown={onCellKeyDown}
+                            onFilterChanged={(params) => {
+                                const api = params.api;
+                                const filteredData = [];
+                                api.forEachNodeAfterFilterAndSort((node) => {
+                                    if (!node.rowPinned) {
+                                        filteredData.push(node.data);
+                                    }
+                                });
 
-                            const updatedFooter = [
-                                {
-                                    adName: 'Total',
-                                    spend: totalSpend.toFixed(2),
-                                    revenue: totalRevenue.toFixed(2),
-                                    profit: totalProfit.toFixed(2),
-                                    margin: totalRevenue ? `${((totalProfit / totalRevenue) * 100).toFixed(2)}%` : '0%',
-                                    rpc: (
-                                        filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.rpc || 0), 0) /
-                                        (filteredData?.length || 1)
-                                    ).toFixed(2),
-                                    cpl: (
-                                        filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.cpl || 0), 0) /
-                                        (filteredData?.length || 1)
-                                    ).toFixed(2),
-                                    ncpl: (
-                                        filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.ncpl || 0), 0) /
-                                        (filteredData?.length || 1)
-                                    ).toFixed(2),
-                                    fbleads: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.fbleads || 0), 0),
-                                    conversions: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.conversions || 0), 0),
-                                    fmargin: totalSpend ? `${((totalProfit / totalSpend) * 100).toFixed(2)}%` : '0%',
-                                    roi: totalSpend
-                                        ? `${(((totalRevenue - totalSpend) / totalSpend) * 100).toFixed(2)}%`
-                                        : '0%',
-                                    cpc: (
-                                        filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.cpc || 0), 0) /
-                                        (filteredData?.length || 1)
-                                    ).toFixed(2),
-                                    fbclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks || 0), 0),
-                                    cpclinkclicks: (
-                                        filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks || 0), 0) /
-                                        (filteredData?.length || 1)
-                                    ).toFixed(2),
-                                    fblinkclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks || 0), 0),
-                                    impressions: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0),
-                                    ctr: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0)
-                                        ? `${(
-                                            (filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks || 0), 0) /
-                                                filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0)) *
-                                            100
-                                        ).toFixed(2)}%`
-                                        : '0%',
-                                },
-                            ];
+                                const totalRevenue = filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0) || 0;
+                                const totalProfit = filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0) || 0;
+                                const totalSpend = filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0) || 0;
 
-                            if (JSON.stringify(domainFixedFooter) !== JSON.stringify(updatedFooter)) {
-                                setDomainFixedFooter(updatedFooter);
-                            }
-                        }}
-                    />
+                                const updatedFooter = [
+                                    {
+                                        adName: 'Total',
+                                        spend: totalSpend.toFixed(2),
+                                        revenue: totalRevenue.toFixed(2),
+                                        profit: totalProfit.toFixed(2),
+                                        margin: totalRevenue ? `${((totalProfit / totalRevenue) * 100).toFixed(2)}%` : '0%',
+                                        rpc: (
+                                            filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.rpc || 0), 0) /
+                                            (filteredData?.length || 1)
+                                        ).toFixed(2),
+                                        cpl: (
+                                            filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.cpl || 0), 0) /
+                                            (filteredData?.length || 1)
+                                        ).toFixed(2),
+                                        ncpl: (
+                                            filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.ncpl || 0), 0) /
+                                            (filteredData?.length || 1)
+                                        ).toFixed(2),
+                                        fbleads: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.fbleads || 0), 0),
+                                        conversions: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.conversions || 0), 0),
+                                        fmargin: totalSpend ? `${((totalProfit / totalSpend) * 100).toFixed(2)}%` : '0%',
+                                        roi: totalSpend
+                                            ? `${(((totalRevenue - totalSpend) / totalSpend) * 100).toFixed(2)}%`
+                                            : '0%',
+                                        cpc: (
+                                            filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.cpc || 0), 0) /
+                                            (filteredData?.length || 1)
+                                        ).toFixed(2),
+                                        fbclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks || 0), 0),
+                                        cpclinkclicks: (
+                                            filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.cpclinkclicks || 0), 0) /
+                                            (filteredData?.length || 1)
+                                        ).toFixed(2),
+                                        fblinkclicks: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks || 0), 0),
+                                        impressions: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0),
+                                        ctr: filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0)
+                                            ? `${(
+                                                (filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks || 0), 0) /
+                                                    filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0)) *
+                                                100
+                                            ).toFixed(2)}%`
+                                            : '0%',
+                                    },
+                                ];
+
+                                if (JSON.stringify(domainFixedFooter) !== JSON.stringify(updatedFooter)) {
+                                    setDomainFixedFooter(updatedFooter);
+                                }
+                            }}
+                        />
+                    </div>
                 </div>
             )}
             </Col>
-            
+            <Modal
+                             title={
+                                    decodedString
+                            }
+                            className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+                            visible={isModalVisibles}
+                            onOk={handleOks} // Default Ok button functionality
+                            onCancel={handleCancels} // Default Cancel button functionality
+                            footer={[
+                                <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+                                    <div style={{display:'flex', flexDirection:"column"}}>
+                                        <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                            Last Edited Time:
+                                        </span>
+                                        <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                            {editUserANdTime ? editUserANdTime?.editedTime : ""}
+                                        </span>
+
+                                    </div>
+                                    <div>
+                                    <Button
+                                        key="delete"
+                                        type="danger"
+                                        onClick={handleDelete}
+                                        style={{ marginRight: 'auto', border: "1px solid #e3e3da" }} // Push Delete button to the far left
+                                    >
+                                        Delete
+                                    </Button>
+                                    <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
+                                        Cancel
+                                    </Button>
+                                    <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#91C25F"}}>
+                                        Ok
+                                    </Button>
+                                    </div>
+                                </div>
+                            ]}
+                        >
+                            <Input.TextArea
+                                placeholder="Enter your comments here"
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                                style={{color: theme === "dark" ? "white" : "black"}}
+                                backgroundColor= {theme === "dark" ? "#1e1e1e" : "white"}   // background color
+                                borderColor={ theme === "dark" ? "#555" : "#d9d9d9" }
+                            />
+                        </Modal>
         </Row>
     );
 };

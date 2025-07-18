@@ -538,7 +538,7 @@ body.dark-mode .startview svg {
   color: gold !important;
 }
 body.dark-mode .Message svg {
-  color: blue !important;
+  color: #4CAF50 !important;
 }
 
 body.light-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-picker-outlined {
@@ -1241,7 +1241,7 @@ body.dark-mode .black-icon-comment.anticon svg {
   outline: none !important;  
 } */
 .custom-input-light .ant-input:focus {
-  border-color: #37474F !important;
+  border-color: #91C25F !important;
   box-shadow: none !important;
   outline: none !important;
 }
@@ -3227,6 +3227,62 @@ body.dark .upload-form-wrapper {
   color: #ffffff !important;
 }
 
+
+
+
+/* Prevent blue color on hover/focus for Input */
+.custom-input-dark, .custom-input-light {
+  border-color: #91C25F !important; /* Retain your custom border color */
+}
+
+.custom-input-dark:focus, .custom-input-light:focus,
+.custom-input-dark:hover, .custom-input-light:hover {
+  border-color: #91C25F !important; /* Retain your custom border color */
+  outline: none !important; /* Remove the default blue outline */
+  box-shadow: none !important; /* Remove any box shadow caused by focus */
+}
+
+/* Prevent blue color on hover/focus for Select */
+.dark-theme, .light-theme {
+  border-color: #91C25F !important; /* Retain your custom border color */
+}
+
+.dark-theme:focus, .light-theme:focus,
+.dark-theme:hover, .light-theme:hover {
+  border-color: #91C25F !important; /* Retain your custom border color */
+  outline: none !important; /* Remove the default blue outline */
+  box-shadow: none !important; /* Remove any box shadow caused by focus */
+}
+
+/* Target the input inside the Select to remove default focus ring */
+.ant-select-selector:focus, .ant-select-selector:hover {
+  border-color: #91C25F !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Ensuring dropdown border color stays the same */
+.custom-dropdown {
+  border-color: #91C25F !important;
+}
+
+/* Optional: Remove the default focus ring on all elements globally */
+input:focus, select:focus, .custom-input-dark:focus, .custom-input-light:focus, .dark-theme:focus, .light-theme:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+
+
+
+
+
+/* Ensure the table container is positioned correctly ---> */
+.table-container {
+  position: relative;
+  z-index: 1; /* Lower z-index for table container */
+  height: 95%;
+}
 
 
 

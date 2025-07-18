@@ -906,7 +906,7 @@ export default function CampaignAndAccount({ params }) {
                 return (
                     <span>
                         {params.value.replace("Copied!", "")}
-                        <span style={{ color: "green", fontWeight: "bold" }}>Copied!</span>
+                        <span style={{ color: "#91C25F", fontWeight: "bold" }}>Copied!</span>
                     </span>
                 );
             }
@@ -955,7 +955,7 @@ export default function CampaignAndAccount({ params }) {
                   return (
                       <span>
                           {params.value.replace("Copied!", "")}
-                          <span style={{ color: "green", fontWeight: "bold" }}>Copied!</span>
+                          <span style={{ color: "#91C25F", fontWeight: "bold" }}>Copied!</span>
                       </span>
                   );
               }
@@ -1724,7 +1724,7 @@ export default function CampaignAndAccount({ params }) {
             
             <Col style={{ display: 'flex', width: '100%', marginLeft: '0%' }}>
                 {/* Top 5 Dates with RPC */}
-                <div style={{ width: '20%' }}>
+                <div style={{ width: '20%', marginLeft:'1%' }}>
                     <p>Top 5 Dates with RPC</p>
                     <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
                         <thead>
@@ -1858,7 +1858,7 @@ export default function CampaignAndAccount({ params }) {
                     </Select>
                     <Input
                         type="text"
-                        placeholder="Search Campaign"
+                        placeholder="Search date"
                         value={searchText}
                         onChange={(e) => setSearchText(e.target.value)}
                         className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
@@ -1900,7 +1900,7 @@ export default function CampaignAndAccount({ params }) {
                             height="80"
                             width="80"
                             radius="9"
-                            color="green"
+                            color="#91C25F"
                             ariaLabel="loading"
                             wrapperStyle
                             wrapperClass

@@ -671,7 +671,7 @@ const AdsetLevelReports = ({functionCallForCampaigns, context, functionCallForCo
                                         cursor: 'pointer',
                                         marginLeft: '10px',
                                         marginRight: '10px',
-                                        color: 'blue'
+                                        color: '#4CAF50'
                                     }}
                                     onClick={handleEditClick} // Open modal directly on click
                                 />
@@ -1603,17 +1603,17 @@ const AdsetLevelReports = ({functionCallForCampaigns, context, functionCallForCo
                         ) : rowData?.length > 0 ? (
                             <div 
                                 className={`ag-theme-alpine ag-container ${gridThemeClass}`}
-                                style={{
-                                    width: '100%',
-                                    // borderRadius: 12,
-                                    backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
-                                    padding: 10,
-                                    height: 'auto',
-                                    boxShadow:
-                                    theme === 'dark'
-                                        ? '0 1px 3px rgba(0,0,0,0.6)'
-                                        : '0 1px 6px rgba(0,0,0,0.08)',
-                                }}
+                                // style={{
+                                //     width: '100%',
+                                //     // borderRadius: 12,
+                                //     backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+                                //     padding: 10,
+                                //     height: 'auto',
+                                //     boxShadow:
+                                //     theme === 'dark'
+                                //         ? '0 1px 3px rgba(0,0,0,0.6)'
+                                //         : '0 1px 6px rgba(0,0,0,0.08)',
+                                // }}
                             >
 
                                 <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d" }}>
@@ -1675,7 +1675,7 @@ const AdsetLevelReports = ({functionCallForCampaigns, context, functionCallForCo
                                         </Tooltip>
                                     </Col>
                                 </Row>
-
+                                <div className='table-container'>
                                 <AgGridReact
                                     ref={gridRef}
                                     className='custom-grid'
@@ -1791,6 +1791,8 @@ const AdsetLevelReports = ({functionCallForCampaigns, context, functionCallForCo
                                         setLiveFixedFooter(updatedFooter);
                                     }}
                                 />
+                                </div>
+                              
 
                             </div>
                         ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
