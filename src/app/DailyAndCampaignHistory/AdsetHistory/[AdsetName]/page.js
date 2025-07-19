@@ -1818,6 +1818,7 @@ export default function AdsetNameAndAccount({params}){
                     <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
                         <AgGridReact
                             rowData={filteredData}
+                            rowHeight={30}
                             className='custom-grid'
                             columnDefs={columnDefs}
                             defaultColDef={defaultColDef}
@@ -1839,6 +1840,7 @@ export default function AdsetNameAndAccount({params}){
                                         //   fontWeight: 'bold',
                                         backgroundColor: theme === "dark" ? '#000' : '#fff',
                                         color: theme === "dark" ? '#fff' : '#000',
+                                        height: '30px'
                                     };
                                 }
                                 return null;

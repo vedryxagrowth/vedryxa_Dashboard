@@ -2290,6 +2290,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                     
                         <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
                             <AgGridReact
+                                rowHeight={30}
                                 rowData={filteredData}
                                 className='custom-grid'
                                 columnDefs={columnDefs}
@@ -2317,6 +2318,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                                             // fontWeight: 'bold',
                                             backgroundColor: theme === 'dark' ? '#000' : '#fff',
                                             color: theme === 'dark' ? '#fff' : '#000',
+                                            height: '30px'
                                         };
                                     }
                                     return null;

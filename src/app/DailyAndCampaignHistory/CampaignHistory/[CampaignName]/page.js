@@ -1956,6 +1956,7 @@ export default function CampaignAndAccount({ params }) {
                     <div className={`ag-container ${gridThemeClass}`}>
                         <AgGridReact
                             rowData={filteredData}
+                            rowHeight={30}
                             className='custom-grid'
                             columnDefs={columnDefs}
                             quickFilterText={searchText}
@@ -1980,6 +1981,7 @@ export default function CampaignAndAccount({ params }) {
                                         // color: darkMode ? '#fff' : '#000',
                                         backgroundColor: theme === "dark" ? '#000' : '#fff',
                                         color: theme === "dark" ? '#fff' : '#000',
+                                        height: '30px'
                                     };
                                 }
                                 return null;
