@@ -197,6 +197,7 @@ const Daily = ({functionCallForCampaigns, context, functionCallForCommnets, star
         minWidth: 450,
         pinned: 'left',
         sortable: true,
+        unSortIcon: true,
 
         comparator: (campaignA, campaignB) => {
             if (!campaignA) return 1;
@@ -1212,10 +1213,10 @@ const Daily = ({functionCallForCampaigns, context, functionCallForCommnets, star
                                             </Space>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ color: theme === "dark" && "white" }}>Acc: {newaccount}</Text>
+                                            <Text style={{ color: theme === "dark" && "white" }}>Id: {newaccount}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ color: theme === "dark" && "white" }}>Acc name: {newAccountName}</Text>
+                                            <Text style={{ color: theme === "dark" && "white" }}>Name: {newAccountName}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ color: theme === "dark" && "white" }}>Time zone: {timezone.current}</Text>
@@ -1252,9 +1253,9 @@ const Daily = ({functionCallForCampaigns, context, functionCallForCommnets, star
                                                             style={{
                                                             color:
                                                                 accountStatus.current === 'Active'
-                                                                ? 'green'
+                                                                ? '#91C25F'
                                                                 : accountStatus.current === 'Inactive'
-                                                                ? 'red'
+                                                                ? '#EC7117'
                                                                 : 'gray',
                                                             fontWeight: 'bold',
                                                             }}
@@ -1298,6 +1299,7 @@ const Daily = ({functionCallForCampaigns, context, functionCallForCommnets, star
                                         ref={gridRef1}
                                         context={context}
                                         className='custom-grid'
+                                        rowHeight={30}
                                         // rowSelection="multiple"
                                         groupSelectsChildren={true} // ✅ Selects all children when a group is selected
                                         suppressRowClickSelection={true} // ✅ Prevents selection on row click, only via checkbox
@@ -1341,7 +1343,8 @@ const Daily = ({functionCallForCampaigns, context, functionCallForCommnets, star
                                                 return {
                                                     // fontWeight: 'bold',
                                                     backgroundColor: theme === "dark" ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
-                                                    color: theme === "dark" ? '#fff' : '#000',           // Text color should contrast with the background
+                                                    color: theme === "dark" ? '#fff' : '#000',  
+                                                    height: '30px'         // Text color should contrast with the background
                                                 };
                                             }
 

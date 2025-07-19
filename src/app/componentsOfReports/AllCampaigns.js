@@ -197,6 +197,8 @@ const AllCampaigns = ({handleChangeInput, handleBlur, onClickRefresh, startDate,
         headerName: 'Campaign name',
         minWidth: 450,
         pinned: 'left',
+        unSortIcon: true,
+        sortable: true,
 
         comparator: (campaignA, campaignB) => {
             if (!campaignA) return 1;
@@ -1187,10 +1189,10 @@ const AllCampaigns = ({handleChangeInput, handleBlur, onClickRefresh, startDate,
                                             </Space>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ color: theme === "dark" && "white" }}>Acc: {newaccount}</Text>
+                                            <Text style={{ color: theme === "dark" && "white" }}>Id: {newaccount}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ color: theme === "dark" && "white" }}>Acc name: {newAccountName}</Text>
+                                            <Text style={{ color: theme === "dark" && "white" }}>Name: {newAccountName}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                             <Text style={{ color: theme === "dark" && "white" }}>Time zone: {timezone.current}</Text>
@@ -1214,6 +1216,7 @@ const AllCampaigns = ({handleChangeInput, handleBlur, onClickRefresh, startDate,
                                         <AgGridReact
                                             ref={gridRef2}
                                             className='custom-grid'
+                                            rowHeight={35}
                                             rowData={memorizedCampaignsData}
                                             columnDefs={memorizedColumnDef2}
                                             onCellClicked={onCellClickedAllCampaigns}
@@ -1256,7 +1259,9 @@ const AllCampaigns = ({handleChangeInput, handleBlur, onClickRefresh, startDate,
                                                     return {
                                                         // fontWeight: 'bold',
                                                         // backgroundColor: theme === "dark" ? '#000' : '#fff', // Apply theme dynamically
-                                                        // color: theme === "dark" ? '#fff' : '#000',           // Apply theme dynamically
+                                                        // color: theme === "dark" ? '#fff' : '#000',           // Apply theme dynamicallyhe
+                                                        height:'35px'
+
                                                     };
                                                 }
                                                 return null;

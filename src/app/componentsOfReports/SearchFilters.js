@@ -30,8 +30,31 @@ const SearchFilters = ({ theme, handleChangeInput, handleBlur, onClickRefresh })
             overlay={
                 <Menu
                 items={[
-                    { key: 'active', label: 'Active' },
-                    { key: 'pause', label: 'Paused' },
+                    { key: 'active', 
+                    label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}}>    
+                    Active
+                    <span
+                            style={{
+                            width: '6px',
+                            height: '6px',
+                            borderRadius: '50%',
+                            backgroundColor: 'green',
+                            marginLeft: '15px',
+                            }}
+                        ></span>
+                    </span> 
+                    },
+                    { key: 'pause', label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}}>Paused
+                     <span
+                            style={{
+                            width: '6px',
+                            height: '6px',
+                            borderRadius: '50%',
+                            backgroundColor: 'red',
+                            marginLeft: '8px',
+                            }}
+                        ></span>
+                    </span> },
                 ]}
                 />
             }
@@ -42,7 +65,7 @@ const SearchFilters = ({ theme, handleChangeInput, handleBlur, onClickRefresh })
                 style={{
                 borderRadius: 8,
                 background: theme === 'dark' ? 'rgba(82,196,26,0.12)' : '#f6ffed',
-                border: '1px solid #52c41a',
+                border: '1px solid #4CAF50',
                 color: theme === 'dark' ? '#95de64' : '#389e0d',
                 fontWeight: 500,
                 marginRight: '5px'
@@ -56,7 +79,6 @@ const SearchFilters = ({ theme, handleChangeInput, handleBlur, onClickRefresh })
             </Button>
         </Dropdown>
 
-        <Tooltip title={`🍳 This feature is cooking—almost ready to serve 😜`}>
             <Button
                 type="default"
                 icon={<FaRobot style={{ fontSize: 20 }} />}
@@ -64,7 +86,7 @@ const SearchFilters = ({ theme, handleChangeInput, handleBlur, onClickRefresh })
                 style={{
                 borderRadius: 8,
                 background: theme === 'dark' ? 'rgba(82,196,26,0.06)' : '#f0fdf4',
-                border: '1px solid #95de64',
+                border: '1px solid #4CAF50',
                 color: theme === 'dark' ? '#52c41a' : '#389e0d',
                 fontWeight: 500,
                 cursor: 'not-allowed',
@@ -73,9 +95,7 @@ const SearchFilters = ({ theme, handleChangeInput, handleBlur, onClickRefresh })
             >
                 AI Assistant
             </Button>
-        </Tooltip>
 
-        <Tooltip title={`🍳 This feature is cooking—almost ready to serve 😜`}>
             <Button
                 type="default"
                 icon={<SettingOutlined />}
@@ -92,9 +112,7 @@ const SearchFilters = ({ theme, handleChangeInput, handleBlur, onClickRefresh })
             >
                 Rules
             </Button>
-        </Tooltip>
 
-        <Tooltip title="Click to Refresh Tables">
             <Button
                     type="primary"
                     style={{
@@ -106,7 +124,6 @@ const SearchFilters = ({ theme, handleChangeInput, handleBlur, onClickRefresh })
                 icon={<ReloadOutlined  className="black-icon" />}
                 onClick={onClickRefresh}
             />               
-        </Tooltip>
     </Space>
 </Col>
   );

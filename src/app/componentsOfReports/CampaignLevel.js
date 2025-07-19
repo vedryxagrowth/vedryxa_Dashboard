@@ -174,6 +174,7 @@ const CampaignLevelReports = ({functionCallForCommnets, context, functionCallFor
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting
+        unSortIcon: true,
 
         comparator: (campaignA, campaignB) => {
             if (!campaignA) return 1;
@@ -1565,16 +1566,16 @@ const CampaignLevelReports = ({functionCallForCommnets, context, functionCallFor
                                         </Space>
                                     </Col>
                                     <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                        <Text style={{ color: theme === "dark" && "white" }}>Acc: {newaccount}</Text>
+                                        <Text style={{ color: theme === "dark" && "white" }}>Id: {newaccount}</Text>
                                     </Col>
                                     <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                        <Text style={{ color: theme === "dark" && "white" }}>Acc name: {newAccountName}</Text>
+                                        <Text style={{ color: theme === "dark" && "white" }}>Name: {newAccountName}</Text>
                                     </Col>
                                     <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                         <Text style={{ color: theme === "dark" && "white" }}>Time zone: {timezone.current}</Text>
                                     </Col>
                                     <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                        <Text style={{ color: theme === "dark" && "white" }}>F/N hour: {maxHour.current}:00 / {maxNetworkHour.current}:00</Text>
+                                        <Text style={{ color: theme === "dark" && "white" }}>F/N Hour: {maxHour.current}:00 / {maxNetworkHour.current}:00</Text>
                                     </Col>
                                     {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                         <Text style={{ fontWeight: '600' }}>
@@ -1592,7 +1593,7 @@ const CampaignLevelReports = ({functionCallForCommnets, context, functionCallFor
                                                 <div>RevAcc status: {`${revenueCron.current}`}</div>
                                                 <Text style={{ color: "white" }}>
                                                     Cron/Acc status: {cronStatus.current} /{' '}
-                                                    <span style={{ color: accountStatus.current === 'Active' ? 'green' : 'red', fontWeight: 'bold' }}>
+                                                    <span style={{ color: accountStatus.current === 'Active' ? '#91C25F' : '#EC7117', fontWeight: 'bold' }}>
                                                         {accountStatus.current}
                                                     </span>
                                                 </Text>
@@ -1619,6 +1620,7 @@ const CampaignLevelReports = ({functionCallForCommnets, context, functionCallFor
                                 <div className='table-container'>
                                 <AgGridReact
                                     ref={gridRef}
+                                    rowHeight={30}
                                     className='custom-grid'
                                     context={context}
                                     rowData={memorizedRowData}
@@ -1665,6 +1667,7 @@ const CampaignLevelReports = ({functionCallForCommnets, context, functionCallFor
                                                 // fontWeight: "bold",
                                                 backgroundColor: theme === "dark" ? "#1a1918" : "#fff", // Dark mode or light mode
                                                 color: theme === "dark" ? "#fff" : "#000",
+                                                height: '30px'
                                             };
                                         }
                                         return null; // Keep other row styles unchanged

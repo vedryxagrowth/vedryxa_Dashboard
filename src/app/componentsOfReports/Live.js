@@ -1723,7 +1723,7 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
 
     return (
             <div>
-                    <div className={`top-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}>
+                    <div className={`top-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`} style={{marginBottom:'0px'}}>
                         {renderCarouselNav()}
                     </div>
                     <Tabs activeKey={activeTab} onChange={handleTabChange} renderTabBar={() => <></>}>

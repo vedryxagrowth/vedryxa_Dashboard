@@ -217,13 +217,14 @@ const UploadComponent = forwardRef(({ onSubmit, isLoading = false }, ref) => {
                     id="network"
                     value={selectedNetwork}
                     onChange={handleNetworkChange}
-                    placeholder="Select Network"
+                    placeholder="Select network"
                     style={{ width: '100%' }}
                     className={theme === 'dark' ? 'custom-select-dark' : ''}
-                    dropdownClassName={theme === 'dark' ? 'custom-dropdown-dark' : ''}
+                    dropdownClassName={theme === 'dark' ? 'custom-dropdown' : ''}
+                    title={''}
                 >
                     {networkOptions.map((option) => (
-                    <Option key={option.value} value={option.value}>
+                    <Option key={option.value} value={option.value} title={''}>
                         {option.label}
                     </Option>
                     ))}

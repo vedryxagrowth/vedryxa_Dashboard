@@ -2009,7 +2009,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
             <Col style={{ display: 'flex', width: '100%', marginLeft: '0%' }}>
                 {/* Left Table: Top 5 RPC Today */}
                 <div style={{ width: '20%', marginLeft:'1%' }}>
-                    <p>Top 5 Rpc Today</p>
+                    <p>Top 5 Rpc today</p>
                     <table style={{ width: '100%', borderCollapse: 'collapse',border: '2px solid #888' }}>
                         <thead>
                             <tr>
@@ -2034,7 +2034,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                     </table>
                 </div>
                 <div style={{ marginLeft: "1%", width: '20%' }}>
-                    <p>Top 5 Margin Today</p>
+                    <p>Top 5 margin today</p>
                     <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
                         <thead>
                             <tr>
@@ -2060,7 +2060,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                 </div>
 
                 <div style={{ marginLeft: "1%", width: '25%' }}>
-                    <p>Top 5 Repeated Hours with RPC (Last 10 Days)</p>
+                    <p>Top 5 repeated hours with Rpc (Last 10 days)</p>
                     <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
                         <thead>
                             <tr>
@@ -2088,7 +2088,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                     </table>
                 </div>
                 <div style={{ marginLeft: "1%", width: '25%' }}>
-                    <p>Top 5 Repeated Hours Margin (Last 10 Days)</p>
+                    <p>Top 5 repeated hours margin (Last 10 days)</p>
                     <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
                         <thead>
                             <tr>
@@ -2179,7 +2179,7 @@ const MnetLiveCampaignHistory = ({ params }) => {
                         placeholder="Select a range"
                         value={selectedValue}
                         onChange={handleChange}
-                        style={{ width: "170px", border: '1px solid #91C25F', borderRadius: '8px', color: theme === 'dark' ? '#fff' : '#000',}}
+                        style={{ width: "170px", border: '1px solid #4CAF50', borderRadius: '8px', color: theme === 'dark' ? '#fff' : '#000',}}
                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                         allowClear
                     >
@@ -2191,14 +2191,14 @@ const MnetLiveCampaignHistory = ({ params }) => {
                     </Select>
                     <Input
                         type="text"
-                        placeholder="Search date"
+                        placeholder="Search..."
                         value={searchText}
                         onChange={(e) => setSearchText(e.target.value)}
                         className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                         // style={{marginLeft: "5px", border: '1px solid #91C25F', width: "170px", padding: "3px",backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
                         style={{
                             borderRadius: 8,
-                            border: '1px solid #91C25F',
+                            border: '1px solid #4CAF50',
                             marginLeft: "5px",
                             color: theme === 'dark' ? '#fff' : '#000',
                             backgroundColor: theme === 'dark' ? '#000' : '#fff',

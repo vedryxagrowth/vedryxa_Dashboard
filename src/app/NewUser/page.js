@@ -1412,14 +1412,14 @@ const UsersTable = () => {
                                                     <>
                                                         {/* <Button  style={{backgroundColor: theme === "dark" ? "#555": "#fff", border: '1px solid green', borderRadius: '6px',}} icon={<SearchOutlined  style={{color: theme === "dark" ? "#fff": "#333"}} />} /> */}
                                                         <Input
-                                                            placeholder="Search user"
+                                                            placeholder="Search..."
                                                             autoFocus
                                                             value={searchInput}
                                                             onChange={handleSearchChange}
                                                             onBlur={handleBlur} 
                                                             className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                                             // style={{ width: '100%', border: '1px solid #37474F', borderRadius: '6px', marginLeft: '8px', backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555',borderColor: theme === 'dark' ? '#444444' : '#d9d9d9'  }}
-                                                            style={{ width: '170px', marginLeft: '3px', border: '1px solid #91C25F', }}
+                                                            style={{ width: '170px', marginLeft: '3px', border: '1px solid #4CAF50', }}
                                                         />
                                                     </>
                                             </div>
@@ -1429,10 +1429,10 @@ const UsersTable = () => {
                                             <Select
                                                 onChange={onChangeRole}
                                                 defaultValue="All"
-                                                style={{ width: "170px", marginTop: '8px', border: '1px solid #91C25F', borderRadius: '6px',
+                                                style={{ width: "170px", marginTop: '8px', border: '1px solid #4CAF50', borderRadius: '6px',
                                                 }}
                                                 className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
                                                 options={roles.map((item) => ({
                                                     value: item,
                                                     label: item,
@@ -1457,7 +1457,7 @@ const UsersTable = () => {
                                         </Col>  */}
                                         <Col style={{marginTop:'8%',}}>
                                             <div style={{marginLeft: '5px', color: theme === 'dark' ? '#fff' : '#333' }}>
-                                                Total.No Of Records {filteredData.length}
+                                                Total.no Of records {filteredData.length}
                                             </div>
                                         </Col>
                                     </Col>    
@@ -1522,14 +1522,14 @@ const UsersTable = () => {
                                             <div style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
                                                 {/* <Button  style={{backgroundColor: theme === "dark" ? "#555": "#fff", border: '1px solid green', borderRadius: '6px',}} icon={<SearchOutlined  style={{color: theme === "dark" ? "#fff": "#333"}} />} onClick={handleSearchClick1} /> */}
                                                 <Input
-                                                    placeholder="Search here"
+                                                    placeholder="Search..."
                                                     autoFocus={isSearchingAccount}  // Only autofocus when searching
                                                     value={newSearchInput}
                                                     onChange={handleaccountSearchChange}
                                                     onBlur={handleBlur1} 
                                                     className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                                     // style={{ width: '100%', border: '1px solid green', borderRadius: '6px', marginLeft: '8px', backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555',borderColor: theme === 'dark' ? '#444444' : '#d9d9d9'  }} 
-                                                    style={{ width: '170px', marginLeft: '3px', border: '1px solid #91C25F', }}
+                                                    style={{ width: '170px', marginLeft: '3px', border: '1px solid #4CAF50', }}
                                                 />
                                             </div>
                                         </Col>
@@ -1538,7 +1538,7 @@ const UsersTable = () => {
                                             <Select
                                                 onChange={onChangeNetwork}
                                                 defaultValue="All"
-                                                style={{ width: "170px", marginTop: '8px', border: '1px solid #91C25F', borderRadius: '6px',
+                                                style={{ width: "170px", marginTop: '8px', border: '1px solid #4CAF50', borderRadius: '6px',
                                                 }}
                                                 className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                                 dropdownClassName={theme === 'dark' && "custom-dropdown"}
@@ -1553,7 +1553,7 @@ const UsersTable = () => {
                                             <Select
                                                 onChange={onChangeStatus}
                                                 defaultValue="All"
-                                                style={{ width: "170px", marginTop: '8px', border: '1px solid #91C25F', borderRadius: '6px',
+                                                style={{ width: "170px", marginTop: '8px', border: '1px solid #4CAF50', borderRadius: '6px',
                                                 }}
                                                 className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                                 dropdownClassName={theme === 'dark' && "custom-dropdown"}
@@ -1565,7 +1565,7 @@ const UsersTable = () => {
                                         </Col>
                                         <Col style={{marginTop:'5%',}}>
                                             <div style={{marginLeft: '5px', color: theme === 'dark' ? '#fff' : '#333' }}>
-                                                Total.No Of Records {accFilteredData.length}
+                                                Total.no Of records {accFilteredData.length}
                                             </div>
                                         </Col>
                                 </Col>
@@ -1623,14 +1623,14 @@ const UsersTable = () => {
                                             <div style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
                                                 {/* <Button  style={{backgroundColor: theme === "dark" ? "#555": "#fff", borderColor: "", border: '1px solid green', borderRadius: '6px',}} icon={<SearchOutlined  style={{color: theme === "dark" ? "#fff": "#333"}} />} onClick={handleSearchNetwork} /> */}
                                                 <Input
-                                                    placeholder="Search here"
+                                                    placeholder="Search..."
                                                     autoFocus={isSearchingNetwork}  // Only autofocus when searching
                                                     value={netSearchInput}
                                                     onChange={handleNetworkSearchChange}
                                                     onBlur={handleBlur2} 
                                                     className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                                     // style={{ width: '100%', marginLeft: '8px', backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555',borderColor: theme === 'dark' ? '#444444' : '#37474F'}}
-                                                    style={{ width: '170px', marginLeft: '3px', border: '1px solid #91C25F', }} 
+                                                    style={{ width: '170px', marginLeft: '3px', border: '1px solid #4CAF50', }} 
                                                 />
                                             </div>
                                         </Col>
@@ -1640,7 +1640,7 @@ const UsersTable = () => {
                                                 onChange={onChangeNetwork}
                                                 dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                                 defaultValue="All"
-                                                style={{ width: "170px", marginTop: '8px', border: '1px solid #91C25F', borderRadius: '6px',
+                                                style={{ width: "170px", marginTop: '8px', border: '1px solid #4CAF50', borderRadius: '6px',
                                                 }}
                                                 className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                                 options={availableNetworks.map((item) => ({
@@ -1655,7 +1655,7 @@ const UsersTable = () => {
                                                 onChange={onChangeStatus}
                                                 dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                                 defaultValue="All"
-                                                style={{ width: "170px", marginTop: '8px', border: '1px solid #91C25F', borderRadius: '6px',
+                                                style={{ width: "170px", marginTop: '8px', border: '1px solid #4CAF50', borderRadius: '6px',
                                                 }}
                                                 className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                                 options={networkStatus.map((item) => ({
@@ -1666,7 +1666,7 @@ const UsersTable = () => {
                                         </Col> 
                                         <Col style={{marginTop:'5%',}}>
                                             <div style={{marginLeft: '0px', color: theme === 'dark' ? '#fff' : '#333' }}>
-                                                Total.No Of Records {networkFilteredData.length}
+                                                Total.no Of records {networkFilteredData.length}
                                             </div>
                                         </Col>                   
                                     {/* </Row> */}
@@ -1724,12 +1724,12 @@ const UsersTable = () => {
                                             <div style={{ display: 'flex', alignItems: 'center', marginTop: '8px' }}>
                                                 {/* <Button  style={{backgroundColor: theme === "dark" ? "#555": "#fff", border: '1px solid #91C25F', borderRadius: '6px',}} icon={<SearchOutlined  style={{color: theme === "dark" ? "#fff": "#333"}} />} onClick={handleSearchClick1} /> */}
                                                 <Input
-                                                    placeholder="Search here"
+                                                    placeholder="Search..."
                                                     autoFocus={isSearchingAccount}  // Only autofocus when searching
                                                     value={newSearchInput} 
                                                     className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                                     // style={{ width: '100%', border: '1px solid green', borderRadius: '6px', marginLeft: '8px', backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555',borderColor: theme === 'dark' ? '#444444' : '#d9d9d9'  }} 
-                                                    style={{ width: '170px', marginLeft: '3px', border: '1px solid #91C25F', }}
+                                                    style={{ width: '170px', marginLeft: '3px', border: '1px solid #4CAF50', }}
                                                 />
                                             </div>
                                         </Col>
@@ -1737,7 +1737,7 @@ const UsersTable = () => {
                                             <span style={{ color: "#B4B4B4", display: 'block' }}>Network</span>
                                             <Select
                                                 defaultValue="All"
-                                                style={{ width: "170px", marginTop: '8px', border: '1px solid #91C25F', borderRadius: '6px',
+                                                style={{ width: "170px", marginTop: '8px', border: '1px solid #4CAF50', borderRadius: '6px',
                                                 }}
                                                 className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                                 dropdownClassName={theme === 'dark' && "custom-dropdown"}

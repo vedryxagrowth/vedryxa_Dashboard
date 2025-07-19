@@ -141,7 +141,7 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
                 className={theme === 'dark' ? 'form-dark' : 'form-light'}
             >
                 <Form.Item
-                    label="UserName"
+                    label="User Name"
                     name="userName"
                     rules={[
                         {
@@ -150,7 +150,7 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
                         },
                     ]}
                 >
-                    <Input placeholder='Enter User Name' className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
+                    <Input autoComplete="off" placeholder='Enter User Name' className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
                 </Form.Item>
 
                 <Form.Item
@@ -163,7 +163,7 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
                         },
                     ]}
                 >
-                    <Input placeholder='Enter User Email' className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
+                    <Input autoComplete="off" placeholder='Enter User Email' className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
                 </Form.Item>
 
                 <Form.Item
@@ -179,11 +179,12 @@ const Createnewuser = ({ visible, onClose, refreshUsers }) => {
                     <Select 
                         placeholder="Select a role"
                         className={theme === 'dark' ? 'custom-select-dark' : ''}
-                        style={{
-                            backgroundColor: theme === 'dark' && '#333', // Background color
-                            color: theme === 'dark' && '#fff',
-                        }}
-                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                        // style={{
+                        //     backgroundColor: theme === 'dark' && '#333', // Background color
+                        //     color: theme === 'dark' && '#fff',
+                        // }}
+                        // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                        dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
                     >
                         <Select.Option value="Media_Buyer">Media_Buyer</Select.Option>
                         <Select.Option value="Special_User">Special_User</Select.Option>

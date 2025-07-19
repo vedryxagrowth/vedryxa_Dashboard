@@ -129,6 +129,7 @@ const InmobiKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePrat
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting
+        unSortIcon: true,
 
         comparator: (campaignA, campaignB) => {
             if (!campaignA) return 1;
