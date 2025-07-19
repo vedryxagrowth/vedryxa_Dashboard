@@ -656,7 +656,7 @@ const Daily = ({functionCallForCommnets,context, functionCallForCampaigns, start
                                     cursor: 'pointer',
                                     marginLeft: '10px',
                                     marginRight: '10px',
-                                    color: 'blue'
+                                    color: '#4CAF50'
                                 }}
                                 onClick={handleEditClick} // Open modal directly on click
                                 />
@@ -1207,17 +1207,17 @@ const Daily = ({functionCallForCommnets,context, functionCallForCampaigns, start
                             )?.length > 0 ? (
                                 <div 
                                     className={`ag-theme-alpine ag-container ${gridThemeClass}`}
-                                    style={{
-                                        width: '100%',
-                                        // borderRadius: 12,
-                                        backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
-                                        padding: 10,
-                                        height: 'auto',
-                                        boxShadow:
-                                        theme === 'dark'
-                                            ? '0 1px 3px rgba(0,0,0,0.6)'
-                                            : '0 1px 6px rgba(0,0,0,0.08)',
-                                    }}
+                                    // style={{
+                                    //     width: '100%',
+                                    //     // borderRadius: 12,
+                                    //     backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+                                    //     padding: 10,
+                                    //     height: 'auto',
+                                    //     boxShadow:
+                                    //     theme === 'dark'
+                                    //         ? '0 1px 3px rgba(0,0,0,0.6)'
+                                    //         : '0 1px 6px rgba(0,0,0,0.08)',
+                                    // }}
                                 >
                                     <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d", }}>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
@@ -1290,6 +1290,7 @@ const Daily = ({functionCallForCommnets,context, functionCallForCampaigns, start
                                             </Tooltip>
                                         </Col>
                                     </Row>
+                                    <div className='table-container'>
                                     <AgGridReact
                                         ref={gridRef1}
                                         className='custom-grid'
@@ -1413,6 +1414,8 @@ const Daily = ({functionCallForCommnets,context, functionCallForCampaigns, start
                                             setDailyFixedFooter(updatedFooter);
                                         }}
                                     />
+                                    </div>
+                                   
                                 </div>
                             ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
                                 {apiStatus === true ? 
