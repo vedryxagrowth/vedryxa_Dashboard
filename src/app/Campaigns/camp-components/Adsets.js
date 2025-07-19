@@ -517,9 +517,9 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
       <Row align="middle" gutter={10}>
         <Col>
           <Input
-            placeholder="Search adsets"
+            placeholder="Search..."
             variant="filled"
-            suffix={<SearchOutlined />}
+            // suffix={<SearchOutlined />}
             className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
             style={{
               width: '170px',

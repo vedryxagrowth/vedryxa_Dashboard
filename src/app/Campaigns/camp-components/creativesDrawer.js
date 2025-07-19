@@ -1147,8 +1147,8 @@ const CreativesDrawer = ({selectedFilesData}) => {
                 </Col>
                 <Col span={3}>
                     <Input
-                        placeholder="Search by filename..."
-                        suffix={<SearchOutlined />}
+                        placeholder="Search..."
+                        // suffix={<SearchOutlined />}
                         value={searchQuery}
                         onChange={handleSearch} // Call function on user input
                     />                       

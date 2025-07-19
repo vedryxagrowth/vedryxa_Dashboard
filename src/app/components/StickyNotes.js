@@ -3,8 +3,8 @@ import axios from "axios";
 import Draggable from "react-draggable";
 import { v4 as uuidv4 } from "uuid";
 import dayjs from "dayjs";
-import { PictureOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
-import { message } from "antd";
+import { PictureOutlined, DeleteOutlined, PlusOutlined, CopyOutlined } from "@ant-design/icons";
+import { Button, message } from "antd";
 import moment from "moment";
 import { useTokenContext } from "./parent";
 import { useRef } from "react";
@@ -160,6 +160,16 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
 
   const openItem = (note) => setOpenNote(note);
   const closeCurrentNote = () => setOpenNote(null);
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text).then(() => {
+      console.log('Text copied to clipboard');
+      message.success("Content copied to clipboard!");
+    }).catch(err => {
+      console.error('Failed to copy text: ', err);
+      message.error("Failed to copy content.");
+    });
+  };
 
   return (
     <>
@@ -389,9 +399,23 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
               borderBottom: "1px solid rgba(0,0,0,0.1)"
             }}>
               <span style={{ fontSize: "12px", color: "#555" }}>{openNote.timestamp}</span>
-              <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+              <div style={{ display: "flex", gap: "5px", alignItems: "center" }}>
+                <div>
+                  <Button onClick={(e) => {
+                    e.stopPropagation();
+                    copyToClipboard(openNote.text);
+                  }}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      fontSize: "14px",
+                      color: "#333",
+                      marginLeft: '10px'
+                    }}><CopyOutlined /></Button>
+                </div>
                 <div
-                  style={{ cursor: "pointer", fontSize: "18px", color: "#333" }}
+                  style={{ cursor: "pointer", fontSize: "18px", color: "#333", marginRight: '10px' }}
                   onClick={(e) => {
                     e.stopPropagation();
                     setColorMenuVisible(!colorMenuVisible);

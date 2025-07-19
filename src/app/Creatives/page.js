@@ -1217,6 +1217,14 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
         setSelectedImages([]);
         selectedImagesRef.current = [];
     };
+    const [isHoveredEdit, setIsHoveredEdit] = useState(false); 
+    const [isHoveredRename, setIsHoveredRename] = useState(false); 
+    const [isHoveredDuplicate, setIsHoveredDuplicate] = useState(false); 
+    const [isHoveredCopy, setIsHoveredCopy] = useState(false); 
+    const [isHoveredCut, setIsHoveredCut] = useState(false); 
+    const [isHoveredDelete, setIsHoveredDelete] = useState(false); 
+   const [isHoveredRestore, setIsHoveredRestore] = useState(false);
+
 
 
     return (
@@ -1468,16 +1476,19 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                             onChange={handleKeyChange}
                             value={selectedKey}
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                            
                         >
                             {options.length > 0 ? (
                                 options.map(option => (
-                                    <Option key={option.value} value={option.value}>
+                                    <Option key={option.value} value={option.value}   title={null}>
                                         {option.label}
+                                        
                                     </Option>
                                 ))
                             ) : (
                                 <Option disabled></Option>
                             )}
+                         
                         </Select>
                     </Col>
 
@@ -1566,7 +1577,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                 format="YYYY-MM-DD"
                                 allowClear={true}
                                 style={{ width: '240px' }}
-                                dropdownClassName={`${theme === 'dark' ? 'Dashboard-Details-1 dark-theme-dropdown' : 'Dashboard-Details-1'} custom-green-calendar`}
+                                dropdownClassName={`${theme === 'dark' ? 'Dashboard-Details-1 dark-theme-dropdown' : 'Dashboard-Details-1'}`}
                             />
                         </ConfigProvider>
                     </Col>
@@ -1584,12 +1595,12 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                 backgroundColor: 'transparent',
                                 color: theme === 'dark' ? '#ffffff' : 'black',
                                 transition: 'background 0.3s',
-                                
+
                             }}
                             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#91C25F'}
                             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                         >
-                            New campaign
+                            Create campaign
                             {checkboxSelected.length > 0 && (
                                 <Badge
                                     style={{
@@ -1658,8 +1669,8 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                     <Col className='container'>
                         <Input
                             className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                            placeholder="Search keyword"
-                            suffix={<SearchOutlined />}
+                            placeholder="Search..."
+                            // suffix={<SearchOutlined />}
                             value={searchQuery}
                             onChange={handleSearch} // Call function on user input
                             style={{ width: '170px', border: '1px solid #4caf50' }}
@@ -1669,10 +1680,11 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                             icon={<DeleteOutlined className="black-icon" />}
                             onClick={() => setIsTrashView(prev => !prev)}
                             style={{
-                                backgroundColor: isTrashView ? 'red' : '#91C25F',
-                                color: isTrashView ? 'white' : 'black',
-                                border: 'none',
-                                marginLeft: '5px'
+                                backgroundColor: isTrashView ? '#e6f7ff' : '#91C25F',
+                                color: isTrashView ? '#1d39c4' : 'black',
+                                border: isTrashView ? '1px solid #91d5ff' : '1px solid #4caf50',
+                                marginLeft: '5px',
+                                fontWeight: 500,
                             }}
                         >
                             {isTrashView ? 'Back to files' : 'Trash'}
@@ -1734,7 +1746,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                         gap: '10px',
                         marginTop: '20px',
                         // border: '2px solid #91C25F',
-                        border: isTrashView ? '2px solid red' : '2px solid #91C25F',
+                        border: isTrashView ? '2px solid #91d5ff' : '2px solid #91C25F',
                         padding: '10px',
                         width: '100%',
                         position: 'relative',
@@ -2313,7 +2325,12 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
 
                                 {/* Delete Permanently */}
                                 <div
-                                    style={{ padding: '8px 12px', color: 'red' }}
+                                    style={{
+                                        padding: '8px 12px',
+                                        color: 'red',
+                                        backgroundColor: isHoveredDelete ? '#e6f7ff' : 'transparent', 
+                                        cursor: 'pointer',
+                                    }}
                                     onClick={async () => {
                                         const items = contextMenu.selectedList?.length > 0 ? contextMenu.selectedList : [contextMenu.target];
                                         try {
@@ -2335,13 +2352,21 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                         }
                                         setContextMenu({ ...contextMenu, visible: false });
                                     }}
+                                    onMouseEnter={() => setIsHoveredDelete(true)} 
+                                    onMouseLeave={() => setIsHoveredDelete(false)}
                                 >
                                     ❌ Delete Permanently
                                 </div>
 
                                 {/* Restore */}
                                 <div
-                                    style={{ padding: '8px 12px' }}
+                                    style={{
+                                        padding: '8px 12px',
+                                        backgroundColor: isHoveredRestore ? '#e6f7ff' : 'transparent',
+                                        color: isHoveredRestore ? '#333' : 'inherit', 
+                                        cursor: 'pointer',
+                                        
+                                    }}
                                     onClick={async () => {
                                         const items = contextMenu.selectedList?.length > 0 ? contextMenu.selectedList : [contextMenu.target];
                                         try {
@@ -2372,6 +2397,8 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
 
                                         setContextMenu({ ...contextMenu, visible: false });
                                     }}
+                                    onMouseEnter={() => setIsHoveredRestore(true)} 
+                                    onMouseLeave={() => setIsHoveredRestore(false)}
                                 >
                                     🔁 Restore
                                 </div>
@@ -2525,60 +2552,132 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                     </>
                                 ) : (
                                     <>
-                                        <div style={{ padding: '8px 12px' }} onClick={() => {
-                                            handleEditFile(contextMenu.target);
-                                            setSelectedImages([]);
-                                            setContextMenu({ ...contextMenu, visible: false });
-                                        }}>
-                                            {/* <EditOutlined style={{ marginRight: 8 }} /> */}
-                                            <MdEdit style={{ fontSize: '16px', marginRight: '8px' }} />
-                                            Edit
-                                        </div>
+                                        <div>
+                                            {/* Edit div */}
+                                            <div
+                                                style={{
+                                                    padding: '8px 12px',
+                                                    backgroundColor: isHoveredEdit ? '#e6f7ff' : 'transparent', 
+                                                    color: isHoveredEdit ? '#333' : 'inherit', 
+                                                    cursor: 'pointer',
+                                                   
+                                                }}
+                                                onClick={() => {
+                                                    handleEditFile(contextMenu.target);
+                                                    setSelectedImages([]);
+                                                    setContextMenu({ ...contextMenu, visible: false });
+                                                }}
+                                                onMouseEnter={() => setIsHoveredEdit(true)} 
+                                                onMouseLeave={() => setIsHoveredEdit(false)} 
+                                            >
+                                                <MdEdit style={{ fontSize: '16px', marginRight: '8px' }} />
+                                                Edit
+                                            </div>
 
-                                        <div style={{ padding: '8px 12px' }} onClick={() => {
-                                            setEditingUid(contextMenu.target.uid);
-                                            setInlineName(extractDisplayName(contextMenu.target.name));
-                                            setSelectedImages([]);
-                                            setContextMenu({ ...contextMenu, visible: false });
-                                        }}>
-                                            <MdDriveFileRenameOutline style={{ fontSize: '16px', marginRight: '8px' }} />
-                                            Rename
-                                        </div>
+                                            {/* Rename div */}
+                                            <div
+                                                style={{
+                                                    padding: '8px 12px',
+                                                    backgroundColor: isHoveredRename ? '#e6f7ff' : 'transparent', 
+                                                    color: isHoveredRename ? '#333' : 'inherit', 
+                                                    cursor: 'pointer',
+                                                    
+                                                }}
+                                                onClick={() => {
+                                                    setEditingUid(contextMenu.target.uid);
+                                                    setInlineName(extractDisplayName(contextMenu.target.name));
+                                                    setSelectedImages([]);
+                                                    setContextMenu({ ...contextMenu, visible: false });
+                                                }}
+                                                onMouseEnter={() => setIsHoveredRename(true)} 
+                                                onMouseLeave={() => setIsHoveredRename(false)} 
+                                            >
+                                                <MdDriveFileRenameOutline style={{ fontSize: '16px', marginRight: '8px' }} />
+                                                Rename
+                                            </div>
 
-                                        <div style={{ padding: '8px 12px' }} onClick={() => {
-                                            handleCloneFile(contextMenu.target);
-                                            setSelectedImages([]);
-                                            setContextMenu({ ...contextMenu, visible: false });
-                                        }}>
-                                            {/* <FileAddOutlined style={{ marginRight: 8 }} /> */}
-                                            <HiOutlineDuplicate style={{ fontSize: '16px', marginRight: '8px' }} />
-                                            Duplicate
-                                        </div>
+                                            {/* Duplicate div */}
+                                            <div
+                                                style={{
+                                                    padding: '8px 12px',
+                                                    backgroundColor: isHoveredDuplicate ? '#e6f7ff' : 'transparent', 
+                                                    color: isHoveredDuplicate ? '#333' : 'inherit', 
+                                                    cursor: 'pointer',
+        
+                                                }}
+                                                onClick={() => {
+                                                    handleCloneFile(contextMenu.target);
+                                                    setSelectedImages([]);
+                                                    setContextMenu({ ...contextMenu, visible: false });
+                                                }}
+                                                onMouseEnter={() => setIsHoveredDuplicate(true)} 
+                                                onMouseLeave={() => setIsHoveredDuplicate(false)} 
+                                            >
+                                                <HiOutlineDuplicate style={{ fontSize: '16px', marginRight: '8px' }} />
+                                                Duplicate
+                                            </div>
 
-                                        <div style={{ padding: '8px 12px', color: 'red' }} onClick={() => {
-                                            showDeleteModal(contextMenu.target);
-                                            setSelectedImages([]);
-                                            setContextMenu({ ...contextMenu, visible: false });
-                                        }}>🗑️ Move to Bin</div>
+                                            {/* Delete div */}
+                                            <div
+                                                style={{
+                                                    padding: '8px 12px',
+                                                    color: 'red',
+                                                    backgroundColor: isHoveredDelete ? '#e6f7ff' : 'transparent', 
+                                                    cursor: 'pointer',
+                                            
+                                                }}
+                                                onClick={() => {
+                                                    showDeleteModal(contextMenu.target);
+                                                    setSelectedImages([]);
+                                                    setContextMenu({ ...contextMenu, visible: false });
+                                                }}
+                                                onMouseEnter={() => setIsHoveredDelete(true)} 
+                                                onMouseLeave={() => setIsHoveredDelete(false)}
+                                            >
+                                                🗑️ Move to Bin
+                                            </div>
 
-                                        <div style={{ padding: '8px 12px' }} onClick={() => {
-                                            setClipboardFile([{ ...contextMenu.target, action: "copy", isFolder: false }]);
-                                            setSelectedImages([]);
-                                            // message.success("File copied");
-                                            setContextMenu({ ...contextMenu, visible: false });
-                                        }}>
-                                            <CopyOutlined style={{ marginRight: 8 }} />
-                                            Copy
-                                        </div>
+                                            {/* Copy div */}
+                                            <div
+                                                style={{
+                                                    padding: '8px 12px',
+                                                    backgroundColor: isHoveredCopy ? '#e6f7ff' : 'transparent', 
+                                                    color: isHoveredCopy ? '#333' : 'inherit', 
+                                                    cursor: 'pointer',
+                                                    
+                                                }}
+                                                onClick={() => {
+                                                    setClipboardFile([{ ...contextMenu.target, action: 'copy', isFolder: false }]);
+                                                    setSelectedImages([]);
+                                                    setContextMenu({ ...contextMenu, visible: false });
+                                                }}
+                                                onMouseEnter={() => setIsHoveredCopy(true)} 
+                                                onMouseLeave={() => setIsHoveredCopy(false)} 
+                                            >
+                                                <CopyOutlined style={{ marginRight: 8 }} />
+                                                Copy
+                                            </div>
 
-                                        <div style={{ padding: '8px 12px' }} onClick={() => {
-                                            setClipboardFile([{ ...contextMenu.target, action: "cut", isFolder: false }]);
-                                            setFilteredImages(prev => prev.filter(f => f.uid !== contextMenu.target.uid));
-                                            setSelectedImages([]);
-                                            // message.success("File cut");
-                                            setContextMenu({ ...contextMenu, visible: false });
-                                        }}>
-                                            ✂️ Cut
+                                            {/* Cut div */}
+                                            <div
+                                                style={{
+                                                    padding: '8px 12px',
+                                                    backgroundColor: isHoveredCut ? '#e6f7ff' : 'transparent', 
+                                                    color: isHoveredCut ? '#333' : 'inherit', 
+                                                    cursor: 'pointer',
+                                                    
+                                                }}
+                                                onClick={() => {
+                                                    setClipboardFile([{ ...contextMenu.target, action: 'cut', isFolder: false }]);
+                                                    setFilteredImages(prev => prev.filter(f => f.uid !== contextMenu.target.uid));
+                                                    setSelectedImages([]);
+                                                    setContextMenu({ ...contextMenu, visible: false });
+                                                }}
+                                                onMouseEnter={() => setIsHoveredCut(true)} 
+                                                onMouseLeave={() => setIsHoveredCut(false)} 
+                                            >
+                                                ✂️ Cut
+                                            </div>
                                         </div>
                                     </>
                                 )}

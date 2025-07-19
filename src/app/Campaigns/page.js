@@ -1406,7 +1406,7 @@ const App = () => {
           <Col span={3}>
             <Select
               showSearch
-              placeholder="Select project"
+              placeholder="Select Project"
               style={{ width: '90%' }}
               onChange={handleKeyChange}
               value={selectedKey}
@@ -1414,7 +1414,7 @@ const App = () => {
               className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
             >
               {options.map(option => (
-                <Option key={option.value} value={option.value}>{option.label}</Option>
+                <Option key={option.value} value={option.value} title={null}>{option.label} </Option>
               ))}
             </Select>
           </Col>
@@ -1422,7 +1422,7 @@ const App = () => {
           <Col span={4} style={{ marginLeft: '-25px' }}>
             <Select
               showSearch
-              placeholder="Select accounts"
+              placeholder="Select Accounts"
               style={{ width: '90%' }}
               onChange={handleValueChange}
               disabled={!selectedKey}
@@ -1505,7 +1505,7 @@ const App = () => {
                 defaultValue={[dayjs(), dayjs()]}
                 // format="YYYY-MM-DD"
                 // style={{ width: '100%' }}
-                dropdownClassName={`${theme === 'dark' ? 'dark-theme-dropdown' : ''} custom-green-calendar`}
+                dropdownClassName={`${theme === 'dark' ? 'dark-theme-dropdown' : ''}`}
               />
             </ConfigProvider>
           </Col>
@@ -1513,8 +1513,8 @@ const App = () => {
           <Col span={3} style={{ marginLeft: '-28px' }}>
 
             <Input
-              placeholder="Search campaigns"
-              suffix={<SearchOutlined onClick={handleSearchSubmit} />}
+              placeholder="Search..."
+              // suffix={<SearchOutlined onClick={handleSearchSubmit} />}
               value={searchInput}
               onChange={handleSearchChange}
               onPressEnter={handleSearchSubmit}
@@ -1569,12 +1569,13 @@ const App = () => {
 
               <span
                 style={{
-                  backgroundColor: theme === 'dark' ? '#1f1f1f' : '#e6f7ff',
+                  backgroundColor: theme === 'dark' ? '#e6f7ff' : '#e6f7ff',
                   padding: '5px 14px',
                   borderRadius: '8px',
                   fontSize: '15px',
-                  color: theme === 'dark' ? '#1890ff' : '#1890ff',
-                  border: `1px solid ${theme === 'dark' ? '#4caf50' : '#4caf50'}`,
+                  fontWeight:'500',
+                  color: theme === 'dark' ? '#1d39c4' : '#1d39c4',
+                  border: `1px solid ${theme === 'dark' ? '#91d5ff' : '#91d5ff'}`,
                   marginRight: '-55px'
 
                 }}
