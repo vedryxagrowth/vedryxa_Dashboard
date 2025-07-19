@@ -292,9 +292,9 @@ export default function Createads({ selectedRow, network }) {
       <Row align="middle" gutter={10}>
         <Col>
           <Input
-            placeholder="Search ads"
+            placeholder="Search..."
             variant="filled"
-            suffix={<SearchOutlined />}
+            // suffix={<SearchOutlined />}
             className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
             style={{
               width: '170px',

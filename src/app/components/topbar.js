@@ -155,7 +155,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
   const items = Object.entries(notifications).map(([key, value]) => ({
     label: key,
     count: value.length,
-    color: "orange"
+    color: "#EC7117"
   }));
 
   const displayedItems = showAll ? items : items.slice(0, 5);
@@ -260,7 +260,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                 }}
               >
                 {label}
-                <Badge count={count} style={{ backgroundColor: color, color: darkMode ? '#fff' : '#000' }} />
+                <Badge count={count} style={{ backgroundColor: color, color: darkMode ? '#000' : '#fff',border:'#EC7117' }} />
               </div>
 
               {expandedIndex === index &&
@@ -330,31 +330,31 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                               style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: '8px' }}
                             />
                           )} */}
-                            {item.imageUrl && ( // check if imageUrl exists before rendering
-                              item.imageUrl.includes('.mp4') ? (
-                                <video
-                                  controls
-                                  src={item.imageUrl}
-                                  style={{
-                                    width: '100%',
-                                    height: '200px',
-                                    objectFit: 'cover',
-                                    borderRadius: '8px',
-                                  }}
-                                />
-                              ) : (
-                                <img
-                                  src={item.imageUrl}
-                                  alt="Notification"
-                                  style={{
-                                    width: '100%',
-                                    height: '200px',
-                                    objectFit: 'cover',
-                                    borderRadius: '8px',
-                                  }}
-                                />
-                              )
-                            )}
+                          {item.imageUrl && ( // check if imageUrl exists before rendering
+                            item.imageUrl.includes('.mp4') ? (
+                              <video
+                                controls
+                                src={item.imageUrl}
+                                style={{
+                                  width: '100%',
+                                  height: '200px',
+                                  objectFit: 'cover',
+                                  borderRadius: '8px',
+                                }}
+                              />
+                            ) : (
+                              <img
+                                src={item.imageUrl}
+                                alt="Notification"
+                                style={{
+                                  width: '100%',
+                                  height: '200px',
+                                  objectFit: 'cover',
+                                  borderRadius: '8px',
+                                }}
+                              />
+                            )
+                          )}
                         </div>
 
                         <Divider
@@ -1194,7 +1194,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                 padding: '0px', margin: '0px', backgroundColor: theme === "dark" &&
                   "transparent"
               }} className={`${darkMode ? 'dark-mode' : 'light-mode'}`} onClick={onChangeStickyNotes}>
-                <SlNotebook size={20} style={{marginLeft:'5px'}}/>
+                <SlNotebook size={20} style={{ marginLeft: '5px' }} />
               </button>}
 
               {userdetails?.role !== "Revenue_Partner" && <button style={{
@@ -1450,7 +1450,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
               />
 
               <Upload {...uploadProps}>
-                <Button style={{ marginTop: '10px',backgroundColor:'#91C25F',border:'#91C25F' }} icon={<UploadOutlined className="black-icon" />} loading={loading}>
+                <Button style={{ marginTop: '10px', backgroundColor: '#91C25F', border: '#91C25F' }} icon={<UploadOutlined className="black-icon" />} loading={loading}>
                   {loading ? 'Uploading...' : 'Upload Image'}
                 </Button>
               </Upload>
@@ -1525,8 +1525,9 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
         <WorldTime setOpenWorldTime={setOpenWorldTime} />
       </div>
     </Modal> */}
-      <Drawer open={openWorldTime} width="95%" onClose={() => setOpenWorldTime(false)}style={{
-        backgroundColor: theme === 'dark' ? '#333' : '#fff'}}>
+      <Drawer open={openWorldTime} width="95%" onClose={() => setOpenWorldTime(false)} style={{
+        backgroundColor: theme === 'dark' ? '#333' : '#fff'
+      }}>
         <div>
           <WorldTime setOpenWorldTime={setOpenWorldTime} />
         </div>
@@ -1537,7 +1538,8 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
       </div>
     </Modal> */}
       <Drawer open={openCalculator} width="32%" onClose={() => setOpenCalculator(false)} style={{
-        backgroundColor: theme === 'dark' ? '#333' : '#fff'}}>
+        backgroundColor: theme === 'dark' ? '#333' : '#fff'
+      }}>
         <div>
           <Calculator setOpenCalculator={setOpenCalculator} />
         </div>
@@ -2060,7 +2062,7 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
                 </Form.Item>
 
                 <div style={{ textAlign: 'right', marginBottom: '15px' }}>
-                  <a style={{ color: '#4CAF50', fontSize: '12px' }}>
+                  <a style={{ color: '#4CAF50', fontSize: '12px',cursor: 'text', }}>
                     Forgot password?
                   </a>
                 </div>
@@ -2074,8 +2076,12 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
                       borderColor: '#4CAF50',
                       height: '36px',
                       fontWeight: 'bold',
-                      fontSize: '14px',
+                    //  cursor: 'not-allowed',
+                      transition: 'none', 
+                      pointerEvents: 'none', 
+                      
                     }}
+                   
                   >
                     Sign In
                   </Button>
@@ -2084,7 +2090,7 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
 
               <div style={{ textAlign: 'center', fontSize: '13px', marginTop: '18px' }}>
                 Don’t have an account?{' '}
-                <a style={{ color: '#4CAF50' }}>
+                <a style={{ color: '#4CAF50', cursor: 'text' }}>
                   Contact your administrator
                 </a>
               </div>

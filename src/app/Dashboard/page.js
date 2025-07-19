@@ -2143,13 +2143,14 @@ const Dashboard = () => {
                         }}
                     >
                         <Divider style={{ color: theme === 'dark' ? 'white' : 'black' }}>
-                            {category}
-                            <Checkbox
+                             <Checkbox
                                 checked={allSelected}
                                 onChange={(e) => handleSelectAllChange(e.target.checked, category)}
-                                style={{ marginLeft: '15px' }}
-                                className={theme === 'dark' ? 'checkbox-dark' : 'checkbox-light'}
+                                style={{ marginRight: '5px' }}
+                                className={theme === 'dark' ? 'checkbox-dark' : 'checkbox-light' }
                             />
+                            {category}
+                           
                         </Divider>
                     </div>
 
@@ -2286,7 +2287,7 @@ const Dashboard = () => {
 
     const autoGroupColumnDefProfit = {
         headerName: 'Account number',
-        minWidth: 210,
+        minWidth: 300,
         sortable: true,
         cellRendererParams: {
             suppressCount: false,
@@ -2316,7 +2317,7 @@ const Dashboard = () => {
 
                 const valueWithCount = `${firstColumnValue}`;
                 return (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                    <div style={{  width: '100%' ,marginRight:'10px'}}>
                         <span
                             onClick={() => {
                                 const data = {
@@ -2380,6 +2381,8 @@ const Dashboard = () => {
         headerName: 'Account number',
         minWidth: 200,
         sortable: true,
+        //  cellStyle: { whiteSpace: "normal", lineHeight: "1.5" }, // Enables text wrapping
+        // autoHeight: true,
         cellRendererParams: {
             suppressCount: false,
             innerRenderer: (params) => {
@@ -3410,6 +3413,7 @@ const Dashboard = () => {
                                                     overflowY: 'auto',
                                                     // width: '100%',
                                                 }}
+                                                
                                                 className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                                 placeholder="Select projects"
                                                 value={firstSelectValues}
@@ -3429,12 +3433,15 @@ const Dashboard = () => {
                                                         }}
                                                     >
                                                         {menu}
+                                                        
                                                     </div>
+                                             
                                                 )}
                                                 options={Object.keys(transformedData).map((category) => ({
                                                     value: category,
                                                     label: category,
                                                 }))}
+                                                
                                             />
                                         </Col>
 
@@ -3445,8 +3452,8 @@ const Dashboard = () => {
                                                 onSearch={handleSearchChange}  // Update searchValue dynamically
                                                 style={{ width: '100%' }}
                                                 className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                                placeholder="Select accounts"
-                                                dropdownClassName={theme === 'dark' && 'custom-dropdown'}
+                                                placeholder="Select Accounts"
+                                                dropdownClassName={theme === 'dark' ? 'custom-dropdown':'custom-dropdown'}
                                                 value={[]} // This should be updated to reflect selectedItems based on the selected categories
                                                 dropdownRender={() => (
                                                     <div style={{ maxHeight: '300px', overflowY: 'auto', padding: '8px' }}>
@@ -3562,13 +3569,14 @@ const Dashboard = () => {
 
                                 <div style={{
                                     width: '60%', display: 'flex', justifyContent: 'flex-end', height: '50px', borderRadius: 12,
-                                    backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+                                    backgroundColor: theme === 'dark' ? '#1E1E1E' : '#dbd9d9ff',
                                     padding: "10px",
+                                    marginBottom:'5px',
 
                                     boxShadow:
                                         theme === 'dark'
                                             ? '0 1px 3px rgba(0,0,0,0.6)'
-                                            : '0 1px 6px rgba(0,0,0,0.08)',
+                                            : '0 1px 6px rgba(0, 0, 0, 0.04)',
                                 }}>
                                     <Row style={{ width: '100%', height: '100px', display: 'flex', justifyContent: 'space-between' }}>
                                         <Col span={5}>
@@ -3604,7 +3612,9 @@ const Dashboard = () => {
                                                 options={Object.keys(transformedData).map((category) => ({
                                                     value: category,
                                                     label: category,
+                                                    title:''
                                                 }))}
+                                                
                                             />
                                         </Col>
 
@@ -3615,7 +3625,7 @@ const Dashboard = () => {
                                                 onSearch={handleSearchChange}  // Update searchValue dynamically
                                                 style={{ width: '100%' }}
                                                 className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
-                                                placeholder="Select accounts"
+                                                placeholder="Select Accounts"
                                                 dropdownClassName={theme === 'dark' && 'custom-dropdown'}
                                                 value={[]} // This should be updated to reflect selectedItems based on the selected categories
                                                 dropdownRender={() => (
@@ -3641,6 +3651,7 @@ const Dashboard = () => {
                                                 options={timezones.map((item) => ({
                                                     value: item,
                                                     label: item,
+                                                    title:''
                                                 }))}
                                             />
                                         </Col>
@@ -3869,7 +3880,7 @@ const Dashboard = () => {
                                                                     marginRight: '8px',
                                                                 }}
                                                             ></span>
-                                                            <span style={{ color: '#5C58EE', fontWeight: 600 }}>Spend</span>
+                                                            <span style={{ color: '#5C58EE', fontWeight: 600 }}>Amount Spent</span>
                                                         </div>
                                                     }
                                                     value={data.length > 0 ? spend1.current : 0}
