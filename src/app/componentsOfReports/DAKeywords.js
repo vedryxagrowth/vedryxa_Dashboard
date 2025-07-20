@@ -130,6 +130,7 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting
+        unSortIcon: true,
 
         comparator: (campaignA, campaignB) => {
             if (!campaignA) return 1;
@@ -925,13 +926,13 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
                                 </Space>
                             </Col>
                             <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Acc: {newaccount}</Text>
+                                <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Account: {newaccount}</Text>
                             </Col>
                             <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>AccName: {newAccountName}</Text>
+                                <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Account Name: {newAccountName}</Text>
                             </Col>
                             <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Timezone: {timezone.current}</Text>
+                                <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Time Zone: {timezone.current}</Text>
                             </Col>
                             {/* <Col>
                                 <Tooltip 

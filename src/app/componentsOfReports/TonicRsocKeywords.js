@@ -130,6 +130,7 @@ const Tonic1RsocKeywords = ({startDate, endDate, newaccount, newtime, newRevenue
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting
+        unSortIcon: true,
 
         comparator: (campaignA, campaignB) => {
             if (!campaignA) return 1;

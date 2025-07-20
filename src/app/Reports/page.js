@@ -9774,9 +9774,9 @@ const MyTablePage = () => {
                         {/* Right Section: Status Icon */}
                         <span style={{ marginLeft: '10px', flexShrink: 0 }}>
                             {account.status === "Active" ? (
-                                <CheckCircleFilled style={{ color: 'green', fontSize: '15px' }} className='black-icon-active-1' />
+                                <CheckCircleFilled style={{ color: '#91C25F', fontSize: '15px' }} className='black-icon-active-1' />
                             ) : (
-                                <CloseCircleFilled style={{ color: 'red', fontSize: '15px' }}  className='black-icon-pause-1' />
+                                <CloseCircleFilled style={{ color: '#EC7117', fontSize: '15px' }}  className='black-icon-pause-1' />
                             )}
                         </span>
                     </div>
@@ -10017,11 +10017,12 @@ const MyTablePage = () => {
                         width: '160px',
                         backgroundColor: theme === 'dark' ? '#333' : undefined,
                         color: theme === 'dark' ? '#fff' : undefined,
-                        border: '1px solid #91C25F',
+                        border: '1px solid #4CAF50',
                         borderRadius: '6px'
                     }}
                     optionFilterProp="label"
-                    options={networks.map(item => ({ value: item, label: item }))}
+                    options={networks.map(item => ({ value: item, label: item, title: '' }))}
+                    title=''
                 />
 
                 {/* Account Selector */}
@@ -10043,7 +10044,7 @@ const MyTablePage = () => {
                         color: theme === 'dark' ? 'white' : undefined,
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
-                        border: '1px solid #91C25F',
+                        border: '1px solid #4CAF50',
                         borderRadius: '6px',
                     }}
                     optionFilterProp="value"
@@ -10071,10 +10072,10 @@ const MyTablePage = () => {
                         width: '240px',
                         backgroundColor: theme === 'dark' ? '#555' : undefined,
                         color: theme === 'dark' ? 'white' : undefined,
-                        border: '1px solid #91C25F',
+                        border: '1px solid #4CAF50',
                         borderRadius: '6px'
                     }}
-                    dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}
+                    dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}
                     />
                 </ConfigProvider>
 
@@ -10084,11 +10085,12 @@ const MyTablePage = () => {
                     onChange={onChangeTime}
                     placeholder="Timezone"
                     dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
-                    style={{ width: '100px', border: '1px solid #91C25F', borderRadius: '6px' }}
+                    style={{ width: '100px', border: '1px solid #4CAF50', borderRadius: '6px' }}
                     className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                     optionFilterProp="label"
                     value={time}
                     options={timezones.map(item => ({ value: item, label: item }))}
+                    title=''
                 />
 
                 {/* Apply Button */}
@@ -10099,7 +10101,7 @@ const MyTablePage = () => {
                     onMouseLeave={() => setHovered(false)}
                     style={{
                         backgroundColor: hovered ? '#91C25F' : 'transparent',
-                        border: '1px solid #91C25F',
+                        border: '1px solid #4CAF50',
                         borderRadius: '6px',
                         color: theme === 'dark' ? '#ffffff' : '#000000',
                         // fontWeight: '600',
@@ -10113,7 +10115,7 @@ const MyTablePage = () => {
             </Space>
 
             <div style={{ padding: '0px', marginLeft: '0px' }}>
-                <Row gutter={8} style={{ marginTop: '16px', display: 'flex', justifyContent: 'space-between' }}> 
+                <Row gutter={8} style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between' }}> 
                     {renderCarouselNav()}
                     {/* <div style={{display: 'flex', marginRight: '15px'}}>
                       
@@ -10158,7 +10160,7 @@ const MyTablePage = () => {
                          <Col>
                          <Space size={2} style={{marginRight: '10px'}}> 
                              <Input
-                                 placeholder="Search campaigns"
+                                 placeholder="Search..."
                                 //  prefix={<SearchOutlined />}
                                  onChange={handleChangeInput}
                                  onBlur={handleBlur}
@@ -10166,7 +10168,7 @@ const MyTablePage = () => {
                                  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                  style={{
                                      borderRadius: 8,
-                                     border: '1px solid #91C25F',
+                                     border: '1px solid #4CAF50',
                                      // background: theme === 'dark' ? '#2a2a2a' : '#fff',
                                      // border: `1px solid ${theme === 'dark' ? '#444' : '#d9d9d9'}`,
                                      color: theme === 'dark' ? '#fff' : '#000',
@@ -10177,12 +10179,35 @@ const MyTablePage = () => {
                              />           
                              <Dropdown
                                  overlay={
-                                     <Menu
-                                     items={[
-                                         { key: 'active', label: 'Active' },
-                                         { key: 'pause', label: 'Paused' },
-                                     ]}
-                                     />
+                                    <Menu
+                                    items={[
+                                        { key: 'active', 
+                                        label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}}>    
+                                        Active
+                                        <span
+                                                style={{
+                                                width: '6px',
+                                                height: '6px',
+                                                borderRadius: '50%',
+                                                backgroundColor: 'green',
+                                                marginLeft: '15px',
+                                                }}
+                                            ></span>
+                                        </span> 
+                                        },
+                                        { key: 'pause', label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}}>Paused
+                                         <span
+                                                style={{
+                                                width: '6px',
+                                                height: '6px',
+                                                borderRadius: '50%',
+                                                backgroundColor: 'red',
+                                                marginLeft: '8px',
+                                                }}
+                                            ></span>
+                                        </span> },
+                                    ]}
+                                    />
                                  }
                                  trigger={['click']}
                              >
@@ -10191,7 +10216,7 @@ const MyTablePage = () => {
                                      style={{
                                      borderRadius: 8,
                                      background: theme === 'dark' ? 'rgba(82,196,26,0.12)' : '#f6ffed',
-                                     border: '1px solid #52c41a',
+                                     border: '1px solid #4CAF50',
                                      color: theme === 'dark' ? '#95de64' : '#389e0d',
                                      fontWeight: 500,
                                      marginRight: '5px'
@@ -10205,7 +10230,7 @@ const MyTablePage = () => {
                                  </Button>
                              </Dropdown>
                  
-                             <Tooltip title={`🍳 This feature is cooking—almost ready to serve 😜`}>
+                             {/* <Tooltip title={`🍳 This feature is cooking—almost ready to serve 😜`}> */}
                                  <Button
                                      type="default"
                                      icon={<FaRobot style={{ fontSize: 20 }} />}
@@ -10213,7 +10238,7 @@ const MyTablePage = () => {
                                      style={{
                                      borderRadius: 8,
                                      background: theme === 'dark' ? 'rgba(82,196,26,0.06)' : '#f0fdf4',
-                                     border: '1px solid #95de64',
+                                     border: '1px solid #4CAF50',
                                      color: theme === 'dark' ? '#52c41a' : '#389e0d',
                                      fontWeight: 500,
                                      cursor: 'not-allowed',
@@ -10222,9 +10247,9 @@ const MyTablePage = () => {
                                  >
                                      AI Assistant
                                  </Button>
-                             </Tooltip>
+                             {/* </Tooltip> */}
  
-                             <Tooltip title={`🍳 This feature is cooking—almost ready to serve 😜`}>
+                             {/* <Tooltip title={`🍳 This feature is cooking—almost ready to serve 😜`}> */}
                                  <Button
                                      type="default"
                                      icon={<SettingOutlined />}
@@ -10241,9 +10266,9 @@ const MyTablePage = () => {
                                  >
                                      Rules
                                  </Button>
-                             </Tooltip>
+                             {/* </Tooltip> */}
  
-                             <Tooltip title="Click to Refresh Tables">
+                             {/* <Tooltip title="Click to Refresh Tables"> */}
                                  <Button
                                          type="primary"
                                          style={{
@@ -10255,7 +10280,7 @@ const MyTablePage = () => {
                                      icon={<ReloadOutlined  className="black-icon" />}
                                      onClick={onClickRefresh}
                                  />               
-                             </Tooltip>
+                             {/* </Tooltip> */}
                          </Space>
                      </Col>
                     )}

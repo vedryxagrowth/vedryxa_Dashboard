@@ -1188,11 +1188,11 @@ body.dark-mode .black-icon-pause.anticon svg {
   color: orange !important;
 }
 body.dark-mode .black-icon-active-1.anticon svg {
-  color: green !important;
+  color: #91C25F !important;
 }
 
 body.dark-mode .black-icon-pause-1.anticon svg {
-  color: red !important;
+  color: #EC7117 !important;
 }
 
 body.dark-mode .black-icon-comment.anticon svg {
@@ -2754,7 +2754,7 @@ body.dark-mode .black-icon-comment.anticon svg {
   border-right: 1px solid red;
 }
 .custom-single-month-picker .ant-picker-panel {
-  border-left: 1px solid blue;
+  border-left: 1px solid #91C25F;
 }
 /* ✅ 1. Calendar HEADER: remove left spacing */
 .custom-single-month-picker .ant-picker-header {
@@ -2789,7 +2789,7 @@ body.dark-mode .black-icon-comment.anticon svg {
 .custom-single-month-picker .ant-picker-header,
 .custom-single-month-picker .ant-picker-panel,
 .custom-single-month-picker .ant-picker-footer {
-  border-left: 1px solid blue;
+  border-left: 1px solid #91C25F;
 }
 .dark-theme-dropdown.custom-single-month-picker .ant-picker-panel {
   background-color: #2e2e2e !important;
@@ -3323,16 +3323,16 @@ input:focus, select:focus, .custom-input-dark:focus, .custom-input-light:focus, 
 }
 
 
-
-
-
-
-/* Ensure the table container is positioned correctly <--- */
+/* Ensure the table container is positioned correctly  */
 .table-container {
   position: relative;
   z-index: 1; 
-  height: 95%;
+  height: 92%;
 }
+
+
+
+
 
 
 
