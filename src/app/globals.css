@@ -3326,8 +3326,8 @@ input:focus, select:focus, .custom-input-dark:focus, .custom-input-light:focus, 
 /* Ensure the table container is positioned correctly <--- */
 .table-container {
   position: relative;
-  z-index: 1; /* Lower z-index for table container */
-  height: 92%;
+  z-index: 1; 
+  height: 95%;
 }
 
 
