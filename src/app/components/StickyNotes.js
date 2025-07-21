@@ -410,9 +410,10 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
                       border: "none",
                       cursor: "pointer",
                       fontSize: "14px",
-                      color: "#333",
                       marginLeft: '10px'
-                    }}><CopyOutlined /></Button>
+                    }}>
+                      < CopyOutlined style={{ color: theme === 'dark' ? '#000' : '#000'}}/>
+                    </Button>
                 </div>
                 <div
                   style={{ cursor: "pointer", fontSize: "18px", color: "#333", marginRight: '10px' }}
@@ -423,7 +424,7 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
                 >
                   ⋯
                 </div>
-                <button onClick={closeCurrentNote} style={{ border: "none", background: "none", cursor: "pointer", fontSize: "16px" }}>✖</button>
+                <button onClick={closeCurrentNote} style={{ border: "none", background: "none", cursor: "pointer", fontSize: "16px",color:'#333' }}>✖</button>
               </div>
             </div>
 
