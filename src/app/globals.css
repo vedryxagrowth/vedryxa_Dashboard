@@ -1573,7 +1573,7 @@ body.dark-mode .black-icon-comment.anticon svg {
   border-radius: 8px;
 }
 
-/* ✅ OK Button - consistent in both themes */
+
 .custom-confirm-dark .ant-btn-primary,
 .custom-confirm-light .ant-btn-primary {
   background-color: #91C25F !important;
