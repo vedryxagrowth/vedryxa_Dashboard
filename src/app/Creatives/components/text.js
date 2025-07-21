@@ -1618,12 +1618,12 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         // onChange={getpixelandpageid}
                                         variant="filled"
                                         options={[
-                                            { value: "OUTCOME_LEADS", label: "Leads" },
-                                            { value: "OUTCOME_SALES", label: "Sales" },
-                                            { value: "OUTCOME_ENGAGEMENT", label: "Engagement" },
-                                            { value: "OUTCOME_AWARENESS", label: "Awareness" },
-                                            { value: "OUTCOME_TRAFFIC", label: "Traffic" },
-                                            { value: "OUTCOME_APP_PROMOTION", label: "App promotion" }
+                                            { value: "OUTCOME_LEADS", label: "Leads",title:'' },
+                                            { value: "OUTCOME_SALES", label: "Sales",title:''  },
+                                            { value: "OUTCOME_ENGAGEMENT", label: "Engagement",title:''  },
+                                            { value: "OUTCOME_AWARENESS", label: "Awareness" ,title:'' },
+                                            { value: "OUTCOME_TRAFFIC", label: "Traffic",title:''  },
+                                            { value: "OUTCOME_APP_PROMOTION", label: "App promotion",title:''  }
 
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
@@ -1646,11 +1646,11 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         mode="multiple"
                                         allowClear
                                         options={[
-                                            { value: "HOUSING", label: "Housing" },
-                                            { value: "CREDIT", label: "Credit" },
-                                            { value: "EMPLOYMENT", label: "Employment" },
-                                            { value: "ISSUES_ELECTIONS_POLITICS", label: "Politics" },
-                                            { value: "NONE", label: "None" }
+                                            { value: "HOUSING", label: "Housing" ,title:'' },
+                                            { value: "CREDIT", label: "Credit",title:''  },
+                                            { value: "EMPLOYMENT", label: "Employment" ,title:'' },
+                                            { value: "ISSUES_ELECTIONS_POLITICS", label: "Politics" ,title:'' },
+                                            { value: "NONE", label: "None" ,title:'' }
 
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
@@ -1670,10 +1670,10 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     <Select
                                         variant="filled"
                                         options={[
-                                            { value: "LOWEST_COST_WITHOUT_CAP", label: "Highest Volume" },
-                                            { value: "LOWEST_COST_WITH_BID_CAP", label: "Bid Cap" },
-                                            { value: "COST_CAP", label: "Cost per Result Goal" },
-                                            { value: "LOWEST_COST_WITH_MIN_ROAS", label: "ROAS Goal" }
+                                            { value: "LOWEST_COST_WITHOUT_CAP", label: "Highest Volume",title:''  },
+                                            { value: "LOWEST_COST_WITH_BID_CAP", label: "Bid Cap",title:''  },
+                                            { value: "COST_CAP", label: "Cost per Result Goal",title:''  },
+                                            { value: "LOWEST_COST_WITH_MIN_ROAS", label: "ROAS Goal" ,title:'' }
                                         ]}
                                         onChange={handleBidStrategyChange}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
@@ -1711,8 +1711,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     <Select
                                         variant="filled"
                                         options={[
-                                            { value: "ACTIVE", label: "ACTIVE" },
-                                            { value: "PAUSED", label: "PAUSE" },
+                                            { value: "ACTIVE", label: "ACTIVE" ,title:'' },
+                                            { value: "PAUSED", label: "PAUSE",title:''  },
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
@@ -1750,10 +1750,10 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 >
                                     <Select
                                         options={[
-                                            { value: "OFFSITE_CONVERSIONS", label: "Conversions" },
-                                            { value: "LINK_CLICKS", label: "Clicks" },
-                                            { value: "REACH", label: "Reach" },
-                                            { value: "VALUE", label: "Value" }
+                                            { value: "OFFSITE_CONVERSIONS", label: "Conversions",title:''  },
+                                            { value: "LINK_CLICKS", label: "Clicks",title:''  },
+                                            { value: "REACH", label: "Reach",title:''  },
+                                            { value: "VALUE", label: "Value",title:''  }
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
@@ -1772,8 +1772,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 >
                                     <Select
                                         options={[
-                                            { value: "IMPRESSIONS", label: "Impressions" },
-                                            { value: "VALUE", label: "Value" }
+                                            { value: "IMPRESSIONS", label: "Impressions",title:''  },
+                                            { value: "VALUE", label: "Value",title:''  }
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
@@ -1806,10 +1806,10 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 >
                                     <Select
                                         options={[
-                                            { value: "website", label: "Website" },
-                                            { value: "email", label: "Email" },
-                                            { value: "app", label: "App" },
-                                            { value: "phone_call", label: "Phone Call" }
+                                            { value: "website", label: "Website" ,title:'' },
+                                            { value: "email", label: "Email",title:''  },
+                                            { value: "app", label: "App" ,title:'' },
+                                            { value: "phone_call", label: "Phone Call",title:''  }
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
@@ -1828,10 +1828,10 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 >
                                     <Select
                                         options={[
-                                            { value: "LEAD", label: "Lead" },
-                                            { value: "PURCHASE", label: "Purchase" },
-                                            { value: "SEARCH", label: "Search" },
-                                            { value: "CONTACT", label: "Contact" },
+                                            { value: "LEAD", label: "Lead",title:''  },
+                                            { value: "PURCHASE", label: "Purchase",title:''  },
+                                            { value: "SEARCH", label: "Search",title:''  },
+                                            { value: "CONTACT", label: "Contact",title:''  },
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
@@ -1918,24 +1918,24 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 >
                                     <Select
                                         options={[
-                                            { value: "US", label: "United States" },
-                                            { value: "GB", label: "United Kingdom" },
-                                            { value: "AU", label: "Australia" },
-                                            { value: "IN", label: "India" },
-                                            { value: "AE", label: "United Arab Emirates" },
-                                            { value: "CA", label: "Canada" },
-                                            { value: "DE", label: "Germany" },
-                                            { value: "FR", label: "France" },
-                                            { value: "JP", label: "Japan" },
-                                            { value: "CN", label: "China" },
-                                            { value: "BR", label: "Brazil" },
-                                            { value: "ZA", label: "South Africa" },
-                                            { value: "RU", label: "Russia" },
-                                            { value: "IT", label: "Italy" },
-                                            { value: "ES", label: "Spain" },
-                                            { value: "SG", label: "Singapore" },
-                                            { value: "NZ", label: "New Zealand" },
-                                            { value: "MX", label: "Mexico" }
+                                            { value: "US", label: "United States",title:''  },
+                                            { value: "GB", label: "United Kingdom" ,title:'' },
+                                            { value: "AU", label: "Australia",title:''  },
+                                            { value: "IN", label: "India",title:''  },
+                                            { value: "AE", label: "United Arab Emirates",title:''  },
+                                            { value: "CA", label: "Canada",title:''  },
+                                            { value: "DE", label: "Germany" ,title:'' },
+                                            { value: "FR", label: "France" ,title:'' },
+                                            { value: "JP", label: "Japan",title:''  },
+                                            { value: "CN", label: "China",title:''  },
+                                            { value: "BR", label: "Brazil",title:''  },
+                                            { value: "ZA", label: "South Africa",title:''  },
+                                            { value: "RU", label: "Russia",title:''  },
+                                            { value: "IT", label: "Italy",title:''  },
+                                            { value: "ES", label: "Spain",title:''  },
+                                            { value: "SG", label: "Singapore",title:''  },
+                                            { value: "NZ", label: "New Zealand",title:''  },
+                                            { value: "MX", label: "Mexico",title:''  }
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
@@ -1954,10 +1954,10 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 >
                                     <Select
                                         options={[
-                                            { value: "18", label: "18" },
-                                            { value: "25", label: "25" },
-                                            { value: "35", label: "35" },
-                                            { value: "40", label: "40", disabled: true },
+                                            { value: "18", label: "18" ,title:'' },
+                                            { value: "25", label: "25",title:''  },
+                                            { value: "35", label: "35",title:''  },
+                                            { value: "40", label: "40", disabled: true ,title:'' },
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
@@ -1976,10 +1976,10 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 >
                                     <Select
                                         options={[
-                                            { value: "20", label: "20" },
-                                            { value: "30", label: "30" },
-                                            { value: "65", label: "65+" },
-                                            { value: "80", label: "80", disabled: true },
+                                            { value: "20", label: "20",title:''  },
+                                            { value: "30", label: "30" ,title:'' },
+                                            { value: "65", label: "65+",title:''  },
+                                            { value: "80", label: "80", disabled: true ,title:'' },
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
@@ -1998,9 +1998,9 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 >
                                     <Select
                                         options={[
-                                            { value: "0", label: "All" },
-                                            { value: "1", label: "Male" },
-                                            { value: "2", label: "Female" },
+                                            { value: "0", label: "All",title:''  },
+                                            { value: "1", label: "Male",title:''  },
+                                            { value: "2", label: "Female",title:''  },
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
@@ -2016,7 +2016,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     <Select
                                         mode="multiple"
                                         showSearch
-                                        placeholder="Select Language"
+                                        placeholder="Select language"
                                         filterOption={(input, option) =>
                                             option.children.toLowerCase().includes(input.toLowerCase())
                                         }
@@ -2024,7 +2024,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     >
                                         {localesdata.map(option => (
-                                            <Option key={option.key} value={option.key}>
+                                            <Option key={option.key} value={option.key} title={null}>
                                                 {option.name}
                                             </Option>
                                         ))}
@@ -2038,8 +2038,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 >
                                     <Select placeholder="Select a mode" onChange={handleModeChange} dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'} >
-                                        <Option value="Advance">Advance</Option>
-                                        <Option value="manual">Manual</Option>
+                                        <Option value="Advance" title={null}>Advance</Option>
+                                        <Option value="manual" title={null}>Manual</Option>
 
                                     </Select>
                                 </Form.Item>
@@ -2074,7 +2074,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         >
                                             <Select
                                                 mode="multiple"
-                                                placeholder="Select Positions"
+                                                placeholder="Select positions"
                                                 value={selectedPositions}
                                                 onChange={handlePositionChange}
                                                 dropdownClassName={theme === 'dark' && "custom-dropdown"}

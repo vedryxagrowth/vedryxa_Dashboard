@@ -1546,9 +1546,9 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                             </div>
                                             <span style={{ marginLeft: '10px', flexShrink: 0 }}>
                                                 {option.status === "Active" ? (
-                                                    <CheckCircleFilled style={{ color: 'green', fontSize: '15px' }} />
+                                                    <CheckCircleFilled style={{ color: '#91C25F', fontSize: '15px' }} className='black-icon-active-1' />
                                                 ) : (
-                                                    <CloseCircleFilled style={{ color: 'red', fontSize: '15px' }} />
+                                                    <CloseCircleFilled style={{ color: '#EC7117', fontSize: '15px' }}className='black-icon-pause-1' />
                                                 )}
                                             </span>
                                         </div>
