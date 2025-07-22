@@ -205,35 +205,37 @@ const Newaddaccounts = ({ visible, onClose }) => {
                     <Form.Item label="Spend Partner" name="spendPartner" value={spendPartner}>
                         <Select placeholder="Select a status" 
                             defaultValue="Facebook" onChange={onChangeSpendPartner}
+                            title=''
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}>
-                            <Option value="Facebook" defaultValue>Facebook</Option>
-                            <Option value="Google">Google</Option>
+                            <Option value="Facebook" title='' defaultValue>Facebook</Option>
+                            <Option value="Google" title=''>Google</Option>
                         </Select>
                     </Form.Item>
-                    <Form.Item label="Spend Account ID" name="accountNumber" rules={[{ required: true, message: 'Please input the Spend Account ID!' }]}>
-                        <Input  value={accountNumber} onChange={onChangeAccountNumber} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
+                    <Form.Item label="Spend Account ID" name="accountNumber" rules={[{ required: true, message: 'Please input the spend account ID!' }]}>
+                        <Input autoComplete="off"  value={accountNumber} onChange={onChangeAccountNumber} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
                     </Form.Item>
                     <Form.Item label="Spend Account Name" name="accountName" rules={[{ required: true, message: 'Please input the Spend Account ID!' }]}>
-                        <Input value={accountName} onChange={onChangeAccountName} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
+                        <Input autoComplete="off" value={accountName} onChange={onChangeAccountName} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
                     </Form.Item>
                     <Form.Item label="Pixel ID" name="pixelID">
-                        <Input value={pixelId} onChange={onChangePixelId}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
+                        <Input autoComplete="off" value={pixelId} onChange={onChangePixelId}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
                     </Form.Item>
                     <Form.Item label="Page ID" name="pageID">
-                        <Input value={pageId} onChange={onChangePagelId}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
+                        <Input autoComplete="off" value={pageId} onChange={onChangePagelId}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
                     </Form.Item>
                     <Form.Item label="Page Name" name="pageName">
-                        <Input value={pageName} onChange={onChangePageName}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
+                        <Input autoComplete="off" value={pageName} onChange={onChangePageName}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
                     </Form.Item>
                     <Form.Item label="Agency Name" name="AgencyName">
-                        <Input value={AgencyName} onChange={onChangeAgencyName}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
+                        <Input autoComplete="off" value={AgencyName} onChange={onChangeAgencyName}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
                     </Form.Item>
-                    <Form.Item label="BM Name" name="BMName">
+                    <Form.Item label="BM name" name="BMName">
                         <div ref={containerRef} className='form-item-bmname' style={{display:'flex'}}>
                             <Select
                                 placeholder="Select or add a value"
                                 value={BMName}
                                 onChange={onChangeBMName}
+                                title=''
                                 style={{
                                     flex: 1,
                                     backgroundColor: theme === "dark" ? "#333" : undefined,
@@ -243,7 +245,7 @@ const Newaddaccounts = ({ visible, onClose }) => {
                                 allowClear
                             >
                                 {options.map((option) => (
-                                    <Option key={option} value={option}>
+                                    <Option key={option} value={option} title=''>
                                         {option}
                                     </Option>
                                 ))}
@@ -255,7 +257,7 @@ const Newaddaccounts = ({ visible, onClose }) => {
 
                         {/* Modal for adding new value */}
                         <Modal
-                            title="Add New Value"
+                            title="Add new value"
                             className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             visible={isModalOpen}
                             onOk={handleAddNewValue}
@@ -281,11 +283,11 @@ const Newaddaccounts = ({ visible, onClose }) => {
                     </Form.Item>
                     { !(newOptions.includes(BMName)) && 
                     <Form.Item label="BM ID" name="BMId" rules={[{ required: true, message: 'Please input the BM ID!' }]}>
-                        <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
+                        <Input autoComplete="off" className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
                     </Form.Item>
                     }
 
-                    <Form.Item label="Time Zone" name="timeZone" value={timeZone}>
+                    <Form.Item label="Time zone" name="timeZone" value={timeZone}>
                         <Select
                             showSearch
                             onChange={onChangeTimeZone}
@@ -301,22 +303,24 @@ const Newaddaccounts = ({ visible, onClose }) => {
                             options={timezones.map((item) => ({
                                 value: item,
                                 label: item,
+                                title: ''
                             }))}
                         />
                     </Form.Item>
                     <Form.Item label="Status" name="status" value={status}>
                         <Select placeholder="Select a status"
                             defaultValue="Active" onChange={onChangeStatus}
+                            title=''
                             style={{
                                 backgroundColor: theme === 'dark' && '#333', // Background color
                                 color: theme === 'dark' && '#fff',
                             }}
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}>
-                            <Option value="Active">Active</Option>
-                            <Option value="InActive">Inactive</Option>
+                            <Option value="Active" title=''>Active</Option>
+                            <Option value="InActive" title=''>Inactive</Option>
                         </Select>
                     </Form.Item>
-                    <Form.Item label="Revenue Partner" name="revenuePartner" value={revenuePartner} >
+                    <Form.Item label="Revenue partner" name="revenuePartner" value={revenuePartner} >
                         <Select
                             showSearch
                             onChange={onChangeRevenuePartner}
@@ -325,29 +329,31 @@ const Newaddaccounts = ({ visible, onClose }) => {
                                 backgroundColor: theme === 'dark' && '#333', // Background color
                                 color: theme === 'dark' && '#fff',
                             }}
-                            placeholder="Select RevenuePartner"
+                            placeholder="Select Revenue partner"
                             optionFilterProp="label"
                             defaultValue="MEDIA_DOT_NET"
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
                             options={availableNetworks.map((item) => ({
                                 value: item,
                                 label: item,
+                                title: ''
                             }))}
                         />
                     </Form.Item>
-                    <Form.Item label="MediaBuyerName" name="MediaBuyerName" rules={[{ required: true, message: 'Please input the Media Buyer Name ID!' }]}>
-                        <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
+                    <Form.Item label="Media Buyer Name" name="MediaBuyerName" rules={[{ required: true, message: 'Please input the Media Buyer Name ID!' }]}>
+                        <Input autoComplete="off" className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
                     </Form.Item>
                     <Form.Item label="Holder" name="Holder" rules={[{ required: true, message: 'Please input the Holder Name ID!' }]}>
-                        <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
+                        <Input autoComplete="off" className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
                     </Form.Item>
                     <Form.Item>
-                        <Button type="primary" onClick={showModal}>Submit</Button>
+                        <Button style={{backgroundColor:'#91C25F'}} onClick={showModal}>Submit</Button>
                     </Form.Item>
                 </Form>
             </Drawer>
             <Modal
                 title="Confirmation"
+                className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                 open={isModalVisible}
                 onOk={() => {
                     form.submit();

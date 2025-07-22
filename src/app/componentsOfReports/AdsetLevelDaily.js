@@ -183,6 +183,8 @@ const Daily = ({functionCallForCommnets,context, functionCallForCampaigns, start
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting
+        unSortIcon: true,
+        headerClass: 'ag-center-header',
 
         comparator: (campaignA, campaignB) => {
             if (!campaignA) return 1;
@@ -584,13 +586,14 @@ const Daily = ({functionCallForCommnets,context, functionCallForCampaigns, start
                         <Modal
                             title="Confirm Action"
                             open={isAdsetModalVisibles}
+                            className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             onOk={handlePauseOk}
                             onCancel={handlePauseCancel}
                         >
                             <p>
-                                Are you sure you want to turn <b>{nextChecked ? "ON" : "OFF"}</b> this adset?
+                                Are you sure you want to turn {nextChecked ? "ON" : "OFF"} this adset?
                             </p>
-                            <p>Adset ID: <strong>{selectedAdset}</strong></p>
+                            <p>Adset ID: {selectedAdset}</p>
                         </Modal>
                         <PinIcon
                             campaignName={campaignName}
@@ -655,7 +658,7 @@ const Daily = ({functionCallForCommnets,context, functionCallForCampaigns, start
                                     cursor: 'pointer',
                                     marginLeft: '10px',
                                     marginRight: '10px',
-                                    color: 'blue'
+                                    color: '#4CAF50'
                                 }}
                                 onClick={handleEditClick} // Open modal directly on click
                                 />
@@ -713,10 +716,10 @@ const Daily = ({functionCallForCommnets,context, functionCallForCampaigns, start
                             footer={[
                                 <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
                                     <div style={{display:'flex', flexDirection:"column"}}>
-                                        <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                        <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", }}>
                                             Last Edited Time:
                                         </span>
-                                        <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                        <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", }}>
                                             {editUserANdTime ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A") : ""}
                                         </span>
 
@@ -726,7 +729,7 @@ const Daily = ({functionCallForCommnets,context, functionCallForCampaigns, start
                                         key="delete"
                                         type="danger"
                                         onClick={handleDelete}
-                                        style={{ marginRight: 'auto', border: "1px solid black" }} // Push Delete button to the far left
+                                        style={{ marginRight: 'auto', border: "1px solid #e3e3da" }} // Push Delete button to the far left
                                     >
                                         Delete
                                     </Button>
@@ -1204,50 +1207,72 @@ const Daily = ({functionCallForCommnets,context, functionCallForCampaigns, start
                                 );
                             }
                             )?.length > 0 ? (
-                                <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
+                                <div 
+                                    className={`ag-theme-alpine ag-container ${gridThemeClass}`}
+                                    // style={{
+                                    //     width: '100%',
+                                    //     // borderRadius: 12,
+                                    //     backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+                                    //     padding: 10,
+                                    //     height: 'auto',
+                                    //     boxShadow:
+                                    //     theme === 'dark'
+                                    //         ? '0 1px 3px rgba(0,0,0,0.6)'
+                                    //         : '0 1px 6px rgba(0,0,0,0.08)',
+                                    // }}
+                                >
                                     <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d", }}>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
                                             <Space align="center" className='daily-contaier'>
                                                 <div className="blinking-circle"></div>
-                                                <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600', color: theme === "dark" && "white" }}>Daily</Text>
+                                                <Text style={{ paddingLeft: '3px', fontSize: '15px', color: theme === "dark" && "white" }}>Daily</Text>
                                             </Space>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Acc: {newaccount}</Text>
+                                            <Text style={{ color: theme === "dark" && "white" }}>Id: {newaccount}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>AccName: {newAccountName}</Text>
+                                            <Text style={{ color: theme === "dark" && "white" }}>Name: {newAccountName}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Timezone: {timezone.current}</Text>
+                                            <Text style={{ color: theme === "dark" && "white" }}>Time zone: {timezone.current}</Text>
                                         </Col>
 
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
                                             <Tooltip
-                                                title={
-                                                    <>
-                                                    {fbCron.current !== '-' && <div>FbAcc Status: {fbCron.current}</div>}
-                                                    {revenueCron.current !== '-' && <div>RevAcc Status: {revenueCron.current}</div>}
-                                                    {(cronStatus.current !== '-' || accountStatus.current !== '-') && (
-                                                        <Text style={{ fontWeight: '600', color: 'white' }}>
-                                                        Cron/Acc status: {cronStatus.current} /{' '}
-                                                        <span
-                                                            style={{
-                                                            color:
-                                                                accountStatus.current === 'Active'
-                                                                ? 'green'
-                                                                : accountStatus.current === 'Inactive'
-                                                                ? 'red'
-                                                                : 'gray',
-                                                            fontWeight: 'bold',
-                                                            }}
-                                                        >
-                                                            {accountStatus.current}
-                                                        </span>
-                                                        </Text>
-                                                    )}
-                                                    </>
-                                                }
+                                             title={
+                                                <div style={{fontSize:'13px'}}>
+                                                {fbCron.current !== '-' && <div>Fb status: {fbCron.current?.toLowerCase()}</div>}
+                                                {revenueCron.current !== '-' && <div>Rev status: {revenueCron.current?.toLowerCase()}</div>}
+                                                {(cronStatus.current !== '-' || accountStatus.current !== '-') && (
+                                                    <Text style={{ color: theme === 'dark' ? '#fff' : '#000' }}>
+                                                    Cron status: {cronStatus.current?.toLowerCase()}
+                                                    </Text>
+                                                )}
+                                                {accountStatus.current && <div>
+                                                    Account:  <span
+                                                        style={{ marginLeft:'3px',
+                                                        color:
+                                                            accountStatus.current === 'Active'
+                                                            ? '#91C25F'
+                                                            : accountStatus.current === 'Inactive'
+                                                            ? '#EC7117'
+                                                            : 'gray',
+                                                        // fontWeight: 'bold',
+                                                        }}
+                                                    >
+                                                        {accountStatus.current}
+                                                    </span>
+                                                </div>}
+                                                </div>
+                                            }
+                                            overlayInnerStyle={{
+                                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                                color: theme === 'dark' ? '#fff' : '#000',
+                                                border: '1px solid #ccc',   
+                                                borderRadius: 6,
+                                                // fontWeight: 500,
+                                            }}
                                             >
 
                                                 <InfoCircleOutlined
@@ -1271,13 +1296,16 @@ const Daily = ({functionCallForCommnets,context, functionCallForCampaigns, start
                                             </Tooltip>
                                         </Col> */}
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
-                                            <Tooltip title="Export to CSV">
+                                            {/* <Tooltip title="Export to CSV"> */}
                                                 <Button type="primary" style={{ backgroundColor: '#91C25F', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={() => onBtExport(gridRef1, "Daily")} />
-                                            </Tooltip>
+                                            {/* </Tooltip> */}
                                         </Col>
                                     </Row>
+                                    <div className='table-container'>
                                     <AgGridReact
                                         ref={gridRef1}
+                                        className='custom-grid'
+                                        rowHeight={30}
                                         context={context}
                                         rowData={memorizedDailyData}
                                         columnDefs={memorizedColumnDef1}
@@ -1319,9 +1347,10 @@ const Daily = ({functionCallForCommnets,context, functionCallForCampaigns, start
                                         getRowStyle={params => {
                                             if (params.node.rowPinned) {
                                                 return {
-                                                    fontWeight: 'bold',
+                                                    // fontWeight: 'bold',
                                                     backgroundColor: theme === "dark" ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
                                                     color: theme === "dark" ? '#fff' : '#000',           // Text color should contrast with the background
+                                                    height: '30px'
                                                 };
                                             }
 
@@ -1398,6 +1427,8 @@ const Daily = ({functionCallForCommnets,context, functionCallForCampaigns, start
                                             setDailyFixedFooter(updatedFooter);
                                         }}
                                     />
+                                    </div>
+                                   
                                 </div>
                             ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
                                 {apiStatus === true ? 

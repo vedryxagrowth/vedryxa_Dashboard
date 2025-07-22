@@ -3,10 +3,12 @@ import axios from "axios";
 import Draggable from "react-draggable";
 import { v4 as uuidv4 } from "uuid";
 import dayjs from "dayjs";
-import { PictureOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
-import { message } from "antd";
+import { PictureOutlined, DeleteOutlined, PlusOutlined, CopyOutlined } from "@ant-design/icons";
+import { Button, message } from "antd";
 import moment from "moment";
 import { useTokenContext } from "./parent";
+import { useRef } from "react";
+
 
 // 🌈 Light pastel color palette
 const colorOptions = [
@@ -22,6 +24,10 @@ const colorOptions = [
 const defaultColor = "#fff9c4";
 
 const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
+
+  const textAreaRef = useRef(null);
+
+  const { theme } = useTokenContext();
   const { apiClient } = useTokenContext();
 
   const [notes, setNotes] = useState([]);
@@ -35,6 +41,13 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
       .then(res => setNotes(res.data))
       .catch(err => console.error("Failed to fetch notes", err));
   }, [userEmail]);
+  useEffect(() => {
+    if (textAreaRef.current) {
+      textAreaRef.current.style.height = "auto";
+      textAreaRef.current.style.height = `${textAreaRef.current.scrollHeight}px`;
+    }
+  });
+
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -148,6 +161,16 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
   const openItem = (note) => setOpenNote(note);
   const closeCurrentNote = () => setOpenNote(null);
 
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text).then(() => {
+      console.log('Text copied to clipboard');
+      message.success("Content copied to clipboard!");
+    }).catch(err => {
+      console.error('Failed to copy text: ', err);
+      message.error("Failed to copy content.");
+    });
+  };
+
   return (
     <>
       {/* Fullscreen Image Viewer */}
@@ -172,12 +195,12 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
       <Draggable>
         <div style={{
           position: "absolute", top: "50px", right: "50px", minHeight: "340px",
-          width: "350px", padding: "10px", borderRadius: "8px", background: "white",
+          width: "350px", padding: "10px", borderRadius: "8px", background: theme === 'dark' ? '#333' : '#fff',
           boxShadow: "0 2px 6px rgba(0,0,0,0.2)", zIndex: selectedImage ? -1 : 9999
         }}>
           <div style={{ cursor: "grab", marginBottom: "10px", display: "flex", justifyContent: "space-between" }}>
             <button onClick={addNote} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "16px" }}><PlusOutlined /></button>
-            <button onClick={() => setOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "16px" }}>✖</button>
+            <button onClick={() => setOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "16px", color: theme === 'dark' ? '#fff' : '#000' }}>✖</button>
           </div>
           <h3 style={{ margin: "0 0 10px 0" }}>Sticky Notes</h3>
           <input
@@ -185,7 +208,7 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
             placeholder="Search..."
             style={{
               width: "100%", marginBottom: "10px", padding: "5px",
-              borderRadius: "5px", border: "none", backgroundColor: "#F0F0F0"
+              borderRadius: "5px", border: "green", backgroundColor: theme === 'dark' ? '#555' : '#F0F0F0', color: theme === 'dark' ? '#fff' : '#000'
             }}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -200,7 +223,8 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
                   marginBottom: "5px",
                   padding: "5px",
                   borderRadius: "5px",
-                  cursor: "pointer"
+                  cursor: "pointer",
+                  color: '#333'
                 }}
               >
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -215,78 +239,235 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
 
       {/* Floating Note */}
       {openNote && (
-        <Draggable defaultPosition={{ x: -800, y: 50 }}>
-          <div style={{
-            position: "absolute", backgroundColor: openNote.color, width: "350px",
-            height: "340px", borderRadius: "8px", boxShadow: "0 1px 5px rgba(0,0,0,0.2)",
-            zIndex: 9998, display: "flex", flexDirection: "column"
-          }}>
-            {/* Note Header */}
+        // <Draggable defaultPosition={{ x: -800, y: 50 }}>
+        //   <div style={{
+        //     position: "absolute",
+        //     backgroundColor: openNote.color,
+        //     width: "350px",
+        //     height: "340px",
+        //     borderRadius: "8px",
+        //     boxShadow: "0 1px 5px rgba(0,0,0,0.2)",
+        //     zIndex: 9998,
+        //     display: "flex",
+        //     flexDirection: "column",
+        //     overflow: "hidden", // outer box should not scroll
+        //   }}>
+        //     {/* Note Header */}
+        //     <div style={{
+        //       display: "flex", justifyContent: "space-between",
+        //       alignItems: "center", padding: "10px", borderBottom: "1px solid rgba(0,0,0,0.1)", position: "relative"
+        //     }}>
+        //       <span style={{ fontSize: "12px", color: "#555" }}>{openNote.timestamp}</span>
+        //       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        //         <div
+        //           className="floating-color-btn"
+        //           style={{ cursor: "pointer", fontSize: "18px", color: '#333' }}
+        //           onClick={(e) => {
+        //             e.stopPropagation();
+        //             setColorMenuVisible(!colorMenuVisible);
+        //           }}
+        //         >⋯</div>
+        //         <button onClick={closeCurrentNote} style={{
+        //           background: "none", border: "none", cursor: "pointer", fontSize: "16px"
+        //         }}>✖</button>
+        //       </div>
+
+        //       {colorMenuVisible && (
+        //         <div className="floating-color-menu" style={{
+        //           position: "absolute", top: "38px", right: "35px",
+        //           background: "#fff", border: "1px solid #ccc", borderRadius: "6px",
+        //           display: "flex", gap: "4px", padding: "6px", zIndex: 9999
+        //         }}>
+        //           {colorOptions.map((clr, idx) => (
+        //             <div
+        //               key={idx}
+        //               onClick={() => {
+        //                 updateColor(openNote.id, clr);
+        //                 setColorMenuVisible(false);
+        //               }}
+        //               style={{
+        //                 width: "20px", height: "20px", borderRadius: "4px",
+        //                 backgroundColor: clr,
+        //                 border: clr === openNote.color ? "2px solid black" : "1px solid #ccc",
+        //                 cursor: "pointer"
+        //               }}
+        //             />
+        //           ))}
+        //         </div>
+        //       )}
+        //     </div>
+
+        //     {/* Note Body */}
+        //     <div style={{
+        //       flex: 1,
+        //       overflowY: "auto",
+        //       padding: "10px",
+        //       display: "flex",
+        //       flexDirection: "column",
+        //       gap: "6px"
+        //     }}>
+        //       <textarea
+        //         value={openNote.text}
+        //         onChange={(e) => updateText(openNote.id, e.target.value)}
+        //         placeholder="Take a note..."
+        //         style={{
+        //           // width: "100%", height: "90%", background: "transparent",
+        //           // border: "none", outline: "none", resize: "none",
+        //           // fontSize: "14px", marginBottom: "6px", color: "#000"
+        //           width: "100%",
+        //           background: "transparent",
+        //           border: "none",
+        //           outline: "none",
+        //           resize: "none",
+        //           fontSize: "14px",
+        //           color: "#000",
+        //           overflow: "hidden", // ⬅️ Important: disables inner scroll
+        //         }}
+        //       />
+        //       {openNote.images?.map((imgSrc, idx) => (
+        //         <div key={idx} style={{ position: "relative", marginBottom: "6px" }}>
+        //           <img
+        //             src={imgSrc}
+        //             alt={`note-img-${idx}`}
+        //             onClick={() => setSelectedImage(imgSrc)}
+        //             style={{
+        //               width: "100%", maxHeight: "80px", objectFit: "cover",
+        //               borderRadius: "4px", cursor: "pointer"
+        //             }}
+        //           />
+        //           <button
+        //             onClick={() => deleteImage(openNote.id, idx)}
+        //             style={{
+        //               position: "absolute", top: "4px", right: "4px",
+        //               background: "rgba(255,0,0,0.7)", border: "none", color: "#fff",
+        //               cursor: "pointer", borderRadius: "50%", width: "20px", height: "20px",
+        //               fontSize: "12px", lineHeight: "20px", textAlign: "center"
+        //             }}
+        //           >×</button>
+        //         </div>
+        //       ))}
+        //     </div>
+
+        //     {/* Note Footer */}
+        //     <div style={{
+        //       display: "flex", justifyContent: "flex-end", alignItems: "center",
+        //       padding: "10px", borderTop: "1px solid rgba(0,0,0,0.1)"
+        //     }}>
+        //       <label title="Insert image" style={{ background: "none", border: "none", cursor: "pointer" }}>
+        //         <PictureOutlined />
+        //         <input type="file" accept="image/*" multiple style={{ display: "none" }}
+        //           onChange={(e) => updateImage(openNote.id, e.target.files)} />
+        //       </label>
+        //       <button
+        //         title="Delete Note"
+        //         style={{
+        //           background: "none", border: "none", cursor: "pointer",
+        //           color: "red", marginLeft: "10px"
+
+        //         }}
+        //         onClick={() => deleteNote(openNote.id)}
+        //       >
+        //         <DeleteOutlined />
+        //       </button>
+        //     </div>
+        //   </div>
+        // </Draggable>
+        <Draggable defaultPosition={{ x: -840, y: 2 }}>
+          <div
+            style={{
+              position: "absolute",
+              top: 50,
+              left: 50,
+              width: "350px",
+              height: "340px",
+              backgroundColor: openNote.color,
+              borderRadius: "8px",
+              boxShadow: "0 1px 5px rgba(0,0,0,0.2)",
+              zIndex: 9998,
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+            }}
+          >
+            {/* Header */}
             <div style={{
-              display: "flex", justifyContent: "space-between",
-              alignItems: "center", padding: "10px", borderBottom: "1px solid rgba(0,0,0,0.1)", position: "relative"
+              flexShrink: 0,
+              padding: "10px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              borderBottom: "1px solid rgba(0,0,0,0.1)"
             }}>
               <span style={{ fontSize: "12px", color: "#555" }}>{openNote.timestamp}</span>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div style={{ display: "flex", gap: "5px", alignItems: "center" }}>
+                <div>
+                  <Button onClick={(e) => {
+                    e.stopPropagation();
+                    copyToClipboard(openNote.text);
+                  }}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      fontSize: "14px",
+                      marginLeft: '10px'
+                    }}>
+                      < CopyOutlined style={{ color: theme === 'dark' ? '#000' : '#000'}}/>
+                    </Button>
+                </div>
                 <div
-                  className="floating-color-btn"
-                  style={{ cursor: "pointer", fontSize: "18px" }}
+                  style={{ cursor: "pointer", fontSize: "18px", color: "#333", marginRight: '10px' }}
                   onClick={(e) => {
                     e.stopPropagation();
                     setColorMenuVisible(!colorMenuVisible);
                   }}
-                >⋯</div>
-                <button onClick={closeCurrentNote} style={{
-                  background: "none", border: "none", cursor: "pointer", fontSize: "16px"
-                }}>✖</button>
-              </div>
-
-              {colorMenuVisible && (
-                <div className="floating-color-menu" style={{
-                  position: "absolute", top: "38px", right: "35px",
-                  background: "#fff", border: "1px solid #ccc", borderRadius: "6px",
-                  display: "flex", gap: "4px", padding: "6px", zIndex: 9999
-                }}>
-                  {colorOptions.map((clr, idx) => (
-                    <div
-                      key={idx}
-                      onClick={() => {
-                        updateColor(openNote.id, clr);
-                        setColorMenuVisible(false);
-                      }}
-                      style={{
-                        width: "20px", height: "20px", borderRadius: "4px",
-                        backgroundColor: clr,
-                        border: clr === openNote.color ? "2px solid black" : "1px solid #ccc",
-                        cursor: "pointer"
-                      }}
-                    />
-                  ))}
+                >
+                  ⋯
                 </div>
-              )}
+                <button onClick={closeCurrentNote} style={{ border: "none", background: "none", cursor: "pointer", fontSize: "16px",color:'#333' }}>✖</button>
+              </div>
             </div>
 
-            {/* Note Body */}
-            <div style={{ flex: 1, overflowY: "auto", padding: "10px" }}>
+            {/* Scrollable body */}
+            <div
+              style={{
+                flex: 1,
+                overflowY: "auto",
+                padding: "10px",
+              }}
+            >
               <textarea
+                ref={textAreaRef}
                 value={openNote.text}
                 onChange={(e) => updateText(openNote.id, e.target.value)}
+                onInput={(e) => {
+                  e.target.style.height = "auto";
+                  e.target.style.height = `${e.target.scrollHeight}px`;
+                }}
                 placeholder="Take a note..."
                 style={{
-                  width: "100%", height: "60px", background: "transparent",
-                  border: "none", outline: "none", resize: "none",
-                  fontSize: "14px", marginBottom: "6px", color: "#000"
+                  width: "100%",
+                  background: "transparent",
+                  border: "none",
+                  outline: "none",
+                  resize: "none",
+                  fontSize: "14px",
+                  color: "#000",
+                  overflow: "hidden",
                 }}
               />
+
               {openNote.images?.map((imgSrc, idx) => (
-                <div key={idx} style={{ position: "relative", marginBottom: "6px" }}>
+                <div key={idx} style={{ position: "relative", marginTop: "6px" }}>
                   <img
                     src={imgSrc}
-                    alt={`note-img-${idx}`}
                     onClick={() => setSelectedImage(imgSrc)}
                     style={{
-                      width: "100%", maxHeight: "80px", objectFit: "cover",
-                      borderRadius: "4px", cursor: "pointer"
+                      width: "100%",
+                      maxHeight: "80px",
+                      objectFit: "cover",
+                      borderRadius: "4px",
+                      cursor: "pointer"
                     }}
                   />
                   <button
@@ -302,29 +483,43 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
               ))}
             </div>
 
-            {/* Note Footer */}
-            <div style={{
-              display: "flex", justifyContent: "flex-end", alignItems: "center",
-              padding: "10px", borderTop: "1px solid rgba(0,0,0,0.1)"
-            }}>
-              <label title="Insert image" style={{ background: "none", border: "none", cursor: "pointer" }}>
+            {/* Footer */}
+            <div
+              style={{
+                flexShrink: 0,
+                display: "flex",
+                justifyContent: "flex-end",
+                alignItems: "center",
+                padding: "10px",
+                borderTop: "1px solid rgba(0,0,0,0.1)",
+                gap: "10px"
+              }}
+            >
+              <label style={{ cursor: "pointer" }} title="Insert image">
                 <PictureOutlined />
-                <input type="file" accept="image/*" multiple style={{ display: "none" }}
-                  onChange={(e) => updateImage(openNote.id, e.target.files)} />
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  style={{ display: "none" }}
+                  onChange={(e) => updateImage(openNote.id, e.target.files)}
+                />
               </label>
               <button
-                title="Delete Note"
-                style={{
-                  background: "none", border: "none", cursor: "pointer",
-                  color: "red", marginLeft: "10px"
-                }}
                 onClick={() => deleteNote(openNote.id)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "red",
+                  cursor: "pointer",
+                }}
               >
                 <DeleteOutlined />
               </button>
             </div>
           </div>
         </Draggable>
+
       )}
     </>
   );

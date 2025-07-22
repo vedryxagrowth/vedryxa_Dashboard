@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 // pages/index.js
 import React from 'react';
 import axios from 'axios';
-import { Select, Tag, theme, Button,Carousel,Tabs, Tooltip, message, Switch } from 'antd';
+import { Select, Tag, theme, Button, Carousel, Tabs, Tooltip, message, Switch } from 'antd';
 import StickyBox from 'react-sticky-box';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
@@ -23,13 +23,14 @@ const revenuePartnerNames = {
     "MEDIA_DOT_NET": "FB_Mnet",
     "Bodies": "FB_Bodies",
     "TONIC": "FB_Tonic",
-    "TONIC1":"FB_Tonic1",
-    "Domain Active":"FB_DomainActive",
-    "ENKI":"FB_Enki",
-    "System1":"FB_System1",
-    "Domain_Active":"Newsbreak_DA",
-    "Sedo":"FB_Sedo"
+    "TONIC1": "FB_Tonic1",
+    "Domain Active": "FB_DomainActive",
+    "ENKI": "FB_Enki",
+    "System1": "FB_System1",
+    "Domain_Active": "Newsbreak_DA",
+    "Sedo": "FB_Sedo"
 };
+
 
 const newtworkCollections = {
     "FB_Mnet": "Facebook_Mnet",
@@ -182,7 +183,9 @@ const RevenuePartnerDashboard = () => {
     const [timeZone, setTimeZone] = useState('UTC');
     const networks = Object.keys(userdetails?.adAccounts);
     const [revenuePratner, setRevenuePartner] = useState(networks);
-    
+
+
+
     const last7Days = dayjs().subtract(7, 'days').format('YYYY-MM-DD');
 
     const today = dayjs().subtract(0, 'days').format('YYYY-MM-DD');
@@ -238,7 +241,7 @@ const RevenuePartnerDashboard = () => {
     const onClickSubmit = () => {
         setFetchData(true);
         setLoading(true);
-    
+
         // Update to "Domain" only if the previous value is "Domain"
         setIsDomain((prevState) => {
             if (prevState === "Domain") {
@@ -296,15 +299,15 @@ const RevenuePartnerDashboard = () => {
 
     const handleCarouselChange = (index) => {
         setActiveTab(index);
-        carouselRef.current.goTo(parseInt(index)-1)
+        carouselRef.current.goTo(parseInt(index) - 1)
         console.log(index);
-        if(index == 2){
+        if (index == 2) {
             setIsDomain("Domain");
         }
     };
 
     const handleSlideChange = (from, to) => {
-        setActiveTab((parseInt(to)+1).toString());
+        setActiveTab((parseInt(to) + 1).toString());
         // console.log((parseInt(to)+1).toString());
     };
 
@@ -322,12 +325,12 @@ const RevenuePartnerDashboard = () => {
                 activeKey={activeTab}
                 onChange={(key) => handleCarouselChange(key)}
                 items={items.map((item) => ({
-                key: item.key,
-                label: item.label,
+                    key: item.key,
+                    label: item.label,
                 }))}
                 className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
                 style={{
-                    backgroundColor:  'transparent',
+                    backgroundColor: 'transparent',
                     padding: '0',
                     marginBottom: '0',
                 }}
@@ -353,14 +356,14 @@ const RevenuePartnerDashboard = () => {
         setLoading(false);
         setColumnDefs([
             {
-                field:"network",
+                field: "network",
                 resizable: true,
                 sortable: true,
                 hide: true, // Hide column as it's grouped
                 rowGroup: true,
                 enableRowGroup: true,
                 minWidth: 150,
-                flex:6,
+                flex: 6,
 
             },
             {
@@ -369,37 +372,37 @@ const RevenuePartnerDashboard = () => {
                 flex: 5,
                 minWidth: 100,
                 valueFormatter: (params) => {
-                  // Format the date with the short weekday
-                  if (params.value !== 'Total') {
-                    const date = dayjs(params.value); // Assuming you are using dayjs
-                    const weekday = date.format('ddd'); // Short weekday (e.g., Mon, Tue)
-                    return `${params.value} (${weekday})`; // e.g., "2023-11-25 (Sat)"
-                  }
-                  return params.value; // For 'Totals' row
+                    // Format the date with the short weekday
+                    if (params.value !== 'Total') {
+                        const date = dayjs(params.value); // Assuming you are using dayjs
+                        const weekday = date.format('ddd'); // Short weekday (e.g., Mon, Tue)
+                        return `${params.value} (${weekday})`; // e.g., "2023-11-25 (Sat)"
+                    }
+                    return params.value; // For 'Totals' row
                 },
                 cellRenderer: (params) => {
-                  if (params.value !== 'Total') {
-                    const date = dayjs(params.value); // Assuming you are using dayjs
-                    const weekday = date.format('ddd'); // Short weekday (e.g., Mon, Tue)
-                    
-                    return (
-                      <div style={{display:'flex', alignItems:'center'}}>
-                        {/* Display Date and Weekday */}
-                        {/* <span>{`${weekday}, ${params.value}`}</span> */}
-                        <span>{params.value}</span>
-                        {/* Display "Not Finalised" if finalised is false */}
-                        {params.data?.finalised === false && (
-                          <span style={{ color: 'red', marginLeft: '5px' }}>(Not Finalized)</span>
-                        //   <span style={{ color: 'red', marginLeft: '5px' }}>
-                        //     <Tooltip title={"The Data is not finalized yet for this date"}>
-                        //         <PiWarningCircleFill />
-                        //     </Tooltip>
-                        //   </span>
-                        )}
-                      </div>
-                    );
-                  }
-                  return params.value; // Return for 'Totals' row
+                    if (params.value !== 'Total') {
+                        const date = dayjs(params.value); // Assuming you are using dayjs
+                        const weekday = date.format('ddd'); // Short weekday (e.g., Mon, Tue)
+
+                        return (
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                {/* Display Date and Weekday */}
+                                {/* <span>{`${weekday}, ${params.value}`}</span> */}
+                                <span>{params.value}</span>
+                                {/* Display "Not Finalised" if finalised is false */}
+                                {params.data?.finalised === false && (
+                                    <span style={{ color: 'red', marginLeft: '5px' }}>(Not Finalized)</span>
+                                    //   <span style={{ color: 'red', marginLeft: '5px' }}>
+                                    //     <Tooltip title={"The Data is not finalized yet for this date"}>
+                                    //         <PiWarningCircleFill />
+                                    //     </Tooltip>
+                                    //   </span>
+                                )}
+                            </div>
+                        );
+                    }
+                    return params.value; // Return for 'Totals' row
                 },
                 suppressMenu: true,
                 menuTabs: [],
@@ -410,8 +413,8 @@ const RevenuePartnerDashboard = () => {
                 resizable: true,
                 sortable: true,
                 minWidth: 150,
-                aggFunc:spender,
-                valueFormatter:currencyFormatter,
+                aggFunc: spender,
+                valueFormatter: currencyFormatter,
                 suppressMenu: true,
                 menuTabs: [],
                 headerClass: 'hide-menu',
@@ -421,30 +424,30 @@ const RevenuePartnerDashboard = () => {
                 resizable: true,
                 sortable: true,
                 minWidth: 150,
-                aggFunc:spender,
-                valueFormatter:currencyFormatter,
+                aggFunc: spender,
+                valueFormatter: currencyFormatter,
                 suppressMenu: true,
                 menuTabs: [],
                 headerClass: 'hide-menu',
             },
-            { 
-                field: 'profit', 
+            {
+                field: 'profit',
                 resizable: true,
                 sortable: true,
                 minWidth: 150,
-                aggFunc:spender,
+                aggFunc: spender,
                 cellClassRules: {
                     'font-red': p => p.value < 0,
                     'font-green': params => params.value > 0,
                 },
-                valueFormatter:currencyFormatter,
+                valueFormatter: currencyFormatter,
                 suppressMenu: true,
                 menuTabs: [],
                 headerClass: 'hide-menu',
             },
             {
                 field: "margin",
-                headerName:"Margin(%)",
+                headerName: "Margin(%)",
                 aggFunc: average,
                 cellClassRules: {
                     'font-red': p => p.value < 0
@@ -505,8 +508,8 @@ const RevenuePartnerDashboard = () => {
         setLoading1(false);
         setDomainColumnDefs([
             {
-                field:'domain',
-                headerName:'Domain',
+                field: 'domain',
+                headerName: 'Domain',
                 minWidth: 400,
                 // resizable: true,
                 sortable: true,
@@ -533,8 +536,8 @@ const RevenuePartnerDashboard = () => {
                 resizable: true,
                 sortable: true,
                 minWidth: 150,
-                aggFunc:spender,
-                valueFormatter:currencyFormatter,
+                aggFunc: spender,
+                valueFormatter: currencyFormatter,
                 suppressMenu: true,
                 menuTabs: [],
                 headerClass: 'hide-menu',
@@ -544,14 +547,14 @@ const RevenuePartnerDashboard = () => {
                 resizable: true,
                 sortable: true,
                 minWidth: 150,
-                aggFunc:spender,
-                valueFormatter:currencyFormatter,
+                aggFunc: spender,
+                valueFormatter: currencyFormatter,
                 suppressMenu: true,
                 menuTabs: [],
                 headerClass: 'hide-menu',
             },
-            { 
-                field: 'profit', 
+            {
+                field: 'profit',
                 resizable: true,
                 sortable: true,
                 minWidth: 150,
@@ -559,15 +562,15 @@ const RevenuePartnerDashboard = () => {
                     'font-red': p => p.value < 0,
                     'font-green': params => params.value > 0,
                 },
-                aggFunc:spender,
-                valueFormatter:currencyFormatter,
+                aggFunc: spender,
+                valueFormatter: currencyFormatter,
                 suppressMenu: true,
                 menuTabs: [],
                 headerClass: 'hide-menu',
             },
             {
                 field: "margin",
-                headerName:'Margin(%)',
+                headerName: 'Margin(%)',
                 aggFunc: average,
                 cellClassRules: {
                     'font-red': p => p.value < 0
@@ -619,16 +622,16 @@ const RevenuePartnerDashboard = () => {
     };
 
     useEffect(() => {
-        if (fetchData) {    
+        if (fetchData) {
             functionForFetchingRevenuePartnerData();
         }
     }, [fetchData]);
 
-    useEffect(()=>{
-        if(isDomain === "Domain"){
+    useEffect(() => {
+        if (isDomain === "Domain") {
             functionForFetchingRevenuePartnerDomainData();
         }
-    },[isDomain]);
+    }, [isDomain]);
 
     const [dropdownVisible, setDropdownVisible] = useState(false);
 
@@ -651,7 +654,7 @@ const RevenuePartnerDashboard = () => {
             width: '100%',
         },
         options,
-        placeholder: 'Select Projects',
+        placeholder: 'Select projects',
         maxTagCount: 'responsive',
     };
 
@@ -683,8 +686,9 @@ const RevenuePartnerDashboard = () => {
         },
     };
 
+
     return (
-        <div style={{ width: '100%', margin:'0px', padding:'0px'}}>
+        <div style={{ width: '100%', margin: '0px', padding: '0px' }}>
             <Space direction="vertical" style={{ width: '100%', paddingBottom: "1%" }}>
                 {/* Filters */}
                 <Row gutter={[16, 16]}>
@@ -696,19 +700,19 @@ const RevenuePartnerDashboard = () => {
                                 backgroundColor: theme === 'dark' ? '#333' : ''
                             }}
                         >
-                            <Select {...sharedProps} {...selectProps} 
-                                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                    dropdownClassName={theme === 'dark' && 'custom-dropdown'}
+                            <Select {...sharedProps} {...selectProps}
+                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                dropdownClassName={theme === 'dark' && 'custom-dropdown'}
                             />
                         </Space>
                     </Col>
                     <Col xs={16} sm={16} md={10} lg={8} className='Dashboard-Details-1'>
-                        <ConfigProvider 
+                        <ConfigProvider
                             locale={locale}
                             theme={{
                                 token: {
-                                  colorPrimary: '#91C25F', 
-                                  colorTextLightSolid: '#000',
+                                    colorPrimary: '#91C25F',
+                                    colorTextLightSolid: '#000',
                                 },
                             }}
                         >
@@ -728,12 +732,12 @@ const RevenuePartnerDashboard = () => {
                         </ConfigProvider>
                     </Col>
                     <Col xs={16} sm={16} md={10} lg={8} className='Dashboard-Details-2'>
-                        <ConfigProvider 
+                        <ConfigProvider
                             locale={locale}
                             theme={{
                                 token: {
-                                  colorPrimary: '#91C25F', 
-                                  colorTextLightSolid: '#000',
+                                    colorPrimary: '#91C25F',
+                                    colorTextLightSolid: '#000',
                                 },
                             }}
                         >
@@ -754,29 +758,29 @@ const RevenuePartnerDashboard = () => {
                     </Col>
                     <Col xs={12} sm={12} md={4} lg={3}>
                         <Select
-                            placeholder="Select Timezone"
+                            placeholder="Select timezone"
                             onChange={onChangeTime}
                             value={timeZone}
-                            style={{width: '100%'}}
+                            style={{ width: '100%' }}
                             options={timezones.map((item) => ({ value: item, label: item }))}
                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             dropdownClassName={theme === 'dark' && 'custom-dropdown'}
                         />
                     </Col>
                     <Col xs={12} sm={12} md={2}>
-                        <Button onClick={onClickSubmit} style={{backgroundColor: '#91C25F', color:"black", fontWeight:'600'}}>
+                        <Button onClick={onClickSubmit} style={{ backgroundColor: '#91C25F', color: "black", fontWeight: '600', border: ' 1px solid #4caf50' }}>
                             Submit
                         </Button>
                     </Col>
                 </Row>
             </Space>
             {/* Table */}
-            <div 
+            <div
             // style={{padding:'0px', margin:'0px'}}
             >
                 {renderCarouselNav()}
             </div>
-            <Carousel  className='zoom-90' dots={false}  ref={carouselRef} beforeChange={handleSlideChange}>
+            <Carousel className='zoom-90' dots={false} ref={carouselRef} beforeChange={handleSlideChange}>
                 <div>
                     {loading ? (
                         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '75vh' }}>
@@ -844,8 +848,8 @@ const RevenuePartnerDashboard = () => {
                         )
                     )}
                 </div>
-                {revenuePratner && revenuePratner.length === 1 && revenuePratner[0] === "Mnet" && 
-                
+                {revenuePratner && revenuePratner.length === 1 && revenuePratner[0] === "Mnet" &&
+
                     <div>
                         {loading1 ? (
                             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
@@ -912,10 +916,10 @@ const RevenuePartnerDashboard = () => {
                                 </div>
                             ) : null
                         )}
-                
+
                     </div>}
             </Carousel>
-            
+
         </div>
     );
 };
@@ -931,10 +935,10 @@ const Dashboard = () => {
     // const handleAsyncLogic = async () => {
     //     // Wait for async function to finish
     //     const data = await functionForFetchingUsersData();
-    
+
     //     // After async function resolves, do something with the data
     //     const anotherVariable = `User count: ${data.length}`;
-    
+
     //     console.log('Fetched Data:', data);
     //     console.log('Another Variable:', anotherVariable);
     //     return data
@@ -950,8 +954,8 @@ const Dashboard = () => {
         </div>;
     }
 
-    if(userdetails?.role === "Revenue_Partner"){
-        return(
+    if (userdetails?.role === "Revenue_Partner") {
+        return (
             <RevenuePartnerDashboard />
         )
     };
@@ -962,14 +966,14 @@ const Dashboard = () => {
                 // Check if the value is an array and if it contains objects
                 if (Array.isArray(value) && value.length > 0 && typeof value[0] === 'object') {
                     // Convert array of objects to array of accountNumbers
-                    return [key, value.map(obj => ({accountNumber:obj.accountNumber, accountName: obj.accountName}))];
+                    return [key, value.map(obj => ({ accountNumber: obj.accountNumber, accountName: obj.accountName }))];
                 }
                 // If it's not an array of objects, keep it as is
                 return [key, value];
             })
         );
     };
-    
+
     const [skeletonLoading, setSkeletonLoading] = useState(true);
     const [rendering, setRendering] = useState(false);
     const [usersDataFromFetch, setUsersDataFromFetch] = useState(null);
@@ -1012,10 +1016,11 @@ const Dashboard = () => {
     //     setDarkMode(!darkMode);
     // };
     const [time, setTime] = useState('UTC');
-    
+
     const [agencyNameReport, setAgencyNameReport] = useState([]);
 
     const [byAccountNumber, setByAccountNumber] = useState([]);
+     const [hovered, setHovered] = useState(false);
 
     const onChangeTime = (value) => {
         setSkeletonLoading(true);
@@ -1081,88 +1086,88 @@ const Dashboard = () => {
         'RPC',
         'CPL',
         'Margin',
-      ]);
+    ]);
 
     const chartByDateRef = useRef(); // ✅ separate ref for second chart
     const [hiddenByDate, setHiddenByDate] = useState([
         'Spend', 'Revenue', 'RPC', 'CPL', 'Margin',
     ]); // ✅ only Profit shown initially
-  
+
     const colorMaps = {
-      Spend: 'rgba(44, 144, 192, 1)',
-      Revenue: 'rgba(99, 200, 99, 1)',
-      RPC: 'rgba(255, 99, 132, 1)',
-      CPL: 'rgba(255, 159, 64, 1)',
-      Profit: 'rgba(255, 206, 86, 1)',
-      Margin: 'rgba(153, 102, 255, 1)',
+        Spend: 'rgba(44, 144, 192, 1)',
+        Revenue: 'rgba(99, 200, 99, 1)',
+        RPC: 'rgba(255, 99, 132, 1)',
+        CPL: 'rgba(255, 159, 64, 1)',
+        Profit: 'rgba(255, 206, 86, 1)',
+        Margin: 'rgba(153, 102, 255, 1)',
     };
-  
+
     const toggle = (label) => {
-      const chart = chartRef.current;
-      const index = chart.data.datasets.findIndex((d) => d.label === label);
-      if (index === -1) return;
-  
-      const meta = chart.getDatasetMeta(index);
-      const isCurrentlyHidden = hidden.includes(label);
-  
-      if (isCurrentlyHidden) {
-        meta.hidden = false;
-        setHidden(hidden.filter((l) => l !== label));
-      } else {
-        meta.hidden = true;
-        setHidden([...hidden, label]);
-      }
-  
-      chart.update();
+        const chart = chartRef.current;
+        const index = chart.data.datasets.findIndex((d) => d.label === label);
+        if (index === -1) return;
+
+        const meta = chart.getDatasetMeta(index);
+        const isCurrentlyHidden = hidden.includes(label);
+
+        if (isCurrentlyHidden) {
+            meta.hidden = false;
+            setHidden(hidden.filter((l) => l !== label));
+        } else {
+            meta.hidden = true;
+            setHidden([...hidden, label]);
+        }
+
+        chart.update();
     };
-  
+
     const datasets = Object.keys(colorMaps).map((key) => ({
-      label: key,
-      data: chartData?.[key.toLowerCase()] || [],
-      borderColor: colorMaps[key],
-      pointBackgroundColor: colorMaps[key],
-      pointHoverBackgroundColor: colorMaps[key],
-      tension: 0.3,
-      pointRadius: 5,
-      pointHoverRadius: 8,
-      hidden: hidden.includes(key),
+        label: key,
+        data: chartData?.[key.toLowerCase()] || [],
+        borderColor: colorMaps[key],
+        pointBackgroundColor: colorMaps[key],
+        pointHoverBackgroundColor: colorMaps[key],
+        tension: 0.3,
+        pointRadius: 5,
+        pointHoverRadius: 8,
+        hidden: hidden.includes(key),
     }));
 
     const toggle0 = (label) => {
         const chart = chartByDateRef.current;
         const index = chart.data.datasets.findIndex((d) => d.label === label);
         if (index === -1) return;
-    
+
         const meta = chart.getDatasetMeta(index);
         const isCurrentlyHidden = hiddenByDate.includes(label);
-    
+
         if (isCurrentlyHidden) {
-          meta.hidden = false;
-          setHiddenByDate(hiddenByDate.filter((l) => l !== label));
+            meta.hidden = false;
+            setHiddenByDate(hiddenByDate.filter((l) => l !== label));
         } else {
-          meta.hidden = true;
-          setHiddenByDate([...hiddenByDate, label]);
+            meta.hidden = true;
+            setHiddenByDate([...hiddenByDate, label]);
         }
-    
+
         chart.update();
     };
-    
+
     const datasets0 = chartDataByDate
-  ? Object.keys(colorMaps)
-      .filter(key => Array.isArray(chartDataByDate?.[`${key.toLowerCase()}ByDate`]))
-      .map((key) => ({
-        label: key,
-        data: chartDataByDate[`${key.toLowerCase()}ByDate`],
-        borderColor: colorMaps[key],
-        pointBackgroundColor: colorMaps[key],
-        pointHoverBackgroundColor: colorMaps[key],
-        // fill: true,
-        tension: 0.3,
-        pointRadius: 5,
-        pointHoverRadius: 8,
-        hidden: hiddenByDate.includes(key),
-      }))
-  : [];
+        ? Object.keys(colorMaps)
+            .filter(key => Array.isArray(chartDataByDate?.[`${key.toLowerCase()}ByDate`]))
+            .map((key) => ({
+                label: key,
+                data: chartDataByDate[`${key.toLowerCase()}ByDate`],
+                borderColor: colorMaps[key],
+                pointBackgroundColor: colorMaps[key],
+                pointHoverBackgroundColor: colorMaps[key],
+                // fill: true,
+                tension: 0.3,
+                pointRadius: 5,
+                pointHoverRadius: 8,
+                hidden: hiddenByDate.includes(key),
+            }))
+        : [];
 
     const handleSearchChange = (value) => {
         setSearchValue(value.toLowerCase());  // Store lowercase search term
@@ -1183,41 +1188,41 @@ const Dashboard = () => {
     const onClickCloseButton = () => {
         setIsPickerOpen(false)
         setSelectedDates([dayjs(startDate), dayjs(endDate)])
-        
+
     }
-    
+
     // Handle the "Submit" button click
     const handleSubmit = () => {
-      if (selectedDates.length === 1) {
-        const [start] = selectedDates;
-        const formattedStart = start ? start.format('YYYY-MM-DD') : '';
-        setStartDate(formattedStart);
-        setEndDate(''); // Keep endDate empty if only startDate is selected
-      } else if (selectedDates.length === 2) {
-        const [start, end] = selectedDates;
-        const formattedStart = start ? start.format('YYYY-MM-DD') : '';
-        const formattedEnd = end ? end.format('YYYY-MM-DD') : '';
-        if (startDate !== formattedStart || endDate !== formattedEnd) {
-          setSkeletonLoading(true); // Start loading when dates change
+        if (selectedDates.length === 1) {
+            const [start] = selectedDates;
+            const formattedStart = start ? start.format('YYYY-MM-DD') : '';
+            setStartDate(formattedStart);
+            setEndDate(''); // Keep endDate empty if only startDate is selected
+        } else if (selectedDates.length === 2) {
+            const [start, end] = selectedDates;
+            const formattedStart = start ? start.format('YYYY-MM-DD') : '';
+            const formattedEnd = end ? end.format('YYYY-MM-DD') : '';
+            if (startDate !== formattedStart || endDate !== formattedEnd) {
+                setSkeletonLoading(true); // Start loading when dates change
+            }
+            setStartDate(formattedStart);
+            setEndDate(formattedEnd);
         }
-        setStartDate(formattedStart);
-        setEndDate(formattedEnd);
-      }
-    
-      // Close the date picker only after clicking submit
-      setIsPickerOpen(false);
+
+        // Close the date picker only after clicking submit
+        setIsPickerOpen(false);
     };
-    
+
     // Handle closing when clicking outside the picker
     const handleOpenChange = (open) => {
-      if (!open && !isPickerOpen) {
-        // This condition ensures we only close when the user clicks outside
-        setIsPickerOpen(false);
-      } else if (open) {
-        setIsPickerOpen(true); // Ensure it remains open if interacting with it
-      }
+        if (!open && !isPickerOpen) {
+            // This condition ensures we only close when the user clicks outside
+            setIsPickerOpen(false);
+        } else if (open) {
+            setIsPickerOpen(true); // Ensure it remains open if interacting with it
+        }
     };
-    
+
     function getTotalEstimatedRevenue(fullData) {
         const total = fullData?.reduce((sum, item) => {
             // Check if 'estimated_revenue' exists in the object and is a number
@@ -1274,7 +1279,7 @@ const Dashboard = () => {
     }
 
     function getTotalConversions(fullData, collectionName) {
-        if(collectionName?.length === 1 && collectionName[0] === "Facebook_Mnet" && time === "UTC"){
+        if (collectionName?.length === 1 && collectionName[0] === "Facebook_Mnet" && time === "UTC") {
             const total = fullData?.reduce((sum, item) => {
                 // Check if 'estimated_revenue' exists in the object and is a number
                 if (item.ad_clicks) {
@@ -1287,7 +1292,7 @@ const Dashboard = () => {
             return total;
 
         }
-        else{
+        else {
             const total = fullData?.reduce((sum, item) => {
                 // Check if 'estimated_revenue' exists in the object and is a number
                 if (item.conversions) {
@@ -1362,25 +1367,25 @@ const Dashboard = () => {
         // console.log(moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A'), "start");
         const transformObjectKeys = (obj) => {
             const transformedObject = {};
-        
+
             Object.keys(obj).forEach((key) => {
                 // Split the key by underscore
                 const splitKey = key.split('_');
-        
+
                 // Join the array back into a string for the new key
                 let newKey;
-                if (key === "Newsbreak_DA"){
+                if (key === "Newsbreak_DA") {
                     newKey = "Newsbreak_DomainActive"
-                }else if (key === "FB_DomainActive"){
+                } else if (key === "FB_DomainActive") {
                     newKey = "Facebook_DActive_Names"
                 }
-                else{ newKey = "Facebook_" + splitKey[1];}
-        
+                else { newKey = "Facebook_" + splitKey[1]; }
+
                 // Initialize the array if the key doesn't exist
                 if (!transformedObject[newKey]) {
                     transformedObject[newKey] = [];
                 }
-        
+
                 // Check if the value is an array
                 if (Array.isArray(obj[key])) {
                     // Loop through the array and extract each accountNumber
@@ -1394,7 +1399,7 @@ const Dashboard = () => {
                     transformedObject[newKey].push(obj[key].accountNumber);
                 }
             });
-        
+
             return transformedObject;
         };
 
@@ -1410,10 +1415,10 @@ const Dashboard = () => {
         // console.log(moment().tz('Asia/Kolkata').format('YYYY-MM-DD hh:mm:ss A'), "end");
         // console.log(transformedObject);
         let response;
-        try{
+        try {
             response = await apiClient.post(`/Dashboard?timezone=${time}&start_date=${startDate}&end_date=${endDate}`, { formattedData: [transformedObject] });
 
-        }catch(error){
+        } catch (error) {
             message.error('API failed to fetch the data please click the reload button', 8);
         }
         const responseData = response?.data;
@@ -1442,10 +1447,10 @@ const Dashboard = () => {
                 const accountNumber = obj?.accountNumber;
                 // Create a combined key for grouping by both campaign_name and specifiedDate
                 const key = `${campaignKey}_${dateKey}_${accountNumber}`;
-        
+
                 // Find if the combined key already exists in the accumulator array
                 let entry = acc.find(item => item.key === key);
-        
+
                 if (!entry) {
                     // If not found, create a new entry for this campaign_name and specifiedDate
                     acc.push({
@@ -1456,12 +1461,12 @@ const Dashboard = () => {
                         estimated_revenue: obj?.estimated_revenue ? parseFloat(obj?.estimated_revenue) : 0,
                         fbLeads: obj.fbLeads ? parseInt(obj?.fbLeads) : 0,
                         conversions: collectionName.length === 1 && collectionName[0] === "Facebook_Mnet" && time === "UTC"
-                        ? obj.ad_clicks
-                            ? parseInt(obj?.ad_clicks)
-                            : 0
-                        : obj.conversions
-                            ? parseInt(obj?.conversions)
-                            : 0,
+                            ? obj.ad_clicks
+                                ? parseInt(obj?.ad_clicks)
+                                : 0
+                            : obj.conversions
+                                ? parseInt(obj?.conversions)
+                                : 0,
                         revenuePartner: obj?.revenuePartner,
                         mediaBuyerName: obj?.MediaBuyerName,
                         holder: obj?.Holder,
@@ -1474,14 +1479,14 @@ const Dashboard = () => {
                     entry.estimated_revenue += obj?.estimated_revenue !== null && obj?.estimated_revenue !== undefined ? parseFloat(obj?.estimated_revenue) : 0;
                     entry.fbLeads += obj?.fbLeads !== null && obj?.fbLeads !== undefined ? parseInt(obj?.fbLeads) : 0;
                     entry.conversions += collectionName.length === 1 && collectionName[0] === "Facebook_Mnet" && time === "UTC"
-                    ? obj?.ad_clicks !== null && obj?.ad_clicks !== undefined
-                        ? parseInt(obj?.ad_clicks)
-                        : 0
-                    : obj?.conversions !== null && obj?.conversions !== undefined
-                        ? parseInt(obj?.conversions)
-                        : 0;
+                        ? obj?.ad_clicks !== null && obj?.ad_clicks !== undefined
+                            ? parseInt(obj?.ad_clicks)
+                            : 0
+                        : obj?.conversions !== null && obj?.conversions !== undefined
+                            ? parseInt(obj?.conversions)
+                            : 0;
                 }
-        
+
                 return acc;
             }, []).map(campaign => {
                 // Calculate profit after grouping
@@ -1489,7 +1494,7 @@ const Dashboard = () => {
                 return campaign;
             });
         }
-        
+
         const group = groupByCampaignAndDate(responseData);
         console.log(group);
 
@@ -1497,29 +1502,29 @@ const Dashboard = () => {
             // Step 1: Group objects by specifiedDate using a Map
             const groupedByDate = data?.reduce((acc, curr) => {
                 const date = curr.Date; // Use specifiedDate directly from the object
-        
+
                 if (!acc.has(date)) {
                     acc.set(date, []);
                 }
                 acc.get(date).push(curr); // Add campaigns to the date group
-        
+
                 return acc;
             }, new Map());
-        
+
             // Step 2: Prepare an array to hold the top 5 campaigns across all dates
             const topFiveCampaigns = [];
-        
+
             // Step 3: Iterate through each date group and get the top 5 campaigns by spend
             groupedByDate?.forEach(campaigns => {
                 // Sort the campaigns by spend in descending order and take the top 5
                 const topFive = campaigns
                     .sort((a, b) => b.spend - a.spend) // Sort by spend descending
                     .slice(0, 5); // Take top 5 campaigns for each date
-        
+
                 // Add the top 5 campaigns to the final result array
                 topFiveCampaigns.push(...topFive);
             });
-        
+
             return topFiveCampaigns; // Return a combined array of top 5 campaigns across all dates
         }
 
@@ -1527,29 +1532,29 @@ const Dashboard = () => {
             // Step 1: Group objects by specifiedDate using a Map
             const groupedByDate = data?.reduce((acc, curr) => {
                 const date = curr.Date; // Use specifiedDate directly from the object
-        
+
                 if (!acc.has(date)) {
                     acc.set(date, []);
                 }
                 acc.get(date).push(curr); // Add campaigns to the date group
-        
+
                 return acc;
             }, new Map());
-        
+
             // Step 2: Prepare an array to hold the top 5 campaigns across all dates
             const topFiveCampaigns = [];
-        
+
             // Step 3: Iterate through each date group and get the top 5 campaigns by spend
             groupedByDate?.forEach(campaigns => {
                 // Sort the campaigns by spend in descending order and take the top 5
                 const topFive = campaigns
                     .sort((a, b) => b.estimated_revenue - a.estimated_revenue) // Sort by spend descending
                     .slice(0, 5); // Take top 5 campaigns for each date
-        
+
                 // Add the top 5 campaigns to the final result array
                 topFiveCampaigns.push(...topFive);
             });
-        
+
             return topFiveCampaigns; // Return a combined array of top 5 campaigns across all dates
         }
 
@@ -1557,29 +1562,29 @@ const Dashboard = () => {
             // Step 1: Group objects by specifiedDate using a Map
             const groupedByDate = data?.reduce((acc, curr) => {
                 const date = curr.Date; // Use specifiedDate directly from the object
-        
+
                 if (!acc.has(date)) {
                     acc.set(date, []);
                 }
                 acc.get(date).push(curr); // Add campaigns to the date group
-        
+
                 return acc;
             }, new Map());
-        
+
             // Step 2: Prepare an array to hold the top 5 campaigns across all dates
             const topFiveCampaigns = [];
-        
+
             // Step 3: Iterate through each date group and get the top 5 campaigns by spend
             groupedByDate?.forEach(campaigns => {
                 // Sort the campaigns by spend in descending order and take the top 5
                 const topFive = campaigns
                     .sort((a, b) => b.profit - a.profit) // Sort by spend descending
                     .slice(0, 5); // Take top 5 campaigns for each date
-        
+
                 // Add the top 5 campaigns to the final result array
                 topFiveCampaigns.push(...topFive);
             });
-        
+
             return topFiveCampaigns; // Return a combined array of top 5 campaigns across all dates
         }
 
@@ -1587,28 +1592,28 @@ const Dashboard = () => {
             // Step 1: Group objects by specifiedDate using a Map
             const groupedByDate = data?.reduce((acc, curr) => {
                 const date = curr.Date; // Use specifiedDate directly from the object
-        
+
                 if (!acc.has(date)) {
                     acc.set(date, []);
                 }
                 acc.get(date).push(curr); // Add campaigns to the date group
-        
+
                 return acc;
             }, new Map());
-        
+
             // Step 2: Prepare an array to hold all profitable campaigns across all dates
             const profitableCampaigns = [];
-        
+
             // Step 3: Iterate through each date group, filter campaigns with profit > 0, and sort them by profit
             groupedByDate?.forEach(campaigns => {
                 const filteredAndSortedCampaigns = campaigns
                     .filter(campaign => campaign.profit > 0) // Keep only campaigns with profit > 0
                     .sort((a, b) => b.profit - a.profit); // Sort by profit in descending order
-        
+
                 // Add all filtered and sorted campaigns to the final result array
                 profitableCampaigns.push(...filteredAndSortedCampaigns);
             });
-        
+
             return profitableCampaigns; // Return a combined array of all profitable campaigns
         }
 
@@ -1616,31 +1621,31 @@ const Dashboard = () => {
             // Step 1: Group objects by specifiedDate using a Map
             const groupedByDate = data?.reduce((acc, curr) => {
                 const date = curr.Date; // Use specifiedDate directly from the object
-        
+
                 if (!acc.has(date)) {
                     acc.set(date, []);
                 }
                 acc.get(date).push(curr); // Add campaigns to the date group
-        
+
                 return acc;
             }, new Map());
-        
+
             // Step 2: Prepare an array to hold all unprofitable campaigns across all dates
             const unprofitableCampaigns = [];
-        
+
             // Step 3: Iterate through each date group, filter campaigns with profit < 0, and sort them by profit
             groupedByDate?.forEach(campaigns => {
                 const filteredAndSortedCampaigns = campaigns
                     .filter(campaign => campaign.profit < 0) // Keep only campaigns with profit < 0
                     .sort((a, b) => b.profit - a.profit); // Sort by profit in descending order (optional)
-        
+
                 // Add all filtered and sorted campaigns to the final result array
                 unprofitableCampaigns.push(...filteredAndSortedCampaigns);
             });
-        
+
             return unprofitableCampaigns; // Return a combined array of all unprofitable campaigns
         }
-        
+
 
         const top5SpendCampaignsByDate = getTopFiveSpendCampaignsByDate(groupByCampaignAndDate(responseData));
         const top5RevenueCampaignsByDate = getTopFiveRevenueCampaignsByDate(groupByCampaignAndDate(responseData));
@@ -1659,10 +1664,10 @@ const Dashboard = () => {
         // function groupAndSortByCampaignSpend(data) {
         //     const groupedData = data.reduce((acc, obj) => {
         //         const key = obj.campaign_name;
-        
+
         //         // Find if the campaign_name already exists in the accumulator array
         //         let campaign = acc.find(item => item.campaign_name === key);
-        
+
         //         if (!campaign) {
         //             // If not found, create a new entry for this campaign_name
         //             acc.push({
@@ -1683,37 +1688,37 @@ const Dashboard = () => {
         //             campaign.fbLeads += obj.fbLeads !== null && obj.fbLeads !== undefined ? parseInt(obj.fbLeads) : 0;
         //             campaign.conversions += obj.conversions !== null && obj.conversions !== undefined ? parseInt(obj.conversions) : 0;
         //         }
-        
+
         //         return acc;
         //     }, []).map(campaign => {
         //         // Calculate profit after grouping
         //         campaign.profit = campaign.estimated_revenue - campaign.spend;
         //         return campaign;
         //     });
-        
+
         //     // Sort the grouped data by spend in descending order and return the top 5 campaigns
         //     return groupedData.sort((a, b) => b.spend - a.spend).slice(0, 5);
         // }
-        
+
         // // Example usage
         // const groupedData1 = groupAndSortByCampaignSpend(responseData);
         // setTop5Campaigns(groupedData1);
 
 
         // console.log(groupedData1, "campaign");
-        
+
 
         function groupByAccountNumberAndDate(data, specifiedDateKey) {
             return data?.reduce((acc, obj) => {
                 const accountKey = obj.accountNumber;
                 const dateKey = obj[`${specifiedDateKey}Date`]; // dynamically access the specified date field
-        
+
                 // Create a combined key for grouping by both accountNumber and dynamically passed date field
                 const key = `${accountKey}_${dateKey}`;
-        
+
                 // Find if the combined key already exists in the accumulator array
                 let entry = acc.find(item => item.key === key);
-        
+
                 if (!entry) {
                     // If not found, create a new entry for this accountNumber and specifiedDate
                     acc.push({
@@ -1724,12 +1729,12 @@ const Dashboard = () => {
                         estimated_revenue: obj.estimated_revenue ? parseFloat(obj.estimated_revenue) : 0,
                         fbLeads: obj.fbLeads ? parseInt(obj.fbLeads) : 0,
                         conversions: collectionName.length === 1 && collectionName[0] === "Facebook_Mnet" && time === "UTC"
-                        ? obj.ad_clicks
-                            ? parseInt(obj?.ad_clicks)
-                            : 0
-                        : obj.conversions
-                            ? parseInt(obj?.conversions)
-                            : 0,
+                            ? obj.ad_clicks
+                                ? parseInt(obj?.ad_clicks)
+                                : 0
+                            : obj.conversions
+                                ? parseInt(obj?.conversions)
+                                : 0,
                         revenuePartner: obj.revenuePartner,
                         mediaBuyerName: obj.MediaBuyerName,
                         holder: obj.Holder,
@@ -1742,20 +1747,20 @@ const Dashboard = () => {
                     entry.estimated_revenue += obj.estimated_revenue !== null && obj.estimated_revenue !== undefined ? parseFloat(obj.estimated_revenue) : 0;
                     entry.fbLeads += obj.fbLeads !== null && obj.fbLeads !== undefined ? parseInt(obj.fbLeads) : 0;
                     entry.conversions += collectionName.length === 1 && collectionName[0] === "Facebook_Mnet" && time === "UTC"
-                    ? obj?.ad_clicks !== null && obj?.ad_clicks !== undefined
-                        ? parseInt(obj?.ad_clicks)
-                        : 0
-                    : obj?.conversions !== null && obj?.conversions !== undefined
-                        ? parseInt(obj?.conversions)
-                        : 0;
+                        ? obj?.ad_clicks !== null && obj?.ad_clicks !== undefined
+                            ? parseInt(obj?.ad_clicks)
+                            : 0
+                        : obj?.conversions !== null && obj?.conversions !== undefined
+                            ? parseInt(obj?.conversions)
+                            : 0;
                 }
-        
+
                 return acc;
             }, []).map(account => {
                 // Calculate profit after grouping
                 account.profit = account.estimated_revenue - account.spend,
-                account.rpc = parseFloat(((account.estimated_revenue/account.conversions)*100)/100).toFixed(2),
-                account.cpl = parseFloat(((account.spend/account.fbLeads)*100)/100).toFixed(2) || 0
+                    account.rpc = parseFloat(((account.estimated_revenue / account.conversions) * 100) / 100).toFixed(2),
+                    account.cpl = parseFloat(((account.spend / account.fbLeads) * 100) / 100).toFixed(2) || 0
                 return account;
             });
         }
@@ -1767,13 +1772,13 @@ const Dashboard = () => {
             return data?.reduce((acc, obj) => {
                 const accountKey = obj.accountNumber;
                 const dateKey = obj[`${specifiedDateKey}Date`]; // dynamically access the specified date field
-        
+
                 // Create a combined key for grouping by both accountNumber and dynamically passed date field
                 const key = `${accountKey}_${dateKey}`;
-        
+
                 // Find if the combined key already exists in the accumulator array
                 let entry = acc.find(item => item.key === key);
-        
+
                 if (!entry) {
                     // If not found, create a new entry for this date
                     acc.push({
@@ -1795,7 +1800,7 @@ const Dashboard = () => {
                     entry.fbLeads += obj.fbLeads !== null && obj.fbLeads !== undefined ? parseInt(obj.fbLeads) : 0;
                     entry.conversions += obj.conversions !== null && obj.conversions !== undefined ? parseInt(obj.conversions) : 0;
                 }
-        
+
                 return acc;
             }, []).map(dateEntry => {
                 // Calculate profit after grouping
@@ -1813,10 +1818,10 @@ const Dashboard = () => {
         function groupByDate(data, specifiedDateKey) {
             return data?.reduce((acc, obj) => {
                 const dateKey = obj[`${specifiedDateKey}Date`]; // dynamically access the specified date field
-        
+
                 // Find if the date key already exists in the accumulator array
                 let entry = acc.find(item => item.date === dateKey);
-        
+
                 if (!entry) {
                     // If not found, create a new entry for this date
                     acc.push({
@@ -1836,7 +1841,7 @@ const Dashboard = () => {
                     entry.fbLeads += obj.fbLeads !== null && obj.fbLeads !== undefined ? parseInt(obj.fbLeads) : 0;
                     entry.conversions += obj.conversions !== null && obj.conversions !== undefined ? parseInt(obj.conversions) : 0;
                 }
-        
+
                 return acc;
             }, []).map(dateEntry => {
                 // Calculate profit after grouping
@@ -1864,7 +1869,7 @@ const Dashboard = () => {
         const rpcByDate = sortedDataByDate.map(d => !isNaN((d.estimated_revenue / d.conversions)) && (d.estimated_revenue / d.conversions) !== undefined ? Math.round((d.estimated_revenue / d.conversions) * 100) / 100 : 0);
         const cplByDate = sortedDataByDate.map(d => !isNaN(((d.spend / d.fbLeads) * 100)) && ((d.spend / d.fbLeads) * 100) !== undefined ? Math.round((((d.spend / d.fbLeads) * 100) / 100) * 100) / 100 : 0);
 
-        const marginByDate = sortedDataByDate.map(d => d.estimated_revenue !== 0 ?Math.round((((d.estimated_revenue - d.spend) / d.estimated_revenue) * 100) * 100) / 100 : 0);
+        const marginByDate = sortedDataByDate.map(d => d.estimated_revenue !== 0 ? Math.round((((d.estimated_revenue - d.spend) / d.estimated_revenue) * 100) * 100) / 100 : 0);
 
         setChartDataByDate({ datesByDate, spendByDate, revenueByDate, profitByDate, marginByDate, rpcByDate, cplByDate });
 
@@ -1873,95 +1878,95 @@ const Dashboard = () => {
         function groupDataByDomainAndAccount(data, dateField) {
             console.log(dateField);
             const DomainGroupedData = data?.reduce((acc, obj) => {
-              const { domain, accountNumber, spend, estimated_revenue, revenuePartner, MediaBuyerName, Holder } = obj;
-              const specifiedDate = obj[dateField]; // Dynamically get the date based on the field
-          
-              // Create a unique key for grouping by domain, specifiedDate, and accountNumber
-              const key = `${specifiedDate}-${domain}-${accountNumber}`;
-          
-              if (!acc[key]) {
-                acc[key] = {
-                  specifiedDate,
-                  domain,
-                  accountNumber,
-                  revenuePartner,   // Store the revenuePartner for the group
-                  MediaBuyerName,   // Store the MediaBuyerName for the group
-                  Holder,           // Store the Holder for the group
-                  spend: 0,
-                  estimated_revenue: 0,
-                };
-              }
-          
-              // Sum the fields (spend, estimated_revenue) based on the new grouping
-              acc[key].spend += spend;
-              acc[key].estimated_revenue += estimated_revenue;
-          
-              return acc;
+                const { domain, accountNumber, spend, estimated_revenue, revenuePartner, MediaBuyerName, Holder } = obj;
+                const specifiedDate = obj[dateField]; // Dynamically get the date based on the field
+
+                // Create a unique key for grouping by domain, specifiedDate, and accountNumber
+                const key = `${specifiedDate}-${domain}-${accountNumber}`;
+
+                if (!acc[key]) {
+                    acc[key] = {
+                        specifiedDate,
+                        domain,
+                        accountNumber,
+                        revenuePartner,   // Store the revenuePartner for the group
+                        MediaBuyerName,   // Store the MediaBuyerName for the group
+                        Holder,           // Store the Holder for the group
+                        spend: 0,
+                        estimated_revenue: 0,
+                    };
+                }
+
+                // Sum the fields (spend, estimated_revenue) based on the new grouping
+                acc[key].spend += spend;
+                acc[key].estimated_revenue += estimated_revenue;
+
+                return acc;
             }, {});
-          
+
             // Convert the grouped data object back to an array and add the profit field
             const domainResult = Object.values(DomainGroupedData).map(item => {
-              item.profit = item.estimated_revenue - item.spend; // Calculate profit
-              return item;
+                item.profit = item.estimated_revenue - item.spend; // Calculate profit
+                return item;
             });
-          
+
             return domainResult;
         }
-          
+
         function groupDataByBMNameAndAgencyName(data, dateField) {
             console.log(dateField);
             const DomainGroupedData = data?.reduce((acc, obj) => {
-              const {  spend, estimated_revenue, BMName, AgencyName } = obj;
-              const specifiedDate = obj[dateField]; // Dynamically get the date based on the field
-          
-              // Create a unique key for grouping by domain, specifiedDate, and accountNumber
-              const key = `${specifiedDate}-${BMName}-${AgencyName}`;
-          
-              if (!acc[key]) {
-                acc[key] = {
-                  specifiedDate,
-                  BMName,
-                  AgencyName,
-                  spend: 0,
-                  estimated_revenue: 0,
-                };
-              }
-          
-              // Sum the fields (spend, estimated_revenue) based on the new grouping
-              acc[key].spend += spend;
-              acc[key].estimated_revenue += estimated_revenue;
-          
-              return acc;
+                const { spend, estimated_revenue, BMName, AgencyName } = obj;
+                const specifiedDate = obj[dateField]; // Dynamically get the date based on the field
+
+                // Create a unique key for grouping by domain, specifiedDate, and accountNumber
+                const key = `${specifiedDate}-${BMName}-${AgencyName}`;
+
+                if (!acc[key]) {
+                    acc[key] = {
+                        specifiedDate,
+                        BMName,
+                        AgencyName,
+                        spend: 0,
+                        estimated_revenue: 0,
+                    };
+                }
+
+                // Sum the fields (spend, estimated_revenue) based on the new grouping
+                acc[key].spend += spend;
+                acc[key].estimated_revenue += estimated_revenue;
+
+                return acc;
             }, {});
-          
+
             // Convert the grouped data object back to an array and add the profit field
             const domainResult = Object.values(DomainGroupedData).map(item => {
-              item.profit = item.estimated_revenue - item.spend; // Calculate profit
-              return item;
+                item.profit = item.estimated_revenue - item.spend; // Calculate profit
+                return item;
             });
-          
+
             return domainResult;
         }
-          
-          
+
+
         const domainResult = groupDataByDomainAndAccount(responseData, `${time}Date`);
 
         const agencyLevelReport = groupDataByBMNameAndAgencyName(responseData, `${time}Date`);
 
         setDomainWiseData(domainResult);
         setAgencyNameReport(agencyLevelReport);
-          
+
         console.log(domainResult, "domain Result");
 
         const sortedData = groupedData.sort((a, b) => {
             // Compare accountNumber first
             if (a.accountNumber < b.accountNumber) return -1;
             if (a.accountNumber > b.accountNumber) return 1;
-        
+
             // If accountNumber is the same, compare specifiedDate
             if (a.specifiedDate < b.specifiedDate) return -1;
             if (a.specifiedDate > b.specifiedDate) return 1;
-        
+
             return 0; // Maintain original order if both values are the same
         });
         console.log(sortedData);
@@ -1974,7 +1979,7 @@ const Dashboard = () => {
         const rpc = sortedData.map(d => !isNaN((d.estimated_revenue / d.conversions)) && (d.estimated_revenue / d.conversions) !== undefined ? Math.round((d.estimated_revenue / d.conversions) * 100) / 100 : 0);
         const cpl = sortedData.map(d => !isNaN(((d.spend / d.fbLeads) * 100)) && ((d.spend / d.fbLeads) * 100) !== undefined ? Math.round((((d.spend / d.fbLeads) * 100) / 100) * 100) / 100 : 0);
 
-        const margin = sortedData.map(d => d.estimated_revenue !== 0 ?Math.round((((d.estimated_revenue - d.spend) / d.estimated_revenue) * 100) * 100) / 100 : 0);
+        const margin = sortedData.map(d => d.estimated_revenue !== 0 ? Math.round((((d.estimated_revenue - d.spend) / d.estimated_revenue) * 100) * 100) / 100 : 0);
 
         // console.log(revenue);
 
@@ -1988,7 +1993,7 @@ const Dashboard = () => {
     //             const networksFetch = await axios.post('http://localhost:8000/getAccountNameandStatus/', {
     //                 updatedNetwork: userdetails?.adAccounts // Pass in the body of the POST request
     //             });
-    
+
     //             if (networksFetch.status === 200) {
     //                 setRendering(false);
     //                 setUsersDataFromFetch(networksFetch.data); // Access data from the Axios response
@@ -1997,14 +2002,14 @@ const Dashboard = () => {
     //             console.error('Error fetching data:', error);
     //         }
     //     };
-    
+
     //     fetchData(); // Call the async function inside useEffect
-    
+
     // }, [userdetails]);
 
     useEffect(() => {
         // if(selectedItems.length > 0){
-        if(startDate !== '' && endDate !== ''){
+        if (startDate !== '' && endDate !== '') {
             functionCallForResponse(selectedItems);
         }
         // }
@@ -2087,9 +2092,9 @@ const Dashboard = () => {
         debounce((category, checkedValues) => {
             setSelectedItems((prevSelected) => ({
                 ...prevSelected,  // Spread the previous selected items to retain selections for other categories
-            [category]: checkedValues.map(value => ({
-                accountNumber: value  // Store the accountNumber in the selected items array for the category
-            }))
+                [category]: checkedValues.map(value => ({
+                    accountNumber: value  // Store the accountNumber in the selected items array for the category
+                }))
             }));
             //   setSkeletonLoading(false); // Optionally stop loading
         }, 1000), // Adjust debounce time (1000ms in this example)
@@ -2134,16 +2139,18 @@ const Dashboard = () => {
                             alignItems: 'center',
                             justifyContent: 'space-between',
                             color: theme === 'dark' ? 'white' : 'black',
+
                         }}
                     >
                         <Divider style={{ color: theme === 'dark' ? 'white' : 'black' }}>
-                            {category}
-                            <Checkbox
+                             <Checkbox
                                 checked={allSelected}
                                 onChange={(e) => handleSelectAllChange(e.target.checked, category)}
-                                style={{ marginLeft: '15px' }}
-                                className={theme === 'dark' ? 'checkbox-dark' : 'checkbox-light'}
+                                style={{ marginRight: '5px' }}
+                                className={theme === 'dark' ? 'checkbox-dark' : 'checkbox-light' }
                             />
+                            {category}
+                           
                         </Divider>
                     </div>
 
@@ -2182,8 +2189,8 @@ const Dashboard = () => {
             );
         });
     };
-    
-    
+
+
 
 
 
@@ -2237,7 +2244,7 @@ const Dashboard = () => {
                 return Number(RPC.toFixed(2));
             }
         }
-    
+
         // For grouped rows (aggregation)
         if (params.node?.aggData !== undefined) {
             console.log(params.node?.aggData);
@@ -2247,7 +2254,7 @@ const Dashboard = () => {
                 return Number(RPC.toFixed(2));
             }
         }
-    
+
         return 0;
     };
 
@@ -2264,7 +2271,7 @@ const Dashboard = () => {
                 return Number(RPC.toFixed(2));
             }
         }
-    
+
         // For grouped rows (aggregation)
         if (params.node?.aggData !== undefined) {
             // console.log(params.node?.aggData);
@@ -2274,13 +2281,13 @@ const Dashboard = () => {
                 return Number(RPC.toFixed(2));
             }
         }
-    
+
         return 0;
     };
 
     const autoGroupColumnDefProfit = {
-        headerName: 'AccountNumber',
-        minWidth: 210,
+        headerName: 'Account number',
+        minWidth: 300,
         sortable: true,
         cellRendererParams: {
             suppressCount: false,
@@ -2288,29 +2295,29 @@ const Dashboard = () => {
                 if (params.node.footer) {
                     return 'Total';
                 }
-    
+
                 const firstColumnValue = params.node.key; // campaign name
                 const campaignName = params.node.key;
                 const groupedData = params.node.allLeafChildren
                     ? params.node.allLeafChildren.map(childNode => childNode.data)
                     : [];
-    
+
                 // Ensure groupedData has at least one element
                 if (groupedData.length === 0) {
                     return '';
                 }
-    
+
                 // Safeguard against undefined or missing properties
                 const firstGroupedItem = groupedData[0] || {};
                 const revenuePartnerNameToPassToReports = firstGroupedItem.revenuePartner
                     ? revenuePartnerNames[firstGroupedItem.revenuePartner]
                     : 'Unknown Partner';
-    
+
                 const accountNumberToPassToReports = firstGroupedItem.accountNumber || 'Unknown Account';
-    
+
                 const valueWithCount = `${firstColumnValue}`;
                 return (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                    <div style={{  width: '100%' ,marginRight:'10px'}}>
                         <span
                             onClick={() => {
                                 const data = {
@@ -2325,7 +2332,7 @@ const Dashboard = () => {
                                 // Convert data to query string
                                 const queryString = new URLSearchParams(data).toString();
                                 const url = `/Reports?${queryString}`;
-    
+
                                 // Open the URL in a new tab
                                 window.open(url, '_blank', 'noopener,noreferrer');
                             }}
@@ -2341,11 +2348,11 @@ const Dashboard = () => {
                 // Keep the original logic for grouped rows
                 return params.valueFormatted || params.value || params.node.key;
             }
-    
+
             // For ungrouped rows, handle navigation directly
             const accountNumber = params.data?.accountNumber || 'Unknown Account';
             const revenuePartner = params.data?.revenuePartner || 'Unknown Partner';
-    
+
             const data = {
                 network: revenuePartner,
                 accountNumber,
@@ -2353,10 +2360,10 @@ const Dashboard = () => {
                 startDate,
                 endDate,
             };
-    
+
             const queryString = new URLSearchParams(data).toString();
             const url = `/Reports?${queryString}`;
-    
+
             return (
                 <span
                     style={{ cursor: 'pointer', color: '#1890ff' }}
@@ -2371,9 +2378,11 @@ const Dashboard = () => {
     };
 
     const autoGroupColumnDefLoss = {
-        headerName: 'AccountNumber',
+        headerName: 'Account number',
         minWidth: 200,
         sortable: true,
+        //  cellStyle: { whiteSpace: "normal", lineHeight: "1.5" }, // Enables text wrapping
+        // autoHeight: true,
         cellRendererParams: {
             suppressCount: false,
             innerRenderer: (params) => {
@@ -2384,8 +2393,8 @@ const Dashboard = () => {
                 const firstColumnValue = params.node.key;  // campaign name
                 const campaignName = params.node.key;
                 const groupedData = params.node.allLeafChildren
-                ? params.node.allLeafChildren.map(childNode => childNode.data)
-                : [];
+                    ? params.node.allLeafChildren.map(childNode => childNode.data)
+                    : [];
 
                 // Ensure groupedData has at least one element
                 if (groupedData.length === 0) {
@@ -2399,11 +2408,11 @@ const Dashboard = () => {
                     : 'Unknown Partner';
 
                 const accountNumberToPassToReports = firstGroupedItem.accountNumber || 'Unknown Account';
-                
+
                 const valueWithCount = `${firstColumnValue}`;
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                        
+
                         <span
                             onClick={() => {
                                 const data = {
@@ -2413,7 +2422,7 @@ const Dashboard = () => {
                                     startDate: startDate,
                                     endDate: endDate,
                                 };
-                        
+
                                 // Convert data to query string
                                 const queryString = new URLSearchParams(data).toString();
                                 const url = `/Reports?${queryString}`;
@@ -2424,16 +2433,16 @@ const Dashboard = () => {
                         >
                             {valueWithCount}
                         </span>
-                        
+
                     </div>
                 );
             }
         }
     };
-    
+
     const autoGroupColumnDefCampaigns = {
-        headerName: 'Campaign Name',
-        minWidth: 250,
+        headerName: 'Campaign name',
+        minWidth: 335,
         sortable: true,
         cellStyle: { whiteSpace: "normal", lineHeight: "1.5" }, // Enables text wrapping
         autoHeight: true,
@@ -2443,28 +2452,28 @@ const Dashboard = () => {
                 if (params.node.footer) {
                     return 'Total';
                 }
-    
+
                 const firstColumnValue = params.node.key; // campaign name
                 const campaignName = params.node.key;
                 const groupedData = params.node.allLeafChildren
                     ? params.node.allLeafChildren.map(childNode => childNode.data)
                     : [];
-    
+
                 // Ensure groupedData has at least one element
                 if (groupedData.length === 0) {
                     return '';
                 }
-    
+
                 // Safeguard against undefined or missing properties
                 const firstGroupedItem = groupedData[0] || {};
                 const revenuePartnerNameToPassToReports = firstGroupedItem.revenuePartner
                     ? revenuePartnerNames[firstGroupedItem.revenuePartner]
                     : 'Unknown Partner';
                 const collectionName = newtworkCollections[revenuePartnerNameToPassToReports];
-    
+
                 const accountNumberToPassToReports = firstGroupedItem.accountNumber || 'Unknown Account';
                 const campaignNameToPass = firstGroupedItem.campaign_name || 'Unknown Account';
-    
+
                 const valueWithCount = `${firstColumnValue}`;
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
@@ -2477,12 +2486,12 @@ const Dashboard = () => {
                                 //     startDate: startDate,
                                 //     endDate: endDate,
                                 // };
-    
+
                                 // // Convert data to query string
                                 // const queryString = new URLSearchParams(data).toString();
                                 const url = `/DailyAndCampaignHistory/CampaignHistory/${campaignNameToPass.replace(/\//g, "*").replace(/-/g, "^")}-${accountNumberToPassToReports}-${time}-${collectionName}`;
                                 console.log(url);
-    
+
                                 // Open the URL in a new tab
                                 window.open(url, '_blank', 'noopener,noreferrer');
                             }}
@@ -2498,11 +2507,11 @@ const Dashboard = () => {
                 // Keep the original logic for grouped rows
                 return params.valueFormatted || params.value || params.node.key;
             }
-    
+
             // For ungrouped rows, handle navigation directly
             const accountNumber = params.data?.accountNumber || 'Unknown Account';
             const revenuePartner = params.data?.revenuePartner || 'Unknown Partner';
-    
+
             const data = {
                 network: revenuePartner,
                 accountNumber,
@@ -2510,10 +2519,10 @@ const Dashboard = () => {
                 startDate,
                 endDate,
             };
-    
+
             const queryString = new URLSearchParams(data).toString();
             const url = `/Reports?${queryString}`;
-    
+
             return (
                 <span
                     style={{ cursor: 'pointer', color: '#1890ff' }}
@@ -2529,7 +2538,7 @@ const Dashboard = () => {
 
     const [columnDefs] = useState([
         {
-            headerName: 'Project Name',
+            headerName: 'Project name',
             field: "revenuePartner",
             resizable: true,
             sortable: true,
@@ -2551,21 +2560,25 @@ const Dashboard = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
         }, // Group by Holder
-        { field: 'accountNumber', headerName: 'AccountNumber',
-        resizable: true,
-        width: 150,
-        sortable: true,
-        hide: true, // Hide column as it's grouped
-        rowGroup: true,
-        enableRowGroup: true,
-        suppressMenu: true,
-        menuTabs: [],
-        headerClass: 'hide-menu', },
-        {field:'specifiedDate', headerName:'Date',
+        {
+            field: 'accountNumber', headerName: 'Account number',
+            resizable: true,
+            width: 150,
+            sortable: true,
+            hide: true, // Hide column as it's grouped
+            rowGroup: true,
+            enableRowGroup: true,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
+        {
+            field: 'specifiedDate', headerName: 'Date',
             minWidth: 115,
             suppressMenu: true,
             menuTabs: [],
-            headerClass: 'hide-menu',},
+            headerClass: 'hide-menu',
+        },
         {
             headerName: 'User',
             field: "mediaBuyerName",
@@ -2625,7 +2638,7 @@ const Dashboard = () => {
             headerClass: 'hide-menu',
             minWidth: 95,
             // valueFormatter: rpcCplFormatter,
-        }, 
+        },
         {
             field: 'conversions',
             headerName: 'Conv',
@@ -2635,34 +2648,34 @@ const Dashboard = () => {
             headerClass: 'hide-menu',
             minWidth: 108,
             // valueFormatter: rpcCplFormatter,
-        }, 
+        },
         {
             field: 'fbLeads',
-            headerName: 'FbLeads',
+            headerName: 'Fb leads',
             aggFunc: spender,
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
             minWidth: 108,
             // valueFormatter: rpcCplFormatter,
-        }, 
+        },
 
     ]);
 
     const items = [
         { key: '1', label: 'Profit', content: 'Content for Profit Accounts' },
         { key: '2', label: 'Loss', content: 'Content for Loss Accounts' },
-        { key: '3', label: 'Top 5 Spend', content: 'Content for Top 5 Spend Accounts' },
-        { key: '4', label: 'Top 5 Revenue', content: 'Content for Top 5 Revenue Accounts' },
-        { key: '5', label: 'Top 5 Profit', content: 'Content for Top 5 Profit Accounts' },
+        { key: '3', label: 'Top 5 spend', content: 'Content for Top 5 Spend Accounts' },
+        { key: '4', label: 'Top 5 revenue', content: 'Content for Top 5 Revenue Accounts' },
+        { key: '5', label: 'Top 5 profit', content: 'Content for Top 5 Profit Accounts' },
     ];
 
     const items1 = [
         { key: '1', label: 'Spend', content: 'Content for Top 5 Spend Campaigns' },
         { key: '2', label: 'Revenue', content: 'Content for Top 5 Revenue Campaigns' },
         { key: '3', label: 'Profit', content: 'Content for Top 5 Profit Campaigns' },
-        { key: '4', label: 'All-Profit', content: 'Content for Top 5 Revenue Campaigns' },
-        { key: '5', label: 'All-Loss', content: 'Content for Top 5 Profit Campaigns' },
+        { key: '4', label: 'All profit', content: 'Content for Top 5 Revenue Campaigns' },
+        { key: '5', label: 'All loss', content: 'Content for Top 5 Profit Campaigns' },
     ];
     const items2 = [
         { key: '1', label: 'Date', content: 'Content for Top 5 Spend Campaigns' },
@@ -2676,7 +2689,7 @@ const Dashboard = () => {
 
     const handleSlideChange = (from, to) => {
         // console.log(to, "to");
-        setActiveTab((parseInt(to)+1).toString());
+        setActiveTab((parseInt(to) + 1).toString());
         // console.log((parseInt(to)+1).toString());
     };
 
@@ -2685,23 +2698,23 @@ const Dashboard = () => {
         // console.log(index);
         // console.log(parseInt(index)-1);
         // carouselRef.current.goTo(parseInt(index)-1)
-        
+
     };
 
     const handleSlideChange1 = (from, to) => {
         // console.log(to, "to");
-        setActiveTab1((parseInt(to)+1).toString());
+        setActiveTab1((parseInt(to) + 1).toString());
         // console.log((parseInt(to)+1).toString());
     };
     const handleSlideChange2 = (from, to) => {
         // console.log(to, "to");
-        setActiveTab2((parseInt(to)+1).toString());
+        setActiveTab2((parseInt(to) + 1).toString());
         // console.log((parseInt(to)+1).toString());
     };
 
     const handleSlideChange3 = (from, to) => {
         // console.log(to, "to");
-        setActiveTab3((parseInt(to)+1).toString());
+        setActiveTab3((parseInt(to) + 1).toString());
         // console.log((parseInt(to)+1).toString());
     };
 
@@ -2710,7 +2723,7 @@ const Dashboard = () => {
         // console.log(index);
         // console.log(parseInt(index)-1);
         // carouselRef1.current.goTo(parseInt(index)-1)
-        
+
     };
 
     const handleCarouselChange2 = (index) => {
@@ -2718,7 +2731,7 @@ const Dashboard = () => {
         // console.log(index);
         // console.log(parseInt(index)-1);
         // carouselRef2.current.goTo(parseInt(index)-1)
-        
+
     };
 
     const handleCarouselChange3 = (index) => {
@@ -2726,7 +2739,7 @@ const Dashboard = () => {
         // console.log(index);
         // console.log(parseInt(index)-1);
         // carouselRef3.current.goTo(parseInt(index)-1)
-        
+
     };
 
     const handleTabChange = (key) => {
@@ -2751,12 +2764,12 @@ const Dashboard = () => {
                 activeKey={activeTab1}
                 onChange={(key) => handleCarouselChange1(key)}
                 items={items1.map((item) => ({
-                key: item.key,
-                label: item.label,
+                    key: item.key,
+                    label: item.label,
                 }))}
                 className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
                 style={{
-                    backgroundColor:  'transparent',
+                    backgroundColor: 'transparent',
                     padding: '0',
                     marginBottom: '0',
                 }}
@@ -2773,34 +2786,44 @@ const Dashboard = () => {
     );
 
     const renderCarouselNav = () => (
-            <StickyBox offsetTop={64} offsetBottom={20} style={{ zIndex: 1, padding: '0px', margin: '0px', paddingLeft: '0px' }}>
-                <Tabs
-                    activeKey={activeTab}
-                    onChange={(key) => handleCarouselChange(key)}
-                    items={items.map((item) => ({
+        <StickyBox offsetTop={64} offsetBottom={20} style={{ zIndex: 1, padding: '0px', margin: '0px', paddingLeft: '0px' }}>
+            <Tabs
+                activeKey={activeTab}
+                onChange={(key) => handleCarouselChange(key)}
+                items={items.map((item) => ({
                     key: item.key,
                     label: item.label,
-                    }))}
-                    className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
-                    style={{
-                        backgroundColor:  'transparent',
-                        padding: '0',
-                        marginBottom: '0',
-                    }}
-                    tabBarStyle={{
-                        fontSize: '12px',
-                        padding: '0',
-                        height: '30px',
-                        lineHeight: '30px',
-                        marginBottom: '-1px',
-                        borderBottom: 'none',
-                    }}
-                />
-            </StickyBox>
+                }))}
+                className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
+                style={{
+                    backgroundColor: 'transparent',
+                    padding: '0',
+                    marginBottom: '0',
+                }}
+                tabBarStyle={{
+                    fontSize: '12px',
+                    padding: '0',
+                    height: '30px',
+                    lineHeight: '30px',
+                    marginBottom: '-1px',
+                    borderBottom: 'none',
+                }}
+            />
+        </StickyBox>
     );
 
     const RenderCarouselNav2 = React.memo(() => (
-        <StickyBox offsetTop={64} offsetBottom={20} style={{ zIndex: 1, padding: '0px', margin: '0px' }}>
+        <StickyBox offsetTop={64} offsetBottom={20} style={{
+            zIndex: 1, padding: '0px', margin: '0px', width: '100%',
+            borderRadius: 12,
+            backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+            padding: 10,
+            height: 'auto', // ✅ Key: no fixed height
+            boxShadow:
+                theme === 'dark'
+                    ? '0 1px 3px rgba(0,0,0,0.6)'
+                    : '0 1px 6px rgba(0,0,0,0.08)',
+        }}>
             <Tabs
                 activeKey={activeTab2}
                 onChange={handleCarouselChange2}
@@ -2810,7 +2833,7 @@ const Dashboard = () => {
                 }))}
                 className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
                 style={{
-                    backgroundColor:  'transparent',
+                    backgroundColor: 'transparent',
                     padding: '0',
                     marginBottom: '0',
                 }}
@@ -2837,7 +2860,7 @@ const Dashboard = () => {
                 }))}
                 className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
                 style={{
-                    backgroundColor:  'transparent',
+                    backgroundColor: 'transparent',
                     padding: '0',
                     marginBottom: '0',
                 }}
@@ -2855,21 +2878,23 @@ const Dashboard = () => {
 
     const [columnDefs1] = useState([
         {
-            headerName: "AccountNumber",
+            headerName: "Account number",
             field: "accountNumber",
             resizable: true,
             sortable: true,
             hide: true, // Hide column as it's grouped
             rowGroup: true,
             enableRowGroup: true,
-            
+
 
         }, // Group by Network
-        {field:'specifiedDate', headerName:'Date',
+        {
+            field: 'specifiedDate', headerName: 'Date',
             suppressMenu: true,
             minWidth: 108,
             menuTabs: [],
-            headerClass: 'hide-menu',},
+            headerClass: 'hide-menu',
+        },
         {
             field: "spend",
             aggFunc: spender,
@@ -2904,7 +2929,7 @@ const Dashboard = () => {
             minWidth: 108,
         },
         {
-            headerName: 'Project Name',
+            headerName: 'Project name',
             field: "revenuePartner",
             suppressMenu: true,
             menuTabs: [],
@@ -2919,17 +2944,18 @@ const Dashboard = () => {
             minWidth: 108,
         },
         {
-            field: "mediaBuyerName", headerName:'User',
+            field: "mediaBuyerName", headerName: 'User',
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
             minWidth: 108,
         },
     ]);
-    
+
 
     const [columnDefs2] = useState([
-        {   field: 'campaign_name', headerName:'CampaignName', minWidth: 430, suppressAutoSize: true,  
+        {
+            field: 'campaign_name', headerName: 'Campaign name', minWidth: 430, suppressAutoSize: true,
             resizable: true,
             sortable: true,
             hide: true, // Hide column as it's grouped
@@ -2937,17 +2963,19 @@ const Dashboard = () => {
             enableRowGroup: true,
         },
         {
-            field: "accountNumber", minWidth:170,
+            field: "accountNumber", minWidth: 170, headerName: "Account number",
             suppressMenu: true,
             menuTabs: [],
             headerClass: 'hide-menu',
 
         }, // Group by Network
-        {field:'Date',
-        minWidth: 112,
-        suppressMenu: true,
-        menuTabs: [],
-        headerClass: 'hide-menu',},
+        {
+            field: 'Date',
+            minWidth: 112,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
         {
             field: "spend",
             aggFunc: spender,
@@ -2981,7 +3009,7 @@ const Dashboard = () => {
             headerClass: 'hide-menu',
         },
         {
-            headerName: 'Project Name',
+            headerName: 'Project name',
             field: "revenuePartner",
             minWidth: 150,
             suppressMenu: true,
@@ -2996,7 +3024,7 @@ const Dashboard = () => {
             headerClass: 'hide-menu',
         },
         {
-            field: "mediaBuyerName", headerName:'User',
+            field: "mediaBuyerName", headerName: 'User',
             minWidth: 125,
             suppressMenu: true,
             menuTabs: [],
@@ -3004,8 +3032,8 @@ const Dashboard = () => {
         },
     ]);
     const [columnDefs3] = useState([
-        {   
-            field: 'domain', minWidth: 200, suppressAutoSize: true,  
+        {
+            field: 'domain', minWidth: 200, suppressAutoSize: true,
             resizable: true,
             sortable: true,
             hide: true, // Hide column as it's grouped
@@ -3013,7 +3041,7 @@ const Dashboard = () => {
             enableRowGroup: true,
         },
         {
-            field: "accountNumber", minWidth:180,
+            field: "accountNumber", minWidth: 180, headerName: 'Account number',
             resizable: true,
             sortable: true,
             hide: true, // Hide column as it's grouped
@@ -3024,11 +3052,13 @@ const Dashboard = () => {
             headerClass: 'hide-menu',
 
         }, // Group by Network
-        {field:'specifiedDate', headerName:"Date",
-        minWidth: 125,
-        suppressMenu: true,
-        menuTabs: [],
-        headerClass: 'hide-menu',},
+        {
+            field: 'specifiedDate', headerName: "Date",
+            minWidth: 125,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
         {
             field: "spend",
             aggFunc: spender,
@@ -3062,7 +3092,7 @@ const Dashboard = () => {
             headerClass: 'hide-menu',
         },
         {
-            headerName: 'Project Name',
+            headerName: 'Project name',
             field: "revenuePartner",
             minWidth: 180,
             suppressMenu: true,
@@ -3077,7 +3107,7 @@ const Dashboard = () => {
             headerClass: 'hide-menu',
         },
         {
-            field: "MediaBuyerName", headerName:'User',
+            field: "MediaBuyerName", headerName: 'User',
             minWidth: 125,
             suppressMenu: true,
             menuTabs: [],
@@ -3085,8 +3115,8 @@ const Dashboard = () => {
         },
     ]);
     const [columnDefs4] = useState([
-        {   
-            field: 'BMName', minWidth: 200, suppressAutoSize: true,  
+        {
+            field: 'BMName', minWidth: 200, suppressAutoSize: true, headerName: 'BM name',
             resizable: true,
             sortable: true,
             hide: true, // Hide column as it's grouped
@@ -3097,7 +3127,7 @@ const Dashboard = () => {
             headerClass: 'hide-menu',
         },
         {
-            field: "AgencyName", minWidth:180,
+            field: "AgencyName", minWidth: 180, headerName: 'Agency name',
             resizable: true,
             sortable: true,
             suppressMenu: true,
@@ -3108,11 +3138,13 @@ const Dashboard = () => {
             // enableRowGroup: true,
 
         }, // Group by Network
-        {field:'specifiedDate', headerName:"Date",
-        minWidth: 125,
-        suppressMenu: true,
-        menuTabs: [],
-        headerClass: 'hide-menu',},
+        {
+            field: 'specifiedDate', headerName: "Date",
+            minWidth: 125,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
         {
             field: "spend",
             aggFunc: spender,
@@ -3153,19 +3185,19 @@ const Dashboard = () => {
         resizable: true, // Enable resizing
         sortable: true, // Enable sorting
         cellRendererParams: {
-          suppressCount: true, // Suppress row count in the grouped column
+            suppressCount: true, // Suppress row count in the grouped column
         },
-      };
+    };
 
     const autoGroupColumnDef = {
-        headerName: 'Campaign Name', // Display name for the grouped column
+        headerName: 'Campaign name', // Display name for the grouped column
         minWidth: 430, // Set width for grouped rows
         resizable: true, // Enable resizing
         sortable: true, // Enable sorting
         cellRendererParams: {
-          suppressCount: true, // Suppress row count in the grouped column
+            suppressCount: true, // Suppress row count in the grouped column
         },
-      };
+    };
 
     const autoGroupColumnDefDomain = {
         headerName: 'Domain', // Display name for the grouped column
@@ -3173,18 +3205,18 @@ const Dashboard = () => {
         resizable: true, // Enable resizing
         sortable: true, // Enable sorting
         cellRendererParams: {
-          suppressCount: true, // Suppress row count in the grouped column
+            suppressCount: true, // Suppress row count in the grouped column
         },
-      };
-      const autoGroupColumnDefAgency = {
-        headerName: 'BMName', // Display name for the grouped column
+    };
+    const autoGroupColumnDefAgency = {
+        headerName: 'BM name', // Display name for the grouped column
         minWidth: 250, // Set width for grouped rows
         resizable: true, // Enable resizing
         sortable: true, // Enable sorting
         cellRendererParams: {
-          suppressCount: true, // Suppress row count in the grouped column
+            suppressCount: true, // Suppress row count in the grouped column
         },
-      };
+    };
 
     //   const [columnDefs2] = useState([
     //     { field: "revenuePartner", 
@@ -3233,12 +3265,12 @@ const Dashboard = () => {
     const refreshUsers = () => {
         try {
             setSkeletonLoading(true);
-            functionCallForResponse(selectedItems);  
-            
+            functionCallForResponse(selectedItems);
+
         } catch (error) {
             console.error("Error refreshing account data:", error);
-            
-        } 
+
+        }
     };
 
     //   function currencyFormatter(params) {
@@ -3250,25 +3282,25 @@ const Dashboard = () => {
         const letters = '0123456789ABCDEF';
         let color = '#';
         for (let i = 0; i < 6; i++) {
-          color += letters[Math.floor(Math.random() * 16)];
+            color += letters[Math.floor(Math.random() * 16)];
         }
         return color;
-      };
-      
-      const colorMap = {};
-      
-      const getColorForValue = (value) => {
+    };
+
+    const colorMap = {};
+
+    const getColorForValue = (value) => {
         if (!colorMap[value]) {
-          colorMap[value] = getRandomColor(); // Generate and assign a color
+            colorMap[value] = getRandomColor(); // Generate and assign a color
         }
         return colorMap[value]; // Return the assigned color
-      };
+    };
 
-    const onClickBarChart = (value) =>{
+    const onClickBarChart = (value) => {
         // console.log(value);
         localStorage.setItem('showGraph', value);
         setShowGraphs(value);
-        
+
     }
 
 
@@ -3276,1522 +3308,1748 @@ const Dashboard = () => {
 
 
     // chartOptions.js
- const getChartOptions = (theme) => ({
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      x: {
-        ticks: {
-          padding: 30,
-          color: theme === 'dark' ? '#fff' : '#000',
+    const getChartOptions = (theme) => ({
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            x: {
+                ticks: {
+                    padding: 30,
+                    color: theme === 'dark' ? '#fff' : '#000',
+                },
+                grid: {
+                    color: theme === 'dark' ? '#444' : '#e0e0e0',
+                },
+            },
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: (value) => value.toFixed(2),
+                    color: theme === 'dark' ? '#fff' : '#000',
+                },
+                grid: {
+                    color: theme === 'dark' ? '#444' : '#e0e0e0',
+                },
+            },
         },
-        grid: {
-          color: theme === 'dark' ? '#444' : '#e0e0e0',
+        plugins: {
+            legend: {
+                position: 'top',
+                labels: {
+                    usePointStyle: true,
+                    color: '#fff',
+                    font: { size: 13, weight: 'normal' },
+                    generateLabels: (chart) => {
+                        const colors = {
+                            Spend: 'rgba(44, 144, 192, 1)',
+                            Revenue: 'rgba(99, 200, 99, 1)',
+                            RPC: 'rgba(255, 99, 132, 1)',
+                            CPL: 'rgba(255, 159, 64, 1)',
+                            Profit: 'rgba(255, 206, 86, 1)',
+                            Margin: 'rgba(153, 102, 255, 1)',
+                        };
+                        return chart.data.datasets.map((dataset, i) => ({
+                            text: dataset.label,
+                            fillStyle: colors[dataset.label],
+                            strokeStyle: colors[dataset.label],
+                            pointStyle: 'rectRounded',
+                            hidden: !chart.isDatasetVisible(i),
+                            index: i,
+                            fontColor: '#fff',
+                        }));
+                    },
+                },
+                onClick: (e, legendItem, legend) => {
+                    const chart = legend.chart;
+                    const index = legendItem.index;
+                    const meta = chart.getDatasetMeta(index);
+                    meta.hidden = meta.hidden === null ? !chart.data.datasets[index].hidden : null;
+                    chart.update();
+                },
+            },
+            tooltip: {
+                mode: 'index',
+                intersect: true,
+                displayColors: true,
+                boxWidth: 15,
+                boxHeight: 15,
+                callbacks: {
+                    label: function (tooltipItem) {
+                        const index = tooltipItem.dataIndex;
+                        const dataset = tooltipItem.dataset;
+                        const value = dataset.data[index];
+                        return `${dataset.label}: ${value}`;
+                    },
+                },
+            },
         },
-      },
-      y: {
-        beginAtZero: true,
-        ticks: {
-          callback: (value) => value.toFixed(2),
-          color: theme === 'dark' ? '#fff' : '#000',
-        },
-        grid: {
-          color: theme === 'dark' ? '#444' : '#e0e0e0',
-        },
-      },
-    },
-    plugins: {
-      legend: {
-        position: 'top',
-        labels: {
-          usePointStyle: true,
-          color: '#fff',
-          font: { size: 13, weight: 'normal' },
-          generateLabels: (chart) => {
-            const colors = {
-              Spend: 'rgba(44, 144, 192, 1)',
-              Revenue: 'rgba(99, 200, 99, 1)',
-              RPC: 'rgba(255, 99, 132, 1)',
-              CPL: 'rgba(255, 159, 64, 1)',
-              Profit: 'rgba(255, 206, 86, 1)',
-              Margin: 'rgba(153, 102, 255, 1)',
-            };
-            return chart.data.datasets.map((dataset, i) => ({
-              text: dataset.label,
-              fillStyle: colors[dataset.label],
-              strokeStyle: colors[dataset.label],
-              pointStyle: 'rectRounded',
-              hidden: !chart.isDatasetVisible(i),
-              index: i,
-              fontColor: '#fff',
-            }));
-          },
-        },
-        onClick: (e, legendItem, legend) => {
-          const chart = legend.chart;
-          const index = legendItem.index;
-          const meta = chart.getDatasetMeta(index);
-          meta.hidden = meta.hidden === null ? !chart.data.datasets[index].hidden : null;
-          chart.update();
-        },
-      },
-      tooltip: {
-        mode: 'index',
-        intersect: true,
-        displayColors: true,
-        boxWidth: 15,
-        boxHeight: 15,
-        callbacks: {
-          label: function (tooltipItem) {
-            const index = tooltipItem.dataIndex;
-            const dataset = tooltipItem.dataset;
-            const value = dataset.data[index];
-            return `${dataset.label}: ${value}`;
-          },
-        },
-      },
-    },
-  });
-  
+    });
+
 
     // console.log(rowData?.map(each=> each.profit > 0));
     // console.log(chartData.revenue, "data");
     return (
         <div>
-            {/* {userdetails?.role === "Revenue_Partner" && <div><h1>hello</h1></div>}
-            {userdetails?.role !== "Revenue_Partner" &&  */}
+
             <div>
-            {rendering === true ? <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><Spin size="large"/></div> : (
-                <div style={{ padding: '20px', paddingBottom:'0px' }}>
-                <div className='Dashboard-Details-2'>
-                    <div style={{ width: '100%' }}>
-                            <h3 style={{  color: theme === 'dark' ? 'white' : 'black' , textAlign: 'start' }}>
-                                Welcome, {userdetails?.userName} !
-                            </h3>
-                    </div>
-                    <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
-                        
-                        <div style={{ width: '100%', display: 'flex', justifyContent: "space-between" }}>
-                            <Row style={{ width: '100%', height: '100px', display: 'flex', justifyContent: 'space-between' }}>
-                                <Col xs={12} sm={8} md={6} >
-                                    <Select
-                                        mode="tags"
-                                        style={{
-                                            width: '100%',
-                                            maxHeight: '40px',
-                                            overflowY: 'auto',
-                                            // width: '100%',
-                                        }}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                        placeholder="Select Projects"
-                                        value={firstSelectValues}
-                                        onChange={handleFirstSelectChange}
-                                        maxTagCount="responsive"
-                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        dropdownRender={(menu) => (
-                                            <div
+                {rendering === true ? <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><Spin size="large" /></div> : (
+                    <div style={{ padding: '20px', paddingBottom: '0px' }}>
+                        <div className='Dashboard-Details-2'>
+                            <div style={{ width: '100%' }}>
+                                <h3 style={{ color: theme === 'dark' ? 'white' : 'black', textAlign: 'start' }}>
+                                    Welcome, {userdetails?.userName} !
+                                </h3>
+                            </div>
+                            <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
+
+                                <div style={{ width: '100%', display: 'flex', justifyContent: "space-between" }}>
+                                    <Row style={{ width: '100%', height: '100px', display: 'flex', justifyContent: 'space-between' }}>
+                                        <Col xs={12} sm={8} md={6} >
+                                            <Select
+                                                mode="tags"
                                                 style={{
                                                     width: '100%',
-                                                    maxHeight: '200px',
+                                                    maxHeight: '40px',
                                                     overflowY: 'auto',
-                                                    overflowX: 'hidden',
-                                                    // padding: '8px',
-                                                    scrollbarWidth: 'none', // For Firefox
-                                                    msOverflowStyle: 'none',
+                                                    // width: '100%',
+                                                }}
+                                                
+                                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                                placeholder="Select projects"
+                                                value={firstSelectValues}
+                                                onChange={handleFirstSelectChange}
+                                                maxTagCount="responsive"
+                                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                dropdownRender={(menu) => (
+                                                    <div
+                                                        style={{
+                                                            width: '100%',
+                                                            maxHeight: '200px',
+                                                            overflowY: 'auto',
+                                                            overflowX: 'hidden',
+                                                            // padding: '8px',
+                                                            scrollbarWidth: 'none', // For Firefox
+                                                            msOverflowStyle: 'none',
+                                                        }}
+                                                    >
+                                                        {menu}
+                                                        
+                                                    </div>
+                                             
+                                                )}
+                                                options={Object.keys(transformedData).map((category) => ({
+                                                    value: category,
+                                                    label: category,
+                                                }))}
+                                                
+                                            />
+                                        </Col>
+
+                                        <Col xs={16} style={{ marginBottom: '5px' }}>
+                                            <Select
+                                                mode="multiple"
+                                                showSearch
+                                                onSearch={handleSearchChange}  // Update searchValue dynamically
+                                                style={{ width: '100%' }}
+                                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                                placeholder="Select Accounts"
+                                                dropdownClassName={theme === 'dark' ? 'custom-dropdown':'custom-dropdown'}
+                                                value={[]} // This should be updated to reflect selectedItems based on the selected categories
+                                                dropdownRender={() => (
+                                                    <div style={{ maxHeight: '300px', overflowY: 'auto', padding: '8px' }}>
+                                                        {renderInnerSelects(theme)}
+                                                    </div>
+                                                )}
+                                            />
+                                        </Col>
+
+                                        <Col xs={7} style={{ marginBottom: '5px' }}>
+                                            <Select
+                                                showSearch
+                                                onChange={onChangeTime}
+                                                style={{
+                                                    width: '100%',
+                                                }}
+                                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                                placeholder="Select timezone"
+                                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                optionFilterProp="label"
+                                                value={time}
+                                                options={timezones.map((item) => ({
+                                                    value: item,
+                                                    label: item,
+                                                }))}
+                                            />
+                                        </Col>
+
+                                        <Col xs={20}>
+                                            <ConfigProvider
+                                                locale={locale}
+                                                theme={{
+                                                    token: {
+                                                        colorPrimary: '#C7F39A',
+                                                        colorTextLightSolid: '#000',
+                                                    },
                                                 }}
                                             >
-                                                {menu}
-                                            </div>
-                                        )}
-                                        options={Object.keys(transformedData).map((category) => ({
-                                            value: category,
-                                            label: category,
-                                        }))}
-                                    />
-                                </Col>
-        
-                                <Col xs={16} style={{marginBottom:'5px'}}>
-                                    <Select
-                                        mode="multiple"
-                                        showSearch
-                                        onSearch={handleSearchChange}  // Update searchValue dynamically
-                                        style={{ width: '100%' }}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                        placeholder="Select Accounts"
-                                        dropdownClassName={theme === 'dark' && 'custom-dropdown'}
-                                        value={[]} // This should be updated to reflect selectedItems based on the selected categories
-                                        dropdownRender={() => (
-                                            <div style={{ maxHeight: '300px', overflowY: 'auto', padding: '8px' }}>
-                                                {renderInnerSelects(theme)}
-                                            </div>
-                                        )}
-                                    />
-                                </Col>
-        
-                                <Col  xs={7} style={{marginBottom:'5px'}}>
-                                    <Select
-                                        showSearch
-                                        onChange={onChangeTime}
-                                        style={{
-                                            width: '100%',
-                                        }}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                        placeholder="Select Timezone"
-                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        optionFilterProp="label"
-                                        value={time}
-                                        options={timezones.map((item) => ({
-                                            value: item,
-                                            label: item,
-                                        }))}
-                                    />
-                                </Col>
-        
-                                <Col  xs={20}>
-                                    <ConfigProvider 
-                                        locale={locale}
-                                        theme={{
-                                            token: {
-                                            colorPrimary: '#C7F39A', 
-                                            colorTextLightSolid: '#000',
-                                            },
-                                        }}
-                                    >
-                                        <RangePicker
-                                            presets={rangePresets}
-                                            value={selectedDates}
-                                            onCalendarChange={handleChangeDates}
-                                            open={isPickerOpen} // Control the open/close state
-                                            onOpenChange={handleOpenChange} // Handle outside click
-                                            onClick={() => setIsPickerOpen(true)} // Open the picker when clicked
-                                            disabledDate={disabledDate}
-                                            format="YYYY-MM-DD"
-                                            dropdownClassName={`custom-single-month-picker Dashboard-Details-2 ${theme === 'dark' ? 'dark-theme-dropdown' : ''}`}
-                                            style={{
-                                                width: '100%',
-                                                height: '35px', // Adjust height as needed
-                                                backgroundColor: theme === 'dark' ? '#333' : '#fff',
-                                                color: theme === 'dark' ? '#fff' : '#000',
-                                                borderRadius: 6,
-                                                padding: '8px 12px',
-                                            }}
-                                            renderExtraFooter={() => (
-                                                <div style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '8px', paddingTop: '5px', paddingBottom: '5px' }}>
-                                                <Button
-                                                    style={{ marginRight: '8px' }} // Adds spacing between buttons
-                                                    onClick={onClickCloseButton} // Close the picker
-                                                >
-                                                    Close
-                                                </Button>
-                                                <Button
-                                                    style={{ backgroundColor: '#C7F39A' }} 
-                                                    onClick={handleSubmit}
-                                                >
-                                                    Submit
-                                                </Button>
-                                                </div>
-                                            )}
-                                        />
-                                    </ConfigProvider>
-                                </Col>
-                                <Col xs={4}>
-                                    <Button 
-                                        type="default" 
-                                        icon={<ReloadOutlined className='black-icon' />} 
-                                        style={{ float: "right", marginLeft: "10px", backgroundColor: '#C7F39A' }} 
-                                        onClick={refreshUsers}  // Call refresh function when clicked
-                                    >
-                                    </Button>
-                                </Col>
-                            </Row>
+                                                <RangePicker
+                                                    presets={rangePresets}
+                                                    value={selectedDates}
+                                                    onCalendarChange={handleChangeDates}
+                                                    open={isPickerOpen} // Control the open/close state
+                                                    onOpenChange={handleOpenChange} // Handle outside click
+                                                    onClick={() => setIsPickerOpen(true)} // Open the picker when clicked
+                                                    disabledDate={disabledDate}
+                                                    format="YYYY-MM-DD"
+                                                    dropdownClassName={`custom-single-month-picker Dashboard-Details-2 ${theme === 'dark' ? 'dark-theme-dropdown' : ''}`}
+                                                    style={{
+                                                        width: '100%',
+                                                        height: '35px', // Adjust height as needed
+                                                        backgroundColor: theme === 'dark' ? '#333' : '#fff',
+                                                        color: theme === 'dark' ? '#fff' : '#000',
+                                                        borderRadius: 6,
+                                                        padding: '8px 12px',
+                                                    }}
+                                                    renderExtraFooter={() => (
+                                                        <div style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '8px', paddingTop: '5px', paddingBottom: '5px' }}>
+                                                            <Button
+                                                                style={{ marginRight: '8px', border: ' 1px solid #4caf50' }} // Adds spacing between buttons
+                                                                onClick={onClickCloseButton} // Close the picker
+                                                            >
+                                                                Close
+                                                            </Button>
+                                                            <Button
+                                                                style={{ backgroundColor: '#91C25F', border: ' 1px solid #4caf50' }}
+                                                                onClick={handleSubmit}
+                                                            >
+                                                                Submit
+                                                            </Button>
+                                                        </div>
+                                                    )}
+                                                />
+                                            </ConfigProvider>
+                                        </Col>
+                                        <Col xs={4}>
+                                            <Button
+                                                type="default"
+                                                icon={<ReloadOutlined className='black-icon' />}
+                                                style={{ float: "right", marginLeft: "10px", backgroundColor: '#C7F39A' }}
+                                                onClick={refreshUsers}  // Call refresh function when clicked
+                                            >
+                                            </Button>
+                                        </Col>
+                                    </Row>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-                <div className='Dashboard-Details-1'>
-                    <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div style={{ width: '40%' }}>
+                        <div className='Dashboard-Details-1'>
+                            <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
+                                {/* <div style={{ width: '40%' }}>
                             <h1 style={{  color: theme === 'dark' ? 'white' : 'black' , fontSize: '22px', textAlign: 'start' }}>
                                 Welcome, {userdetails?.userName} !
                             </h1>
-                        </div>
-                        <div style={{ width: '60%', display: 'flex', justifyContent: 'flex-end', height: '50px' }}>
-                            <Row style={{ width: '100%', height: '100px', display: 'flex', justifyContent: 'space-between' }}>
-                                <Col span={5}>
-                                    <Select
-                                        mode="tags"
-                                        style={{
-                                            width: '100%',
-                                            maxHeight: '40px',
-                                            overflowY: 'auto',
-                                            // width: '100%',
-                                        }}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                        placeholder="Select Projects"
-                                        value={firstSelectValues}
-                                        onChange={handleFirstSelectChange}
-                                        maxTagCount="responsive"
-                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        dropdownRender={(menu) => (
-                                            <div
+                        </div> */}
+                                <div style={{ width: '40%', textAlign: 'start' }}>
+                                    <h3 style={{
+                                        margin: 0,
+                                        fontSize: '20px',
+                                        fontWeight: 600,
+                                        color: theme === 'dark' ? '#fff' : '#4b5563'  // gray-700
+                                    }}>
+                                        Analytics dashboard
+                                    </h3>
+                                    <p style={{
+                                        margin: 0,
+                                        fontSize: '13px',
+                                        color: theme === 'dark' ? '#cbd5e1' : '#6b7280'  // gray-500
+                                    }}>
+                                        Real-time insights for your digital campaigns
+                                    </p>
+                                </div>
+
+                                <div style={{
+                                    width: '60%', display: 'flex', justifyContent: 'flex-end', height: '50px', borderRadius: 12,
+                                    backgroundColor: theme === 'dark' ? '#1E1E1E' : '#dbd9d9ff',
+                                    padding: "10px",
+                                    marginBottom:'5px',
+
+                                    boxShadow:
+                                        theme === 'dark'
+                                            ? '0 1px 3px rgba(0,0,0,0.6)'
+                                            : '0 1px 6px rgba(0, 0, 0, 0.04)',
+                                }}>
+                                    <Row style={{ width: '100%', height: '100px', display: 'flex', justifyContent: 'space-between' }}>
+                                        <Col span={5}>
+                                            <Select
+                                                mode="tags"
                                                 style={{
                                                     width: '100%',
-                                                    maxHeight: '200px',
+                                                    maxHeight: '40px',
                                                     overflowY: 'auto',
-                                                    overflowX: 'hidden',
-                                                    // padding: '8px',
-                                                    scrollbarWidth: 'none', // For Firefox
-                                                    msOverflowStyle: 'none',
+                                                    // width: '100%',
+                                                }}
+                                                className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
+                                                placeholder="Select Projects"
+                                                value={firstSelectValues}
+                                                onChange={handleFirstSelectChange}
+                                                maxTagCount="responsive"
+                                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                dropdownRender={(menu) => (
+                                                    <div
+                                                        style={{
+                                                            width: '100%',
+                                                            maxHeight: '200px',
+                                                            overflowY: 'auto',
+                                                            overflowX: 'hidden',
+                                                            // padding: '8px',
+                                                            scrollbarWidth: 'none', // For Firefox
+                                                            msOverflowStyle: 'none',
+                                                        }}
+                                                    >
+                                                        {menu}
+                                                    </div>
+                                                )}
+                                                options={Object.keys(transformedData).map((category) => ({
+                                                    value: category,
+                                                    label: category,
+                                                    title:''
+                                                }))}
+                                                
+                                            />
+                                        </Col>
+
+                                        <Col span={6}>
+                                            <Select
+                                                mode="multiple"
+                                                showSearch
+                                                onSearch={handleSearchChange}  // Update searchValue dynamically
+                                                style={{ width: '100%' }}
+                                                className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
+                                                placeholder="Select Accounts"
+                                                dropdownClassName={theme === 'dark' && 'custom-dropdown'}
+                                                value={[]} // This should be updated to reflect selectedItems based on the selected categories
+                                                dropdownRender={() => (
+                                                    <div style={{ maxHeight: '300px', overflowY: 'auto', padding: '8px' }}>
+                                                        {renderInnerSelects(theme)}
+                                                    </div>
+                                                )}
+                                            />
+                                        </Col>
+
+                                        <Col span={3}>
+                                            <Select
+                                                showSearch
+                                                onChange={onChangeTime}
+                                                style={{
+                                                    width: '100%',
+                                                }}
+                                                className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
+                                                placeholder="Select timezone"
+                                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                optionFilterProp="label"
+                                                value={time}
+                                                options={timezones.map((item) => ({
+                                                    value: item,
+                                                    label: item,
+                                                    title:''
+                                                }))}
+                                            />
+                                        </Col>
+
+                                        <Col span={8}>
+                                            <ConfigProvider
+                                                locale={locale}
+                                                theme={{
+                                                    token: {
+                                                        colorPrimary: '#91C25F',
+                                                        colorTextLightSolid: '#000',
+                                                    },
                                                 }}
                                             >
-                                                {menu}
-                                            </div>
-                                        )}
-                                        options={Object.keys(transformedData).map((category) => ({
-                                            value: category,
-                                            label: category,
-                                        }))}
-                                    />
-                                </Col>
-        
-                                <Col span={6}>
-                <Select
-                    mode="multiple"
-                    showSearch
-                    onSearch={handleSearchChange}  // Update searchValue dynamically
-                    style={{ width: '100%' }}
-                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                    placeholder="Select Accounts"
-                    dropdownClassName={theme === 'dark' && 'custom-dropdown'}
-                    value={[]} // This should be updated to reflect selectedItems based on the selected categories
-                    dropdownRender={() => (
-                        <div style={{ maxHeight: '300px', overflowY: 'auto', padding: '8px' }}>
-                            {renderInnerSelects(theme)}
+                                                <RangePicker
+                                                    className="green-border-picker"
+                                                    presets={rangePresets}
+                                                    value={selectedDates}
+                                                    onCalendarChange={handleChangeDates}
+                                                    open={isPickerOpen} // Control the open/close state
+                                                    onOpenChange={handleOpenChange} // Handle outside click
+                                                    onClick={() => setIsPickerOpen(true)} // Open the picker when clicked
+                                                    disabledDate={disabledDate}
+                                                    format="YYYY-MM-DD"
+                                                    style={{
+                                                        width: '100%',
+                                                        backgroundColor: theme === 'dark' ? '#555' : undefined,
+                                                        color: theme === 'dark' ? 'white' : undefined,
+                                                    }}
+                                                    dropdownClassName={theme === 'dark' ? 'Dashboard-Details-1 dark-theme-dropdown' : ' Dashboard-Details-1'}
+                                                    renderExtraFooter={() => (
+                                                        <div style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '8px', paddingTop: '5px', paddingBottom: '5px' }}>
+                                                            <Button
+                                                                style={{ marginRight: '8px', border: ' 1px solid #4caf50' }} // Adds spacing between buttons
+                                                                onClick={onClickCloseButton} // Close the picker
+                                                            >
+                                                                Close
+                                                            </Button>
+                                                            <Button
+                                                                style={{ backgroundColor: '#91C25F', border: ' 1px solid #4caf50' }}
+                                                                onClick={handleSubmit}
+                                                            >
+                                                                Submit
+                                                            </Button>
+                                                        </div>
+                                                    )}
+                                                />
+                                            </ConfigProvider>
+                                        </Col>
+                                        <Col>
+                                            <Button
+                                                type="default"
+                                                icon={<ReloadOutlined className='black-icon' />}
+                                                style={{ float: "right", marginLeft: "10px", backgroundColor: '#91C25F' }}
+                                                onClick={refreshUsers}  // Call refresh function when clicked
+                                            >
+                                            </Button>
+                                        </Col>
+                                    </Row>
+                                </div>
+                            </div>
                         </div>
-                    )}
-                />
-            </Col>
-        
-                                <Col span={3}>
-                                    <Select
-                                        showSearch
-                                        onChange={onChangeTime}
-                                        style={{
-                                            width: '100%',
-                                        }}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                        placeholder="Select Timezone"
-                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        optionFilterProp="label"
-                                        value={time}
-                                        options={timezones.map((item) => ({
-                                            value: item,
-                                            label: item,
-                                        }))}
-                                    />
-                                </Col>
-        
-                                <Col span={8}>
-                                    <ConfigProvider 
-                                        locale={locale}
-                                        theme={{
-                                            token: {
-                                            colorPrimary: '#91C25F', 
-                                            colorTextLightSolid: '#000',
-                                            },
-                                        }}
-                                    >
-                                        <RangePicker
-                                            presets={rangePresets}
-                                            value={selectedDates}
-                                            onCalendarChange={handleChangeDates}
-                                            open={isPickerOpen} // Control the open/close state
-                                            onOpenChange={handleOpenChange} // Handle outside click
-                                            onClick={() => setIsPickerOpen(true)} // Open the picker when clicked
-                                            disabledDate={disabledDate}
-                                            format="YYYY-MM-DD"
-                                            style={{
-                                                width: '100%',
-                                                backgroundColor: theme === 'dark' ? '#555' : undefined,
-                                                color: theme === 'dark' ? 'white' : undefined,
-                                            }}
-                                            dropdownClassName={theme === 'dark' ? 'Dashboard-Details-1 dark-theme-dropdown' : ' Dashboard-Details-1'}
-                                            renderExtraFooter={() => (
-                                                <div style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '8px', paddingTop: '5px', paddingBottom: '5px' }}>
-                                                <Button
-                                                    style={{ marginRight: '8px' }} // Adds spacing between buttons
-                                                    onClick={onClickCloseButton} // Close the picker
-                                                >
-                                                    Close
-                                                </Button>
-                                                <Button
-                                                    style={{ backgroundColor: '#91C25F' }} 
-                                                    onClick={handleSubmit}
-                                                >
-                                                    Submit
-                                                </Button>
-                                                </div>
-                                            )}
-                                        />
-                                    </ConfigProvider>
-                                </Col>
-                                <Col>
-                                    <Button 
-                                        type="default" 
-                                        icon={<ReloadOutlined className='black-icon' />} 
-                                        style={{ float: "right", marginLeft: "10px", backgroundColor: '#91C25F' }} 
-                                        onClick={refreshUsers}  // Call refresh function when clicked
-                                    >
-                                    </Button>
-                                </Col>
-                            </Row>
-                        </div>
-                    </div>
-                </div>
-    
-                {skeletonLoading ? (
-                    <Skeleton active paragraph={{ rows: 15 }} style={{marginTop:'20px'}}/>
-                ) : (
-                    <div style={{ height: '100%' }}>
-                        <Card
-                            style={{
-                                marginTop: '25px',
-                                border: 'none',
-                                boxShadow: 'none',
-                                padding: 0,
-                                borderRadius: '20px',
-                                overflow: 'hidden',
-                                backgroundColor: theme === 'dark' ? '#0E1E38' : '#fff',
-                            }}
-                            bodyStyle={{ padding: 0 }}
-                            className='Dashboard-Details-2'
-                        >
-                            <div
-                                className="responsive-grid"
-                                style={{
-                                    display: 'grid',
-                                    // gridTemplateColumns: 'repeat(2, fr)',
-                                    // gap: '1px',
-                                    // backgroundColor: theme === 'dark' ? '#ffffff' : '#0B3D63',
-                                    width: '100%',
-                                    position: 'relative',
-                                }}
-                            >
-                                {[
-                                    { title: 'Revenue', value: revenue1.current, prefix: '$', color: '#91C25F', dot: '#91C25F' },
-                                    { title: 'Profit', value: profit1.current, prefix: '$', color: '#EC7117', dot: '#EC7117' },
-                                    { title: 'Spend', value: spend1.current, prefix: '$', color: '#5C58EE', dot: '#5C58EE' },
-                                    { title: 'Leads', value: leads1.current, color: '#EC7117', dot: '#EC7117' },
-                                    { title: 'Conversions', value: conversions1.current, color: '#5C58EE', dot: '#5C58EE' },
-                                    { title: 'NCPL', value: ncpl1.current, prefix: '$', color: '#91C25F', dot: '#91C25F' },
-                                    { title: 'CPL', value: cpl1.current, color: '#EC7117', dot: '#EC7117' },
-                                    { title: 'CTR', value: ctr1.current, color: '#5C58EE', dot: '#5C58EE' },
-                                    { title: 'CPC', value: cpc1.current, prefix: '$', color: '#EC7117', dot: '#EC7117' },
-                                    { title: 'RPC', value: rpc1.current, color: '#5C58EE', dot: '#5C58EE' },
-                                ].map((item, idx) => (
+
+                        {skeletonLoading ? (
+                            <Skeleton active paragraph={{ rows: 15 }} style={{ marginTop: '20px' }} />
+                        ) : (
+                            <div style={{ height: '100%' }}>
+                                <Card
+                                    style={{
+                                        marginTop: '25px',
+                                        border: 'none',
+                                        boxShadow: 'none',
+                                        padding: 0,
+                                        borderRadius: '20px',
+                                        overflow: 'hidden',
+                                        backgroundColor: theme === 'dark' ? '#0E1E38' : '#fff',
+                                    }}
+                                    bodyStyle={{ padding: 0 }}
+                                    className='Dashboard-Details-2'
+                                >
                                     <div
-                                        key={idx}
-                                        className={theme === 'dark' ? "grid-cell" : "grid-cell-1"}
+                                        className="responsive-grid"
                                         style={{
-                                            backgroundColor: theme === 'dark' ? '#333' : '#e1e2e3',
-                                            padding: '16px',
-                                            textAlign: 'center',
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            justifyContent: 'center',
+                                            display: 'grid',
+                                            // gridTemplateColumns: 'repeat(2, fr)',
+                                            // gap: '1px',
+                                            // backgroundColor: theme === 'dark' ? '#ffffff' : '#0B3D63',
                                             width: '100%',
                                             position: 'relative',
-                                            zIndex: 2,
-                                            borderBottom: idx < 8 ? (theme === 'dark' ? '1px solid #8d8989' : '1px solid #9e9e9e') : 'none',
-                                            borderLeft:
-                                                (idx % 2 === 1 && idx < 8  || idx === 9) ? (theme === 'dark' ? '1px solid #8d8989' : '1px solid #9e9e9e') : 'none',
-                                            // borderLeft: idx === 9 ? (theme === 'dark' ? '1px solid #fff' : '1px solid #0B3D63') : 'none',
                                         }}
                                     >
-                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 6 }}>
-                                            {item.dot && (
-                                                <span
-                                                    style={{
-                                                        display: 'inline-block',
-                                                        height: '10px',
-                                                        width: '10px',
-                                                        borderRadius: '50%',
-                                                        backgroundColor: item.dot,
-                                                        marginRight: 6,
-                                                    }}
-                                                ></span>
-                                            )}
-                                            <span
+                                        {[
+                                            { title: 'Revenue', value: revenue1.current, prefix: '$', color: '#91C25F', dot: '#91C25F' },
+                                            { title: 'Profit', value: profit1.current, prefix: '$', color: '#EC7117', dot: '#EC7117' },
+                                            { title: 'Spend', value: spend1.current, prefix: '$', color: '#5C58EE', dot: '#5C58EE' },
+                                            { title: 'Leads', value: leads1.current, color: '#EC7117', dot: '#EC7117' },
+                                            { title: 'Conversions', value: conversions1.current, color: '#5C58EE', dot: '#5C58EE' },
+                                            { title: 'NCPL', value: ncpl1.current, prefix: '$', color: '#91C25F', dot: '#91C25F' },
+                                            { title: 'CPL', value: cpl1.current, color: '#EC7117', dot: '#EC7117' },
+                                            { title: 'CTR', value: ctr1.current, color: '#5C58EE', dot: '#5C58EE' },
+                                            { title: 'CPC', value: cpc1.current, prefix: '$', color: '#EC7117', dot: '#EC7117' },
+                                            { title: 'RPC', value: rpc1.current, color: '#5C58EE', dot: '#5C58EE' },
+                                        ].map((item, idx) => (
+                                            <div
+                                                key={idx}
+                                                className={theme === 'dark' ? "grid-cell" : "grid-cell-1"}
                                                 style={{
-                                                    fontSize: 15,
-                                                    fontWeight: 600,
-                                                    color: item.color || (theme === 'dark' ? '#66b2ff' : '#4a5d78'),
-                                                }}
-                                            >
-                                                {item.title}
-                                            </span>
-                                        </div>
-                                        <div
-                                            style={{
-                                                fontSize: 18,
-                                                fontWeight: 700,
-                                                // color: '#fff',
-                                            }}
-                                        >
-                                            {item.prefix || ''}
-                                            {data.length > 0 && item.value !== undefined && item.value !== Infinity ? item.value : 0}
-                                        </div>
-                                    </div>
-                                ))}
-                                <div className="vertical-divider" />
-                                <div className="horizontal-divider" />
-                            </div>
-                        </Card>
-
-                        <div className='Dashboard-Details-1'>
-                            <Row gutter={24} style={{ marginTop: '20px' }} justify="space-between">
-                                <Col flex="1">
-                                    <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
-                                        <Statistic
-                                            title={
-                                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                    <span
-                                                        style={{
-                                                            display: 'inline-block',
-                                                            height: '12px',
-                                                            width: '12px',
-                                                            backgroundColor: '#A3F254',
-                                                            borderRadius: '50%',
-                                                            marginRight: '8px',
-                                                        }}
-                                                    ></span>
-                                                    <span style={{ color: '#A3F254', fontWeight: 600 }}>Revenue</span>
-                                                </div>
-                                            }
-                                            value={data.length > 0 ? revenue1.current : 0}
-                                            prefix="$"
-                                            valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}
-                                        />
-                                    </Card>
-                                </Col>
-        
-                                <Col flex="1">
-                                    <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
-                                        <Statistic
-                                            title={
-                                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                    <span
-                                                        style={{
-                                                            display: 'inline-block',
-                                                            height: '12px',
-                                                            width: '12px',
-                                                            backgroundColor: '#EC7117',
-                                                            borderRadius: '50%',
-                                                            marginRight: '8px',
-                                                        }}
-                                                    ></span>
-                                                    <span style={{ color: '#EC7117', fontWeight: 600 }}>Profit</span>
-                                                </div>
-                                            }
-                                            value={data.length > 0 ? profit1.current : 0}
-                                            prefix="$"
-                                            valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
-                                    </Card>
-                                </Col>
-        
-                                <Col flex="1">
-                                    <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
-                                        <Statistic
-                                            title={
-                                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                    <span
-                                                        style={{
-                                                            display: 'inline-block',
-                                                            height: '12px',
-                                                            width: '12px',
-                                                            backgroundColor: '#5C58EE',
-                                                            borderRadius: '50%',
-                                                            marginRight: '8px',
-                                                        }}
-                                                    ></span>
-                                                    <span style={{ color: '#5C58EE', fontWeight: 600 }}>Spend</span>
-                                                </div>
-                                            }
-                                            value={data.length > 0 ? spend1.current : 0}
-                                            prefix="$"
-                                            valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
-                                    </Card>
-                                </Col>
-        
-                                <Col flex="1">
-                                    <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
-                                        <Statistic
-                                            title={
-                                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                    <span
-                                                        style={{
-                                                            display: 'inline-block',
-                                                            height: '12px',
-                                                            width: '12px',
-                                                            backgroundColor: '#EC7117',
-                                                            borderRadius: '50%',
-                                                            marginRight: '8px',
-                                                        }}
-                                                    ></span>
-                                                    <span style={{ color: '#EC7117', fontWeight: 600 }}>Leads</span>
-                                                </div>
-                                            }
-                                            value={data.length > 0 ? leads1.current : 0}
-                                            valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
-                                    </Card>
-                                </Col>
-        
-                                <Col flex="1">
-                                    <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
-                                        <Statistic
-                                            title={
-                                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                    <span
-                                                        style={{
-                                                            display: 'inline-block',
-                                                            height: '12px',
-                                                            width: '12px',
-                                                            backgroundColor: '#5C58EE',
-                                                            borderRadius: '50%',
-                                                            marginRight: '8px',
-                                                        }}
-                                                    ></span>
-                                                    <span style={{ color: '#5C58EE', fontWeight: 600 }}>Conversions</span>
-                                                </div>
-                                            }
-                                            value={data.length > 0 ? conversions1.current : 0}
-                                            valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
-                                    </Card>
-                                </Col>
-                            </Row>
-        
-                            <Row gutter={24} style={{ marginTop: '20px' }} justify="space-between">
-                                <Col flex="1">
-                                    <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
-                                        <Statistic
-                                            title={
-                                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                    <span
-                                                        style={{
-                                                            display: 'inline-block',
-                                                            height: '12px',
-                                                            width: '12px',
-                                                            backgroundColor: '#A3F254',
-                                                            borderRadius: '50%',
-                                                            marginRight: '8px',
-                                                        }}
-                                                    ></span>
-                                                    <span style={{ color: '#A3F254', fontWeight: 600 }}>NCPL</span>
-                                                </div>
-                                            }
-                                            value={data.length > 0 ? ncpl1.current : 0}
-                                            valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
-                                    </Card>
-                                </Col>
-        
-                                <Col flex="1">
-                                    <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
-                                        <Statistic
-                                            title={
-                                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                    <span
-                                                        style={{
-                                                            display: 'inline-block',
-                                                            height: '12px',
-                                                            width: '12px',
-                                                            backgroundColor: '#EC7117',
-                                                            borderRadius: '50%',
-                                                            marginRight: '8px',
-                                                        }}
-                                                    ></span>
-                                                    <span style={{ color: '#EC7117', fontWeight: 600 }}>CPL</span>
-                                                </div>
-                                            }
-                                            value={data.length > 0 ? cpl1.current !== Infinity ? cpl1.current: 0 : 0}
-                                            valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
-                                    </Card>
-                                </Col>
-        
-                                <Col flex="1">
-                                    <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
-                                        <Statistic
-                                            title={
-                                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                    <span
-                                                        style={{
-                                                            display: 'inline-block',
-                                                            height: '12px',
-                                                            width: '12px',
-                                                            backgroundColor: '#5C58EE',
-                                                            borderRadius: '50%',
-                                                            marginRight: '8px',
-                                                        }}
-                                                    ></span>
-                                                    <span style={{ color: '#5C58EE', fontWeight: 600 }}>CTR</span>
-                                                </div>
-                                            }
-                                            value={data.length > 0 ? ctr1.current : 0}
-                                            valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
-                                    </Card>
-                                </Col>
-        
-                                <Col flex="1">
-                                    <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
-                                        <Statistic
-                                            title={
-                                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                    <span
-                                                        style={{
-                                                            display: 'inline-block',
-                                                            height: '12px',
-                                                            width: '12px',
-                                                            backgroundColor: '#EC7117',
-                                                            borderRadius: '50%',
-                                                            marginRight: '8px',
-                                                        }}
-                                                    ></span>
-                                                    <span style={{ color: '#EC7117', fontWeight: 600 }}>CPC</span>
-                                                </div>
-                                            }
-                                            value={data.length > 0 ? cpc1.current : 0}
-                                            valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
-                                    </Card>
-                                </Col>
-        
-                                <Col flex="1">
-                                    <Card style={{backgroundColor: theme === "dark" ? '#333' : '',}}>
-                                        <Statistic
-                                            title={
-                                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                    <span
-                                                        style={{
-                                                            display: 'inline-block',
-                                                            height: '12px',
-                                                            width: '12px',
-                                                            backgroundColor: '#5C58EE',
-                                                            borderRadius: '50%',
-                                                            marginRight: '8px',
-                                                        }}
-                                                    ></span>
-                                                    <span style={{ color: '#5C58EE', fontWeight: 600 }}>RPC</span>
-                                                </div>
-                                            }
-                                            value={data.length > 0 ? rpc1.current : 0}
-                                            valueStyle={{color: theme === 'dark' ? '#ffffff' : '#3f8600' }}                                    />
-                                    </Card>
-                                </Col>
-                            </Row>
-                        </div>
-    
-                        {/* <Row style={{ height: '400px', marginBottom: '10px', marginTop: '25px', padding: '0px', marginLeft:'0px', marginRight:'0px' }}>
-                        <Line
-                        data={{
-                            labels: chartData.dates,
-                            datasets: [
-                            {
-                                label: 'Spend',
-                                data: chartData.spend,
-                                borderColor: 'rgba(44, 144, 192, 1)',
-                                backgroundColor: 'rgba(44, 144, 192, 0.2)',
-                                fill: true,
-                                hidden: true,
-                                tension: 0.3
-                            },
-                            {
-                                label: 'Revenue',
-                                data: chartData.revenue,
-                                borderColor: 'rgba(99, 200, 99, 1)',
-                                backgroundColor: 'rgba(99, 200, 99, 0.2)',
-                                fill: true,
-                                hidden: true,
-                                tension: 0.3
-                            },
-                            {
-                                label: 'RPC',
-                                data: chartData.rpc,
-                                borderColor: 'rgba(255, 99, 132, 1)',
-                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                                fill: true,
-                                hidden: true,
-                                tension: 0.3
-                            },
-                            {
-                                label: 'CPL',
-                                data: chartData.cpl,
-                                borderColor: 'rgba(255, 159, 64, 1)',
-                                backgroundColor: 'rgba(255, 159, 64, 0.2)',
-                                fill: true,
-                                hidden: true,
-                                tension: 0.3
-                            },
-                            {
-                                label: 'Profit',
-                                data: chartData.profit,
-                                borderColor: 'rgba(255, 206, 86, 1)',
-                                backgroundColor: 'rgba(255, 206, 86, 0.2)',
-                                fill: true,
-                                tension: 0.3
-                            },
-                            {
-                                label: 'Margin',
-                                data: chartData.margin,
-                                borderColor: 'rgba(153, 102, 255, 1)',
-                                backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                                fill: true,
-                                hidden: true,
-                                tension: 0.3
-                            },
-                            ],
-                        }}
-                        options={{
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            scales: {
-                            x: {
-                                ticks: {
-                                padding: 30,
-                                },
-                            },
-                            y: {
-                                beginAtZero: true,
-                            },
-                            },
-                        }}
-                        height={350}
-                        />
-                    </Row> */}
-                        <Row style={{display:'flex', justifyContent:'flex-end', alignItems:'center'}}>
-                            <Col style={{marginTop:'10px'}}>
-                                <Switch checked={showGraphs} style={{backgroundColor: showGraphs && "#91C25F"}} onClick={onClickBarChart}/> Chart
-                            </Col>
-                        </Row>
-                        <div style={{ display: showGraphs ? 'flex' : "none", flexDirection: 'column' }}>
-                            <div style={{padding:'0px', marginTop:'15px'}}>
-                                <RenderCarouselNav2/>
-                            </div>
-                            <Tabs activeKey={activeTab2} onChange={handleTabChange2} renderTabBar={() => <></>}>    
-                            {/* <Carousel ref={carouselRef2} beforeChange={handleSlideChange2} dots={false}> */}
-                                <Tabs.TabPane key="1">
-                                    <div>
-                                        {/* ✅ Custom Checkbox-style Legend */}
-                                        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '8px', justifyContent:'center' }}>
-                                            {Object.keys(colorMaps).map((label) => {
-                                            const isVisible = !hiddenByDate.includes(label);
-                                            return (
-                                                <div
-                                                key={label}
-                                                onClick={() => toggle0(label)}
-                                                style={{
+                                                    backgroundColor: theme === 'dark' ? '#333' : '#e1e2e3',
+                                                    padding: '16px',
+                                                    textAlign: 'center',
                                                     display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '6px',
-                                                    cursor: 'pointer',
-                                                    fontSize: '13px',
-                                                    color: theme === 'dark' ? '#fff' : '#000',
-                                                }}
-                                                >
-                                                <div
-                                                    style={{
-                                                    width: '16px',
-                                                    height: '16px',
-                                                    borderRadius: '4px',
-                                                    backgroundColor: colorMaps[label],
-                                                    display: 'flex',
-                                                    alignItems: 'center',
+                                                    flexDirection: 'column',
                                                     justifyContent: 'center',
-                                                    color: '#fff',
-                                                    fontWeight: 'bold',
-                                                    fontSize: '11px',
-                                                    }}
-                                                >
-                                                    {isVisible ? '✔' : ''}
-                                                </div>
-                                                {label}
-                                                </div>
-                                            );
-                                            })}
-                                        </div>
-                                        <Row
-                                            style={{
-                                            height: '400px',
-                                            marginBottom: '10px',
-                                            marginTop: '25px',
-                                            padding: '0px',
-                                            }}
-                                        >
-                                            {Array.isArray(datasets0) && datasets0.length > 0 && (
-                                            <Line
-                                                ref={chartByDateRef}
-                                                data={{
-                                                labels: chartDataByDate?.datesByDate || [],
-                                                datasets: datasets0,
+                                                    width: '100%',
+                                                    position: 'relative',
+                                                    zIndex: 2,
+                                                    borderBottom: idx < 8 ? (theme === 'dark' ? '1px solid #8d8989' : '1px solid #9e9e9e') : 'none',
+                                                    borderLeft:
+                                                        (idx % 2 === 1 && idx < 8 || idx === 9) ? (theme === 'dark' ? '1px solid #8d8989' : '1px solid #9e9e9e') : 'none',
+                                                    // borderLeft: idx === 9 ? (theme === 'dark' ? '1px solid #fff' : '1px solid #0B3D63') : 'none',
                                                 }}
-                                                options={{
-                                                responsive: true,
-                                                maintainAspectRatio: false,
-                                                plugins: {
-                                                    legend: {
-                                                    display: false,
-                                                    },
-                                                    tooltip: {
-                                                    mode: 'index',
-                                                    intersect: false,
-                                                    displayColors: true,
-                                                    callbacks: {
-                                                        title: function (tooltipItems) {
-                                                        const index = tooltipItems[0].dataIndex;
-                                                        const rawDate = chartDataByDate?.datesByDate?.[index];
-                                                        const dateObj = new Date(rawDate);
-                                                        const weekday = dateObj.toLocaleDateString('en-US', { weekday: 'long' });
-                                                        return [`${rawDate} (${weekday})`];
-                                                        },
-                                                        label: function (tooltipItem) {
-                                                        const dataset = tooltipItem.dataset;
-                                                        const value = dataset.data[tooltipItem.dataIndex];
-                                                        return `${dataset.label}: ${value}`;
-                                                        },
-                                                    },
-                                                    },
-                                                },
-                                                scales: {
-                                                    x: {
-                                                        ticks: {
-                                                        padding: 30,
-                                                        color: (context) => {
-                                                            const index = context.index;
-                                                            const label = chartData?.dates?.[index]; // get the X label
-                                                            return getColorForValue(label); // ✅ apply unique color
-                                                        },
-                                                        },
-                                                        grid: {
-                                                        color: theme === 'dark' ? '#444' : '#e0e0e0',
-                                                        },
-                                                    },
-                                                    y: {
-                                                    beginAtZero: true,
-                                                    ticks: {
-                                                        callback: (value) => value.toFixed(2),
-                                                        color: theme === 'dark' ? '#fff' : '#000',
-                                                    },
-                                                    grid: {
-                                                        color: theme === 'dark' ? '#444' : '#e0e0e0',
-                                                    },
-                                                    },
-                                                },
-                                                }}
-                                                height={350}
-                                            />
-                                            )}
-                                        </Row>
-
-                                    
-                                    </div>
-                                </Tabs.TabPane>
-                                <Tabs.TabPane key="2">
-                                    <div>
-                                        {/* ✅ Custom Legend */}
-                                        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '8px', justifyContent:'center' }}>
-                                            {Object.keys(colorMaps).map((label) => {
-                                            const isVisible = !hidden.includes(label);
-                                            return (
-                                                <div
-                                                key={label}
-                                                onClick={() => toggle(label)}
-                                                style={{
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '6px',
-                                                    cursor: 'pointer',
-                                                    fontSize: '13px',
-                                                    color: theme === 'dark' ? '#fff' : '#000', // Adjust text color based on theme
-                                                }}
-                                                >
-                                                <div
-                                                    style={{
-                                                    width: '16px',
-                                                    height: '16px',
-                                                    borderRadius: '4px',
-                                                    backgroundColor: colorMaps[label],
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    color: '#fff',
-                                                    fontWeight: 'bold',
-                                                    fontSize: '11px',
-                                                    }}
-                                                >
-                                                    {isVisible ? '✔' : ''}
-                                                </div>
-                                                {label}
-                                                </div>
-                                            );
-                                            })}
-                                        </div>
-                                        <Row
-                                            style={{
-                                            height: '400px',
-                                            marginBottom: '10px',
-                                            marginTop: '25px',
-                                            padding: '0px',
-                                            }}
-                                        >
-                                            <Line
-                                            ref={chartRef}
-                                            data={{
-                                                labels: chartData?.dates || [],
-                                                datasets,
-                                            }}
-                                            options={{
-                                                responsive: true,
-                                                maintainAspectRatio: false,
-                                                plugins: {
-                                                legend: {
-                                                    display: false, // disable default
-                                                },
-                                                tooltip: {
-                                                    mode: 'index',
-                                                    intersect: false,
-                                                    displayColors: true,
-                                                    boxWidth: 15,
-                                                    boxHeight: 15,
-                                                    callbacks: {
-                                                        title: function (tooltipItems) {
-                                                            const index = tooltipItems[0].dataIndex;
-                                                            const xValue = tooltipItems[0].label;
-                                                            const date = chartData?.newDates?.[index] || chartData?.dates?.[index] || '';
-                                                            return `${xValue} ( ${date} )`; // ⬅️ both lines at top
-                                                        },
-                                                    label: function (tooltipItem) {
-                                                        const index = tooltipItem.dataIndex;
-                                                        const dataset = tooltipItem.dataset;
-                                                        const value = dataset.data[index];
-                                                        const label = dataset.label || '';
-                                                        return `${label}: ${value}`;
-                                                    },
-                                                    
-                                                    },
-                                                },
-                                                },
-                                                scales: {
-                                                    x: {
-                                                        ticks: {
-                                                        padding: 30,
-                                                        // color: (context) => {
-                                                        //     const index = context.index;
-                                                        //     const label = chartData?.dates?.[index]; // get the X label
-                                                        //     return getColorForValue(label); // ✅ apply unique color
-                                                        // },
-                                                        color: (function () {
-                                                            const memoizedColors = {};
-                                                            return (context) => {
-                                                                const index = context.index;
-                                                                const label = chartData?.dates?.[index];
-                                                                if (!label) return '#ccc';
-                                                                if (!memoizedColors[label]) {
-                                                                    memoizedColors[label] = getColorForValue(label);
-                                                                }
-                                                                return memoizedColors[label];
-                                                            };
-                                                        })()
-                                                        
-                                                        },
-                                                        grid: {
-                                                        color: theme === 'dark' ? '#444' : '#e0e0e0',
-                                                        },
-                                                    },
-                                                y: {
-                                                    beginAtZero: true,
-                                                    ticks: {
-                                                    callback: function (value) {
-                                                        return value.toFixed(2);
-                                                    },
-                                                    color: theme === 'dark' ? '#fff' : '#000',
-                                                    },
-                                                    grid: {
-                                                    color: theme === 'dark' ? '#444' : '#e0e0e0',
-                                                    },
-                                                },
-                                                },
-                                                elements: {
-                                                    point: {
-                                                      radius: 4,
-                                                      hitRadius: 10,
-                                                      hoverRadius: 6,
-                                                    },
-                                                  },
-                                            }}
-                                            height={350}
-                                            />
-                                        </Row>
-
-                                    
-                                    </div>
-                                </Tabs.TabPane>
-                            {/* </Carousel> */}
-                            </Tabs>
-                        </div>
-                        
-
-                        
-    
-                        <Row style={{ display: 'flex', flexDirection: 'column', }}>
-                            <Col>
-                                <h2>
-                                    Overall Report
-                                </h2>
-    
-                            </Col>
-                            {/* <Col>
-                            <div className="ag-theme-alpine" style={{ width: '100%', height: '400px' }}>
-                                
-                                <AgGridReact
-                                rowData={rowData}
-                                columnDefs={columnDefs}
-                                defaultColDef={defaultColDef}
-                                rowGroupPanelShow="always"
-                                suppressAggFuncInHeader={true}
-                                groupIncludeFooter={true}
-                                groupIncludeTotalFooter={true}
-                                />
-                            </div>
-                        </Col> */}
-                            <Col>
-                                {/* <div className='ag-grid-responsive'> */}
-                                    <div
-                                        className={`ag-theme-alpine ${gridThemeClass}`}
-                                        // style={{ width: '100%', height: '100%' }}
-                                    >
-                                        <AgGridReact
-                                            domLayout="normal"
-                                            rowData={rowData}
-                                            columnDefs={columnDefs}
-                                            defaultColDef={defaultColDef}
-                                            gridOptions={{
-                                                ensureDomOrder: false,
-                                                suppressRowClickSelection: true,
-                                                suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                            }}
-                                            autoGroupColumnDef={autoGroupColumnDefOverAllReport}
-                                            rowGroupPanelShow="always"
-                                            suppressAggFuncInHeader={true}
-                                            groupIncludeFooter={true}
-                                            groupIncludeTotalFooter={true}
-                                        />
-                                    </div>
-                                {/* </div> */}
-                            </Col>
-    
-                        </Row>
-                        
-                        <h2 style={{marginTop: "15px"}}>Accounts</h2>
-                        <div style={{padding:'0px', margin:'0px'}}>
-                            {renderCarouselNav()}
-                        </div>
-                        <Tabs activeKey={activeTab} onChange={handleSlideChange} renderTabBar={() => <></>}>
-                        {/* <Carousel ref={carouselRef} beforeChange={handleSlideChange} dots={false}> */}
-                            <Tabs.TabPane key="1">
-                                {/* <div>
-                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                        <Col> */}
-                                            <div
-                                                className={`ag-theme-alpine ${gridThemeClass}`}
-                                                style={{ width: '100%', height: '100%' }}
                                             >
-                                                <AgGridReact
-                                                    rowData={rowData?.filter((each) => each.profit > 0)}
-                                                    columnDefs={columnDefs1}
-                                                    defaultColDef={defaultColDef}
-                                                    gridOptions={{
-                                                        ensureDomOrder: false,
-                                                        suppressRowClickSelection: true,
-                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                    }}
-                                                    rowGroupPanelShow="always"
-                                                    suppressAggFuncInHeader={true}
-                                                    groupIncludeFooter={true}
-                                                    groupIncludeTotalFooter={true}
-                                                    autoGroupColumnDef={autoGroupColumnDefProfit}
-                                                />
-                                            </div>
-                                        {/* </Col>
-                
-                                    </Row>
-                                </div> */}
-                            </Tabs.TabPane>
-                            <Tabs.TabPane key="2">
-                                {/* <div>
-                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                        <Col> */}
-                                            <div
-                                                className={`ag-theme-alpine ${gridThemeClass}`}
-                                                style={{ width: '100%', height: '100%' }}
-                                            >             <AgGridReact
-                                                    rowData={rowData?.filter(each => each.profit < 0)}
-                                                    columnDefs={columnDefs1}
-                                                    defaultColDef={defaultColDef}
-                                                    gridOptions={{
-                                                        ensureDomOrder: false,
-                                                        suppressRowClickSelection: true,
-                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                    }}
-                                                    rowGroupPanelShow="always"
-                                                    suppressAggFuncInHeader={true}
-                                                    groupIncludeFooter={true}
-                                                    groupIncludeTotalFooter={true}
-                                                    autoGroupColumnDef={autoGroupColumnDefLoss}
-                                                />
-                                            </div>
-                                        {/* </Col>
-                                    </Row>
-                                </div> */}
-                            </Tabs.TabPane>
-                            <Tabs.TabPane key="3">
-                                {/* <div>
-                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                        <Col> */}
-                                            <div
-                                                className={`ag-theme-alpine ${gridThemeClass}`}
-                                                style={{ width: '100%', height: '100%' }}
-                                            >
-                                                <AgGridReact
-                                                    rowData={Object.values(
-                                                        byAccountNumber?.reduce((acc, curr) => {
-                                                        (acc[curr.specifiedDate] = acc[curr.specifiedDate] || []).push(curr);
-                                                        return acc;
-                                                        }, {})
-                                                    ).flatMap(records =>
-                                                        records
-                                                        .sort((a, b) => b.spend - a.spend) // Sort by spend (descending)
-                                                        .slice(0, 5) // Get top 5 records per date
-                                                    )}
-                                                    columnDefs={columnDefs1}
-                                                    defaultColDef={defaultColDef}
-                                                    gridOptions={{
-                                                        ensureDomOrder: false,
-                                                        suppressRowClickSelection: true,
-                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                    }}
-                                                    rowGroupPanelShow="always"
-                                                    suppressAggFuncInHeader={true}
-                                                    groupIncludeFooter={true}
-                                                    groupIncludeTotalFooter={true}
-                                                    autoGroupColumnDef={autoGroupColumnDefProfit}
-                                                />
-                                            </div>
-                                        {/* </Col>
-                
-                                    </Row>
-                                </div> */}
-                            </Tabs.TabPane>
-                            <Tabs.TabPane key="4">
-                                {/* <div>
-                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                        <Col> */}
-                                            <div
-                                                className={`ag-theme-alpine ${gridThemeClass}`}
-                                                style={{ width: '100%', height: '100%' }}
-                                            >
-                                                <AgGridReact
-                                                    rowData={Object.values(
-                                                        byAccountNumber?.reduce((acc, curr) => {
-                                                        (acc[curr.specifiedDate] = acc[curr.specifiedDate] || []).push(curr);
-                                                        return acc;
-                                                        }, {})
-                                                    ).flatMap(records =>
-                                                        records
-                                                        .sort((a, b) => b.estimated_revenue - a.estimated_revenue) // Sort by spend (descending)
-                                                        .slice(0, 5) // Get top 5 records per date
-                                                    )}
-                                                    columnDefs={columnDefs1}
-                                                    defaultColDef={defaultColDef}
-                                                    gridOptions={{
-                                                        ensureDomOrder: false,
-                                                        suppressRowClickSelection: true,
-                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                    }}
-                                                    rowGroupPanelShow="always"
-                                                    suppressAggFuncInHeader={true}
-                                                    groupIncludeFooter={true}
-                                                    groupIncludeTotalFooter={true}
-                                                    autoGroupColumnDef={autoGroupColumnDefProfit}
-                                                />
-                                            </div>
-                                        {/* </Col>
-                
-                                    </Row>
-                                </div> */}
-                            </Tabs.TabPane>
-                            <Tabs.TabPane key="5">
-                                {/* <div>
-                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                        <Col> */}
-                                            <div
-                                                className={`ag-theme-alpine ${gridThemeClass}`}
-                                                style={{ width: '100%', height: '100%' }}
-                                            >
-                                                <AgGridReact
-                                                    rowData={Object.values(
-                                                        byAccountNumber?.reduce((acc, curr) => {
-                                                        (acc[curr.specifiedDate] = acc[curr.specifiedDate] || []).push(curr);
-                                                        return acc;
-                                                        }, {})
-                                                    ).flatMap(records =>
-                                                        records
-                                                        .sort((a, b) => b.profit - a.profit) // Sort by spend (descending)
-                                                        .slice(0, 5) // Get top 5 records per date
-                                                    )}
-                                                    columnDefs={columnDefs1}
-                                                    defaultColDef={defaultColDef}
-                                                    gridOptions={{
-                                                        ensureDomOrder: false,
-                                                        suppressRowClickSelection: true,
-                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                    }}
-                                                    rowGroupPanelShow="always"
-                                                    suppressAggFuncInHeader={true}
-                                                    groupIncludeFooter={true}
-                                                    groupIncludeTotalFooter={true}
-                                                    autoGroupColumnDef={autoGroupColumnDefProfit}
-                                                />
-                                            </div>
-                                        {/* </Col>
-                
-                                    </Row>
-                                </div> */}
-                            </Tabs.TabPane>
-                        {/* </Carousel> */}
-                        </Tabs>
-
-                        <h2 style={{marginTop: "15px"}}>Top 5 Campaigns</h2>
-
-                        <div style={{padding:'0px', margin:'0px'}}>
-                            {renderCarouselNav1()}
-                        </div>
-                        <Tabs  activeKey={activeTab1} onChange={handleSlideChange1} renderTabBar={() => <></>}>
-                        {/* <Carousel ref={carouselRef1} beforeChange={handleSlideChange1} dots={false}> */}
-                            <Tabs.TabPane key="1">
-                                {/* <div>
-                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                        <Col> */}
-                                            <div
-                                                className={`ag-theme-alpine ${gridThemeClass}`}
-                                                style={{ width: '100%', height: '100%' }}
-                                            >             <AgGridReact
-                                                    rowData={top5Campaigns}
-                                                    columnDefs={columnDefs2}
-                                                    defaultColDef={defaultColDef}
-                                                    gridOptions={{
-                                                        ensureDomOrder: false,
-                                                        suppressRowClickSelection: true,
-                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                    }}
-                                                    rowGroupPanelShow="always"
-                                                    suppressAggFuncInHeader={true}
-                                                    groupIncludeFooter={true}
-                                                    groupIncludeTotalFooter={true}
-                                                    autoGroupColumnDef={autoGroupColumnDefCampaigns}
-                                                />
-                                            </div>
-                                        {/* </Col>
-                                    </Row>
-                                </div> */}
-                            </Tabs.TabPane>
-                            <Tabs.TabPane key="2">
-                                {/* <div>
-                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                        <Col> */}
-                                            <div
-                                                className={`ag-theme-alpine ${gridThemeClass}`}
-                                                style={{ width: '100%', height: '100%' }}
-                                            >             <AgGridReact
-                                                    rowData={top5RevenueCampaigns}
-                                                    columnDefs={columnDefs2}
-                                                    defaultColDef={defaultColDef}
-                                                    gridOptions={{
-                                                        ensureDomOrder: false,
-                                                        suppressRowClickSelection: true,
-                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                    }}
-                                                    rowGroupPanelShow="always"
-                                                    suppressAggFuncInHeader={true}
-                                                    groupIncludeFooter={true}
-                                                    groupIncludeTotalFooter={true}
-                                                    autoGroupColumnDef={autoGroupColumnDefCampaigns}
-                                                />
-                                            </div>
-                                        {/* </Col>
-                                    </Row>
-                                </div> */}
-                            </Tabs.TabPane>
-                            <Tabs.TabPane key="3">
-                                {/* <div>
-                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                        <Col> */}
-                                            <div
-                                                className={`ag-theme-alpine ${gridThemeClass}`}
-                                                style={{ width: '100%', height: '100%' }}
-                                            >   <AgGridReact
-                                                    rowData={top5ProfitCampaigns}
-                                                    columnDefs={columnDefs2}
-                                                    defaultColDef={defaultColDef}
-                                                    gridOptions={{
-                                                        ensureDomOrder: false,
-                                                        suppressRowClickSelection: true,
-                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                    }}
-                                                    rowGroupPanelShow="always"
-                                                    suppressAggFuncInHeader={true}
-                                                    groupIncludeFooter={true}
-                                                    groupIncludeTotalFooter={true}
-                                                    autoGroupColumnDef={autoGroupColumnDefCampaigns}
-                                                />
-                                            </div>
-                                        {/* </Col>
-                                    </Row>
-                                </div> */}
-                            </Tabs.TabPane>
-                            <Tabs.TabPane key="4">
-                                {/* <div>
-                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                        <Col> */}
-                                            <div
-                                                className={`ag-theme-alpine ${gridThemeClass}`}
-                                                style={{ width: '100%', height: '100%' }}
-                                            >             <AgGridReact
-                                                    rowData={overAllProfitCampaigns}
-                                                    columnDefs={columnDefs2}
-                                                    defaultColDef={defaultColDef}
-                                                    gridOptions={{
-                                                        ensureDomOrder: false,
-                                                        suppressRowClickSelection: true,
-                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                    }}
-                                                    rowGroupPanelShow="always"
-                                                    suppressAggFuncInHeader={true}
-                                                    groupIncludeFooter={true}
-                                                    groupIncludeTotalFooter={true}
-                                                    autoGroupColumnDef={autoGroupColumnDefCampaigns}
-                                                />
-                                            </div>
-                                        {/* </Col>
-                                    </Row>
-                                </div> */}
-                            </Tabs.TabPane>
-                            <Tabs.TabPane key="5">
-                                {/* <div>
-                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                        <Col> */}
-                                            <div
-                                                className={`ag-theme-alpine ${gridThemeClass}`}
-                                                style={{ width: '100%', height: '100%' }}
-                                            >             <AgGridReact
-                                                    rowData={overAllLossCampaigns}
-                                                    columnDefs={columnDefs2}
-                                                    defaultColDef={defaultColDef}
-                                                    gridOptions={{
-                                                        ensureDomOrder: false,
-                                                        suppressRowClickSelection: true,
-                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                    }}
-                                                    rowGroupPanelShow="always"
-                                                    suppressAggFuncInHeader={true}
-                                                    groupIncludeFooter={true}
-                                                    groupIncludeTotalFooter={true}
-                                                    autoGroupColumnDef={autoGroupColumnDefCampaigns}
-                                                />
-                                            </div>
-                                        {/* </Col>
-                                    </Row>
-                                </div> */}
-                            </Tabs.TabPane>
-                        {/* </Carousel> */}
-                        </Tabs>
-                        
-                        <div style={{padding:'0px', marginTop:'15px'}}>
-                            <RenderCarouselNav3/>
-                        </div>
-                        {/* <Carousel ref={carouselRef3} beforeChange={handleSlideChange3} dots={false}> */}
-                        <Tabs  activeKey={activeTab3} onChange={handleTabChange3} renderTabBar={() => <></>}>
-                            <Tabs.TabPane key="1">
-                                {/* <div>
-                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                        <Col> */}
-                                            <div
-                                                className={`ag-theme-alpine ${gridThemeClass}`}
-                                                style={{ width: '100%', height: '100%' }}
-                                            >             <AgGridReact
-                                                    rowData={domainWiseData}
-                                                    columnDefs={columnDefs3}
-                                                    defaultColDef={defaultColDef}
-                                                    gridOptions={{
-                                                        ensureDomOrder: false,
-                                                        suppressRowClickSelection: true,
-                                                        suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                        enableRangeSelection: true, // ✅ Enables Shift + Arrow for selection
-                                                    }}
-                                                    // rowGroupPanelShow="always"
-                                                    suppressAggFuncInHeader={true}
-                                                    // groupIncludeFooter={true}
-                                                    groupIncludeTotalFooter={true}
-                                                    autoGroupColumnDef={autoGroupColumnDefDomain}
-                                                />
-                                            </div>
-                                        {/* </Col>
-                                    </Row>
-                                </div> */}
-                            </Tabs.TabPane>
-                            <Tabs.TabPane key="2">
-                                {/* <div>
-                                    <Row style={{ display: 'flex', flexDirection: 'column', paddingTop:'10px' }}>
-                                        <Col> */}
-                                            <div
-                                                className={`ag-theme-alpine ${gridThemeClass}`}
-                                                style={{ width: '100%', height: '100%' }}
-                                            >           <AgGridReact
-                                                            rowData={agencyNameReport}
-                                                            columnDefs={columnDefs4}
-                                                            defaultColDef={defaultColDef}
-                                                            gridOptions={{
-                                                                groupDefaultExpanded: -1, 
-                                                                ensureDomOrder: false,
-                                                                suppressRowClickSelection: true,
-                                                                suppressClipboardPaste: false, // ✅ Allow AG Grid clipboard functionality
-                                                                enableRangeSelection: true,// Expands all groups by default
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 6 }}>
+                                                    {item.dot && (
+                                                        <span
+                                                            style={{
+                                                                display: 'inline-block',
+                                                                height: '10px',
+                                                                width: '10px',
+                                                                borderRadius: '50%',
+                                                                backgroundColor: item.dot,
+                                                                marginRight: 6,
                                                             }}
-                                                            // rowGroupPanelShow="always"
-                                                            suppressAggFuncInHeader={true}
-                                                            rowGroupPanelShow="always"
-                                                            // groupIncludeFooter={true}
-                                                            groupIncludeTotalFooter={true}
-                                                            autoGroupColumnDef={autoGroupColumnDefAgency}
-                                                        />
+                                                        ></span>
+                                                    )}
+                                                    <span
+                                                        style={{
+                                                            fontSize: 15,
+                                                            fontWeight: 600,
+                                                            color: item.color || (theme === 'dark' ? '#66b2ff' : '#4a5d78'),
+                                                        }}
+                                                    >
+                                                        {item.title}
+                                                    </span>
+                                                </div>
+                                                <div
+                                                    style={{
+                                                        fontSize: 18,
+                                                        fontWeight: 700,
+                                                        // color: '#fff',
+                                                    }}
+                                                >
+                                                    {item.prefix || ''}
+                                                    {data.length > 0 && item.value !== undefined && item.value !== Infinity ? item.value : 0}
+                                                </div>
                                             </div>
-                                        {/* </Col>
+                                        ))}
+                                        <div className="vertical-divider" />
+                                        <div className="horizontal-divider" />
+                                    </div>
+                                </Card>
+
+                                <div className='Dashboard-Details-1' >
+                                    <Row gutter={24} style={{ marginTop: '5px' }} justify="space-between">
+                                        <Col flex="1">
+                                            <Card style={{ backgroundColor: theme === "dark" ? '#333' : '', }}>
+                                                <Statistic
+                                                    title={
+                                                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                            <span
+                                                                style={{
+                                                                    display: 'inline-block',
+                                                                    height: '12px',
+                                                                    width: '12px',
+                                                                    backgroundColor: '#A3F254',
+                                                                    borderRadius: '50%',
+                                                                    marginRight: '8px',
+                                                                }}
+                                                            ></span>
+                                                            <span style={{ color: '#A3F254', fontWeight: 600 }}>Revenue</span>
+                                                        </div>
+                                                    }
+                                                    value={data.length > 0 ? revenue1.current : 0}
+                                                    prefix="$"
+                                                    valueStyle={{ color: theme === 'dark' ? '#ffffff' : '#3f8600' }}
+                                                />
+                                            </Card>
+                                        </Col>
+
+                                        <Col flex="1">
+                                            <Card style={{ backgroundColor: theme === "dark" ? '#333' : '', }}>
+                                                <Statistic
+                                                    title={
+                                                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                            <span
+                                                                style={{
+                                                                    display: 'inline-block',
+                                                                    height: '12px',
+                                                                    width: '12px',
+                                                                    backgroundColor: '#EC7117',
+                                                                    borderRadius: '50%',
+                                                                    marginRight: '8px',
+                                                                }}
+                                                            ></span>
+                                                            <span style={{ color: '#EC7117', fontWeight: 600 }}>Profit</span>
+                                                        </div>
+                                                    }
+                                                    value={data.length > 0 ? profit1.current : 0}
+                                                    prefix="$"
+                                                    valueStyle={{ color: theme === 'dark' ? '#ffffff' : '#3f8600' }} />
+                                            </Card>
+                                        </Col>
+
+                                        <Col flex="1">
+                                            <Card style={{ backgroundColor: theme === "dark" ? '#333' : '', }}>
+                                                <Statistic
+                                                    title={
+                                                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                            <span
+                                                                style={{
+                                                                    display: 'inline-block',
+                                                                    height: '12px',
+                                                                    width: '12px',
+                                                                    backgroundColor: '#5C58EE',
+                                                                    borderRadius: '50%',
+                                                                    marginRight: '8px',
+                                                                }}
+                                                            ></span>
+                                                            <span style={{ color: '#5C58EE', fontWeight: 600 }}>Amount Spent</span>
+                                                        </div>
+                                                    }
+                                                    value={data.length > 0 ? spend1.current : 0}
+                                                    prefix="$"
+                                                    valueStyle={{ color: theme === 'dark' ? '#ffffff' : '#3f8600' }} />
+                                            </Card>
+                                        </Col>
+
+                                        <Col flex="1">
+                                            <Card style={{ backgroundColor: theme === "dark" ? '#333' : '', }}>
+                                                <Statistic
+                                                    title={
+                                                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                            <span
+                                                                style={{
+                                                                    display: 'inline-block',
+                                                                    height: '12px',
+                                                                    width: '12px',
+                                                                    backgroundColor: '#EC7117',
+                                                                    borderRadius: '50%',
+                                                                    marginRight: '8px',
+                                                                }}
+                                                            ></span>
+                                                            <span style={{ color: '#EC7117', fontWeight: 600 }}>Leads</span>
+                                                        </div>
+                                                    }
+                                                    value={data.length > 0 ? leads1.current : 0}
+                                                    valueStyle={{ color: theme === 'dark' ? '#ffffff' : '#3f8600' }} />
+                                            </Card>
+                                        </Col>
+
+                                        <Col flex="1">
+                                            <Card style={{ backgroundColor: theme === "dark" ? '#333' : '', }}>
+                                                <Statistic
+                                                    title={
+                                                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                            <span
+                                                                style={{
+                                                                    display: 'inline-block',
+                                                                    height: '12px',
+                                                                    width: '12px',
+                                                                    backgroundColor: '#5C58EE',
+                                                                    borderRadius: '50%',
+                                                                    marginRight: '8px',
+                                                                }}
+                                                            ></span>
+                                                            <span style={{ color: '#5C58EE', fontWeight: 600 }}>Conversions</span>
+                                                        </div>
+                                                    }
+                                                    value={data.length > 0 ? conversions1.current : 0}
+                                                    valueStyle={{ color: theme === 'dark' ? '#ffffff' : '#3f8600' }} />
+                                            </Card>
+                                        </Col>
                                     </Row>
-                                </div> */}
-                            </Tabs.TabPane>
-                        </Tabs>
-                        {/* </Carousel> */}
-                        {/* <Row className='showin-mobile'></Row> */}
+
+                                    <Row gutter={24} style={{ marginTop: '20px' }} justify="space-between">
+                                        <Col flex="1">
+                                            <Card style={{ backgroundColor: theme === "dark" ? '#333' : '', }}>
+                                                <Statistic
+                                                    title={
+                                                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                            <span
+                                                                style={{
+                                                                    display: 'inline-block',
+                                                                    height: '12px',
+                                                                    width: '12px',
+                                                                    backgroundColor: '#A3F254',
+                                                                    borderRadius: '50%',
+                                                                    marginRight: '8px',
+                                                                }}
+                                                            ></span>
+                                                            <span style={{ color: '#A3F254', fontWeight: 600 }}>NCPL</span>
+                                                        </div>
+                                                    }
+                                                    value={data.length > 0 ? ncpl1.current : 0}
+                                                    valueStyle={{ color: theme === 'dark' ? '#ffffff' : '#3f8600' }} />
+                                            </Card>
+                                        </Col>
+
+                                        <Col flex="1">
+                                            <Card style={{ backgroundColor: theme === "dark" ? '#333' : '', }}>
+                                                <Statistic
+                                                    title={
+                                                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                            <span
+                                                                style={{
+                                                                    display: 'inline-block',
+                                                                    height: '12px',
+                                                                    width: '12px',
+                                                                    backgroundColor: '#EC7117',
+                                                                    borderRadius: '50%',
+                                                                    marginRight: '8px',
+                                                                }}
+                                                            ></span>
+                                                            <span style={{ color: '#EC7117', fontWeight: 600 }}>CPL</span>
+                                                        </div>
+                                                    }
+                                                    value={data.length > 0 ? cpl1.current !== Infinity ? cpl1.current : 0 : 0}
+                                                    valueStyle={{ color: theme === 'dark' ? '#ffffff' : '#3f8600' }} />
+                                            </Card>
+                                        </Col>
+
+                                        <Col flex="1">
+                                            <Card style={{ backgroundColor: theme === "dark" ? '#333' : '', }}>
+                                                <Statistic
+                                                    title={
+                                                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                            <span
+                                                                style={{
+                                                                    display: 'inline-block',
+                                                                    height: '12px',
+                                                                    width: '12px',
+                                                                    backgroundColor: '#5C58EE',
+                                                                    borderRadius: '50%',
+                                                                    marginRight: '8px',
+                                                                }}
+                                                            ></span>
+                                                            <span style={{ color: '#5C58EE', fontWeight: 600 }}>CTR</span>
+                                                        </div>
+                                                    }
+                                                    value={data.length > 0 ? ctr1.current : 0}
+                                                    valueStyle={{ color: theme === 'dark' ? '#ffffff' : '#3f8600' }} />
+                                            </Card>
+                                        </Col>
+
+                                        <Col flex="1">
+                                            <Card style={{ backgroundColor: theme === "dark" ? '#333' : '', }}>
+                                                <Statistic
+                                                    title={
+                                                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                            <span
+                                                                style={{
+                                                                    display: 'inline-block',
+                                                                    height: '12px',
+                                                                    width: '12px',
+                                                                    backgroundColor: '#EC7117',
+                                                                    borderRadius: '50%',
+                                                                    marginRight: '8px',
+                                                                }}
+                                                            ></span>
+                                                            <span style={{ color: '#EC7117', fontWeight: 600 }}>CPC</span>
+                                                        </div>
+                                                    }
+                                                    value={data.length > 0 ? cpc1.current : 0}
+                                                    valueStyle={{ color: theme === 'dark' ? '#ffffff' : '#3f8600' }} />
+                                            </Card>
+                                        </Col>
+
+                                        <Col flex="1">
+                                            <Card style={{ backgroundColor: theme === "dark" ? '#333' : '', }}>
+                                                <Statistic
+                                                    title={
+                                                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                            <span
+                                                                style={{
+                                                                    display: 'inline-block',
+                                                                    height: '12px',
+                                                                    width: '12px',
+                                                                    backgroundColor: '#5C58EE',
+                                                                    borderRadius: '50%',
+                                                                    marginRight: '8px',
+                                                                }}
+                                                            ></span>
+                                                            <span style={{ color: '#5C58EE', fontWeight: 600 }}>RPC</span>
+                                                        </div>
+                                                    }
+                                                    value={data.length > 0 ? rpc1.current : 0}
+                                                    valueStyle={{ color: theme === 'dark' ? '#ffffff' : '#3f8600' }} />
+                                            </Card>
+                                        </Col>
+                                    </Row>
+                                </div>
+
+                                <div
+                                    style={{
+                                        display: showGraphs ? 'flex' : 'none',
+                                        flexDirection: 'column',
+                                        // backgroundColor: '#e6e6e6', // ✅ Background match
+                                        borderRadius: '12px',
+                                        padding: '16px',
+                                        marginTop: '15px',
+                                        boxShadow: '0 1px 6px rgba(0, 0, 0, 0.08)',
+                                    }}
+                                >
+                                    <div style={{ padding: '0px', }}>
+                                        <RenderCarouselNav2 />
+                                    </div>
+
+                                    <Tabs
+                                        activeKey={activeTab2}
+                                        onChange={handleTabChange2}
+                                        renderTabBar={() => <></>}
+                                        style={{
+                                            width: '100%',
+                                            borderRadius: 12,
+                                            backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+                                            padding: 10,
+                                            height: 'auto', // ✅ Key: no fixed height
+                                            boxShadow:
+                                                theme === 'dark'
+                                                    ? '0 1px 3px rgba(0,0,0,0.6)'
+                                                    : '0 1px 6px rgba(0,0,0,0.08)',
+                                        }}
+
+                                    >
+                                        {/* Tab 1 */}
+                                        <Tabs.TabPane key="1">
+                                            <div>
+                                                {/* Custom Legend */}
+                                                <div
+                                                    style={{
+                                                        display: 'flex',
+                                                        gap: '12px',
+                                                        flexWrap: 'wrap',
+                                                        marginTop: '8px',
+                                                        justifyContent: 'center',
+
+                                                    }}
+                                                >
+                                                    {Object.keys(colorMaps).map((label) => {
+                                                        const isVisible = !hiddenByDate.includes(label);
+                                                        return (
+                                                            <div
+                                                                key={label}
+                                                                onClick={() => toggle0(label)}
+                                                                style={{
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: '6px',
+                                                                    cursor: 'pointer',
+                                                                    fontSize: '13px',
+                                                                    color: theme === 'dark' ? '#fff' : '#000',
+                                                                }}
+                                                            >
+                                                                <div
+                                                                    style={{
+                                                                        width: '16px',
+                                                                        height: '16px',
+                                                                        borderRadius: '4px',
+                                                                        backgroundColor: colorMaps[label],
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        justifyContent: 'center',
+                                                                        color: '#fff',
+                                                                        fontWeight: 'bold',
+                                                                        fontSize: '11px',
+                                                                    }}
+                                                                >
+                                                                    {isVisible ? '✔' : ''}
+                                                                </div>
+                                                                {label}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+
+                                                <Row style={{ height: '400px', marginTop: '25px' }}>
+                                                    {Array.isArray(datasets0) && datasets0.length > 0 && (
+                                                        <Line
+                                                            ref={chartByDateRef}
+                                                            data={{
+                                                                labels: chartDataByDate?.datesByDate || [],
+                                                                datasets: datasets0,
+                                                            }}
+                                                            options={{
+                                                                responsive: true,
+                                                                maintainAspectRatio: false,
+                                                                plugins: {
+                                                                    legend: { display: false },
+                                                                    tooltip: {
+                                                                        mode: 'index',
+                                                                        intersect: false,
+                                                                        displayColors: true,
+                                                                        callbacks: {
+                                                                            title: (tooltipItems) => {
+                                                                                const index = tooltipItems[0].dataIndex;
+                                                                                const rawDate = chartDataByDate?.datesByDate?.[index];
+                                                                                const dateObj = new Date(rawDate);
+                                                                                const weekday = dateObj.toLocaleDateString('en-US', {
+                                                                                    weekday: 'long',
+                                                                                });
+                                                                                return [`${rawDate} (${weekday})`];
+                                                                            },
+                                                                            label: (tooltipItem) => {
+                                                                                const dataset = tooltipItem.dataset;
+                                                                                const value = dataset.data[tooltipItem.dataIndex];
+                                                                                return `${dataset.label}: ${value}`;
+                                                                            },
+                                                                        },
+                                                                    },
+                                                                },
+                                                                scales: {
+                                                                    x: {
+                                                                        ticks: {
+                                                                            padding: 30,
+                                                                            color: (context) => {
+                                                                                const index = context.index;
+                                                                                const label = chartData?.dates?.[index];
+                                                                                return getColorForValue(label);
+                                                                            },
+                                                                        },
+                                                                        grid: {
+                                                                            color: theme === 'dark' ? '#444' : '#e0e0e0',
+                                                                        },
+                                                                    },
+                                                                    y: {
+                                                                        beginAtZero: true,
+                                                                        ticks: {
+                                                                            callback: (value) => value.toFixed(2),
+                                                                            color: theme === 'dark' ? '#fff' : '#000',
+                                                                        },
+                                                                        grid: {
+                                                                            color: theme === 'dark' ? '#444' : '#e0e0e0',
+                                                                        },
+                                                                    },
+                                                                },
+                                                            }}
+                                                            height={350}
+                                                        />
+                                                    )}
+                                                </Row>
+                                            </div>
+                                        </Tabs.TabPane>
+
+                                        {/* Tab 2 */}
+                                        <Tabs.TabPane key="2">
+                                            <div>
+                                                <div
+                                                    style={{
+                                                        display: 'flex',
+                                                        gap: '12px',
+                                                        flexWrap: 'wrap',
+                                                        marginTop: '8px',
+                                                        justifyContent: 'center',
+                                                    }}
+                                                >
+                                                    {Object.keys(colorMaps).map((label) => {
+                                                        const isVisible = !hidden.includes(label);
+                                                        return (
+                                                            <div
+                                                                key={label}
+                                                                onClick={() => toggle(label)}
+                                                                style={{
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: '6px',
+                                                                    cursor: 'pointer',
+                                                                    fontSize: '13px',
+                                                                    color: theme === 'dark' ? '#fff' : '#000',
+                                                                }}
+                                                            >
+                                                                <div
+                                                                    style={{
+                                                                        width: '16px',
+                                                                        height: '16px',
+                                                                        borderRadius: '4px',
+                                                                        backgroundColor: colorMaps[label],
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        justifyContent: 'center',
+                                                                        color: '#fff',
+                                                                        fontWeight: 'bold',
+                                                                        fontSize: '11px',
+                                                                    }}
+                                                                >
+                                                                    {isVisible ? '✔' : ''}
+                                                                </div>
+                                                                {label}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+
+                                                <Row style={{ height: '400px', marginTop: '25px' }}>
+                                                    <Line
+                                                        ref={chartRef}
+                                                        data={{
+                                                            labels: chartData?.dates || [],
+                                                            datasets,
+                                                        }}
+                                                        options={{
+                                                            responsive: true,
+                                                            maintainAspectRatio: false,
+                                                            plugins: {
+                                                                legend: { display: false },
+                                                                tooltip: {
+                                                                    mode: 'index',
+                                                                    intersect: false,
+                                                                    displayColors: true,
+                                                                    callbacks: {
+                                                                        title: (tooltipItems) => {
+                                                                            const index = tooltipItems[0].dataIndex;
+                                                                            const xValue = tooltipItems[0].label;
+                                                                            const date =
+                                                                                chartData?.newDates?.[index] ||
+                                                                                chartData?.dates?.[index] ||
+                                                                                '';
+                                                                            return `${xValue} ( ${date} )`;
+                                                                        },
+                                                                        label: (tooltipItem) => {
+                                                                            const index = tooltipItem.dataIndex;
+                                                                            const dataset = tooltipItem.dataset;
+                                                                            const value = dataset.data[index];
+                                                                            const label = dataset.label || '';
+                                                                            return `${label}: ${value}`;
+                                                                        },
+                                                                    },
+                                                                },
+                                                            },
+                                                            scales: {
+                                                                x: {
+                                                                    ticks: {
+                                                                        padding: 30,
+                                                                        color: (() => {
+                                                                            const memoizedColors = {};
+                                                                            return (context) => {
+                                                                                const index = context.index;
+                                                                                const label = chartData?.dates?.[index];
+                                                                                if (!label) return '#ccc';
+                                                                                if (!memoizedColors[label]) {
+                                                                                    memoizedColors[label] = getColorForValue(label);
+                                                                                }
+                                                                                return memoizedColors[label];
+                                                                            };
+                                                                        })(),
+                                                                    },
+                                                                    grid: {
+                                                                        color: theme === 'dark' ? '#444' : '#e0e0e0',
+                                                                    },
+                                                                },
+                                                                y: {
+                                                                    beginAtZero: true,
+                                                                    ticks: {
+                                                                        callback: (value) => value.toFixed(2),
+                                                                        color: theme === 'dark' ? '#fff' : '#000',
+                                                                    },
+                                                                    grid: {
+                                                                        color: theme === 'dark' ? '#444' : '#e0e0e0',
+                                                                    },
+                                                                },
+                                                            },
+                                                            elements: {
+                                                                point: {
+                                                                    radius: 4,
+                                                                    hitRadius: 10,
+                                                                    hoverRadius: 6,
+                                                                },
+                                                            },
+                                                        }}
+                                                        height={350}
+                                                    />
+                                                </Row>
+                                            </div>
+                                        </Tabs.TabPane>
+                                    </Tabs>
+                                </div>
+
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
+                                    <Button
+                                        type="default"
+                                        icon={<BarChartOutlined />}
+                                        onClick={() => setShowGraphs(!showGraphs)}
+                                        onMouseEnter={() => setHovered(true)}
+                                        onMouseLeave={() => setHovered(false)}
+                                        style={{
+                                            border: '2px solid #4CAF50',
+                                            color: showGraphs || hovered ? 'green' : theme === 'dark' ? '#f9fafb' : '#1f2937',
+                                            backgroundColor: showGraphs || hovered ? '#91C25F' : 'transparent',
+                                            borderRadius: '999px',
+                                            fontWeight: 500,
+                                            padding: '0 10px',
+                                            height: '32px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '4px',
+                                            margin: '10px',
+                                            transition: 'all 0.2s ease-in-out',
+                                        }}
+                                    >
+                                        Chart
+                                    </Button>
+                                    {/* {showGraphs && (
+                                        <div style={{ marginTop: 10 }}>
+
+                                            <RenderCarouselNav2 />
+                                        </div>
+                                    )} */}
+                                </div>
+
+
+
+                                <Row style={{ display: 'flex', flexDirection: 'column', marginTop: "5px" }}>
+                                    <Col>
+
+                                        <div
+                                            className={`ag-theme-alpine ${gridThemeClass}`}
+                                            style={{
+                                                width: '100%',
+                                                borderRadius: 12,
+                                                backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+                                                padding: 10,
+                                                height: 'auto', // ✅ Key: no fixed height
+                                                boxShadow:
+                                                    theme === 'dark'
+                                                        ? '0 1px 3px rgba(0,0,0,0.6)'
+                                                        : '0 1px 6px rgba(0,0,0,0.08)',
+                                            }}
+                                        >
+                                            <Row style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                {/* Left: Title */}
+                                                <Col>
+                                                    <h3
+                                                        style={{
+                                                            fontSize: '16px',
+                                                            fontWeight: 500,
+                                                            marginLeft: 10,
+                                                            color: theme === 'dark' ? '#fff' : '#111827',
+                                                        }}
+                                                    >
+                                                        Overall report
+                                                    </h3>
+                                                </Col>
+
+                                                {/* Right: Chart Switch */}
+                                                <Col>
+                                                    <div>
+
+
+                                                        {/* <Button
+                                                            type="default"
+                                                            icon={<BarChartOutlined />}
+                                                            onClick={() => setShowGraphs(!showGraphs)}
+                                                            onMouseEnter={() => setHovered(true)}
+                                                            onMouseLeave={() => setHovered(false)}
+                                                            style={{
+                                                                border: '3px solid #91C25F',
+                                                                color: showGraphs || hovered ? '#91C25F' : '#555',
+                                                                backgroundColor: showGraphs || hovered ? 'green' : 'transparent',
+                                                                borderRadius: '999px',
+                                                                fontWeight: 500,
+                                                                padding: '0 12px',
+                                                                height: '32px',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: '4px',
+                                                                transition: 'all 0.2s ease-in-out',
+                                                            }}
+                                                        >
+                                                            Chart
+                                                        </Button> */}
+                                                        {/* {showGraphs && (
+                                                            <div style={{ marginTop: 10 }}>
+                                                                
+                                                                <RenderCarouselNav2 /> 
+                                                            </div>
+                                                        )} */}
+
+
+                                                    </div>
+                                                    {/* <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: 10 }}>
+      <Switch
+        checked={showGraphs}
+        style={{ backgroundColor: showGraphs ? '#91C25F' : undefined }}
+        onClick={onClickBarChart}
+      />
+      <span style={{ fontSize: '14px', color: theme === 'dark' ? '#fff' : '#000' }}>
+        Chart
+      </span>
+    </div> */}
+                                                </Col>
+                                            </Row>
+
+
+                                            {/* Grid wrapper with no padding/margin overflow */}
+                                            <div style={{ width: '100%', height: 'auto' }}>
+                                                <AgGridReact
+                                                    className="custom-grid"
+                                                    domLayout="auto"
+                                                    rowData={rowData}
+                                                    columnDefs={columnDefs}
+                                                    defaultColDef={{
+                                                        ...defaultColDef,
+                                                        wrapText: true,
+                                                        autoHeight: true,
+                                                        cellStyle: {
+                                                            whiteSpace: 'normal',
+                                                            lineHeight: '1.4',
+                                                            paddingTop: '4px',
+                                                            paddingBottom: '4px',
+                                                            fontSize: '13px',
+                                                        },
+                                                    }}
+
+                                                    autoGroupColumnDef={autoGroupColumnDefOverAllReport}
+                                                    rowGroupPanelShow="always"
+                                                    suppressAggFuncInHeader={true}
+                                                    groupIncludeFooter={true}
+                                                    groupIncludeTotalFooter={true}
+                                                    getRowHeight={() => 32} // ✅ consistent row height
+                                                />
+                                            </div>
+                                        </div>
+                                    </Col>
+                                </Row>
+
+
+                                <Row style={{ display: 'flex', flexDirection: 'column', marginTop: "20px" }}>
+                                    <Col>
+                                        <div
+                                            className={`ag-theme-alpine ${gridThemeClass}`}
+                                            style={{
+                                                width: '100%',
+                                                borderRadius: 12,
+                                                backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+                                                padding: 10,
+                                                height: 'auto',
+                                                boxShadow:
+                                                    theme === 'dark'
+                                                        ? '0 1px 3px rgba(0,0,0,0.6)'
+                                                        : '0 1px 6px rgba(0,0,0,0.08)',
+                                            }}
+                                        >
+                                            {/* Title */}
+                                            <Row style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                {/* Left: Title */}
+                                                <Col>
+                                                    <h3
+                                                        style={{
+                                                            fontSize: '16px',
+                                                            fontWeight: 500,
+                                                            marginLeft: 10,
+                                                            color: theme === 'dark' ? '#fff' : '#111827',
+                                                        }}
+                                                    >
+                                                        Accounts
+                                                    </h3>
+                                                </Col>
+                                            </Row>
+
+                                            {/* Carousel Navigation */}
+                                            <div style={{ padding: 0, marginBottom: 10 }}>{renderCarouselNav()}</div>
+
+                                            {/* Tabs for Grid Sections */}
+                                            <Tabs activeKey={activeTab} onChange={handleSlideChange} renderTabBar={() => <></>}>
+                                                <Tabs.TabPane key="1">
+                                                    <AgGridReact
+                                                        className="custom-grid"
+                                                        rowData={rowData?.filter((each) => each.profit > 0)}
+                                                        columnDefs={columnDefs1}
+                                                        defaultColDef={{
+                                                            ...defaultColDef,
+                                                            wrapText: true,
+                                                            autoHeight: true,
+                                                            cellStyle: {
+                                                                whiteSpace: 'normal',
+                                                                lineHeight: '1.4',
+                                                                paddingTop: '4px',
+                                                                paddingBottom: '4px',
+                                                                fontSize: '13px',
+                                                            },
+                                                        }}
+                                                        gridOptions={{
+                                                            ensureDomOrder: false,
+                                                            suppressRowClickSelection: true,
+                                                            suppressClipboardPaste: false,
+                                                            enableRangeSelection: true,
+                                                        }}
+                                                        rowGroupPanelShow="always"
+                                                        suppressAggFuncInHeader={true}
+                                                        groupIncludeFooter={true}
+                                                        groupIncludeTotalFooter={true}
+                                                        autoGroupColumnDef={autoGroupColumnDefProfit}
+                                                        domLayout="auto"
+                                                        getRowHeight={() => 32}
+                                                    />
+                                                </Tabs.TabPane>
+
+                                                <Tabs.TabPane key="2">
+                                                    <AgGridReact
+                                                        className="custom-grid"
+                                                        rowData={rowData?.filter((each) => each.profit < 0)}
+                                                        columnDefs={columnDefs1}
+                                                        defaultColDef={{
+                                                            ...defaultColDef,
+                                                            wrapText: true,
+                                                            autoHeight: true,
+                                                            cellStyle: {
+                                                                whiteSpace: 'normal',
+                                                                lineHeight: '1.4',
+                                                                paddingTop: '4px',
+                                                                paddingBottom: '4px',
+                                                                fontSize: '13px',
+                                                            },
+                                                        }}
+                                                        gridOptions={{
+                                                            ensureDomOrder: false,
+                                                            suppressRowClickSelection: true,
+                                                            suppressClipboardPaste: false,
+                                                            enableRangeSelection: true,
+                                                        }}
+                                                        rowGroupPanelShow="always"
+                                                        suppressAggFuncInHeader={true}
+                                                        groupIncludeFooter={true}
+                                                        groupIncludeTotalFooter={true}
+                                                        autoGroupColumnDef={autoGroupColumnDefLoss}
+                                                        domLayout="auto"
+                                                        getRowHeight={() => 32}
+                                                    />
+                                                </Tabs.TabPane>
+
+                                                <Tabs.TabPane key="3">
+                                                    <AgGridReact
+                                                        className="custom-grid"
+                                                        rowData={Object.values(
+                                                            byAccountNumber?.reduce((acc, curr) => {
+                                                                (acc[curr.specifiedDate] = acc[curr.specifiedDate] || []).push(curr);
+                                                                return acc;
+                                                            }, {})
+                                                        )
+                                                            .flatMap(records =>
+                                                                records
+                                                                    .sort((a, b) => b.spend - a.spend)
+                                                                    .slice(0, 5)
+                                                            )}
+                                                        columnDefs={columnDefs1}
+                                                        defaultColDef={{
+                                                            ...defaultColDef,
+                                                            wrapText: true,
+                                                            autoHeight: true,
+                                                            cellStyle: {
+                                                                whiteSpace: 'normal',
+                                                                lineHeight: '1.4',
+                                                                paddingTop: '4px',
+                                                                paddingBottom: '4px',
+                                                                fontSize: '13px',
+                                                            },
+                                                        }}
+                                                        gridOptions={{
+                                                            ensureDomOrder: false,
+                                                            suppressRowClickSelection: true,
+                                                            suppressClipboardPaste: false,
+                                                            enableRangeSelection: true,
+                                                        }}
+                                                        rowGroupPanelShow="always"
+                                                        suppressAggFuncInHeader={true}
+                                                        groupIncludeFooter={true}
+                                                        groupIncludeTotalFooter={true}
+                                                        autoGroupColumnDef={autoGroupColumnDefProfit}
+                                                        domLayout="auto"
+                                                        getRowHeight={() => 32}
+                                                    />
+                                                </Tabs.TabPane>
+
+                                                <Tabs.TabPane key="4">
+                                                    <AgGridReact
+                                                        className="custom-grid"
+                                                        rowData={Object.values(
+                                                            byAccountNumber?.reduce((acc, curr) => {
+                                                                (acc[curr.specifiedDate] = acc[curr.specifiedDate] || []).push(curr);
+                                                                return acc;
+                                                            }, {})
+                                                        )
+                                                            .flatMap(records =>
+                                                                records
+                                                                    .sort((a, b) => b.estimated_revenue - a.estimated_revenue)
+                                                                    .slice(0, 5)
+                                                            )}
+                                                        columnDefs={columnDefs1}
+                                                        defaultColDef={{
+                                                            ...defaultColDef,
+                                                            wrapText: true,
+                                                            autoHeight: true,
+                                                            cellStyle: {
+                                                                whiteSpace: 'normal',
+                                                                lineHeight: '1.4',
+                                                                paddingTop: '4px',
+                                                                paddingBottom: '4px',
+                                                                fontSize: '13px',
+                                                            },
+                                                        }}
+                                                        gridOptions={{
+                                                            ensureDomOrder: false,
+                                                            suppressRowClickSelection: true,
+                                                            suppressClipboardPaste: false,
+                                                            enableRangeSelection: true,
+                                                        }}
+                                                        rowGroupPanelShow="always"
+                                                        suppressAggFuncInHeader={true}
+                                                        groupIncludeFooter={true}
+                                                        groupIncludeTotalFooter={true}
+                                                        autoGroupColumnDef={autoGroupColumnDefProfit}
+                                                        domLayout="auto"
+                                                        getRowHeight={() => 32}
+                                                    />
+                                                </Tabs.TabPane>
+
+                                                <Tabs.TabPane key="5">
+                                                    <AgGridReact
+                                                        className="custom-grid"
+                                                        rowData={Object.values(
+                                                            byAccountNumber?.reduce((acc, curr) => {
+                                                                (acc[curr.specifiedDate] = acc[curr.specifiedDate] || []).push(curr);
+                                                                return acc;
+                                                            }, {})
+                                                        )
+                                                            .flatMap(records =>
+                                                                records
+                                                                    .sort((a, b) => b.profit - a.profit)
+                                                                    .slice(0, 5)
+                                                            )}
+                                                        columnDefs={columnDefs1}
+                                                        defaultColDef={{
+                                                            ...defaultColDef,
+                                                            wrapText: true,
+                                                            autoHeight: true,
+                                                            cellStyle: {
+                                                                whiteSpace: 'normal',
+                                                                lineHeight: '1.4',
+                                                                paddingTop: '4px',
+                                                                paddingBottom: '4px',
+                                                                fontSize: '13px',
+                                                            },
+                                                        }}
+                                                        gridOptions={{
+                                                            ensureDomOrder: false,
+                                                            suppressRowClickSelection: true,
+                                                            suppressClipboardPaste: false,
+                                                            enableRangeSelection: true,
+                                                        }}
+                                                        rowGroupPanelShow="always"
+                                                        suppressAggFuncInHeader={true}
+                                                        groupIncludeFooter={true}
+                                                        groupIncludeTotalFooter={true}
+                                                        autoGroupColumnDef={autoGroupColumnDefProfit}
+                                                        domLayout="auto"
+                                                        getRowHeight={() => 32}
+                                                    />
+                                                </Tabs.TabPane>
+                                            </Tabs>
+                                        </div>
+                                    </Col>
+                                </Row>
+
+
+                                <Row style={{ display: 'flex', flexDirection: 'column', marginTop: "20px" }}>
+                                    <Col>
+                                        <div
+                                            className={`ag-theme-alpine ${gridThemeClass}`}
+                                            style={{
+                                                width: '100%',
+                                                borderRadius: 12,
+                                                backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+                                                padding: 10,
+                                                height: 'auto',
+                                                boxShadow:
+                                                    theme === 'dark'
+                                                        ? '0 1px 3px rgba(0,0,0,0.6)'
+                                                        : '0 1px 6px rgba(0,0,0,0.08)',
+                                            }}
+                                        >
+
+                                            <Row style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                {/* Left: Title */}
+                                                <Col>
+                                                    <h3
+                                                        style={{
+                                                            fontSize: '16px',
+                                                            fontWeight: 500,
+                                                            marginLeft: 10,
+                                                            color: theme === 'dark' ? '#fff' : '#111827',
+                                                        }}
+                                                    >
+                                                        Top 5 campaigns
+                                                    </h3>
+                                                </Col>
+                                            </Row>
+                                            {/* Carousel Nav */}
+                                            <div style={{ padding: 0, marginBottom: 10 }}>{renderCarouselNav1()}</div>
+
+                                            {/* Tab Content */}
+                                            <Tabs activeKey={activeTab1} onChange={handleSlideChange1} renderTabBar={() => <></>}>
+                                                {/* Tab 1: Top Spend */}
+                                                <Tabs.TabPane key="1">
+                                                    <AgGridReact
+                                                        className="custom-grid"
+                                                        domLayout="auto"
+                                                        rowData={top5Campaigns}
+                                                        columnDefs={columnDefs2}
+                                                        defaultColDef={{
+                                                            ...defaultColDef,
+                                                            wrapText: true,
+                                                            autoHeight: true,
+                                                            cellStyle: {
+                                                                whiteSpace: 'normal',
+                                                                lineHeight: '1.4',
+                                                                paddingTop: '4px',
+                                                                paddingBottom: '4px',
+                                                                fontSize: '13px',
+                                                            },
+                                                        }}
+                                                        gridOptions={{
+                                                            ensureDomOrder: false,
+                                                            suppressRowClickSelection: true,
+                                                            suppressClipboardPaste: false,
+                                                            enableRangeSelection: true,
+                                                        }}
+                                                        rowGroupPanelShow="always"
+                                                        suppressAggFuncInHeader={true}
+                                                        groupIncludeFooter={true}
+                                                        groupIncludeTotalFooter={true}
+                                                        autoGroupColumnDef={autoGroupColumnDefCampaigns}
+                                                        getRowHeight={() => 32}
+                                                    />
+                                                </Tabs.TabPane>
+
+                                                {/* Tab 2: Top Revenue */}
+                                                <Tabs.TabPane key="2">
+                                                    <AgGridReact
+                                                        className="custom-grid"
+                                                        domLayout="auto"
+                                                        rowData={top5RevenueCampaigns}
+                                                        columnDefs={columnDefs2}
+                                                        defaultColDef={{
+                                                            ...defaultColDef,
+                                                            wrapText: true,
+                                                            autoHeight: true,
+                                                            cellStyle: {
+                                                                whiteSpace: 'normal',
+                                                                lineHeight: '1.4',
+                                                                paddingTop: '4px',
+                                                                paddingBottom: '4px',
+                                                                fontSize: '13px',
+                                                            },
+                                                        }}
+                                                        gridOptions={{
+                                                            ensureDomOrder: false,
+                                                            suppressRowClickSelection: true,
+                                                            suppressClipboardPaste: false,
+                                                            enableRangeSelection: true,
+                                                        }}
+                                                        rowGroupPanelShow="always"
+                                                        suppressAggFuncInHeader={true}
+                                                        groupIncludeFooter={true}
+                                                        groupIncludeTotalFooter={true}
+                                                        autoGroupColumnDef={autoGroupColumnDefCampaigns}
+                                                        getRowHeight={() => 32}
+                                                    />
+                                                </Tabs.TabPane>
+
+                                                {/* Tab 3: Top Profit */}
+                                                <Tabs.TabPane key="3">
+                                                    <AgGridReact
+                                                        className="custom-grid"
+                                                        domLayout="auto"
+                                                        rowData={top5ProfitCampaigns}
+                                                        columnDefs={columnDefs2}
+                                                        defaultColDef={{
+                                                            ...defaultColDef,
+                                                            wrapText: true,
+                                                            autoHeight: true,
+                                                            cellStyle: {
+                                                                whiteSpace: 'normal',
+                                                                lineHeight: '1.4',
+                                                                paddingTop: '4px',
+                                                                paddingBottom: '4px',
+                                                                fontSize: '13px',
+                                                            },
+                                                        }}
+                                                        gridOptions={{
+                                                            ensureDomOrder: false,
+                                                            suppressRowClickSelection: true,
+                                                            suppressClipboardPaste: false,
+                                                            enableRangeSelection: true,
+                                                        }}
+                                                        rowGroupPanelShow="always"
+                                                        suppressAggFuncInHeader={true}
+                                                        groupIncludeFooter={true}
+                                                        groupIncludeTotalFooter={true}
+                                                        autoGroupColumnDef={autoGroupColumnDefCampaigns}
+                                                        getRowHeight={() => 32}
+                                                    />
+                                                </Tabs.TabPane>
+
+                                                {/* Tab 4: Overall Profit */}
+                                                <Tabs.TabPane key="4">
+                                                    <AgGridReact
+                                                        className="custom-grid"
+                                                        domLayout="auto"
+                                                        rowData={overAllProfitCampaigns}
+                                                        columnDefs={columnDefs2}
+                                                        defaultColDef={{
+                                                            ...defaultColDef,
+                                                            wrapText: true,
+                                                            autoHeight: true,
+                                                            cellStyle: {
+                                                                whiteSpace: 'normal',
+                                                                lineHeight: '1.4',
+                                                                paddingTop: '4px',
+                                                                paddingBottom: '4px',
+                                                                fontSize: '13px',
+                                                            },
+                                                        }}
+                                                        gridOptions={{
+                                                            ensureDomOrder: false,
+                                                            suppressRowClickSelection: true,
+                                                            suppressClipboardPaste: false,
+                                                            enableRangeSelection: true,
+                                                        }}
+                                                        rowGroupPanelShow="always"
+                                                        suppressAggFuncInHeader={true}
+                                                        groupIncludeFooter={true}
+                                                        groupIncludeTotalFooter={true}
+                                                        autoGroupColumnDef={autoGroupColumnDefCampaigns}
+                                                        getRowHeight={() => 32}
+                                                    />
+                                                </Tabs.TabPane>
+
+                                                {/* Tab 5: Overall Loss */}
+                                                <Tabs.TabPane key="5">
+                                                    <AgGridReact
+                                                        className="custom-grid"
+                                                        domLayout="auto"
+                                                        rowData={overAllLossCampaigns}
+                                                        columnDefs={columnDefs2}
+                                                        defaultColDef={{
+                                                            ...defaultColDef,
+                                                            wrapText: true,
+                                                            autoHeight: true,
+                                                            cellStyle: {
+                                                                whiteSpace: 'normal',
+                                                                lineHeight: '1.4',
+                                                                paddingTop: '4px',
+                                                                paddingBottom: '4px',
+                                                                fontSize: '13px',
+                                                            },
+                                                        }}
+                                                        gridOptions={{
+                                                            ensureDomOrder: false,
+                                                            suppressRowClickSelection: true,
+                                                            suppressClipboardPaste: false,
+                                                            enableRangeSelection: true,
+                                                        }}
+                                                        rowGroupPanelShow="always"
+                                                        suppressAggFuncInHeader={true}
+                                                        groupIncludeFooter={true}
+                                                        groupIncludeTotalFooter={true}
+                                                        autoGroupColumnDef={autoGroupColumnDefCampaigns}
+                                                        getRowHeight={() => 32}
+                                                    />
+                                                </Tabs.TabPane>
+                                            </Tabs>
+                                        </div>
+                                    </Col>
+                                </Row>
+
+
+                                <Row style={{ display: 'flex', flexDirection: 'column', marginTop: '20px' }}>
+                                    <Col>
+                                        <div
+                                            className={`ag-theme-alpine ${gridThemeClass}`}
+                                            style={{
+                                                width: '100%',
+                                                borderRadius: 12,
+                                                backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+                                                padding: 10,
+                                                height: 'auto',
+                                                boxShadow:
+                                                    theme === 'dark'
+                                                        ? '0 1px 3px rgba(0,0,0,0.6)'
+                                                        : '0 1px 6px rgba(0,0,0,0.08)',
+                                            }}
+                                        >
+                                            {/* Title Row */}
+                                            <Row style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                <Col>
+                                                    <h3
+                                                        style={{
+                                                            fontSize: '16px',
+                                                            fontWeight: 500,
+                                                            marginLeft: 10,
+                                                            color: theme === 'dark' ? '#fff' : '#111827',
+                                                        }}
+                                                    >
+                                                        Insights by Domain & Agency
+                                                    </h3>
+                                                </Col>
+                                            </Row>
+
+                                            {/* Carousel Nav */}
+                                            <div style={{ padding: '0px' }}>
+                                                <RenderCarouselNav3 />
+                                            </div>
+
+                                            {/* Tab Navigation */}
+                                            <Tabs activeKey={activeTab3} onChange={handleTabChange3} renderTabBar={() => <></>}>
+                                                {/* Domain View */}
+                                                <Tabs.TabPane key="1">
+                                                    <AgGridReact
+                                                        className="custom-grid"
+                                                        domLayout="auto"
+                                                        rowData={domainWiseData}
+                                                        columnDefs={columnDefs3}
+                                                        defaultColDef={{
+                                                            ...defaultColDef,
+                                                            wrapText: true,
+                                                            autoHeight: true,
+                                                            cellStyle: {
+                                                                whiteSpace: 'normal',
+                                                                lineHeight: '1.4',
+                                                                paddingTop: '4px',
+                                                                paddingBottom: '4px',
+                                                                fontSize: '13px',
+                                                            },
+                                                        }}
+                                                        gridOptions={{
+                                                            ensureDomOrder: false,
+                                                            suppressRowClickSelection: true,
+                                                            suppressClipboardPaste: false,
+                                                            enableRangeSelection: true,
+                                                        }}
+                                                        suppressAggFuncInHeader={true}
+                                                        groupIncludeTotalFooter={true}
+                                                        autoGroupColumnDef={autoGroupColumnDefDomain}
+                                                        getRowHeight={() => 32}
+                                                    />
+                                                </Tabs.TabPane>
+
+                                                {/* Agency View */}
+                                                <Tabs.TabPane key="2">
+                                                    <AgGridReact
+                                                        className="custom-grid"
+                                                        domLayout="auto"
+                                                        rowData={agencyNameReport}
+                                                        columnDefs={columnDefs4}
+                                                        defaultColDef={{
+                                                            ...defaultColDef,
+                                                            wrapText: true,
+                                                            autoHeight: true,
+                                                            cellStyle: {
+                                                                whiteSpace: 'normal',
+                                                                lineHeight: '1.4',
+                                                                paddingTop: '4px',
+                                                                paddingBottom: '4px',
+                                                                fontSize: '13px',
+                                                            },
+                                                        }}
+                                                        gridOptions={{
+                                                            groupDefaultExpanded: -1,
+                                                            ensureDomOrder: false,
+                                                            suppressRowClickSelection: true,
+                                                            suppressClipboardPaste: false,
+                                                            enableRangeSelection: true,
+                                                        }}
+                                                        rowGroupPanelShow="always"
+                                                        suppressAggFuncInHeader={true}
+                                                        groupIncludeTotalFooter={true}
+                                                        autoGroupColumnDef={autoGroupColumnDefAgency}
+                                                        getRowHeight={() => 32}
+                                                    />
+                                                </Tabs.TabPane>
+                                            </Tabs>
+                                        </div>
+                                    </Col>
+                                </Row>
+
+                            </div>
+                        )}
                     </div>
                 )}
-            </div>
-            )}
             </div>
             {/* } */}
         </div>

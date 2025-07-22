@@ -2,6 +2,7 @@
 import {
   CloseOutlined,
   CommentOutlined,
+  DollarOutlined,
   DownOutlined,
   EditOutlined,
   EyeOutlined,
@@ -232,9 +233,13 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
             <Spin />
           ) : (
             value !== 0 && value !== '' && (
-              <div onClick={handleEdit}>
-                {value}
-                <EditOutlined style={{ marginLeft: "5px", cursor: "pointer" }} />
+              <div onClick={handleEdit} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <DollarOutlined className="custom-dollar-icon" />
+                <span style={{ color: '#1890ff' }}>{value}</span>
+                <p style={{ marginLeft: "5px" }}>Daily</p>
+
+                {/* {value} */}
+                {/* <EditOutlined style={{ marginLeft: "5px", cursor: "pointer" }} /> */}
               </div>
             )
           )
@@ -267,7 +272,7 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
     }
   };
 
-  const onToggleStatus = async(record, checked) => {
+  const onToggleStatus = async (record, checked) => {
     console.log(record, "record")
     console.log(checked, "checked")
     console.log(record.Adsetid, "Adsetid");
@@ -275,21 +280,21 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
     console.log(selectedRow);
 
     const response = await axios.post(
-      `https://www.testapi.adsgoat.in/api/adsetlevel`,  
+      `https://www.testapi.adsgoat.in/api/adsetlevel`,
       {
         status: checked ? "ACTIVE" : "PAUSED",
-        id:selectedRow.identifier,
+        id: selectedRow.identifier,
         adset_id: record.Adsetid
       }, {
-        headers: {
-          Authorization: token,
-        }
+      headers: {
+        Authorization: token,
       }
+    }
     );
-    if(response.status === 200){
+    if (response.status === 200) {
       rerender();
     };
-      
+
     // updateAdSetStatus(record.Adsetid, checked ? "ACTIVE" : "PAUSED", selectedRow.access_token)
   }
 
@@ -389,10 +394,10 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
   //     ),
   //   }
   // ];
-  
+
   const columns = useMemo(() => [
     {
-      title: 'AdsetName',
+      title: 'Adset name',
       dataIndex: 'AdsetName',
       key: 'AdsetName',
       render: (text, record) => (
@@ -405,7 +410,7 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
       ),
     },
     {
-      title: 'Account_Number',
+      title: 'Account number',
       dataIndex: 'Account_Number',
       key: 'Account_Number',
       render: (text, record) => (
@@ -413,7 +418,7 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
       ),
     },
     {
-      title: "Daily Amount",
+      title: "Daily amount",
       dataIndex: "Daily_amount",
       width: "5%",
       render: (Daily_amount, record) => (
@@ -444,7 +449,7 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
               <span style={{ color: 'red', cursor: 'pointer' }}>Error</span>
             </Tooltip>
           ) : (
-            <span>No Error</span>
+            <span>No error</span>
           )}
         </>
       ),
@@ -474,10 +479,10 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
       key: 'action',
       render: (_, record) => (
         <div style={{ display: 'flex', gap: '10px' }}>
-          <Button  className="dark-icon-button" onClick={() => handleadsetsEdit(record)} icon={<EditOutlined />} style={{color: theme === "dark" ? "white" : "#000"}}>
+          <Button className="dark-icon-button" onClick={() => handleadsetsEdit(record)} icon={<EditOutlined />} style={{ color: theme === "dark" ? "white" : "#000" }}>
             Edit
           </Button>
-          <Button  className="dark-icon-button" onClick={() => handleadsetsView(record)} icon={<EyeOutlined />} style={{color: theme === "dark" ? "white" : "#000"}}>
+          <Button className="dark-icon-button" onClick={() => handleadsetsView(record)} icon={<EyeOutlined />} style={{ color: theme === "dark" ? "white" : "#000" }}>
             View
           </Button>
         </div>
@@ -499,33 +504,46 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
       <Flex justify="space-between" align="center">
         <Title
           level={3}
-          style={{ margin: "0 0 10px 0", color: theme === "dark" ? "white" : "#1677ff" }}>
+          style={{ margin: "0 0 10px 0", color: theme === "dark" ? "#1677ff" : "#1677ff",fontSize:'18px' }}>
           Adsets
         </Title>
         <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <Button  style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px",marginRight: '10px'}} onClick={showDrawer1}>
-            Create Adset
+          <Button style={{ backgroundColor: '#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px", marginRight: '10px' }} onClick={showDrawer1}>
+            Create adset
           </Button>
         </div>
 
       </Flex>
-      <Row style={{ columnGap: "10px" }} align={"bottom"}>
-        <Col span={7}>
+      <Row align="middle" gutter={10}>
+        <Col>
           <Input
             placeholder="Search..."
             variant="filled"
-            suffix={<SearchOutlined />}
+            // suffix={<SearchOutlined />}
             className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+            style={{
+              width: '170px',
+              marginLeft: '12px',
+              border: '1px solid green',
+              marginBottom: '10px'
+            }}
           // value={searchInput}
           // onChange={handleSearchChange}
           />
         </Col>
 
-        <Col span={4}>
-          {<span style={{ color: "#B4B4B4" }}>Status</span>}
+        <Col span={5}>
+          {/* {<span style={{ color: "#B4B4B4" }}>Status</span>} */}
           <Select
             // defaultValue="All"
-            style={{ width: "100%" }}
+            style={{
+              width: '180px',
+              border: '1px solid green',
+              borderRadius: '5px',
+              marginBottom: '10px',
+
+            }}
+            placeholder="Select status"
             dropdownClassName={theme === 'dark' && "custom-dropdown"}
             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
             // onChange={handleSelectChange}
@@ -555,10 +573,10 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
         // closable={false}
         onClose={onCloseDrawer}
         open={adsDrawerVisible}
-        width="90%" // Adjust width as needed
+        width="100%" // Adjust width as needed
         style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
       >
-        <Createads selectedRow={ovrallcampdetal} network={network}/>
+        <Createads selectedRow={ovrallcampdetal} network={network} />
 
       </Drawer>
       <Drawer
@@ -567,7 +585,7 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
         // closable={false}
         onClose={onCloseDrawer}
         open={editadsetsDrawerVisible}
-        width="90%" // Adjust width as needed
+        width="100%" // Adjust width as needed
         style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
       >
         <Editadset selectedRow={ovrallcampdetal} editadsetlevel={editadsetsdata} onClose={onCloseDrawer} changeRRefrst={changeRRefrst} rerender={rerender} />
@@ -579,13 +597,13 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
         // closable={false}
         onClose={onCloseDrawer}
         open={viewadsetsDrawerVisible}
-        width="90%" // Adjust width as needed
+        width="100%" // Adjust width as needed
         style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
       >
         <Viewadsets selectedRow={ovrallcampdetal} viewadsetlevel={viewadsetsdata} onClose={onCloseDrawer} />
 
       </Drawer>
-      <Table dataSource={data} columns={columns} rowKey={(record, index) => index} className={`custom-dark-table ${theme === 'dark' ? 'dark-mode-pagination' : 'light-mode-pagination'}`}/>
+      <Table dataSource={data} columns={columns} rowKey={(record, index) => index} className={`custom-dark-table ${theme === 'dark' ? 'dark-mode-pagination' : 'light-mode-pagination'}`} />
     </>
   )
 }

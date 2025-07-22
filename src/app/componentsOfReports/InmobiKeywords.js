@@ -129,6 +129,8 @@ const InmobiKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePrat
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting
+        unSortIcon: true,
+        headerClass: 'ag-center-header',
 
         comparator: (campaignA, campaignB) => {
             if (!campaignA) return 1;
@@ -488,7 +490,7 @@ const InmobiKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePrat
                                     <EditOutlined onClick={handleEditClick} style={{ marginLeft: '10px', color: 'blue', cursor: 'pointer' }} />
                                 </div>
                             )}>
-                                <MessageOutlined  className= {theme === "dark" ? "black-icon-comment" : 'Message'} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
+                                <MessageOutlined  className= {theme === "dark" ? "black-icon-comment" : 'Message'} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: '#4CAF50' }} />
                                 <Tooltip title={tooltipText}></Tooltip>
                             </Tooltip>
                         ) : (

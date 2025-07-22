@@ -122,12 +122,13 @@ a {
 
 .ad-button button {
   font-size: 14px;
-  font-weight: 400;
-  border-radius: 10px;
-  border: none;
+  border-radius: 20px;
   padding: 6px 12px;
   white-space: nowrap;
   cursor: pointer;
+  background-color: #91C25F;
+  border: 1px solid #4caf50;
+  margin-bottom:'5px';
 }
 .icons {
   display: flex;
@@ -250,22 +251,22 @@ body {
   align-items: center;
 }
 .blinking-circle {
-  width: 20px;
-  height: 18px;
+  width: 13px;
+  height: 13px;
   background-color: green;
   border-radius: 50%;
   animation: blink 1s infinite;
 }
 .blinking-circle-1 {
-  width: 18px;
-  height: 18px;
+  width: 13px;
+  height: 13px;
   background-color:red;
   border-radius: 50%;
   animation: blink 1s infinite;
 }
 .blinking-circle-3{
-  width: 18px;
-  height: 18px;
+  width: 13px;
+  height: 13px;
   background-color:rgb(18, 47, 110);
   border-radius: 50%;
   animation: blink 1s infinite;
@@ -423,8 +424,9 @@ body {
 
 .ag-theme-alpine .ag-row.ag-footer {
   background-color: lightblue;
-  color: black;
+  color: #000;
 }
+
 
 /* Specific styling for total footer if needed */
 .ag-theme-alpine .ag-row.ag-footer.ag-row-level-0 { /* Assuming level 0 is the total footer */
@@ -536,7 +538,7 @@ body.dark-mode .startview svg {
   color: gold !important;
 }
 body.dark-mode .Message svg {
-  color: blue !important;
+  color: #4CAF50 !important;
 }
 
 body.light-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-picker-outlined {
@@ -690,10 +692,16 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 }
 
 /* Style for hovered/active options (light black color) */
-.custom-dropdown .ant-select-item-option-selected,
+.custom-dropdown .ant-select-item-option-selected
+ {
+  background-color: #d5e9f3 !important; /* Light black color */
+  color: #333 !important;
+  
+}
 .custom-dropdown .ant-select-item-option-active {
-  background-color: #2b2b2b !important; /* Light black color */
-  color: white !important;
+  background-color: #646363 !important; /* Light black color */
+  color: #fff !important;
+  
 }
 
 /* Scrollbar styling for the custom dropdown */
@@ -891,7 +899,7 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 }
 .Badge{
   position: relative;
-    background-color: orange;
+    background-color: #EC7117;
     padding: 2px 5px;
     border-radius: 50%;
     color: white;
@@ -1180,11 +1188,11 @@ body.dark-mode .black-icon-pause.anticon svg {
   color: orange !important;
 }
 body.dark-mode .black-icon-active-1.anticon svg {
-  color: green !important;
+  color: #91C25F !important;
 }
 
 body.dark-mode .black-icon-pause-1.anticon svg {
-  color: red !important;
+  color: #EC7117 !important;
 }
 
 body.dark-mode .black-icon-comment.anticon svg {
@@ -1192,7 +1200,7 @@ body.dark-mode .black-icon-comment.anticon svg {
 }
 
 .custom-input-dark {
-  background-color: #5d5b5b !important;  /* Input background */
+  background-color: #333 !important;  /* Input background */
   color: #fff !important;                /* Input text color */
 }
 .custom-input-dark::placeholder {
@@ -1204,17 +1212,26 @@ body.dark-mode .black-icon-comment.anticon svg {
 
 @media (max-width: 500px) {
   .custom-input-dark{
-    width: 310px !important; /* Adjust width for smaller screens */
+    width: 310px !important;
     /* margin-bottom: 10px; */
     /* margin-top: 10px; */
   }
   .custom-input-light{
-    width: 310px !important; /* Adjust width for smaller screens */
+    width: 310px !important; 
     /* margin-bottom: 10px; */
     /* margin-top: 10px; */
   }
 }
-  
+.custom-input-dark:hover {
+  border-color: #4caf50 !important; 
+ 
+}
+
+
+.custom-input-light:hover {
+  border-color: #4caf50 !important; 
+ ;
+}
 
 .custom-input-light::placeholder {
   color: #888 !important;
@@ -1229,7 +1246,7 @@ body.dark-mode .black-icon-comment.anticon svg {
   outline: none !important;  
 } */
 .custom-input-light .ant-input:focus {
-  border-color: #37474F !important;
+  border-color: #91C25F !important;
   box-shadow: none !important;
   outline: none !important;
 }
@@ -1254,12 +1271,28 @@ body.dark-mode .black-icon-comment.anticon svg {
 /* Ink bar */
 .custom-tabs.dark-mode-tabs .ant-tabs-ink-bar {
   background-color: #91C25F !important;
+  /* width: fit-content !important; */
 }
 .custom-tabs.light-mode-tabs .ant-tabs-ink-bar {
-  background-color: #52c41a !important;
+  background-color: #91C25F !important;
 }
 .custom-tabs.dark-mode-tabs .ant-tabs-nav::before {
   border-bottom: 1px solid transparent !important;
+}
+
+.top-tabs.dark-mode-tabs .ant-tabs-ink-bar {
+  background-color: #91C25F !important;
+  width: fit-content !important;
+}
+
+.top-tabs.light-mode-tabs .ant-tabs-ink-bar {
+  background-color: #91C25F !important;
+  width: fit-content !important;
+}
+
+/* Hide the horizontal bottom border under the tab bar */
+.ant-tabs-nav::before {
+  display: none !important;
 }
 
 /* Light theme tab bar (optional, for clarity) */
@@ -1309,14 +1342,14 @@ body.dark-mode .black-icon-comment.anticon svg {
 .custom-dark-table.dark-mode-pagination .ant-table-thead > tr > th {
   background-color: #000000 !important; /* Olive green for dark mode */
   color: white !important;
-  font-weight: 600;
+  font-weight: normal !important;
   border-bottom: 1px solid #4e5f3f;
 }
 
 .custom-dark-table.light-mode-pagination .ant-table-thead > tr > th {
   background-color: #E5E9EF !important; /* Light green for light mode */
   color: black !important;
-  font-weight: 600;
+  font-weight: normal !important;
   border-bottom: 1px solid #ccc;
 }
 
@@ -1540,7 +1573,7 @@ body.dark-mode .black-icon-comment.anticon svg {
   border-radius: 8px;
 }
 
-/* ✅ OK Button - consistent in both themes */
+
 .custom-confirm-dark .ant-btn-primary,
 .custom-confirm-light .ant-btn-primary {
   background-color: #91C25F !important;
@@ -2721,7 +2754,7 @@ body.dark-mode .black-icon-comment.anticon svg {
   border-right: 1px solid red;
 }
 .custom-single-month-picker .ant-picker-panel {
-  border-left: 1px solid blue;
+  border-left: 1px solid #91C25F;
 }
 /* ✅ 1. Calendar HEADER: remove left spacing */
 .custom-single-month-picker .ant-picker-header {
@@ -2756,7 +2789,7 @@ body.dark-mode .black-icon-comment.anticon svg {
 .custom-single-month-picker .ant-picker-header,
 .custom-single-month-picker .ant-picker-panel,
 .custom-single-month-picker .ant-picker-footer {
-  border-left: 1px solid blue;
+  border-left: 1px solid #91C25F;
 }
 .dark-theme-dropdown.custom-single-month-picker .ant-picker-panel {
   background-color: #2e2e2e !important;
@@ -2984,3 +3017,339 @@ body.dark-mode .black-icon-comment.anticon svg {
 .custom-light-notification .ant-notification-notice-description {
   color: #1f1f1f !important;  
 }
+
+
+
+
+/*Updates notification styles*/
+.upload-form-wrapper {
+  --bg: #f9fafb;
+  --text: #111827;
+  --form-bg: #ffffff;
+  --border: #e5e7eb;
+  --input-bg: #ffffff;
+  --input-border: #d1d5db;
+  --placeholder: #9ca3af;
+  --button-bg: #91C25F;
+  --button-hover: #84cd3b;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg);
+  height: 100vh; /* This ensures it takes full screen height */
+}
+
+body.dark .upload-form-wrapper {
+  --bg: #262326;
+  --text: #191a1b;
+  --form-bg: #191919;
+  --border: #334155;
+  --input-bg: #0e1012;
+  --input-border: #475569;
+  --placeholder: #94a3b8;
+  --button-bg: #91C25F;
+  --button-hover: #84cd3b;
+}
+
+.upload-form-wrapper .form-container {
+  max-width: 600px;
+  /* max-height: 500px; */
+  width: 100%;
+  height: 90%;
+  /* margin: 60px auto; */
+  background-color: var(--form-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.upload-form-wrapper .form-title {
+  font-size: 24px;
+  text-align: center;
+  font-weight: 700;
+  margin-bottom: 10px;
+  margin-top: 2px;
+  color: var(--text);
+}
+
+.upload-form-wrapper .form-group {
+  margin-bottom: 1.2rem;
+}
+
+.upload-form-wrapper label {
+  display: flex;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.upload-form-wrapper input[type="text"],
+.upload-form-wrapper textarea {
+  width: 100%;
+  padding: 6px 9px;
+  border: 1px solid var(--input-border);
+  border-radius: 6px;
+  background-color: var(--input-bg);
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.upload-form-wrapper input::placeholder,
+.upload-form-wrapper textarea::placeholder {
+  color: var(--placeholder);
+}
+
+.upload-form-wrapper textarea {
+  resize: vertical;
+  min-height: 50px;
+}
+
+.upload-form-wrapper .image-upload-box {
+  border: 2px dashed var(--input-border);
+  padding: 15px;
+  text-align: center;
+  border-radius: 6px;
+  background-color: var(--input-bg);
+  cursor: pointer;
+  transition: background-color 0.2s;
+  color: var(--text);
+}
+
+.upload-form-wrapper .image-upload-box:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.upload-form-wrapper button {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background-color: var(--button-bg);
+  color: #111827;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.upload-form-wrapper button:hover {
+  background-color: var(--button-hover);
+}
+
+
+
+.custom-dropdown-dark {
+  background-color: #0e1012 !important;
+  color: #f9fafb !important;
+}
+
+.custom-dropdown-dark .ant-select-item-option {
+  color: #f9fafb;
+}
+
+.custom-dropdown-dark .ant-select-item-option-active {
+  background-color: #1f2937;
+}
+
+.custom-select-dark .ant-select-selector {
+  background-color: #0e1012 !important;
+  border-color: #475569 !important;
+  color: #f9fafb !important;
+}
+.custom-grid .ag-header-cell-label {
+ font-weight: normal !important;
+}
+
+.green-border-select.ant-select > .ant-select-selector {
+  border: 1px solid #4caf50 !important;
+  border-radius: 6px !important;
+}
+
+.green-border-picker.ant-picker {
+  border: 1px solid #4caf50 !important;
+  border-radius: 6px;
+}
+.green-border-picker.ant-picker:hover,
+.green-border-picker.ant-picker-focused {
+  border-color: #4caf50 !important;
+  box-shadow: 0 0 0 2px rgba(145, 194, 95, 0.2);
+}
+
+.ant-modal .ant-btn-primary {
+  background-color: #91C25F !important;
+  border-color: #91C25F !important;
+}
+
+.delete-icon{
+  color:'red'
+}
+.custom-dollar-icon svg {
+  fill: #1890ff !important;
+  margin-right: 5px;
+ 
+}
+
+.custom-grid .ag-header-cell-label {
+  font-weight: normal !important;
+}
+
+
+.ant-modal .ant-btn-primary {
+  background-color: #91C25F !important;
+  border-color: #91C25F !important;
+}
+
+
+
+.dark-confirm-modal .ant-modal-confirm-content {
+  color: #ffffff;
+}
+
+.dark-confirm-modal .ant-modal-confirm .ant-modal-title {
+  color: #ffffff !important;
+}
+
+
+/* LIGHT THEME – DEFAULT STATE */
+.checkbox-light .ant-checkbox-inner {
+  background-color: #e6f7ff !important;  /* White background */
+  border: 1px solid #91d5ff !important;  /* Blue border */
+}
+
+/* LIGHT THEME – CHECKED STATE */
+.checkbox-light .ant-checkbox-checked .ant-checkbox-inner {
+  background-color: #e6f7ff !important;  /* Light blue background */
+  border-color: #91d5ff !important;  /* Blue border */
+}
+
+/* LIGHT THEME – CHECKMARK */
+.checkbox-light .ant-checkbox-checked .ant-checkbox-inner::after {
+  border-color: #1d39c4 !important;  /* Blue tick color */
+}
+
+/* LIGHT THEME – HOVER EFFECT */
+.checkbox-light .ant-checkbox:hover .ant-checkbox-inner {
+  border-color: #91d5ff !important;  /* Blue border on hover */
+  background-color: #e6f7ff !important;  /* Light blue background on hover */
+}
+
+/* DARK THEME – DEFAULT STATE */
+.checkbox-dark .ant-checkbox-inner {
+  background-color: #e6f7ff !important;  /* Dark background */
+  border: 1px solid #91d5ff !important;  /* Blue border */
+}
+
+/* DARK THEME – CHECKED STATE */
+.checkbox-dark .ant-checkbox-checked .ant-checkbox-inner {
+  background-color: #e6f7ff !important;  /* Light blue background */
+  border-color: #91d5ff !important;  /* Blue border */
+}
+
+/* DARK THEME – CHECKMARK */
+.checkbox-dark .ant-checkbox-checked .ant-checkbox-inner::after {
+  border-color: #1d39c4 !important;  /* Blue tick color */
+}
+
+/* DARK THEME – HOVER EFFECT */
+.checkbox-dark .ant-checkbox:hover .ant-checkbox-inner {
+  border-color: #91d5ff !important;  /* Blue border on hover */
+  background-color: #e6f7ff !important;  /* Light blue background on hover */
+}
+
+/* FOR CHECKBOX GROUP (both light and dark themes) */
+.checkbox-group-light .ant-checkbox-inner,
+.checkbox-group-dark .ant-checkbox-inner {
+  background-color: #e6f7ff !important;  /* White background */
+  border: 1px solid #91d5ff !important;  /* Blue border */
+}
+
+/* CHECKBOX GROUP – CHECKED STATE */
+.checkbox-group-light .ant-checkbox-checked .ant-checkbox-inner,
+.checkbox-group-dark .ant-checkbox-checked .ant-checkbox-inner {
+  background-color: #e6f7ff !important;  /* Light blue background */
+  border-color: #91d5ff !important;  /* Blue border */
+}
+
+/* CHECKBOX GROUP – CHECKMARK */
+.checkbox-group-light .ant-checkbox-checked .ant-checkbox-inner::after,
+.checkbox-group-dark .ant-checkbox-checked .ant-checkbox-inner::after {
+  border-color: #1d39c4 !important;  /* Blue tick color */
+}
+
+
+/* Prevent blue color on hover/focus for Input */
+.custom-input-dark, .custom-input-light {
+  border-color: #91C25F !important; /* Retain your custom border color */
+}
+
+.custom-input-dark:focus, .custom-input-light:focus,
+.custom-input-dark:hover, .custom-input-light:hover {
+  border-color: #91C25F !important; /* Retain your custom border color */
+  outline: none !important; /* Remove the default blue outline */
+  box-shadow: none !important; /* Remove any box shadow caused by focus */
+}
+
+/* Prevent blue color on hover/focus for Select */
+.dark-theme, .light-theme {
+  border-color: #91C25F !important; /* Retain your custom border color */
+}
+
+.dark-theme:focus, .light-theme:focus,
+.dark-theme:hover, .light-theme:hover {
+  border-color: #91C25F !important; /* Retain your custom border color */
+  outline: none !important; /* Remove the default blue outline */
+  box-shadow: none !important; /* Remove any box shadow caused by focus */
+}
+
+/* Target the input inside the Select to remove default focus ring */
+.ant-select-selector:focus, .ant-select-selector:hover {
+  border-color: #91C25F !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Ensuring dropdown border color stays the same */
+.custom-dropdown {
+  border-color: #91C25F !important;
+}
+
+/* Optional: Remove the default focus ring on all elements globally */
+input:focus, select:focus, .custom-input-dark:focus, .custom-input-light:focus, .dark-theme:focus, .light-theme:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+
+/* Ensure the table container is */
+.table-container {
+  position: relative;
+  z-index: 1; 
+  height: 92%;
+}
+
+.custom-dropdown                                        
+  .ant-select-item-option-selected:not(.ant-select-item-option-disabled)
+  .ant-select-item-option-state svg {                  
+    color:#1d39c4  !important;                          
+    fill: #1d39c4  !important;
+}
+
+
+/* Center header text while preserving icons */
+.ag-center-header .ag-header-cell-label {
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+/* Optional: make sure text spans */
+.ag-center-header .ag-header-cell-text {
+  width: 100%;
+  text-align: center;
+}
+
+
+
+

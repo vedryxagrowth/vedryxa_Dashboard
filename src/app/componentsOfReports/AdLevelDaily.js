@@ -195,6 +195,8 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting
+        unSortIcon: true,
+        headerClass: 'ag-center-header',
         // filter: 'agTextColumnFilter',      // Enable string filter
         // floatingFilter: false,              // Optional: show quick filter below header
         // suppressMenu: false,
@@ -639,13 +641,14 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
                         <Modal
                             title="Confirm Action"
                             open={isAdidModalVisibles}
+                            className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             onOk={handlePauseOk}
                             onCancel={handlePauseCancel}
                         >
                             <p>
-                                Are you sure you want to turn <b>{nextChecked ? "ON" : "OFF"}</b> this ad?
+                                Are you sure you want to turn {nextChecked ? "ON" : "OFF"} this ad?
                             </p>
-                            <p>Ad ID: <strong>{selectedAdid}</strong></p>
+                            <p>Ad ID: {selectedAdid}</p>
                         </Modal>
                         <PinIcon
                             campaignName={campaignName}
@@ -710,7 +713,7 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
                                     cursor: 'pointer',
                                     marginLeft: '10px',
                                     marginRight: '10px',
-                                    color: 'blue'
+                                    color: '#4CAF50'
                                 }}
                                 onClick={handleEditClick} // Open modal directly on click
                                 />
@@ -750,10 +753,10 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
                             footer={[
                                 <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
                                     <div style={{display:'flex', flexDirection:"column"}}>
-                                        <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                        <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", }}>
                                             Last Edited Time:
                                         </span>
-                                        <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                        <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", }}>
                                             {editUserANdTime ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A") : ""}
                                         </span>
 
@@ -763,7 +766,7 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
                                         key="delete"
                                         type="danger"
                                         onClick={handleDelete}
-                                        style={{ marginRight: 'auto', border: "1px solid black" }} // Push Delete button to the far left
+                                        style={{ marginRight: 'auto', border: "1px solid #e3e3da" }} // Push Delete button to the far left
                                     >
                                         Delete
                                     </Button>
@@ -803,22 +806,41 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
             // const fetchData = await apiClient.get(`/${api}?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`);
             const fetchData = await apiClient.post(`/AdLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=Daily&network=Facebook_Mnet_AD`, { adsetids : adsets, campaignids : campaigns });
             const mainData = fetchData.data;
+            console.log("MainData:", mainData);
             timezone.current = mainData.length > 0  ? mainData[0].accountTimezone : "";
 
-            const deviceTqMap = new Map();
+            let deviceTqMap = new Map();
 
             // Organize data by ad_id + date
-            mainData.forEach(item => {
-                const key = `${item.ad_id}_${item[selectTimezone[newtime]]}`;
-                if (!deviceTqMap.has(key)) {
-                    deviceTqMap.set(key, {});
-                }
-                const entry = deviceTqMap.get(key);
-                if (item.device === "Mobile") entry.M_tq = item.tq;
-                if (item.device === "Desktop") entry.D_tq = item.tq;
-                deviceTqMap.set(key, { ...entry, ...item });
-            });
-
+            if(newRevenuePratner === "FB_TonicRsoc"){
+                mainData.forEach(item => {
+                    const key = `${item.ad_id}_${item[selectTimezone[newtime]]}_${item.keyword}`;
+                    if (!deviceTqMap.has(key)) {
+                        deviceTqMap.set(key, {});
+                    }
+                    // if(newRevenuePratner === "FB_Mnet"){
+                        const entry = deviceTqMap.get(key);
+                            // if (item.device === "Mobile" ) entry.M_tq = item.tq;
+                            // if (item.device === "Desktop" ) entry.D_tq = item.tq;
+                        deviceTqMap.set(key, { ...entry, ...item });
+                    // }
+                });
+            }else{
+                mainData.forEach(item => {
+                    const key = `${item.ad_id}_${item[selectTimezone[newtime]]}`;
+                    if (!deviceTqMap.has(key)) {
+                        deviceTqMap.set(key, {});
+                    }
+                    // if(newRevenuePratner === "FB_Mnet"){
+                        const entry = deviceTqMap.get(key);
+                        if (item.device === "Mobile" ) entry.M_tq = item.tq;
+                        if (item.device === "Desktop" ) entry.D_tq = item.tq;
+                        deviceTqMap.set(key, { ...entry, ...item });
+                    // }
+                });
+            }
+                     
+            
             const mergedData = Array.from(deviceTqMap.values()).map(entry => {
                 return {
                     ...entry,
@@ -826,6 +848,125 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
                     D_tq: entry.D_tq !== undefined ? entry.D_tq : 0,
                 };
             });
+
+            console.log(mergedData);
+
+            // 
+
+            function groupByAccountNumber(data, specifiedDateKey) {
+                return data?.reduce((acc, obj) => {
+                    const accountKey = obj.accountNumber;
+                    const dateKey = obj[`${specifiedDateKey}Date`]; // dynamically access the specified date field
+            
+                    // Create a combined key for grouping by both accountNumber and dynamically passed date field
+                    const key = `${accountKey}_${dateKey}`;
+            
+                    // Find if the combined key already exists in the accumulator array
+                    let entry = acc.find(item => item.key === key);
+            
+                    if (!entry) {
+                        // If not found, create a new entry for this date
+                        acc.push({
+                            // date: dateKey,
+                            accountNumber: obj.accountNumber,
+                            specifiedDate: obj.specifiedDate,
+                            spend: obj.spend ? parseFloat(obj.spend) : 0,
+                            estimated_revenue: obj.estimated_revenue ? parseFloat(obj.estimated_revenue) : 0,
+                            fbLeads: obj.fbLeads ? parseInt(obj.fbLeads) : 0,
+                            conversions: obj.conversions ? parseInt(obj.conversions) : 0,
+                            revenuePartner: obj.revenuePartner,
+                            mediaBuyerName: obj.MediaBuyerName,
+                            holder: obj.Holder,
+                        });
+                    } else {
+                        // If found, sum the respective fields
+                        entry.spend += obj.spend !== null && obj.spend !== undefined ? parseFloat(obj.spend) : 0;
+                        entry.estimated_revenue += obj.estimated_revenue !== null && obj.estimated_revenue !== undefined ? parseFloat(obj.estimated_revenue) : 0;
+                        entry.fbLeads += obj.fbLeads !== null && obj.fbLeads !== undefined ? parseInt(obj.fbLeads) : 0;
+                        entry.conversions += obj.conversions !== null && obj.conversions !== undefined ? parseInt(obj.conversions) : 0;
+                    }
+            
+                    return acc;
+                }, []).map(dateEntry => {
+                    // Calculate profit after grouping
+                    dateEntry.profit = dateEntry.estimated_revenue - dateEntry.spend;
+                    return dateEntry;
+                });
+            }
+
+
+
+            
+            // let keywordKey = "";
+
+            // mainData.forEach(item => {
+            //     const date = item[selectTimezone[newtime]];
+            //     const adId = item.ad_id;
+            
+            //     if (item.revenuePartner === "Tonic_Rsoc") {
+            //         keywordKey =
+            //             item.keyword && item.keyword.trim() !== "" && item.keyword !== "no"
+            //                 ? item.keyword.trim()
+            //                 : "no";  // ⬅️ group null/empty as "no"
+            //     }            
+            
+            //     const key = item.revenuePartner === "Tonic_Rsoc"
+            //     ? `${adId}_${date}_${keywordKey}`
+            //     : item.revenuePartner === "MEDIA_DOT_NET"
+            //     ? `${adId}_${date}_${item.device}`
+            //     : `${adId}_${date}`;
+            
+            //     const entry = deviceTqMap.get(key) || {
+            //         spend: 0,
+            //         estimated_revenue: 0,
+            //         fbLeads: 0,
+            //         fbClicks: 0,
+            //         fbLinkClicks: 0,
+            //         conversions: 0,
+            //         impressions: 0,
+            //         ad_clicks: 0,
+            //         cpcSum: 0,
+            //         tqSum: 0,
+            //         count: 0,
+            //         M_tq: 0,
+            //         D_tq: 0,
+            //         ...item
+            //     };
+            
+            //     // Device-specific tq
+            //     if (item.revenuePartner === "MEDIA_DOT_NET") {
+            //         if (item.device === "Mobile") entry.M_tq = item.tq;
+            //         if (item.device === "Desktop") entry.D_tq = item.tq;
+            //     }
+            
+            //     // Aggregate
+            //     entry.spend += parseFloat(item.spend || 0);
+            //     entry.estimated_revenue += parseFloat(item.estimated_revenue || 0);
+            //     entry.fbLeads += parseInt(item.fbLeads || 0);
+            //     entry.fbClicks += parseInt(item.fbClicks || 0);
+            //     entry.fbLinkClicks += parseInt(item.fbLinkClicks || 0);
+            //     entry.conversions += parseInt(item.conversions || 0);
+            //     entry.impressions += parseInt(item.impressions || 0);
+            //     entry.ad_clicks += parseInt(item.ad_clicks || 0);
+            //     entry.cpcSum += parseFloat(item.cpc || 0);
+            //     entry.tqSum += parseFloat(item.tq || 0);
+            //     entry.count += 1;
+            
+            //     deviceTqMap.set(key, entry);
+            // });
+
+            // const mergedData = Array.from(deviceTqMap.values()).map(entry => ({
+            //     ...entry,
+            //     M_tq: entry.M_tq || 0,
+            //     D_tq: entry.D_tq || 0,
+            //     spend: entry.spend.toFixed(2),
+            //     estimated_revenue: entry.estimated_revenue.toFixed(2),
+            //     cpc: entry.count ? parseFloat((entry.cpcSum / entry.count).toFixed(2)) : 0,
+            //     tq: entry.count ? parseFloat((entry.tqSum / entry.count).toFixed(2)) : 0
+            // }));
+
+            
+                                    
 
             console.log("hi");
             let totalSpend = 0;
@@ -920,10 +1061,13 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
                             fbCron: eachData.fbCron,
                             revenueCron: eachData.revenueCron,
                             cronStatus: eachData.cronStatus,
-                            accountStatus: eachData.accountStatus
+                            accountStatus: eachData.accountStatus,
+                            keyword: eachData.keyword || '',
                         }
                     )
                 }) : null;
+
+                console.log("returnedData:", filteredData);
 
                 const getValidField = (field) => {
                     for (const item of mainData) {
@@ -1252,50 +1396,72 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
                                 );
                             }
                             )?.length > 0 ? (
-                                <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
+                                <div 
+                                    className={`ag-theme-alpine ag-container ${gridThemeClass}`}
+                                    // style={{
+                                    //     width: '100%',
+                                    //     // borderRadius: 12,
+                                    //     backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+                                    //     padding: 10,
+                                    //     height: 'auto',
+                                    //     boxShadow:
+                                    //     theme === 'dark'
+                                    //         ? '0 1px 3px rgba(0,0,0,0.6)'
+                                    //         : '0 1px 6px rgba(0,0,0,0.08)',
+                                    // }}
+                                >
                                     <Row style={{ width: '100%', height: "8%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'nowrap', backgroundColor: theme === "dark" && "#4d4d4d", }}>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '0.2 1 auto' }}>
                                             <Space align="center" className='daily-contaier'>
                                                 <div className="blinking-circle"></div>
-                                                <Text style={{ paddingLeft: '3px', fontSize: '15px', fontWeight: '600', color: theme === "dark" && "white" }}>Daily</Text>
+                                                <Text style={{ paddingLeft: '3px', fontSize: '15px', color: theme === "dark" && "white" }}>Daily</Text>
                                             </Space>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Acc: {newaccount}</Text>
+                                            <Text style={{ color: theme === "dark" && "white" }}>Id: {newaccount}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>AccName: {newAccountName}</Text>
+                                            <Text style={{ color: theme === "dark" && "white" }}>Name: {newAccountName}</Text>
                                         </Col>
                                         <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                            <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Timezone: {timezone.current}</Text>
+                                            <Text style={{ color: theme === "dark" && "white" }}>Time zone: {timezone.current}</Text>
                                         </Col>
                                        
                                          <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
                                                 < Tooltip
-                                                    title={
-                                                        <>
-                                                        {fbCron.current !== '-' && <div>FbAcc Status: {fbCron.current}</div>}
-                                                        {revenueCron.current !== '-' && <div>RevAcc Status: {revenueCron.current}</div>}
-                                                        {(cronStatus.current !== '-' || accountStatus.current !== '-') && (
-                                                            <Text style={{ fontWeight: '600', color: 'white' }}>
-                                                            Cron/Acc status: {cronStatus.current} /{' '}
-                                                            <span
-                                                                style={{
-                                                                color:
-                                                                    accountStatus.current === 'Active'
-                                                                    ? 'green'
-                                                                    : accountStatus.current === 'Inactive'
-                                                                    ? 'red'
-                                                                    : 'gray',
-                                                                fontWeight: 'bold',
-                                                                }}
-                                                            >
-                                                                {accountStatus.current}
-                                                            </span>
-                                                            </Text>
-                                                        )}
-                                                        </>
-                                                    }
+                                                  title={
+                                                    <div style={{fontSize:'13px'}}>
+                                                    {fbCron.current !== '-' && <div>Fb status: {fbCron.current?.toLowerCase()}</div>}
+                                                    {revenueCron.current !== '-' && <div>Rev status: {revenueCron.current?.toLowerCase()}</div>}
+                                                    {(cronStatus.current !== '-' || accountStatus.current !== '-') && (
+                                                        <Text style={{ color: theme === 'dark' ? '#fff' : '#000' }}>
+                                                        Cron status: {cronStatus.current?.toLowerCase()}
+                                                        </Text>
+                                                    )}
+                                                    {accountStatus.current && <div>
+                                                        Account:  <span
+                                                            style={{ marginLeft:'3px',
+                                                            color:
+                                                                accountStatus.current === 'Active'
+                                                                ? '#91C25F'
+                                                                : accountStatus.current === 'Inactive'
+                                                                ? '#EC7117'
+                                                                : 'gray',
+                                                            // fontWeight: 'bold',
+                                                            }}
+                                                        >
+                                                            {accountStatus.current}
+                                                        </span>
+                                                    </div>}
+                                                    </div>
+                                                }
+                                                overlayInnerStyle={{
+                                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                                    color: theme === 'dark' ? '#fff' : '#000',
+                                                    border: '1px solid #ccc',   
+                                                    borderRadius: 6,
+                                                    // fontWeight: 500,
+                                                }}
                                                 >
                                                     <InfoCircleOutlined
                                                     style={{
@@ -1317,13 +1483,16 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
                                             </Tooltip>
                                         </Col> */}
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
-                                            <Tooltip title="Export to CSV">
+                                            {/* <Tooltip title="Export to CSV"> */}
                                                 <Button type="primary" style={{ backgroundColor: '#91C25F', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={() => onBtExport(gridRef1, "Daily")} />
-                                            </Tooltip>
+                                            {/* </Tooltip> */}
                                         </Col>
                                     </Row>
+                                    <div className='table-container'>
                                     <AgGridReact
                                         ref={gridRef1}
+                                        rowHeight={30}
+                                        className='custom-grid'
                                         rowData={memorizedDailyData}
                                         columnDefs={memorizedColumnDef1}
                                         onCellClicked={onCellClicked}
@@ -1360,9 +1529,10 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
                                         getRowStyle={params => {
                                             if (params.node.rowPinned) {
                                                 return {
-                                                    fontWeight: 'bold',
+                                                    // fontWeight: 'bold',
                                                     backgroundColor: theme === "dark" ? '#000' : '#fff', // Dark mode background should be dark, light mode should be light
-                                                    color: theme === "dark" ? '#fff' : '#000',           // Text color should contrast with the background
+                                                    color: theme === "dark" ? '#fff' : '#000',  
+                                                    height: '30px'         // Text color should contrast with the background
                                                 };
                                             }
 
@@ -1459,6 +1629,8 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
                                             setDailyFixedFooter(updatedFooter);
                                         }}
                                     />
+                                    </div>
+                                    
                                 </div>
                             ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
                                 {apiStatus === true ? 

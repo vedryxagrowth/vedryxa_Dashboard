@@ -625,7 +625,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                         maxCount={1}
                                         accept="image/*, video/*"
                                     >
-                                        <Button className="dark-icon-button" icon={<UploadOutlined/>}  style={{color: theme === "dark" ? "white" : "#000"}}>Select File</Button>
+                                        <Button className="dark-icon-button" icon={<UploadOutlined/>}  style={{color: theme === "dark" ? "white" : "#000"}}>Select file</Button>
                                     </Upload>
                                 </Form.Item>
                                 <Form.Item
@@ -645,7 +645,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                             </div>
                             <Form.Item
                                 name="AddName"
-                                label={<span style={{ color: "#B4B4B4" }}>Add name</span>}
+                                label={<span style={{ color: "#B4B4B4" }}>Ad name</span>}
                                 rules={[
                                     {
                                         required: true,
@@ -661,7 +661,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                 />
                             </Form.Item>
                             <Form.Item
-                                label="Primary text"
+                                label={<span style={{ color: "#B4B4B4" }}>Primary text</span>}
                                 name="message"
                                 rules={[
                                     {
@@ -681,7 +681,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                             </Form.Item>
 
                             <Form.Item
-                                label="Headline"
+                                label={<span style={{ color: "#B4B4B4" }}>Headline</span>}
                                 name="headline"
                                 rules={[
                                     {
@@ -700,7 +700,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                             </Form.Item>
 
                             <Form.Item
-                                label="Description"
+                                label={<span style={{ color: "#B4B4B4" }}>Description</span>}
                                 name="Description"
                                 rules={[
                                     {
@@ -721,7 +721,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                 label={
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', paddingRight: '50px' }}>
-                                        <span>Website_URL</span>
+                                        <span style={{ color: "#B4B4B4" }}>Website_URL</span>
                                         <Tooltip title="This is a required field">
                                         <QuestionCircleOutlined style={{ marginLeft: 4, cursor: 'pointer' }} />
                                         </Tooltip>
@@ -749,7 +749,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                                 />
                             </Form.Item>
                             <Form.Item
-                                label="Display Link"
+                                label={<span style={{ color: "#B4B4B4" }}>Display link</span>}
                                 name="Caption"
                                 rules={[
                                     {

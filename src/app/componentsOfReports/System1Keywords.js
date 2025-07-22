@@ -107,6 +107,8 @@ const System1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePra
         minWidth: 300, // Set width for grouped rows
         resizable: true, // Enable resizing
         sortable: true, // Enable sorting
+        unSortIcon: true,
+        headerClass: 'ag-center-header',
         cellRendererParams: {
             suppressCount: true, // Suppress row count in the grouped column
         },
@@ -471,13 +473,13 @@ const System1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePra
                                 </Space>
                             </Col>
                             <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Acc: {newaccount}</Text>
+                                <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Account: {newaccount}</Text>
                             </Col>
                             <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>AccName: {newAccountName}</Text>
+                                <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Account Name: {newAccountName}</Text>
                             </Col>
                             <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Timezone: {timezone.current}</Text>
+                                <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Time Zone: {timezone.current}</Text>
                             </Col>
                             {/* <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
                                 <Text style={{ fontWeight: '600' }}>

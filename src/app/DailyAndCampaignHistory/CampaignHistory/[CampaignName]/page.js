@@ -11,7 +11,7 @@ import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { useTokenContext } from '../../../components/parent'
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
-import { Spin, Row, Col, Select, Input, Button, Modal, message, Switch, Tooltip, Skeleton } from 'antd';
+import { Spin, Row, Col, Select, Input, Button, Modal, message, Switch, Tooltip, Skeleton, } from 'antd';
 import { ReloadOutlined, EditOutlined, BarChartOutlined } from '@ant-design/icons';
 Chart.register(...registerables);
 import debounce from 'lodash.debounce';
@@ -62,6 +62,8 @@ export default function CampaignAndAccount({ params }) {
     const [dailyData, setdailyData] = useState([]);
     const [chartData, setChartData] = useState({ dates: [], spend: [], revenue: [], profit: [], margin: [] });
     const [copied, setCopied] = useState(false);
+
+    const [hovered, setHovered] = useState(false);
 
     const handleCopy = () => {
         navigator.clipboard.writeText(decodedString).then(() => {
@@ -904,7 +906,7 @@ export default function CampaignAndAccount({ params }) {
                 return (
                     <span>
                         {params.value.replace("Copied!", "")}
-                        <span style={{ color: "green", fontWeight: "bold" }}>Copied!</span>
+                        <span style={{ color: "#91C25F", fontWeight: "bold" }}>Copied!</span>
                     </span>
                 );
             }
@@ -953,7 +955,7 @@ export default function CampaignAndAccount({ params }) {
                   return (
                       <span>
                           {params.value.replace("Copied!", "")}
-                          <span style={{ color: "green", fontWeight: "bold" }}>Copied!</span>
+                          <span style={{ color: "#91C25F", fontWeight: "bold" }}>Copied!</span>
                       </span>
                   );
               }
@@ -979,9 +981,9 @@ export default function CampaignAndAccount({ params }) {
             return valueA.toString().localeCompare(valueB.toString());
         },
         
-        cellStyle: {
-            fontWeight: 'bold', // Makes the cell text bold
-        },
+        // cellStyle: {
+        //     fontWeight: 'bold', // Makes the cell text bold
+        // },
         valueFormatter: (params) => {
             // If the row is grouped or pinned, return the original value (or empty for pinned rows)
             if (params.node.group) {
@@ -1556,141 +1558,181 @@ export default function CampaignAndAccount({ params }) {
     }
 
     return (
-        <Row style={{display:'flex', flexDirection:'column'}}>
-            <Col style={{width:'100%', display:'flex', alignItems:'center'}}>
-                <div style={{width:'100%'}}>
+        <Row style={{display:'flex', flexDirection:'column', marginRight:'10px'}}>
+            <Col style={{width:'100%', display:'flex', justifyContent:'flex-end', alignItems:'center'}}>
+                {/* <div style={{width:'100%'}}>
                     <h3 style={{textAlign:'center'}}>{decodedString}</h3>
-                </div>
+                </div> */}
                 <div style={{width:'120px'}}>
-                    <p>Timezone: <span style={{fontWeight:'bold'}}>{timeZone}</span></p>
+                    <p>Timezone: <span>{timeZone}</span></p>
                 </div>    
             </Col>
             <Col style={{display: 'flex', justifyContent: 'flex-end'}}>
-                <Switch checked={isGraphVisible} style={{fontSize:"20px", paddingTop:'5px', marginRight:'10px', backgroundColor: isGraphVisible ? '#91C25F' : undefined}} onClick={onClickBarChart}/>
+                {/* <Switch checked={isGraphVisible} style={{fontSize:"20px", paddingTop:'5px', marginRight:'10px', backgroundColor: isGraphVisible ? '#91C25F' : undefined}} onClick={onClickBarChart}/> */}
+                <Button
+                    type="default"
+                    icon={<BarChartOutlined />}
+                    onClick={onClickBarChart}
+                    checked={isGraphVisible} 
+                    onMouseEnter={() => setHovered(true)}
+                    onMouseLeave={() => setHovered(false)}
+                    style={{
+                        border: '3px solid #91C25F',
+                        // color: isGraphVisible || hovered ? '#fff' : '#555',
+                        color: theme === 'dark' ? '#fff' : (isGraphVisible || hovered ? '#fff' : '#555'),
+                        backgroundColor: isGraphVisible || hovered ? '#91C25F' : 'transparent',
+                        borderRadius: '999px',
+                        fontWeight: 500,
+                        padding: '0 12px',
+                        height: '32px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        transition: 'all 0.2s ease-in-out',
+                    }}
+                >
+                    Chart
+                </Button>
             </Col> 
             {/* <h1>{params.campaignAndAccount}hi</h1> */}
             {isGraphVisible && (
-                 <Col style={{ height: '400px', marginBottom: '10px' }}> {/* Container with fixed height */}
-                 {chartData.dates.length === 0 ? (<div style={{width:'100%', height:'100%', display:'flex', justifyContent:'center', alignItems:'center'}}>
-                    {/* <Spin size="large" /> */}
-                    <div style={{ padding: '24px' }}>
-                        <Skeleton active paragraph={{ rows: 20 }} />
-                    </div>
-                    </div>):
-                   (
-                    <div>
-                        {/* ✅ Custom Checkbox-Style Legend */}
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '12px', justifyContent:'center' }}>
-                            {Object.keys(datasetColorMap).map(label => {
-                            const isVisible = !hiddenKeys.includes(label);
-                            return (
-                                <div
-                                key={label}
-                                onClick={() => toggleLegend(label)}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    cursor: 'pointer',
-                                    gap: '6px',
-                                    fontSize: '13px',
-                                    color: theme === 'dark' ? '#fff' : '#000',
-                                }}
-                                >
-                                <div
-                                    style={{
-                                    width: '16px',
-                                    height: '16px',
-                                    borderRadius: '4px',
-                                    backgroundColor: datasetColorMap[label],
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    color: '#fff',
-                                    fontWeight: 'bold',
-                                    fontSize: '11px',
+                <div
+                        style={{
+                            width: '100%',
+                            borderRadius: 12,
+                            backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+                            padding: 15,
+                            height: 'auto',
+                            boxShadow:
+                            theme === 'dark'
+                                ? '0 1px 3px rgba(0,0,0,0.6)'
+                                : '0 1px 6px rgba(0,0,0,0.08)',
+                        }}
+                >
+                    <Col style={{ height: '400px', marginBottom: '20px' }}> {/* Container with fixed height */}
+                        {chartData.dates.length === 0 ? (<div style={{width:'100%', height:'100%', display:'flex', justifyContent:'flex-start', alignItems:'center'}}>
+                            {/* <Spin size="large" /> */}
+                            <div style={{ padding: '24px' }}>
+                                <Skeleton active paragraph={{ rows: 20 }} />
+                            </div>
+                            </div>):
+                        (
+                            <div>
+                                {/* ✅ Custom Checkbox-Style Legend */}
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '12px', justifyContent:'center' }}>
+                                    {Object.keys(datasetColorMap).map(label => {
+                                    const isVisible = !hiddenKeys.includes(label);
+                                    return (
+                                        <div
+                                        key={label}
+                                        onClick={() => toggleLegend(label)}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            cursor: 'pointer',
+                                            gap: '6px',
+                                            fontSize: '13px',
+                                            color: theme === 'dark' ? '#fff' : '#000',
+                                        }}
+                                        >
+                                        <div
+                                            style={{
+                                            width: '16px',
+                                            height: '16px',
+                                            borderRadius: '4px',
+                                            backgroundColor: datasetColorMap[label],
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: '#fff',
+                                            // fontWeight: 'bold',
+                                            fontSize: '11px',
+                                            }}
+                                        >
+                                            {isVisible ? '✔' : ''}
+                                        </div>
+                                        {label}
+                                        </div>
+                                    );
+                                    })}
+                                </div>
+                                <Row style={{ height: '400px', marginTop: '20px' }}>
+                                    <Line
+                                    data={{
+                                        labels: chartData.dates || [],
+                                        datasets,
                                     }}
-                                >
-                                    {isVisible ? '✔' : ''}
-                                </div>
-                                {label}
-                                </div>
-                            );
-                            })}
-                        </div>
-                        <Row style={{ height: '400px', marginTop: '20px' }}>
-                            <Line
-                            data={{
-                                labels: chartData.dates || [],
-                                datasets,
-                            }}
-                            options={{
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: {
-                                legend: { display: false },
-                                tooltip: {
-                                    mode: 'index',
-                                    intersect: true,
-                                    displayColors: true,
-                                    boxWidth: 15,
-                                    boxHeight: 15,
-                                    callbacks: {
-                                    label: function (tooltipItem) {
-                                        const index = tooltipItem.dataIndex;
-                                        const dataset = tooltipItem.dataset;
-                                        const value = dataset.data[index];
-                                        const datasetLabel = dataset.label || '';
-                                        return `${datasetLabel}: ${value}`;
-                                    },
-                                    },
-                                },
-                                },
-                                scales: {
-                                x: {
-                                    ticks: {
-                                    padding: 30,
-                                    color: (context) => {
-                                        const index = context.index;
-                                        const label = chartData?.dates?.[index];
-                                        return getColorForValue(label);
-                                    },
-                                    },
-                                    grid: {
-                                    color: theme === 'dark' ? '#444' : '#e0e0e0',
-                                    },
-                                },
-                                y: {
-                                    beginAtZero: true,
-                                    ticks: {
-                                    callback: value => value.toFixed(2),
-                                    color: theme === 'dark' ? '#fff' : '#000',
-                                    },
-                                    grid: {
-                                    color: theme === 'dark' ? '#444' : '#e0e0e0',
-                                    },
-                                },
-                                },
-                            }}
-                            height={350}
-                            />
-                        </Row>
+                                    options={{
+                                        responsive: true,
+                                        maintainAspectRatio: false,
+                                        plugins: {
+                                        legend: { display: false },
+                                        tooltip: {
+                                            mode: 'index',
+                                            intersect: true,
+                                            displayColors: true,
+                                            boxWidth: 15,
+                                            boxHeight: 15,
+                                            callbacks: {
+                                            label: function (tooltipItem) {
+                                                const index = tooltipItem.dataIndex;
+                                                const dataset = tooltipItem.dataset;
+                                                const value = dataset.data[index];
+                                                const datasetLabel = dataset.label || '';
+                                                return `${datasetLabel}: ${value}`;
+                                            },
+                                            },
+                                        },
+                                        },
+                                        scales: {
+                                        x: {
+                                            ticks: {
+                                            padding: 30,
+                                            color: (context) => {
+                                                const index = context.index;
+                                                const label = chartData?.dates?.[index];
+                                                return getColorForValue(label);
+                                            },
+                                            },
+                                            grid: {
+                                            color: theme === 'dark' ? '#444' : '#e0e0e0',
+                                            },
+                                        },
+                                        y: {
+                                            beginAtZero: true,
+                                            ticks: {
+                                            callback: value => value.toFixed(2),
+                                            color: theme === 'dark' ? '#fff' : '#000',
+                                            },
+                                            grid: {
+                                            color: theme === 'dark' ? '#444' : '#e0e0e0',
+                                            },
+                                        },
+                                        },
+                                    }}
+                                    height={350}
+                                    />
+                                </Row>
 
-                        
-                    </div>
-                     
-                   )}
-               </Col>
+                                
+                            </div>
+                            
+                        )}
+                    </Col>
+                </div>
+            
             )}
-            <Col style={{ display: 'flex', width: '100%', marginLeft: '2%' }}>
+            
+            <Col style={{ display: 'flex', width: '100%', marginLeft: '0%' }}>
                 {/* Top 5 Dates with RPC */}
-                <div style={{ width: '20%' }}>
-                    <h3>Top 5 Dates with RPC</h3>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <div style={{ width: '20%', marginLeft:'1%' }}>
+                    <p>Top 5 dates with Rpc</p>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
                         <thead>
                             <tr>
-                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Date</th>
-                                <th style={{ border: '1px solid #ddd', padding: '2px' }}>RPC</th>
-                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>WeekDay</th>
+                                <th style={{fontWeight:'normal', border: '1px solid #888', padding: '3px' }}>Date</th>
+                                <th style={{fontWeight:'normal', border: '1px solid #888', padding: '2px' }}>RPC</th>
+                                <th style={{fontWeight:'normal', border: '1px solid #888', padding: '3px' }}>WeekDay</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1703,9 +1745,9 @@ export default function CampaignAndAccount({ params }) {
                                 .slice(0, 5) // Take top 5 dates
                                 .map((item, index) => (
                                     <tr key={index}>
-                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.date}</td>
-                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.rpc}</td>
-                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{moment(item.date).format('dddd')}</td>
+                                        <td style={{fontWeight:'normal', border: '1px solid #888', padding: '8px' }}>{item.date}</td>
+                                        <td style={{fontWeight:'normal', border: '1px solid #888', padding: '8px' }}>{item.rpc}</td>
+                                        <td style={{fontWeight:'normal', border: '1px solid #888', padding: '8px' }}>{moment(item.date).format('dddd')}</td>
                                     </tr>
                                 ))}
                         </tbody>
@@ -1714,13 +1756,13 @@ export default function CampaignAndAccount({ params }) {
 
                 {/* Top 5 Dates with Margin */}
                 <div style={{ marginLeft: "1%", width: '20%' }}>
-                    <h3>Top 5 Dates with Margin</h3>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <p>Top 5 dates with margin</p>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #888' }}>
                         <thead>
                             <tr>
-                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Date</th>
-                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>Margin</th>
-                                <th style={{ border: '1px solid #ddd', padding: '3px' }}>WeekDay</th>
+                                <th style={{fontWeight:'normal', border: '1px solid #888', padding: '3px' }}>Date</th>
+                                <th style={{fontWeight:'normal', border: '1px solid #888', padding: '3px' }}>Margin</th>
+                                <th style={{fontWeight:'normal', border: '1px solid #888', padding: '3px' }}>WeekDay</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1733,86 +1775,123 @@ export default function CampaignAndAccount({ params }) {
                                 .slice(0, 5) // Take top 5 dates
                                 .map((item, index) => (
                                     <tr key={index}>
-                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.date}</td>
-                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{item.margin}</td>
-                                        <td style={{ border: '1px solid #ddd', padding: '8px' }}>{moment(item.date).format('dddd')}</td>
+                                        <td style={{fontWeight:'normal', border: '1px solid #888', padding: '8px' }}>{item.date}</td>
+                                        <td style={{fontWeight:'normal', border: '1px solid #888', padding: '8px' }}>{item.margin}</td>
+                                        <td style={{fontWeight:'normal', border: '1px solid #888', padding: '8px' }}>{moment(item.date).format('dddd')}</td>
                                     </tr>
                                 ))}
                         </tbody>
                     </table>
                 </div>
             </Col>
-            <Col style={{display:'flex', justifyContent:'space-between', marginTop: '10px'}}>
-                <Col style={{display:'flex', justifyContent:"space-between", alignItems:'center'}}>
-                    <Input
+            <Col style={{display:'flex', justifyContent:'flex-end', marginTop: '10px'}}>
+                {/* <Col style={{display:'flex', justifyContent:"space-between", alignItems:'center'}}> */}
+                    {/* <Input
                         type="text"
                         placeholder="Search table..."
                         value={searchText}
                         onChange={(e) => setSearchText(e.target.value)}
                         className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                        style={{ width: "200px", padding: "3px",backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
+                        style={{border: '1px solid #91C25F', width: "170px", padding: "3px",backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
                     />
                     <Button 
                         type="default" 
                         icon={<ReloadOutlined  className='black-icon'/>} 
-                        style={{ height: "30px", marginLeft: "10px", backgroundColor: '#91C25F', border: 'none' }} 
+                        style={{width: '43px', height: "30px", marginLeft: "10px", backgroundColor: '#91C25F', border: 'solid 0px' }} 
                         onClick={handleReload}  // Call refresh function when clicked
-                    />
+                    /> */}
                     {/* <p style={{marginLeft:"10px"}}>{comment}</p> */}
-                    <EditOutlined 
+                    {/* <EditOutlined 
                         onClick={() => setIsModalVisibles(true)} 
                         style={{ 
                             marginLeft: '15px', 
                             color: comment ? 'blue' : 'gray', 
-                            cursor: 'pointer' 
+                            cursor: 'pointer',
+                            fontSize: '20px',
                         }} 
                         title={comment ? 'Edit Comment' : 'Add Comment'}
-                    />
-                    <div style={{ width: '100%' }}>
+                    /> */}
+                    {/* <div style={{ width: '100%' }}>
                         <Tooltip
                             title={copied ? 'Copied!' : 'Click to copy'}
                             // color={copied ? 'green' : undefined}
                         >
-                            <h3
+                            <p
                             style={{ textAlign: 'center', cursor: 'pointer' }}
                             onClick={handleCopy}
                             >
                             {decodedString}
-                            </h3>
+                            </p>
                         </Tooltip>
-                    </div>
-                    {comment && (
+                    </div> */}
+                    {/* {comment && (
                         <Tooltip title={comment}>
                             <p
                             style={{
-                                marginLeft: '5px',
+                                // marginLeft: '0px',
                                 whiteSpace: 'nowrap',
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis',
                                 maxWidth: '300px',
                                 cursor: 'pointer',
-                                marginBottom: '5px',
+                                marginBottom: '15px',
                             }}
                             >
                             ({comment})
                             </p>
                         </Tooltip>
-                    )}
+                    )} */}
+                {/* </Col> */}
+                <Col style={{display:'flex', justifyContent:"space-between", alignItems:'center', marginBottom:'5px'}}>
+                    <Select
+                        placeholder="Select a range"
+                        value={selectedValue}
+                        onChange={handleChange}
+                        style={{ width: "170px", border: '1px solid #4CAF50', borderRadius: '8px', color: theme === 'dark' ? '#fff' : '#000',}}
+                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                        allowClear
+                    >
+                        {dateOptions.map((option, index) => (
+                        <Option key={index} value={option}>
+                            {option}
+                        </Option>
+                        ))}
+                    </Select>
+                    <Input
+                        type="text"
+                        placeholder="Search..."
+                        value={searchText}
+                        onChange={(e) => setSearchText(e.target.value)}
+                        className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                        // style={{marginLeft: "5px", border: '1px solid #91C25F', width: "170px", padding: "3px",backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
+                        style={{
+                            borderRadius: 8,
+                            border: '1px solid #4CAF50',
+                            marginLeft: "5px",
+                            color: theme === 'dark' ? '#fff' : '#000',
+                            backgroundColor: theme === 'dark' ? '#000' : '#fff',
+                            fontWeight: 500,
+                            width: 170,
+                        }}
+                    />
+                    <Button 
+                        type="default" 
+                        icon={<ReloadOutlined  className='black-icon'/>} 
+                        style={{width: '35px', height: "33px", marginLeft: "5px", backgroundColor: '#91C25F', border: 'solid 0px' }} 
+                        onClick={handleReload}  // Call refresh function when clicked
+                    />
+                    <EditOutlined 
+                        onClick={() => setIsModalVisibles(true)} 
+                        style={{ 
+                            marginLeft: '3px', 
+                            marginRight: '3px', 
+                            color: comment ? '#91C25F' : 'gray', 
+                            cursor: 'pointer',
+                            fontSize: '27px',
+                        }} 
+                        title={comment ? 'Edit Comment' : 'Add Comment'}
+                    />
                 </Col>
-                <Select
-                    placeholder="Select a range"
-                    value={selectedValue}
-                    onChange={handleChange}
-                    style={{ width: "200px" }}
-                    dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                    allowClear
-                >
-                    {dateOptions.map((option, index) => (
-                    <Option key={index} value={option}>
-                        {option}
-                    </Option>
-                    ))}
-                </Select>
             </Col>
             <Col>
             {isLoading === true ? (
@@ -1822,7 +1901,7 @@ export default function CampaignAndAccount({ params }) {
                             height="80"
                             width="80"
                             radius="9"
-                            color="green"
+                            color="#91C25F"
                             ariaLabel="loading"
                             wrapperStyle
                             wrapperClass
@@ -1830,10 +1909,56 @@ export default function CampaignAndAccount({ params }) {
                     </div>
                 </div>
             ) :  (
-                // <div className="ag-theme-alpine ag-container" >
-                <div className={`ag-theme-alpine ag-container ${gridThemeClass}`}>
+                <div
+                    style={{
+                        width: '100%',
+                        borderRadius: 12,
+                        backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+                        padding: 10,
+                        height: 'auto',
+                        boxShadow:
+                        theme === 'dark'
+                            ? '0 1px 3px rgba(0,0,0,0.6)'
+                            : '0 1px 6px rgba(0,0,0,0.08)',
+                    }}
+                >
+                     <Col>
+                        <div style={{ width: '100%', display:'flex', }}>
+                            <Tooltip
+                                title={copied ? 'Copied!' : 'Click to copy'}
+                                // color={copied ? 'green' : undefined}
+                            >
+                                <p
+                                style={{ cursor: 'pointer', marginRight:'5px' }}
+                                onClick={handleCopy}
+                                >
+                                {decodedString}
+                                </p>
+                            </Tooltip>
+                            {comment && (
+                                <Tooltip title={comment}>
+                                    <p
+                                        style={{
+                                            // marginLeft: '0px',
+                                            whiteSpace: 'nowrap',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            maxWidth: '300px',
+                                            cursor: 'pointer',
+                                            marginBottom: '15px',
+                                        }}
+                                    >
+                                        ({comment})
+                                    </p>
+                                </Tooltip>
+                            )}
+                        </div>
+                    </Col>
+                    <div className={`ag-container ${gridThemeClass}`}>
                         <AgGridReact
                             rowData={filteredData}
+                            rowHeight={30}
+                            className='custom-grid'
                             columnDefs={columnDefs}
                             quickFilterText={searchText}
                             defaultColDef={defaultColDef}
@@ -1852,9 +1977,12 @@ export default function CampaignAndAccount({ params }) {
                             getRowStyle={(params) => {
                                 if (params.node.rowPinned) {
                                     return {
-                                        fontWeight: 'bold',
-                                        backgroundColor: darkMode ? '#000' : '#fff',
-                                        color: darkMode ? '#fff' : '#000',
+                                        // fontWeight: 'bold',
+                                        // backgroundColor: darkMode ? '#000' : '#fff',
+                                        // color: darkMode ? '#fff' : '#000',
+                                        backgroundColor: theme === "dark" ? '#000' : '#fff',
+                                        color: theme === "dark" ? '#fff' : '#000',
+                                        height: '30px'
                                     };
                                 }
                                 return null;
@@ -1952,7 +2080,10 @@ export default function CampaignAndAccount({ params }) {
                                 console.log('Filtered by status (Active):', specificFieldData);
                             }}
                         />
+                    </div>
                 </div>
+                // <div className="ag-theme-alpine ag-container" >
+
             )}
             </Col>
             <Modal
@@ -1966,10 +2097,10 @@ export default function CampaignAndAccount({ params }) {
                             footer={[
                                 <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
                                     <div style={{display:'flex', flexDirection:"column"}}>
-                                        <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                        <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", }}>
                                             Last Edited Time:
                                         </span>
-                                        <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                        <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", }}>
                                             {editUserANdTime ? editUserANdTime?.editedTime : ""}
                                         </span>
 
@@ -1979,7 +2110,7 @@ export default function CampaignAndAccount({ params }) {
                                         key="delete"
                                         type="danger"
                                         onClick={handleDelete}
-                                        style={{ marginRight: 'auto', border: "1px solid black" }} // Push Delete button to the far left
+                                        style={{ marginRight: 'auto', border: "1px solid #e3e3da" }} // Push Delete button to the far left
                                     >
                                         Delete
                                     </Button>

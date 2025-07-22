@@ -177,6 +177,7 @@
 
 import React, { useState } from 'react';
 import { Button, Typography, Card, Space, Select, Row, Col } from 'antd';
+import { useTokenContext } from './parent';
 
 const { Text } = Typography;
 
@@ -185,6 +186,8 @@ export default function Calculator() {
   const [display, setDisplay] = useState('0');
   const [history, setHistory] = useState([]);
   const [selectedHistoryIndex, setSelectedHistoryIndex] = useState(null);
+  const { theme } = useTokenContext();
+  
 
   const handleNumber = (num) => {
     setExpression((prev) => prev + num);
@@ -252,7 +255,7 @@ export default function Calculator() {
   };
 
   const renderButton = (label, onClick, type = 'default') => (
-    <Button onClick={onClick} style={{ width: 70, height: 50 }} type={type}>{label}</Button>
+    <Button onClick={onClick} style={{ width: 70, height: 50,background:theme === 'dark' ? '#555' : '#f0f0f0',  color: theme === 'dark' ? '#fff' : '#000'}} type={type}>{label}</Button>
   );
 
   return (
@@ -260,7 +263,7 @@ export default function Calculator() {
       <Card
         title={
           <Row justify="space-between" align="middle">
-            <Col>🧮 Enhanced Calculator</Col>
+            <Col style={{ color: theme === 'dark' ? '#fff' : '#000' }}>🧮 Enhanced Calculator</Col>
             <Col>
               {history.length > 0 && (
                 <Select
@@ -276,12 +279,12 @@ export default function Calculator() {
           </Row>
         }
         style={{ maxWidth: 350, margin: 'auto' }}
-        extra={<Button size="small" onClick={clearHistory}>Clear</Button>}
+        extra={<Button size="small" onClick={clearHistory} style={{backgroundColor:'transparent',border:'1px solid green', color: theme === 'dark' ? '#fff' : '#000'}}>Clear</Button>}
       >
-        <div style={{ background: '#f0f0f0', padding: '12px', textAlign: 'right', fontSize: 24, borderRadius: 4, marginBottom: 12 }}>
-          <div style={{ fontSize: 16, color: '#888' }}>{expression}</div>
-          <div style={{ fontSize: 24 }}>
-            <Text>{display}</Text>
+        <div style={{ background:theme === 'dark' ? '#555' : '#f0f0f0', padding: '12px', textAlign: 'right', fontSize: 24, borderRadius: 4, marginBottom: 12 }}>
+          <div style={{ fontSize: 16, color:theme === 'dark' ? '#fff' : '#000', }}>{expression}</div>
+          <div style={{ fontSize: 24}}>
+            <Text style={{color:theme === 'dark' ? '#fff' : '#333'}}>{display}</Text>
           </div>
         </div>
 
@@ -321,8 +324,7 @@ export default function Calculator() {
             {renderButton('CE', handleClear)}
             {renderButton('C', handleClear)}
             <Button
-              type="primary"
-              style={{ width: 150 }}
+              style={{ width: 150,backgroundColor:'#91C25F',border:'#91C25F' }}
               onClick={calculate}
             >
               =

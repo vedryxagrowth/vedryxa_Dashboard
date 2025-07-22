@@ -14,6 +14,7 @@ import MnetUrlBuilder from '../../Campaigns/camp-components/urlbuilder/mnet';
 import TonicUrlBuilder from '../../Campaigns/camp-components/urlbuilder/tonic';
 import System1UrlBuilder from '../../Campaigns/camp-components/urlbuilder/system1';
 import DActiveUrlBuilder from '../../Campaigns/camp-components/urlbuilder/dactive';
+import { useTokenContext } from '../../components/parent';
 // import MnetUrlBuilder from './urlbuilder/mnet';
 // import TonicUrlBuilder from './urlbuilder/tonic';
 // import System1UrlBuilder from './urlbuilder/system1';
@@ -21,6 +22,7 @@ import DActiveUrlBuilder from '../../Campaigns/camp-components/urlbuilder/dactiv
 
 
 const FabricCanvas = dynamic(() => import('../../Campaigns/camp-components/Fabricanvas'), { ssr: false });
+
 
 const { Panel } = Collapse;
 const { Option } = Select;
@@ -507,6 +509,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     const [campaignLevelDailyBudget, setCampaignLevelDailyBudget] = useState(0);
     const [adsetLevelDailyBudget, setAdsetLevelDailyBudget] = useState(0);
     const [activeKey, setActiveKey] = useState(['1']); // State to control active panels
+    const { theme } = useTokenContext();
 
     console.log("Image files:", imageFiles);
 
@@ -902,7 +905,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
 
         const uploadFilesSequentially = async (selectedFiles) => {
             const mediaHashArray = [];
-        
+
             // for (const file of selectedFiles) {
             //     try {
             //         const fileType = file.type;
@@ -910,7 +913,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
             //             onError("Unsupported file type");
             //             continue;
             //         }
-        
+
             //         if (file?.url) {
             //             if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith('.mp4')) {
             //                 const formData = new FormData();
@@ -921,28 +924,28 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
             //                         Authorization: localStorage.getItem("token"),
             //                     },
             //                 });
-        
+
             //                 const uploadFile = await response.blob();
             //                 if (!(uploadFile instanceof Blob)) {
             //                     console.error("The fetched file is not a Blob:", uploadFile);
             //                     continue;
             //                 }
-        
+
             //                 formData.append("file", uploadFile, file.name);
             //                 // console.log(formData);
-        
+
             //                 let fbResponse;
             //                 if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg')) {
             //                     formData.append('file', uploadFile, file.name);
             //                     formData.append('access_token', token);
             //                     const fileName = file.name.split('/').pop();
-        
+
             //                     fbResponse = await axios.post(
             //                         `https://graph.facebook.com/v20.0/act_${account}/adimages`,
             //                         formData,
             //                         { headers: { 'Content-Type': 'multipart/form-data' } }
             //                     );
-        
+
             //                     if (fbResponse.status === 200) {
             //                         onSuccess("ok", response);
             //                         mediaHashArray.push({
@@ -960,11 +963,11 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
             //                         formData,
             //                         { headers: { 'Content-Type': 'multipart/form-data' } }
             //                     );
-        
+
             //                     if (fbResponse.status === 200) {
             //                         const videoid = fbResponse?.data?.id;
             //                         await new Promise(resolve => setTimeout(resolve, 10000));
-        
+
             //                         const thumbnailResponse = await axios.get(
             //                             `https://graph.facebook.com/v20.0/${videoid}`,
             //                             {
@@ -975,12 +978,12 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
             //                                 }
             //                             }
             //                         );
-        
+
             //                         const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
             //                         const uri = preferredThumbnail ? preferredThumbnail.uri : "";
             //                         // console.log(videoid);
             //                         // console.log(uri);
-        
+
             //                         onSuccess("ok", fbResponse);
             //                         mediaHashArray.push({
             //                             filename: file?.url,
@@ -999,96 +1002,96 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
             //         onError("error", error);
             //     }
             // }
-        
+
             // console.log("All media files uploaded successfully:", mediaHashArray);
-            
+
             for (const file of selectedFiles) {
                 try {
-                  const fileType = file.type;
-              
-                  if (!fileType.startsWith("image/") && !fileType.startsWith("video/")) {
-                    onError("Unsupported file type");
-                    continue;
-                  }
-              
-                  if (file?.url) {
-                    const fileName = file.name.split('/').pop();
-              
-                    const response = await fetch(`https://prodapis.adsgoat.in/s3?s3Url=${file.url}`, {
-                      method: 'GET',
-                      headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: localStorage.getItem("token"),
-                      },
-                    });
-              
-                    const uploadFile = await response.blob();
-                    if (!(uploadFile instanceof Blob)) {
-                      console.error("Fetched file is not a Blob");
-                      continue;
+                    const fileType = file.type;
+
+                    if (!fileType.startsWith("image/") && !fileType.startsWith("video/")) {
+                        onError("Unsupported file type");
+                        continue;
                     }
-              
-                    // ❗ Create FormData inside this block (not reused)
-                    const formData = new FormData();
-              
-                    if (fileType.startsWith('image/')) {
-                      formData.append('file', uploadFile, fileName);
-                      formData.append('access_token', token);
-              
-                      const fbResponse = await axios.post(
-                        `https://graph.facebook.com/v20.0/act_${account}/adimages`,
-                        formData,
-                        { headers: { 'Content-Type': 'multipart/form-data' } }
-                      );
-              
-                      if (fbResponse.status === 200) {
-                        mediaHashArray.push({
-                          filename: file.url,
-                          imag_hash: fbResponse.data?.images?.[fileName]?.hash,
-                        });
-                      }
-                    } else if (fileType.startsWith('video/')) {
-                      formData.append('file', uploadFile, fileName);
-                      formData.append('access_token', token);
-              
-                      const fbResponse = await axios.post(
-                        `https://graph.facebook.com/v20.0/act_${account}/advideos`,
-                        formData,
-                        { headers: { 'Content-Type': 'multipart/form-data' } }
-                      );
-              
-                      if (fbResponse.status === 200) {
-                        const videoid = fbResponse.data.id;
-                        await new Promise(resolve => setTimeout(resolve, 10000));
-              
-                        const thumbnailResponse = await axios.get(
-                          `https://graph.facebook.com/v20.0/${videoid}`,
-                          {
-                            params: {
-                              access_token: token,
-                              fields: 'thumbnails',
+
+                    if (file?.url) {
+                        const fileName = file.name.split('/').pop();
+
+                        const response = await fetch(`https://prodapis.adsgoat.in/s3?s3Url=${file.url}`, {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                Authorization: localStorage.getItem("token"),
                             },
-                          }
-                        );
-              
-                        const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(
-                          t => t.is_preferred
-                        );
-              
-                        mediaHashArray.push({
-                          filename: file.url,
-                          videoid,
-                          thambnailurl: preferredThumbnail?.uri || "",
                         });
-                      }
+
+                        const uploadFile = await response.blob();
+                        if (!(uploadFile instanceof Blob)) {
+                            console.error("Fetched file is not a Blob");
+                            continue;
+                        }
+
+                        // ❗ Create FormData inside this block (not reused)
+                        const formData = new FormData();
+
+                        if (fileType.startsWith('image/')) {
+                            formData.append('file', uploadFile, fileName);
+                            formData.append('access_token', token);
+
+                            const fbResponse = await axios.post(
+                                `https://graph.facebook.com/v20.0/act_${account}/adimages`,
+                                formData,
+                                { headers: { 'Content-Type': 'multipart/form-data' } }
+                            );
+
+                            if (fbResponse.status === 200) {
+                                mediaHashArray.push({
+                                    filename: file.url,
+                                    imag_hash: fbResponse.data?.images?.[fileName]?.hash,
+                                });
+                            }
+                        } else if (fileType.startsWith('video/')) {
+                            formData.append('file', uploadFile, fileName);
+                            formData.append('access_token', token);
+
+                            const fbResponse = await axios.post(
+                                `https://graph.facebook.com/v20.0/act_${account}/advideos`,
+                                formData,
+                                { headers: { 'Content-Type': 'multipart/form-data' } }
+                            );
+
+                            if (fbResponse.status === 200) {
+                                const videoid = fbResponse.data.id;
+                                await new Promise(resolve => setTimeout(resolve, 10000));
+
+                                const thumbnailResponse = await axios.get(
+                                    `https://graph.facebook.com/v20.0/${videoid}`,
+                                    {
+                                        params: {
+                                            access_token: token,
+                                            fields: 'thumbnails',
+                                        },
+                                    }
+                                );
+
+                                const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(
+                                    t => t.is_preferred
+                                );
+
+                                mediaHashArray.push({
+                                    filename: file.url,
+                                    videoid,
+                                    thambnailurl: preferredThumbnail?.uri || "",
+                                });
+                            }
+                        }
                     }
-                  }
                 } catch (err) {
-                  console.error("Upload failed:", err);
-                  onError("upload_error", err);
+                    console.error("Upload failed:", err);
+                    onError("upload_error", err);
                 }
             }
-              
+
             return mediaHashArray;
         };
 
@@ -1109,33 +1112,33 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     //     }
     //     const token = imagehash.token;
     //     const account = imagehash.accountNumber;
-    
+
     //     const uploadPromises = selectedFiles.map(async (fileUrl) => { // ✅ Use props directly
     //         try {
     //             const formData = new FormData();
     //             const response = await fetch(fileUrl); // ✅ Fetch the file from S3
     //             const blob = await response.blob();
     //             const fileType = blob.type;
-    
+
     //             console.log("File type:", fileType);
-    
+
     //             if (!fileType.startsWith("image/") && !fileType.startsWith("video/")) {
     //                 onError("Unsupported file type");
     //                 return;
     //             }
-    
+
     //             formData.append("file", blob, "uploadedFile"); 
     //             formData.append("access_token", token);
-    
+
     //             let fbResponse;
-    
+
     //             if (fileType.startsWith("image/")) {
     //                 fbResponse = await axios.post(
     //                     `https://graph.facebook.com/v20.0/act_${account}/adimages`,
     //                     formData,
     //                     { headers: { "Content-Type": "multipart/form-data" } }
     //                 );
-    
+
     //                 if (fbResponse.status === 200) {
     //                     onSuccess("ok", fbResponse);
     //                     return {
@@ -1151,11 +1154,11 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     //                     formData,
     //                     { headers: { "Content-Type": "multipart/form-data" } }
     //                 );
-    
+
     //                 if (fbResponse.status === 200) {
     //                     const videoid = fbResponse?.data?.id;
     //                     await new Promise((resolve) => setTimeout(resolve, 10000));
-    
+
     //                     const thumbnailResponse = await axios.get(
     //                         `https://graph.facebook.com/v20.0/${videoid}`,
     //                         {
@@ -1166,14 +1169,14 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     //                             },
     //                         }
     //                     );
-    
+
     //                     const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(
     //                         (thumbnail) => thumbnail.is_preferred === true
     //                     );
     //                     const uri = preferredThumbnail ? preferredThumbnail.uri : "";
-    
+
     //                     onSuccess("ok", fbResponse);
-    
+
     //                     return {
     //                         filename: fileUrl, // ✅ Use S3 URL directly
     //                         videoid: videoid,
@@ -1189,7 +1192,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     //             throw error;
     //         }
     //     });
-    
+
     //     try {
     //         const mediaHashArray = await Promise.all(uploadPromises);
     //         console.log("All media files uploaded successfully. Media Hash Array:", mediaHashArray);
@@ -1199,7 +1202,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     //         return [];
     //     }
     // };
-    
+
 
 
     // const customRequest = async (onSuccess, onError) => {
@@ -1351,7 +1354,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
 
             try {
                 const imageHashArray = await customRequest(onSuccess, onError);
-                console.log("hashfile:",imageHashArray);
+                console.log("hashfile:", imageHashArray);
 
                 if (imageHashArray.length > 0) {  // Only proceed if all images are uploaded successfully
                     console.log("Image Hashes just before postData:", imageHashArray);
@@ -1562,20 +1565,21 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     return (
         <Drawer
             title="Create a new campaign"
-            width="95%"
+            width="100%"
             open={visible}
             onClose={handleDrawerClose}
+            style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
         >
 
             <Spin spinning={loading}>
                 <Form layout="vertical" form={form} onFinish={onFinish} onValuesChange={handleFormChange} initialValues={initialValues}>
                     <Collapse accordion activeKey={activeKey} // Bind active key state
-                        onChange={(key) => setActiveKey([key])}  >
-                        <Panel header="CAMPAIGN LEVEL" key="1">
-                            <div style={{ display: "flex" }}>
+                        onChange={(key) => setActiveKey([key])} className={theme === 'dark' ? 'custom-collapse-dark' : 'custom-collapse-light'}  >
+                        <Panel header="CAMPAIGN LEVEL" key="1" style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}>
+                            <div style={{ display: "flex", backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}>
                                 <Form.Item
                                     name="Account_Number"
-                                    label={<span style={{ color: "#B4B4B4" }}>Account Number</span>}
+                                    label={<span style={{ color: "#B4B4B4" }}>Account number</span>}
                                     rules={[
                                         {
                                             required: true,
@@ -1583,7 +1587,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         },
                                     ]}
                                     style={{ flex: 0.2 }}>
-                                    <Input value={accountNumber} onChange={Accountchange} />
+                                    <Input value={accountNumber} onChange={Accountchange} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                                 </Form.Item>
                                 <Form.Item
                                     name="Name"
@@ -1597,6 +1601,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     style={{ flex: 0.25 }}>
                                     <Input onChange={handleNameChange}
                                         style={{ width: "100%", marginLeft: "3%" }}
+                                        className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -1613,14 +1618,16 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         // onChange={getpixelandpageid}
                                         variant="filled"
                                         options={[
-                                            { value: "OUTCOME_LEADS", label: "Leads" },
-                                            { value: "OUTCOME_SALES", label: "Sales" },
-                                            { value: "OUTCOME_ENGAGEMENT", label: "Engagement" },
-                                            { value: "OUTCOME_AWARENESS", label: "Awareness" },
-                                            { value: "OUTCOME_TRAFFIC", label: "Traffic" },
-                                            { value: "OUTCOME_APP_PROMOTION", label: "App promotion" }
+                                            { value: "OUTCOME_LEADS", label: "Leads",title:'' },
+                                            { value: "OUTCOME_SALES", label: "Sales",title:''  },
+                                            { value: "OUTCOME_ENGAGEMENT", label: "Engagement",title:''  },
+                                            { value: "OUTCOME_AWARENESS", label: "Awareness" ,title:'' },
+                                            { value: "OUTCOME_TRAFFIC", label: "Traffic",title:''  },
+                                            { value: "OUTCOME_APP_PROMOTION", label: "App promotion",title:''  }
 
                                         ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -1639,13 +1646,15 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         mode="multiple"
                                         allowClear
                                         options={[
-                                            { value: "HOUSING", label: "Housing" },
-                                            { value: "CREDIT", label: "Credit" },
-                                            { value: "EMPLOYMENT", label: "Employment" },
-                                            { value: "ISSUES_ELECTIONS_POLITICS", label: "Politics" },
-                                            { value: "NONE", label: "None" }
+                                            { value: "HOUSING", label: "Housing" ,title:'' },
+                                            { value: "CREDIT", label: "Credit",title:''  },
+                                            { value: "EMPLOYMENT", label: "Employment" ,title:'' },
+                                            { value: "ISSUES_ELECTIONS_POLITICS", label: "Politics" ,title:'' },
+                                            { value: "NONE", label: "None" ,title:'' }
 
                                         ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme-category' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -1661,12 +1670,14 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     <Select
                                         variant="filled"
                                         options={[
-                                            { value: "LOWEST_COST_WITHOUT_CAP", label: "Highest Volume" },
-                                            { value: "LOWEST_COST_WITH_BID_CAP", label: "Bid Cap" },
-                                            { value: "COST_CAP", label: "Cost per Result Goal" },
-                                            { value: "LOWEST_COST_WITH_MIN_ROAS", label: "ROAS Goal" }
+                                            { value: "LOWEST_COST_WITHOUT_CAP", label: "Highest Volume",title:''  },
+                                            { value: "LOWEST_COST_WITH_BID_CAP", label: "Bid Cap",title:''  },
+                                            { value: "COST_CAP", label: "Cost per Result Goal",title:''  },
+                                            { value: "LOWEST_COST_WITH_MIN_ROAS", label: "ROAS Goal" ,title:'' }
                                         ]}
                                         onChange={handleBidStrategyChange}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -1683,6 +1694,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             onChange={onChangeCampaignLevelDailyBudget}
                                             readOnly={adsetLevelDailyBudget !== 0 ? true : false}
                                             step="0.01"
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                         />
                                     </Tooltip>
                                 </Form.Item> {/*pk*/}
@@ -1699,9 +1711,11 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     <Select
                                         variant="filled"
                                         options={[
-                                            { value: "ACTIVE", label: "ACTIVE" },
-                                            { value: "PAUSED", label: "PAUSED" },
+                                            { value: "ACTIVE", label: "ACTIVE" ,title:'' },
+                                            { value: "PAUSED", label: "PAUSE",title:''  },
                                         ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                             </div>
@@ -1721,7 +1735,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     ]}
                                     style={{ flex: '1 1 200px' }}
                                 >
-                                    <Input />
+                                    <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                                 </Form.Item>
                                 <Form.Item
                                     name="optimization_goal"
@@ -1736,11 +1750,13 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 >
                                     <Select
                                         options={[
-                                            { value: "OFFSITE_CONVERSIONS", label: "Conversions" },
-                                            { value: "LINK_CLICKS", label: "Clicks" },
-                                            { value: "REACH", label: "Reach" },
-                                            { value: "VALUE", label: "Value" }
+                                            { value: "OFFSITE_CONVERSIONS", label: "Conversions",title:''  },
+                                            { value: "LINK_CLICKS", label: "Clicks",title:''  },
+                                            { value: "REACH", label: "Reach",title:''  },
+                                            { value: "VALUE", label: "Value",title:''  }
                                         ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -1756,14 +1772,16 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 >
                                     <Select
                                         options={[
-                                            { value: "IMPRESSIONS", label: "Impressions" },
-                                            { value: "VALUE", label: "Value" }
+                                            { value: "IMPRESSIONS", label: "Impressions",title:''  },
+                                            { value: "VALUE", label: "Value",title:''  }
                                         ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
                                     name="DatePicker"
-                                    label={<span style={{ color: "#B4B4B4" }}>Start Time</span>}
+                                    label={<span style={{ color: "#B4B4B4" }}>Start time</span>}
                                     rules={[
                                         {
                                             required: true,
@@ -1773,7 +1791,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     style={{ flex: '1 1 150px' }}
                                     initialValue={currentDate}
                                 >
-                                    <DatePicker style={{ width: '100%' }} />
+                                    <DatePicker style={{ width: '100%' }} dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''} />
                                 </Form.Item>
                                 <Form.Item
                                     name="action_source"
@@ -1788,11 +1806,13 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 >
                                     <Select
                                         options={[
-                                            { value: "website", label: "Website" },
-                                            { value: "email", label: "Email" },
-                                            { value: "app", label: "App" },
-                                            { value: "phone_call", label: "Phone Call" }
+                                            { value: "website", label: "Website" ,title:'' },
+                                            { value: "email", label: "Email",title:''  },
+                                            { value: "app", label: "App" ,title:'' },
+                                            { value: "phone_call", label: "Phone Call",title:''  }
                                         ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -1808,11 +1828,13 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 >
                                     <Select
                                         options={[
-                                            { value: "LEAD", label: "Lead" },
-                                            { value: "PURCHASE", label: "Purchase" },
-                                            { value: "SEARCH", label: "Search" },
-                                            { value: "CONTACT", label: "Contact" },
+                                            { value: "LEAD", label: "Lead",title:''  },
+                                            { value: "PURCHASE", label: "Purchase",title:''  },
+                                            { value: "SEARCH", label: "Search",title:''  },
+                                            { value: "CONTACT", label: "Contact",title:''  },
                                         ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -1827,7 +1849,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     ]}
                                     style={{ flex: '1 1 200px' }}
                                 >
-                                    <Input />
+                                    <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                                 </Form.Item>
                                 {/*pk*/}
                                 <Form.Item
@@ -1843,6 +1865,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             onChange={onChangeAdsetLevelDailyBudget}
                                             readOnly={campaignLevelDailyBudget !== 0} // This will keep the field readonly
                                             step="0.01"
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                         />
                                     </Tooltip>
                                 </Form.Item>
@@ -1875,11 +1898,12 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                                     event.preventDefault();
                                                 }
                                             }}
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                         />
                                     </Form.Item>
                                 )}
                             </div>
-                            <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "green" }}>Targeting</span>
+                            <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "#91C25F" }}>Targeting</span>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
                                 <Form.Item
                                     name="countries"
@@ -1894,30 +1918,32 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 >
                                     <Select
                                         options={[
-                                            { value: "US", label: "United States" },
-                                            { value: "GB", label: "United Kingdom" },
-                                            { value: "AU", label: "Australia" },
-                                            { value: "IN", label: "India" },
-                                            { value: "AE", label: "United Arab Emirates" },
-                                            { value: "CA", label: "Canada" },
-                                            { value: "DE", label: "Germany" },
-                                            { value: "FR", label: "France" },
-                                            { value: "JP", label: "Japan" },
-                                            { value: "CN", label: "China" },
-                                            { value: "BR", label: "Brazil" },
-                                            { value: "ZA", label: "South Africa" },
-                                            { value: "RU", label: "Russia" },
-                                            { value: "IT", label: "Italy" },
-                                            { value: "ES", label: "Spain" },
-                                            { value: "SG", label: "Singapore" },
-                                            { value: "NZ", label: "New Zealand" },
-                                            { value: "MX", label: "Mexico" }
+                                            { value: "US", label: "United States",title:''  },
+                                            { value: "GB", label: "United Kingdom" ,title:'' },
+                                            { value: "AU", label: "Australia",title:''  },
+                                            { value: "IN", label: "India",title:''  },
+                                            { value: "AE", label: "United Arab Emirates",title:''  },
+                                            { value: "CA", label: "Canada",title:''  },
+                                            { value: "DE", label: "Germany" ,title:'' },
+                                            { value: "FR", label: "France" ,title:'' },
+                                            { value: "JP", label: "Japan",title:''  },
+                                            { value: "CN", label: "China",title:''  },
+                                            { value: "BR", label: "Brazil",title:''  },
+                                            { value: "ZA", label: "South Africa",title:''  },
+                                            { value: "RU", label: "Russia",title:''  },
+                                            { value: "IT", label: "Italy",title:''  },
+                                            { value: "ES", label: "Spain",title:''  },
+                                            { value: "SG", label: "Singapore",title:''  },
+                                            { value: "NZ", label: "New Zealand",title:''  },
+                                            { value: "MX", label: "Mexico",title:''  }
                                         ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
                                     name="Min_Age"
-                                    label={<span style={{ color: "#B4B4B4" }}>Min Age</span>}
+                                    label={<span style={{ color: "#B4B4B4" }}>Min age</span>}
                                     rules={[
                                         {
                                             required: true,
@@ -1928,16 +1954,18 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 >
                                     <Select
                                         options={[
-                                            { value: "18", label: "18" },
-                                            { value: "25", label: "25" },
-                                            { value: "35", label: "35" },
-                                            { value: "40", label: "40", disabled: true },
+                                            { value: "18", label: "18" ,title:'' },
+                                            { value: "25", label: "25",title:''  },
+                                            { value: "35", label: "35",title:''  },
+                                            { value: "40", label: "40", disabled: true ,title:'' },
                                         ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
                                     name="Max_Age"
-                                    label={<span style={{ color: "#B4B4B4" }}>Max Age</span>}
+                                    label={<span style={{ color: "#B4B4B4" }}>Max age</span>}
                                     rules={[
                                         {
                                             required: true,
@@ -1948,11 +1976,13 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 >
                                     <Select
                                         options={[
-                                            { value: "20", label: "20" },
-                                            { value: "30", label: "30" },
-                                            { value: "65", label: "65+" },
-                                            { value: "80", label: "80", disabled: true },
+                                            { value: "20", label: "20",title:''  },
+                                            { value: "30", label: "30" ,title:'' },
+                                            { value: "65", label: "65+",title:''  },
+                                            { value: "80", label: "80", disabled: true ,title:'' },
                                         ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -1968,10 +1998,12 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 >
                                     <Select
                                         options={[
-                                            { value: "0", label: "All" },
-                                            { value: "1", label: "Male" },
-                                            { value: "2", label: "Female" },
+                                            { value: "0", label: "All",title:''  },
+                                            { value: "1", label: "Male",title:''  },
+                                            { value: "2", label: "Female",title:''  },
                                         ]}
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -1984,26 +2016,30 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     <Select
                                         mode="multiple"
                                         showSearch
-                                        placeholder="Select Language"
+                                        placeholder="Select language"
                                         filterOption={(input, option) =>
                                             option.children.toLowerCase().includes(input.toLowerCase())
                                         }
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     >
                                         {localesdata.map(option => (
-                                            <Option key={option.key} value={option.key}>
+                                            <Option key={option.key} value={option.key} title={null}>
                                                 {option.name}
                                             </Option>
                                         ))}
+
                                     </Select>
                                 </Form.Item>
                                 <Form.Item
-                                    label="Placements"
+                                    label={<span style={{ color: "#B4B4B4" }}>Placements</span>}
                                     name="placements"
                                     rules={[{ required: true, message: 'Please select a mode!' }]}
                                 >
-                                    <Select placeholder="Select a mode" onChange={handleModeChange}>
-                                        <Option value="Advance">Advance</Option>
-                                        <Option value="manual">Manual</Option>
+                                    <Select placeholder="Select a mode" onChange={handleModeChange} dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'} >
+                                        <Option value="Advance" title={null}>Advance</Option>
+                                        <Option value="manual" title={null}>Manual</Option>
 
                                     </Select>
                                 </Form.Item>
@@ -2020,6 +2056,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                                 placeholder="Select Publishers"
                                                 onChange={handlePublisherChange}
                                                 value={selectedPublishers}
+                                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                             >
                                                 {publisherOptions.map(option => (
                                                     <Option key={option.value} value={option.value}>
@@ -2036,9 +2074,11 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         >
                                             <Select
                                                 mode="multiple"
-                                                placeholder="Select Positions"
+                                                placeholder="Select positions"
                                                 value={selectedPositions}
                                                 onChange={handlePositionChange}
+                                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                             >
                                                 {selectedPublishers.length > 0 && getPositionOptions()?.map(position => (
                                                     <Option key={`${position.key}_${position.label}`} value={position.key}>
@@ -2091,13 +2131,13 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             <ul style={{ listStyleType: 'none', padding: 0 }}>
                                                 {selectedFiles.map((file, index) => (
                                                     <li key={file.uid} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
-                                                        <span>{index + 1}.</span>
-                                                        <DeleteOutlined 
+                                                        <span style={{ color: theme === 'dark' ? '#fff' : '#333' }}>{index + 1}.</span>
+                                                        <DeleteOutlined
                                                             onClick={() => {
                                                                 onDeleteFile(file); // Call the delete function from the parent
                                                                 setSelectedFiles((prevFiles) => prevFiles.filter((f) => f.uid !== file.uid)); // Update UI state
                                                             }}
-                                                            style={{ color: 'red', cursor: 'pointer' }} 
+                                                            style={{ color: 'red', cursor: 'pointer' }}
                                                         />
                                                     </li>
                                                 ))}
@@ -2116,7 +2156,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             ]}
                                             style={{ flex: 3, marginLeft: "1%" }}
                                         >
-                                            <Input style={{ width: "45%" }} />
+                                            <Input style={{ width: "45%" }} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                                         </Form.Item>
                                     </div>
                                     <Form.Item
@@ -2133,11 +2173,12 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         <Input
                                             style={{ width: "60%" }}
                                             onChange={(e) => setAddName(e.target.value)}
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
 
                                         />
                                     </Form.Item>
                                     <Form.Item
-                                        label="Primary text"
+                                        label={<span style={{ color: "#B4B4B4" }}>Primary test</span>}
                                         name="message"
                                         rules={[
                                             {
@@ -2151,6 +2192,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             placeholder="Primary text"
                                             autoSize={{ minRows: 2, maxRows: 10 }}
                                             onChange={(e) => setPrimaryText(e.target.value)}
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
 
 
                                         />
@@ -2174,7 +2216,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         />
                                     </Form.Item> */}
                                     <Form.Item
-                                        label="Headline"
+                                        label={<span style={{ color: "#B4B4B4" }}>Headline</span>}
                                         name="headline"
                                         rules={[
                                             {
@@ -2188,12 +2230,12 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             placeholder="Headline"
                                             autoSize={{ minRows: 2, maxRows: 10 }}
                                             onChange={(e) => setHeadline(e.target.value)}
-
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                         />
                                     </Form.Item>
 
                                     <Form.Item
-                                        label="Description"
+                                        label={<span style={{ color: "#B4B4B4" }}>Description</span>}
                                         name="Description"
                                         rules={[
                                             {
@@ -2207,6 +2249,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             placeholder="Description"
                                             autoSize={{ minRows: 2, maxRows: 10 }}
                                             onChange={(e) => setDescription(e.target.value)}
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
 
                                         />
                                     </Form.Item>
@@ -2214,7 +2257,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         label={
                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', paddingRight: '50px' }}>
-                                                    <span>Website_URL</span>
+                                                    <span style={{ color: "#B4B4B4" }}>Website_URL</span>
                                                     <Tooltip title="This is a required field">
                                                         <QuestionCircleOutlined style={{ marginLeft: 4, cursor: 'pointer' }} />
                                                     </Tooltip>
@@ -2237,12 +2280,13 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             placeholder="Website_URL"
                                             autoSize={{ minRows: 5, maxRows: 15 }}
                                             onChange={(e) => setWebsiteURL(e.target.value)}
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
 
 
                                         />
                                     </Form.Item>
                                     <Form.Item
-                                        label="Display Link"
+                                        label={<span style={{ color: "#B4B4B4" }}>Display link</span>}
                                         name="Caption"
                                         rules={[
                                             {
@@ -2256,10 +2300,12 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             placeholder="Display Link"
                                             autoSize={{ minRows: 2, maxRows: 10 }}
                                             onChange={(e) => setCaption(e.target.value)}
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
 
                                         />
                                     </Form.Item>
                                     <Modal
+                                        className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                                         title="URL Builder"
                                         visible={isModalVisibleForURLBuilder}
                                         onCancel={handleCancelForURLBuilder}
@@ -2293,15 +2339,16 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', marginTop: '20px' }}>
                                     {selectedFiles?.length > 0 ? (
                                         selectedFiles.map((file) => (
-                                            <div 
-                                                key={file.uid} 
+                                            <div
+                                                key={file.uid}
                                                 style={{
                                                     width: '250px',
                                                     borderRadius: '8px',
                                                     boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
                                                     padding: '10px',
-                                                    backgroundColor: '#fff',
                                                     textAlign: 'center',
+                                                    backgroundColor: theme === 'dark' ? '#555' : '#ffffff',  // 🔹 background
+                                                    color: theme === 'dark' ? '#fff' : '#333',              // 🔹 text
                                                 }}
                                             >
                                                 {file?.type?.startsWith("image/") ? (
@@ -2328,8 +2375,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                                     </div>
                                                     <div className="ad-button" style={{ marginTop: '10px' }}>
                                                         <button type="button" style={{
-                                                            backgroundColor: '#1877F2',
-                                                            color: '#fff',
+                                                            backgroundColor: '#91C25F',
+                                                            color: theme === 'dark' ? '#fff' : '#333',
                                                             border: 'none',
                                                             padding: '8px 12px',
                                                             borderRadius: '5px',
@@ -2339,14 +2386,14 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                                 </div>
 
                                                 {/* Website URL */}
-                                                <a 
-                                                    href={websiteURL} 
-                                                    target="_blank" 
-                                                    rel="noopener noreferrer" 
-                                                    style={{ 
-                                                        display: 'block', 
-                                                        color: '#0066cc', 
-                                                        marginTop: '10px', 
+                                                <a
+                                                    href={websiteURL}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    style={{
+                                                        display: 'block',
+                                                         color: theme === 'dark' ? '#fff' : '333', 
+                                                        marginTop: '10px',
                                                         textDecoration: 'none',
                                                         fontSize: '14px',
                                                         wordBreak: 'break-word', // 🔹 Ensures long URLs wrap within the container
@@ -2385,7 +2432,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     )}
                                 </div>
 
-                                
+
                             </div>
                         </Panel>
                     </Collapse>

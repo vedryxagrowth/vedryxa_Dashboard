@@ -153,7 +153,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
           <Form.Item
             label="Spend Partner"
             name="spendPartner"
-            rules={[{ required: true, message: "Please select a Spend Partner!" }]}
+            rules={[{ required: true, message: "Please select a Spend partner!" }]}
             disabled  style={{backgroundColor:'transparent', color: 'black'}}
           >
             <Select placeholder="Select a partner" disabled  style={{
@@ -168,7 +168,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
           <Form.Item
             label="Spend Account ID"
             name="accountNumber"
-            rules={[{ required: true, message: "Please input the Spend Account ID!" }]}
+            rules={[{ required: true, message: "Please input the spend account ID!" }]}
           >
             <Input   disabled  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black'}}/>
           </Form.Item>
@@ -278,6 +278,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose }) => {
 
       <Modal
         title="Confirmation"
+        className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
         open={isModalVisible}
         onOk={() => {
           form.submit();

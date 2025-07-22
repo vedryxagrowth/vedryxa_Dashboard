@@ -1771,8 +1771,8 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
 
     return (
         <Drawer
-            title="Campaign New Strategy"
-            width="95%"
+            title="Campaign new strategy"
+            width="100%"
             open={visible}
             onClose={handleDrawerClose}
             style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
@@ -1782,7 +1782,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                 <Form layout="vertical" form={form} onFinish={onFinish} onValuesChange={handleFormChange} initialValues={initialValues} className={theme === 'dark' ? 'form-dark' : 'form-light'}>
                     <Form.Item
                         name="Draft_Name"
-                        label={<span style={{ color: "#B4B4B4" }}>Draft Name</span>}
+                        label={<span style={{ color: "#B4B4B4" }}>Draft name</span>}
                         rules={[
                             {
                                 required: true,
@@ -1790,7 +1790,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                             },
                         ]}
                         style={{ flex: 0.2 }}>
-                        <Input placeholder='Enter Draft Name'  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
+                        <Input placeholder='Enter draft name'  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                     </Form.Item>
                     <Collapse accordion activeKey={activeKey} // Bind active key state
                         onChange={(key) => setActiveKey([key])} className={theme === 'dark' ? 'custom-collapse-dark' : 'custom-collapse-light'}  >
@@ -1798,7 +1798,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                             <div style={{ display: "flex", backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000'}}>
                                 <Form.Item
                                     name="Account_Number"
-                                    label={<span style={{ color: "#B4B4B4" }}>Account Number</span>}
+                                    label={<span style={{ color: "#B4B4B4" }}>Account number</span>}
                                     // rules={[
                                     //     {
                                     //         required: true,
@@ -1941,7 +1941,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                         variant="filled"
                                         options={[
                                             { value: "ACTIVE", label: "ACTIVE" },
-                                            { value: "PAUSED", label: "PAUSED" },
+                                            { value: "PAUSED", label: "PAUSE" },
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
@@ -2010,7 +2010,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                 </Form.Item>
                                 <Form.Item
                                     name="DatePicker"
-                                    label={<span style={{ color: "#B4B4B4" }}>Start Time</span>}
+                                    label={<span style={{ color: "#B4B4B4" }}>Start time</span>}
                                     // rules={[
                                     //     {
                                     //         required: true,
@@ -2116,7 +2116,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                 {showBidAmount && (
                                     <Form.Item
                                         name="bid_amount"
-                                        label={<span style={{ color: "#B4B4B4" }}>Cost per Result Goal</span>}
+                                        label={<span style={{ color: "#B4B4B4" }}>Cost per result goal</span>}
                                         // rules={[
                                         //     {
                                         //         required: true,
@@ -2156,7 +2156,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                     </Form.Item>
                                 )}
                             </div>
-                            <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "green" }}>Targeting</span>
+                            <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "#91C25F" }}>Targeting</span>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
                                 <Form.Item
                                     name="countries"
@@ -2196,7 +2196,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                 </Form.Item>
                                 <Form.Item
                                     name="Min_Age"
-                                    label={<span style={{ color: "#B4B4B4" }}>Min Age</span>}
+                                    label={<span style={{ color: "#B4B4B4" }}>Min age</span>}
                                     // rules={[
                                     //     {
                                     //         required: true,
@@ -2218,7 +2218,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                 </Form.Item>
                                 <Form.Item
                                     name="Max_Age"
-                                    label={<span style={{ color: "#B4B4B4" }}>Max Age</span>}
+                                    label={<span style={{ color: "#B4B4B4" }}>Max age</span>}
                                     // rules={[
                                     //     {
                                     //         required: true,
@@ -2284,7 +2284,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                     </Select>
                                 </Form.Item>
                                 <Form.Item
-                                    label="Placements"
+                                    label={<span style={{ color: "#B4B4B4" }}>Placements</span>}
                                     name="placements"
                                     // rules={[{ required: true, message: 'Please select a mode!' }]}
                                 >
@@ -2374,7 +2374,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                     <div style={{ display: 'flex', gap: '16px' }}>
                                     <div style={{display:'flex', flexDirection:'column'}}>
                                         <Form.Item
-                                            label={<span style={{ color: "#B4B4B4" }}>Select Source</span>}
+                                            label={<span style={{ color: "#B4B4B4" }}>Select source</span>}
                                             style={{ flex: 1 }}
                                             >
                                             <Select
@@ -2389,7 +2389,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                                 className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                             >
                                                 <Option value="upload">Upload</Option>
-                                                <Option value="creative">Creative Library</Option>
+                                                <Option value="creative">Creative library</Option>
                                             </Select>
                                             </Form.Item>
 
@@ -2467,7 +2467,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                                             listType="picture"
                                                             accept="image/*, video/*"
                                                         >
-                                                            <Button icon={<UploadOutlined />} className="dark-icon-button"  style={{color: theme === "dark" ? "white" : "#000"}}>Select Files</Button>
+                                                            <Button icon={<UploadOutlined />} className="dark-icon-button"  style={{color: theme === "dark" ? "white" : "#000"}}>Select files</Button>
                                                         </Upload>
                                                     </div>
 
@@ -2475,7 +2475,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                                     {selectedOption === "creative" && (
                                                     <div>
                                                         <Button icon={<UploadOutlined />} onClick={onClickCreativesDrawer} className="dark-icon-button"  style={{color: theme === "dark" ? "white" : "#000"}}>
-                                                        Select Files
+                                                        Select files
                                                         </Button>
 
                                                         {selectedFilesFromCreatives?.length > 0 && (
@@ -2566,7 +2566,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                     <Form.Item
                                         name="AddName"
                                         initialValue={campaignName}
-                                        label={<span style={{ color: "#B4B4B4" }}>Add name</span>}
+                                        label={<span style={{ color: "#B4B4B4" }}>Ad name</span>}
                                         // rules={[
                                         //     {
                                         //         required: true,
@@ -2581,7 +2581,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                         />
                                     </Form.Item>
                                     <Form.Item
-                                        label="Primary text"
+                                        label={<span style={{ color: "#B4B4B4" }}>Primary text</span>}
                                         name="message"
                                         // rules={[
                                         //     {
@@ -2618,7 +2618,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                         />
                                     </Form.Item> */}
                                     <Form.Item
-                                        label="Headline"
+                                        label={<span style={{ color: "#B4B4B4" }}>Headline</span>}
                                         name="headline"
                                         // rules={[
                                         //     {
@@ -2637,7 +2637,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                     </Form.Item>
 
                                     <Form.Item
-                                        label="Description"
+                                        label={<span style={{ color: "#B4B4B4" }}>Description</span>}
                                         name="Description"
                                         // rules={[
                                         //     {
@@ -2658,7 +2658,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                         label={
                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', paddingRight: '50px' }}>
-                                                    <span>Website_URL</span>
+                                                    <span style={{ color: "#B4B4B4" }}>Website_URL</span>
                                                     <Tooltip title="This is a required field">
                                                         <QuestionCircleOutlined style={{ marginLeft: 4, cursor: 'pointer' }} />
                                                     </Tooltip>
@@ -2686,7 +2686,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                         />
                                     </Form.Item>
                                     <Form.Item
-                                        label="Display Link"
+                                        label={<span style={{ color: "#B4B4B4" }}>Display link</span>}
                                         name="Caption"
                                         // rules={[
                                         //     {

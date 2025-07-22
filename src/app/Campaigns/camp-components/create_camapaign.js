@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useMemo } from 'react';
 import { Drawer, Button, DatePicker, Space, Form, Input, Select, Collapse, Upload, Steps, Modal, message, Spin, Badge, Tooltip } from 'antd';
-import { PlusOutlined, UploadOutlined, ShareAltOutlined, CommentOutlined, LikeOutlined, MoreOutlined, CloseOutlined, GlobalOutlined, EditOutlined, QuestionCircleOutlined,PaperClipOutlined,DeleteOutlined  } from '@ant-design/icons';
+import { PlusOutlined, UploadOutlined, ShareAltOutlined, CommentOutlined, LikeOutlined, MoreOutlined, CloseOutlined, GlobalOutlined, EditOutlined, QuestionCircleOutlined, PaperClipOutlined, DeleteOutlined } from '@ant-design/icons';
 import moment from 'moment-timezone';
 import { useState, useRef } from 'react';
 import TextArea from 'antd/es/input/TextArea';
@@ -79,7 +79,7 @@ const allPositions = [
     { key: "right_hand_column", label: "Facebook Right Column" },
     { key: "instant_article", label: "Facebook Instant Articles" },
     { key: "biz_disco_feed", label: "Facebook Business Explore" },
-  
+
     { key: "stream", label: "Instagram Stream" },
     { key: "story_i", label: "Instagram Stories" },
     { key: "explore", label: "Instagram Explore" },
@@ -88,11 +88,11 @@ const allPositions = [
     { key: "profile_feed-i", label: "Instagram Profile Feed" },
     { key: "ig_search", label: "Instagram Search" },
     { key: "profile_reels", label: "Instagram Profile Reels" },
-  
+
     { key: "messenger_home", label: "Messenger Home" },
     { key: "story_m", label: "Messenger Stories" },
     { key: "sponsored_messages", label: "Messenger Sponsored Messages" },
-  
+
     { key: "classic", label: "Audience Network Classic" },
     { key: "rewarded_video", label: "Audience Network Rewarded Video" }
 ];
@@ -571,7 +571,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
             setAdsetLevelDailyBudget(0);
             setCampaignLevelDailyBudget(0);
             setSelectedOption("upload");
-            setIsManual(false); 
+            setIsManual(false);
         }
     }, [visible]);
 
@@ -617,7 +617,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
 
         // // Trigger form completion check
         // checkFormCompletion();
-        setIsFormComplete(true); 
+        setIsFormComplete(true);
         // console.log(text, "text");
     }
 
@@ -644,8 +644,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
             case 'FB_DomainActive':
                 return <DActiveUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
         }
-        
-    },[network, accountis, onReturnUrl])
+
+    }, [network, accountis, onReturnUrl])
 
 
 
@@ -669,8 +669,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         console.log(values, "values");
         console.log(options, "options");
         const formatted = options.map(opt => ({
-          key: opt.value,
-          label: opt.label || opt.children
+            key: opt.value,
+            label: opt.label || opt.children
         }));
         console.log(formatted, "formatted positions");
         setSelectedPositions(formatted);
@@ -850,7 +850,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
 
     //     const uploadFilesSequentially = async (selectedFiles) => {
     //         const mediaHashArray = [];
-        
+
     //         for (const file of selectedFiles) {
     //             try {
     //                 const fileType = file.type;
@@ -858,7 +858,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     //                     onError("Unsupported file type");
     //                     continue;
     //                 }
-        
+
     //                 if (file?.url) {
     //                     if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") || file?.url?.endsWith('.mp4')) {
     //                         const formData = new FormData();
@@ -869,29 +869,29 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     //                                 Authorization: localStorage.getItem("token"),
     //                             },
     //                         });
-        
+
     //                         const uploadFile = await response.blob();
     //                         if (!(uploadFile instanceof Blob)) {
     //                             console.error("The fetched file is not a Blob:", uploadFile);
     //                             continue;
     //                         }
-        
+
     //                         formData.append("file", uploadFile, file.name);
     //                         // console.log(formData);
-        
+
     //                         let fbResponse;
     //                         if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") ) {
     //                             formData.append('file', uploadFile, file.name);
     //                             formData.append('access_token', token);
     //                             const fileName = file.name.split('/').pop();
-        
+
     //                             fbResponse = await axios.post(
     //                                 `https://graph.facebook.com/v20.0/act_${account}/adimages`,
     //                                 formData,
     //                                 { headers: { 'Content-Type': 'multipart/form-data' } }
     //                             );
-                                
-        
+
+
     //                             if (fbResponse.status === 200) {
     //                                 onSuccess("ok", response);
     //                                 mediaHashArray.push({
@@ -909,11 +909,11 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     //                                 formData,
     //                                 { headers: { 'Content-Type': 'multipart/form-data' } }
     //                             );
-        
+
     //                             if (fbResponse.status === 200) {
     //                                 const videoid = fbResponse?.data?.id;
     //                                 await new Promise(resolve => setTimeout(resolve, 10000));
-        
+
     //                                 const thumbnailResponse = await axios.get(
     //                                     `https://graph.facebook.com/v20.0/${videoid}`,
     //                                     {
@@ -924,12 +924,12 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     //                                         }
     //                                     }
     //                                 );
-        
+
     //                                 const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
     //                                 const uri = preferredThumbnail ? preferredThumbnail.uri : "";
     //                                 // console.log(videoid);
     //                                 // console.log(uri);
-        
+
     //                                 onSuccess("ok", fbResponse);
     //                                 mediaHashArray.push({
     //                                     filename: file?.url,
@@ -949,18 +949,18 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     //                         const fileId = `${uniqueId}_${file.name}`;
     //                         const editedImage = editedImages[file.name];
     //                         const uploadFile = editedImage ? await fetch(editedImage).then(res => res.blob()) : null;
-        
+
     //                         console.log(file.originFileObj.name);
-        
+
     //                         if (uploadFile) {
     //                             formData.append("file", uploadFile, `blob/${uniqueId}_${file.name}`);
     //                         } else {
     //                             formData.append("file", file.originFileObj, `blob/${uniqueId}_${file.originFileObj.name}`);
     //                         }
-        
+
     //                         // console.log(formData);
     //                         let response, fbResponse;
-        
+
     //                         if (file.type.startsWith('image/')) {
     //                             response = await axios.post(
     //                                 'https://www.testapi.adsgoat.in/upload',
@@ -972,16 +972,16 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     //                                     },
     //                                 }
     //                             );
-        
+
     //                             if (!response.data.imageUrl) {
     //                                 onError("Error: Image URL not returned from custom API");
     //                                 console.error("Image upload to custom API failed, imageUrl missing");
     //                                 continue;
     //                             }
-        
+
     //                             // console.log("Custom API response imageUrl:", response);
     //                             formData.append('access_token', token);
-        
+
     //                             fbResponse = await axios.post(
     //                                 `https://graph.facebook.com/v20.0/act_${account}/adimages`,
     //                                 formData,
@@ -989,7 +989,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     //                             );
 
     //                             // console.log("Facebook API response:", fbResponse.data);
-        
+
     //                             if (response.status === 200 && fbResponse.status === 200) {
     //                                 onSuccess("ok", response);
     //                                 mediaHashArray.push({
@@ -1011,25 +1011,25 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     //                                     },
     //                                 }
     //                             );
-        
+
     //                             if (response.status !== 200) {
     //                                 onError("error", response);
     //                                 console.error("Video upload to custom API failed");
     //                                 continue;
     //                             }
-        
+
     //                             formData.append('access_token', token);
-        
+
     //                             fbResponse = await axios.post(
     //                                 `https://graph.facebook.com/v20.0/act_${account}/advideos`,
     //                                 formData,
     //                                 { headers: { 'Content-Type': 'multipart/form-data' } }
     //                             );
-        
+
     //                             if (fbResponse.status === 200) {
     //                                 const videoid = fbResponse?.data?.id;
     //                                 await new Promise(resolve => setTimeout(resolve, 10000));
-        
+
     //                                 const thumbnailResponse = await axios.get(
     //                                     `https://graph.facebook.com/v20.0/${videoid}`,
     //                                     {
@@ -1040,10 +1040,10 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     //                                         }
     //                                     }
     //                                 );
-        
+
     //                                 const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
     //                                 const uri = preferredThumbnail ? preferredThumbnail.uri : "";
-        
+
     //                                 onSuccess("ok", fbResponse);
     //                                 mediaHashArray.push({
     //                                     filename: response.data.imageUrl,
@@ -1062,7 +1062,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     //                 onError("error", error);
     //             }
     //         }
-        
+
     //         // console.log("All media files uploaded successfully:", mediaHashArray);
     //         return mediaHashArray;
     //     };
@@ -1096,7 +1096,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                         "x-action": "create-folder"
                     }
                 });
-        
+
                 if (!response.ok) throw new Error("Failed to create folder");
                 const data = await response.json();
                 console.log("Folder created:", folderPath);
@@ -1105,14 +1105,14 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                 console.error("Error creating folder:", err);
                 return false;
             }
-        };        
-    
+        };
+
         const uploadFileToS3 = async (fileBlob, fileName, folderPath) => {
             const fullPath = `${folderPath}/${fileName}`;
             const formData = new FormData();
             formData.append("file", fileBlob, fileName);
             formData.append("filename", fullPath); // required in body
-        
+
             try {
                 const response = await fetch("https://prodapis.adsgoat.in/uploadUserFiles", {
                     method: "POST",
@@ -1122,9 +1122,9 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                     },
                     body: formData,
                 });
-        
+
                 if (!response.ok) throw new Error("S3 upload failed");
-        
+
                 const data = await response.json();
                 return data.imageUrl;
             } catch (err) {
@@ -1132,11 +1132,11 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                 return null;
             }
         };
-        
-    
+
+
         const uploadFilesSequentially = async (selectedFiles) => {
             const mediaHashArray = [];
-    
+
             for (const file of selectedFiles) {
                 try {
                     const fileType = file.type;
@@ -1144,12 +1144,12 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                         onError("Unsupported file type");
                         continue;
                     }
-    
+
                     const folderPath = `${network}/${imagehash.accountNumber}/${imagehash.campaignName}`;
-                    await createS3Folder(folderPath); 
+                    await createS3Folder(folderPath);
                     let fileBlob = null;
                     let s3FileUrl = null;
-    
+
                     if (file?.url) {
                         const response = await fetch(`https://prodapis.adsgoat.in/s3?s3Url=${file.url}`, {
                             method: 'GET',
@@ -1158,24 +1158,24 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 Authorization: localStorage.getItem("token"),
                             },
                         });
-    
+
                         fileBlob = await response.blob();
                         s3FileUrl = await uploadFileToS3(fileBlob, file.name, folderPath);
-    
+
                         const formData = new FormData();
                         formData.append("file", fileBlob, file.name);
                         formData.append('access_token', token);
-    
+
                         let fbResponse;
                         if (file.url.endsWith('.png') || file.url.endsWith('.jpg') || file.url.endsWith(".jpeg")) {
                             const fileName = file.name.split('/').pop();
-    
+
                             fbResponse = await axios.post(
                                 `https://graph.facebook.com/v20.0/act_${account}/adimages`,
                                 formData,
                                 { headers: { 'Content-Type': 'multipart/form-data' } }
                             );
-    
+
                             if (fbResponse.status === 200) {
                                 onSuccess("ok", fbResponse);
                                 mediaHashArray.push({
@@ -1192,11 +1192,11 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 formData,
                                 { headers: { 'Content-Type': 'multipart/form-data' } }
                             );
-    
+
                             if (fbResponse.status === 200) {
                                 const videoid = fbResponse?.data?.id;
                                 await new Promise(resolve => setTimeout(resolve, 10000));
-    
+
                                 const thumbnailResponse = await axios.get(
                                     `https://graph.facebook.com/v20.0/${videoid}`,
                                     {
@@ -1207,10 +1207,10 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         }
                                     }
                                 );
-    
+
                                 const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
                                 const uri = preferredThumbnail ? preferredThumbnail.uri : "";
-    
+
                                 onSuccess("ok", fbResponse);
                                 mediaHashArray.push({
                                     filename: s3FileUrl,
@@ -1228,13 +1228,13 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                         const editedImage = editedImages[file.name];
                         fileBlob = editedImage ? await fetch(editedImage).then(res => res.blob()) : file.originFileObj;
                         s3FileUrl = await uploadFileToS3(fileBlob, safeName, folderPath);
-    
+
                         const formData = new FormData();
                         formData.append("file", fileBlob, safeName);
                         formData.append('access_token', token);
-    
+
                         let response, fbResponse;
-    
+
                         if (file.type.startsWith('image/')) {
                             response = await axios.post(
                                 'https://www.testapi.adsgoat.in/upload',
@@ -1246,19 +1246,19 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     },
                                 }
                             );
-    
+
                             if (!response.data.imageUrl) {
                                 onError("Error: Image URL not returned from custom API");
                                 console.error("Image upload to custom API failed, imageUrl missing");
                                 continue;
                             }
-    
+
                             fbResponse = await axios.post(
                                 `https://graph.facebook.com/v20.0/act_${account}/adimages`,
                                 formData,
                                 { headers: { 'Content-Type': 'multipart/form-data' } }
                             );
-    
+
                             if (response.status === 200 && fbResponse.status === 200) {
                                 onSuccess("ok", response);
                                 mediaHashArray.push({
@@ -1280,23 +1280,23 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     },
                                 }
                             );
-    
+
                             if (response.status !== 200) {
                                 onError("error", response);
                                 console.error("Video upload to custom API failed");
                                 continue;
                             }
-    
+
                             fbResponse = await axios.post(
                                 `https://graph.facebook.com/v20.0/act_${account}/advideos`,
                                 formData,
                                 { headers: { 'Content-Type': 'multipart/form-data' } }
                             );
-    
+
                             if (fbResponse.status === 200) {
                                 const videoid = fbResponse?.data?.id;
                                 await new Promise(resolve => setTimeout(resolve, 10000));
-    
+
                                 const thumbnailResponse = await axios.get(
                                     `https://graph.facebook.com/v20.0/${videoid}`,
                                     {
@@ -1307,10 +1307,10 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         }
                                     }
                                 );
-    
+
                                 const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
                                 const uri = preferredThumbnail ? preferredThumbnail.uri : "";
-    
+
                                 onSuccess("ok", fbResponse);
                                 mediaHashArray.push({
                                     filename: s3FileUrl,
@@ -1328,10 +1328,10 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                     onError("error", error);
                 }
             }
-    
+
             return mediaHashArray;
         };
-    
+
         try {
             const mediaHashArray = await uploadFilesSequentially(selectedFiles);
             console.log("All media files uploaded successfully. Media Hash Array:", mediaHashArray);
@@ -1340,7 +1340,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
             console.error("One or more media uploads failed:", error);
             return [];
         }
-    }; 
+    };
 
     const handleBeforeUpload = (file) => {
         return false; // Prevent auto-upload
@@ -1352,7 +1352,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     const onFinish = (values) => {
         // console.log("Form Values:", values);
         // console.log("Selected Publishers:", formValues);
-        if(values.placements === 'manual'){
+        if (values.placements === 'manual') {
             const selectedPlatforms = selectedPublishers.reduce((acc, publisher) => {
                 acc[publisher + '_positions'] = values.positions.filter(position =>
                     positionOptions[publisher].map(option => option.key).includes(position)
@@ -1363,7 +1363,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                 publisher_platforms: values.publisher_platforms,
                 ...selectedPlatforms, ...values
             });
-    
+
             setIsModalVisible(true);
             setFormValues({
                 publisher_platforms: values.publisher_platforms,
@@ -1411,12 +1411,12 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     function extractValuesByPartialLabel(dataArray, labelName) {
         console.log(dataArray, labelName);
         return dataArray
-          .filter(item => item.label.toLowerCase().includes(labelName.toLowerCase()))
-          .map(item => {
-            if (item.key.includes('story_')) return 'story';
-            if (item.key.includes('profile_feed-')) return 'profile_feed';
-            return item.key;
-          });
+            .filter(item => item.label.toLowerCase().includes(labelName.toLowerCase()))
+            .map(item => {
+                if (item.key.includes('story_')) return 'story';
+                if (item.key.includes('profile_feed-')) return 'profile_feed';
+                return item.key;
+            });
     }
 
     const postData = async (values) => {
@@ -1439,7 +1439,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                         Description: values.Description,
                         Caption: values.Caption,
                         Website_URL: values.Website_URL,
-                        
+
                         // urlParameters: values.urlParameters
                     };
                 } else if (media.videoid) {
@@ -1555,24 +1555,24 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
 
     const handleChange = (info) => {
         const newFiles = info.fileList.map(file => ({
-          ...file,
-          uid: file.uid || `-${Date.now()}`,
-          source: "media",
+            ...file,
+            uid: file.uid || `-${Date.now()}`,
+            source: "media",
         }));
-      
+
         setSelectedFiles(prev => {
-          const existingUids = new Set(prev.map(f => f.uid));
-          const filteredNewFiles = newFiles.filter(f => !existingUids.has(f.uid));
-          return [...prev, ...filteredNewFiles];
+            const existingUids = new Set(prev.map(f => f.uid));
+            const filteredNewFiles = newFiles.filter(f => !existingUids.has(f.uid));
+            return [...prev, ...filteredNewFiles];
         });
-      
+
         // 👇 Update selectedFilesFromMedia — preserve + append
         setSelectedFilesFromMedia(prev => {
-          const existingUids = new Set(prev.map(f => f.uid));
-          const filteredNewFiles = newFiles.filter(f => !existingUids.has(f.uid));
-          return [...prev, ...filteredNewFiles];
+            const existingUids = new Set(prev.map(f => f.uid));
+            const filteredNewFiles = newFiles.filter(f => !existingUids.has(f.uid));
+            return [...prev, ...filteredNewFiles];
         });
-      };
+    };
 
     const currentDate = dayjs();
     console.log(moment(), "currentDate")
@@ -1634,7 +1634,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         setCampaignLevelDailyBudget(0);
         onClose(); // Call onClose handler to close the drawer
         setActiveKey(['1']);
-        isManual !== "manual" && setIsManual(false); 
+        isManual !== "manual" && setIsManual(false);
         setSelectedPositions([]); // Clear selected positions
         newSelectedRef.current = null;
         setSelectedFilesFromCreatives([]); // Clear selected files from creatives
@@ -1655,18 +1655,18 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
 
     const selectedFilesData = (data) => {
         console.log("Selected Files Data:", data);
-        setSelectedFiles(prev => [...prev, ...data.map((file, index)=>{
-            return({
-                uid: file.uid || `-${index+1}`,
+        setSelectedFiles(prev => [...prev, ...data.map((file, index) => {
+            return ({
+                uid: file.uid || `-${index + 1}`,
                 name: file?.name,
                 status: 'done',
                 type: `${file?.url?.endsWith(".jpg") || file?.url?.endsWith(".png") || file?.url?.endsWith(".jpeg") ? file?.url?.endsWith(".jpg") ? "image/jpg" : file?.url?.endsWith(".jpeg") ? "image/jpeg" : "image/png" : "video/"}`,
                 url: file?.url,
             })
         })]);
-        setSelectedFilesFromCreatives(prev => [...prev, ...data.map((file, index)=>{
-            return({
-                uid: file.uid || `-${index+1}`,
+        setSelectedFilesFromCreatives(prev => [...prev, ...data.map((file, index) => {
+            return ({
+                uid: file.uid || `-${index + 1}`,
                 name: file?.name,
                 status: 'done',
                 type: `${file?.url?.endsWith(".jpg") || file?.url?.endsWith(".png") || file?.url?.endsWith(".jpeg") ? file?.url?.endsWith(".jpg") ? "image/jpg" : file?.url?.endsWith(".jpeg") ? "image/jpeg" : "image/png" : "video/"}`,
@@ -1674,10 +1674,10 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
             })
         })]);
         setOpenCreativesDrawer(false);
-        
+
         if (data.length > 0) {
             const currentMediaContent = form.getFieldValue("MediaContent") || [];
-        
+
             const newFiles = data.map((file, index) => ({
                 uid: file.uid || `-${index + 1}`,
                 name: file?.name,
@@ -1685,15 +1685,15 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                 type: file?.url?.endsWith(".jpg")
                     ? "image/jpg"
                     : file?.url?.endsWith(".jpeg")
-                    ? "image/jpeg"
-                    : file?.url?.endsWith(".png")
-                    ? "image/png"
-                    : "video/",
+                        ? "image/jpeg"
+                        : file?.url?.endsWith(".png")
+                            ? "image/png"
+                            : "video/",
                 url: file?.url,
             }));
-        
+
             const updatedMediaContent = [...currentMediaContent, ...newFiles];
-        
+
             form.setFieldsValue({ MediaContent: updatedMediaContent });
             form.validateFields(["MediaContent"]);
         }
@@ -1713,7 +1713,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     const handleRemove = (fileToRemove) => {
         setSelectedFilesFromMedia(prev => prev.filter(file => file.uid !== fileToRemove.uid));
         setSelectedFiles(prev =>
-          prev.filter(file => file.uid !== fileToRemove.uid)
+            prev.filter(file => file.uid !== fileToRemove.uid)
         );
     };
 
@@ -1774,7 +1774,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         setSelectedFiles(draft?.addlevel?.ads);
         setSelectedPublishers(draft?.adsetlevel?.publisher_platforms || []);
         setIsManual(draft?.adsetlevel?.placements === "manual" ? "manual" : false);
-        draft?.addlevel?.ads?.length > 0 ? setSelectedOption("creative"): setSelectedOption("upload");
+        draft?.addlevel?.ads?.length > 0 ? setSelectedOption("creative") : setSelectedOption("upload");
         const checkFormCompletion = () => {
             const allValues = form.getFieldsValue(true);
             const isComplete = Object.keys(allValues).every(
@@ -1782,7 +1782,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
             );
             setIsFormComplete(isComplete);
         };
-        
+
         setSubmitErrors([]); // Reset submit errors when loading a draft
 
 
@@ -1795,7 +1795,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         console.log("Selected Draft:", value);
         console.log("Drafts Data:", draftsData.find(draft => draft.id === value));
         setFormValuesFromDraft(draftsData.find(draft => draft.id === value));
-        selectedRef.current = {Draft_Name: draft?.Draft_Name, Draft_Id: draft?.id};
+        selectedRef.current = { Draft_Name: draft?.Draft_Name, Draft_Id: draft?.id };
         newSelectedRef.current = draft?.Draft_Name;
         setWebsiteURL("");
         setCaption("");
@@ -1806,9 +1806,9 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
             title={
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span>Create a new campaign</span>
-                    <Select value={newSelectedRef.current} placeholder="Select Draft" style={{ width: 150 }} onChange={onChangeDraft}
-                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}>
+                    <Select value={newSelectedRef.current} placeholder="Select draft" style={{ width: 150 }} onChange={onChangeDraft}
+                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}>
                         {draftsData.map((draft) => (
                             <Select.Option value={draft.id}>{draft.Draft_Name}</Select.Option>
                         ))}
@@ -1818,7 +1818,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                     </Select>
                 </div>
             }
-            width="95%"
+            width="100%"
             open={visible}
             onClose={handleDrawerClose}
             style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
@@ -1827,12 +1827,12 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
             <Spin spinning={loading}>
                 <Form layout="vertical" form={form} onFinish={onFinish} onValuesChange={handleFormChange} initialValues={initialValues} className={theme === 'dark' ? 'form-dark' : 'form-light'}>
                     <Collapse accordion activeKey={activeKey} // Bind active key state
-                        onChange={(key) => setActiveKey([key])}  className={theme === 'dark' ? 'custom-collapse-dark' : 'custom-collapse-light'} >
+                        onChange={(key) => setActiveKey([key])} className={theme === 'dark' ? 'custom-collapse-dark' : 'custom-collapse-light'} >
                         <Panel header="CAMPAIGN LEVEL" key="1" style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}>
-                            <div style={{ display: "flex", backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000'}}>
+                            <div style={{ display: "flex", backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}>
                                 <Form.Item
                                     name="Account_Number"
-                                    label={<span style={{ color: "#B4B4B4" }}>Account Number</span>}
+                                    label={<span style={{ color: "#B4B4B4" }}>Account number</span>}
                                     rules={[
                                         {
                                             required: true,
@@ -1840,7 +1840,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         },
                                     ]}
                                     style={{ flex: 0.2 }}>
-                                    <Input value={accountNumber} onChange={Accountchange}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
+                                    <Input value={accountNumber} onChange={Accountchange} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                                 </Form.Item>
                                 <Form.Item
                                     name="Name"
@@ -1853,7 +1853,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     ]}
                                     style={{ flex: 0.25 }}>
                                     <Input onChange={handleNameChange}
-                                        style={{ width: "100%", marginLeft: "3%" }}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                        style={{ width: "100%", marginLeft: "3%" }} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -1870,14 +1870,15 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         // onChange={getpixelandpageid}
                                         variant="filled"
                                         options={[
-                                            { value: "OUTCOME_LEADS", label: "Leads" },
-                                            { value: "OUTCOME_SALES", label: "Sales" },
-                                            { value: "OUTCOME_ENGAGEMENT", label: "Engagement" },
-                                            { value: "OUTCOME_AWARENESS", label: "Awareness" },
-                                            { value: "OUTCOME_TRAFFIC", label: "Traffic" },
-                                            { value: "OUTCOME_APP_PROMOTION", label: "App promotion" }
-
+                                            { value: "OUTCOME_LEADS", label: "Leads", title:"" },
+                                            { value: "OUTCOME_SALES", label: "Sales" , title:""},
+                                            { value: "OUTCOME_ENGAGEMENT", label: "Engagement", title:"" },
+                                            { value: "OUTCOME_AWARENESS", label: "Awareness", title:"" },
+                                            { value: "OUTCOME_TRAFFIC", label: "Traffic", title:"" },
+                                            { value: "OUTCOME_APP_PROMOTION", label: "App promotion", title:"" }
+                                           
                                         ]}
+
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
@@ -1898,11 +1899,11 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         mode="multiple"
                                         allowClear
                                         options={[
-                                            { value: "HOUSING", label: "Housing" },
-                                            { value: "FINANCIAL_PRODUCTS_SERVICES", label: "Credit" },
-                                            { value: "EMPLOYMENT", label: "Employment" },
-                                            { value: "ISSUES_ELECTIONS_POLITICS", label: "Politics" },
-                                            { value: "NONE", label: "None" }
+                                            { value: "HOUSING", label: "Housing", title:"" },
+                                            { value: "FINANCIAL_PRODUCTS_SERVICES", label: "Credit" , title:""},
+                                            { value: "EMPLOYMENT", label: "Employment" , title:""},
+                                            { value: "ISSUES_ELECTIONS_POLITICS", label: "Politics", title:"" },
+                                            { value: "NONE", label: "None", title:"" }
 
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
@@ -1922,10 +1923,10 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     <Select
                                         variant="filled"
                                         options={[
-                                            { value: "LOWEST_COST_WITHOUT_CAP", label: "Highest Volume" },
-                                            { value: "LOWEST_COST_WITH_BID_CAP", label: "Bid Cap" },
-                                            { value: "COST_CAP", label: "Cost per Result Goal" },
-                                            { value: "LOWEST_COST_WITH_MIN_ROAS", label: "ROAS Goal" }
+                                            { value: "LOWEST_COST_WITHOUT_CAP", label: "Highest Volume" , title:""},
+                                            { value: "LOWEST_COST_WITH_BID_CAP", label: "Bid Cap", title:"" },
+                                            { value: "COST_CAP", label: "Cost per Result Goal", title:"" },
+                                            { value: "LOWEST_COST_WITH_MIN_ROAS", label: "ROAS Goal" ,title:"" }
                                         ]}
                                         onChange={handleBidStrategyChange}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
@@ -1973,8 +1974,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     <Select
                                         variant="filled"
                                         options={[
-                                            { value: "ACTIVE", label: "ACTIVE" },
-                                            { value: "PAUSED", label: "PAUSED" },
+                                            { value: "ACTIVE", label: "ACTIVE", title:"" },
+                                            { value: "PAUSED", label: "PAUSE" , title:""},
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
@@ -1997,7 +1998,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     ]}
                                     style={{ flex: '1 1 200px' }}
                                 >
-                                    <Input  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
+                                    <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                                 </Form.Item>
                                 <Form.Item
                                     name="optimization_goal"
@@ -2012,10 +2013,10 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 >
                                     <Select
                                         options={[
-                                            { value: "OFFSITE_CONVERSIONS", label: "Conversions" },
-                                            { value: "LINK_CLICKS", label: "Clicks" },
-                                            { value: "REACH", label: "Reach" },
-                                            { value: "VALUE", label: "Value" }
+                                            { value: "OFFSITE_CONVERSIONS", label: "Conversions", title:"" },
+                                            { value: "LINK_CLICKS", label: "Clicks", title:"" },
+                                            { value: "REACH", label: "Reach", title:"" },
+                                            { value: "VALUE", label: "Value", title:"" }
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
@@ -2034,8 +2035,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 >
                                     <Select
                                         options={[
-                                            { value: "IMPRESSIONS", label: "Impressions" },
-                                            { value: "VALUE", label: "Value" }
+                                            { value: "IMPRESSIONS", label: "Impressions", title:"" },
+                                            { value: "VALUE", label: "Value", title:"" }
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
@@ -2053,12 +2054,12 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     style={{ flex: '1 1 150px' }}
                                     initialValue={currentDate}
                                 >
-                                    <DatePicker showTime  dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}
-    //                                 onChange={(value, dateString) => {
-    //     console.log("Local Time:", dateString)
-    //     console.log("UTC ISO:", moment(value).utc().format("YYYY-MM-DDTHH:mm:ssZ"))
-    //   }}
-                                    style={{ width: '100%' }} />
+                                    <DatePicker showTime dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}
+                                        //                                 onChange={(value, dateString) => {
+                                        //     console.log("Local Time:", dateString)
+                                        //     console.log("UTC ISO:", moment(value).utc().format("YYYY-MM-DDTHH:mm:ssZ"))
+                                        //   }}
+                                        style={{ width: '100%' }} />
                                 </Form.Item>
                                 <Form.Item
                                     name="action_source"
@@ -2073,10 +2074,10 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 >
                                     <Select
                                         options={[
-                                            { value: "website", label: "Website" },
-                                            { value: "email", label: "Email" },
-                                            { value: "app", label: "App" },
-                                            { value: "phone_call", label: "Phone Call" }
+                                            { value: "website", label: "Website", title:"" },
+                                            { value: "email", label: "Email", title:"" },
+                                            { value: "app", label: "App" , title:""},
+                                            { value: "phone_call", label: "Phone Call" , title:""}
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
@@ -2095,16 +2096,16 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 >
                                     <Select
                                         options={[
-                                            { value: "LEAD", label: "Lead" },
-                                            { value: "PURCHASE", label: "Purchase" },
-                                            { value: "SEARCH", label: "Search" },
-                                            { value: "CONTACT", label: "Contact" },
+                                            { value: "LEAD", label: "Lead", title:"" },
+                                            { value: "PURCHASE", label: "Purchase" , title:""},
+                                            { value: "SEARCH", label: "Search", title:"" },
+                                            { value: "CONTACT", label: "Contact", title:"" },
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
                                 </Form.Item>
-                                <Form.Item
+                                {/* <Form.Item
                                     name="pixel_id"
                                     initialValue={imagehash?.pixelID}
                                     label={<span style={{ color: "#B4B4B4" }}>Pixel id</span>}
@@ -2117,6 +2118,39 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     style={{ flex: '1 1 200px' }}
                                 >
                                     <Input  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
+                                </Form.Item> */}
+                                <Form.Item
+                                    name="pixel_id"
+                                    initialValue={
+                                        typeof imagehash?.pixelID === 'object'
+                                            ? imagehash.pixelID.Universal
+                                            : imagehash?.pixelID
+                                    }
+                                    label={<span style={{ color: "#B4B4B4" }}>Pixel id</span>}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Please select an option!",
+                                        },
+                                    ]}
+                                    style={{ flex: '1 1 200px' }}
+                                >
+                                    {typeof imagehash?.pixelID === 'object' ? (
+                                        <Select
+                                            defaultValue={imagehash?.pixelID?.Universal}
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                        >
+                                            {Object.entries(imagehash.pixelID).map(([label, value]) => (
+                                                <Select.Option key={value} value={value} title={null}>
+                                                    {`${label} - ${value}`}
+                                                </Select.Option>
+                                            ))}
+                                        </Select>
+                                    ) : (
+                                        <Input
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                        />
+                                    )}
                                 </Form.Item>
                                 {/*pk*/}
                                 <Form.Item
@@ -2149,7 +2183,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 {showBidAmount && (
                                     <Form.Item
                                         name="bid_amount"
-                                        label={<span style={{ color: "#B4B4B4" }}>Cost per Result Goal</span>}
+                                        label={<span style={{ color: "#B4B4B4" }}>Cost per result goal</span>}
                                         rules={[
                                             {
                                                 required: true,
@@ -2189,7 +2223,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     </Form.Item>
                                 )}
                             </div>
-                            <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "green" }}>Targeting</span>
+                            <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "#91C25F" }}>Targeting</span>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
                                 <Form.Item
                                     name="countries"
@@ -2204,24 +2238,24 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 >
                                     <Select
                                         options={[
-                                            { value: "US", label: "United States" },
-                                            { value: "GB", label: "United Kingdom" },
-                                            { value: "AU", label: "Australia" },
+                                            { value: "US", label: "United States", title:"" },
+                                            { value: "GB", label: "United Kingdom", title:"" },
+                                            { value: "AU", label: "Australia", title:"" },
                                             { value: "IN", label: "India" },
-                                            { value: "AE", label: "United Arab Emirates" },
-                                            { value: "CA", label: "Canada" },
-                                            { value: "DE", label: "Germany" },
-                                            { value: "FR", label: "France" },
-                                            { value: "JP", label: "Japan" },
-                                            { value: "CN", label: "China" },
-                                            { value: "BR", label: "Brazil" },
-                                            { value: "ZA", label: "South Africa" },
-                                            { value: "RU", label: "Russia" },
-                                            { value: "IT", label: "Italy" },
-                                            { value: "ES", label: "Spain" },
-                                            { value: "SG", label: "Singapore" },
-                                            { value: "NZ", label: "New Zealand" },
-                                            { value: "MX", label: "Mexico" }
+                                            { value: "AE", label: "United Arab Emirates", title:"" },
+                                            { value: "CA", label: "Canada" , title:""},
+                                            { value: "DE", label: "Germany", title:"" },
+                                            { value: "FR", label: "France" , title:""},
+                                            { value: "JP", label: "Japan", title:"" },
+                                            { value: "CN", label: "China" , title:""},
+                                            { value: "BR", label: "Brazil", title:"" },
+                                            { value: "ZA", label: "South Africa", title:"" },
+                                            { value: "RU", label: "Russia", title:"" },
+                                            { value: "IT", label: "Italy", title:"" },
+                                            { value: "ES", label: "Spain" , title:""},
+                                            { value: "SG", label: "Singapore", title:"" },
+                                            { value: "NZ", label: "New Zealand", title:"" },
+                                            { value: "MX", label: "Mexico" , title:""}
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
@@ -2229,7 +2263,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 </Form.Item>
                                 <Form.Item
                                     name="Min_Age"
-                                    label={<span style={{ color: "#B4B4B4" }}>Min Age</span>}
+                                    label={<span style={{ color: "#B4B4B4" }}>Min age</span>}
                                     rules={[
                                         {
                                             required: true,
@@ -2240,10 +2274,10 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 >
                                     <Select
                                         options={[
-                                            { value: "18", label: "18" },
-                                            { value: "25", label: "25" },
-                                            { value: "35", label: "35" },
-                                            { value: "40", label: "40", disabled: true },
+                                            { value: "18", label: "18", title:"" },
+                                            { value: "25", label: "25", title:"" },
+                                            { value: "35", label: "35", title:"" },
+                                            { value: "40", label: "40", disabled: true, title:"" },
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
@@ -2251,7 +2285,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 </Form.Item>
                                 <Form.Item
                                     name="Max_Age"
-                                    label={<span style={{ color: "#B4B4B4" }}>Max Age</span>}
+                                    label={<span style={{ color: "#B4B4B4" }}>Max age</span>}
                                     rules={[
                                         {
                                             required: true,
@@ -2262,10 +2296,10 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 >
                                     <Select
                                         options={[
-                                            { value: "20", label: "20" },
-                                            { value: "30", label: "30" },
-                                            { value: "65", label: "65+" },
-                                            { value: "80", label: "80", disabled: true },
+                                            { value: "20", label: "20", title:"" },
+                                            { value: "30", label: "30" , title:""},
+                                            { value: "65", label: "65+", title:"" },
+                                            { value: "80", label: "80", disabled: true, title:"" },
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
@@ -2284,9 +2318,9 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 >
                                     <Select
                                         options={[
-                                            { value: "0", label: "All" },
-                                            { value: "1", label: "Male" },
-                                            { value: "2", label: "Female" },
+                                            { value: "0", label: "All", title:"" },
+                                            { value: "1", label: "Male", title:"" },
+                                            { value: "2", label: "Female", title:"" },
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
@@ -2317,13 +2351,13 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     </Select>
                                 </Form.Item>
                                 <Form.Item
-                                    label="Placements"
+                                    label={<span style={{ color: "#B4B4B4" }}>Placements</span>}
                                     name="placements"
                                     rules={[{ required: true, message: 'Please select a mode!' }]}
                                 >
                                     <Select placeholder="Select a mode" onChange={handleModeChange}
-                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}>
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}>
                                         <Option value="Advance">Advance</Option>
                                         <Option value="manual">Manual</Option>
 
@@ -2405,93 +2439,93 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                             <div style={{ display: "flex", justifyContent: "space-between" }}>
                                 <div style={{ flex: "70%", marginRight: "5%" }}>
                                     <div style={{ display: 'flex', gap: '16px' }}>
-                                    <div style={{display:'flex', flexDirection:'column'}}>
-                                        <Form.Item
-                                            label={<span style={{ color: "#B4B4B4" }}>Select Source</span>}
-                                            style={{ flex: 1 }}
+                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                            <Form.Item
+                                                label={<span style={{ color: "#B4B4B4" }}>Select source</span>}
+                                                style={{ flex: 1 }}
                                             >
-                                            <Select
-                                                value={selectedOption}
-                                                onChange={(value) => {
-                                                setSelectedOption(value);
-                                                form.validateFields(["MediaContent"]); // Revalidate when switching source
-                                                }}
-                                                style={{ marginBottom: 16 }}
-                                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                            >
-                                                <Option value="upload">Upload</Option>
-                                                <Option value="creative">Creative Library</Option>
-                                            </Select>
+                                                <Select
+                                                    value={selectedOption}
+                                                    onChange={(value) => {
+                                                        setSelectedOption(value);
+                                                        form.validateFields(["MediaContent"]); // Revalidate when switching source
+                                                    }}
+                                                    style={{ marginBottom: 16 }}
+                                                    dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                                >
+                                                    <Option value="upload">Upload</Option>
+                                                    <Option value="creative">Creative library</Option>
+                                                </Select>
                                             </Form.Item>
 
                                             <Form.Item
-                                            name="MediaContent"
-                                            rules={[
-                                                {
-                                                validator: async () => {
-                                                    if (
-                                                    (selectedOption === "upload" && selectedFilesFromMedia.length === 0) ||
-                                                    (selectedOption === "creative" && selectedFilesFromCreatives.length === 0)
-                                                    ) {
-                                                    throw new Error("Please select Upload!");
-                                                    }
-                                                    return Promise.resolve();
-                                                },
-                                                },
-                                            ]}
+                                                name="MediaContent"
+                                                rules={[
+                                                    {
+                                                        validator: async () => {
+                                                            if (
+                                                                (selectedOption === "upload" && selectedFilesFromMedia.length === 0) ||
+                                                                (selectedOption === "creative" && selectedFilesFromCreatives.length === 0)
+                                                            ) {
+                                                                throw new Error("Please select Upload!");
+                                                            }
+                                                            return Promise.resolve();
+                                                        },
+                                                    },
+                                                ]}
                                             >
                                                 <div>
                                                     {/* Upload UI */}
-                                                    <div className="custom-dark-mode"  style={{ display: selectedOption === "upload" ? "block" : "none" }}>
+                                                    <div className="custom-dark-mode" style={{ display: selectedOption === "upload" ? "block" : "none" }}>
                                                         <Upload
                                                             beforeUpload={() => false}
                                                             onChange={(info) => {
-                                                            const newFiles = info.fileList.map((file) => ({
-                                                                ...file,
-                                                                uid: file.uid || `-${Date.now()}`,
-                                                                source: "media",
-                                                                thumbUrl:
-                                                                file.thumbUrl ||
-                                                                (file.originFileObj
-                                                                    ? URL.createObjectURL(file.originFileObj)
-                                                                    : undefined),
-                                                            }));
+                                                                const newFiles = info.fileList.map((file) => ({
+                                                                    ...file,
+                                                                    uid: file.uid || `-${Date.now()}`,
+                                                                    source: "media",
+                                                                    thumbUrl:
+                                                                        file.thumbUrl ||
+                                                                        (file.originFileObj
+                                                                            ? URL.createObjectURL(file.originFileObj)
+                                                                            : undefined),
+                                                                }));
 
-                                                            setSelectedFiles((prev) => {
-                                                                const existingUids = new Set(prev.map((f) => f.uid));
-                                                                const filteredNewFiles = newFiles.filter((f) => !existingUids.has(f.uid));
-                                                                const updated = [...prev, ...filteredNewFiles];
-                                                                form.setFieldsValue({ MediaContent: updated });
-                                                                form.validateFields(["MediaContent"]);
-                                                                return updated;
-                                                            });
+                                                                setSelectedFiles((prev) => {
+                                                                    const existingUids = new Set(prev.map((f) => f.uid));
+                                                                    const filteredNewFiles = newFiles.filter((f) => !existingUids.has(f.uid));
+                                                                    const updated = [...prev, ...filteredNewFiles];
+                                                                    form.setFieldsValue({ MediaContent: updated });
+                                                                    form.validateFields(["MediaContent"]);
+                                                                    return updated;
+                                                                });
 
-                                                            setSelectedFilesFromMedia((prev) => {
-                                                                const existingUids = new Set(prev.map((f) => f.uid));
-                                                                const filteredNewFiles = newFiles.filter((f) => !existingUids.has(f.uid));
-                                                                const updated = [...prev, ...filteredNewFiles];
-                                                                form.setFieldsValue({ MediaContent: updated });
-                                                                form.validateFields(["MediaContent"]);
-                                                                return updated;
-                                                            });
+                                                                setSelectedFilesFromMedia((prev) => {
+                                                                    const existingUids = new Set(prev.map((f) => f.uid));
+                                                                    const filteredNewFiles = newFiles.filter((f) => !existingUids.has(f.uid));
+                                                                    const updated = [...prev, ...filteredNewFiles];
+                                                                    form.setFieldsValue({ MediaContent: updated });
+                                                                    form.validateFields(["MediaContent"]);
+                                                                    return updated;
+                                                                });
                                                             }}
                                                             onRemove={(fileToRemove) => {
-                                                            setSelectedFilesFromMedia((prev) => {
-                                                                const updated = prev.filter((file) => file.uid !== fileToRemove.uid);
-                                                                form.setFieldsValue({ MediaContent: updated });
-                                                                form.validateFields(["MediaContent"]);
-                                                                return updated;
-                                                            });
+                                                                setSelectedFilesFromMedia((prev) => {
+                                                                    const updated = prev.filter((file) => file.uid !== fileToRemove.uid);
+                                                                    form.setFieldsValue({ MediaContent: updated });
+                                                                    form.validateFields(["MediaContent"]);
+                                                                    return updated;
+                                                                });
 
-                                                            setSelectedFiles((prev) => {
-                                                                const updated = prev.filter((file) => file.uid !== fileToRemove.uid);
-                                                                form.setFieldsValue({ MediaContent: updated });
-                                                                form.validateFields(["MediaContent"]);
-                                                                return updated;
-                                                            });
+                                                                setSelectedFiles((prev) => {
+                                                                    const updated = prev.filter((file) => file.uid !== fileToRemove.uid);
+                                                                    form.setFieldsValue({ MediaContent: updated });
+                                                                    form.validateFields(["MediaContent"]);
+                                                                    return updated;
+                                                                });
 
-                                                            return true;
+                                                                return true;
                                                             }}
                                                             multiple
                                                             maxCount={10}
@@ -2499,86 +2533,86 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                                             listType="picture"
                                                             accept="image/*, video/*"
                                                         >
-                                                            <Button icon={<UploadOutlined />} className="dark-icon-button"  style={{color: theme === "dark" ? "white" : "#000"}}>Select Files</Button>
+                                                            <Button icon={<UploadOutlined />} className="dark-icon-button" style={{ color: theme === "dark" ? "white" : "#000" }}>Select files</Button>
                                                         </Upload>
                                                     </div>
 
                                                     {/* Creative Library UI */}
                                                     {selectedOption === "creative" && (
-                                                    <div>
-                                                        <Button icon={<UploadOutlined />} onClick={onClickCreativesDrawer} className="dark-icon-button"  style={{color: theme === "dark" ? "white" : "#000"}}>
-                                                        Select Files
-                                                        </Button>
+                                                        <div>
+                                                            <Button icon={<UploadOutlined />} onClick={onClickCreativesDrawer} className="dark-icon-button" style={{ color: theme === "dark" ? "white" : "#000" }}>
+                                                                Select files
+                                                            </Button>
 
-                                                        {selectedFilesFromCreatives?.length > 0 && (
-                                                        <div style={{ marginTop: "10px" }}>
-                                                            {selectedFilesFromCreatives.map((file, index) => (
-                                                            <div
-                                                                key={index}
-                                                                style={{
-                                                                display: "flex",
-                                                                alignItems: "center",
-                                                                marginBottom: 8,
-                                                                }}
-                                                            >
-                                                                {/* <PaperClipOutlined style={{ marginRight: 8 }} /> */}
-                                                                {/* <Tooltip title={file.name}> */}
-                                                                {file.type?.startsWith("image/") && (
-                                                                    <img
-                                                                        src={
-                                                                        file.originFileObj
-                                                                            ? URL.createObjectURL(file.originFileObj)
-                                                                            : file.url
-                                                                        }
-                                                                        alt="preview"
-                                                                        style={{
-                                                                        width: 40,
-                                                                        height: 40,
-                                                                        objectFit: "cover",
-                                                                        borderRadius: 4,
-                                                                        marginLeft: 8,
-                                                                        }}
-                                                                    />
-                                                                )}
-                                                                <span
-                                                                    style={{
-                                                                    maxWidth: 160,
-                                                                    overflow: "hidden",
-                                                                    textOverflow: "ellipsis",
-                                                                    whiteSpace: "nowrap",
-                                                                    paddingLeft: 8,
-                                                                    color: theme === 'dark' ? '#fff' : '#000',
-                                                                    }}
-                                                                >
-                                                                    {file.name}
-                                                                </span>
-                                                                {/* </Tooltip> */}
+                                                            {selectedFilesFromCreatives?.length > 0 && (
+                                                                <div style={{ marginTop: "10px" }}>
+                                                                    {selectedFilesFromCreatives.map((file, index) => (
+                                                                        <div
+                                                                            key={index}
+                                                                            style={{
+                                                                                display: "flex",
+                                                                                alignItems: "center",
+                                                                                marginBottom: 8,
+                                                                            }}
+                                                                        >
+                                                                            {/* <PaperClipOutlined style={{ marginRight: 8 }} /> */}
+                                                                            {/* <Tooltip title={file.name}> */}
+                                                                            {file.type?.startsWith("image/") && (
+                                                                                <img
+                                                                                    src={
+                                                                                        file.originFileObj
+                                                                                            ? URL.createObjectURL(file.originFileObj)
+                                                                                            : file.url
+                                                                                    }
+                                                                                    alt="preview"
+                                                                                    style={{
+                                                                                        width: 40,
+                                                                                        height: 40,
+                                                                                        objectFit: "cover",
+                                                                                        borderRadius: 4,
+                                                                                        marginLeft: 8,
+                                                                                    }}
+                                                                                />
+                                                                            )}
+                                                                            <span
+                                                                                style={{
+                                                                                    maxWidth: 160,
+                                                                                    overflow: "hidden",
+                                                                                    textOverflow: "ellipsis",
+                                                                                    whiteSpace: "nowrap",
+                                                                                    paddingLeft: 8,
+                                                                                    color: theme === 'dark' ? '#fff' : '#000',
+                                                                                }}
+                                                                            >
+                                                                                {file.name}
+                                                                            </span>
+                                                                            {/* </Tooltip> */}
 
-                                                                
 
-                                                                <DeleteOutlined
-                                                                onClick={() => {
-                                                                    const updated = selectedFilesFromCreatives.filter(
-                                                                    (f) => f.uid !== file.uid
-                                                                    );
-                                                                    setSelectedFilesFromCreatives(updated);
-                                                                    setSelectedFiles((prev) =>
-                                                                    prev.filter((f) => f.uid !== file.uid)
-                                                                    );
-                                                                    form.setFieldsValue({ MediaContent: updated });
-                                                                    form.validateFields(["MediaContent"]);
-                                                                }}
-                                                                style={{ color: "red", marginLeft: 12, cursor: "pointer" }}
-                                                                />
-                                                            </div>
-                                                            ))}
+
+                                                                            <DeleteOutlined
+                                                                                onClick={() => {
+                                                                                    const updated = selectedFilesFromCreatives.filter(
+                                                                                        (f) => f.uid !== file.uid
+                                                                                    );
+                                                                                    setSelectedFilesFromCreatives(updated);
+                                                                                    setSelectedFiles((prev) =>
+                                                                                        prev.filter((f) => f.uid !== file.uid)
+                                                                                    );
+                                                                                    form.setFieldsValue({ MediaContent: updated });
+                                                                                    form.validateFields(["MediaContent"]);
+                                                                                }}
+                                                                                style={{ color: "red", marginLeft: 12, cursor: "pointer" }}
+                                                                            />
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            )}
                                                         </div>
-                                                        )}
-                                                    </div>
                                                     )}
                                                 </div>
-                                        </Form.Item>
-                                    </div>
+                                            </Form.Item>
+                                        </div>
 
                                         <Form.Item
                                             name="page_id"
@@ -2592,13 +2626,13 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             ]}
                                             style={{ flex: 3, marginLeft: "1%" }}
                                         >
-                                            <Input style={{ width: "45%" }}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
+                                            <Input style={{ width: "45%" }} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                                         </Form.Item>
                                     </div>
                                     <Form.Item
                                         name="AddName"
                                         initialValue={campaignName}
-                                        label={<span style={{ color: "#B4B4B4" }}>Add name</span>}
+                                        label={<span style={{ color: "#B4B4B4" }}>Ad name</span>}
                                         rules={[
                                             {
                                                 required: true,
@@ -2613,7 +2647,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         />
                                     </Form.Item>
                                     <Form.Item
-                                        label="Primary text"
+                                        label={<span style={{ color: "#B4B4B4" }}>Primary text</span>}
                                         name="message"
                                         rules={[
                                             {
@@ -2650,7 +2684,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         />
                                     </Form.Item> */}
                                     <Form.Item
-                                        label="Headline"
+                                        label={<span style={{ color: "#B4B4B4" }}>Headline</span>}
                                         name="headline"
                                         rules={[
                                             {
@@ -2669,7 +2703,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     </Form.Item>
 
                                     <Form.Item
-                                        label="Description"
+                                        label={<span style={{ color: "#B4B4B4" }}>Description</span>}
                                         name="Description"
                                         rules={[
                                             {
@@ -2690,7 +2724,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         label={
                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', paddingRight: '50px' }}>
-                                                    <span>Website_URL</span>
+                                                    <span style={{ color: "#B4B4B4" }}>Website_URL</span>
                                                     <Tooltip title="This is a required field">
                                                         <QuestionCircleOutlined style={{ marginLeft: 4, cursor: 'pointer' }} />
                                                     </Tooltip>
@@ -2718,7 +2752,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         />
                                     </Form.Item>
                                     <Form.Item
-                                        label="Display Link"
+                                        label={<span style={{ color: "#B4B4B4" }}>Display link</span>}
                                         name="Caption"
                                         rules={[
                                             {
@@ -2768,129 +2802,129 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 </div>
 
                                 <div style={{ flex: "30%" }}>
-                                        {selectedFiles && selectedFiles.length > 0 ? (
-                                            selectedFiles.map((file, index) => (
-                                                <Badge
-                                                    count={
-                                                        (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") || file?.url?.endsWith('.mp4')) ? 
-                                                        null:
+                                    {selectedFiles && selectedFiles.length > 0 ? (
+                                        selectedFiles.map((file, index) => (
+                                            <Badge
+                                                count={
+                                                    (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") || file?.url?.endsWith('.mp4')) ?
+                                                        null :
                                                         <EditOutlined
                                                             style={{ fontSize: '25px', color: '#fff' }}
                                                             onClick={() => handleEditClick(file)} // Edit icon click handler
                                                         />
-                                                    }
-                                                    style={{
-                                                        backgroundColor: '#52c41a',
-                                                        borderRadius: '50%',
-                                                        position: 'absolute',
-                                                        top: '5px',
-                                                        right: '5px',
-                                                        zIndex: 10,
-                                                        cursor: 'pointer',
-                                                    }}
-                                                    offset={[5, 5]}
-                                                    key={index}
-                                                >
-                                                    <div key={index} className="container-ad-preview">
-                                                        <div className="ad-preview" style={{ width: "350px", backgroundColor: theme === "dark" && "#4f4f4d" }}>
-                                                            <div className="ad-heading">
-                                                                <div className="img">
-                                                                    {/* {file?.filename?.endsWith('.png') && console.log(file)} */}
-                                                                    {file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") ? (
-                                                                        <img
-                                                                            src={file?.url}
-                                                                            alt="page id"
-                                                                            width="40"
-                                                                            height="40"
-                                                                            style={{ objectFit: 'cover' }}
-                                                                        />
-                                                                    ) : file?.url?.endsWith('.mp4') ? (
-                                                                        <video
-                                                                            src={file?.url}
-                                                                            alt="page id"
-                                                                            width="40"
-                                                                            height="30"
-                                                                            style={{ objectFit: 'cover' }}
-                                                                            muted // Muted to prevent sound on preview
-                                                                        />
-                                                                    ) : 
+                                                }
+                                                style={{
+                                                    backgroundColor: '#52c41a',
+                                                    borderRadius: '50%',
+                                                    position: 'absolute',
+                                                    top: '5px',
+                                                    right: '5px',
+                                                    zIndex: 10,
+                                                    cursor: 'pointer',
+                                                }}
+                                                offset={[5, 5]}
+                                                key={index}
+                                            >
+                                                <div key={index} className="container-ad-preview">
+                                                    <div className="ad-preview" style={{ width: "350px", backgroundColor: theme === "dark" && "#4f4f4d" }}>
+                                                        <div className="ad-heading">
+                                                            <div className="img">
+                                                                {/* {file?.filename?.endsWith('.png') && console.log(file)} */}
+                                                                {file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") ? (
+                                                                    <img
+                                                                        src={file?.url}
+                                                                        alt="page id"
+                                                                        width="40"
+                                                                        height="40"
+                                                                        style={{ objectFit: 'cover' }}
+                                                                    />
+                                                                ) : file?.url?.endsWith('.mp4') ? (
+                                                                    <video
+                                                                        src={file?.url}
+                                                                        alt="page id"
+                                                                        width="40"
+                                                                        height="30"
+                                                                        style={{ objectFit: 'cover' }}
+                                                                        muted // Muted to prevent sound on preview
+                                                                    />
+                                                                ) :
                                                                     file?.type?.startsWith('image/') ? (
                                                                         <img
-                                                                            src={editedImages[file?.name] ? editedImages[file?.name]:  file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url}
+                                                                            src={editedImages[file?.name] ? editedImages[file?.name] : file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url}
                                                                             alt="page id"
                                                                             width="40"
                                                                             height="40"
                                                                             style={{ objectFit: 'cover' }}
-                                                                        />
-                                                                    ) 
-                                                                    : 
-                                                                    (
-                                                                        <video
-                                                                            src={file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url}
-                                                                            alt="page id"
-                                                                            width="40"
-                                                                            height="30"
-                                                                            style={{ objectFit: 'cover' }}
-                                                                            muted // Muted to prevent sound on preview
                                                                         />
                                                                     )
+                                                                        :
+                                                                        (
+                                                                            <video
+                                                                                src={file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url}
+                                                                                alt="page id"
+                                                                                width="40"
+                                                                                height="30"
+                                                                                style={{ objectFit: 'cover' }}
+                                                                                muted // Muted to prevent sound on preview
+                                                                            />
+                                                                        )
                                                                     // null
-                                                                    }
-                                                                </div>
+                                                                }
+                                                            </div>
 
-                                                                <div className="title">
-                                                                    <div className="main" style={{ wordWrap: 'break-word', whiteSpace: 'normal',color : theme === "dark" && "white" }}>
-                                                                        {addName}
-                                                                        {/* </div>                                                            <div className="sub">
+                                                            <div className="title">
+                                                                <div className="main" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: theme === "dark" && "white" }}>
+                                                                    {addName}
+                                                                    {/* </div>                                                            <div className="sub">
                                                                         Sponsored <GlobalOutlined style={{ opacity: "0.6" }} /> */}
-                                                                        <div className="sub">
-                                                                            {imagehash?.pageName ? (
-                                                                                <>
-                                                                                    {imagehash.pageName} <GlobalOutlined style={{ opacity: "0.6" }} />
-                                                                                </>
-                                                                            ) : (
-                                                                                <GlobalOutlined style={{ opacity: "0.6" }} />
-                                                                            )}
-                                                                        </div>
+                                                                    <div className="sub">
+                                                                        {imagehash?.pageName ? (
+                                                                            <>
+                                                                                {imagehash.pageName} <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                                            </>
+                                                                        ) : (
+                                                                            <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                                        )}
                                                                     </div>
                                                                 </div>
-                                                                <div className="close">
-                                                                    <CloseOutlined style={{ fontSize: "20px" }} />
-                                                                </div>
-                                                                <div className="moreoptions">
-                                                                    <MoreOutlined style={{ fontSize: "20px" }} />
-                                                                </div>
                                                             </div>
-                                                            <div className="ad-desc" style={{ wordWrap: 'break-word', whiteSpace: 'normal',color : theme === "dark" && "white" }}>
-                                                                {primaryText}
+                                                            <div className="close">
+                                                                <CloseOutlined style={{ fontSize: "20px" }} />
                                                             </div>
-                                                            <div className="ad-image" style={{ width: '350px', height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                                    {file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") ? (
-                                                                        <img
-                                                                            src={file?.url}
-                                                                            alt="ad content"
-                                                                            // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
-                                                                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                                                                        />
-                                                                    ) : file?.url?.endsWith('.mp4') ? (
-                                                                        <video
-                                                                        controls
+                                                            <div className="moreoptions">
+                                                                <MoreOutlined style={{ fontSize: "20px" }} />
+                                                            </div>
+                                                        </div>
+                                                        <div className="ad-desc" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: theme === "dark" && "white" }}>
+                                                            {primaryText}
+                                                        </div>
+                                                        <div className="ad-image" style={{ width: '350px', height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                            {file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") ? (
+                                                                <img
+                                                                    src={file?.url}
+                                                                    alt="ad content"
+                                                                    // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                    style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                                                                />
+                                                            ) : file?.url?.endsWith('.mp4') ? (
+                                                                <video
+                                                                    controls
+                                                                    // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                    style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                                                                >
+                                                                    <source src={file?.url} />
+                                                                    Your browser does not support the video tag.
+                                                                </video>
+                                                            )
+                                                                :
+                                                                file?.type?.startsWith('image/') ? (
+                                                                    <img
+                                                                        src={editedImages[file?.name] ? editedImages[file?.name] : file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url} // Use edited image if available
+                                                                        alt="ad content"
                                                                         // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
                                                                         style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                                                                        >
-                                                                            <source src={file?.url} />
-                                                                            Your browser does not support the video tag.
-                                                                        </video>
-                                                                    ) 
-                                                                    :
-                                                                    file?.type?.startsWith('image/') ? (
-                                                                        <img
-                                                                            src={editedImages[file?.name] ? editedImages[file?.name]:  file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url} // Use edited image if available
-                                                                            alt="ad content"
-                                                                            // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
-                                                                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                                                                        />
-                                                                    ) : 
+                                                                    />
+                                                                ) :
                                                                     (
                                                                         <video
                                                                             controls
@@ -2901,42 +2935,42 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                                                             Your browser does not support the video tag.
                                                                         </video>
                                                                     )
-                                                                    // null
-                                                                    }
-                                                            </div>
+                                                                // null
+                                                            }
+                                                        </div>
 
-                                                            <div className="ad-cta">
-                                                                <div className="details">
-                                                                    <div className="link" style={{color : theme === "dark" && "white"}}>{caption}</div>
-                                                                    <div className="title" style={{color : theme === "dark" && "white"}}>{headline}</div>
-                                                                    <div className="desc" style={{color : theme === "dark" && "white"}}>{description}</div>
-                                                                </div>
-                                                                <div className="ad-button">
-                                                                    <button  style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}}>Learn More</button>
-                                                                </div>
+                                                        <div className="ad-cta">
+                                                            <div className="details">
+                                                                <div className="link" style={{ color: theme === "dark" && "white" }}>{caption}</div>
+                                                                <div className="title" style={{ color: theme === "dark" && "white" }}>{headline}</div>
+                                                                <div className="desc" style={{ color: theme === "dark" && "white" }}>{description}</div>
                                                             </div>
-                                                            <a href={websiteURL} target="_blank" rel="noopener noreferrer" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: '#0066cc', padding: '10px' }}>
-                                                                {websiteURL}
-                                                            </a>                                                <div className="icons">
-                                                                <div className="like" style={{color : theme === "dark" && "white"}}>
-                                                                    <LikeOutlined style={{ fontSize: "20px" }} />
-                                                                    Like
-                                                                </div>
-                                                                <div className="comment" style={{color : theme === "dark" && "white"}}>
-                                                                    <CommentOutlined style={{ fontSize: "20px" }} />
-                                                                    Comment
-                                                                </div>
-                                                                <div className="share" style={{color : theme === "dark" && "white"}}>
-                                                                    <ShareAltOutlined style={{ fontSize: "20px" }} />
-                                                                    Share
-                                                                </div>
+                                                            <div className="ad-button">
+                                                                <button style={{ backgroundColor: '#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px" }}>Learn More</button>
+                                                            </div>
+                                                        </div>
+                                                        <a href={websiteURL} target="_blank" rel="noopener noreferrer" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: '#0066cc', padding: '10px' }}>
+                                                            {websiteURL}
+                                                        </a>                                                <div className="icons">
+                                                            <div className="like" style={{ color: theme === "dark" && "white" }}>
+                                                                <LikeOutlined style={{ fontSize: "20px" }} />
+                                                                Like
+                                                            </div>
+                                                            <div className="comment" style={{ color: theme === "dark" && "white" }}>
+                                                                <CommentOutlined style={{ fontSize: "20px" }} />
+                                                                Comment
+                                                            </div>
+                                                            <div className="share" style={{ color: theme === "dark" && "white" }}>
+                                                                <ShareAltOutlined style={{ fontSize: "20px" }} />
+                                                                Share
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </Badge>
+                                                </div>
+                                            </Badge>
 
-                                            ))
-                                        ) : null
+                                        ))
+                                    ) : null
                                         // (
                                         //     <div className="container-ad-preview">
                                         //         <div className="ad-preview">
@@ -2996,8 +3030,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                         //         </div>
                                         //     </div>
                                         // )
-                                        }
-                                    </div>
+                                    }
+                                </div>
 
                             </div>
 
@@ -3014,73 +3048,73 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                     <Form.Item label=" ">
                         {(isFormComplete || newSelectedRef.current) && (
                             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-                            <Button
-                                type="primary"
-                                style={{ background: '#21c55d', minWidth: '200px', borderWidth: '0px' }}
-                                onClick={async () => {
-                                try {
-                                    const values = await form.validateFields(); // Validates all form fields
+                                <Button
+                                    type="primary"
+                                    style={{ background: '#21c55d', minWidth: '200px', borderWidth: '0px' }}
+                                    onClick={async () => {
+                                        try {
+                                            const values = await form.validateFields(); // Validates all form fields
 
-                                    // Clear existing validation errors
-                                    
+                                            // Clear existing validation errors
 
-                                    if (((adsetLevelDailyBudget === 0 && campaignLevelDailyBudget === 0) ||
-                                    isNaN(adsetLevelDailyBudget) || isNaN(campaignLevelDailyBudget))) {
-                                        // Throw a validation error manually in the same format as AntD expects
-                                        throw {
-                                          errorFields: [
-                                            {
-                                              name: ['Daily_amount'], // This should match your Form.Item name path
-                                              errors: ['Daily budget cannot be zero on both Adset and Campaign levels'],
-                                            },
-                                          ],
-                                        };
-                                    }
 
-                                    setSubmitErrors([]);
-                                    console.log("Form values:", values);
+                                            if (((adsetLevelDailyBudget === 0 && campaignLevelDailyBudget === 0) ||
+                                                isNaN(adsetLevelDailyBudget) || isNaN(campaignLevelDailyBudget))) {
+                                                // Throw a validation error manually in the same format as AntD expects
+                                                throw {
+                                                    errorFields: [
+                                                        {
+                                                            name: ['Daily_amount'], // This should match your Form.Item name path
+                                                            errors: ['Daily budget cannot be zero on both Adset and Campaign levels'],
+                                                        },
+                                                    ],
+                                                };
+                                            }
 
-                                    // Optionally trigger your existing logic
-                                    onFinish(values); // If you want to reuse your existing logic
+                                            setSubmitErrors([]);
+                                            console.log("Form values:", values);
 
-                                    // Show confirmation modal
-                                    setIsModalVisible(true);
+                                            // Optionally trigger your existing logic
+                                            onFinish(values); // If you want to reuse your existing logic
 
-                                    // Save values if needed
-                                    setFormValues(values);
-                                } catch (err) {
-                                    const allErrors = err?.errorFields?.map((field) => ({
-                                    name: field.name?.[0],       // field name
-                                    message: field.errors?.[0],  // validation message
-                                    }));
-                                    setSubmitErrors(allErrors);
-                                }
-                                }}
-                            >
-                                Submit
-                            </Button>
+                                            // Show confirmation modal
+                                            setIsModalVisible(true);
 
-                            {/* Show validation messages beside button */}
-                            {submitErrors.length > 0 && (
-                                <div style={{ color: "red", marginTop: 8 }}>
-                                {submitErrors.map((err, index) => (
-                                    <div key={index}>
-                                    <strong>{err.name}:</strong> {err.message}
+                                            // Save values if needed
+                                            setFormValues(values);
+                                        } catch (err) {
+                                            const allErrors = err?.errorFields?.map((field) => ({
+                                                name: field.name?.[0],       // field name
+                                                message: field.errors?.[0],  // validation message
+                                            }));
+                                            setSubmitErrors(allErrors);
+                                        }
+                                    }}
+                                >
+                                    Submit
+                                </Button>
+
+                                {/* Show validation messages beside button */}
+                                {submitErrors.length > 0 && (
+                                    <div style={{ color: "red", marginTop: 8 }}>
+                                        {submitErrors.map((err, index) => (
+                                            <div key={index}>
+                                                <strong>{err.name}:</strong> {err.message}
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
-                                </div>
-                            )}
+                                )}
                             </div>
                         )}
                     </Form.Item>
 
                     {isImgEditorShown && currentFile && (
-                            <FabricCanvas
-                                fileId={currentFile.name} // Pass a unique identifier
-                                initialImage={currentFile?.originFileObj ? URL.createObjectURL(currentFile.originFileObj) : currentFile?.url}
-                                closeCanvasModal={closeCanvasModal}
-                                onSaveEditedImage={handleSaveEditedImage}
-                            />
+                        <FabricCanvas
+                            fileId={currentFile.name} // Pass a unique identifier
+                            initialImage={currentFile?.originFileObj ? URL.createObjectURL(currentFile.originFileObj) : currentFile?.url}
+                            closeCanvasModal={closeCanvasModal}
+                            onSaveEditedImage={handleSaveEditedImage}
+                        />
                     )}
 
                     {/* {isImgEditorShown && currentFile && (
@@ -3103,7 +3137,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
             </Spin>
             {openCreativesDrawer && (
                 <Drawer
-                    title="Select Creatives"
+                    title="Select creatives"
                     width="95%"
                     open={openCreativesDrawer}
                     onClose={() => setOpenCreativesDrawer(false)}

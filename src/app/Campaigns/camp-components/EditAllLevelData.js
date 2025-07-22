@@ -2075,7 +2075,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
     return (
         <Drawer
             title={`${DuplicatedampaignData ? DuplicatedampaignData.campaign_name : "Edit Campaign"}`}
-            width="95%"
+            width="100%"
             open={visible}
             onClose={handleDrawerClose}
             style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
@@ -2089,7 +2089,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                             <div style={{ display: "flex" }}>
                                 <Form.Item
                                     name={["Campaign", "Account_Number"]}
-                                    label={<span style={{ color: "#B4B4B4" }}>Account Number</span>}
+                                    label={<span style={{ color: "#B4B4B4" }}>Account number</span>}
                                     rules={[
                                         {
                                             required: true,
@@ -2233,7 +2233,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                         variant="filled"
                                         options={[
                                             { value: "ACTIVE", label: "ACTIVE" },
-                                            { value: "PAUSED", label: "PAUSED" },
+                                            { value: "PAUSED", label: "PAUSE" },
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
@@ -2304,7 +2304,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 </Form.Item>
                                 <Form.Item
                                     name={["Adset", "DatePicker"]}
-                                    label={<span style={{ color: "#B4B4B4" }}>Start Time</span>}
+                                    label={<span style={{ color: "#B4B4B4" }}>Start time</span>}
                                     rules={[
                                         {
                                             required: true,
@@ -2413,7 +2413,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 {showBidAmount && (
                                     <Form.Item
                                         name={["Adset", "bid_amount"]}
-                                        label={<span style={{ color: "#B4B4B4" }}>Cost per Result Goal</span>}
+                                        label={<span style={{ color: "#B4B4B4" }}>Cost per result goal</span>}
                                         rules={[
                                             {
                                                 required: true,
@@ -2444,7 +2444,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     </Form.Item>
                                 )}
                             </div>
-                            <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "green" }}>Targeting</span>
+                            <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "#91C25F" }}>Targeting</span>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
                                 <Form.Item
                                     name={["Adset", "countries"]}
@@ -2484,7 +2484,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 </Form.Item>
                                 <Form.Item
                                     name={["Adset", "Min_Age"]}
-                                    label={<span style={{ color: "#B4B4B4" }}>Min Age</span>}
+                                    label={<span style={{ color: "#B4B4B4" }}>Min age</span>}
                                     rules={[
                                         {
                                             required: true,
@@ -2506,7 +2506,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 </Form.Item>
                                 <Form.Item
                                     name={["Adset", "Max_Age"]}
-                                    label={<span style={{ color: "#B4B4B4" }}>Max Age</span>}
+                                    label={<span style={{ color: "#B4B4B4" }}>Max age</span>}
                                     rules={[
                                         {
                                             required: true,
@@ -2572,7 +2572,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     </Select>
                                 </Form.Item>
                                 <Form.Item
-                                    label="Placements"
+                                    label={<span style={{ color: "#B4B4B4" }}>Placements</span>}
                                     name={["Adset", "placements"]}
                                     rules={[{ required: true, message: 'Please select a mode!' }]}
                                    
@@ -2672,7 +2672,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                 <div style={{ display: 'flex', flexDirection: 'column', width:"100%" }}>
                                                     {/* Ad Name Input */}
                                                     <Form.Item
-                                                    label={<span style={{ color: "#B4B4B4" }}>Ad Name</span>}
+                                                    label={<span style={{ color: "#B4B4B4" }}>Ad name</span>}
                                                     name={`AddName_${panel.key}`}
                                                     rules={[{ required: true, message: 'Please enter Ad Name' }]}
                                                     initialValue={panel.AddName || ""}
@@ -2720,7 +2720,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                     </Form.Item>
 
                                                     {/* Select Source Dropdown */}
-                                                    <Form.Item label={<span style={{ color: "#B4B4B4" }}>Select Source</span>}>
+                                                    <Form.Item label={<span style={{ color: "#B4B4B4" }}>Select source</span>}>
                                                     <Select
                                                         value={panel.selectedOption}
                                                         onChange={(value) => {
@@ -2733,7 +2733,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                                     >
                                                         <Option value="upload">Upload</Option>
-                                                        <Option value="creative">Creative Library</Option>
+                                                        <Option value="creative">Creative library</Option>
                                                     </Select>
                                                     </Form.Item>
 
@@ -2857,7 +2857,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                                 }
                                                                 className="dark-icon-button"  style={{color: theme === "dark" ? "white" : "#000"}}
                                                                 >
-                                                                Select Files
+                                                                Select files
                                                                 </Button>
                                                             </Upload>
                                                         )}
@@ -2880,7 +2880,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                                 }
                                                                 className="dark-icon-button"  style={{color: theme === "dark" ? "white" : "#000"}}
                                                                 >
-                                                                Select Files
+                                                                Select files
                                                                 </Button>
 
                                                                 {panel.selectedFilesFromCreatives?.length > 0 && (
@@ -3341,7 +3341,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                         />
                                     </Form.Item> */}
                                     <Form.Item
-                                        label="Primary text"
+                                        label={<span style={{ color: "#B4B4B4" }}>Primary text</span>}
                                         name={["Ad", "message"]}
                                         rules={[
                                             {
@@ -3352,7 +3352,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                         required
                                         tooltip="This is a required field">
                                         <TextArea
-                                            placeholder="Primary text"
+                                            placeholder={<span style={{ color: "#B4B4B4" }}>Primary text</span>}
                                             autoSize={{ minRows: 2, maxRows: 10 }}
                                             onChange={(e) => setPrimaryText(e.target.value)}
                                             className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
@@ -3378,7 +3378,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                         />
                                     </Form.Item> */}
                                     <Form.Item
-                                        label="Headline"
+                                        label={<span style={{ color: "#B4B4B4" }}>Headline</span>}
                                         name={["Ad", "headline"]}
                                         rules={[
                                             {
@@ -3397,7 +3397,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     </Form.Item>
 
                                     <Form.Item
-                                        label="Description"
+                                        label={<span style={{ color: "#B4B4B4" }}>Description</span>}
                                         name={["Ad", "Description"]}
                                         rules={[
                                             {
@@ -3418,7 +3418,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                         label={
                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', paddingRight: '50px' }}>
-                                                    <span>Website_URL</span>
+                                                    <span style={{ color: "#B4B4B4" }} >Website_URL</span>
                                                     <Tooltip title="This is a required field">
                                                         <QuestionCircleOutlined style={{ marginLeft: 4, cursor: 'pointer' }} />
                                                     </Tooltip>
@@ -3446,7 +3446,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                         />
                                     </Form.Item>
                                     <Form.Item
-                                        label="Display Link"
+                                        label={<span style={{ color: "#B4B4B4" }}>Display link</span>}
                                         name={["Ad", "Caption"]}
                                         rules={[
                                             {
@@ -3464,7 +3464,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                         />
                                     </Form.Item>
                                     <Modal
-                                        title="URL Builder"
+                                        title="URL builder"
                                         visible={isModalVisibleForURLBuilder}
                                         onCancel={handleCancelForURLBuilder}
                                         // footer={[
@@ -3821,8 +3821,8 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
             </Spin>
             {openCreativesDrawer && (
                 <Drawer
-                    title="Select Creatives"
-                    width="95%"
+                    title="Select creatives"
+                    width="100%"
                     open={openCreativesDrawer}
                     onClose={() => setOpenCreativesDrawer(false)}
                     style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}

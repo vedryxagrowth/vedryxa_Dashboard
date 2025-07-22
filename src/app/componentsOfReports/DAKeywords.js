@@ -130,6 +130,8 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
         minWidth: 450,
         pinned: 'left',
         sortable: true, // Enable sorting
+        unSortIcon: true,
+        headerClass: 'ag-center-header',
 
         comparator: (campaignA, campaignB) => {
             if (!campaignA) return 1;
@@ -489,7 +491,7 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
                                     <EditOutlined onClick={handleEditClick} style={{ marginLeft: '10px', color: 'blue', cursor: 'pointer' }} />
                                 </div>
                             )}>
-                                <MessageOutlined  className= {theme === "dark" ? "black-icon-comment" : 'Message'} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: 'blue' }} />
+                                <MessageOutlined  className= {theme === "dark" ? "black-icon-comment" : 'Message'} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px', color: '#4CAF50' }} />
                                 <Tooltip title={tooltipText}></Tooltip>
                             </Tooltip>
                         ) : (
@@ -925,13 +927,13 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
                                 </Space>
                             </Col>
                             <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Acc: {newaccount}</Text>
+                                <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Account: {newaccount}</Text>
                             </Col>
                             <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>AccName: {newAccountName}</Text>
+                                <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Account Name: {newAccountName}</Text>
                             </Col>
                             <Col xs={24} sm={24} md={8} style={{ flex: '1 1 auto' }}>
-                                <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Timezone: {timezone.current}</Text>
+                                <Text style={{ fontWeight: '600', color: theme === "dark" && "white" }}>Time Zone: {timezone.current}</Text>
                             </Col>
                             {/* <Col>
                                 <Tooltip 

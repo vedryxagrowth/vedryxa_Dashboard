@@ -4,8 +4,8 @@ import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
 import moment from 'moment-timezone';
 import React from 'react';
-import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch} from 'antd';
-import {  DownloadOutlined,  SmileOutlined, CopyOutlined,  EditOutlined,  MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, CloseOutlined, FolderOutlined, AppstoreOutlined, FileSearchOutlined } from '@ant-design/icons';
+import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Dropdown, Menu} from 'antd';
+import {  DownloadOutlined,  SmileOutlined, CopyOutlined,  EditOutlined,  MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, CloseOutlined, FolderOutlined, AppstoreOutlined, FileSearchOutlined, FilterOutlined, DownOutlined, SettingOutlined, OpenAIOutlined, SearchOutlined, RobotOutlined } from '@ant-design/icons';
 import { Tooltip} from 'antd';
 import { Space, Tabs } from 'antd';
 import StickyBox from 'react-sticky-box';
@@ -15,10 +15,13 @@ import 'ag-grid-enterprise';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { useTokenContext } from '../components/parent';
+import { FaRobot } from "react-icons/fa";
+import { Filter1Outlined, RoundaboutLeftOutlined, SettingsOutlined } from '@mui/icons-material';
 
 const CampaignLevelReports = React.lazy(() => import('./CampaignLevelDaily'));
 const AdsetLevelReports = React.lazy(() => import('./AdsetLevelDaily'));
 const AdLevelReports = React.lazy(() => import('./AdLevelDaily'));
+const SearchFilters = React.lazy(() => import('./SearchFilters')); 
 
 const contentStyle = {
     margin: "10px",
@@ -62,7 +65,7 @@ const selectTimezone = {
 };
 
 
-const Daily = ({functionCallForCampaigns, context, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle}) => {
+const Daily = ({handleChangeInput, handleBlur, onClickRefresh, functionCallForCampaigns, context, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle}) => {
     const {theme} = useTokenContext();
     const {apiClient} = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -587,7 +590,7 @@ const Daily = ({functionCallForCampaigns, context, functionCallForCommnets, star
                                     cursor: 'pointer',
                                     marginLeft: '10px',
                                     marginRight: '10px',
-                                    color: 'blue'
+                                    color: '#4CAF50'
                                 }}
                                 onClick={handleEditClick} // Open modal directly on click
                                 />
@@ -993,7 +996,7 @@ const Daily = ({functionCallForCampaigns, context, functionCallForCommnets, star
             navigator.clipboard.writeText(copiedText).then(() => {
                 console.log("Copied to clipboard:", copiedText);
             }).catch((err) => {
-                console.error("Clipboard copy failed:", err);
+                console.error("Clipboard . copy failed:", err);
             });
     
             // ✅ Trigger AG Grid’s built-in copy effect (blinking dark blue selection)
@@ -1046,21 +1049,151 @@ const Daily = ({functionCallForCampaigns, context, functionCallForCommnets, star
         { key: '3', label: 'Ad', content: 'Content for Ad data' }
     ];
 
+    // const carouselItems = useMemo(() => {
+    //     return [
+    //       {
+    //         key: '1',
+    //         label: (
+    //           <div className="fb-tab">
+    //             <FolderOutlined className="fb-icon" />
+    //             <span className="fb-tab-label">Campaigns</span>
+    //             {selectedCampaigns.length > 0 && (
+    //               <button className={`fb-clear-btn ${theme === "dark" ? "dark-theme-tabs" : "light-theme-tabs"}`} onClick={(e) => {
+    //                 e.stopPropagation();
+    //                 onClickRemoveSelectedCampaigns();
+    //               }}>
+    //                 {selectedCampaigns.length} <CloseOutlined />
+    //               </button>
+    //             )}
+    //           </div>
+    //         ),
+    //         content: <div>{`Content for Campaign data (${selectedCampaigns.length} selected)`}</div>,
+    //       },
+    //       {
+    //         key: '2',
+    //         label: (
+    //           <div className="fb-tab">
+    //             <AppstoreOutlined className="fb-icon" />
+    //             <span className="fb-tab-label">Ad sets</span>
+    //             {selectedAdsets.length > 0 && (
+    //               <button className={`fb-clear-btn ${theme === "dark" ? "dark-theme-tabs" : "light-theme-tabs"}`} onClick={(e) => {
+    //                 e.stopPropagation();
+    //                 onClickRemoveSelectedAdsets();
+    //               }}>
+    //                 {selectedAdsets.length} <CloseOutlined />
+    //               </button>
+    //             )}
+    //           </div>
+    //         ),
+    //         content: <div>{`Content for Adset data (${selectedAdsets.length} selected)`}</div>,
+    //       },
+    //       {
+    //         key: '3',
+    //         label: (
+    //           <div className="fb-tab">
+    //             <FileSearchOutlined className="fb-icon" />
+    //             <span className="fb-tab-label">Ads</span>
+    //             {selectedAds.length > 0 && (
+    //               <button className={`fb-clear-btn ${theme === "dark" ? "dark-theme-tabs" : "light-theme-tabs"}`} onClick={(e) => {
+    //                 e.stopPropagation();
+    //                 onClickRemoveSelectedAds();
+    //               }}>
+    //                 {selectedAds.length} <CloseOutlined />
+    //               </button>
+    //             )}
+    //           </div>
+    //         ),
+    //         content: <div>{`Content for Ad data (${selectedAds.length} selected)`}</div>,
+    //       },
+    //     ];
+    //   }, [
+    //     selectedCampaigns,
+    //     selectedAdsets,
+    //     selectedAds,
+    //     onClickRemoveSelectedCampaigns,
+    //     onClickRemoveSelectedAdsets,
+    //     onClickRemoveSelectedAds,
+    //   ]);
+      
+      
+
+    // const handleCarouselChange = (index) => {
+    //     setActiveTab(index);
+    //     // console.log(index);
+    //     // console.log(parseInt(index)-1);
+    //     // carouselRef.current.goTo(parseInt(index))
+    //     localStorage.setItem("DailyActiveTab", index);
+        
+    // };
+
+    // const renderCarouselNav = () => (
+    //     <StickyBox
+    //       offsetTop={64}
+    //       offsetBottom={20}
+    //       style={{ zIndex: 1, paddingLeft: '10px', paddingTop: '8px' }}
+    //     >
+    //       <Tabs
+    //         activeKey={activeTab}
+    //         onChange={handleCarouselChange}
+    //         items={carouselItems}
+    //         className={`fb-tabs ${theme === 'dark' ? 'dark-theme-tabs' : 'light-theme-tabs'}`}
+    //         tabBarStyle={{
+    //           borderBottom: 'none',
+    //           marginBottom: '0px',
+    //           padding: '0',
+    //         }}
+    //       />
+    //     </StickyBox>
+    //   );
+      
+    // console.log(selectedCampaigns, "selectedCampaigns");
+      
     const carouselItems = useMemo(() => {
+        const baseTabStyle = {
+          display: 'flex',
+          alignItems: 'center',
+          gap: 4,
+          padding: '6px 12px',
+          fontWeight: 600,
+          fontSize: 13,
+          borderRadius: '6px 6px 0 0',
+          cursor: 'pointer',
+          transition: 'all 0.2s ease-in-out',
+        };
+      
+        const getTabStyle = (isActive) => ({
+          ...baseTabStyle,
+          backgroundColor: isActive ? (theme === 'dark' ? '#1e1e1e' : '#fff') : (theme === 'dark' ? '#2a2a2a' : '#f0f2f5'),
+          color: isActive ? (theme === 'dark' ? '#fff' : '#000') : (theme === 'dark' ? '#aaa' : '#6b7280'),
+          boxShadow: isActive ? '0 0 0 1px #91C25F inset' : 'none',
+          fontWeight: isActive ? 'normal' : 'bold', 
+        });
+      
         return [
           {
             key: '1',
             label: (
-              <div className="fb-tab">
-                <FolderOutlined className="fb-icon" />
-                <span className="fb-tab-label">Campaigns</span>
+              <div style={getTabStyle(activeTab === '1')}>
+                <FolderOutlined />
+                <span style={{ marginLeft: 4 }}>Campaigns</span>
                 {selectedCampaigns.length > 0 && (
-                  <button className={`fb-clear-btn ${theme === "dark" ? "dark-theme-tabs" : "light-theme-tabs"}`} onClick={(e) => {
-                    e.stopPropagation();
-                    onClickRemoveSelectedCampaigns();
-                  }}>
-                    {selectedCampaigns.length} <CloseOutlined />
-                  </button>
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onClickRemoveSelectedCampaigns();
+                    }}
+                    icon={<CloseOutlined style={{ fontSize: 10 }} />}
+                    size="small"
+                    type="text"
+                    style={{
+                      marginLeft: 6,
+                      fontSize: 11,
+                      height: 5,
+                      color: theme === 'dark' ? '#fff' : '#000',
+                    }}
+                  >
+                    {selectedCampaigns.length}
+                  </Button>
                 )}
               </div>
             ),
@@ -1069,34 +1202,56 @@ const Daily = ({functionCallForCampaigns, context, functionCallForCommnets, star
           {
             key: '2',
             label: (
-              <div className="fb-tab">
-                <AppstoreOutlined className="fb-icon" />
-                <span className="fb-tab-label">Ad sets</span>
+              <div style={getTabStyle(activeTab === '2')}>
+                <AppstoreOutlined />
+                <span style={{ marginLeft: 4 }}>Ad sets</span>
                 {selectedAdsets.length > 0 && (
-                  <button className={`fb-clear-btn ${theme === "dark" ? "dark-theme-tabs" : "light-theme-tabs"}`} onClick={(e) => {
-                    e.stopPropagation();
-                    onClickRemoveSelectedAdsets();
-                  }}>
-                    {selectedAdsets.length} <CloseOutlined />
-                  </button>
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onClickRemoveSelectedAdsets();
+                    }}
+                    icon={<CloseOutlined style={{ fontSize: 10 }} />}
+                    size="small"
+                    type="text"
+                    style={{
+                      marginLeft: 6,
+                      fontSize: 11,
+                      height: 5,
+                      color: theme === 'dark' ? '#fff' : '#000',
+                    }}
+                  >
+                    {selectedAdsets.length}
+                  </Button>
                 )}
               </div>
             ),
-            content: <div>{`Content for Adset data (${selectedAdsets.length} selected)`}</div>,
+            content: <div>{`Content for Adset data (${selectedAdsets.length} selected).`}</div>,
           },
           {
             key: '3',
             label: (
-              <div className="fb-tab">
-                <FileSearchOutlined className="fb-icon" />
-                <span className="fb-tab-label">Ads</span>
+              <div style={getTabStyle(activeTab === '3')}>
+                <FileSearchOutlined />
+                <span style={{ marginLeft: 4 }}>Ads</span>
                 {selectedAds.length > 0 && (
-                  <button className={`fb-clear-btn ${theme === "dark" ? "dark-theme-tabs" : "light-theme-tabs"}`} onClick={(e) => {
-                    e.stopPropagation();
-                    onClickRemoveSelectedAds();
-                  }}>
-                    {selectedAds.length} <CloseOutlined />
-                  </button>
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onClickRemoveSelectedAds();
+                    }}
+                    icon={<CloseOutlined style={{ fontSize: 10 }} />}
+                    size="small"
+                    type="text"
+                    style={{
+                      marginLeft: 6,
+                      fontSize: 11,
+                      height: 5,
+                      color: theme === 'dark' ? '#fff' : '#000',
+                    }}
+                  >
+                    {selectedAds.length}
+                  </Button>
                 )}
               </div>
             ),
@@ -1104,51 +1259,147 @@ const Daily = ({functionCallForCampaigns, context, functionCallForCommnets, star
           },
         ];
       }, [
+        activeTab,
         selectedCampaigns,
         selectedAdsets,
         selectedAds,
         onClickRemoveSelectedCampaigns,
         onClickRemoveSelectedAdsets,
         onClickRemoveSelectedAds,
+        theme,
       ]);
       
+      const handleFeatureBlast = () => {
+        message.warning('🚀 This feature is cooking—almost ready to serve 😜', 3);
+    
+        const blast = document.createElement('span');
+        blast.className = 'blast-circle';
+        document.body.appendChild(blast);
+    
+        setTimeout(() => {
+          blast.remove();
+        }, 600);
+      };
+      const renderCarouselNav = () => (
+        <StickyBox offsetTop={64} offsetBottom={20} style={{  padding: '4px 5px' }}>
+          <Row align="middle" justify="space-between" wrap={false}>
+            <Col flex="auto">
+              <Tabs
+                activeKey={activeTab}
+                onChange={(key) => {
+                  setActiveTab(key);
+                  localStorage.setItem('LiveActiveTab', key);
+                }}
+                items={carouselItems}
+                tabBarStyle={{
+                  display: 'flex',
+                  gap: '1px',
+                  borderBottom: 'none',
+                  marginBottom: 0,
+                  padding: 0,
+                }}
+                
+                size="small"
+              />
+              
+            </Col>
       
+            <Col>
+              {/* <Space size={2}>
+                <Input
+                  placeholder="Search campaigns..."
+                  prefix={<SearchOutlined />}
+                  allowClear
+                  style={{
+                    borderRadius: 8,
+                    background: theme === 'dark' ? '#2a2a2a' : '#fff',
+                    border: `1px solid ${theme === 'dark' ? '#444' : '#d9d9d9'}`,
+                    color: theme === 'dark' ? '#fff' : '#000',
+                    fontWeight: 500,
+                    width: 200,
+                  }}
+                />
+      
+                <Dropdown
+                  overlay={
+                    <Menu
+                      items={[
+                        { key: 'active', label: 'Active' },
+                        { key: 'pause', label: 'Paused' },
+                      ]}
+                    />
+                  }
+                  trigger={['click']}
+                >
+                  <Button
+                    type="default"
+                    style={{
+                      borderRadius: 8,
+                      background: theme === 'dark' ? 'rgba(82,196,26,0.12)' : '#f6ffed',
+                      border: '1px solid #52c41a',
+                      color: theme === 'dark' ? '#95de64' : '#389e0d',
+                      fontWeight: 500,
+                    }}
+                  >
+                    <Space size={2}>
+                      <FilterOutlined />
+                      Filters
+                      <DownOutlined style={{ fontSize: 10 }} />
+                    </Space>
+                  </Button>
+                </Dropdown>
+      
+                <Tooltip title="🍳 This feature is cooking—almost ready to serve 😜">
+                    <Button
+                        type="default"
+                        icon={<FaRobot style={{ fontSize: 20 }} />}
+                        disabled
+                        style={{
+                        borderRadius: 8,
+                        background: theme === 'dark' ? 'rgba(82,196,26,0.06)' : '#f0fdf4',
+                        border: '1px solid #95de64',
+                        color: theme === 'dark' ? '#52c41a' : '#389e0d',
+                        fontWeight: 500,
+                        cursor: 'not-allowed',
+                        }}
+                    >
+                        AI Assistant
+                    </Button>
+                </Tooltip>
 
-    const handleCarouselChange = (index) => {
-        setActiveTab(index);
-        // console.log(index);
-        // console.log(parseInt(index)-1);
-        // carouselRef.current.goTo(parseInt(index))
-        localStorage.setItem("DailyActiveTab", index);
-        
-    };
-
-    const renderCarouselNav = () => (
-        <StickyBox
-          offsetTop={64}
-          offsetBottom={20}
-          style={{ zIndex: 1, paddingLeft: '10px', paddingTop: '8px' }}
-        >
-          <Tabs
-            activeKey={activeTab}
-            onChange={handleCarouselChange}
-            items={carouselItems}
-            className={`fb-tabs ${theme === 'dark' ? 'dark-theme-tabs' : 'light-theme-tabs'}`}
-            tabBarStyle={{
-              borderBottom: 'none',
-              marginBottom: '0px',
-              padding: '0',
-            }}
-          />
+                <Tooltip title="🍳 This feature is cooking—almost ready to serve 😜">
+                <Button
+                    type="default"
+                    icon={<SettingOutlined />}
+                    disabled
+                    style={{
+                    borderRadius: 8,
+                    background: theme === 'dark' ? 'rgba(24,144,255,0.06)' : '#e6f7ff',
+                    border: '1px solid #91d5ff',
+                    color: theme === 'dark' ? '#69c0ff' : '#1d39c4',
+                    fontWeight: 500,
+                    cursor: 'not-allowed',
+                    }}
+                >
+                    Rules
+                </Button>
+                </Tooltip>
+              </Space> */}
+               <SearchFilters
+                    theme={theme}
+                    handleChangeInput={handleChangeInput}
+                    handleBlur={handleBlur}
+                    onClickRefresh={onClickRefresh}
+                />
+            </Col>
+          </Row>
         </StickyBox>
       );
       
-    // console.log(selectedCampaigns, "selectedCampaigns");
       
-    
     return(
         <div>
-                    <div>
+                    <div className={`top-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}>
                         {renderCarouselNav()}
                     </div>
                     <Tabs activeKey={activeTab} onChange={handleTabChange} renderTabBar={() => <></>}>

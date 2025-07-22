@@ -72,9 +72,10 @@ const RequestComponent = ({ network, adAccounts }) => {
                             onChange={(value) => setSelectedPath(value)}
                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                            title=''
                         >
                             {domainMapping[network]?.map((path, idx) => (
-                                <Option key={idx} value={path}>
+                                <Option key={idx} value={path} title=''>
                                     {path}
                                 </Option>
                             ))}
@@ -89,9 +90,10 @@ const RequestComponent = ({ network, adAccounts }) => {
                             onChange={(value) => setSelectedDays(value)}
                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                            title={''}
                         >
                             {daysOptions.map((option) => (
-                                <Option key={option.value} value={option.value}>
+                                <Option key={option.value} value={option.value} title={''}>
                                     {option.label}
                                 </Option>
                             ))}
