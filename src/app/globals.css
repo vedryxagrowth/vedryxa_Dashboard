@@ -3323,7 +3323,7 @@ input:focus, select:focus, .custom-input-dark:focus, .custom-input-light:focus, 
 }
 
 
-/* Ensure the table container is positioned -- */
+/* Ensure the table container is */
 .table-container {
   position: relative;
   z-index: 1; 
