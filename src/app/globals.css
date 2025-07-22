@@ -3330,6 +3330,13 @@ input:focus, select:focus, .custom-input-dark:focus, .custom-input-light:focus, 
   height: 92%;
 }
 
+.custom-dropdown                                        
+  .ant-select-item-option-selected:not(.ant-select-item-option-disabled)
+  .ant-select-item-option-state svg {                  
+    color:#1d39c4  !important;                          
+    fill: #1d39c4  !important;
+}
+
 
 
 
