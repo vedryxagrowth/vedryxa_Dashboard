@@ -3338,7 +3338,17 @@ input:focus, select:focus, .custom-input-dark:focus, .custom-input-light:focus, 
 }
 
 
+/* Center header text while preserving icons */
+.ag-center-header .ag-header-cell-label {
+  justify-content: center !important;
+  text-align: center !important;
+}
 
+/* Optional: make sure text spans full width */
+.ag-center-header .ag-header-cell-text {
+  width: 100%;
+  text-align: center;
+}
 
 
 
