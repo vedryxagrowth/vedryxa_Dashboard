@@ -174,6 +174,7 @@ const AdsetLevelReports = ({functionCallForCampaigns, context, functionCallForCo
         pinned: 'left',
         sortable: true, // Enable sorting
         unSortIcon: true,
+        headerClass: 'ag-center-header',
         // filter: 'agTextColumnFilter',      // Enable string filter
         // floatingFilter: false,              // Optional: show quick filter below header
         // suppressMenu: false,

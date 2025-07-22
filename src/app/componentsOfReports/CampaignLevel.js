@@ -175,6 +175,7 @@ const CampaignLevelReports = ({functionCallForCommnets, context, functionCallFor
         pinned: 'left',
         sortable: true, // Enable sorting
         unSortIcon: true,
+        headerClass: 'ag-center-header',
 
         comparator: (campaignA, campaignB) => {
             if (!campaignA) return 1;

@@ -25,60 +25,80 @@ const SearchFilters = ({ theme, handleChangeInput, handleBlur, onClickRefresh })
                 width: 170,
                 marginRight: '5px'
             }}
-        />           
-        <Dropdown
-            overlay={
-                <Menu
-                items={[
-                    { key: 'active', 
-                    label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}}>    
-                    Active
-                    <span
-                            style={{
-                            width: '6px',
-                            height: '6px',
-                            borderRadius: '50%',
-                            backgroundColor: 'green',
-                            marginLeft: '15px',
-                            }}
-                        ></span>
-                    </span> 
-                    },
-                    { key: 'pause', label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}}>Paused
-                     <span
-                            style={{
-                            width: '6px',
-                            height: '6px',
-                            borderRadius: '50%',
-                            backgroundColor: 'red',
-                            marginLeft: '8px',
-                            }}
-                        ></span>
-                    </span> },
-                ]}
-                />
-            }
-            trigger={['click']}
-        >
-            <Button
-                type="default"
-                style={{
-                borderRadius: 8,
-                background: theme === 'dark' ? 'rgba(82,196,26,0.12)' : '#f6ffed',
-                border: '1px solid #4CAF50',
-                color: theme === 'dark' ? '#95de64' : '#389e0d',
-                fontWeight: 500,
-                marginRight: '5px'
-                }}
+        />  
+        <Tooltip 
+            title={`🍳 This feature is cooking—almost ready to serve 😜`}
+            overlayInnerStyle={{
+                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                color: theme === 'dark' ? '#fff' : '#000',
+                border: '1px solid #ccc',   
+                borderRadius: 6,
+                // fontWeight: 500,
+            }}
+        >         
+            <Dropdown
+                overlay={
+                    <Menu
+                    items={[
+                        { key: 'active', 
+                        label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}}>    
+                        Active
+                        <span
+                                style={{
+                                width: '6px',
+                                height: '6px',
+                                borderRadius: '50%',
+                                backgroundColor: 'green',
+                                marginLeft: '15px',
+                                }}
+                            ></span>
+                        </span> 
+                        },
+                        { key: 'pause', label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}}>Paused
+                        <span
+                                style={{
+                                width: '6px',
+                                height: '6px',
+                                borderRadius: '50%',
+                                backgroundColor: 'red',
+                                marginLeft: '8px',
+                                }}
+                            ></span>
+                        </span> },
+                    ]}
+                    />
+                }
+                trigger={['click']}
             >
-                <Space size={2}>
-                <FilterOutlined />
-                Filters
-                <DownOutlined style={{ fontSize: 10 }} />
-                </Space>
-            </Button>
-        </Dropdown>
-
+                <Button
+                    type="default"
+                    style={{
+                    borderRadius: 8,
+                    background: theme === 'dark' ? 'rgba(82,196,26,0.12)' : '#f6ffed',
+                    border: '1px solid #4CAF50',
+                    color: theme === 'dark' ? '#95de64' : '#389e0d',
+                    fontWeight: 500,
+                    marginRight: '5px'
+                    }}
+                >
+                    <Space size={2}>
+                    <FilterOutlined />
+                    Filters
+                    <DownOutlined style={{ fontSize: 10 }} />
+                    </Space>
+                </Button>
+            </Dropdown>
+        </Tooltip>
+        <Tooltip 
+            title={`🍳 This feature is cooking—almost ready to serve 😜`}
+            overlayInnerStyle={{
+                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                color: theme === 'dark' ? '#fff' : '#000',
+                border: '1px solid #ccc',   
+                borderRadius: 6,
+                // fontWeight: 500,
+            }}
+        >
             <Button
                 type="default"
                 icon={<FaRobot style={{ fontSize: 20 }} />}
@@ -95,7 +115,17 @@ const SearchFilters = ({ theme, handleChangeInput, handleBlur, onClickRefresh })
             >
                 AI Assistant
             </Button>
-
+        </Tooltip>
+        <Tooltip 
+            title={`🍳 This feature is cooking—almost ready to serve 😜`}
+            overlayInnerStyle={{
+                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                color: theme === 'dark' ? '#fff' : '#000',
+                border: '1px solid #ccc',   
+                borderRadius: 6,
+                // fontWeight: 500,
+            }}
+        >
             <Button
                 type="default"
                 icon={<SettingOutlined />}
@@ -112,7 +142,7 @@ const SearchFilters = ({ theme, handleChangeInput, handleBlur, onClickRefresh })
             >
                 Rules
             </Button>
-
+        </Tooltip>
             <Button
                     type="primary"
                     style={{

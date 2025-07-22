@@ -199,6 +199,7 @@ const AllCampaigns = ({handleChangeInput, handleBlur, onClickRefresh, startDate,
         pinned: 'left',
         unSortIcon: true,
         sortable: true,
+        headerClass: 'ag-center-header',
 
         comparator: (campaignA, campaignB) => {
             if (!campaignA) return 1;

@@ -131,6 +131,7 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
         pinned: 'left',
         sortable: true, // Enable sorting
         unSortIcon: true,
+        headerClass: 'ag-center-header',
 
         comparator: (campaignA, campaignB) => {
             if (!campaignA) return 1;
