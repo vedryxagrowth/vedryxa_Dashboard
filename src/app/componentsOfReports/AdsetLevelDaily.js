@@ -184,6 +184,7 @@ const Daily = ({functionCallForCommnets,context, functionCallForCampaigns, start
         pinned: 'left',
         sortable: true, // Enable sorting
         unSortIcon: true,
+        headerClass: 'ag-center-header',
 
         comparator: (campaignA, campaignB) => {
             if (!campaignA) return 1;
@@ -1239,30 +1240,39 @@ const Daily = ({functionCallForCommnets,context, functionCallForCampaigns, start
 
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
                                             <Tooltip
-                                                title={
-                                                    <>
-                                                    {fbCron.current !== '-' && <div>FbAcc status: {fbCron.current}</div>}
-                                                    {revenueCron.current !== '-' && <div>RevAcc status: {revenueCron.current}</div>}
-                                                    {(cronStatus.current !== '-' || accountStatus.current !== '-') && (
-                                                        <Text style={{ fontWeight: '600', color: 'white' }}>
-                                                        Cron/Acc status: {cronStatus.current} /{' '}
-                                                        <span
-                                                            style={{
-                                                            color:
-                                                                accountStatus.current === 'Active'
-                                                                ? '#91C25F'
-                                                                : accountStatus.current === 'Inactive'
-                                                                ? '#EC7117'
-                                                                : 'gray',
-                                                            fontWeight: 'bold',
-                                                            }}
-                                                        >
-                                                            {accountStatus.current}
-                                                        </span>
-                                                        </Text>
-                                                    )}
-                                                    </>
-                                                }
+                                             title={
+                                                <div style={{fontSize:'13px'}}>
+                                                {fbCron.current !== '-' && <div>Fb status: {fbCron.current?.toLowerCase()}</div>}
+                                                {revenueCron.current !== '-' && <div>Rev status: {revenueCron.current?.toLowerCase()}</div>}
+                                                {(cronStatus.current !== '-' || accountStatus.current !== '-') && (
+                                                    <Text style={{ color: theme === 'dark' ? '#fff' : '#000' }}>
+                                                    Cron status: {cronStatus.current?.toLowerCase()}
+                                                    </Text>
+                                                )}
+                                                {accountStatus.current && <div>
+                                                    Account:  <span
+                                                        style={{ marginLeft:'3px',
+                                                        color:
+                                                            accountStatus.current === 'Active'
+                                                            ? '#91C25F'
+                                                            : accountStatus.current === 'Inactive'
+                                                            ? '#EC7117'
+                                                            : 'gray',
+                                                        // fontWeight: 'bold',
+                                                        }}
+                                                    >
+                                                        {accountStatus.current}
+                                                    </span>
+                                                </div>}
+                                                </div>
+                                            }
+                                            overlayInnerStyle={{
+                                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                                color: theme === 'dark' ? '#fff' : '#000',
+                                                border: '1px solid #ccc',   
+                                                borderRadius: 6,
+                                                // fontWeight: 500,
+                                            }}
                                             >
 
                                                 <InfoCircleOutlined
@@ -1286,9 +1296,9 @@ const Daily = ({functionCallForCommnets,context, functionCallForCampaigns, start
                                             </Tooltip>
                                         </Col> */}
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
-                                            <Tooltip title="Export to CSV">
+                                            {/* <Tooltip title="Export to CSV"> */}
                                                 <Button type="primary" style={{ backgroundColor: '#91C25F', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={() => onBtExport(gridRef1, "Daily")} />
-                                            </Tooltip>
+                                            {/* </Tooltip> */}
                                         </Col>
                                     </Row>
                                     <div className='table-container'>

@@ -108,6 +108,7 @@ const System1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePra
         resizable: true, // Enable resizing
         sortable: true, // Enable sorting
         unSortIcon: true,
+        headerClass: 'ag-center-header',
         cellRendererParams: {
             suppressCount: true, // Suppress row count in the grouped column
         },

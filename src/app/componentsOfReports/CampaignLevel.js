@@ -175,6 +175,7 @@ const CampaignLevelReports = ({functionCallForCommnets, context, functionCallFor
         pinned: 'left',
         sortable: true, // Enable sorting
         unSortIcon: true,
+        headerClass: 'ag-center-header',
 
         comparator: (campaignA, campaignB) => {
             if (!campaignA) return 1;
@@ -1588,17 +1589,29 @@ const CampaignLevelReports = ({functionCallForCommnets, context, functionCallFor
                                     <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
                                         <Tooltip
                                         title={
-                                            <>
-                                                <div>FbAcc status: {`${fbCron.current}`}</div>
-                                                <div>RevAcc status: {`${revenueCron.current}`}</div>
-                                                <Text style={{ color: "white" }}>
-                                                    Cron/Acc status: {cronStatus.current} /{' '}
-                                                    <span style={{ color: accountStatus.current === 'Active' ? '#91C25F' : '#EC7117', fontWeight: 'bold' }}>
+                                            <div style={{fontSize:'13px'}}>
+                                                <div>Fb status: {`${fbCron.current?.toLowerCase()}`}</div>
+                                                <div>Rev status: {`${revenueCron.current?.toLowerCase()}`}</div>
+                                                <Text style={{color: theme === 'dark' ? '#fff' : '#000'}}>
+                                                    Cron status: {cronStatus.current?.toLowerCase()}
+                                                    {/* <span style={{ color: accountStatus.current === 'Active' ? '#91C25F' : '#EC7117', }}>
+                                                        {accountStatus.current}
+                                                    </span> */}
+                                                </Text>
+                                                <div>Account:  
+                                                    <span style={{marginLeft: '3px', color: accountStatus.current === 'Active' ? '#91C25F' : '#EC7117', }}>
                                                         {accountStatus.current}
                                                     </span>
-                                                </Text>
-                                            </>
+                                                </div>
+                                            </div>
                                         }
+                                        overlayInnerStyle={{
+                                            backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                            color: theme === 'dark' ? '#fff' : '#000',
+                                            border: '1px solid #ccc',   
+                                            borderRadius: 6,
+                                            // fontWeight: 500,
+                                        }}
                                         >
                                             <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color:"#91C25F" }} className="black-icon-info"/>
                                         </Tooltip>
@@ -1612,9 +1625,9 @@ const CampaignLevelReports = ({functionCallForCommnets, context, functionCallFor
                                         </Tooltip>
                                     </Col> */}
                                     <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
-                                        <Tooltip title="Export to CSV">
+                                        {/* <Tooltip title="Export to CSV"> */}
                                             <Button type="primary" style={{ backgroundColor: '#91C25F', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={onBtExport1} />
-                                        </Tooltip>
+                                        {/* </Tooltip> */}
                                     </Col>
                                 </Row>
                                 <div className='table-container'>

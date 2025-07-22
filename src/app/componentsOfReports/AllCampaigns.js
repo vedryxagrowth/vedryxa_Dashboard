@@ -199,6 +199,7 @@ const AllCampaigns = ({handleChangeInput, handleBlur, onClickRefresh, startDate,
         pinned: 'left',
         unSortIcon: true,
         sortable: true,
+        headerClass: 'ag-center-header',
 
         comparator: (campaignA, campaignB) => {
             if (!campaignA) return 1;
@@ -1206,9 +1207,9 @@ const AllCampaigns = ({handleChangeInput, handleBlur, onClickRefresh, startDate,
                                             </Tooltip>
                                         </Col> */}
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
-                                            <Tooltip title="Export to CSV">
+                                            {/* <Tooltip title="Export to CSV"> */}
                                                 <Button type="primary" style={{ backgroundColor: '#91C25F', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={() => onBtExport(gridRef2, "AllCampaigns")} />
-                                            </Tooltip>
+                                            {/* </Tooltip> */}
                                         </Col>
                                     </Row>
                                    
