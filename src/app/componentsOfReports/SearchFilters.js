@@ -41,29 +41,32 @@ const SearchFilters = ({ theme, handleChangeInput, handleBlur, onClickRefresh })
                     <Menu
                     items={[
                         { key: 'active', 
-                        label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}}>    
-                        Active
-                        <span
+                        label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}}>  
+                          <span
                                 style={{
                                 width: '6px',
                                 height: '6px',
                                 borderRadius: '50%',
                                 backgroundColor: 'green',
-                                marginLeft: '15px',
+                                marginRight: '6px',
                                 }}
-                            ></span>
+                            ></span>  
+                        Active
+                      
                         </span> 
                         },
-                        { key: 'pause', label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}}>Paused
-                        <span
+                        { key: 'pause', label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}}>
+                              <span
                                 style={{
                                 width: '6px',
                                 height: '6px',
                                 borderRadius: '50%',
                                 backgroundColor: 'red',
-                                marginLeft: '8px',
+                                marginRight: '6px',
                                 }}
                             ></span>
+                            Paused
+                      
                         </span> },
                     ]}
                     />

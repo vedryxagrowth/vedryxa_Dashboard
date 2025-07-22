@@ -1483,9 +1483,9 @@ const Daily = ({functionCallForCommnets, functionCallForCampaigns, startDate, en
                                             </Tooltip>
                                         </Col> */}
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
-                                            <Tooltip title="Export to CSV">
+                                            {/* <Tooltip title="Export to CSV"> */}
                                                 <Button type="primary" style={{ backgroundColor: '#91C25F', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={() => onBtExport(gridRef1, "Daily")} />
-                                            </Tooltip>
+                                            {/* </Tooltip> */}
                                         </Col>
                                     </Row>
                                     <div className='table-container'>

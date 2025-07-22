@@ -10176,35 +10176,48 @@ const MyTablePage = () => {
                                      width: 170,
                                      marginRight: '5px'
                                  }}
-                             />           
-                             <Dropdown
+                             />   
+                               <Tooltip 
+                                title={`🍳 This feature is cooking—almost ready to serve 😜`}
+                                overlayInnerStyle={{
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',   
+                                    borderRadius: 6,
+                                    // fontWeight: 500,
+                                }}
+                            >
+                                 <Dropdown
                                  overlay={
                                     <Menu
                                     items={[
                                         { key: 'active', 
-                                        label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}}>    
-                                        Active
+                                        label: <span style={{ fontSize:'13px', display:'flex', alignItems:'left'}}>  
                                         <span
                                                 style={{
                                                 width: '6px',
                                                 height: '6px',
                                                 borderRadius: '50%',
                                                 backgroundColor: 'green',
-                                                marginLeft: '15px',
+                                                marginRight: '6px',
                                                 }}
-                                            ></span>
+                                            ></span>  
+                                        Active
+                                        
                                         </span> 
                                         },
-                                        { key: 'pause', label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}}>Paused
-                                         <span
+                                        { key: 'pause', label: <span style={{ fontSize:'13px', display:'flex', alignItems:'left'}}>
+                                            <span
                                                 style={{
                                                 width: '6px',
                                                 height: '6px',
                                                 borderRadius: '50%',
                                                 backgroundColor: 'red',
-                                                marginLeft: '8px',
+                                                marginRight: '6px',
                                                 }}
                                             ></span>
+                                            Paused
+                                         
                                         </span> },
                                     ]}
                                     />
@@ -10229,8 +10242,19 @@ const MyTablePage = () => {
                                      </Space>
                                  </Button>
                              </Dropdown>
+                            </Tooltip>        
+                            
                  
-                             {/* <Tooltip title={`🍳 This feature is cooking—almost ready to serve 😜`}> */}
+                             <Tooltip 
+                                title={`🍳 This feature is cooking—almost ready to serve 😜`}
+                                overlayInnerStyle={{
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',   
+                                    borderRadius: 6,
+                                    // fontWeight: 500,
+                                }}
+                             >
                                  <Button
                                      type="default"
                                      icon={<FaRobot style={{ fontSize: 20 }} />}
@@ -10247,9 +10271,18 @@ const MyTablePage = () => {
                                  >
                                      AI Assistant
                                  </Button>
-                             {/* </Tooltip> */}
+                             </Tooltip>
  
-                             {/* <Tooltip title={`🍳 This feature is cooking—almost ready to serve 😜`}> */}
+                             <Tooltip 
+                                title={`🍳 This feature is cooking—almost ready to serve 😜`}
+                                overlayInnerStyle={{
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',   
+                                    borderRadius: 6,
+                                    // fontWeight: 500,
+                                }}
+                            >
                                  <Button
                                      type="default"
                                      icon={<SettingOutlined />}
@@ -10266,7 +10299,7 @@ const MyTablePage = () => {
                                  >
                                      Rules
                                  </Button>
-                             {/* </Tooltip> */}
+                             </Tooltip>
  
                              {/* <Tooltip title="Click to Refresh Tables"> */}
                                  <Button
