@@ -1681,7 +1681,8 @@ const MnetLiveAdHistory = ({params}) => {
                     onMouseLeave={() => setHovered(false)}
                     style={{
                         border: '3px solid #91C25F',
-                        color: isGraphVisible || hovered ? '#fff' : '#555',
+                        // color: isGraphVisible || hovered ? '#fff' : '#555',
+                        color: theme === 'dark' ? '#fff' : (isGraphVisible || hovered ? '#fff' : '#555'),
                         backgroundColor: isGraphVisible || hovered ? '#91C25F' : 'transparent',
                         borderRadius: '999px',
                         fontWeight: 500,
@@ -1995,7 +1996,7 @@ const MnetLiveAdHistory = ({params}) => {
                         <Button 
                             type="default" 
                             icon={<ReloadOutlined  className='black-icon'/>} 
-                            style={{width: '43px', height: "33px", marginLeft: "5px", backgroundColor: '#91C25F', border: 'solid 0px' }} 
+                            style={{width: '35px', height: "33px", marginLeft: "5px", backgroundColor: '#91C25F', border: 'solid 0px' }} 
                             onClick={handleReload}  // Call refresh function when clicked
                         />
                         <EditOutlined 
