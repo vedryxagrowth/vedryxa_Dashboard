@@ -1231,13 +1231,26 @@ const MyTablePage = () => {
         return cell;
     };
 
+    // const isYesterday = () => {
+    //     const startDate1 = moment(startDate); // Convert to moment object
+    //     const endDate1 = moment(endDate);     // Convert to moment object
+
+    //     // Define "yesterday" as a reference
+    //     const yesterday1 = moment().subtract(1, 'days');
+    //     return startDate1.isSame(yesterday1, 'day') && endDate1.isSame(yesterday1, 'day');
+    // };
+
     const isYesterday = () => {
         const startDate1 = moment(startDate); // Convert to moment object
         const endDate1 = moment(endDate);     // Convert to moment object
-
-        // Define "yesterday" as a reference
-        const yesterday1 = moment().subtract(1, 'days');
-        return startDate1.isSame(yesterday1, 'day') && endDate1.isSame(yesterday1, 'day');
+    
+        const today = moment();
+        const yesterday = moment().subtract(1, 'days');
+    
+        const isToday = startDate1.isSame(today, 'day') && endDate1.isSame(today, 'day');
+        const isYesterday = startDate1.isSame(yesterday, 'day') && endDate1.isSame(yesterday, 'day');
+    
+        return isToday || isYesterday;
     };
 
     // const campaignMap = useMemo(() => {

@@ -525,6 +525,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     const { data: session } = useSession();
     var token = localStorage.getItem("token")
     const [showBidAmount, setShowBidAmount] = useState(false);
+    const [showBidLabel, setShowBidLabel] = useState();
     const [selectedPublishers, setSelectedPublishers] = useState([]);
     const [selectedPositions, setSelectedPositions] = useState([]);
     const [selectedFiles, setSelectedFiles] = useState([]);
@@ -689,7 +690,8 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         return [...new Set(allPositions)]; // Remove duplicates
     };
 
-    const handleBidStrategyChange = (value) => {
+    const handleBidStrategyChange = (value, label) => {
+        setShowBidLabel(label);
         // Show bid_amount if the selected bid strategy is "Bid Cap", otherwise hide it
         setShowBidAmount(value === "LOWEST_COST_WITH_BID_CAP" || value === "COST_CAP");
         // setShowBidAmount(["LOWEST_COST_WITH_BID_CAP", "COST_CAP"].includes(value));
@@ -1824,7 +1826,20 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
             style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
         >
 
-            <Spin spinning={loading}>
+            {loading ? (
+                <div
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '300px',
+                }}
+                >
+                    <Spin size="large" />
+                    <div style={{ marginTop: 10, fontSize: 16, color: theme === 'dark' ? '#fff' : '#555' }}>Loading...</div>
+                </div>
+            ) : (
                 <Form layout="vertical" form={form} onFinish={onFinish} onValuesChange={handleFormChange} initialValues={initialValues} className={theme === 'dark' ? 'form-dark' : 'form-light'}>
                     <Collapse accordion activeKey={activeKey} // Bind active key state
                         onChange={(key) => setActiveKey([key])} className={theme === 'dark' ? 'custom-collapse-dark' : 'custom-collapse-light'} >
@@ -1876,7 +1891,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             { value: "OUTCOME_AWARENESS", label: "Awareness", title:"" },
                                             { value: "OUTCOME_TRAFFIC", label: "Traffic", title:"" },
                                             { value: "OUTCOME_APP_PROMOTION", label: "App promotion", title:"" }
-                                           
+                                        
                                         ]}
 
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
@@ -1928,7 +1943,20 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                             { value: "COST_CAP", label: "Cost per Result Goal", title:"" },
                                             { value: "LOWEST_COST_WITH_MIN_ROAS", label: "ROAS Goal" ,title:"" }
                                         ]}
-                                        onChange={handleBidStrategyChange}
+                                        // onChange={handleBidStrategyChange}
+                                        onChange={(value) => {
+                                            // Access the options directly from the Select component
+                                            const selectedOption = [
+                                                { value: "LOWEST_COST_WITHOUT_CAP", label: "Highest Volume", title: "" },
+                                                { value: "LOWEST_COST_WITH_BID_CAP", label: "Bid Cap", title: "" },
+                                                { value: "COST_CAP", label: "Cost per Result Goal", title: "" },
+                                                { value: "LOWEST_COST_WITH_MIN_ROAS", label: "ROAS Goal", title: "" }
+                                            ].find(option => option.value === value);
+
+                                            const label = selectedOption ? selectedOption.label : '';
+                                            
+                                            handleBidStrategyChange(value, label);
+                                        }}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                         className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                     />
@@ -2183,7 +2211,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                 {showBidAmount && (
                                     <Form.Item
                                         name="bid_amount"
-                                        label={<span style={{ color: "#B4B4B4" }}>Cost per result goal</span>}
+                                        label={<span style={{ color: "#B4B4B4" }}>{showBidLabel || 'Cost per result goal'}</span>}
                                         rules={[
                                             {
                                                 required: true,
@@ -3038,13 +3066,14 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
 
                         </Panel>
                     </Collapse>
-                    {/* <Form.Item label=" ">
-                        {isFormComplete && (
-                            <Button type="primary" htmlType="submit" style={{ background: '#21c55d', minWidth: '200px' }}>
-                                Submit
-                            </Button>
-                        )}
-                    </Form.Item> */}
+
+                {/* <Form.Item label=" ">
+                    {isFormComplete && (
+                        <Button type="primary" htmlType="submit" style={{ background: '#21c55d', minWidth: '200px' }}>
+                            Submit
+                        </Button>
+                    )}
+                </Form.Item> */}
                     <Form.Item label=" ">
                         {(isFormComplete || newSelectedRef.current) && (
                             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
@@ -3134,7 +3163,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                         <p>Are you sure you want to submit?</p>
                     </Modal>
                 </Form>
-            </Spin>
+            )}
             {openCreativesDrawer && (
                 <Drawer
                     title="Select creatives"

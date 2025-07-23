@@ -2080,8 +2080,20 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
             onClose={handleDrawerClose}
             style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
         >
-
-            <Spin spinning={loading}>
+             {loading ? (
+                <div
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '300px',
+                }}
+                >
+                    <Spin size="large" />
+                    <div style={{ marginTop: 10, fontSize: 16, color: theme === 'dark' ? '#fff' : '#555' }}>Loading...</div>
+                </div>
+            ) : (
                 <Form layout="vertical" form={form} onFinish={onFinish} onValuesChange={handleFormChange} initialValues={initialValues} className={theme === 'dark' ? 'form-dark' : 'form-light'}>
                     <Collapse accordion activeKey={activeKey} // Bind active key state
                         onChange={(key) => setActiveKey([key])} className={theme === 'dark' ? 'custom-collapse-dark' : 'custom-collapse-light'} >
@@ -3818,7 +3830,9 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                         <p>Are you sure you want to submit?</p>
                     </Modal>
                 </Form>
-            </Spin>
+            )}
+
+          
             {openCreativesDrawer && (
                 <Drawer
                     title="Select creatives"

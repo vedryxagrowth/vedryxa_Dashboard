@@ -3350,6 +3350,12 @@ input:focus, select:focus, .custom-input-dark:focus, .custom-input-light:focus, 
   text-align: center;
 }
 
+/*for Creative right click*/
+.custom-context-menu {
+  transition: top 0.1s ease, left 0.1s ease;
+}
+
+
 
 
 
