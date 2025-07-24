@@ -3515,12 +3515,14 @@ const Dashboard = () => {
                                                     renderExtraFooter={() => (
                                                         <div style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '8px', paddingTop: '5px', paddingBottom: '5px' }}>
                                                             <Button
+                                                                className='custom-button'
                                                                 style={{ marginRight: '8px', border: ' 1px solid #4caf50' }} // Adds spacing between buttons
                                                                 onClick={onClickCloseButton} // Close the picker
                                                             >
                                                                 Close
                                                             </Button>
                                                             <Button
+                                                                className='custom-button1'
                                                                 style={{ backgroundColor: '#91C25F', border: ' 1px solid #4caf50' }}
                                                                 onClick={handleSubmit}
                                                             >
@@ -3687,12 +3689,14 @@ const Dashboard = () => {
                                                     renderExtraFooter={() => (
                                                         <div style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '8px', paddingTop: '5px', paddingBottom: '5px' }}>
                                                             <Button
+                                                                className='custom-button'
                                                                 style={{ marginRight: '8px', border: ' 1px solid #4caf50' }} // Adds spacing between buttons
                                                                 onClick={onClickCloseButton} // Close the picker
                                                             >
                                                                 Close
                                                             </Button>
                                                             <Button
+                                                                className='custom-button1'
                                                                 style={{ backgroundColor: '#91C25F', border: ' 1px solid #4caf50' }}
                                                                 onClick={handleSubmit}
                                                             >
