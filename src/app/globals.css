@@ -786,6 +786,10 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
   border: none;
 }
 
+.dark-theme-dropdown .ant-picker-presets ul > li:hover {
+  background-color: #646363 !important;  
+  color: #fff !important;              
+}
 
 .checkbox-group-dark .ant-checkbox-wrapper {
   color: white !important;
@@ -1022,8 +1026,21 @@ body.dark-mode :where(.css-dev-only-do-not-override-f7vrd6).ant-result{
 .ant-picker-cell.ant-picker-cell-in-view.ant-picker-cell-range-start,
 .ant-picker-cell.ant-picker-cell-in-view.ant-picker-cell-range-end,
 .ant-picker-cell.ant-picker-cell-in-view.ant-picker-cell-selected {
-  background-color: #91C25F !important; /* your highlight color */
+  background-color: #dcf1fa !important; /* your highlight color */
   color: #000 !important;              /* text color on top */
+}
+
+.ant-picker-cell-range-start .ant-picker-cell-inner {
+  background-color: #dcf1fa !important; /* your custom color */
+  color: #000 !important;
+  border: 1px solid #abcbf9;
+}
+ 
+/* Change the background color of END date */
+.ant-picker-cell-range-end .ant-picker-cell-inner {
+  background-color: #dcf1fa !important; /* your custom color */
+  color: #000 !important;
+  border: 1px solid #abcbf9;
 }
 
 
@@ -2111,7 +2128,7 @@ body.dark-mode .black-icon-comment.anticon svg {
 
 .dark-theme-dropdown .ant-picker-cell-range-start .ant-picker-cell-inner,
 .dark-theme-dropdown .ant-picker-cell-range-end .ant-picker-cell-inner {
-  background-color: #91C25F !important;
+  background-color: #e6f7ff !important;
   color: black !important;
   border-radius: 50% !important;
 }
@@ -2133,6 +2150,12 @@ body.dark-mode .black-icon-comment.anticon svg {
 .dark-theme-dropdown .ant-picker-cell-in-range:hover::after,
 .dark-theme-dropdown .ant-picker-cell-in-range:hover .ant-picker-cell-inner {
   background-color: transparent !important;
+}
+
+.dark-theme-dropdown .ant-picker-cell-in-range .ant-picker-cell-inner {
+  background-color: transparent !important;
+  color: #000 !important;
+  border-radius: 0 !important;
 }
 
 /* ✅ Calendar arrow buttons white in dark mode */
@@ -2441,7 +2464,7 @@ body.dark-mode .black-icon-comment.anticon svg {
 }
 
 .dark-theme-dropdown.custom-single-month-picker .ant-picker-cell-selected::before {
-  background-color: #91C25F !important;
+  background-color: #e6f7ff !important;
 }
 
 .dark-theme-dropdown.custom-single-month-picker .ant-picker-cell-disabled {
@@ -2816,7 +2839,7 @@ body.dark-mode .black-icon-comment.anticon svg {
 }
 /* 🌙 Make selected date background visible in dark theme */
 .dark-theme-dropdown.custom-single-month-picker .ant-picker-cell-selected::before {
-  background-color: #91C25F !important; /* or any highlight color you prefer */
+  background-color: #e6f7ff !important; /* or any highlight color you prefer */
   border-radius: 4px;
 }
 
@@ -2832,7 +2855,7 @@ body.dark-mode .black-icon-comment.anticon svg {
   .ant-picker-cell-range-start::before,
 .dark-theme-dropdown.custom-single-month-picker 
   .ant-picker-cell-range-end::before {
-  background-color: #91C25F !important; /* Or any visible color */
+  background-color: #e6f7ff !important; /* Or any visible color */
   border-radius: 4px;
 }
 
@@ -2844,7 +2867,7 @@ body.dark-mode .black-icon-comment.anticon svg {
 .dark-theme-dropdown.custom-single-month-picker 
   .ant-picker-cell-range-end .ant-picker-cell-inner {
   color: #333 !important;
-  background-color: #91C25F !important;
+  background-color: #e6f7ff !important;
   font-weight: 600;
   border-radius: 0% !important; /* Remove rounded corners */
 }
@@ -2855,7 +2878,7 @@ body.dark-mode .black-icon-comment.anticon svg {
 .custom-single-month-picker 
   .ant-picker-cell-range-end .ant-picker-cell-inner {
   color: #333 !important;
-  background-color: #91C25F !important;
+  background-color: #e6f7ff !important;
   font-weight: 600;
   border-radius: 0% !important; /* Remove rounded corners */
   border: 0 !important; /* Remove any border */
@@ -3350,6 +3373,55 @@ input:focus, select:focus, .custom-input-dark:focus, .custom-input-light:focus, 
   text-align: center;
 }
 
+/*for Creative right click*/
+.custom-context-menu {
+  transition: top 0.1s ease, left 0.1s ease;
+}
 
 
+.dark-theme .copy-icon svg {
+  color: #000 !important;
+   fill: #000 !important;
+}
+.dark-theme .copy-icon1 svg {
+  color: #EC7117 !important;
+   fill: #EC7117 !important;
+}
+.light-theme .copy-icon1 svg {
+  color: #EC7117 !important;
+   fill: #EC7117 !important;
+}
+ 
+.light-theme .copy-icon  svg{
+  color: #000 !important;
+  fill: #000 !important;
+}
+/* Apply styles to AntD message only when inside .dark-message */
+.dark-message .ant-message-notice-content {
+  background-color: #333 !important;  
+  color: #fff !important;            
+  border: 1px solid #ccc;
+}
+ 
+.dark-message .ant-message-success .anticon svg {
+  color: #91c25f !important;
+  fill: #91c25f !important;
+}
+.dark-message1 .ant-message-notice-content {
+  background-color: #333 !important;  
+  color: #fff !important;            
+  border: 1px solid #ccc;
+}
+ 
+.dark-message1 .ant-message-success .anticon svg {
+  color: #EC7117 !important;
+  fill: #EC7117 !important;
+}
 
+
+.custom-button:hover {
+  color: #4caf50 !important; /* Change text color on hover */
+}
+.custom-button1:hover {
+  color: #fff !important; /* Change text color on hover for submit button */
+}

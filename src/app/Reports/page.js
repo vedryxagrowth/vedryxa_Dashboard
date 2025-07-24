@@ -1231,13 +1231,26 @@ const MyTablePage = () => {
         return cell;
     };
 
+    // const isYesterday = () => {
+    //     const startDate1 = moment(startDate); // Convert to moment object
+    //     const endDate1 = moment(endDate);     // Convert to moment object
+
+    //     // Define "yesterday" as a reference
+    //     const yesterday1 = moment().subtract(1, 'days');
+    //     return startDate1.isSame(yesterday1, 'day') && endDate1.isSame(yesterday1, 'day');
+    // };
+
     const isYesterday = () => {
         const startDate1 = moment(startDate); // Convert to moment object
         const endDate1 = moment(endDate);     // Convert to moment object
-
-        // Define "yesterday" as a reference
-        const yesterday1 = moment().subtract(1, 'days');
-        return startDate1.isSame(yesterday1, 'day') && endDate1.isSame(yesterday1, 'day');
+    
+        const today = moment();
+        const yesterday = moment().subtract(1, 'days');
+    
+        const isToday = startDate1.isSame(today, 'day') && endDate1.isSame(today, 'day');
+        const isYesterday = startDate1.isSame(yesterday, 'day') && endDate1.isSame(yesterday, 'day');
+    
+        return isToday || isYesterday;
     };
 
     // const campaignMap = useMemo(() => {
@@ -3965,12 +3978,12 @@ const MyTablePage = () => {
                     >
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                         <div style={{display: 'flex'}}>
-                          <p>
+                          <p style={{marginBottom:'0px'}}>
                             Budget Type:
                           </p>{' '}
                           <span style={{ fontWeight: 'normal' }}>
                             {adsetInfo?.budget?.daily_budget ? 'Daily' :
-                              adsetInfo?.budget?.lifetime_budget ? 'Lifetime' : 'Unknown'}
+                              adsetInfo?.budget?.lifetime_budget ? 'Lifetime' : 'No budget'}
                           </span>
                         </div>
           
@@ -3981,6 +3994,8 @@ const MyTablePage = () => {
                           placeholder="Enter budget in USD"
                           className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                         />
+
+                        <p style={{marginBottom:'0px'}}>Bid amount</p>
           
                         <Input
                           type="number"
@@ -6280,12 +6295,12 @@ const MyTablePage = () => {
                     >
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                         <div style={{display: 'flex'}}>
-                            <p>
+                            <p style={{marginBottom:'0px'}} >
                             Budget Type:
                             </p>{' '}
                             <span style={{ fontWeight: 'normal' }}>
                             {adsetInfo?.budget?.daily_budget ? 'Daily' :
-                                adsetInfo?.budget?.lifetime_budget ? 'Lifetime' : 'Unknown'}
+                                adsetInfo?.budget?.lifetime_budget ? 'Lifetime' : 'No budget'}
                             </span>
                         </div>
             
@@ -6296,6 +6311,8 @@ const MyTablePage = () => {
                             placeholder="Enter budget in USD"
                             className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                         />
+
+                        <p style={{marginBottom:'0px'}}>Bid amount</p>
             
                         <Input
                             type="number"

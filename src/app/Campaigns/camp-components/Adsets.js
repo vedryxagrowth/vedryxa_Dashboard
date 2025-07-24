@@ -236,7 +236,7 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
               <div onClick={handleEdit} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                 <DollarOutlined className="custom-dollar-icon" />
                 <span style={{ color: '#1890ff' }}>{value}</span>
-                <p style={{ marginLeft: "5px" }}>Daily</p>
+                <span style={{ marginLeft: "5px" }}>Daily</span>
 
                 {/* {value} */}
                 {/* <EditOutlined style={{ marginLeft: "5px", cursor: "pointer" }} /> */}
