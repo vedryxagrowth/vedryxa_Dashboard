@@ -315,8 +315,8 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
 
                       <div style={{ fontSize: '12px', flex: 1, marginRight: '10px' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                          <div style={{ fontWeight: 'bold', fontSize: '16px' }}>{item.title}</div>
-                          <div style={{ fontSize: '14px', color: '#333' }}>{item.message}</div>
+                          <div style={{ fontWeight: 'bold', fontSize: '16px', color: darkMode ? '#fff' : '#333' }}>{item.title}</div>
+                          <div style={{ fontSize: '14px', color: darkMode ? '#fff' : '#333' }}>{item.message}</div>
                           {/* {item.imageUrl?.includes('.mp4') ? (
                             <video
                               controls

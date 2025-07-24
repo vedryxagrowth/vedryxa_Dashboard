@@ -28,7 +28,8 @@ const revenuePartnerNames = {
     "ENKI": "FB_Enki",
     "System1": "FB_System1",
     "Domain_Active": "Newsbreak_DA",
-    "Sedo": "FB_Sedo"
+    "Sedo": "FB_Sedo",
+    "Tonic_Rsoc": "FB_TonicRsoc"
 };
 
 
@@ -44,7 +45,8 @@ const newtworkCollections = {
     "FB_Bodies1": "Facebook_Bodies1",
     "Newsbreak_DA": "Newsbreak_DomainActive",
     "FB_Tonic1": "Facebook_Tonic1",
-    "FB_Sedo": "Facebook_Sedo"
+    "FB_Sedo": "Facebook_Sedo",
+    "FB_TonicRsoc": "Facebook_TonicRsoc"
 }
 
 import { DatePicker, Space, ConfigProvider, Flex, Spin, Skeleton } from 'antd';
@@ -4343,8 +4345,8 @@ const Dashboard = () => {
                                         type="default"
                                         icon={<BarChartOutlined />}
                                         onClick={() => setShowGraphs(!showGraphs)}
-                                        onMouseEnter={() => setHovered(true)}
-                                        onMouseLeave={() => setHovered(false)}
+                                        // onMouseEnter={() => setHovered(true)}
+                                        // onMouseLeave={() => setHovered(false)}
                                         style={{
                                             border: '2px solid #4CAF50',
                                             color: showGraphs || hovered ? 'green' : theme === 'dark' ? '#f9fafb' : '#1f2937',
@@ -4472,6 +4474,12 @@ const Dashboard = () => {
                                                             paddingBottom: '4px',
                                                             fontSize: '13px',
                                                         },
+                                                    }}
+                                                    gridOptions={{
+                                                        ensureDomOrder: false,
+                                                        suppressRowClickSelection: true,
+                                                        suppressClipboardPaste: false,
+                                                        enableRangeSelection: true,
                                                     }}
 
                                                     autoGroupColumnDef={autoGroupColumnDefOverAllReport}

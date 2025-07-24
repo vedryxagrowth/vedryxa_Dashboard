@@ -3978,12 +3978,12 @@ const MyTablePage = () => {
                     >
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                         <div style={{display: 'flex'}}>
-                          <p>
+                          <p style={{marginBottom:'0px'}}>
                             Budget Type:
                           </p>{' '}
                           <span style={{ fontWeight: 'normal' }}>
                             {adsetInfo?.budget?.daily_budget ? 'Daily' :
-                              adsetInfo?.budget?.lifetime_budget ? 'Lifetime' : 'Unknown'}
+                              adsetInfo?.budget?.lifetime_budget ? 'Lifetime' : 'No budget'}
                           </span>
                         </div>
           
@@ -3994,6 +3994,8 @@ const MyTablePage = () => {
                           placeholder="Enter budget in USD"
                           className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                         />
+
+                        <p style={{marginBottom:'0px'}}>Bid amount</p>
           
                         <Input
                           type="number"
@@ -6293,12 +6295,12 @@ const MyTablePage = () => {
                     >
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                         <div style={{display: 'flex'}}>
-                            <p>
+                            <p style={{marginBottom:'0px'}} >
                             Budget Type:
                             </p>{' '}
                             <span style={{ fontWeight: 'normal' }}>
                             {adsetInfo?.budget?.daily_budget ? 'Daily' :
-                                adsetInfo?.budget?.lifetime_budget ? 'Lifetime' : 'Unknown'}
+                                adsetInfo?.budget?.lifetime_budget ? 'Lifetime' : 'No budget'}
                             </span>
                         </div>
             
@@ -6309,6 +6311,8 @@ const MyTablePage = () => {
                             placeholder="Enter budget in USD"
                             className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                         />
+
+                        <p style={{marginBottom:'0px'}}>Bid amount</p>
             
                         <Input
                             type="number"
