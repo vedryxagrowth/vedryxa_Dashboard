@@ -5774,10 +5774,6 @@ const removeAdset = (index, adsetid) => {
                     onClose={() => setOpenCreativesDrawer(false)}
                     style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
                 >
-                    {/* <CreativesDrawer
-                        selectedFilesData={selectedFilesData}
-                        
-                    /> */}
                     <ImageUploadPage selectedFilesData={selectedFilesData} fromCampaigns={true} network={network} Account_Number={accountis} />
                 </Drawer>
             )}
