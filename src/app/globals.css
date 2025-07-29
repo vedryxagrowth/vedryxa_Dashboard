@@ -3423,5 +3423,5 @@ input:focus, select:focus, .custom-input-dark:focus, .custom-input-light:focus, 
   color: #4caf50 !important; /* Change text color on hover */
 }
 .custom-button1:hover {
-  color: #fff !important; /* Change text color on hover for submit button */
+  color: #fff !important; /* Change text color on hover for submit ---- button */
 }
