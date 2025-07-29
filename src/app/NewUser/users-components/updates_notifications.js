@@ -13,8 +13,8 @@ const UploadComponent = forwardRef(({ onSubmit, isLoading = false }, ref) => {
     image: null
   });
 
-    const [selectedNetwork, setSelectedNetwork] = useState(null);
-    const [networkOptions, setNetworkOptions] = useState([]);
+  const [selectedNetwork, setSelectedNetwork] = useState(null);
+  const [networkOptions, setNetworkOptions] = useState([]);
 
   const [errors, setErrors] = useState({});
   const [imagePreview, setImagePreview] = useState(null);
@@ -27,12 +27,12 @@ const UploadComponent = forwardRef(({ onSubmit, isLoading = false }, ref) => {
       const userNetworks = Object.keys(userdetails.adAccounts);
       const options = [{ value: 'All', label: 'All' }, ...userNetworks.map(key => ({ value: key, label: key }))];
       setNetworkOptions(options);
-  
+
       if (!selectedNetwork) {
         setSelectedNetwork('All'); // Default to All
       }
     }
-  }, [userdetails]);  
+  }, [userdetails]);
 
   const handleNetworkChange = (value) => {
     setSelectedNetwork(value);
@@ -64,7 +64,7 @@ const UploadComponent = forwardRef(({ onSubmit, isLoading = false }, ref) => {
     if (!validateForm()) return;
 
     Modal.confirm({
-    //   title: 'Confirm Submission',
+      //   title: 'Confirm Submission',
       content: 'Are you sure you want to submit this notification?',
       okText: 'Yes',
       cancelText: 'No',
@@ -109,49 +109,49 @@ const UploadComponent = forwardRef(({ onSubmit, isLoading = false }, ref) => {
     }
   };
 
-//   const handleImageChange = (file) => {
-//     if (!file) return;
-//     if (!file.type.startsWith('image/')) {
-//       setErrors(prev => ({ ...prev, image: 'Please select a valid image file' }));
-//       return;
-//     }
-//     if (file.size > 5 * 1024 * 1024) {
-//       setErrors(prev => ({ ...prev, image: 'Image size must be less than 5MB' }));
-//       return;
-//     }
+  //   const handleImageChange = (file) => {
+  //     if (!file) return;
+  //     if (!file.type.startsWith('image/')) {
+  //       setErrors(prev => ({ ...prev, image: 'Please select a valid image file' }));
+  //       return;
+  //     }
+  //     if (file.size > 5 * 1024 * 1024) {
+  //       setErrors(prev => ({ ...prev, image: 'Image size must be less than 5MB' }));
+  //       return;
+  //     }
 
-//     setFormData(prev => ({ ...prev, image: file }));
-//     const reader = new FileReader();
-//     reader.onload = (e) => setImagePreview(e.target?.result);
-//     reader.readAsDataURL(file);
-//     setErrors(prev => ({ ...prev, image: undefined }));
-//   };
+  //     setFormData(prev => ({ ...prev, image: file }));
+  //     const reader = new FileReader();
+  //     reader.onload = (e) => setImagePreview(e.target?.result);
+  //     reader.readAsDataURL(file);
+  //     setErrors(prev => ({ ...prev, image: undefined }));
+  //   };
 
-    const handleMediaChange = (file) => {
-        if (!file) return;
-    
-        const isImage = file.type.startsWith('image/');
-        const isVideo = file.type.startsWith('video/');
-    
-        if (!isImage && !isVideo) {
-        setErrors(prev => ({ ...prev, image: 'Please select a valid image or video file' }));
-        return;
-        }
-    
-        if (file.size > 20 * 1024 * 1024) { // Optional: limit to 20MB
-        setErrors(prev => ({ ...prev, image: 'File size must be less than 20MB' }));
-        return;
-        }
-    
-        setFormData(prev => ({ ...prev, image: file }));
-    
-        const reader = new FileReader();
-        reader.onload = (e) => setImagePreview(e.target?.result);
-        reader.readAsDataURL(file);
-    
-        setErrors(prev => ({ ...prev, image: undefined }));
-    };
-  
+  const handleMediaChange = (file) => {
+    if (!file) return;
+
+    const isImage = file.type.startsWith('image/');
+    const isVideo = file.type.startsWith('video/');
+
+    if (!isImage && !isVideo) {
+      setErrors(prev => ({ ...prev, image: 'Please select a valid image or video file' }));
+      return;
+    }
+
+    if (file.size > 20 * 1024 * 1024) { // Optional: limit to 20MB
+      setErrors(prev => ({ ...prev, image: 'File size must be less than 20MB' }));
+      return;
+    }
+
+    setFormData(prev => ({ ...prev, image: file }));
+
+    const reader = new FileReader();
+    reader.onload = (e) => setImagePreview(e.target?.result);
+    reader.readAsDataURL(file);
+
+    setErrors(prev => ({ ...prev, image: undefined }));
+  };
+
   const handleFileSelect = (e) => {
     const file = e.target.files?.[0] || null;
     handleMediaChange(file);
@@ -211,25 +211,25 @@ const UploadComponent = forwardRef(({ onSubmit, isLoading = false }, ref) => {
             {errors.description && <span className="form-error">{errors.description}</span>}
           </div>
 
-            <div className="form-group">
-                <label htmlFor="network">Action</label>
-                <Select
-                    id="network"
-                    value={selectedNetwork}
-                    onChange={handleNetworkChange}
-                    placeholder="Select network"
-                    style={{ width: '100%' }}
-                    className={theme === 'dark' ? 'custom-select-dark' : ''}
-                    dropdownClassName={theme === 'dark' ? 'custom-dropdown' : ''}
-                    title={''}
-                >
-                    {networkOptions.map((option) => (
-                    <Option key={option.value} value={option.value} title={''}>
-                        {option.label}
-                    </Option>
-                    ))}
-                </Select>
-            </div>
+          <div className="form-group">
+            <label htmlFor="network">Action</label>
+            <Select
+              id="network"
+              value={selectedNetwork}
+              onChange={handleNetworkChange}
+              placeholder="Select network"
+              style={{ width: '100%' }}
+              className={theme === 'dark' ? 'custom-select-dark' : ''}
+              dropdownClassName={theme === 'dark' ? 'custom-dropdown' : ''}
+              title={''}
+            >
+              {networkOptions.map((option) => (
+                <Option key={option.value} value={option.value} title={''}>
+                  {option.label}
+                </Option>
+              ))}
+            </Select>
+          </div>
 
 
           <div className="form-group">
@@ -248,8 +248,14 @@ const UploadComponent = forwardRef(({ onSubmit, isLoading = false }, ref) => {
                   onChange={handleFileSelect}
                   style={{ display: 'none' }}
                 />
-                <p>Click to upload or drag and drop</p>
-                <p>PNG, JPG, GIF </p>
+                <p style={{
+                  color: theme === 'dark' ? '#fff' : '#333'
+
+                }}>Click to upload or drag and drop</p>
+                <p style={{
+                  color: theme === 'dark' ? '#fff' : '#333'
+
+                }} >PNG, JPG, GIF </p>
               </div>
             )}
             {/* {imagePreview && (
@@ -269,29 +275,29 @@ const UploadComponent = forwardRef(({ onSubmit, isLoading = false }, ref) => {
               </div>
             )} */}
             {imagePreview && (
-                <div className="image-preview-wrapper">
-                    {formData.image?.type.startsWith('image/') ? (
-                    <img src={imagePreview} alt="Preview" className="image-preview" />
-                    ) : (
-                    <video
-                        controls
-                        src={imagePreview}
-                        className="image-preview"
-                        style={{ maxHeight: '200px', objectFit: 'cover' }}
-                    />
-                    )}
-                    <div className="image-info">
-                    <span>{formData.image?.name}</span>
-                    <span>({Math.round((formData.image?.size || 0) / 1024)} KB)</span>
-                    <button
-                        type="button"
-                        className="remove-image-btn"
-                        onClick={removeImage}
-                    >
-                        Remove
-                    </button>
-                    </div>
+              <div className="image-preview-wrapper">
+                {formData.image?.type.startsWith('image/') ? (
+                  <img src={imagePreview} alt="Preview" className="image-preview" />
+                ) : (
+                  <video
+                    controls
+                    src={imagePreview}
+                    className="image-preview"
+                    style={{ maxHeight: '200px', objectFit: 'cover' }}
+                  />
+                )}
+                <div className="image-info">
+                  <span>{formData.image?.name}</span>
+                  <span>({Math.round((formData.image?.size || 0) / 1024)} KB)</span>
+                  <button
+                    type="button"
+                    className="remove-image-btn"
+                    onClick={removeImage}
+                  >
+                    Remove
+                  </button>
                 </div>
+              </div>
             )}
 
             {errors.image && <span className="form-error">{errors.image}</span>}

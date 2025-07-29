@@ -346,7 +346,7 @@ const Appbar = ({ children, usersDataForLogin }) => {
                     {collapsed ? (
                         <Image
                             // src="/ssk1.png"
-                            src={darkMode ? "/dark.png" : "/light.png"}
+                            src={darkMode ? "/Collapselogo.png" : "/light.png"}
                             width={100}   // Smaller logo when collapsed
                             height={70}
                             priority={true}
@@ -356,7 +356,7 @@ const Appbar = ({ children, usersDataForLogin }) => {
                     ) : (
                         <Image
                             // src="/RR1.png"
-                            src={darkMode ? "/logodark.png" : "/logolight.png"}
+                            src={darkMode ? "/Expandlogo.png" : "/logolight.png"}
                             width={150}  // Larger logo when expanded
                             height={65}
                             priority={true}

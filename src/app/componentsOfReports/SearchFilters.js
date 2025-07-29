@@ -4,7 +4,7 @@ import { Col, Space, Input, Button, Dropdown, Menu, Tooltip } from 'antd';
 import { SearchOutlined, FilterOutlined, DownOutlined, ReloadOutlined, SettingOutlined } from '@ant-design/icons';
 import { FaRobot } from 'react-icons/fa';
 
-const SearchFilters = ({ theme, handleChangeInput, handleBlur, onClickRefresh }) => {
+const SearchFilters = ({campaignStatusLabel, theme, handleChangeInput, handleBlur, onClickRefresh, onStatusFilterChange }) => {
   return (
     <Col>
     <Space size={2} style={{marginRight: '10px'}}> 
@@ -26,7 +26,7 @@ const SearchFilters = ({ theme, handleChangeInput, handleBlur, onClickRefresh })
                 marginRight: '5px'
             }}
         />  
-        <Tooltip 
+        {/* <Tooltip 
             title={`🍳 This feature is cooking—almost ready to serve 😜`}
             overlayInnerStyle={{
                 backgroundColor: theme === 'dark' ? '#111' : '#fff',
@@ -35,27 +35,47 @@ const SearchFilters = ({ theme, handleChangeInput, handleBlur, onClickRefresh })
                 borderRadius: 6,
                 // fontWeight: 500,
             }}
-        >         
+        >          */}
             <Dropdown
                 overlay={
                     <Menu
+                    onClick={({ key }) => onStatusFilterChange && onStatusFilterChange(key)} // <-- Add this line
                     items={[
-                        { key: 'active', 
-                        label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}}>  
-                          <span
-                                style={{
-                                width: '6px',
-                                height: '6px',
-                                borderRadius: '50%',
-                                backgroundColor: 'green',
-                                marginRight: '6px',
-                                }}
-                            ></span>  
-                        Active
-                      
-                        </span> 
+                        {
+                            key: 'all',
+                            label: (
+                              <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                                <span
+                                  style={{
+                                    width: '6px',
+                                    height: '6px',
+                                    borderRadius: '50%',
+                                    backgroundColor: '#122F6E',
+                                    marginRight: '6px',
+                                  }}
+                                ></span>
+                                All
+                              </span>
+                            ),
                         },
-                        { key: 'pause', label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}}>
+                        { 
+                            key: 'active', 
+                            label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}}>  
+                            <span
+                                    style={{
+                                    width: '6px',
+                                    height: '6px',
+                                    borderRadius: '50%',
+                                    backgroundColor: 'green',
+                                    marginRight: '6px',
+                                    }}
+                                ></span>  
+                            Active
+                        
+                            </span> 
+                        },
+                        { 
+                            key: 'pause', label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}}>
                               <span
                                 style={{
                                 width: '6px',
@@ -67,7 +87,8 @@ const SearchFilters = ({ theme, handleChangeInput, handleBlur, onClickRefresh })
                             ></span>
                             Paused
                       
-                        </span> },
+                            </span> 
+                        },
                     ]}
                     />
                 }
@@ -86,12 +107,12 @@ const SearchFilters = ({ theme, handleChangeInput, handleBlur, onClickRefresh })
                 >
                     <Space size={2}>
                     <FilterOutlined />
-                    Filters
+                    {campaignStatusLabel}
                     <DownOutlined style={{ fontSize: 10 }} />
                     </Space>
                 </Button>
             </Dropdown>
-        </Tooltip>
+        {/* </Tooltip> */}
         <Tooltip 
             title={`🍳 This feature is cooking—almost ready to serve 😜`}
             overlayInnerStyle={{

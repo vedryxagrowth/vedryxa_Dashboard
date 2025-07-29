@@ -83,16 +83,16 @@ async function getUserDetails(name) {
 
 const retryFetch = async (fetchFunc, retries = 3) => {
   try {
-      return await fetchFunc();  // Try the API call
+    return await fetchFunc();  // Try the API call
   } catch (error) {
-      if (retries === 1) throw error;  // Throw error if no retries left
+    if (retries === 1) throw error;  // Throw error if no retries left
 
-      console.log(`Retrying... Attempts left: ${retries - 1}`);
-      
-      // Use debounce for a delay before retrying
-      return new Promise((resolve, reject) => {
-          debouncedRetry(fetchFunc, retries, resolve, reject);
-      });
+    console.log(`Retrying... Attempts left: ${retries - 1}`);
+
+    // Use debounce for a delay before retrying
+    return new Promise((resolve, reject) => {
+      debouncedRetry(fetchFunc, retries, resolve, reject);
+    });
   }
 };
 
@@ -112,68 +112,68 @@ const BodyWrapper = ({ children }) => {
 };
 
 const UserActivities = ({ children, onComplete }) => {
-  const { data: session, status } = useSession(); 
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [useractivites, setuseractivites] = useState({});
-  const {sessionClose, setSessionClose} = useState("open");
-  
+  const { sessionClose, setSessionClose } = useState("open");
+
   useEffect(() => {
-    if(sessionClose === "close"){
-        const handleSignOutAcrossTabs = () => {
-            console.log("Sign-out triggered across all tabs.");
-            const { storedData, activeTab, showGraph } = localStorage; localStorage.clear(); Object.assign(localStorage, { storedData, activeTab, showGraph });
-            localStorage.removeItem("token");
-            signOut(); // Sign out the user using your existing auth logic
-             // Trigger the onComplete callback
-          };
-      
-          const handleStorageEvent = (event) => {
-            if (event.key === "signout" && event.newValue === "true") {
-              // Another tab triggered the sign-out
-              handleSignOutAcrossTabs();
-              onComplete();
-            }
-          };
-      
-          window.addEventListener("storage", handleStorageEvent);
-      
-          return () => {
-            window.removeEventListener("storage", handleStorageEvent);
-          };
+    if (sessionClose === "close") {
+      const handleSignOutAcrossTabs = () => {
+        console.log("Sign-out triggered across all tabs.");
+        const { storedData, activeTab, showGraph } = localStorage; localStorage.clear(); Object.assign(localStorage, { storedData, activeTab, showGraph });
+        localStorage.removeItem("token");
+        signOut(); // Sign out the user using your existing auth logic
+        // Trigger the onComplete callback
+      };
+
+      const handleStorageEvent = (event) => {
+        if (event.key === "signout" && event.newValue === "true") {
+          // Another tab triggered the sign-out
+          handleSignOutAcrossTabs();
+          onComplete();
+        }
+      };
+
+      window.addEventListener("storage", handleStorageEvent);
+
+      return () => {
+        window.removeEventListener("storage", handleStorageEvent);
+      };
     }
   }, [sessionClose]);
-  
+
   useEffect(() => {
     if (status === "authenticated") {
       const token = localStorage.getItem("token");
       console.log(token);
       let decodedToken;
-  
+
       if (token) {
         // console.log("Hi");
         try {
           // Decode the token
           decodedToken = jwt.decode(token);
           // console.log("This");
-  
+
           if (!decodedToken || !decodedToken.exp) {
             // console.log("is");
             console.error("Decoded token is invalid or missing 'exp' field:", decodedToken);
             throw new Error("Invalid token structure.");
           }
-  
+
           // Compare the token expiration with the current time
           const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
           // console.log("Decoded token expiration:", decodedToken.exp);
           // console.log("Current time:", currentTime);
-  
+
           if (decodedToken.exp < currentTime) {
             // console.log("praveen");
             // console.log("Token is expired. Clearing localStorage and signing out.");
-  
+
             // Broadcast sign-out to all tabs
             localStorage.setItem("signout", "true");
-  
+
             // Clear local changes and log out
             const { storedData, activeTab, showGraph } = localStorage; localStorage.clear(); Object.assign(localStorage, { storedData, activeTab, showGraph });
             localStorage.removeItem("token");
@@ -181,8 +181,8 @@ const UserActivities = ({ children, onComplete }) => {
             signOut();
             setSessionClose("close");
             return;
-            
-          } 
+
+          }
           else if (decodedToken.exp > currentTime) {
             // Token exists and is valid
             // console.log("testing");
@@ -205,7 +205,7 @@ const UserActivities = ({ children, onComplete }) => {
         // signOut();
       }
     }
-    if(status === "unauthenticated"){
+    if (status === "unauthenticated") {
       console.log("users");
       const { storedData, activeTab, showGraph } = localStorage; localStorage.clear(); Object.assign(localStorage, { storedData, activeTab, showGraph });
       onComplete();
@@ -213,7 +213,7 @@ const UserActivities = ({ children, onComplete }) => {
       console.log("un auth");
     }
   }, [status]);
-  
+
   return <>{children}</>;
 };
 
@@ -223,7 +223,7 @@ const ContentWrapper = ({ children }) => {
   const [usersDataForLogin, setusersDataForLogin] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isComponentMounted, setIsComponentMounted] = useState(false); // To prevent initial rendering issues
-  
+
   // useEffect to fetch user data
   const fetchDataUntilSuccess = async (email, delay = 1500) => {
     while (true) {
@@ -243,15 +243,15 @@ const ContentWrapper = ({ children }) => {
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
   };
-  
+
   useEffect(() => {
     let isMounted = true;
-  
+
     const fetchUserData = async () => {
       if (session?.user?.email) {
         try {
           setLoading(true);
-          
+
           const userData = await fetchDataUntilSuccess(session?.user?.email);
           if (isMounted) {
             setusersDataForLogin(userData);
@@ -266,12 +266,12 @@ const ContentWrapper = ({ children }) => {
       }
     };
     fetchUserData();
-  
+
     return () => {
       isMounted = false; // Cleanup on component unmount
     };
   }, [session?.user?.email]);
-  
+
 
   useEffect(() => {
     // Mark component as mounted after all initial effects are done
@@ -292,7 +292,7 @@ const ContentWrapper = ({ children }) => {
       return <Topbar />;
     }
 
-    if ((status === "authenticated" && usersDataForLogin.length === 0 && !loading)){
+    if ((status === "authenticated" && usersDataForLogin.length === 0 && !loading)) {
       return <TopBar1 />
     }
 
@@ -345,18 +345,21 @@ const AuthenticationProvider = ({ children }) => {
 };
 
 export default function RootLayout({ children }) {
-  
+
   return (
     <html lang="en">
-      <head></head>
+      <head>
+        <link rel="icon" type="image/png"  href="/ssk1.png"/>
+         
+      </head>
       <body className={`${inter.className} full-width `}>
         <SessionProvider refetchOnWindowFocus={false} refetchInterval={0} broadcast={false}>
-          
-              <AuthenticationProvider>
-                {children}
-              </AuthenticationProvider>
-            
-          
+
+          <AuthenticationProvider>
+            {children}
+          </AuthenticationProvider>
+
+
         </SessionProvider>
       </body>
     </html>
