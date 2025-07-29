@@ -138,7 +138,7 @@
   "app\\NewUser\\page.js -> ./users-components/updates_notifications": {
     "id": 71645,
     "files": [
-      "static/chunks/1645.49c23f1fadbdf7b2.js"
+      "static/chunks/1645.57cb896cf8883128.js"
     ]
   },
   "app\\Reports\\page.js -> ../componentsOfReports/AgencyAndBMName": {
@@ -156,7 +156,7 @@
       "static/chunks/160b575a-393707cfbe900b39.js",
       "static/chunks/225-9f1be4e1a6c8bfc5.js",
       "static/chunks/8110-0a7b255b83a3fc52.js",
-      "static/chunks/3397.142582cafeaad122.js"
+      "static/chunks/3397.a3ade5cd1d7d10b7.js"
     ]
   },
   "app\\Reports\\page.js -> ../componentsOfReports/DAKeywords": {
@@ -173,7 +173,7 @@
     "files": [
       "static/chunks/160b575a-393707cfbe900b39.js",
       "static/chunks/225-9f1be4e1a6c8bfc5.js",
-      "static/chunks/1541.1499b19db6e52b64.js"
+      "static/chunks/1541.21fb87b361529224.js"
     ]
   },
   "app\\Reports\\page.js -> ../componentsOfReports/InmobiKeywords": {
@@ -190,7 +190,7 @@
     "files": [
       "static/chunks/160b575a-393707cfbe900b39.js",
       "static/chunks/225-9f1be4e1a6c8bfc5.js",
-      "static/chunks/4887.ae7a0b14ff425fd2.js"
+      "static/chunks/4887.6adb4f6a5dbe32e4.js"
     ]
   },
   "app\\Reports\\page.js -> ../componentsOfReports/MnetAdDaily": {
@@ -250,61 +250,61 @@
   "app\\componentsOfReports\\AllCampaigns.js -> ./SearchFilters": {
     "id": 78466,
     "files": [
-      "static/chunks/8466.19b6f7e3092084d4.js"
+      "static/chunks/8466.206faa3a64e2659e.js"
     ]
   },
   "app\\componentsOfReports\\Daily.js -> ./AdLevelDaily": {
     "id": 15825,
     "files": [
       "static/chunks/8110-0a7b255b83a3fc52.js",
-      "static/chunks/5825.113de068f9765ce2.js"
+      "static/chunks/5825.3e873ead0447e49d.js"
     ]
   },
   "app\\componentsOfReports\\Daily.js -> ./AdsetLevelDaily": {
     "id": 99369,
     "files": [
       "static/chunks/8110-0a7b255b83a3fc52.js",
-      "static/chunks/9369.4df6aa08eb1f3713.js"
+      "static/chunks/9369.d0972bdf4dd11175.js"
     ]
   },
   "app\\componentsOfReports\\Daily.js -> ./CampaignLevelDaily": {
     "id": 11997,
     "files": [
       "static/chunks/8110-0a7b255b83a3fc52.js",
-      "static/chunks/1997.a46aef099c6a7cbe.js"
+      "static/chunks/1997.02040c886182d3a4.js"
     ]
   },
   "app\\componentsOfReports\\Daily.js -> ./SearchFilters": {
     "id": 78466,
     "files": [
-      "static/chunks/8466.19b6f7e3092084d4.js"
+      "static/chunks/8466.206faa3a64e2659e.js"
     ]
   },
   "app\\componentsOfReports\\Live.js -> ./AdLevel": {
     "id": 54630,
     "files": [
       "static/chunks/8110-0a7b255b83a3fc52.js",
-      "static/chunks/4630.fbd98e05495450b5.js"
+      "static/chunks/4630.b711ae15acdca6f3.js"
     ]
   },
   "app\\componentsOfReports\\Live.js -> ./AdsetLevel": {
     "id": 29941,
     "files": [
       "static/chunks/8110-0a7b255b83a3fc52.js",
-      "static/chunks/9941.d75de660326669f7.js"
+      "static/chunks/9941.171bada28500faa2.js"
     ]
   },
   "app\\componentsOfReports\\Live.js -> ./CampaignLevel": {
     "id": 60781,
     "files": [
       "static/chunks/8110-0a7b255b83a3fc52.js",
-      "static/chunks/781.7b1796fec6748e24.js"
+      "static/chunks/781.050385f5c235ed67.js"
     ]
   },
   "app\\componentsOfReports\\Live.js -> ./SearchFilters": {
     "id": 78466,
     "files": [
-      "static/chunks/8466.19b6f7e3092084d4.js"
+      "static/chunks/8466.206faa3a64e2659e.js"
     ]
   }
 }
