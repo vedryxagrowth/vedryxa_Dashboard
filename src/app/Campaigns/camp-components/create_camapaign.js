@@ -1039,7 +1039,7 @@ const AdsetComponent = ({
                                 message: "Please select an option!",
                             },
                         ]}
-                        style={{ flex: '1 1 150px' }}
+                        style={{ flex: '120px' }}
                         initialValue={adset.optimization_goal || "OFFSITE_CONVERSIONS"}
                     >
                         <Select
@@ -1052,7 +1052,7 @@ const AdsetComponent = ({
                             // onChange={(value) => handleFieldChange(index, "optimization_goal", value)}
                             // defaultValue={adset.optimization_goal || "OFFSITE_CONVERSIONS"}
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                            className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                         />
                     </Form.Item>
                     <Form.Item
@@ -1064,7 +1064,7 @@ const AdsetComponent = ({
                                 message: "Please select an option!",
                             },
                         ]}
-                        style={{ flex: '1 1 150px' }}
+                        style={{ flex: '120px' }}
                         initialValue={adset.billing_event || "IMPRESSIONS"}
                     >
                         <Select
@@ -1073,7 +1073,7 @@ const AdsetComponent = ({
                                 { value: "VALUE", label: "Value" }
                             ]}
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                            className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                             // defaultValue={adset.billing_event || "IMPRESSIONS"}
                             // onChange={(value) => handleFieldChange(index, "billing_event", value)}
                         />
@@ -1087,10 +1087,11 @@ const AdsetComponent = ({
                                 message: 'Please input!',
                             },
                         ]}
-                        style={{ flex: '1 1 150px' }}
+                        style={{ flex: '150px' }}
                         initialValue={currentDate ? dayjs(currentDate) : dayjs()}
                     >
                         <DatePicker showTime  dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}
+                             className="green-border-picker"
     //                                 onChange={(value, dateString) => {
     //     console.log("Local Time:", dateString)
     //     console.log("UTC ISO:", moment(value).utc().format("YYYY-MM-DDTHH:mm:ssZ"))
@@ -1106,7 +1107,7 @@ const AdsetComponent = ({
                                 message: "Please select an option!",
                             },
                         ]}
-                        style={{ flex: '1 1 150px' }}
+                        style={{ flex: '120px' }}
                         initialValue={adset.action_source || "website"}
                     >
                         <Select
@@ -1117,7 +1118,7 @@ const AdsetComponent = ({
                                 { value: "phone_call", label: "Phone Call" }
                             ]}
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                            className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                             // defaultValue={adset.action_source || "website"}
                             // onChange={(value) => handleFieldChange(index, "action_source", value)}
                         />
@@ -1131,7 +1132,7 @@ const AdsetComponent = ({
                                 message: "Please select an option!",
                             },
                         ]}
-                        style={{ flex: '1 1 150px' }}
+                        style={{ flex: '120px' }}
                         initialValue={adset.custom_event_type || "LEAD"}
                     >
                         <Select
@@ -1142,7 +1143,7 @@ const AdsetComponent = ({
                                 { value: "CONTACT", label: "Contact" },
                             ]}
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                            className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                             // defaultValue={adset.custom_event_type || "LEAD"}
                             // onChange={(value) => handleFieldChange(index, "custom_event_type", value)}
                         />
@@ -1175,7 +1176,7 @@ const AdsetComponent = ({
                             message: "Please select an option!",
                             },
                         ]}
-                        style={{ flex: '1 1 200px' }}
+                        style={{ flex: '140px' }}
                         >
                         {typeof imagehash?.pixelID === 'object' ? (
                             <Select
@@ -1326,7 +1327,7 @@ const AdsetComponent = ({
 
 <Form.Item
     name={['adsets', index, "DailyAdd_amount"]}
-    label={`Adset ${index + 1} Daily Budget`}
+    label={`Daily Budget`}
     rules={[
         {
             required: !(isCampaignBudgetActive || form.getFieldValue(['adsets', index, 'DailyAdd_amount']) > 0),
@@ -1357,7 +1358,8 @@ const AdsetComponent = ({
                 });
             }}
             readOnly={isCampaignBudgetActive} // Make adset budget read-only if campaign budget is active
-            style={{ width: 200 }}
+            style={{ width: 120 }}
+            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
         />
     </Tooltip>
 </Form.Item>
@@ -1417,7 +1419,7 @@ const AdsetComponent = ({
                                 message: "Please select an option!",
                             },
                         ]}
-                        style={{ flex: '1 1 150px' }}
+                        style={{ flex: '140px' }}
                         initialValue={adset.countries || "US"}
                     >
                         <Select
@@ -1443,7 +1445,7 @@ const AdsetComponent = ({
                             ]}
                             // defaultValue={adset.countries || "US"}
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                            className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                         />
                     </Form.Item>
                     <Form.Item
@@ -1467,7 +1469,7 @@ const AdsetComponent = ({
                             ]}
                             // defaultValue={adset.Min_Age || "18"}
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                            className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                         />
                     </Form.Item>
                     <Form.Item
@@ -1491,7 +1493,7 @@ const AdsetComponent = ({
                             ]}
                             // defaultValue={adset.Max_Age || "65"}
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                            className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                         />
                     </Form.Item>
                     <Form.Item
@@ -1514,7 +1516,7 @@ const AdsetComponent = ({
                             ]}
                             // defaultValue={"0"}
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                            className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                         />
                     </Form.Item>
                     <Form.Item
@@ -1533,7 +1535,7 @@ const AdsetComponent = ({
                                 option.children.toLowerCase().includes(input.toLowerCase())
                             }
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                            className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                             // defaultValue={adset.Language || "English (US)"}
                         >
                             {localesdata.map(option => (
@@ -1634,7 +1636,7 @@ const AdsetComponent = ({
     <Select
     placeholder="Select a mode"
     dropdownClassName={theme === 'dark' && "custom-dropdown"}
-    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+    className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
     // defaultValue={adset.placements || "Advance"}
     >
     <Option value="Advance">Advance</Option>
@@ -1663,7 +1665,7 @@ const AdsetComponent = ({
     label={<span style={{ color: "#B4B4B4" }}>Platforms</span>}
     rules={[{ required: true, message: "Please select an option!" }]}
     // style={{ flex: '1 1 300px' }}
-    style={{ flex: 1, minWidth: '250px' }}
+    style={{ flex: 1, minWidth: '210px' }}
     >
     <Select
     mode="multiple"
@@ -1671,7 +1673,7 @@ const AdsetComponent = ({
     onChange={handlePublisherChange}
     value={selectedPublishers}
     dropdownClassName={theme === 'dark' && "custom-dropdown"}
-    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+    className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
     >
     {publisherOptions.map(option => (
     <Option key={option.value} value={option.value}>
@@ -1685,7 +1687,7 @@ const AdsetComponent = ({
   name={['adsets', index, "positions"]}
   label={<span style={{ color: "#B4B4B4" }}>Positions</span>}
   rules={[{ required: true, message: "Please select an option!" }]}
-  style={{ flex: 2, minWidth: '300px' }}
+  style={{ flex: 2, minWidth: '215px' }}
 >
   <Select
     mode="multiple"
@@ -1693,7 +1695,7 @@ const AdsetComponent = ({
     value={(selectedPositions?.[adset.id] || []).map(pos => pos.key)} // ✅ fixed
     onChange={handlePositionChange}
     dropdownClassName={theme === 'dark' && "custom-dropdown"}
-    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+    className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
   >
     {Array.isArray(selectedPublishers?.[adset.id]) &&
       selectedPublishers[adset.id].length > 0 &&
@@ -1711,7 +1713,7 @@ const AdsetComponent = ({
     label={<span style={{ color: "#B4B4B4" }}>Device</span>}
     rules={[{ required: true, message: "Please select an option!" }]}
     // style={{ flex: '1 1 200px' }}
-    style={{ flex: 1, minWidth: '200px' }}
+    style={{ flex: 1, minWidth: '215px' }}
     >
     <Select
     mode="multiple"
@@ -1722,7 +1724,7 @@ const AdsetComponent = ({
     { value: "desktop", label: "Desktop" }
     ]}
     dropdownClassName={theme === 'dark' && "custom-dropdown"}
-    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+    className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
     />
     </Form.Item>
     </div>
@@ -1783,7 +1785,7 @@ const AdsetComponent = ({
                                                     }}
                                                     style={{ marginBottom: 16 }}
                                                     dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                                    className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                                 >
                                                     <Option value="upload">Upload</Option>
                                                     <Option value="creative">Creative library</Option>
@@ -2100,7 +2102,7 @@ const AdsetComponent = ({
                                         ]}
                                         style={{ flex: 3, marginLeft: "1%" }}
                                     >
-                                        <Input style={{ width: "45%" }}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
+                                        <Input style={{ width: "23%" }}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                                     </Form.Item>
                                 </div>
                                 <Form.Item
@@ -5130,9 +5132,14 @@ const removeAdset = (index, adsetid) => {
     return (
         <Drawer
             title={
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '5px' }}>
                     <span>Create a new campaign</span>
-                    <Select value={newSelectedRef.current} placeholder="Select Draft" style={{ width: 150 }} onChange={onChangeDraft}
+                    <Select value={newSelectedRef.current} placeholder="Select Draft"  
+                        style={{
+                            width: 160,
+                            border: '1.5px solid #4CAF50',
+                            borderRadius: '8px',
+                        }} onChange={onChangeDraft}
                                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}>
                         {/* {draftsData.map((draft) => (
@@ -5170,7 +5177,9 @@ const removeAdset = (index, adsetid) => {
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: 0.2 }}>
+                                    // style={{ width: 200, }}
+                                    style={{ flex: 0.25, }}
+                                >
                                     <Input value={accountNumber} onChange={Accountchange}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
                                 </Form.Item>
                                 <Form.Item
@@ -5182,9 +5191,11 @@ const removeAdset = (index, adsetid) => {
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: 0.25 }}>
+                                    // style={{ width: 200, marginLeft: "1%" }}
+                                    style={{ flex: 0.25, marginLeft: "1%" }}
+                                >
                                     <Input onChange={handleNameChange}
-                                        style={{ width: "100%", marginLeft: "3%" }}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                        style={{ width: "100%", }}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -5196,7 +5207,9 @@ const removeAdset = (index, adsetid) => {
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: 0.1, marginLeft: "2%" }}>
+                                    style={{ flex: 0.15, marginLeft: "1%" }}
+                                    // style={{ width: 170, marginLeft: "1%" }}
+                                >
                                     <Select
                                         // onChange={getpixelandpageid}
                                         variant="filled"
@@ -5210,7 +5223,7 @@ const removeAdset = (index, adsetid) => {
 
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -5222,7 +5235,9 @@ const removeAdset = (index, adsetid) => {
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: 0.1, marginLeft: "2%" }}>
+                                    style={{ flex: 0.12, marginLeft: "1%" }}
+                                    // style={{ width: 160, marginLeft: "1%" }}
+                                >
                                     <Select
 
                                         variant="filled"
@@ -5237,7 +5252,7 @@ const removeAdset = (index, adsetid) => {
 
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        className={theme === 'dark' ? 'dark-theme-category' : 'light-theme'}
+                                        className={`${theme === 'dark' ? 'dark-theme-category' : 'light-theme'} green-border-select`}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -5249,7 +5264,9 @@ const removeAdset = (index, adsetid) => {
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: 0.1, marginLeft: "2%" }}>
+                                    style={{ flex: 0.2, marginLeft: "1%" }}
+                                    // style={{ width: 170, marginLeft: "1%" }}
+                                >
                                     <Select
                                         variant="filled"
                                         options={[
@@ -5260,7 +5277,7 @@ const removeAdset = (index, adsetid) => {
                                         ]}
                                         onChange={handleBidStrategyChange}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                     />
                                 </Form.Item>
                                 {/*pk*/}
@@ -5406,13 +5423,14 @@ const removeAdset = (index, adsetid) => {
       <Tooltip title={isAnyAdsetBudgetSet ? 'You have enabled daily budget in the Adset Level' : ''}>
                     <Form.Item
                         name="Daily_amount"
-                        label="Campaign Daily Budget"
+                        label="Daily Budget"
                         rules={[
                             {
                                 required: !(isAnyAdsetBudgetSet || campaignLevelDailyBudget > 0),
                                 message: "Please enter a valid daily budget for the Campaign"
                             }
                         ]}
+                        style={{ marginLeft: "1%" }}
                     >
                         <InputNumber
                             min={0}
@@ -5424,7 +5442,8 @@ const removeAdset = (index, adsetid) => {
                                 setIsCampaignBudgetActive(value > 0);
                             }}
                             readOnly={isAnyAdsetBudgetSet} // Make campaign budget read-only if any adset has a budget
-                            style={{ width: 200 }}
+                            style={{ flex: 0.2, }}
+                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                         />
                     </Form.Item>
                 </Tooltip>
@@ -5437,7 +5456,9 @@ const removeAdset = (index, adsetid) => {
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: 0.1, marginLeft: "2%" }}>
+                                    style={{ flex: 0.1, marginLeft: "1%" }}
+                                    // style={{ width: 160, marginLeft: "1%" }}
+                                >
                                     <Select
                                         variant="filled"
                                         options={[
@@ -5445,7 +5466,7 @@ const removeAdset = (index, adsetid) => {
                                             { value: "PAUSED", label: "PAUSED" },
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                     />
                                 </Form.Item>
                             </div>
@@ -5553,7 +5574,7 @@ const removeAdset = (index, adsetid) => {
 </Button> */}
 <Button
   type="primary"
-  style={{ background: '#21c55d', minWidth: '200px', borderWidth: '0px' }}
+  style={{ background: '#91c25f', minWidth: '200px', borderWidth: '0px' }}
   onClick={async () => {
     try {
       const values = await form.validateFields(); // Validates all form fields
@@ -5657,7 +5678,7 @@ const removeAdset = (index, adsetid) => {
       onCancel={handleCancelPop}
       okButtonProps={{ loading: confirmLoading }}
     >
-      <Button type="primary" style={{ background: '#11dd44', minWidth: '100px', borderWidth: '0px', marginLeft: '10px' }} onClick={() => setOpen(true)}>
+      <Button type="primary" style={{ background: '#91c25f', minWidth: '100px', borderWidth: '0px', marginLeft: '10px' }} onClick={() => setOpen(true)}>
         Draft
       </Button>
     </Popconfirm>

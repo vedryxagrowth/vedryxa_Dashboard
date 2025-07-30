@@ -1,6 +1,6 @@
 "use client"
 import React from 'react';
-import { Drawer, Button, DatePicker, Space, Form, Input, Select, Collapse, Upload, Steps, Modal, message, Spin, Badge, Tooltip, Skeleton } from 'antd';
+import { Drawer, Button, DatePicker, Space, Form, Input, Select, Collapse, Upload, Steps, Modal, message, Spin, Badge, Tooltip, Skeleton, InputNumber } from 'antd';
 import { PlusOutlined, UploadOutlined, ShareAltOutlined, CommentOutlined, LikeOutlined, MoreOutlined, CloseOutlined, GlobalOutlined, EditOutlined, QuestionCircleOutlined, DeleteOutlined } from '@ant-design/icons';
 import moment from 'moment-timezone';
 import { useState, useRef, useEffect } from 'react';
@@ -1800,7 +1800,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: 0.2 }}>
+                                    style={{ flex: 0.25 }}>
                                     <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
                                 </Form.Item>
                                 <Form.Item
@@ -1812,9 +1812,9 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: 0.25 }}>
+                                    style={{ flex: 0.25, marginLeft: "1%" }}>
                                     <Input onChange={handleNameChange}
-                                        style={{ width: "100%", marginLeft: "3%" }}
+                                        style={{ width: "100%", }}
                                         className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                     />
                                 </Form.Item>
@@ -1827,7 +1827,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: 0.1, marginLeft: "2%" }}>
+                                    style={{ flex: 0.15, marginLeft: "1%" }}>
                                     <Select onChange={getpixelandpageid}
 
                                         variant="filled"
@@ -1854,7 +1854,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: 0.1, marginLeft: "2%" }}>
+                                    style={{ flex: 0.12, marginLeft: "1%" }}>
                                     <Select
 
                                         variant="filled"
@@ -1881,7 +1881,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: 0.1, marginLeft: "2%" }}>
+                                    style={{ flex: 0.2, marginLeft: "1%" }}>
                                     <Select
 
                                         variant="filled"
@@ -1899,11 +1899,11 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                 <Form.Item
                                     name="Daily_amount"
                                     label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
-                                    style={{ flex: 0.1, marginLeft: "2%" }}
+                                    style={{ marginLeft: "1%" }}
                                 // tooltip={adsetLevelDailyBudget !== "" ? "You have enabled daily budget in the Adset Level" : ""}
                                 >
                                     <Tooltip title={adsetLevelDailyBudget !== 0 ? "You have enabled daily budget in the Adset Level" : ""}>
-                                        <Input
+                                        <InputNumber
                                             type="number"
                                             placeholder="$"
                                             value={campaignLevelDailyBudget}
@@ -1917,7 +1917,8 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 borderColor: adsetLevelDailyBudget !== 0 ? 'transparent' : undefined,
                                                 fontSize: '14px',
                                                 color: '#333',
-                                                width: '200px',
+                                                // width: '200px',
+                                                flex: 0.2,
                                                 boxSizing: 'border-box'
                                             }}
                                             className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
@@ -1933,7 +1934,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: 0.1, marginLeft: "2%" }}>
+                                    style={{ flex: 0.1, marginLeft: "1%" }}>
                                     <Select
                                         variant="filled"
                                         options={[
@@ -1975,7 +1976,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: '1 1 150px', marginLeft: "2%" }}>
+                                    style={{ flex: '1 1 120px', }}>
                                     <Select
 
                                         variant="filled"
@@ -1998,7 +1999,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: '1 1 150px' }}>
+                                    style={{ flex: '1 1 120px' }}>
                                     <Select
 
                                         variant="filled"
@@ -2034,7 +2035,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: '1 1 150px' }}>
+                                    style={{ flex: '1 1 120px' }}>
                                     <Select
 
                                         variant="filled"
@@ -2057,7 +2058,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: '1 1 150px' }}>
+                                    style={{ flex: '1 1 120px' }}>
                                     <Select
 
                                         variant="filled"
@@ -2101,7 +2102,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                         message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: '1 1 200px' }}
+                                    style={{ flex: '1 1 150px' }}
                                     >
                                     {typeof imagehash?.pixelID === 'object' ? (
                                         <Select
@@ -2261,7 +2262,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: '1 1 150px' }}>
+                                    style={{ flex: '1 1 140px' }}>
                                     <Select
                                         variant="filled"
 
@@ -2403,7 +2404,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             label={<span style={{ color: "#B4B4B4" }}>Platforms</span>}
                                             rules={[{ required: true, message: "Please select an option!" }]}
                                             // style={{ marginRight: "10px" }}
-                                            style={{ flex: '1 1 300px' }}
+                                            style={{ flex: '1 1 210px' }}
                                         >
 
                                             <Select
@@ -2427,7 +2428,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             name="positions"
                                             label={<span style={{ color: "#B4B4B4" }}>Positions</span>}
                                             rules={[{ required: true, message: "Please select an option!" }]}
-                                            style={{ flex: '1 1 400px' }}
+                                            style={{ flex: '1 1 215px' }}
                                         // style={{ marginRight: "10px" }}
                                         >
                                             <Select
@@ -2435,7 +2436,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 placeholder="Select Positions"
                                                 value={selectedPositions.map(pos => pos.value)}
                                                 onChange={handlePositionChange}
-                                                style={{ width: 400 }}
+                                                // style={{ width: 400 }}
                                                 dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                                 className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                                             >
@@ -2460,7 +2461,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                     message: "Please select an option!",
                                                 },
                                             ]}
-                                            style={{ flex: '1 1 200px' }}>
+                                            style={{ flex: '1 1 215px' }}>
                                             <Select
                                                 mode="multiple"
                                                 variant="filled"
@@ -2774,7 +2775,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             ]}
                                             style={{ flex: 3, marginLeft: "1%" }}
                                         >
-                                            <Input style={{ width: "45%" }}
+                                            <Input style={{ width: "23%" }}
                                             className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                                         </Form.Item>
                                     </div>

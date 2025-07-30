@@ -1,6 +1,6 @@
 "use client"
 import React, { useEffect } from 'react';
-import { Drawer, Button, DatePicker, Space, Form, Input, Select, Collapse, Upload, Steps, Modal, message, Spin, Badge, Tooltip } from 'antd';
+import { Drawer, Button, DatePicker, Space, Form, Input, Select, Collapse, Upload, Steps, Modal, message, Spin, Badge, Tooltip, InputNumber } from 'antd';
 import { PlusOutlined, UploadOutlined, ShareAltOutlined, CommentOutlined, LikeOutlined, MoreOutlined, CloseOutlined, GlobalOutlined, EditOutlined, QuestionCircleOutlined,PaperClipOutlined,DeleteOutlined  } from '@ant-design/icons';
 import moment from 'moment-timezone';
 import { useState, useRef } from 'react';
@@ -2108,7 +2108,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: 0.2 }}>
+                                    style={{ flex: 0.25 }}>
                                     <Input value={accountNumber} onChange={Accountchange}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                                 </Form.Item>
                                 <Form.Item
@@ -2120,9 +2120,9 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: 0.25 }}>
+                                    style={{ flex: 0.25,marginLeft: '1%' }}>
                                     <Input onChange={handleNameChange}
-                                        style={{ width: "100%", marginLeft: "3%" }}
+                                        style={{ width: "100%",}}
                                         className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                     />
                                 </Form.Item>
@@ -2135,7 +2135,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: 0.1, marginLeft: "2%" }}>
+                                    style={{ flex: 0.15, marginLeft: "1.5%" }}>
                                     <Select
                                         // onChange={getpixelandpageid}
                                         variant="filled"
@@ -2162,7 +2162,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: 0.1, marginLeft: "2%" }}>
+                                    style={{ flex: 0.12, marginLeft: "1%" }}>
                                     <Select
 
                                         variant="filled"
@@ -2189,7 +2189,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: 0.1, marginLeft: "2%" }}>
+                                    style={{ flex: 0.15, marginLeft: "1%" }}>
                                     <Select
                                         variant="filled"
                                         options={[
@@ -2207,11 +2207,11 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 <Form.Item
                                     name={["Campaign", "Daily_amount"]}
                                     label={<span style={{ color: "#B4B4B4" }}>Daily budget</span>}
-                                    style={{ flex: 0.1, marginLeft: "2%" }}
+                                    style={{ marginLeft: "1%" }}
                                 // tooltip={adsetLevelDailyBudget !== "" ? "You have enabled daily budget in the Adset Level" : ""}
                                 >
                                     <Tooltip title={adsetLevelDailyBudget !== 0 ? "You have enabled daily budget in the Adset Level" : ""}>
-                                        <Input
+                                        <InputNumber
                                             type="number"
                                             placeholder="$"
                                             value={campaignLevelDailyBudget}
@@ -2224,7 +2224,8 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                 borderColor: adsetLevelDailyBudget !== 0 ? 'transparent' : undefined,
                                                 fontSize: '14px',
                                                 color: '#333',
-                                                width: '200px',
+                                                // width: '110px',
+                                                flex: 0.2,
                                                 boxSizing: 'border-box'
                                             }}
                                             className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
@@ -2240,7 +2241,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: 0.1, marginLeft: "2%" }}>
+                                    style={{ flex: 0.1, marginLeft: "1%" }}>
                                     <Select
                                         variant="filled"
                                         options={[
@@ -2255,7 +2256,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                         </Panel>
 
                         <Panel header="ADSET LEVEL" key="2" forceRender>
-                            <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: "17px" }}>
                                 <Form.Item
                                     name={["Adset", "AdsetName"]}
                                     initialValue={campaignName}
@@ -2279,7 +2280,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: '1 1 150px' }}
+                                    style={{ flex: '1 1 120px' }}
                                 >
                                     <Select
                                         options={[
@@ -2302,7 +2303,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: '1 1 150px' }}
+                                    style={{ flex: '1 1 120px' }}
                                 >
                                     <Select
                                         options={[
@@ -2343,7 +2344,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: '1 1 150px' }}
+                                    style={{ flex: '1 1 120px' }}
                                 >
                                     <Select
                                         options={[
@@ -2365,7 +2366,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: '1 1 150px' }}
+                                    style={{ flex: '1 1 120px' }}
                                 >
                                     <Select
                                         options={[
@@ -2389,7 +2390,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: '1 1 200px' }}
+                                    style={{ flex: '1 1 150px' }}
                                 >
                                     <Input 
                                     disabled={true}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
@@ -2402,7 +2403,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     style={{ flex: '1 1 200px' }}
                                 >
                                     <Tooltip title={campaignLevelDailyBudget !== 0 ? "You have enabled daily budget in the Campaign Level" : ""}>
-                                        <Input
+                                        <InputNumber
                                             type="number"
                                             placeholder="$"
                                             value={adsetLevelDailyBudget}
@@ -2467,7 +2468,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: '1 1 150px' }}
+                                    style={{ flex: '1 1 140px' }}
                                 >
                                     <Select
                                         options={[
@@ -2603,7 +2604,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             name={["Adset", "publisher_platforms"]}
                                             label={<span style={{ color: "#B4B4B4" }}>Platforms</span>}
                                             rules={[{ required: true, message: "Please select an option!" }]}
-                                            style={{ flex: '1 1 300px' }}
+                                            style={{ flex: '1 1 210px' }}
                                         >
                                             <Select
                                                 mode="multiple"
@@ -2625,7 +2626,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             name={["Adset", "positions"]}
                                             label={<span style={{ color: "#B4B4B4" }}>Positions</span>}
                                             rules={[{ required: true, message: "Please select an option!" }]}
-                                            style={{ flex: '1 1 400px' }}
+                                            style={{ flex: '1 1 210px' }}
                                         >
                                             <Select
                                                 mode="multiple"
@@ -2652,7 +2653,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                     message: "Please select an option!",
                                                 },
                                             ]}
-                                            style={{ flex: '1 1 200px' }}
+                                            style={{ flex: '1 1 210px' }}
                                         >
                                             <Select
                                                 mode="multiple"
@@ -3330,10 +3331,10 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                     message: "Please select an option!",
                                                 },
                                             ]}
-                                            style={{ flex: 3, marginLeft: "1%", marginTop: "1%" }}
+                                            style={{ flex: 3, marginTop: "1%" }}
                                              // Disable the input field
                                     >
-                                            <Input style={{ width: "45%" }} disabled={true}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
+                                            <Input style={{ width: "15%" }} disabled={true}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
                                     </Form.Item>
                                     {/* <Form.Item
                                         name="AddName"

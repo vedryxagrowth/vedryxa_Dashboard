@@ -1,7 +1,7 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import { Table, Tag, Button, Col, Card, Drawer, Dropdown, Flex, Input, Row, Select, Spin, Menu, Space, Modal, message, Switch, Tooltip, ConfigProvider, Skeleton } from 'antd';
-import { EditOutlined, EyeOutlined, SearchOutlined, CloseOutlined, SwapRightOutlined, PlusOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, ExclamationCircleFilled, ReloadOutlined, LinkOutlined, InfoCircleOutlined, DeleteOutlined, DownOutlined, DollarOutlined } from "@ant-design/icons";
+import { FilterOutlined, EditOutlined, EyeOutlined, SearchOutlined, CloseOutlined, SwapRightOutlined, PlusOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, ExclamationCircleFilled, ReloadOutlined, LinkOutlined, InfoCircleOutlined, DeleteOutlined, DownOutlined, DollarOutlined } from "@ant-design/icons";
 import CreateCampaignDrawer from './camp-components/create_camapaign';
 import CreateDraft from './camp-components/CreateDraft';
 import EditAllLevelDataDrawer from './camp-components/EditAllLevelData';
@@ -1322,10 +1322,11 @@ const App = () => {
                 visible={EditcamapaignDrawerVisible}
                 onClose={() => setEditcamapaignDrawerVisible(false)}
             /> */}
-      <Card style={{
-        marginBottom: "10px", boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)', // subtle shadow
-        borderRadius: '10px'
-      }}
+      <Card 
+        style={{
+          marginBottom: "10px", boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)', // subtle shadow
+          borderRadius: '10px'
+        }}
         headStyle={{
           borderBottom: 'none', // ❌ removes the bottom line
           paddingBottom: 0, // Optional: tighter spacing
@@ -1400,9 +1401,9 @@ const App = () => {
           </Button.Group>
 
         }
-      // style={{ backgroundColor:'blue'}}
+        // style={{ backgroundColor:'blue'}}
       >
-        <Row justify="start" align="middle" gutter={[16, 16]}>
+        <Row align="middle" gutter={[16, 16]}>
           <Col span={3}>
             <Select
               showSearch
@@ -1510,7 +1511,7 @@ const App = () => {
             </ConfigProvider>
           </Col>
 
-          <Col span={3} style={{ marginLeft: '-28px' }}>
+          {/* <Col span={3} style={{ marginLeft: '-28px' }}>
 
             <Input
               placeholder="Search..."
@@ -1524,8 +1525,8 @@ const App = () => {
                 border: '1px solid #4caf50',
               }}
             />
-          </Col>
-          <Col span={9} style={{ marginRight: '-30px' }} >
+          </Col> */}
+          <Col style={{ marginLeft: 'auto' }}>
             <div
               style={{
                 display: 'flex',
@@ -1533,7 +1534,7 @@ const App = () => {
                 alignItems: 'center',
                 gap: '12px',
                 flexWrap: 'wrap',
-                width: '100%',
+                // width: '100%',
 
                 // marginLeft:'3px'
               }}
@@ -1553,7 +1554,7 @@ const App = () => {
                   Create campaign
                 </Button>
               )}
-
+              {/* 
               <Button
                 type="primary"
                 onClick={handleRefresh}
@@ -1565,7 +1566,7 @@ const App = () => {
                   marginRight: '-5px',
                   border: '#4caf50'
                 }}
-              />
+              /> */}
 
               <span
                 style={{
@@ -1576,7 +1577,7 @@ const App = () => {
                   fontWeight:'500',
                   color: theme === 'dark' ? '#1d39c4' : '#1d39c4',
                   border: `1px solid ${theme === 'dark' ? '#91d5ff' : '#91d5ff'}`,
-                  marginRight: '-55px'
+                  // marginRight: '-55px'
 
                 }}
               >
@@ -1586,6 +1587,150 @@ const App = () => {
             </div>
           </Col>
 
+
+        </Row>
+
+
+        <Row justify="end" align="middle" gutter={[8, 0]} style={{marginTop: '5px'}}>
+
+          <Col>
+            <Input
+              placeholder="Search..."
+              // suffix={<SearchOutlined onClick={handleSearchSubmit} />}
+              value={searchInput}
+              onChange={handleSearchChange}
+              onPressEnter={handleSearchSubmit}
+              className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+              style={{
+                width: '170px',
+                border: '1px solid #4caf50',
+              }}
+            />
+          </Col>
+
+          <Col>
+            <Dropdown
+                overlay={
+                    <Menu
+                    onClick={({ key }) => onStatusFilterChange && onStatusFilterChange(key)} // <-- Add this line
+                    items={[
+                        {
+                            key: 'all',
+                            label: (
+                              <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                                {/* <span
+                                  style={{
+                                    width: '6px',
+                                    height: '6px',
+                                    borderRadius: '50%',
+                                    backgroundColor: '#122F6E',
+                                    marginRight: '6px',
+                                  }}
+                                ></span> */}
+                                All Campaigns
+                              </span>
+                            ),
+                        },
+                        { 
+                            key: 'active', 
+                            label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}}>  
+                            {/* <span
+                                    style={{
+                                    width: '6px',
+                                    height: '6px',
+                                    borderRadius: '50%',
+                                    backgroundColor: 'green',
+                                    marginRight: '6px',
+                                    }}
+                                ></span>   */}
+                            Active Campaigns
+                        
+                            </span> 
+                        },
+                        { 
+                            key: 'pause', label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}}>
+                              {/* <span
+                                style={{
+                                width: '6px',
+                                height: '6px',
+                                borderRadius: '50%',
+                                backgroundColor: 'red',
+                                marginRight: '6px',
+                                }}
+                            ></span> */}
+                            Paused Campaigns
+                      
+                            </span> 
+                        },
+                        { 
+                          key: 'pending', label: <span style={{fontSize:'13px', display:'flex', alignItems:'center'}}>
+                            {/* <span
+                              style={{
+                              width: '6px',
+                              height: '6px',
+                              borderRadius: '50%',
+                              backgroundColor: 'red',
+                              marginRight: '6px',
+                              }}
+                          ></span> */}
+                          Pending Campaigns
+                    
+                          </span> 
+                      },
+                    ]}
+                    />
+                }
+                trigger={['click']}
+            >
+                <Button
+                    type="default"
+                    style={{
+                    borderRadius: 8,
+                    background: theme === 'dark' ? 'rgba(82,196,26,0.12)' : '#f6ffed',
+                    border: '1px solid #4CAF50',
+                    color: theme === 'dark' ? '#95de64' : '#389e0d',
+                    fontWeight: 500,
+                    // marginRight: '3px'
+                    }}
+                >
+                    <Space size={2}>
+                    <FilterOutlined />
+                      Filters
+                    <DownOutlined style={{ fontSize: 10 }} />
+                    </Space>
+                </Button>
+            </Dropdown>
+          </Col>
+
+          <Col>
+            <div
+              style={{
+                display: 'flex',
+                // justifyContent: 'flex-end',
+                alignItems: 'center',
+                gap: '10px',
+                flexWrap: 'wrap',
+                width: '100%',
+
+                // marginLeft:'3px'
+              }}
+            >
+
+              <Button
+                type="primary"
+                onClick={handleRefresh}
+                icon={<ReloadOutlined className="black-icon" />}
+                style={{
+                  backgroundColor: '#91C25F',
+                  color: '#000',
+                  border: 'none',
+                  // marginRight: '-5px',
+                  border: '#4caf50'
+                }}
+              />
+
+            </div>
+          </Col>
 
         </Row>
       </Card>

@@ -2936,6 +2936,7 @@ body.dark-mode .black-icon-comment.anticon svg {
 
 .dark-icon-button {
   background-color: transparent !important;
+  border-color: #91C25F !important;
   /* border: none; */
 }
 
@@ -3424,4 +3425,15 @@ input:focus, select:focus, .custom-input-dark:focus, .custom-input-light:focus, 
 }
 .custom-button1:hover {
   color: #fff !important; /* Change text color on hover  */
+}
+
+
+
+/* Reduce header height */
+.custom-dark-table thead > tr > th {
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
+  height: 50px !important;
+  line-height: 20px !important;
+  font-size: 13px; /* optional: match row font */
 }
