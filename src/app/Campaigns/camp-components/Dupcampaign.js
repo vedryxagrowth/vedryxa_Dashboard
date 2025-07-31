@@ -22,76 +22,76 @@ const { Panel } = Collapse;
 const { Option } = Select;
 const { Step } = Steps;
 const publisherOptions = [
-    { label: 'Facebook', value: 'facebook' },
-    { label: 'Instagram', value: 'instagram' },
-    { label: 'Messenger', value: 'messenger' },
-    { label: 'Audience Network', value: 'audience_network' }
+    { label: 'Facebook', value: 'facebook',title:"" },
+    { label: 'Instagram', value: 'instagram',title:"" },
+    { label: 'Messenger', value: 'messenger',title:"" },
+    { label: 'Audience Network', value: 'audience_network',title:"" }
 ];
 const positionOptions = {
     facebook: [
-        { key: "feed", label: "Facebook Feed" },
-        { key: "marketplace", label: "Facebook Marketplace" },
-        { key: "video_feeds", label: "Facebook Video Feeds" },
-        { key: "instream_video", label: "Facebook In-Stream Videos" },
-        { key: "facebook_reels", label: "Facebook Reels" },
-        { key: "profile_feed-f", label: "Facebook Profile Feed" },
-        { key: "search", label: "Facebook Search" },
-        { key: "story_f", label: "Facebook Stories" },
-        { key: "right_hand_column", label: "Facebook Right Column" },
-        { key: "instant_article", label: "Facebook Instant Articles" },
-        { key: "biz_disco_feed", label: "Facebook Business Explore" } // Added Business Explore
+        { key: "feed", label: "Facebook Feed",title:"" },
+        { key: "marketplace", label: "Facebook Marketplace",title:"" },
+        { key: "video_feeds", label: "Facebook Video Feeds" ,title:""},
+        { key: "instream_video", label: "Facebook In-Stream Videos",title:"" },
+        { key: "facebook_reels", label: "Facebook Reels",title:"" },
+        { key: "profile_feed-f", label: "Facebook Profile Feed",title:"" },
+        { key: "search", label: "Facebook Search",title:"" },
+        { key: "story_f", label: "Facebook Stories",title:"" },
+        { key: "right_hand_column", label: "Facebook Right Column",title:"" },
+        { key: "instant_article", label: "Facebook Instant Articles" ,title:""},
+        { key: "biz_disco_feed", label: "Facebook Business Explore",title:"" } // Added Business Explore
     ],
     instagram: [
-        { key: "stream", label: "Instagram Stream" },
-        { key: "story_i", label: "Instagram Stories" },
-        { key: "explore", label: "Instagram Explore" },
-        { key: "explore_home", label: "Instagram Explore Home" },
-        { key: "reels", label: "Instagram Reels" },
-        { key: "profile_feed-i", label: "Instagram Profile Feed" },
-        { key: "ig_search", label: "Instagram Search" },
-        { key: "profile_reels", label: "Instagram Profile Reels" }
+        { key: "stream", label: "Instagram Stream",title:"" },
+        { key: "story_i", label: "Instagram Stories",title:"" },
+        { key: "explore", label: "Instagram Explore" ,title:""},
+        { key: "explore_home", label: "Instagram Explore Home",title:"" },
+        { key: "reels", label: "Instagram Reels",title:"" },
+        { key: "profile_feed-i", label: "Instagram Profile Feed",title:"" },
+        { key: "ig_search", label: "Instagram Search",title:"" },
+        { key: "profile_reels", label: "Instagram Profile Reels",title:"" }
     ],
     messenger: [
-        { key: "messenger_home", label: "Messenger Home" },
-        { key: "story_m", label: "Messenger Stories" },
-        { key: "sponsored_messages", label: "Messenger Sponsored Messages" },
+        { key: "messenger_home", label: "Messenger Home",title:"" },
+        { key: "story_m", label: "Messenger Stories" ,title:""},
+        { key: "sponsored_messages", label: "Messenger Sponsored Messages",title:"" },
         // { key: "messenger_inbox", label: "Messenger Inbox" }
     ],
     audience_network: [
-        { key: "classic", label: "Audience Network Classic" },
-        { key: "rewarded_video", label: "Audience Network Rewarded Video" },
+        { key: "classic", label: "Audience Network Classic",title:"" },
+        { key: "rewarded_video", label: "Audience Network Rewarded Video",title:"" },
         // { key: "instream_video", label: "Audience Network In-Stream Video" }
     ]
 };
 
 const allPositions = [
-    { key: "feed", label: "Facebook Feed" },
-    { key: "marketplace", label: "Facebook Marketplace" },
-    { key: "video_feeds", label: "Facebook Video Feeds" },
-    { key: "instream_video", label: "Facebook In-Stream Videos" },
-    { key: "facebook_reels", label: "Facebook Reels" },
-    { key: "profile_feed-f", label: "Facebook Profile Feed" },
-    { key: "search", label: "Facebook Search" },
-    { key: "story_f", label: "Facebook Stories" },
-    { key: "right_hand_column", label: "Facebook Right Column" },
-    { key: "instant_article", label: "Facebook Instant Articles" },
-    { key: "biz_disco_feed", label: "Facebook Business Explore" },
+    { key: "feed", label: "Facebook Feed" ,title:""},
+    { key: "marketplace", label: "Facebook Marketplace",title:"" },
+    { key: "video_feeds", label: "Facebook Video Feeds" ,title:""},
+    { key: "instream_video", label: "Facebook In-Stream Videos",title:"" },
+    { key: "facebook_reels", label: "Facebook Reels" ,title:""},
+    { key: "profile_feed-f", label: "Facebook Profile Feed",title:"" },
+    { key: "search", label: "Facebook Search",title:"" },
+    { key: "story_f", label: "Facebook Stories",title:"" },
+    { key: "right_hand_column", label: "Facebook Right Column" ,title:""},
+    { key: "instant_article", label: "Facebook Instant Articles",title:"" },
+    { key: "biz_disco_feed", label: "Facebook Business Explore",title:"" },
   
-    { key: "stream", label: "Instagram Stream" },
-    { key: "story_i", label: "Instagram Stories" },
-    { key: "explore", label: "Instagram Explore" },
-    { key: "explore_home", label: "Instagram Explore Home" },
-    { key: "reels", label: "Instagram Reels" },
-    { key: "profile_feed-i", label: "Instagram Profile Feed" },
-    { key: "ig_search", label: "Instagram Search" },
-    { key: "profile_reels", label: "Instagram Profile Reels" },
+    { key: "stream", label: "Instagram Stream",title:"" },
+    { key: "story_i", label: "Instagram Stories",title:"" },
+    { key: "explore", label: "Instagram Explore",title:"" },
+    { key: "explore_home", label: "Instagram Explore Home",title:"" },
+    { key: "reels", label: "Instagram Reels",title:"" },
+    { key: "profile_feed-i", label: "Instagram Profile Feed" ,title:""},
+    { key: "ig_search", label: "Instagram Search",title:"" },
+    { key: "profile_reels", label: "Instagram Profile Reels" ,title:""},
   
-    { key: "messenger_home", label: "Messenger Home" },
-    { key: "story_m", label: "Messenger Stories" },
-    { key: "sponsored_messages", label: "Messenger Sponsored Messages" },
+    { key: "messenger_home", label: "Messenger Home",title:"" },
+    { key: "story_m", label: "Messenger Stories",title:"" },
+    { key: "sponsored_messages", label: "Messenger Sponsored Messages",title:"" },
   
-    { key: "classic", label: "Audience Network Classic" },
-    { key: "rewarded_video", label: "Audience Network Rewarded Video" }
+    { key: "classic", label: "Audience Network Classic",title:"" },
+    { key: "rewarded_video", label: "Audience Network Rewarded Video" ,title:""}
 ];
   
   
@@ -1768,7 +1768,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
     return (
         <Drawer
             title={selectedRow?.campaign_name}
-            width="100%"
+            width="95%"
             open={visible}
             onClose={handleDrawerClose}
             style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
@@ -1832,16 +1832,16 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
 
                                         variant="filled"
                                         options={[
-                                            { value: "OUTCOME_LEADS", label: "Leads" },
-                                            { value: "OUTCOME_SALES", label: "Sales" },
-                                            { value: "OUTCOME_ENGAGEMENT", label: "Engagement" },
-                                            { value: "OUTCOME_AWARENESS", label: "Awareness" },
-                                            { value: "OUTCOME_TRAFFIC", label: "Traffic" },
-                                            { value: "OUTCOME_APP_PROMOTION", label: "App promotion" }
+                                            { value: "OUTCOME_LEADS", label: "Leads",title:"" },
+                                            { value: "OUTCOME_SALES", label: "Sales" ,title:""},
+                                            { value: "OUTCOME_ENGAGEMENT", label: "Engagement",title:"" },
+                                            { value: "OUTCOME_AWARENESS", label: "Awareness",title:"" },
+                                            { value: "OUTCOME_TRAFFIC", label: "Traffic",title:"" },
+                                            { value: "OUTCOME_APP_PROMOTION", label: "App promotion",title:"" }
 
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
 
                                     />
                                 </Form.Item>
@@ -1861,15 +1861,15 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                         mode="multiple"
                                         allowClear
                                         options={[
-                                            { value: "HOUSING", label: "Housing" },
-                                            { value: "FINANCIAL_PRODUCTS_SERVICES", label: "Credit" },
-                                            { value: "EMPLOYMENT", label: "Employment" },
-                                            { value: "ISSUES_ELECTIONS_POLITICS", label: "Politics" },
-                                            { value: "NONE", label: "None" }
+                                            { value: "HOUSING", label: "Housing",title:"" },
+                                            { value: "FINANCIAL_PRODUCTS_SERVICES", label: "Credit",title:"" },
+                                            { value: "EMPLOYMENT", label: "Employment" ,title:""},
+                                            { value: "ISSUES_ELECTIONS_POLITICS", label: "Politics",title:"" },
+                                            { value: "NONE", label: "None" ,title:""}
 
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        className={theme === 'dark' ? 'dark-theme-category' : 'light-theme'}
+                                        className={`${theme === 'dark' ? 'dark-theme-category' : 'light-theme'} green-border-select`}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -1886,14 +1886,14 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
 
                                         variant="filled"
                                         options={[
-                                            { value: "LOWEST_COST_WITHOUT_CAP", label: "Highest Volume" },
-                                            { value: "LOWEST_COST_WITH_BID_CAP", label: "Bid Cap" },
-                                            { value: "COST_CAP", label: "Cost Per Result Goal" },
-                                            { value: "LOWEST_COST_WITH_MIN_ROAS", label: "ROAS Goal" }
+                                            { value: "LOWEST_COST_WITHOUT_CAP", label: "Highest Volume",title:"" },
+                                            { value: "LOWEST_COST_WITH_BID_CAP", label: "Bid Cap",title:"" },
+                                            { value: "COST_CAP", label: "Cost Per Result Goal",title:"" },
+                                            { value: "LOWEST_COST_WITH_MIN_ROAS", label: "ROAS Goal",title:"" }
                                         ]}
                                         onChange={handleBidStrategyChange}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -1916,7 +1916,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 borderRadius: '6px',
                                                 borderColor: adsetLevelDailyBudget !== 0 ? 'transparent' : undefined,
                                                 fontSize: '14px',
-                                                color: '#333',
+                                                color: theme === 'dark' ? '#fff' : '#000',
                                                 // width: '200px',
                                                 flex: 0.2,
                                                 boxSizing: 'border-box'
@@ -1938,12 +1938,12 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                     <Select
                                         variant="filled"
                                         options={[
-                                            { value: "ACTIVE", label: "ACTIVE" },
-                                            { value: "PAUSED", label: "PAUSE" },
+                                            { value: "ACTIVE", label: "ACTIVE",title:"" },
+                                            { value: "PAUSED", label: "PAUSE",title:"" },
 
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                     />
                                 </Form.Item>
 
@@ -1981,13 +1981,13 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
 
                                         variant="filled"
                                         options={[
-                                            { value: "OFFSITE_CONVERSIONS", label: "Conversions" },
-                                            { value: "LINK_CLICKS", label: "Clicks" },
-                                            { value: "REACH", label: "Reach" },
-                                            { value: "VALUE", label: "Value" }
+                                            { value: "OFFSITE_CONVERSIONS", label: "Conversions",title:"" },
+                                            { value: "LINK_CLICKS", label: "Clicks",title:"" },
+                                            { value: "REACH", label: "Reach" ,title:""},
+                                            { value: "VALUE", label: "Value" ,title:""}
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2004,11 +2004,11 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
 
                                         variant="filled"
                                         options={[
-                                            { value: "IMPRESSIONS", label: "Impressions" },
-                                            { value: "VALUE", label: "Value" }
+                                            { value: "IMPRESSIONS", label: "Impressions",title:"" },
+                                            { value: "VALUE", label: "Value",title:"" }
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2020,11 +2020,11 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             message: 'Please input!',
                                         },
                                     ]}
-                                    style={{ flex: '1 1 150px' }}
+                                    style={{ flex: '1 1 150px',color: theme === 'dark' ? '#fff' : '#000', }}
                                     initialValue={currentDate}
 
                                 >
-                                    <DatePicker showTime dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}/>
+                                    <DatePicker   className={`green-border-picker ${theme === 'dark' ? 'custom-datepicker-dark' : 'custom-datepicker-light'}`} showTime dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}/>
                                 </Form.Item>
                                 <Form.Item
                                     name="action_source"
@@ -2040,13 +2040,13 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
 
                                         variant="filled"
                                         options={[
-                                            { value: "website", label: "Website" },
-                                            { value: "email", label: "Email" },
-                                            { value: "app", label: "App" },
-                                            { value: "phone_call", label: "Phone Call" }
+                                            { value: "website", label: "Website",title:"" },
+                                            { value: "email", label: "Email",title:"" },
+                                            { value: "app", label: "App" ,title:""},
+                                            { value: "phone_call", label: "Phone Call",title:"" }
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2063,13 +2063,13 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
 
                                         variant="filled"
                                         options={[
-                                            { value: "LEAD", label: "Lead" },
-                                            { value: "PURCHASE", label: "Purchase" },
-                                            { value: "SEARCH", label: "Search" },
-                                            { value: "CONTACT", label: "Contact" },
+                                            { value: "LEAD", label: "Lead",title:"" },
+                                            { value: "PURCHASE", label: "Purchase",title:"" },
+                                            { value: "SEARCH", label: "Search",title:"" },
+                                            { value: "CONTACT", label: "Contact" ,title:""},
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                         className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                     />
                                 </Form.Item>
                                 {/* <Form.Item
@@ -2110,7 +2110,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                         className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                         >
                                         {Object.entries(imagehash.pixelID).map(([label, value]) => (
-                                            <Select.Option key={value} value={value}>
+                                            <Select.Option key={value} value={value} title={null}>
                                             {`${label} - ${value}`}
                                             </Select.Option>
                                         ))}
@@ -2141,7 +2141,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 borderRadius: '6px',
                                                 borderColor: campaignLevelDailyBudget !== 0 ? 'transparent' : undefined,
                                                 fontSize: '14px',
-                                                color: '#333',
+                                                color: theme === 'dark' ? '#fff' : '#000',
                                                 width: '200px',
                                                 boxSizing: 'border-box'
                                             }}
@@ -2168,7 +2168,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                             ]}
                                             style={{ flex: '1 1 150px' }}
                                         >
-                                            <Input
+                                            <InputNumber
                                                 type="number"
                                                 placeholder="$"
                                                 onWheel={(e) => e.target.blur()}
@@ -2180,6 +2180,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                         event.preventDefault();
                                                     }
                                                 }}
+                                                style={{color: theme === "dark" ? "white" : "#000"}}
                                                 className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                             />
                                         </Form.Item>
@@ -2267,27 +2268,27 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                         variant="filled"
 
                                         options={[
-                                            { value: "US", label: "United States" },
-                                            { value: "GB", label: "United Kingdom" },
-                                            { value: "AU", label: "Australia" },
-                                            { value: "IN", label: "India" },
-                                            { value: "AE", label: "United Arab Emirates" },
-                                            { value: "CA", label: "Canada" },
-                                            { value: "DE", label: "Germany" },
-                                            { value: "FR", label: "France" },
-                                            { value: "JP", label: "Japan" },
-                                            { value: "CN", label: "China" },
-                                            { value: "BR", label: "Brazil" },
-                                            { value: "ZA", label: "South Africa" },
-                                            { value: "RU", label: "Russia" },
-                                            { value: "IT", label: "Italy" },
-                                            { value: "ES", label: "Spain" },
-                                            { value: "SG", label: "Singapore" },
-                                            { value: "NZ", label: "New Zealand" },
-                                            { value: "MX", label: "Mexico" }
+                                            { value: "US", label: "United States",title:"" },
+                                            { value: "GB", label: "United Kingdom",title:"" },
+                                            { value: "AU", label: "Australia",title:"" },
+                                            { value: "IN", label: "India",title:"" },
+                                            { value: "AE", label: "United Arab Emirates",title:"" },
+                                            { value: "CA", label: "Canada",title:"" },
+                                            { value: "DE", label: "Germany" ,title:""},
+                                            { value: "FR", label: "France",title:"" },
+                                            { value: "JP", label: "Japan",title:"" },
+                                            { value: "CN", label: "China",title:"" },
+                                            { value: "BR", label: "Brazil",title:"" },
+                                            { value: "ZA", label: "South Africa",title:"" },
+                                            { value: "RU", label: "Russia",title:"" },
+                                            { value: "IT", label: "Italy",title:"" },
+                                            { value: "ES", label: "Spain",title:"" },
+                                            { value: "SG", label: "Singapore" ,title:""},
+                                            { value: "NZ", label: "New Zealand",title:"" },
+                                            { value: "MX", label: "Mexico",title:"" }
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                         className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2303,13 +2304,13 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                     <Select
                                         variant="filled"
                                         options={[
-                                            { value: "18", label: "18" },
-                                            { value: "25", label: "25" },
-                                            { value: "35", label: "35" },
-                                            { value: "40", label: "40", disabled: true },
+                                            { value: "18", label: "18" ,title:""},
+                                            { value: "25", label: "25" ,title:""},
+                                            { value: "35", label: "35" ,title:""},
+                                            { value: "40", label: "40", disabled: true ,title:""},
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                         className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2326,13 +2327,13 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                     <Select
                                         variant="filled"
                                         options={[
-                                            { value: "20", label: "20" },
-                                            { value: "30", label: "30" },
-                                            { value: "65", label: "65+" },
-                                            { value: "80", label: "80", disabled: true },
+                                            { value: "20", label: "20",title:"" },
+                                            { value: "30", label: "30" ,title:""},
+                                            { value: "65", label: "65+",title:"" },
+                                            { value: "80", label: "80", disabled: true,title:"" },
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                         className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2349,12 +2350,12 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                     <Select
                                         variant="filled"
                                         options={[
-                                            { value: "0", label: "All" },
-                                            { value: "1", label: "Male" },
-                                            { value: "2", label: "Female" },
+                                            { value: "0", label: "All",title:"" },
+                                            { value: "1", label: "Male" ,title:""},
+                                            { value: "2", label: "Female" ,title:""},
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2374,10 +2375,10 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                         placeholder="Select language"
                                         optionFilterProp="children"
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                         className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                     >
                                         {localesdata.map(option => (
-                                            <Option key={option.key} value={option.key}>
+                                            <Option key={option.key} value={option.key} title={null}>
                                                 {option.name}
                                             </Option>
                                         ))}
@@ -2391,9 +2392,9 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                 >
                                     <Select placeholder="Select a mode" onChange={handleModeChange}
                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}>
-                                        <Option value="Advance">Advance</Option>
-                                        <Option value="manual">Manual</Option>
+                       className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}>
+                                        <Option value="Advance" title={null}>Advance</Option>
+                                        <Option value="manual" title={null}>Manual</Option>
 
                                     </Select>
                                 </Form.Item>
@@ -2414,10 +2415,10 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 value={selectedPublishers}
                                                 style={{ width: 300 }}
                                                 dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                                 className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                             >
                                                 {publisherOptions.map(option => (
-                                                    <Option key={option.value} value={option.value}>
+                                                    <Option key={option.value} value={option.value} title={null}>
                                                         {option.label}
                                                     </Option>
                                                 ))}
@@ -2438,11 +2439,11 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 onChange={handlePositionChange}
                                                 // style={{ width: 400 }}
                                                 dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                                 className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                             >
                                                 {selectedPublishers && selectedPublishers.length > 0 ? (
                                                     getPositionOptions()?.map(position => (
-                                                        <Option key={`${position.key}_${position.label}`} value={position.key}>
+                                                        <Option key={`${position.key}_${position.label}`} value={position.key} title={null}>
                                                             {position.label}
                                                         </Option>
                                                     ))
@@ -2469,11 +2470,11 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                 style={{ width: 200 }}
                                                 placeholder="Please select"
                                                 options={[
-                                                    { value: "mobile", label: "Mobile" },
-                                                    { value: "desktop", label: "Desktop" }
+                                                    { value: "mobile", label: "Mobile" ,title:""},
+                                                    { value: "desktop", label: "Desktop",title:"" }
                                                 ]}
                                                 dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                                className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                             />
                                         </Form.Item>
                                     </>
@@ -2601,7 +2602,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                                                     }}
                                                     style={{ marginBottom: 16 }}
                                                     dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                                    className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                                     className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                                 >
                                                     <Option value="upload">Upload</Option>
                                                     <Option value="creative">Creative library</Option>
@@ -3213,7 +3214,7 @@ const DuplicateCampaignDrawer = ({ visible, onClose, selectedRow, changeRRefrst,
                         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
                         <Button
                             type="primary"
-                            style={{ background: '#21c55d', minWidth: '200px', borderWidth:'0px' }}
+                            style={{ background: '#91C25F', minWidth: '200px', borderWidth:'0px' ,border:'1px solid #4caf50'}}
                             onClick={async () => {
                             try {
                                 const values = await form.validateFields(); // Validates all form fields

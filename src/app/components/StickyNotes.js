@@ -59,34 +59,77 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
-  const handleMultipleFileUpload = async (files, userdetails) => {
-    if (!files.length || !userdetails?.userName) {
+  // const handleMultipleFileUpload = async (files, userdetails) => {
+  //   if (!files.length || !userdetails?.userName) {
+  //     message.error("No files or user details!");
+  //     return [];
+  //   }
+  //   const uploadDate = moment().format("YYYY-MM-DD");
+  //   const uploadedUrls = [];
+  //   for (const file of files) {
+  //     const extension = file.name.split(".").pop();
+  //     const uniqueFilename = `${uuidv4()}.${extension}`;
+  //     const formData = new FormData();
+  //     formData.append("file", file);
+  //     formData.append("uploadDate", uploadDate);
+  //     formData.append("filename", uniqueFilename);
+  //     try {
+  //       const response = await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
+  //         headers: { Authorization: localStorage.getItem("token") },
+  //       });
+  //       const imageUrl = response.data?.imageUrl;
+  //       if (imageUrl) uploadedUrls.push(imageUrl);
+  //       else message.error(`No URL returned for ${file.name}`);
+  //     } catch (error) {
+  //       console.error(`Upload failed for ${file.name}:`, error.response?.data || error.message);
+  //       message.error(`Failed to upload ${file.name}`);
+  //     }
+  //   }
+  //   return uploadedUrls;
+  // };
+  
+const handleMultipleFileUpload = async (files, userdetails) => {
+    if (!files?.length || !userdetails?.userName) {
       message.error("No files or user details!");
       return [];
     }
+
     const uploadDate = moment().format("YYYY-MM-DD");
     const uploadedUrls = [];
+
     for (const file of files) {
       const extension = file.name.split(".").pop();
       const uniqueFilename = `${uuidv4()}.${extension}`;
+      const finalKey = `StickyNotes/${userdetails.userName}/${uniqueFilename}`; 
+
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("uploadDate", uploadDate);
-      formData.append("filename", uniqueFilename);
+      formData.append("filename", finalKey);
+      formData.append("uploadDate", uploadDate); 
+
       try {
         const response = await axios.post("https://prodapis.adsgoat.in/uploadUserFiles", formData, {
-          headers: { Authorization: localStorage.getItem("token") },
+          headers: {
+            Authorization: localStorage.getItem("token"),
+            username: userdetails.userName, 
+          },
         });
+
         const imageUrl = response.data?.imageUrl;
-        if (imageUrl) uploadedUrls.push(imageUrl);
-        else message.error(`No URL returned for ${file.name}`);
+        if (imageUrl) {
+          uploadedUrls.push(imageUrl);
+        } else {
+          message.error(`No URL returned for ${file.name}`);
+        }
       } catch (error) {
         console.error(`Upload failed for ${file.name}:`, error.response?.data || error.message);
         message.error(`Failed to upload ${file.name}`);
       }
     }
+
     return uploadedUrls;
   };
+
 
   const saveToDB = (updated) => {
     setNotes(updated);
@@ -120,17 +163,37 @@ const StickyNotes = ({ userEmail, userdetails, setOpen }) => {
     saveToDB(updated);
   };
 
+  // const updateImage = async (id, files) => {
+
+  //   const uploadedUrls = await handleMultipleFileUpload(files, userdetails);
+  //   if (!uploadedUrls.length) return;
+  //   if (openNote?.id === id) {
+  //     setOpenNote({ ...openNote, images: [...(openNote.images || []), ...uploadedUrls] });
+  //   }
+  //   const updated = notes.map(n =>
+  //     n.id === id ? { ...n, images: [...(n.images || []), ...uploadedUrls] } : n
+  //   );
+  //   saveToDB(updated);
+  // };
   const updateImage = async (id, files) => {
     const uploadedUrls = await handleMultipleFileUpload(files, userdetails);
+
     if (!uploadedUrls.length) return;
+
     if (openNote?.id === id) {
-      setOpenNote({ ...openNote, images: [...(openNote.images || []), ...uploadedUrls] });
+      setOpenNote(prev => ({
+        ...prev,
+        images: [...(prev.images || []), ...uploadedUrls],
+      }));
     }
+
     const updated = notes.map(n =>
       n.id === id ? { ...n, images: [...(n.images || []), ...uploadedUrls] } : n
     );
+
     saveToDB(updated);
   };
+
 
   const deleteImage = (noteId, imgIndex) => {
     if (openNote?.id === noteId) {

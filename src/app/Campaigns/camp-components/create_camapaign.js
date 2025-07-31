@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useMemo } from 'react';
 import { Drawer, Button, DatePicker, Space, Form, Input, Select, Collapse, Upload, Steps, Modal, message, Spin, Badge, Tooltip, InputNumber, Breadcrumb, Popconfirm } from 'antd';
-import { PlusOutlined, UploadOutlined, ShareAltOutlined, CommentOutlined, LikeOutlined, MoreOutlined, CloseOutlined, GlobalOutlined, EditOutlined, QuestionCircleOutlined, PaperClipOutlined,DeleteOutlined, CopyOutlined  } from '@ant-design/icons';
+import { PlusOutlined, UploadOutlined, ShareAltOutlined, CommentOutlined, LikeOutlined, MoreOutlined, CloseOutlined, GlobalOutlined, EditOutlined, QuestionCircleOutlined, PaperClipOutlined, DeleteOutlined, CopyOutlined } from '@ant-design/icons';
 import moment from 'moment-timezone';
 import { useState, useRef } from 'react';
 import TextArea from 'antd/es/input/TextArea';
@@ -18,6 +18,7 @@ import CreativesDrawer from './creativesDrawer';
 import ImageUploadPage from '../../Creatives/page';
 import { NodeNextRequest } from 'next/dist/server/base-http/node';
 import { useTokenContext } from "../../components/parent";
+import { useContext } from 'react';
 
 const FabricCanvas = dynamic(() => import('./Fabricanvas'), { ssr: false });
 
@@ -79,7 +80,7 @@ const allPositions = [
     { key: "right_hand_column", label: "Facebook Right Column" },
     { key: "instant_article", label: "Facebook Instant Articles" },
     { key: "biz_disco_feed", label: "Facebook Business Explore" },
-  
+
     { key: "stream", label: "Instagram Stream" },
     { key: "story_i", label: "Instagram Stories" },
     { key: "explore", label: "Instagram Explore" },
@@ -88,11 +89,11 @@ const allPositions = [
     { key: "profile_feed-i", label: "Instagram Profile Feed" },
     { key: "ig_search", label: "Instagram Search" },
     { key: "profile_reels", label: "Instagram Profile Reels" },
-  
+
     { key: "messenger_home", label: "Messenger Home" },
     { key: "story_m", label: "Messenger Stories" },
     { key: "sponsored_messages", label: "Messenger Sponsored Messages" },
-  
+
     { key: "classic", label: "Audience Network Classic" },
     { key: "rewarded_video", label: "Audience Network Rewarded Video" }
 ];
@@ -540,8 +541,8 @@ const AdsetComponent = ({
     setSelectedPositions,
     selectedPositions,
     selectedPublishers,
-    setSelectedPublishers,
-  }) => {
+    setSelectedPublishers
+}) => {
     const [activeMediaIndex, setActiveMediaIndex] = useState({});
     const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] = useState(false);
     const [primaryText, setPrimaryText] = useState('');
@@ -559,6 +560,7 @@ const AdsetComponent = ({
     console.log(selectedPublishers, "selectedPublishers in adset component");
     console.log(selectedPositions?.[adset.id]);
     console.log(adset, "adset in adset component");
+
 
     const onReturnUrl = (text) => {
         setIsModalVisibleForURLBuilder(false);
@@ -583,8 +585,8 @@ const AdsetComponent = ({
 
         }
 
-        
-        
+
+
 
         // Update the form with the new adsets
         form.setFieldsValue({
@@ -616,8 +618,8 @@ const AdsetComponent = ({
             case 'FB_DomainActive':
                 return <DActiveUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
         }
-        
-    },[network, accountis, onReturnUrl])
+
+    }, [network, accountis, onReturnUrl])
 
     // const getPositionOptions = () => {
     //     const allPositions = selectedPublishers[adset.id].reduce((acc, publisher) => {
@@ -631,21 +633,21 @@ const AdsetComponent = ({
     //     const allPositions = publishers.reduce((acc, publisher) => {
     //       return acc.concat(positionOptions[publisher] || []);
     //     }, []);
-      
+
     //     // Ensure uniqueness by key
     //     const uniqueMap = new Map(allPositions.map(pos => [pos.key, pos]));
     //     return Array.from(uniqueMap.values());
     //   };
     const getPositionOptions = () => {
         const publishers = selectedPublishers?.[adset.id] || [];
-      
+
         const combined = publishers.flatMap(pub => positionOptions[pub] || []);
-      
+
         // De-duplicate by `key`
         const unique = Array.from(new Map(combined.map(pos => [pos.key, pos])).values());
-      
+
         return unique;
-      };
+    };
 
     // const handlePublisherChange = (value) => {
     //     setSelectedPublishers(prevState => ({
@@ -654,22 +656,22 @@ const AdsetComponent = ({
     //     }));
     //     // setSelectedPositions([]); // Clear positions when publisher selection changes
     // };
-  
+
     const handlePublisherChange = (value) => {
         setSelectedPublishers(prev => ({
-          ...prev,
-          [adset.id]: value
+            ...prev,
+            [adset.id]: value
         }));
-      
+
         // Optionally reset selected positions for this adset
         setSelectedPositions(prev => ({
-          ...prev,
-          [adset.id]: [] // clear when publishers change
+            ...prev,
+            [adset.id]: [] // clear when publishers change
         }));
-      };
+    };
 
     const handleCancelForURLBuilder = () => {
-      setIsModalVisibleForURLBuilder(false);
+        setIsModalVisibleForURLBuilder(false);
     };
 
     const onClickCreativesDrawer = (adset, index) => {
@@ -682,8 +684,8 @@ const AdsetComponent = ({
         console.log(values, "values");
         console.log(options, "options");
         const formatted = options.map(opt => ({
-          key: opt.value,
-          label: opt.label || opt.children
+            key: opt.value,
+            label: opt.label || opt.children
         }));
         console.log(formatted, "formatted positions");
         // setSelectedPositions(formatted);
@@ -696,13 +698,13 @@ const AdsetComponent = ({
     const onClickEdit = (index) => {
         setIsModalVisibleForURLBuilder(true);
     }
-  
+
     const tooltipMsg = isCampaignBudgetActive
-      ? 'You have enabled daily budget in the campaign level'
-      : isAnyAdsetBudgetSet
-      ? 'You have enabled daily budget in the Adset Level'
-      : '';
-    
+        ? 'You have enabled daily budget in the campaign level'
+        : isAnyAdsetBudgetSet
+            ? 'You have enabled daily budget in the Adset Level'
+            : '';
+
     //   const selectedFilesData = (data) => {
     //     const mappedFiles = data.map((file, i) => ({
     //       uid: file.uid || `-${Date.now()}-${i}`,
@@ -717,27 +719,27 @@ const AdsetComponent = ({
     //         : "video/",
     //       url: file?.url,
     //     }));
-      
+
     //     // ✅ Update selectedFiles
     //     setSelectedFiles((prev) => {
     //       const updated = [...(prev[creativeIndex] || []), ...mappedFiles];
     //     //   updateAdMediaData(creativeIndex, updated); // ✅ Call here too
     //       return { ...prev, [creativeIndex]: updated };
     //     });
-      
+
     //     // ✅ Update selectedFilesFromCreatives
     //     setSelectedFilesFromCreatives((prev) => {
     //       const updated = [...(prev[creativeIndex] || []), ...mappedFiles];
     //       return { ...prev, [creativeIndex]: updated };
     //     });
-      
+
     //     // ✅ Close drawer
     //     setOpenCreativesDrawer(false);
-      
+
     //     // ✅ Update Form MediaContent
     //     const currentMediaContent = form.getFieldValue(['adsets', creativeIndex, 'MediaContent']) || [];
     //     const updatedMediaContent = [...currentMediaContent, ...mappedFiles];
-      
+
     //     form.setFieldsValue({
     //       adsets: {
     //         [creativeIndex]: {
@@ -745,13 +747,13 @@ const AdsetComponent = ({
     //         }
     //       }
     //     });
-      
+
     //     // form.validateFields('MediaContent');
     // };
-  
+
     // const selectedFilesData = (data) => {
     //     console.log("Selected Files Data:", data);
-        
+
     //     setSelectedFiles(prev => [...prev, ...data.map((file, index)=>{
     //         return({
     //             uid: file.uid || `-${index+1}`,
@@ -770,11 +772,11 @@ const AdsetComponent = ({
     //             url: file?.url,
     //         })
     //     })]);
-        
-        
+
+
     //     if (data.length > 0) {
     //         const currentMediaContent = form.getFieldValue("MediaContent") || [];
-        
+
     //         const newFiles = data.map((file, index) => ({
     //             uid: file.uid || `-${index + 1}`,
     //             name: file?.name,
@@ -788,9 +790,9 @@ const AdsetComponent = ({
     //                 : "video/",
     //             url: file?.url,
     //         }));
-        
+
     //         const updatedMediaContent = [...currentMediaContent, ...newFiles];
-        
+
     //         form.setFieldsValue({ MediaContent: updatedMediaContent });
     //         form.validateFields(["MediaContent"]);
     //     }
@@ -799,7 +801,7 @@ const AdsetComponent = ({
 
     // const selectedFilesData = (data) => {
     //      // hardcoded for now as you requested
-      
+
     //     const mappedFiles = data.map((file, i) => ({
     //       uid: file.uid || `-${Date.now()}-${i}`,
     //       name: file?.name,
@@ -813,26 +815,26 @@ const AdsetComponent = ({
     //         : "video/",
     //       url: file?.url,
     //     }));
-      
+
     //     // ✅ Update selectedFiles as object by index
     //     setSelectedFiles((prev) => {
     //       const updated = [...(prev[index] || []), ...mappedFiles];
     //       return { ...prev, [index]: updated };
     //     });
-      
+
     //     // ✅ Update selectedFilesFromCreatives as object by index
     //     setSelectedFilesFromCreatives((prev) => {
     //       const updated = [...(prev[index] || []), ...mappedFiles];
     //       return { ...prev, [index]: updated };
     //     });
-      
+
     //     // ✅ Close creative drawer
     //     setOpenCreativesDrawer(false);
-      
+
     //     // ✅ Update form MediaContent for adset[0]
     //     const currentMediaContent = form.getFieldValue(['adsets', index, 'MediaContent']) || [];
     //     const updatedMediaContent = [...currentMediaContent, ...mappedFiles];
-      
+
     //     form.setFieldsValue({
     //       adsets: {
     //         [index]: {
@@ -840,39 +842,39 @@ const AdsetComponent = ({
     //         }
     //       }
     //     });
-      
+
     //     form.validateFields([['adsets', index, 'MediaContent']]);
     //   };
-      
+
     const selectedFilesData = (data, index, adsetId = creativeIndex) => {
         const mapped = data.map((file, i) => ({
-          uid: file.uid || `-${Date.now()}-${i}`,
-          name: file?.name,
-          status: 'done',
-          type: file?.url?.endsWith(".jpg") ? "image/jpg" :
+            uid: file.uid || `-${Date.now()}-${i}`,
+            name: file?.name,
+            status: 'done',
+            type: file?.url?.endsWith(".jpg") ? "image/jpg" :
                 file?.url?.endsWith(".jpeg") ? "image/jpeg" :
-                file?.url?.endsWith(".png") ? "image/png" : "video/",
-          url: file?.url,
+                    file?.url?.endsWith(".png") ? "image/png" : "video/",
+            url: file?.url,
         }));
-      
+
         setSelectedFilesFromCreatives(prev => ({
-          ...prev,
-          [adsetId]: [...(prev[adsetId] || []), ...mapped],
+            ...prev,
+            [adsetId]: [...(prev[adsetId] || []), ...mapped],
         }));
-      
+
         setSelectedFiles(prev => ({
-          ...prev,
-          [adsetId]: [...(prev[adsetId] || []), ...mapped],
+            ...prev,
+            [adsetId]: [...(prev[adsetId] || []), ...mapped],
         }));
-      
+
         form.setFieldsValue({
-          adsets: {
-            [index]: {
-              MediaContent: [...(form.getFieldValue(['adsets', index, 'MediaContent']) || []), ...mapped],
+            adsets: {
+                [index]: {
+                    MediaContent: [...(form.getFieldValue(['adsets', index, 'MediaContent']) || []), ...mapped],
+                }
             }
-          }
         });
-      
+
         form.validateFields([['adsets', index, 'MediaContent']]);
         setOpenCreativesDrawer(false);
     };
@@ -880,27 +882,27 @@ const AdsetComponent = ({
     useEffect(() => {
         const creatives = selectedFilesFromCreatives?.[adset.id];
         if (Array.isArray(creatives) && creatives.length > 0) {
-          setSelectedOption("creative");
+            setSelectedOption("creative");
         } else {
-          setSelectedOption("upload");
+            setSelectedOption("upload");
         }
-      }, [selectedFilesFromCreatives, adset.id]);
+    }, [selectedFilesFromCreatives, adset.id]);
 
-      useEffect(() => {
+    useEffect(() => {
         // Re-run once selectedPositions or adset.id updates
         if (
-          selectedPositions?.[adset.id] &&
-          Array.isArray(selectedPositions[adset.id])
+            selectedPositions?.[adset.id] &&
+            Array.isArray(selectedPositions[adset.id])
         ) {
-          form.setFieldsValue({
-            adsets: {
-              [index]: {
-                positions: selectedPositions[adset.id].map(pos => pos.key),
-              },
-            },
-          });
+            form.setFieldsValue({
+                adsets: {
+                    [index]: {
+                        positions: selectedPositions[adset.id].map(pos => pos.key),
+                    },
+                },
+            });
         }
-      }, [selectedPositions, adset.id]);
+    }, [selectedPositions, adset.id]);
     // useEffect(() => {
     //     if(adset?.DailyAdd_amount){
     //         form.setFieldsValue({
@@ -914,24 +916,24 @@ const AdsetComponent = ({
     // }, [adset]);
     useEffect(() => {
         if (adset?.DailyAdd_amount !== undefined) {
-          form.setFields([
-            {
-              name: ['adsets', index, 'DailyAdd_amount'],
-              value: adset.DailyAdd_amount,
-            },
-          ]);
+            form.setFields([
+                {
+                    name: ['adsets', index, 'DailyAdd_amount'],
+                    value: adset.DailyAdd_amount,
+                },
+            ]);
         }
-      }, [adset?.DailyAdd_amount]);
+    }, [adset?.DailyAdd_amount]);
 
     //   useEffect(() => {
     //     if (!selectedPublishers?.[adset.id]) return;
-      
+
     //     // const allPositions = selectedPublishers[adset.id].reduce((acc, publisher) => {
     //     //   return acc.concat(positionOptions[publisher] || []);
     //     // }, []);
-      
+
     //     const draftPositions = selectedPositions?.[adset.id] || [];
-      
+
     //     // Optional: Only update if empty or differs
     //     if ((selectedPositions?.[adset.id]?.length ?? 0) === 0) {
     //       setSelectedPositions(prev => ({
@@ -948,34 +950,34 @@ const AdsetComponent = ({
     //         [adset.id]: selectedPublishers?.[adset.id] || []
     //     }));
     // }, [selectedPublishers, adset.id, index]);
-      
-      
+
+
 
     return (
-        
-            <Collapse accordion>
-                <Panel header={
-                <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-                    <span style={{ color: theme === 'dark' ? '#fff' : '#000', alignContent:'center' }}>{adset.AdsetPanelName}</span>
-                    
+
+        <Collapse accordion>
+            <Panel header={
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ color: theme === 'dark' ? '#fff' : '#000', alignContent: 'center' }}>{adset.AdsetPanelName}</span>
+
                     <div>
-                        {index !==0 && (
+                        {index !== 0 && (
                             <Popconfirm
-                            title="Are you sure to delete this Adset?"
-                            onConfirm={(e) => {
-                                e.stopPropagation(); // Prevent panel collapse
-                                removeAdset(index, adset.id)
-                            }}
-                            okText="Yes"
-                            cancelText="No"
-                            style={{ float: 'right', marginLeft: '10px' }}
-                        >
-                            <Button 
-                                type="text" 
-                                onClick={(e) => e.stopPropagation()} // Prevent panel collapse
-                                icon={<DeleteOutlined />} 
-                            />
-                        </Popconfirm>
+                                title="Are you sure to delete this Adset?"
+                                onConfirm={(e) => {
+                                    e.stopPropagation(); // Prevent panel collapse
+                                    removeAdset(index, adset.id)
+                                }}
+                                okText="Yes"
+                                cancelText="No"
+                                style={{ float: 'right', marginLeft: '10px' }}
+                            >
+                                <Button
+                                    type="text"
+                                    onClick={(e) => e.stopPropagation()} // Prevent panel collapse
+                                    icon={<DeleteOutlined />}
+                                />
+                            </Popconfirm>
                         )}
                         <Button
                             type="text"
@@ -985,18 +987,19 @@ const AdsetComponent = ({
                             //     setAdsets(updatedAdsets);
                             //     setActiveKey(['1']); // Reset to the first panel
                             // }}
-                            onClick={(e)=>{
+                            onClick={(e) => {
                                 e.stopPropagation(); // Prevent panel 
                                 addAdset()
                             }}
                             style={{ float: 'right', marginLeft: '10px' }}
                         />
-                        <Button 
-                            type="text" 
-                            icon={<CopyOutlined />} 
+                        <Button
+                            type="text"
+                            icon={<CopyOutlined />}
                             onClick={(e) => {
                                 e.stopPropagation(); // Prevent panel collapse
-                                cloneAdset(adset.id)}} 
+                                cloneAdset(adset.id)
+                            }}
                             style={{ float: 'right', marginLeft: '10px' }}
                         />
                     </div>
@@ -1016,19 +1019,19 @@ const AdsetComponent = ({
                         ]}
                         style={{ flex: '1 1 200px' }}
                     >
-                        <Input 
-                        onChange={(e) => {
-                            const value = e.target.value;  // Correct way to get the value
-                            form.setFieldsValue({
-                              adsets: [
-                                ...form.getFieldValue("adsets").slice(0, index),  // Get previous adsets before the current index
-                                { ...form.getFieldValue("adsets")[index], AddName: value }, // Update AddName for the current adset
-                                ...form.getFieldValue("adsets").slice(index + 1),  // Get adsets after the current index
-                              ]
-                            });
-                          }}
-                        
-            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
+                        <Input
+                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                            onChange={(e) => {
+                                const value = e.target.value;  // Correct way to get the value
+                                form.setFieldsValue({
+                                    adsets: [
+                                        ...form.getFieldValue("adsets").slice(0, index),  // Get previous adsets before the current index
+                                        { ...form.getFieldValue("adsets")[index], AddName: value }, // Update AddName for the current adset
+                                        ...form.getFieldValue("adsets").slice(index + 1),  // Get adsets after the current index
+                                    ]
+                                });
+                            }}
+                        />
                     </Form.Item>
                     <Form.Item
                         name={['adsets', index, "optimization_goal"]}
@@ -1074,8 +1077,8 @@ const AdsetComponent = ({
                             ]}
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
                             className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
-                            // defaultValue={adset.billing_event || "IMPRESSIONS"}
-                            // onChange={(value) => handleFieldChange(index, "billing_event", value)}
+                        // defaultValue={adset.billing_event || "IMPRESSIONS"}
+                        // onChange={(value) => handleFieldChange(index, "billing_event", value)}
                         />
                     </Form.Item>
                     <Form.Item
@@ -1090,13 +1093,13 @@ const AdsetComponent = ({
                         style={{ flex: '150px' }}
                         initialValue={currentDate ? dayjs(currentDate) : dayjs()}
                     >
-                        <DatePicker showTime  dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}
-                             className="green-border-picker"
-    //                                 onChange={(value, dateString) => {
-    //     console.log("Local Time:", dateString)
-    //     console.log("UTC ISO:", moment(value).utc().format("YYYY-MM-DDTHH:mm:ssZ"))
-    //   }}
-                        style={{ width: '100%' }} />
+                        <DatePicker showTime dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}
+                            className="green-border-picker"
+                            //                                 onChange={(value, dateString) => {
+                            //     console.log("Local Time:", dateString)
+                            //     console.log("UTC ISO:", moment(value).utc().format("YYYY-MM-DDTHH:mm:ssZ"))
+                            //   }}
+                            style={{ width: '100%' }} />
                     </Form.Item>
                     <Form.Item
                         name={['adsets', index, "action_source"]}
@@ -1119,8 +1122,8 @@ const AdsetComponent = ({
                             ]}
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
                             className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
-                            // defaultValue={adset.action_source || "website"}
-                            // onChange={(value) => handleFieldChange(index, "action_source", value)}
+                        // defaultValue={adset.action_source || "website"}
+                        // onChange={(value) => handleFieldChange(index, "action_source", value)}
                         />
                     </Form.Item>
                     <Form.Item
@@ -1144,8 +1147,8 @@ const AdsetComponent = ({
                             ]}
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
                             className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
-                            // defaultValue={adset.custom_event_type || "LEAD"}
-                            // onChange={(value) => handleFieldChange(index, "custom_event_type", value)}
+                        // defaultValue={adset.custom_event_type || "LEAD"}
+                        // onChange={(value) => handleFieldChange(index, "custom_event_type", value)}
                         />
                     </Form.Item>
                     {/* <Form.Item
@@ -1166,32 +1169,32 @@ const AdsetComponent = ({
                         name="pixel_id"
                         initialValue={
                             typeof imagehash?.pixelID === 'object'
-                            ? imagehash.pixelID.Universal
-                            : imagehash?.pixelID
+                                ? imagehash.pixelID.Universal
+                                : imagehash?.pixelID
                         }
                         label={<span style={{ color: "#B4B4B4" }}>Pixel id</span>}
                         rules={[
                             {
-                            required: true,
-                            message: "Please select an option!",
+                                required: true,
+                                message: "Please select an option!",
                             },
                         ]}
                         style={{ flex: '140px' }}
-                        >
+                    >
                         {typeof imagehash?.pixelID === 'object' ? (
                             <Select
-                            defaultValue={imagehash?.pixelID?.Universal}
-                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                defaultValue={imagehash?.pixelID?.Universal}
+                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                             >
-                            {Object.entries(imagehash.pixelID).map(([label, value]) => (
-                                <Select.Option key={value} value={value}>
-                                {`${label} - ${value}`}
-                                </Select.Option>
-                            ))}
+                                {Object.entries(imagehash.pixelID).map(([label, value]) => (
+                                    <Select.Option key={value} value={value}>
+                                        {`${label} - ${value}`}
+                                    </Select.Option>
+                                ))}
                             </Select>
                         ) : (
                             <Input
-                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                             />
                         )}
                     </Form.Item>
@@ -1325,44 +1328,44 @@ const AdsetComponent = ({
                         </Tooltip>
                     </Form.Item> */}
 
-<Form.Item
-    name={['adsets', index, "DailyAdd_amount"]}
-    label={`Daily Budget`}
-    rules={[
-        {
-            required: !(isCampaignBudgetActive || form.getFieldValue(['adsets', index, 'DailyAdd_amount']) > 0),
-            message: `Please enter a valid number > 0 in Adset ${index + 1}`
-        }
-    ]}
->
-    <Tooltip title={isCampaignBudgetActive ? 'You have enabled daily budget in the Campaign Level' : ''}>
-        <InputNumber
-            placeholder="$"
-            min={0}
-            step={0.01}
-            value={adset.DailyAdd_amount}
-            onChange={value => {
-                // Handle the change, updating the adset value both in the form and the adset state
-                handleAdsetChange(index, value);
+                    <Form.Item
+                        name={['adsets', index, "DailyAdd_amount"]}
+                        label={`Daily budget`}
+                        rules={[
+                            {
+                                required: !(isCampaignBudgetActive || form.getFieldValue(['adsets', index, 'DailyAdd_amount']) > 0),
+                                message: `Please enter a valid number > 0 in Adset ${index + 1}`
+                            }
+                        ]}
+                    >
+                        <Tooltip title={isCampaignBudgetActive ? 'You have enabled daily budget in the Campaign Level' : ''}>
+                            <InputNumber
+                                placeholder="$"
+                                min={0}
+                                step={0.01}
+                                value={adset.DailyAdd_amount}
+                                onChange={value => {
+                                    // Handle the change, updating the adset value both in the form and the adset state
+                                    handleAdsetChange(index, value);
 
-                // Ensure that 'adsets' is defined and is an array
-                const adsets = form.getFieldValue('adsets') || []; // Fallback to empty array if undefined
+                                    // Ensure that 'adsets' is defined and is an array
+                                    const adsets = form.getFieldValue('adsets') || []; // Fallback to empty array if undefined
 
-                // Update only the DailyAdd_amount in the form without disturbing other values
-                const updatedAdsets = adsets.map((ad, i) =>
-                    i === index ? { ...ad, DailyAdd_amount: value } : ad
-                );
+                                    // Update only the DailyAdd_amount in the form without disturbing other values
+                                    const updatedAdsets = adsets.map((ad, i) =>
+                                        i === index ? { ...ad, DailyAdd_amount: value } : ad
+                                    );
 
-                form.setFieldsValue({
-                    adsets: updatedAdsets
-                });
-            }}
-            readOnly={isCampaignBudgetActive} // Make adset budget read-only if campaign budget is active
-            style={{ width: 120 }}
-            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-        />
-    </Tooltip>
-</Form.Item>
+                                    form.setFieldsValue({
+                                        adsets: updatedAdsets
+                                    });
+                                }}
+                                readOnly={isCampaignBudgetActive} // Make adset budget read-only if campaign budget is active
+                                style={{ width: 120 }}
+                                className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                            />
+                        </Tooltip>
+                    </Form.Item>
 
 
                     {showBidAmount && (
@@ -1383,10 +1386,11 @@ const AdsetComponent = ({
                             ]}
                             style={{ flex: '1 1 150px' }}
                         >
-                            <Input
+                            <InputNumber
                                 type="number"
                                 placeholder="$"
                                 step="0.1"
+                                style={{color: theme === "dark" ? "#fff" : "#000"}}
                                 onWheel={(e) => e.target.blur()}
                                 onKeyPress={(event) => {
                                     const charCode = event.charCode;
@@ -1424,24 +1428,24 @@ const AdsetComponent = ({
                     >
                         <Select
                             options={[
-                                { value: "US", label: "United States" },
-                                { value: "GB", label: "United Kingdom" },
-                                { value: "AU", label: "Australia" },
-                                { value: "IN", label: "India" },
-                                { value: "AE", label: "United Arab Emirates" },
-                                { value: "CA", label: "Canada" },
-                                { value: "DE", label: "Germany" },
-                                { value: "FR", label: "France" },
-                                { value: "JP", label: "Japan" },
-                                { value: "CN", label: "China" },
-                                { value: "BR", label: "Brazil" },
-                                { value: "ZA", label: "South Africa" },
-                                { value: "RU", label: "Russia" },
-                                { value: "IT", label: "Italy" },
-                                { value: "ES", label: "Spain" },
-                                { value: "SG", label: "Singapore" },
-                                { value: "NZ", label: "New Zealand" },
-                                { value: "MX", label: "Mexico" }
+                                { value: "US", label: "United States",title:"" },
+                                { value: "GB", label: "United Kingdom" ,title:""},
+                                { value: "AU", label: "Australia",title:"" },
+                                { value: "IN", label: "India",title:"" },
+                                { value: "AE", label: "United Arab Emirates",title:"" },
+                                { value: "CA", label: "Canada" ,title:""},
+                                { value: "DE", label: "Germany",title:"" },
+                                { value: "FR", label: "France" ,title:""},
+                                { value: "JP", label: "Japan",title:"" },
+                                { value: "CN", label: "China",title:"" },
+                                { value: "BR", label: "Brazil",title:"" },
+                                { value: "ZA", label: "South Africa",title:"" },
+                                { value: "RU", label: "Russia" ,title:""},
+                                { value: "IT", label: "Italy",title:"" },
+                                { value: "ES", label: "Spain",title:"" },
+                                { value: "SG", label: "Singapore",title:"" },
+                                { value: "NZ", label: "New Zealand",title:"" },
+                                { value: "MX", label: "Mexico" ,title:""}
                             ]}
                             // defaultValue={adset.countries || "US"}
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
@@ -1462,10 +1466,10 @@ const AdsetComponent = ({
                     >
                         <Select
                             options={[
-                                { value: "18", label: "18" },
-                                { value: "25", label: "25" },
-                                { value: "35", label: "35" },
-                                { value: "40", label: "40", disabled: true },
+                                { value: "18", label: "18",title:"" },
+                                { value: "25", label: "25" ,title:""},
+                                { value: "35", label: "35",title:"" },
+                                { value: "40", label: "40", disabled: true ,title:""},
                             ]}
                             // defaultValue={adset.Min_Age || "18"}
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
@@ -1486,10 +1490,10 @@ const AdsetComponent = ({
                     >
                         <Select
                             options={[
-                                { value: "20", label: "20" },
-                                { value: "30", label: "30" },
-                                { value: "65", label: "65+" },
-                                { value: "80", label: "80", disabled: true },
+                                { value: "20", label: "20" ,title:""},
+                                { value: "30", label: "30",title:"" },
+                                { value: "65", label: "65+",title:"" },
+                                { value: "80", label: "80", disabled: true,title:"" },
                             ]}
                             // defaultValue={adset.Max_Age || "65"}
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
@@ -1510,9 +1514,9 @@ const AdsetComponent = ({
                     >
                         <Select
                             options={[
-                                { value: "0", label: "All" },
-                                { value: "1", label: "Male" },
-                                { value: "2", label: "Female" },
+                                { value: "0", label: "All" ,title:""},
+                                { value: "1", label: "Male",title:"" },
+                                { value: "2", label: "Female" ,title:""},
                             ]}
                             // defaultValue={"0"}
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
@@ -1536,10 +1540,10 @@ const AdsetComponent = ({
                             }
                             dropdownClassName={theme === 'dark' && "custom-dropdown"}
                             className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
-                            // defaultValue={adset.Language || "English (US)"}
+                        // defaultValue={adset.Language || "English (US)"}
                         >
                             {localesdata.map(option => (
-                                <Option key={option.key} value={option.key}>
+                                <Option key={option.key} value={option.key} title={null}>
                                     {option.name}
                                 </Option>
                             ))}
@@ -1628,417 +1632,417 @@ const AdsetComponent = ({
                         </>
                     )} */}
                     <Form.Item
-    label="Placements"
-    name={['adsets', index, "placements"]}
-    rules={[{ required: true, message: 'Please select a mode!' }]}
-    initialValue={adset.placements || "Advance"}
-    >
-    <Select
-    placeholder="Select a mode"
-    dropdownClassName={theme === 'dark' && "custom-dropdown"}
-    className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
-    // defaultValue={adset.placements || "Advance"}
-    >
-    <Option value="Advance">Advance</Option>
-    <Option value="manual">Manual</Option>
-    </Select>
-    </Form.Item>
-    {/* <div style={{display:'flex', flexDirection:"row", justifyContent:'center', alignItems:"center", width:'100%'}}> */}
+                        label="Placements"
+                        name={['adsets', index, "placements"]}
+                        rules={[{ required: true, message: 'Please select a mode!' }]}
+                        initialValue={adset.placements || "Advance"}
+                    >
+                        <Select
+                            placeholder="Select a mode"
+                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                            className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
+                        // defaultValue={adset.placements || "Advance"}
+                        >
+                            <Option value="Advance" title={null}>Advance</Option>
+                            <Option value="manual" title={null}>Manual</Option>
+                        </Select>
+                    </Form.Item>
+                    {/* <div style={{display:'flex', flexDirection:"row", justifyContent:'center', alignItems:"center", width:'100%'}}> */}
 
-    <Form.Item shouldUpdate={(prevValues, curValues) =>
-    prevValues.adsets?.[index]?.placements !== curValues.adsets?.[index]?.placements
-    }>
-    {({ getFieldValue }) => {
-    const placementValue = getFieldValue(['adsets', index, 'placements']);
-    return placementValue === 'manual' ? (
-    <div style={{
-    display: 'flex',
-    flexDirection: "row",
-    justifyContent: 'space-between',
-    alignItems: "flex-start",
-    gap: '16px', // spacing between items
-    width: '100%',
-    flexWrap: 'wrap' // optional for responsive wrapping
-    }}>
-    <Form.Item
-    name={['adsets', index, "platforms"]}
-    label={<span style={{ color: "#B4B4B4" }}>Platforms</span>}
-    rules={[{ required: true, message: "Please select an option!" }]}
-    // style={{ flex: '1 1 300px' }}
-    style={{ flex: 1, minWidth: '210px' }}
-    >
-    <Select
-    mode="multiple"
-    placeholder="Select Platforms"
-    onChange={handlePublisherChange}
-    value={selectedPublishers}
-    dropdownClassName={theme === 'dark' && "custom-dropdown"}
-    className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
-    >
-    {publisherOptions.map(option => (
-    <Option key={option.value} value={option.value}>
-    {option.label}
-    </Option>
-    ))}
-    </Select>
-    </Form.Item>
+                    <Form.Item shouldUpdate={(prevValues, curValues) =>
+                        prevValues.adsets?.[index]?.placements !== curValues.adsets?.[index]?.placements
+                    }>
+                        {({ getFieldValue }) => {
+                            const placementValue = getFieldValue(['adsets', index, 'placements']);
+                            return placementValue === 'manual' ? (
+                                <div style={{
+                                    display: 'flex',
+                                    flexDirection: "row",
+                                    justifyContent: 'space-between',
+                                    alignItems: "flex-start",
+                                    gap: '16px', // spacing between items
+                                    width: '100%',
+                                    flexWrap: 'wrap' // optional for responsive wrapping
+                                }}>
+                                    <Form.Item
+                                        name={['adsets', index, "platforms"]}
+                                        label={<span style={{ color: "#B4B4B4" }}>Platforms</span>}
+                                        rules={[{ required: true, message: "Please select an option!" }]}
+                                        // style={{ flex: '1 1 300px' }}
+                                        style={{ flex: 1, minWidth: '210px' }}
+                                    >
+                                        <Select
+                                            mode="multiple"
+                                            placeholder="Select Platforms"
+                                            onChange={handlePublisherChange}
+                                            value={selectedPublishers}
+                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                            className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
+                                        >
+                                            {publisherOptions.map(option => (
+                                                <Option key={option.value} value={option.value} title={null}>
+                                                    {option.label}
+                                                </Option>
+                                            ))}
+                                        </Select>
+                                    </Form.Item>
 
-    <Form.Item
-  name={['adsets', index, "positions"]}
-  label={<span style={{ color: "#B4B4B4" }}>Positions</span>}
-  rules={[{ required: true, message: "Please select an option!" }]}
-  style={{ flex: 2, minWidth: '215px' }}
->
-  <Select
-    mode="multiple"
-    placeholder="Select Positions"
-    value={(selectedPositions?.[adset.id] || []).map(pos => pos.key)} // ✅ fixed
-    onChange={handlePositionChange}
-    dropdownClassName={theme === 'dark' && "custom-dropdown"}
-    className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
-  >
-    {Array.isArray(selectedPublishers?.[adset.id]) &&
-      selectedPublishers[adset.id].length > 0 &&
-      getPositionOptions().map(position => (
-        <Option key={`${position.key}_${position.label}`} value={position.key}>
-          {position.label}
-        </Option>
-      ))}
-  </Select>
-</Form.Item>
+                                    <Form.Item
+                                        name={['adsets', index, "positions"]}
+                                        label={<span style={{ color: "#B4B4B4" }}>Positions</span>}
+                                        rules={[{ required: true, message: "Please select an option!" }]}
+                                        style={{ flex: 2, minWidth: '215px' }}
+                                    >
+                                        <Select
+                                            mode="multiple"
+                                            placeholder="Select Positions"
+                                            value={(selectedPositions?.[adset.id] || []).map(pos => pos.key)} // ✅ fixed
+                                            onChange={handlePositionChange}
+                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                            className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
+                                        >
+                                            {Array.isArray(selectedPublishers?.[adset.id]) &&
+                                                selectedPublishers[adset.id].length > 0 &&
+                                                getPositionOptions().map(position => (
+                                                    <Option key={`${position.key}_${position.label}`} value={position.key} title={null}>
+                                                        {position.label}
+                                                    </Option>
+                                                ))}
+                                        </Select>
+                                    </Form.Item>
 
 
-    <Form.Item
-    name={['adsets', index, "device_platforms"]}
-    label={<span style={{ color: "#B4B4B4" }}>Device</span>}
-    rules={[{ required: true, message: "Please select an option!" }]}
-    // style={{ flex: '1 1 200px' }}
-    style={{ flex: 1, minWidth: '215px' }}
-    >
-    <Select
-    mode="multiple"
-    allowClear
-    placeholder="Please select"
-    options={[
-    { value: "mobile", label: "Mobile" },
-    { value: "desktop", label: "Desktop" }
-    ]}
-    dropdownClassName={theme === 'dark' && "custom-dropdown"}
-    className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
-    />
-    </Form.Item>
-    </div>
-    ) : null;
-    }}
-    </Form.Item>
-    {/* </div> */}
+                                    <Form.Item
+                                        name={['adsets', index, "device_platforms"]}
+                                        label={<span style={{ color: "#B4B4B4" }}>Device</span>}
+                                        rules={[{ required: true, message: "Please select an option!" }]}
+                                        // style={{ flex: '1 1 200px' }}
+                                        style={{ flex: 1, minWidth: '215px' }}
+                                    >
+                                        <Select
+                                            mode="multiple"
+                                            allowClear
+                                            placeholder="Please select"
+                                            options={[
+                                                { value: "mobile", label: "Mobile" ,title:""},
+                                                { value: "desktop", label: "Desktop" ,title:""}
+                                            ]}
+                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                            className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
+                                        />
+                                    </Form.Item>
+                                </div>
+                            ) : null;
+                        }}
+                    </Form.Item>
+                    {/* </div> */}
 
                 </div>
                 <Collapse defaultActiveKey={['open']} expandIconPosition="start">
-                    <Panel 
-                    key="open" forceRender
-                    header={
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-                        <span>AD LEVEL</span>
-                        {(selectedFiles[index] || []).length > 0 && (
-    <div onClick={(e) => e.stopPropagation()}>
-    <Breadcrumb separator="/">
-    {selectedFiles[index].map((_, i) => (
-    <Breadcrumb.Item key={i}>
-    <span
-    onClick={(e) => {
-    e.stopPropagation();
-    setActiveMediaIndex((prev) => ({
-    ...prev,
-    [index]: i,
-    }));
-    }}
-    style={{
-    fontWeight: activeMediaIndex[index] === i ? "900" : "normal",
-    color: activeMediaIndex[index] === i ? "#91C25F" : "#888",
-    cursor: "pointer",
-    }}
-    >
-    {i + 1}
-    </span>
-    </Breadcrumb.Item>
-    ))}
-    </Breadcrumb>
-    </div>
-    )}
-                        </div>
-                    }
+                    <Panel
+                        key="open" forceRender
+                        header={
+                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                                <span>AD LEVEL</span>
+                                {(selectedFiles[index] || []).length > 0 && (
+                                    <div onClick={(e) => e.stopPropagation()}>
+                                        <Breadcrumb separator="/">
+                                            {selectedFiles[index].map((_, i) => (
+                                                <Breadcrumb.Item key={i}>
+                                                    <span
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setActiveMediaIndex((prev) => ({
+                                                                ...prev,
+                                                                [index]: i,
+                                                            }));
+                                                        }}
+                                                        style={{
+                                                            fontWeight: activeMediaIndex[index] === i ? "900" : "normal",
+                                                            color: activeMediaIndex[index] === i ? "#91C25F" : "#888",
+                                                            cursor: "pointer",
+                                                        }}
+                                                    >
+                                                        {i + 1}
+                                                    </span>
+                                                </Breadcrumb.Item>
+                                            ))}
+                                        </Breadcrumb>
+                                    </div>
+                                )}
+                            </div>
+                        }
                     >
                         <div style={{ display: "flex", justifyContent: "space-between" }}>
                             <div style={{ flex: "70%", marginRight: "5%" }}>
                                 <div style={{ display: 'flex', gap: '16px' }}>
-                                <div style={{display:'flex', flexDirection:'column'}}>
-                                            <Form.Item
-                                                label={<span style={{ color: "#B4B4B4" }}>Select source</span>}
-                                                style={{ flex: 1 }}
-                                                >
-                                                <Select
-                                                    value={selectedOption}
-                                                    onChange={(value) => {
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <Form.Item
+                                            label={<span style={{ color: "#B4B4B4" }}>Select source</span>}
+                                            style={{ flex: 1 }}
+                                        >
+                                            <Select
+                                                value={selectedOption}
+                                                onChange={(value) => {
                                                     setSelectedOption(value);
                                                     form.validateFields(["MediaContent"]); // Revalidate when switching source
-                                                    }}
-                                                    style={{ marginBottom: 16 }}
-                                                    dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                                    className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
-                                                >
-                                                    <Option value="upload">Upload</Option>
-                                                    <Option value="creative">Creative library</Option>
-                                                </Select>
-                                                </Form.Item>
+                                                }}
+                                                style={{ marginBottom: 16 }}
+                                                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
+                                            >
+                                                <Option value="upload" >Upload</Option>
+                                                <Option value="creative">Creative library</Option>
+                                            </Select>
+                                        </Form.Item>
 
-                                                <Form.Item
-                                                name={['adsets', index, "MediaContent"]}
-                                                rules={[
-                                                    {
-                                                      validator: async () => {
+                                        <Form.Item
+                                            name={['adsets', index, "MediaContent"]}
+                                            rules={[
+                                                {
+                                                    validator: async () => {
                                                         // Default to empty array if the value for the index is undefined
                                                         const mediaFiles = selectedFilesFromMedia[adset.id] || [];
                                                         const creativeFiles = selectedFilesFromCreatives[adset.id] || [];
-                                                  
+
                                                         // Check if there are any files selected based on the selected option
                                                         if (
-                                                          (selectedOption === "upload" && mediaFiles.length === 0) ||
-                                                          (selectedOption === "creative" && creativeFiles.length === 0)
+                                                            (selectedOption === "upload" && mediaFiles.length === 0) ||
+                                                            (selectedOption === "creative" && creativeFiles.length === 0)
                                                         ) {
-                                                          throw new Error("Please select Upload!");
+                                                            throw new Error("Please select Upload!");
                                                         }
                                                         return Promise.resolve();
-                                                      }
                                                     }
-                                                  ]}
-                                                >
+                                                }
+                                            ]}
+                                        >
+                                            <div>
+                                                {/* Upload UI */}
+                                                <div className="custom-dark-mode" style={{ display: selectedOption === "upload" ? "block" : "none" }}>
+                                                    <Upload
+                                                        beforeUpload={() => false}
+                                                        // onChange={(info) => {
+                                                        //   const newFiles = info.fileList.map((file) => ({
+                                                        //     ...file,
+                                                        //     uid: file.uid || `-${Date.now()}`,
+                                                        //     source: "media",
+                                                        //     thumbUrl:
+                                                        //       file.thumbUrl ||
+                                                        //       (file.originFileObj ? URL.createObjectURL(file.originFileObj) : undefined),
+                                                        //   }));
+
+                                                        //   setSelectedFiles((prev) => {
+                                                        //     const existingUids = new Set((prev[index] || []).map((f) => f.uid));
+                                                        //     const filtered = newFiles.filter((f) => !existingUids.has(f.uid));
+                                                        //     const updated = [...(prev[index] || []), ...filtered];
+                                                        //     const newState = { ...prev, [index]: updated };
+                                                        //     form.setFieldsValue({ adsets: { [index]: { MediaContent: updated } } });
+                                                        //     form.validateFields([['adsets', index, 'MediaContent']]);
+                                                        //     return newState;
+                                                        //   });
+
+                                                        //   setSelectedFilesFromMedia((prev) => {
+                                                        //     const existingUids = new Set((prev[index] || []).map((f) => f.uid));
+                                                        //     const filtered = newFiles.filter((f) => !existingUids.has(f.uid));
+                                                        //     const updated = [...(prev[index] || []), ...filtered];
+                                                        //     const newState = { ...prev, [index]: updated };
+                                                        //     form.setFieldsValue({ adsets: { [index]: { MediaContent: updated } } });
+                                                        //     form.validateFields([['adsets', index, 'MediaContent']]);
+                                                        //     return newState;
+                                                        //   });
+                                                        // }}
+                                                        onChange={(info) => {
+                                                            const newFiles = info.fileList.map((file) => ({
+                                                                ...file,
+                                                                uid: file.uid || `-${Date.now()}`,
+                                                                source: "media",
+                                                                thumbUrl:
+                                                                    file.thumbUrl ||
+                                                                    (file.originFileObj ? URL.createObjectURL(file.originFileObj) : undefined),
+                                                            }));
+
+                                                            setSelectedFiles((prev) => {
+                                                                const existingUids = new Set((prev[adset.id] || []).map((f) => f.uid));
+                                                                const updated = [...(prev[adset.id] || []), ...newFiles.filter(f => !existingUids.has(f.uid))];
+                                                                return { ...prev, [adset.id]: updated };
+                                                            });
+
+                                                            setSelectedFilesFromMedia((prev) => {
+                                                                const existingUids = new Set((prev[adset.id] || []).map((f) => f.uid));
+                                                                const updated = [...(prev[adset.id] || []), ...newFiles.filter(f => !existingUids.has(f.uid))];
+                                                                return { ...prev, [adset.id]: updated };
+                                                            });
+
+                                                            const formMedia = form.getFieldValue(['adsets', index, 'MediaContent']) || [];
+                                                            form.setFieldsValue({
+                                                                adsets: {
+                                                                    [index]: {
+                                                                        MediaContent: [...formMedia, ...newFiles],
+                                                                    },
+                                                                },
+                                                            });
+
+                                                            form.validateFields([['adsets', index, 'MediaContent']]);
+                                                        }}
+
+                                                        // onRemove={(fileToRemove) => {
+                                                        //   setSelectedFilesFromMedia((prev) => {
+                                                        //     const updated = (prev[index] || []).filter((f) => f.uid !== fileToRemove.uid);
+                                                        //     const newState = { ...prev, [index]: updated };
+                                                        //     form.setFieldsValue({ adsets: { [index]: { MediaContent: updated } } });
+                                                        //     form.validateFields([['adsets', index, 'MediaContent']]);
+                                                        //     return newState;
+                                                        //   });
+
+                                                        //   setSelectedFiles((prev) => {
+                                                        //     const updated = (prev[index] || []).filter((f) => f.uid !== fileToRemove.uid);
+                                                        //     const newState = { ...prev, [index]: updated };
+                                                        //     form.setFieldsValue({ adsets: { [index]: { MediaContent: updated } } });
+                                                        //     form.validateFields([['adsets', index, 'MediaContent']]);
+                                                        //     return newState;
+                                                        //   });
+
+                                                        //   return true;
+                                                        // }}
+                                                        // onChange={(info) => {
+                                                        //     const newFiles = info.fileList.map((file) => ({
+                                                        //       ...file,
+                                                        //       uid: file.uid || `-${Date.now()}`,
+                                                        //       status: 'done',
+                                                        //       type: file.type,
+                                                        //       thumbUrl: file.thumbUrl || (file.originFileObj ? URL.createObjectURL(file.originFileObj) : undefined),
+                                                        //       adsetIndex: index, // Tag the file with adsetIndex
+                                                        //     }));
+
+                                                        //     setSelectedFiles(prev => [...prev, ...newFiles]);
+                                                        //     setSelectedFilesFromMedia(prev => [...prev, ...newFiles]);
+
+                                                        //     const currentAll = [...selectedFiles, ...newFiles];
+                                                        //     const filtered = currentAll.filter(f => f.adsetIndex === index);
+
+                                                        //     form.setFieldsValue({
+                                                        //       adsets: {
+                                                        //         [index]: {
+                                                        //           MediaContent: filtered
+                                                        //         }
+                                                        //       }
+                                                        //     });
+
+                                                        //     form.validateFields([['adsets', index, 'MediaContent']]);
+                                                        // }}
+
+                                                        // onRemove={(fileToRemove) => {
+                                                        //     setSelectedFiles(prev => prev.filter(f => f.uid !== fileToRemove.uid));
+                                                        //     setSelectedFilesFromMedia(prev => prev.filter(f => f.uid !== fileToRemove.uid));
+
+                                                        //     const updated = selectedFiles.filter(f => f.uid !== fileToRemove.uid && f.adsetIndex === index);
+
+                                                        //     form.setFieldsValue({
+                                                        //       adsets: {
+                                                        //         [index]: {
+                                                        //           MediaContent: updated
+                                                        //         }
+                                                        //       }
+                                                        //     });
+
+                                                        //     form.validateFields([['adsets', index, 'MediaContent']]);
+                                                        //     return true;
+                                                        // }}
+
+                                                        onRemove={(fileToRemove) => {
+                                                            setSelectedFilesFromMedia((prev) => {
+                                                                const updated = (prev[adset.id] || []).filter(f => f.uid !== fileToRemove.uid);
+                                                                return { ...prev, [adset.id]: updated };
+                                                            });
+
+                                                            setSelectedFiles((prev) => {
+                                                                const updated = (prev[adset.id] || []).filter(f => f.uid !== fileToRemove.uid);
+                                                                return { ...prev, [adset.id]: updated };
+                                                            });
+
+                                                            const updatedFormMedia = (form.getFieldValue(['adsets', index, 'MediaContent']) || []).filter(
+                                                                f => f.uid !== fileToRemove.uid
+                                                            );
+
+                                                            form.setFieldsValue({
+                                                                adsets: {
+                                                                    [index]: {
+                                                                        MediaContent: updatedFormMedia,
+                                                                    },
+                                                                },
+                                                            });
+
+                                                            form.validateFields([['adsets', index, 'MediaContent']]);
+                                                            return true;
+                                                        }}
+                                                        multiple
+                                                        maxCount={10}
+                                                        fileList={selectedFilesFromMedia[adset.id] || []}
+                                                        listType="picture"
+                                                        accept="image/*, video/*"
+                                                    >
+                                                        <Button icon={<UploadOutlined />} className="dark-icon-button" style={{ color: theme === "dark" ? "white" : "#000" }}>
+                                                            Select files
+                                                        </Button>
+                                                    </Upload>
+
+                                                </div>
+
+                                                {/* Creative Library UI */}
+                                                {selectedOption === "creative" && (
                                                     <div>
-                                                        {/* Upload UI */}
-                                                        <div className="custom-dark-mode"  style={{ display: selectedOption === "upload" ? "block" : "none" }}>
-                                                        <Upload
-        beforeUpload={() => false}
-        // onChange={(info) => {
-        //   const newFiles = info.fileList.map((file) => ({
-        //     ...file,
-        //     uid: file.uid || `-${Date.now()}`,
-        //     source: "media",
-        //     thumbUrl:
-        //       file.thumbUrl ||
-        //       (file.originFileObj ? URL.createObjectURL(file.originFileObj) : undefined),
-        //   }));
+                                                        <Button icon={<UploadOutlined />} onClick={() => { onClickCreativesDrawer(adset, index) }} className="dark-icon-button" style={{ color: theme === "dark" ? "#fff" : "#000" }}>
+                                                            Select files
+                                                        </Button>
 
-        //   setSelectedFiles((prev) => {
-        //     const existingUids = new Set((prev[index] || []).map((f) => f.uid));
-        //     const filtered = newFiles.filter((f) => !existingUids.has(f.uid));
-        //     const updated = [...(prev[index] || []), ...filtered];
-        //     const newState = { ...prev, [index]: updated };
-        //     form.setFieldsValue({ adsets: { [index]: { MediaContent: updated } } });
-        //     form.validateFields([['adsets', index, 'MediaContent']]);
-        //     return newState;
-        //   });
-
-        //   setSelectedFilesFromMedia((prev) => {
-        //     const existingUids = new Set((prev[index] || []).map((f) => f.uid));
-        //     const filtered = newFiles.filter((f) => !existingUids.has(f.uid));
-        //     const updated = [...(prev[index] || []), ...filtered];
-        //     const newState = { ...prev, [index]: updated };
-        //     form.setFieldsValue({ adsets: { [index]: { MediaContent: updated } } });
-        //     form.validateFields([['adsets', index, 'MediaContent']]);
-        //     return newState;
-        //   });
-        // }}
-        onChange={(info) => {
-            const newFiles = info.fileList.map((file) => ({
-              ...file,
-              uid: file.uid || `-${Date.now()}`,
-              source: "media",
-              thumbUrl:
-                file.thumbUrl ||
-                (file.originFileObj ? URL.createObjectURL(file.originFileObj) : undefined),
-            }));
-          
-            setSelectedFiles((prev) => {
-              const existingUids = new Set((prev[adset.id] || []).map((f) => f.uid));
-              const updated = [...(prev[adset.id] || []), ...newFiles.filter(f => !existingUids.has(f.uid))];
-              return { ...prev, [adset.id]: updated };
-            });
-          
-            setSelectedFilesFromMedia((prev) => {
-              const existingUids = new Set((prev[adset.id] || []).map((f) => f.uid));
-              const updated = [...(prev[adset.id] || []), ...newFiles.filter(f => !existingUids.has(f.uid))];
-              return { ...prev, [adset.id]: updated };
-            });
-          
-            const formMedia = form.getFieldValue(['adsets', index, 'MediaContent']) || [];
-            form.setFieldsValue({
-              adsets: {
-                [index]: {
-                  MediaContent: [...formMedia, ...newFiles],
-                },
-              },
-            });
-          
-            form.validateFields([['adsets', index, 'MediaContent']]);
-        }}
-          
-        // onRemove={(fileToRemove) => {
-        //   setSelectedFilesFromMedia((prev) => {
-        //     const updated = (prev[index] || []).filter((f) => f.uid !== fileToRemove.uid);
-        //     const newState = { ...prev, [index]: updated };
-        //     form.setFieldsValue({ adsets: { [index]: { MediaContent: updated } } });
-        //     form.validateFields([['adsets', index, 'MediaContent']]);
-        //     return newState;
-        //   });
-
-        //   setSelectedFiles((prev) => {
-        //     const updated = (prev[index] || []).filter((f) => f.uid !== fileToRemove.uid);
-        //     const newState = { ...prev, [index]: updated };
-        //     form.setFieldsValue({ adsets: { [index]: { MediaContent: updated } } });
-        //     form.validateFields([['adsets', index, 'MediaContent']]);
-        //     return newState;
-        //   });
-
-        //   return true;
-        // }}
-        // onChange={(info) => {
-        //     const newFiles = info.fileList.map((file) => ({
-        //       ...file,
-        //       uid: file.uid || `-${Date.now()}`,
-        //       status: 'done',
-        //       type: file.type,
-        //       thumbUrl: file.thumbUrl || (file.originFileObj ? URL.createObjectURL(file.originFileObj) : undefined),
-        //       adsetIndex: index, // Tag the file with adsetIndex
-        //     }));
-          
-        //     setSelectedFiles(prev => [...prev, ...newFiles]);
-        //     setSelectedFilesFromMedia(prev => [...prev, ...newFiles]);
-          
-        //     const currentAll = [...selectedFiles, ...newFiles];
-        //     const filtered = currentAll.filter(f => f.adsetIndex === index);
-          
-        //     form.setFieldsValue({
-        //       adsets: {
-        //         [index]: {
-        //           MediaContent: filtered
-        //         }
-        //       }
-        //     });
-          
-        //     form.validateFields([['adsets', index, 'MediaContent']]);
-        // }}
-          
-        // onRemove={(fileToRemove) => {
-        //     setSelectedFiles(prev => prev.filter(f => f.uid !== fileToRemove.uid));
-        //     setSelectedFilesFromMedia(prev => prev.filter(f => f.uid !== fileToRemove.uid));
-          
-        //     const updated = selectedFiles.filter(f => f.uid !== fileToRemove.uid && f.adsetIndex === index);
-            
-        //     form.setFieldsValue({
-        //       adsets: {
-        //         [index]: {
-        //           MediaContent: updated
-        //         }
-        //       }
-        //     });
-          
-        //     form.validateFields([['adsets', index, 'MediaContent']]);
-        //     return true;
-        // }}
-          
-        onRemove={(fileToRemove) => {
-            setSelectedFilesFromMedia((prev) => {
-              const updated = (prev[adset.id] || []).filter(f => f.uid !== fileToRemove.uid);
-              return { ...prev, [adset.id]: updated };
-            });
-          
-            setSelectedFiles((prev) => {
-              const updated = (prev[adset.id] || []).filter(f => f.uid !== fileToRemove.uid);
-              return { ...prev, [adset.id]: updated };
-            });
-          
-            const updatedFormMedia = (form.getFieldValue(['adsets', index, 'MediaContent']) || []).filter(
-              f => f.uid !== fileToRemove.uid
-            );
-          
-            form.setFieldsValue({
-              adsets: {
-                [index]: {
-                  MediaContent: updatedFormMedia,
-                },
-              },
-            });
-          
-            form.validateFields([['adsets', index, 'MediaContent']]);
-            return true;
-        }}
-        multiple
-        maxCount={10}
-        fileList={selectedFilesFromMedia[adset.id] || []}
-        listType="picture"
-        accept="image/*, video/*"
-      >
-        <Button icon={<UploadOutlined />} className="dark-icon-button" style={{ color: theme === "dark" ? "white" : "#000" }}>
-          Select Files
-        </Button>
-      </Upload>
-
-                                                        </div>
-
-                                                        {/* Creative Library UI */}
-                                                        {selectedOption === "creative" && (
-                                                        <div>
-                                                            <Button icon={<UploadOutlined />} onClick={()=>{onClickCreativesDrawer(adset, index)}} className="dark-icon-button"  style={{color: theme === "dark" ? "white" : "#000"}}>
-                                                            Select Files
-                                                            </Button>
-
-                                                            {selectedFilesFromCreatives[adset.id]?.length > 0 && (
+                                                        {selectedFilesFromCreatives[adset.id]?.length > 0 && (
                                                             <div style={{ marginTop: "10px" }}>
                                                                 {selectedFilesFromCreatives[adset.id].map((file, index) => (
-                                                                <div
-                                                                    key={index}
-                                                                    style={{
-                                                                    display: "flex",
-                                                                    alignItems: "center",
-                                                                    marginBottom: 8,
-                                                                    }}
-                                                                >
-                                                                    {/* <PaperClipOutlined style={{ marginRight: 8 }} /> */}
-                                                                    {/* <Tooltip title={file.name}> */}
-                                                                    {file.type?.startsWith("image/") && (
-                                                                        <img
-                                                                            src={
-                                                                            file.originFileObj
-                                                                                ? URL.createObjectURL(file.originFileObj)
-                                                                                : file.url
-                                                                            }
-                                                                            alt="preview"
-                                                                            style={{
-                                                                            width: 40,
-                                                                            height: 40,
-                                                                            objectFit: "cover",
-                                                                            borderRadius: 4,
-                                                                            marginLeft: 8,
-                                                                            }}
-                                                                        />
-                                                                    )}
-                                                                    <span
+                                                                    <div
+                                                                        key={index}
                                                                         style={{
-                                                                        maxWidth: 160,
-                                                                        overflow: "hidden",
-                                                                        textOverflow: "ellipsis",
-                                                                        whiteSpace: "nowrap",
-                                                                        paddingLeft: 8,
-                                                                        color: theme === 'dark' ? '#fff' : '#000',
+                                                                            display: "flex",
+                                                                            alignItems: "center",
+                                                                            marginBottom: 8,
                                                                         }}
                                                                     >
-                                                                        {file.name}
-                                                                    </span>
-                                                                    {/* </Tooltip> */}
+                                                                        {/* <PaperClipOutlined style={{ marginRight: 8 }} /> */}
+                                                                        {/* <Tooltip title={file.name}> */}
+                                                                        {file.type?.startsWith("image/") && (
+                                                                            <img
+                                                                                src={
+                                                                                    file.originFileObj
+                                                                                        ? URL.createObjectURL(file.originFileObj)
+                                                                                        : file.url
+                                                                                }
+                                                                                alt="preview"
+                                                                                style={{
+                                                                                    width: 40,
+                                                                                    height: 40,
+                                                                                    objectFit: "cover",
+                                                                                    borderRadius: 4,
+                                                                                    marginLeft: 8,
+                                                                                }}
+                                                                            />
+                                                                        )}
+                                                                        <span
+                                                                            style={{
+                                                                                maxWidth: 160,
+                                                                                overflow: "hidden",
+                                                                                textOverflow: "ellipsis",
+                                                                                whiteSpace: "nowrap",
+                                                                                paddingLeft: 8,
+                                                                                color: theme === 'dark' ? '#fff' : '#000',
+                                                                            }}
+                                                                        >
+                                                                            {file.name}
+                                                                        </span>
+                                                                        {/* </Tooltip> */}
 
-                                                                    
 
-                                                                    {/* <DeleteOutlined
+
+                                                                        {/* <DeleteOutlined
                                                                     onClick={() => {
                                                                         const updated = selectedFilesFromCreatives[index].filter(
                                                                         (f) => f.uid !== file.uid
@@ -2052,43 +2056,43 @@ const AdsetComponent = ({
                                                                     }}
                                                                     style={{ color: "red", marginLeft: 12, cursor: "pointer" }}
                                                                     /> */}
-                                                                    <DeleteOutlined
-  onClick={() => {
-    // Update selectedFilesFromCreatives for the current adset (index)
-    const updatedCreatives = selectedFilesFromCreatives[adset.id].filter(
-      (f) => f.uid !== file.uid
-    );
-    setSelectedFilesFromCreatives((prev) => {
-      const updated = { ...prev, [adset.id]: updatedCreatives };  // Update the adset.id specifically
-      return updated;
-    });
+                                                                        <DeleteOutlined
+                                                                            onClick={() => {
+                                                                                // Update selectedFilesFromCreatives for the current adset (index)
+                                                                                const updatedCreatives = selectedFilesFromCreatives[adset.id].filter(
+                                                                                    (f) => f.uid !== file.uid
+                                                                                );
+                                                                                setSelectedFilesFromCreatives((prev) => {
+                                                                                    const updated = { ...prev, [adset.id]: updatedCreatives };  // Update the adset.id specifically
+                                                                                    return updated;
+                                                                                });
 
-    // Update selectedFiles for the current adset (adset.id)
-    const updatedFiles = selectedFiles[adset.id].filter((f) => f.uid !== file.uid);
-    setSelectedFiles((prev) => {
-      const updated = { ...prev, [adset.id]: updatedFiles };  // Update the index specifically
-      return updated;
-    });
+                                                                                // Update selectedFiles for the current adset (adset.id)
+                                                                                const updatedFiles = selectedFiles[adset.id].filter((f) => f.uid !== file.uid);
+                                                                                setSelectedFiles((prev) => {
+                                                                                    const updated = { ...prev, [adset.id]: updatedFiles };  // Update the index specifically
+                                                                                    return updated;
+                                                                                });
 
-    // Update form values with the new MediaContent array
-    form.setFieldsValue({
-      MediaContent: updatedCreatives
-    });
+                                                                                // Update form values with the new MediaContent array
+                                                                                form.setFieldsValue({
+                                                                                    MediaContent: updatedCreatives
+                                                                                });
 
-    // Trigger validation
-    form.validateFields(["MediaContent"]);
-  }}
-  style={{ color: "red", marginLeft: 12, cursor: "pointer" }}
-/>
-                                                                </div>
+                                                                                // Trigger validation
+                                                                                form.validateFields(["MediaContent"]);
+                                                                            }}
+                                                                            style={{ color: "red", marginLeft: 12, cursor: "pointer" }}
+                                                                        />
+                                                                    </div>
                                                                 ))}
                                                             </div>
-                                                            )}
-                                                        </div>
                                                         )}
                                                     </div>
-                                            </Form.Item>
-                                        </div>
+                                                )}
+                                            </div>
+                                        </Form.Item>
+                                    </div>
 
                                     <Form.Item
                                         name="page_id"
@@ -2102,7 +2106,7 @@ const AdsetComponent = ({
                                         ]}
                                         style={{ flex: 3, marginLeft: "1%" }}
                                     >
-                                        <Input style={{ width: "23%" }}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
+                                        <Input style={{ width: "23%" }} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                                     </Form.Item>
                                 </div>
                                 <Form.Item
@@ -2279,174 +2283,174 @@ const AdsetComponent = ({
                             </div>
 
                             <div style={{ flex: "30%" }}>
-  {selectedFiles[adset.id] && selectedFiles[adset.id].length > 0 ? (
-    selectedFiles[adset.id].map((file, i) => (
-      <Badge
-        key={i}
-        count={
-          file?.url?.endsWith('.png') ||
-          file?.url?.endsWith('.jpg') ||
-          file?.url?.endsWith('.jpeg') ||
-          file?.url?.endsWith('.mp4')
-            ? null
-            : (
-              <EditOutlined
-                style={{ fontSize: '25px', color: '#fff' }}
-                onClick={() => handleEditClick(file)}
-              />
-            )
-        }
-        style={{
-          backgroundColor: '#52c41a',
-          borderRadius: '50%',
-          position: 'absolute',
-          top: '5px',
-          right: '5px',
-          zIndex: 10,
-          cursor: 'pointer',
-        }}
-        offset={[5, 5]}
-      >
-        <div className="container-ad-preview">
-          <div className="ad-preview" style={{ width: "350px", backgroundColor: theme === "dark" ? "#4f4f4d" : "#fff" }}>
-            <div className="ad-heading">
-              <div className="img">
-                {file?.url?.endsWith('.png') ||
-                file?.url?.endsWith('.jpg') ||
-                file?.url?.endsWith('.jpeg') ? (
-                  <img
-                    src={file?.url}
-                    alt="preview"
-                    width="40"
-                    height="40"
-                    style={{ objectFit: 'cover' }}
-                  />
-                ) : file?.url?.endsWith('.mp4') ? (
-                  <video
-                    src={file?.url}
-                    width="40"
-                    height="30"
-                    style={{ objectFit: 'cover' }}
-                    muted
-                  />
-                ) : file?.type?.startsWith('image/') ? (
-                  <img
-                    src={editedImages[file?.name]
-                      ? editedImages[file?.name]
-                      : file?.originFileObj
-                        ? URL.createObjectURL(file.originFileObj)
-                        : file?.url}
-                    alt="preview"
-                    width="40"
-                    height="40"
-                    style={{ objectFit: 'cover' }}
-                  />
-                ) : (
-                  <video
-                    src={file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url}
-                    width="40"
-                    height="30"
-                    style={{ objectFit: 'cover' }}
-                    muted
-                  />
-                )}
-              </div>
+                                {selectedFiles[adset.id] && selectedFiles[adset.id].length > 0 ? (
+                                    selectedFiles[adset.id].map((file, i) => (
+                                        <Badge
+                                            key={i}
+                                            count={
+                                                file?.url?.endsWith('.png') ||
+                                                    file?.url?.endsWith('.jpg') ||
+                                                    file?.url?.endsWith('.jpeg') ||
+                                                    file?.url?.endsWith('.mp4')
+                                                    ? null
+                                                    : (
+                                                        <EditOutlined
+                                                            style={{ fontSize: '25px', color: '#fff' }}
+                                                            onClick={() => handleEditClick(file)}
+                                                        />
+                                                    )
+                                            }
+                                            style={{
+                                                backgroundColor: '#52c41a',
+                                                borderRadius: '50%',
+                                                position: 'absolute',
+                                                top: '5px',
+                                                right: '5px',
+                                                zIndex: 10,
+                                                cursor: 'pointer',
+                                            }}
+                                            offset={[5, 5]}
+                                        >
+                                            <div className="container-ad-preview">
+                                                <div className="ad-preview" style={{ width: "350px", backgroundColor: theme === "dark" ? "#4f4f4d" : "#fff" }}>
+                                                    <div className="ad-heading">
+                                                        <div className="img">
+                                                            {file?.url?.endsWith('.png') ||
+                                                                file?.url?.endsWith('.jpg') ||
+                                                                file?.url?.endsWith('.jpeg') ? (
+                                                                <img
+                                                                    src={file?.url}
+                                                                    alt="preview"
+                                                                    width="40"
+                                                                    height="40"
+                                                                    style={{ objectFit: 'cover' }}
+                                                                />
+                                                            ) : file?.url?.endsWith('.mp4') ? (
+                                                                <video
+                                                                    src={file?.url}
+                                                                    width="40"
+                                                                    height="30"
+                                                                    style={{ objectFit: 'cover' }}
+                                                                    muted
+                                                                />
+                                                            ) : file?.type?.startsWith('image/') ? (
+                                                                <img
+                                                                    src={editedImages[file?.name]
+                                                                        ? editedImages[file?.name]
+                                                                        : file?.originFileObj
+                                                                            ? URL.createObjectURL(file.originFileObj)
+                                                                            : file?.url}
+                                                                    alt="preview"
+                                                                    width="40"
+                                                                    height="40"
+                                                                    style={{ objectFit: 'cover' }}
+                                                                />
+                                                            ) : (
+                                                                <video
+                                                                    src={file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url}
+                                                                    width="40"
+                                                                    height="30"
+                                                                    style={{ objectFit: 'cover' }}
+                                                                    muted
+                                                                />
+                                                            )}
+                                                        </div>
 
-              <div className="title">
-                <div className="main" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: theme === "dark" ? "white" : "#000" }}>
-                  {addName}
-                  <div className="sub">
-                    {imagehash?.pageName ? (
-                      <>
-                        {imagehash.pageName} <GlobalOutlined style={{ opacity: "0.6" }} />
-                      </>
-                    ) : (
-                      <GlobalOutlined style={{ opacity: "0.6" }} />
-                    )}
-                  </div>
-                </div>
-              </div>
+                                                        <div className="title">
+                                                            <div className="main" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: theme === "dark" ? "white" : "#000" }}>
+                                                                {addName}
+                                                                <div className="sub">
+                                                                    {imagehash?.pageName ? (
+                                                                        <>
+                                                                            {imagehash.pageName} <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                                        </>
+                                                                    ) : (
+                                                                        <GlobalOutlined style={{ opacity: "0.6" }} />
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </div>
 
-              <div className="close"><CloseOutlined style={{ fontSize: "20px" }} /></div>
-              <div className="moreoptions"><MoreOutlined style={{ fontSize: "20px" }} /></div>
-            </div>
+                                                        <div className="close"><CloseOutlined style={{ fontSize: "20px" }} /></div>
+                                                        <div className="moreoptions"><MoreOutlined style={{ fontSize: "20px" }} /></div>
+                                                    </div>
 
-            <div className="ad-desc" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: theme === "dark" ? "white" : "#000" }}>
-              {primaryText}
-            </div>
+                                                    <div className="ad-desc" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: theme === "dark" ? "white" : "#000" }}>
+                                                        {primaryText}
+                                                    </div>
 
-            <div className="ad-image" style={{ width: '350px', height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {file?.url?.endsWith('.png') ||
-              file?.url?.endsWith('.jpg') ||
-              file?.url?.endsWith('.jpeg') ? (
-                <img
-                  src={file?.url}
-                  alt="ad"
-                  style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                />
-              ) : file?.url?.endsWith('.mp4') ? (
-                <video
-                  controls
-                  style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                >
-                  <source src={file?.url} />
-                  Your browser does not support the video tag.
-                </video>
-              ) : file?.type?.startsWith('image/') ? (
-                <img
-                  src={editedImages[file?.name]
-                    ? editedImages[file?.name]
-                    : file?.originFileObj
-                      ? URL.createObjectURL(file.originFileObj)
-                      : file?.url}
-                  alt="ad"
-                  style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                />
-              ) : (
-                <video
-                  controls
-                  style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                >
-                  <source src={file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url} />
-                  Your browser does not support the video tag.
-                </video>
-              )}
-            </div>
+                                                    <div className="ad-image" style={{ width: '350px', height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                        {file?.url?.endsWith('.png') ||
+                                                            file?.url?.endsWith('.jpg') ||
+                                                            file?.url?.endsWith('.jpeg') ? (
+                                                            <img
+                                                                src={file?.url}
+                                                                alt="ad"
+                                                                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                                                            />
+                                                        ) : file?.url?.endsWith('.mp4') ? (
+                                                            <video
+                                                                controls
+                                                                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                                                            >
+                                                                <source src={file?.url} />
+                                                                Your browser does not support the video tag.
+                                                            </video>
+                                                        ) : file?.type?.startsWith('image/') ? (
+                                                            <img
+                                                                src={editedImages[file?.name]
+                                                                    ? editedImages[file?.name]
+                                                                    : file?.originFileObj
+                                                                        ? URL.createObjectURL(file.originFileObj)
+                                                                        : file?.url}
+                                                                alt="ad"
+                                                                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                                                            />
+                                                        ) : (
+                                                            <video
+                                                                controls
+                                                                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                                                            >
+                                                                <source src={file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url} />
+                                                                Your browser does not support the video tag.
+                                                            </video>
+                                                        )}
+                                                    </div>
 
-            <div className="ad-cta">
-              <div className="details">
-                <div className="link" style={{ color: theme === "dark" ? "white" : "#000" }}>{caption}</div>
-                <div className="title" style={{ color: theme === "dark" ? "white" : "#000" }}>{headline}</div>
-                <div className="desc" style={{ color: theme === "dark" ? "white" : "#000" }}>{description}</div>
-              </div>
-              <div className="ad-button">
-                <button style={{ backgroundColor: '#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px" }}>
-                  Learn More
-                </button>
-              </div>
-            </div>
+                                                    <div className="ad-cta">
+                                                        <div className="details">
+                                                            <div className="link" style={{ color: theme === "dark" ? "white" : "#000" }}>{caption}</div>
+                                                            <div className="title" style={{ color: theme === "dark" ? "white" : "#000" }}>{headline}</div>
+                                                            <div className="desc" style={{ color: theme === "dark" ? "white" : "#000" }}>{description}</div>
+                                                        </div>
+                                                        <div className="ad-button">
+                                                            <button style={{ backgroundColor: '#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px" }}>
+                                                                Learn More
+                                                            </button>
+                                                        </div>
+                                                    </div>
 
-            <a href={websiteURL} target="_blank" rel="noopener noreferrer" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: '#0066cc', padding: '10px' }}>
-              {websiteURL}
-            </a>
+                                                    <a href={websiteURL} target="_blank" rel="noopener noreferrer" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: '#0066cc', padding: '10px' }}>
+                                                        {websiteURL}
+                                                    </a>
 
-            <div className="icons">
-              <div className="like" style={{ color: theme === "dark" ? "white" : "#000" }}>
-                <LikeOutlined style={{ fontSize: "20px" }} /> Like
-              </div>
-              <div className="comment" style={{ color: theme === "dark" ? "white" : "#000" }}>
-                <CommentOutlined style={{ fontSize: "20px" }} /> Comment
-              </div>
-              <div className="share" style={{ color: theme === "dark" ? "white" : "#000" }}>
-                <ShareAltOutlined style={{ fontSize: "20px" }} /> Share
-              </div>
-            </div>
-          </div>
-        </div>
-      </Badge>
-    ))
-  ) : null}
-</div>
+                                                    <div className="icons">
+                                                        <div className="like" style={{ color: theme === "dark" ? "white" : "#000" }}>
+                                                            <LikeOutlined style={{ fontSize: "20px" }} /> Like
+                                                        </div>
+                                                        <div className="comment" style={{ color: theme === "dark" ? "white" : "#000" }}>
+                                                            <CommentOutlined style={{ fontSize: "20px" }} /> Comment
+                                                        </div>
+                                                        <div className="share" style={{ color: theme === "dark" ? "white" : "#000" }}>
+                                                            <ShareAltOutlined style={{ fontSize: "20px" }} /> Share
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </Badge>
+                                    ))
+                                ) : null}
+                            </div>
 
 
 
@@ -2471,30 +2475,30 @@ const AdsetComponent = ({
                     </Drawer>
                 )}
                 <Modal
-                                    title="URL Builder"
-                                    visible={isModalVisibleForURLBuilder}
-                                    onCancel={handleCancelForURLBuilder}
-                                    // footer={[
-                                    //     <Button key="cancel" onClick={handleCancel}>
-                                    //         Cancel
-                                    //     </Button>,
-                                    //     <Button key="submit" type="primary" onClick={() => setIsModalVisible(false)}>
-                                    //         Submit
-                                    //     </Button>
-                                    // ]}
-                                    footer={null}
-                                    width="80%" // Set width of the modal
-                                    bodyStyle={{ height: '50vh', overflowY: 'auto' }}
-                                    className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
-                                >
-                                    {getUrlBuilder}
-                                </Modal>
-                </Panel>
-            
-            </Collapse>
+                    title="URL Builder"
+                    visible={isModalVisibleForURLBuilder}
+                    onCancel={handleCancelForURLBuilder}
+                    // footer={[
+                    //     <Button key="cancel" onClick={handleCancel}>
+                    //         Cancel
+                    //     </Button>,
+                    //     <Button key="submit" type="primary" onClick={() => setIsModalVisible(false)}>
+                    //         Submit
+                    //     </Button>
+                    // ]}
+                    footer={null}
+                    width="80%" // Set width of the modal
+                    bodyStyle={{ height: '50vh', overflowY: 'auto' }}
+                    className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+                >
+                    {getUrlBuilder}
+                </Modal>
+            </Panel>
+
+        </Collapse>
     );
 };
-const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, network}) => {
+const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, network }) => {
     // const [selectedFile, setSelectedFile] = useState(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] = useState(false);
@@ -2531,7 +2535,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     const [selectedFilesFromCreatives, setSelectedFilesFromCreatives] = useState({});
     const [selectedFilesFromMedia, setSelectedFilesFromMedia] = useState({});
     const [openCreativesDrawer, setOpenCreativesDrawer] = useState(false);
-    const [adsets, setAdsets] = useState([{ id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName:"Adset 1" }]);
+    const [adsets, setAdsets] = useState([{ id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName: "Adset 1" }]);
     const [creativeIndex, setCreativeIndex] = useState(0);
     const selectedRef = useRef({});
     const newSelectedRef = useRef(null);
@@ -2549,20 +2553,20 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
     const [errors, setErrors] = useState({ input1: '', input2: '' });
     const [refreshDraft, setRefreshDraft] = useState(false);
     console.log(draftsData, "draftsData in CreateCampaignDrawer");
-  
+
     // const handleConfirm = async() => {
     //   const newErrors = {
     //     input1: popupInputs.input1.trim() ? '' : 'First input is required',
     //     input2: popupInputs.input2.trim() ? '' : 'Second input is required',
     //   };
-  
+
     //   setErrors(newErrors);
-  
+
     //   const hasErrors = Object.values(newErrors).some((msg) => msg !== '');
     //   if (hasErrors) {
     //     return Promise.reject(); // prevent closing
     //   }
-  
+
     //   setConfirmLoading(true);
     //   const allValues = form.getFieldsValue(true);
     // //   console.log(allValues);
@@ -2582,62 +2586,62 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
 
     const handleConfirm = async () => {
         const newErrors = {
-          input1: popupInputs.input1.trim() ? '' : 'First input is required',
-          input2: popupInputs.input2.trim() ? '' : 'Second input is required',
+            input1: popupInputs.input1.trim() ? '' : 'First input is required',
+            input2: popupInputs.input2.trim() ? '' : 'Second input is required',
         };
-      
+
         setErrors(newErrors);
-      
+
         const hasErrors = Object.values(newErrors).some((msg) => msg !== '');
         if (hasErrors) {
-          return Promise.reject(); // keep Popconfirm open
+            return Promise.reject(); // keep Popconfirm open
         }
-      
-        setConfirmLoading(true);
-      
-        try {
-          const allValues = form.getFieldsValue(true);
-      
-          const draftData = await MultipleAdsetsDraftFetching(allValues);
-          const totalDraftData = {id: uuidv4(), Title: popupInputs.input1, Draft_Name: popupInputs.input2, ...draftData }
-        //   console.log(totalDraftData, "totalDraftData in handleConfirm");
 
-          const response = await fetch('https://www.testapi.adsgoat.in/api/submitDraftData', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: token
-            },
-            body: JSON.stringify({ draftData: totalDraftData, email: session?.user?.email, userName: session?.user?.name })
-          
-          });
-          if(response.status === 200 || response.status === 201) {
-            setRefreshDraft(prev => !prev); 
-          }
-          console.log("Draft data submitted successfully:", response);
-      
-          // Close only after successful fetch and processing
-          return new Promise((resolve) => {
-            setTimeout(() => {
-              setConfirmLoading(false);
-              setOpen(false); // 👈 Close here after everything is done
-              setPopupInputs({ input1: '', input2: '' });
-              setErrors({ input1: '', input2: '' });
-              resolve(); // must resolve to properly finish Popconfirm
-            }, 500);
-          });
+        setConfirmLoading(true);
+
+        try {
+            const allValues = form.getFieldsValue(true);
+
+            const draftData = await MultipleAdsetsDraftFetching(allValues);
+            const totalDraftData = { id: uuidv4(), Title: popupInputs.input1, Draft_Name: popupInputs.input2, ...draftData }
+            //   console.log(totalDraftData, "totalDraftData in handleConfirm");
+
+            const response = await fetch('https://www.testapi.adsgoat.in/api/submitDraftData', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: token
+                },
+                body: JSON.stringify({ draftData: totalDraftData, email: session?.user?.email, userName: session?.user?.name })
+
+            });
+            if (response.status === 200 || response.status === 201) {
+                setRefreshDraft(prev => !prev);
+            }
+            console.log("Draft data submitted successfully:", response);
+
+            // Close only after successful fetch and processing
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    setConfirmLoading(false);
+                    setOpen(false); // 👈 Close here after everything is done
+                    setPopupInputs({ input1: '', input2: '' });
+                    setErrors({ input1: '', input2: '' });
+                    resolve(); // must resolve to properly finish Popconfirm
+                }, 500);
+            });
         } catch (err) {
-          console.error("❌ Error during MultipleAdsetsDraftFetching:", err);
-          setConfirmLoading(false);
-          return Promise.reject(); // keep Popconfirm open
+            console.error("❌ Error during MultipleAdsetsDraftFetching:", err);
+            setConfirmLoading(false);
+            return Promise.reject(); // keep Popconfirm open
         }
-      };
-      
-  
+    };
+
+
     const handleCancelPop = () => {
-      setOpen(false);
-      setPopupInputs({ input1: '', input2: '' });
-      setErrors({ input1: '', input2: '' });
+        setOpen(false);
+        setPopupInputs({ input1: '', input2: '' });
+        setErrors({ input1: '', input2: '' });
     };
 
     // Track if any adset has a budget set
@@ -2657,7 +2661,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         const newAdsets = [...adsets];
         newAdsets[index].DailyAdd_amount = value;
         setAdsets(newAdsets);
-        if(value > 0) {
+        if (value > 0) {
             setIsAnyAdsetBudgetSet(true);
         }
         else {
@@ -2696,7 +2700,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
             setAdsetLevelDailyBudget(0);
             // setCampaignLevelDailyBudget(0);
             setSelectedOption("upload");
-            setIsManual(false); 
+            setIsManual(false);
         }
     }, [visible]);
 
@@ -2716,410 +2720,410 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
         console.log(index, "index in updateAdMediaData");
         console.log(form.getFieldValue("adsets"), "form.getFieldValue('adsets') in updateAdMediaData");
         const formatted = files.map((file) => ({
-          AddName: adset.AddName || "",
-          Caption: adset.Caption || "",
-          Description: adset.Description || "",
-          message: adset.message || "",
-          filename: file.name || "",
-          headline: adset.headline || "",
-          Website_URL: adset.Website_URL || ""
+            AddName: adset.AddName || "",
+            Caption: adset.Caption || "",
+            Description: adset.Description || "",
+            message: adset.message || "",
+            filename: file.name || "",
+            headline: adset.headline || "",
+            Website_URL: adset.Website_URL || ""
         }));
-      
+
         setAdMediaData((prev) => ({
-          ...prev,
-          [index]: formatted
+            ...prev,
+            [index]: formatted
         }));
     };
 
-    
-// Helper function to get the next Adset name
-// const getNextAdsetName = (adsets) => {
-//     const adsetNames = adsets.map(adset => adset.AdsetPanelName);
-//     let highestNumber = 0;
 
-//     // Loop to find the highest number in adset names
-//     adsetNames.forEach((name) => {
-//         const match = name.match(/^Adset (\d+)/);
-//         if (match && match[1]) {
-//             const num = parseInt(match[1]);
-//             if (num > highestNumber) {
-//                 highestNumber = num;
-//             }
-//         }
-//     });
+    // Helper function to get the next Adset name
+    // const getNextAdsetName = (adsets) => {
+    //     const adsetNames = adsets.map(adset => adset.AdsetPanelName);
+    //     let highestNumber = 0;
 
-//     return `Adset ${highestNumber + 1}`;
-// };
-
-// Helper function to get default adset data
-// Helper function to get the next Adset name
-// Helper function to get the next Adset name
-const getNextAdsetName = (adsets) => {
-    const adsetNames = adsets.map(adset => adset.AdsetPanelName);
-    let highestNumber = 0;
-
-    // Loop to find the highest number in adset names
-    adsetNames.forEach((name) => {
-        if (typeof name === 'string') {
-          const match = name.match(/^Adset (\d+)/);
-          if (match && match[1]) {
-            const num = parseInt(match[1]);
-            if (num > highestNumber) {
-              highestNumber = num;
-            }
-          }
-        }
-      });
-      
-
-    return `Adset ${highestNumber + 1}`;
-};
-
-// Helper function to get default adset data
-const getDefaultAdset = (campaignName, caption, websiteURL, imagehash, currentDate) => {
-    return {
-        id: uuidv4(), // Generate a new unique ID for the adset
-        AdsetPanelName: getNextAdsetName(adsets),
-        AdsetName: campaignName,
-        optimization_goal: "OFFSITE_CONVERSIONS",
-        billing_event: "IMPRESSIONS",
-        action_source: "website",
-        custom_event_type: "LEAD",
-        countries: "US",
-        Min_Age: "18",
-        Max_Age: "65",
-        Gender: "0",
-        Language: [6],
-        placements: "Advance",
-        DailyAdd_amount: 0,
-        AddName: campaignName,
-        Description: "Find More",
-        Caption: caption,
-        Website_URL: websiteURL,
-        pixel_id: imagehash?.pixelID,
-        start_date: currentDate,
-        MediaContent: [],  // Default MediaContent as empty array
-    };
-};
-
-// For adding a new adset
-// For adding a new adset
-// For adding a new adset
-// For adding a new adset
-const addAdset = () => {
-    const newAdsetName = getNextAdsetName(adsets); // Get the next highest number
-    const newAdset = { 
-        id: uuidv4(),
-        AdsetPanelName: newAdsetName,
-        AdsetName: "", // Add default values for the new adset
-        optimization_goal: "OFFSITE_CONVERSIONS",
-        billing_event: "IMPRESSIONS",
-        action_source: "website",
-        custom_event_type: "LEAD",
-        countries: "US",
-        Min_Age: "18",
-        Max_Age: "65",
-        Gender: "0",
-        Language: [6],
-        placements: "Advance",
-        DailyAdd_amount: 0,
-        AddName: "",
-        Description: "Find More",
-        Caption: "",
-        Website_URL: "",
-        pixel_id: "", // Or set it based on your requirement
-        start_date: new Date(),
-        MediaContent: [],  // Default MediaContent as empty array
-    };
-    setAdsets((prevAdsets) => [...prevAdsets, newAdset]);
-
-    // Add the new adset to the state
-    // setAdsets(prevAdsets => {
-    //     const updatedAdsets = [...prevAdsets, newAdset];
-
-    //     // Update the form with only the new adset at the last index
-    //     form.setFieldsValue({
-    //         // Only update the last adset (the newly added one)
-    //         [`adsets[${updatedAdsets.length - 1}]`]: {
-    //             ...newAdset,
-    //             [`adsets[${updatedAdsets.length - 1}].AdsetPanelName`]: newAdset.AdsetPanelName,
-    //             [`adsets[${updatedAdsets.length - 1}].AdsetName`]: newAdset.AdsetName,
-    //             [`adsets[${updatedAdsets.length - 1}].MediaContent`]: newAdset.MediaContent,
-    //             // Add other fields as needed
+    //     // Loop to find the highest number in adset names
+    //     adsetNames.forEach((name) => {
+    //         const match = name.match(/^Adset (\d+)/);
+    //         if (match && match[1]) {
+    //             const num = parseInt(match[1]);
+    //             if (num > highestNumber) {
+    //                 highestNumber = num;
+    //             }
     //         }
     //     });
 
-    //     return updatedAdsets;
-    // });
+    //     return `Adset ${highestNumber + 1}`;
+    // };
 
-    // setActiveKey([`${adsets.length}`]); // Open the newly added adset by default
-};
+    // Helper function to get default adset data
+    // Helper function to get the next Adset name
+    // Helper function to get the next Adset name
+    const getNextAdsetName = (adsets) => {
+        const adsetNames = adsets.map(adset => adset.AdsetPanelName);
+        let highestNumber = 0;
 
-// const cloneAdset = (adsetId) => {
-//     const adsetIndex = adsets.findIndex(ad => ad.id === adsetId);
-//     if (adsetIndex === -1) return;
-  
-//     const originalAdset = adsets[adsetIndex];
-//     const newId = uuidv4();
-  
-//     const baseName = originalAdset.AdsetPanelName;
-//     const copyCount = adsets.filter(ad => ad.AdsetPanelName.startsWith(baseName)).length;
-//     const newPanelName = copyCount > 0 ? `${baseName}(${copyCount})_Copy` : `${baseName}_Copy`;
-  
-//     const clonedAdset = {
-//       ...originalAdset,
-//       id: newId,
-//       AdsetPanelName: newPanelName,
-//     };
-  
-//     const currentFormAdsets = form.getFieldValue('adsets') || [];
-  
-//     // ✅ Match by UUID not index!
-//     const formIndex = currentFormAdsets.findIndex((_, i) => adsets[i]?.id === adsetId);
-//     const clonedFormData = { ...currentFormAdsets[formIndex] };
-  
-//     const updatedFormAdsets = [...currentFormAdsets, clonedFormData];
-//     const updatedAdsets = [...adsets, clonedAdset];
-  
-//     // ✅ Set both states
-//     setAdsets(updatedAdsets);
-//     form.setFieldsValue({ adsets: updatedFormAdsets });
-  
-//     // ✅ Clone media/file states by UUID
-//     const cloneFiles = (prev, setter) => {
-//       setter(old => ({ ...old, [newId]: [...(old[adsetId] || [])] }));
-//     };
-  
-//     cloneFiles(selectedFiles, setSelectedFiles);
-//     cloneFiles(selectedFilesFromMedia, setSelectedFilesFromMedia);
-//     cloneFiles(selectedFilesFromCreatives, setSelectedFilesFromCreatives);
-//     setSelectedPositions(prev => ({
-//         ...prev,
-//         [newId]: [...(prev[adsetId] || [])], // safely clone if exists
-//     }));
-  
-//     // ✅ Open the last panel (the newly cloned one)
-//     setActiveKey([`${updatedAdsets.length - 1}`]);
-//   };
-  
-  
+        // Loop to find the highest number in adset names
+        adsetNames.forEach((name) => {
+            if (typeof name === 'string') {
+                const match = name.match(/^Adset (\d+)/);
+                if (match && match[1]) {
+                    const num = parseInt(match[1]);
+                    if (num > highestNumber) {
+                        highestNumber = num;
+                    }
+                }
+            }
+        });
 
 
-// For cloning an existing adset
-// const cloneAdset = (index) => {
-//     const clonedAdset = { ...adsets[index], id: uuidv4() }; // Create a new clone with a new UUID
-
-//     // Ensure MediaContent is an array (default to empty array if it's undefined)
-//     // clonedAdset.MediaContent = Array.isArray(adsets[index].MediaContent) 
-//     //     ? [...adsets[index].MediaContent] 
-//     //     : [];  // If MediaContent is not an array, default to empty array
-
-//     // Handle the naming for the cloned adset
-//     const originalName = adsets[index].AdsetPanelName;
-//     const copyCount = adsets.filter(adset => adset.AdsetPanelName.startsWith(originalName)).length;
-
-//     const cloneName = copyCount > 0 ? `${originalName}(${copyCount})_Copy` : `${originalName}_Copy`;
-//     clonedAdset.AdsetPanelName = cloneName;
-
-//     // Add the cloned adset at the end of the list
-//     setAdsets(prevAdsets => {
-//         const updatedAdsets = [...prevAdsets, clonedAdset];
-
-//         // Update the form with only the cloned adset at the last index
-//         // form.setFieldsValue({
-//         //     // Only update the last adset (the newly cloned one)
-//         //     [`adsets[${updatedAdsets.length - 1}]`]: {
-//         //         ...clonedAdset,
-//         //         [`adsets[${updatedAdsets.length - 1}].AdsetPanelName`]: clonedAdset.AdsetPanelName,
-//         //         [`adsets[${updatedAdsets.length - 1}].AdsetName`]: clonedAdset.AdsetName,
-//         //         [`adsets[${updatedAdsets.length - 1}].MediaContent`]: clonedAdset.MediaContent,
-//         //         // Add other fields as needed
-//         //     }
-//         // });
-
-//         return updatedAdsets;
-//     });
-
-//     setActiveKey([`${adsets.length}`]); // Open the newly cloned adset by default
-// };
-
-// const cloneAdset = (index) => {
-//   // Clone logic here
-//   const clonedAdset = {
-//     ...adsets[index],
-//     id: uuidv4(),
-//     AdsetPanelName: `${adsets[index].AdsetPanelName}_Copy`, // Modify the name to make it unique
-//   };
-
-//   setAdsets((prevAdsets) => [...prevAdsets, clonedAdset]);
-// };
-
-
-
-// For removing an adset based on its id
-// const removeAdset = (id) => {
-//     // Safely remove the adset by id
-//     setAdsets(prevAdsets => {
-//         const newAdsets = prevAdsets.filter(adset => adset.id !== id); // Filter by id
-//         form.setFieldsValue({
-//             adsets: newAdsets // Update the form with remaining adsets
-//         });
-//         return newAdsets;
-//     });
-
-//     // Update the activeKey to reflect the removal
-//     setActiveKey(prevActiveKey => {
-//         // If the deleted adset was the active one, reset the active key
-//         if (prevActiveKey[0] === id) {
-//             return newAdsets.length > 0 ? ['0'] : [];
-//         }
-//         return prevActiveKey; // Keep the previous active key if it's valid
-//     });
-// };
-// const removeAdset = (id) => {
-//     setAdsets(prevAdsets => {
-//       const indexToRemove = prevAdsets.findIndex(adset => adset.id === id);
-//       if (indexToRemove === -1) return prevAdsets; // nothing to remove
-  
-//       const newAdsets = [...prevAdsets];
-//       newAdsets.splice(indexToRemove, 1); // remove from state
-  
-//       // Remove only the specific adset from the form
-//       const currentFormValues = form.getFieldValue("adsets") || [];
-//       const newFormAdsets = [...currentFormValues];
-//       newFormAdsets.splice(indexToRemove, 1); // remove corresponding form data
-//       form.setFieldsValue({ adsets: newFormAdsets });
-  
-//       return newAdsets;
-//     });
-  
-//     // Update the activeKey properly
-//     setActiveKey(prevActiveKey => {
-//       const newActiveIndex = activeKey.length > 0 ? 0 : [];
-//       return [String(newActiveIndex)];
-//     });
-// };
-  
-
-// Sync form values after adsets state change
-// useEffect(() => {
-//     form.setFieldsValue({
-//         adsets: adsets.map((adset, index) => ({
-//             ...adset,
-//             [`adsets[${index}].AdsetPanelName`]: adset.AdsetPanelName,
-//             [`adsets[${index}].AdsetName`]: adset.AdsetName,
-//             // Include other fields as needed, including MediaContent
-//             [`adsets[${index}].MediaContent`]: adset.MediaContent
-//         }))
-//     });
-// }, [adsets]);
-
-const cloneAdset = (adsetId) => {
-    const adsetIndex = adsets.findIndex(ad => ad.id === adsetId);
-    if (adsetIndex === -1) return;
-  
-    const originalAdset = adsets[adsetIndex];
-    const newId = uuidv4();
-  
-    const baseName = originalAdset.AdsetPanelName;
-    const copyCount = adsets.filter(ad => ad.AdsetPanelName.startsWith(baseName)).length;
-    const newPanelName = copyCount > 0 ? `${baseName}(${copyCount})_Copy` : `${baseName}_Copy`;
-  
-    const clonedAdset = {
-      ...originalAdset,
-      id: newId,
-      AdsetPanelName: newPanelName,
+        return `Adset ${highestNumber + 1}`;
     };
-  
-    const currentFormAdsets = form.getFieldValue('adsets') || [];
-  
-    // ✅ Match by UUID not index!
-    const formIndex = currentFormAdsets.findIndex((_, i) => adsets[i]?.id === adsetId);
-    const clonedFormData = { ...currentFormAdsets[formIndex] };
-  
-    // ✅ Add `_Copy` to AdsetName and AddName if present
-    if (clonedFormData.AdsetName) {
-      clonedFormData.AdsetName = `${clonedFormData.AdsetName}_Copy`;
-    }
-    if (clonedFormData.AddName) {
-      clonedFormData.AddName = `${clonedFormData.AddName}_Copy`;
-    }
-  
-    const updatedFormAdsets = [...currentFormAdsets, clonedFormData];
-    const updatedAdsets = [...adsets, clonedAdset];
-  
-    // ✅ Set both states
-    setAdsets(updatedAdsets);
-    form.setFieldsValue({ adsets: updatedFormAdsets });
-  
-    // ✅ Clone media/file states by UUID
-    const cloneFiles = (prev, setter) => {
-      setter(old => ({ ...old, [newId]: [...(old[adsetId] || [])] }));
+
+    // Helper function to get default adset data
+    const getDefaultAdset = (campaignName, caption, websiteURL, imagehash, currentDate) => {
+        return {
+            id: uuidv4(), // Generate a new unique ID for the adset
+            AdsetPanelName: getNextAdsetName(adsets),
+            AdsetName: campaignName,
+            optimization_goal: "OFFSITE_CONVERSIONS",
+            billing_event: "IMPRESSIONS",
+            action_source: "website",
+            custom_event_type: "LEAD",
+            countries: "US",
+            Min_Age: "18",
+            Max_Age: "65",
+            Gender: "0",
+            Language: [6],
+            placements: "Advance",
+            DailyAdd_amount: 0,
+            AddName: campaignName,
+            Description: "Find More",
+            Caption: caption,
+            Website_URL: websiteURL,
+            pixel_id: imagehash?.pixelID,
+            start_date: currentDate,
+            MediaContent: [],  // Default MediaContent as empty array
+        };
     };
-  
-    cloneFiles(selectedFiles, setSelectedFiles);
-    cloneFiles(selectedFilesFromMedia, setSelectedFilesFromMedia);
-    cloneFiles(selectedFilesFromCreatives, setSelectedFilesFromCreatives);
-  
-    // ✅ Clone selectedPositions
-    setSelectedPositions(prev => ({
-      ...prev,
-      [newId]: [...(prev[adsetId] || [])],
-    }));
-    setSelectedPublishers(prev => ({
-        ...prev,
-        [newId]: [...(prev[adsetId] || [])],
-    }));
-  
-    // ✅ Open the last panel (the newly cloned one)
-    setActiveKey([`${updatedAdsets.length - 1}`]);
-  };
-  
 
-const removeAdset = (index, adsetid) => {
-    // Step 1: Get current form values safely
-    const currentFormAdsets = form.getFieldValue("adsets") || [];
-  
-    // Step 2: Remove adset from state
-    setAdsets(prevAdsets => {
-      const updatedAdsets = prevAdsets.filter(ad => ad.id !== adsetid);
-  
-      // Step 3: Rebuild form values by matching UUIDs
-      const newFormAdsets = updatedAdsets.map(updatedAdset => {
-        const oldIndex = prevAdsets.findIndex(old => old.id === updatedAdset.id);
-        return currentFormAdsets[oldIndex]; // retain values of other adsets
-      });
+    // For adding a new adset
+    // For adding a new adset
+    // For adding a new adset
+    // For adding a new adset
+    const addAdset = () => {
+        const newAdsetName = getNextAdsetName(adsets); // Get the next highest number
+        const newAdset = {
+            id: uuidv4(),
+            AdsetPanelName: newAdsetName,
+            AdsetName: "", // Add default values for the new adset
+            optimization_goal: "OFFSITE_CONVERSIONS",
+            billing_event: "IMPRESSIONS",
+            action_source: "website",
+            custom_event_type: "LEAD",
+            countries: "US",
+            Min_Age: "18",
+            Max_Age: "65",
+            Gender: "0",
+            Language: [6],
+            placements: "Advance",
+            DailyAdd_amount: 0,
+            AddName: "",
+            Description: "Find More",
+            Caption: "",
+            Website_URL: "",
+            pixel_id: "", // Or set it based on your requirement
+            start_date: new Date(),
+            MediaContent: [],  // Default MediaContent as empty array
+        };
+        setAdsets((prevAdsets) => [...prevAdsets, newAdset]);
 
-      console.log(newFormAdsets, "newFormAdsets in removeAdset");
-  
-      // Step 4: Set updated form values
-      form.setFieldsValue({ adsets: newFormAdsets });
-  
-      return updatedAdsets;
-    });
-  
-    // Step 5: Clean up all related file states
-    setSelectedFiles(prev => {
-      const updated = { ...prev };
-      delete updated[adsetid];
-      return updated;
-    });
-  
-    setSelectedFilesFromMedia(prev => {
-      const updated = { ...prev };
-      delete updated[adsetid];
-      return updated;
-    });
-  
-    setSelectedFilesFromCreatives(prev => {
-      const updated = { ...prev };
-      delete updated[adsetid];
-      return updated;
-    });
-  };
-  
-  
-  
+        // Add the new adset to the state
+        // setAdsets(prevAdsets => {
+        //     const updatedAdsets = [...prevAdsets, newAdset];
+
+        //     // Update the form with only the new adset at the last index
+        //     form.setFieldsValue({
+        //         // Only update the last adset (the newly added one)
+        //         [`adsets[${updatedAdsets.length - 1}]`]: {
+        //             ...newAdset,
+        //             [`adsets[${updatedAdsets.length - 1}].AdsetPanelName`]: newAdset.AdsetPanelName,
+        //             [`adsets[${updatedAdsets.length - 1}].AdsetName`]: newAdset.AdsetName,
+        //             [`adsets[${updatedAdsets.length - 1}].MediaContent`]: newAdset.MediaContent,
+        //             // Add other fields as needed
+        //         }
+        //     });
+
+        //     return updatedAdsets;
+        // });
+
+        // setActiveKey([`${adsets.length}`]); // Open the newly added adset by default
+    };
+
+    // const cloneAdset = (adsetId) => {
+    //     const adsetIndex = adsets.findIndex(ad => ad.id === adsetId);
+    //     if (adsetIndex === -1) return;
+
+    //     const originalAdset = adsets[adsetIndex];
+    //     const newId = uuidv4();
+
+    //     const baseName = originalAdset.AdsetPanelName;
+    //     const copyCount = adsets.filter(ad => ad.AdsetPanelName.startsWith(baseName)).length;
+    //     const newPanelName = copyCount > 0 ? `${baseName}(${copyCount})_Copy` : `${baseName}_Copy`;
+
+    //     const clonedAdset = {
+    //       ...originalAdset,
+    //       id: newId,
+    //       AdsetPanelName: newPanelName,
+    //     };
+
+    //     const currentFormAdsets = form.getFieldValue('adsets') || [];
+
+    //     // ✅ Match by UUID not index!
+    //     const formIndex = currentFormAdsets.findIndex((_, i) => adsets[i]?.id === adsetId);
+    //     const clonedFormData = { ...currentFormAdsets[formIndex] };
+
+    //     const updatedFormAdsets = [...currentFormAdsets, clonedFormData];
+    //     const updatedAdsets = [...adsets, clonedAdset];
+
+    //     // ✅ Set both states
+    //     setAdsets(updatedAdsets);
+    //     form.setFieldsValue({ adsets: updatedFormAdsets });
+
+    //     // ✅ Clone media/file states by UUID
+    //     const cloneFiles = (prev, setter) => {
+    //       setter(old => ({ ...old, [newId]: [...(old[adsetId] || [])] }));
+    //     };
+
+    //     cloneFiles(selectedFiles, setSelectedFiles);
+    //     cloneFiles(selectedFilesFromMedia, setSelectedFilesFromMedia);
+    //     cloneFiles(selectedFilesFromCreatives, setSelectedFilesFromCreatives);
+    //     setSelectedPositions(prev => ({
+    //         ...prev,
+    //         [newId]: [...(prev[adsetId] || [])], // safely clone if exists
+    //     }));
+
+    //     // ✅ Open the last panel (the newly cloned one)
+    //     setActiveKey([`${updatedAdsets.length - 1}`]);
+    //   };
+
+
+
+
+    // For cloning an existing adset
+    // const cloneAdset = (index) => {
+    //     const clonedAdset = { ...adsets[index], id: uuidv4() }; // Create a new clone with a new UUID
+
+    //     // Ensure MediaContent is an array (default to empty array if it's undefined)
+    //     // clonedAdset.MediaContent = Array.isArray(adsets[index].MediaContent) 
+    //     //     ? [...adsets[index].MediaContent] 
+    //     //     : [];  // If MediaContent is not an array, default to empty array
+
+    //     // Handle the naming for the cloned adset
+    //     const originalName = adsets[index].AdsetPanelName;
+    //     const copyCount = adsets.filter(adset => adset.AdsetPanelName.startsWith(originalName)).length;
+
+    //     const cloneName = copyCount > 0 ? `${originalName}(${copyCount})_Copy` : `${originalName}_Copy`;
+    //     clonedAdset.AdsetPanelName = cloneName;
+
+    //     // Add the cloned adset at the end of the list
+    //     setAdsets(prevAdsets => {
+    //         const updatedAdsets = [...prevAdsets, clonedAdset];
+
+    //         // Update the form with only the cloned adset at the last index
+    //         // form.setFieldsValue({
+    //         //     // Only update the last adset (the newly cloned one)
+    //         //     [`adsets[${updatedAdsets.length - 1}]`]: {
+    //         //         ...clonedAdset,
+    //         //         [`adsets[${updatedAdsets.length - 1}].AdsetPanelName`]: clonedAdset.AdsetPanelName,
+    //         //         [`adsets[${updatedAdsets.length - 1}].AdsetName`]: clonedAdset.AdsetName,
+    //         //         [`adsets[${updatedAdsets.length - 1}].MediaContent`]: clonedAdset.MediaContent,
+    //         //         // Add other fields as needed
+    //         //     }
+    //         // });
+
+    //         return updatedAdsets;
+    //     });
+
+    //     setActiveKey([`${adsets.length}`]); // Open the newly cloned adset by default
+    // };
+
+    // const cloneAdset = (index) => {
+    //   // Clone logic here
+    //   const clonedAdset = {
+    //     ...adsets[index],
+    //     id: uuidv4(),
+    //     AdsetPanelName: `${adsets[index].AdsetPanelName}_Copy`, // Modify the name to make it unique
+    //   };
+
+    //   setAdsets((prevAdsets) => [...prevAdsets, clonedAdset]);
+    // };
+
+
+
+    // For removing an adset based on its id
+    // const removeAdset = (id) => {
+    //     // Safely remove the adset by id
+    //     setAdsets(prevAdsets => {
+    //         const newAdsets = prevAdsets.filter(adset => adset.id !== id); // Filter by id
+    //         form.setFieldsValue({
+    //             adsets: newAdsets // Update the form with remaining adsets
+    //         });
+    //         return newAdsets;
+    //     });
+
+    //     // Update the activeKey to reflect the removal
+    //     setActiveKey(prevActiveKey => {
+    //         // If the deleted adset was the active one, reset the active key
+    //         if (prevActiveKey[0] === id) {
+    //             return newAdsets.length > 0 ? ['0'] : [];
+    //         }
+    //         return prevActiveKey; // Keep the previous active key if it's valid
+    //     });
+    // };
+    // const removeAdset = (id) => {
+    //     setAdsets(prevAdsets => {
+    //       const indexToRemove = prevAdsets.findIndex(adset => adset.id === id);
+    //       if (indexToRemove === -1) return prevAdsets; // nothing to remove
+
+    //       const newAdsets = [...prevAdsets];
+    //       newAdsets.splice(indexToRemove, 1); // remove from state
+
+    //       // Remove only the specific adset from the form
+    //       const currentFormValues = form.getFieldValue("adsets") || [];
+    //       const newFormAdsets = [...currentFormValues];
+    //       newFormAdsets.splice(indexToRemove, 1); // remove corresponding form data
+    //       form.setFieldsValue({ adsets: newFormAdsets });
+
+    //       return newAdsets;
+    //     });
+
+    //     // Update the activeKey properly
+    //     setActiveKey(prevActiveKey => {
+    //       const newActiveIndex = activeKey.length > 0 ? 0 : [];
+    //       return [String(newActiveIndex)];
+    //     });
+    // };
+
+
+    // Sync form values after adsets state change
+    // useEffect(() => {
+    //     form.setFieldsValue({
+    //         adsets: adsets.map((adset, index) => ({
+    //             ...adset,
+    //             [`adsets[${index}].AdsetPanelName`]: adset.AdsetPanelName,
+    //             [`adsets[${index}].AdsetName`]: adset.AdsetName,
+    //             // Include other fields as needed, including MediaContent
+    //             [`adsets[${index}].MediaContent`]: adset.MediaContent
+    //         }))
+    //     });
+    // }, [adsets]);
+
+    const cloneAdset = (adsetId) => {
+        const adsetIndex = adsets.findIndex(ad => ad.id === adsetId);
+        if (adsetIndex === -1) return;
+
+        const originalAdset = adsets[adsetIndex];
+        const newId = uuidv4();
+
+        const baseName = originalAdset.AdsetPanelName;
+        const copyCount = adsets.filter(ad => ad.AdsetPanelName.startsWith(baseName)).length;
+        const newPanelName = copyCount > 0 ? `${baseName}(${copyCount})_Copy` : `${baseName}_Copy`;
+
+        const clonedAdset = {
+            ...originalAdset,
+            id: newId,
+            AdsetPanelName: newPanelName,
+        };
+
+        const currentFormAdsets = form.getFieldValue('adsets') || [];
+
+        // ✅ Match by UUID not index!
+        const formIndex = currentFormAdsets.findIndex((_, i) => adsets[i]?.id === adsetId);
+        const clonedFormData = { ...currentFormAdsets[formIndex] };
+
+        // ✅ Add `_Copy` to AdsetName and AddName if present
+        if (clonedFormData.AdsetName) {
+            clonedFormData.AdsetName = `${clonedFormData.AdsetName}_Copy`;
+        }
+        if (clonedFormData.AddName) {
+            clonedFormData.AddName = `${clonedFormData.AddName}_Copy`;
+        }
+
+        const updatedFormAdsets = [...currentFormAdsets, clonedFormData];
+        const updatedAdsets = [...adsets, clonedAdset];
+
+        // ✅ Set both states
+        setAdsets(updatedAdsets);
+        form.setFieldsValue({ adsets: updatedFormAdsets });
+
+        // ✅ Clone media/file states by UUID
+        const cloneFiles = (prev, setter) => {
+            setter(old => ({ ...old, [newId]: [...(old[adsetId] || [])] }));
+        };
+
+        cloneFiles(selectedFiles, setSelectedFiles);
+        cloneFiles(selectedFilesFromMedia, setSelectedFilesFromMedia);
+        cloneFiles(selectedFilesFromCreatives, setSelectedFilesFromCreatives);
+
+        // ✅ Clone selectedPositions
+        setSelectedPositions(prev => ({
+            ...prev,
+            [newId]: [...(prev[adsetId] || [])],
+        }));
+        setSelectedPublishers(prev => ({
+            ...prev,
+            [newId]: [...(prev[adsetId] || [])],
+        }));
+
+        // ✅ Open the last panel (the newly cloned one)
+        setActiveKey([`${updatedAdsets.length - 1}`]);
+    };
+
+
+    const removeAdset = (index, adsetid) => {
+        // Step 1: Get current form values safely
+        const currentFormAdsets = form.getFieldValue("adsets") || [];
+
+        // Step 2: Remove adset from state
+        setAdsets(prevAdsets => {
+            const updatedAdsets = prevAdsets.filter(ad => ad.id !== adsetid);
+
+            // Step 3: Rebuild form values by matching UUIDs
+            const newFormAdsets = updatedAdsets.map(updatedAdset => {
+                const oldIndex = prevAdsets.findIndex(old => old.id === updatedAdset.id);
+                return currentFormAdsets[oldIndex]; // retain values of other adsets
+            });
+
+            console.log(newFormAdsets, "newFormAdsets in removeAdset");
+
+            // Step 4: Set updated form values
+            form.setFieldsValue({ adsets: newFormAdsets });
+
+            return updatedAdsets;
+        });
+
+        // Step 5: Clean up all related file states
+        setSelectedFiles(prev => {
+            const updated = { ...prev };
+            delete updated[adsetid];
+            return updated;
+        });
+
+        setSelectedFilesFromMedia(prev => {
+            const updated = { ...prev };
+            delete updated[adsetid];
+            return updated;
+        });
+
+        setSelectedFilesFromCreatives(prev => {
+            const updated = { ...prev };
+            delete updated[adsetid];
+            return updated;
+        });
+    };
+
+
+
 
 
 
@@ -3166,8 +3170,8 @@ const removeAdset = (index, adsetid) => {
 
         }
 
-        
-        
+
+
 
         // Update the form with the new adsets
         form.setFieldsValue({
@@ -3184,7 +3188,7 @@ const removeAdset = (index, adsetid) => {
 
         // // Trigger form completion check
         // checkFormCompletion();
-        setIsFormComplete(true); 
+        setIsFormComplete(true);
         // console.log(text, "text");
     }
 
@@ -3211,8 +3215,8 @@ const removeAdset = (index, adsetid) => {
             case 'FB_DomainActive':
                 return <DActiveUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
         }
-        
-    },[network, accountis, onReturnUrl])
+
+    }, [network, accountis, onReturnUrl])
 
 
 
@@ -3238,8 +3242,8 @@ const removeAdset = (index, adsetid) => {
         console.log(values, "values");
         console.log(options, "options");
         const formatted = options.map(opt => ({
-          key: opt.value,
-          label: opt.label || opt.children
+            key: opt.value,
+            label: opt.label || opt.children
         }));
         console.log(formatted, "formatted positions");
         setSelectedPositions(formatted);
@@ -3401,7 +3405,7 @@ const removeAdset = (index, adsetid) => {
             // console.log("account data", ...response?.data);
             console.log("Draft data fetched successfully:", response.data);
             // console.log((Array.isArray(response?.data?.Drafts && response?.data?.Drafts.length > 0) ? response?.data?.Drafts : []));
-            setDraftsData((Array.isArray(response?.data?.Drafts) && response?.data?.Drafts.length > 0) ? response?.data?.Drafts : []); ;
+            setDraftsData((Array.isArray(response?.data?.Drafts) && response?.data?.Drafts.length > 0) ? response?.data?.Drafts : []);;
             // setimagehash(...response?.data)
         } catch (error) {
             console.error("Error fetching campaign data:", error);
@@ -3443,7 +3447,7 @@ const removeAdset = (index, adsetid) => {
         //     if (AddName || Caption || Description || message || headline || Website_URL) {
         //       setAdMediaData((prev) => {
         //         const updatedAdset = { ...prev };
-        
+
         //         // Update all media objects for the affected adset index
         //         if (updatedAdset[changedAdsetIndex]) {
         //           updatedAdset[changedAdsetIndex] = updatedAdset[changedAdsetIndex].map((file) => ({
@@ -3456,7 +3460,7 @@ const removeAdset = (index, adsetid) => {
         //             Website_URL: Website_URL || file.Website_URL,
         //           }));
         //         }
-        
+
         //         return updatedAdset;
         //       });
         //     }
@@ -3477,7 +3481,7 @@ const removeAdset = (index, adsetid) => {
 
     //     const uploadFilesSequentially = async (selectedFiles) => {
     //         const mediaHashArray = [];
-        
+
     //         for (const file of selectedFiles) {
     //             try {
     //                 const fileType = file.type;
@@ -3485,7 +3489,7 @@ const removeAdset = (index, adsetid) => {
     //                     onError("Unsupported file type");
     //                     continue;
     //                 }
-        
+
     //                 if (file?.url) {
     //                     if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") || file?.url?.endsWith('.mp4')) {
     //                         const formData = new FormData();
@@ -3496,29 +3500,29 @@ const removeAdset = (index, adsetid) => {
     //                                 Authorization: localStorage.getItem("token"),
     //                             },
     //                         });
-        
+
     //                         const uploadFile = await response.blob();
     //                         if (!(uploadFile instanceof Blob)) {
     //                             console.error("The fetched file is not a Blob:", uploadFile);
     //                             continue;
     //                         }
-        
+
     //                         formData.append("file", uploadFile, file.name);
     //                         // console.log(formData);
-        
+
     //                         let fbResponse;
     //                         if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") ) {
     //                             formData.append('file', uploadFile, file.name);
     //                             formData.append('access_token', token);
     //                             const fileName = file.name.split('/').pop();
-        
+
     //                             fbResponse = await axios.post(
     //                                 `https://graph.facebook.com/v20.0/act_${account}/adimages`,
     //                                 formData,
     //                                 { headers: { 'Content-Type': 'multipart/form-data' } }
     //                             );
-                                
-        
+
+
     //                             if (fbResponse.status === 200) {
     //                                 onSuccess("ok", response);
     //                                 mediaHashArray.push({
@@ -3536,11 +3540,11 @@ const removeAdset = (index, adsetid) => {
     //                                 formData,
     //                                 { headers: { 'Content-Type': 'multipart/form-data' } }
     //                             );
-        
+
     //                             if (fbResponse.status === 200) {
     //                                 const videoid = fbResponse?.data?.id;
     //                                 await new Promise(resolve => setTimeout(resolve, 10000));
-        
+
     //                                 const thumbnailResponse = await axios.get(
     //                                     `https://graph.facebook.com/v20.0/${videoid}`,
     //                                     {
@@ -3551,12 +3555,12 @@ const removeAdset = (index, adsetid) => {
     //                                         }
     //                                     }
     //                                 );
-        
+
     //                                 const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
     //                                 const uri = preferredThumbnail ? preferredThumbnail.uri : "";
     //                                 // console.log(videoid);
     //                                 // console.log(uri);
-        
+
     //                                 onSuccess("ok", fbResponse);
     //                                 mediaHashArray.push({
     //                                     filename: file?.url,
@@ -3576,18 +3580,18 @@ const removeAdset = (index, adsetid) => {
     //                         const fileId = `${uniqueId}_${file.name}`;
     //                         const editedImage = editedImages[file.name];
     //                         const uploadFile = editedImage ? await fetch(editedImage).then(res => res.blob()) : null;
-        
+
     //                         console.log(file.originFileObj.name);
-        
+
     //                         if (uploadFile) {
     //                             formData.append("file", uploadFile, `blob/${uniqueId}_${file.name}`);
     //                         } else {
     //                             formData.append("file", file.originFileObj, `blob/${uniqueId}_${file.originFileObj.name}`);
     //                         }
-        
+
     //                         // console.log(formData);
     //                         let response, fbResponse;
-        
+
     //                         if (file.type.startsWith('image/')) {
     //                             response = await axios.post(
     //                                 'https://www.testapi.adsgoat.in/upload',
@@ -3599,16 +3603,16 @@ const removeAdset = (index, adsetid) => {
     //                                     },
     //                                 }
     //                             );
-        
+
     //                             if (!response.data.imageUrl) {
     //                                 onError("Error: Image URL not returned from custom API");
     //                                 console.error("Image upload to custom API failed, imageUrl missing");
     //                                 continue;
     //                             }
-        
+
     //                             // console.log("Custom API response imageUrl:", response);
     //                             formData.append('access_token', token);
-        
+
     //                             fbResponse = await axios.post(
     //                                 `https://graph.facebook.com/v20.0/act_${account}/adimages`,
     //                                 formData,
@@ -3616,7 +3620,7 @@ const removeAdset = (index, adsetid) => {
     //                             );
 
     //                             // console.log("Facebook API response:", fbResponse.data);
-        
+
     //                             if (response.status === 200 && fbResponse.status === 200) {
     //                                 onSuccess("ok", response);
     //                                 mediaHashArray.push({
@@ -3638,25 +3642,25 @@ const removeAdset = (index, adsetid) => {
     //                                     },
     //                                 }
     //                             );
-        
+
     //                             if (response.status !== 200) {
     //                                 onError("error", response);
     //                                 console.error("Video upload to custom API failed");
     //                                 continue;
     //                             }
-        
+
     //                             formData.append('access_token', token);
-        
+
     //                             fbResponse = await axios.post(
     //                                 `https://graph.facebook.com/v20.0/act_${account}/advideos`,
     //                                 formData,
     //                                 { headers: { 'Content-Type': 'multipart/form-data' } }
     //                             );
-        
+
     //                             if (fbResponse.status === 200) {
     //                                 const videoid = fbResponse?.data?.id;
     //                                 await new Promise(resolve => setTimeout(resolve, 10000));
-        
+
     //                                 const thumbnailResponse = await axios.get(
     //                                     `https://graph.facebook.com/v20.0/${videoid}`,
     //                                     {
@@ -3667,10 +3671,10 @@ const removeAdset = (index, adsetid) => {
     //                                         }
     //                                     }
     //                                 );
-        
+
     //                                 const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
     //                                 const uri = preferredThumbnail ? preferredThumbnail.uri : "";
-        
+
     //                                 onSuccess("ok", fbResponse);
     //                                 mediaHashArray.push({
     //                                     filename: response.data.imageUrl,
@@ -3689,7 +3693,7 @@ const removeAdset = (index, adsetid) => {
     //                 onError("error", error);
     //             }
     //         }
-        
+
     //         // console.log("All media files uploaded successfully:", mediaHashArray);
     //         return mediaHashArray;
     //     };
@@ -3723,7 +3727,7 @@ const removeAdset = (index, adsetid) => {
                         "x-action": "create-folder"
                     }
                 });
-        
+
                 if (!response.ok) throw new Error("Failed to create folder");
                 const data = await response.json();
                 console.log("Folder created:", folderPath);
@@ -3732,14 +3736,14 @@ const removeAdset = (index, adsetid) => {
                 console.error("Error creating folder:", err);
                 return false;
             }
-        };        
-    
+        };
+
         const uploadFileToS3 = async (fileBlob, fileName, folderPath) => {
             const fullPath = `${folderPath}/${fileName}`;
             const formData = new FormData();
             formData.append("file", fileBlob, fileName);
             formData.append("filename", fullPath); // required in body
-        
+
             try {
                 const response = await fetch("https://prodapis.adsgoat.in/uploadUserFiles", {
                     method: "POST",
@@ -3749,9 +3753,9 @@ const removeAdset = (index, adsetid) => {
                     },
                     body: formData,
                 });
-        
+
                 if (!response.ok) throw new Error("S3 upload failed");
-        
+
                 const data = await response.json();
                 return data.imageUrl;
             } catch (err) {
@@ -3759,11 +3763,11 @@ const removeAdset = (index, adsetid) => {
                 return null;
             }
         };
-        
-    
+
+
         const uploadFilesSequentially = async (selectedFiles) => {
             const mediaHashArray = [];
-    
+
             for (const file of selectedFiles) {
                 try {
                     const fileType = file.type;
@@ -3771,12 +3775,12 @@ const removeAdset = (index, adsetid) => {
                         onError("Unsupported file type");
                         continue;
                     }
-    
+
                     const folderPath = `${network}/${imagehash.accountNumber}/${formValues ? formValues.Name : "Drafts"}`;
-                    await createS3Folder(folderPath); 
+                    await createS3Folder(folderPath);
                     let fileBlob = null;
                     let s3FileUrl = null;
-    
+
                     if (file?.url) {
                         const response = await fetch(`https://prodapis.adsgoat.in/s3?s3Url=${file.url}`, {
                             method: 'GET',
@@ -3785,24 +3789,24 @@ const removeAdset = (index, adsetid) => {
                                 Authorization: localStorage.getItem("token"),
                             },
                         });
-    
+
                         fileBlob = await response.blob();
                         s3FileUrl = await uploadFileToS3(fileBlob, file.name, folderPath);
-    
+
                         const formData = new FormData();
                         formData.append("file", fileBlob, file.name);
                         formData.append('access_token', token);
-    
+
                         let fbResponse;
                         if (file.url.endsWith('.png') || file.url.endsWith('.jpg') || file.url.endsWith(".jpeg")) {
                             const fileName = file.name.split('/').pop();
-    
+
                             fbResponse = await axios.post(
                                 `https://graph.facebook.com/v20.0/act_${account}/adimages`,
                                 formData,
                                 { headers: { 'Content-Type': 'multipart/form-data' } }
                             );
-    
+
                             if (fbResponse.status === 200) {
                                 onSuccess("ok", fbResponse);
                                 mediaHashArray.push({
@@ -3819,11 +3823,11 @@ const removeAdset = (index, adsetid) => {
                                 formData,
                                 { headers: { 'Content-Type': 'multipart/form-data' } }
                             );
-    
+
                             if (fbResponse.status === 200) {
                                 const videoid = fbResponse?.data?.id;
                                 await new Promise(resolve => setTimeout(resolve, 10000));
-    
+
                                 const thumbnailResponse = await axios.get(
                                     `https://graph.facebook.com/v20.0/${videoid}`,
                                     {
@@ -3834,10 +3838,10 @@ const removeAdset = (index, adsetid) => {
                                         }
                                     }
                                 );
-    
+
                                 const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
                                 const uri = preferredThumbnail ? preferredThumbnail.uri : "";
-    
+
                                 onSuccess("ok", fbResponse);
                                 mediaHashArray.push({
                                     filename: s3FileUrl,
@@ -3855,13 +3859,13 @@ const removeAdset = (index, adsetid) => {
                         const editedImage = editedImages[file.name];
                         fileBlob = editedImage ? await fetch(editedImage).then(res => res.blob()) : file.originFileObj;
                         s3FileUrl = await uploadFileToS3(fileBlob, safeName, folderPath);
-    
+
                         const formData = new FormData();
                         formData.append("file", fileBlob, safeName);
                         formData.append('access_token', token);
-    
+
                         let response, fbResponse;
-    
+
                         if (file.type.startsWith('image/')) {
                             response = await axios.post(
                                 'https://www.testapi.adsgoat.in/upload',
@@ -3873,19 +3877,19 @@ const removeAdset = (index, adsetid) => {
                                     },
                                 }
                             );
-    
+
                             if (!response.data.imageUrl) {
                                 onError("Error: Image URL not returned from custom API");
                                 console.error("Image upload to custom API failed, imageUrl missing");
                                 continue;
                             }
-    
+
                             fbResponse = await axios.post(
                                 `https://graph.facebook.com/v20.0/act_${account}/adimages`,
                                 formData,
                                 { headers: { 'Content-Type': 'multipart/form-data' } }
                             );
-    
+
                             if (response.status === 200 && fbResponse.status === 200) {
                                 onSuccess("ok", response);
                                 mediaHashArray.push({
@@ -3907,23 +3911,23 @@ const removeAdset = (index, adsetid) => {
                                     },
                                 }
                             );
-    
+
                             if (response.status !== 200) {
                                 onError("error", response);
                                 console.error("Video upload to custom API failed");
                                 continue;
                             }
-    
+
                             fbResponse = await axios.post(
                                 `https://graph.facebook.com/v20.0/act_${account}/advideos`,
                                 formData,
                                 { headers: { 'Content-Type': 'multipart/form-data' } }
                             );
-    
+
                             if (fbResponse.status === 200) {
                                 const videoid = fbResponse?.data?.id;
                                 await new Promise(resolve => setTimeout(resolve, 10000));
-    
+
                                 const thumbnailResponse = await axios.get(
                                     `https://graph.facebook.com/v20.0/${videoid}`,
                                     {
@@ -3934,10 +3938,10 @@ const removeAdset = (index, adsetid) => {
                                         }
                                     }
                                 );
-    
+
                                 const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
                                 const uri = preferredThumbnail ? preferredThumbnail.uri : "";
-    
+
                                 onSuccess("ok", fbResponse);
                                 mediaHashArray.push({
                                     filename: s3FileUrl,
@@ -3955,13 +3959,13 @@ const removeAdset = (index, adsetid) => {
                     onError("error", error);
                 }
             }
-    
+
             return mediaHashArray;
         };
-    
+
         try {
             let mediaHashArray = [];
-            if(Array.isArray(selectedFiles[id]) && selectedFiles[id].length > 0){
+            if (Array.isArray(selectedFiles[id]) && selectedFiles[id].length > 0) {
                 mediaHashArray = await uploadFilesSequentially(selectedFiles[id]);
             }
             console.log("All media files uploaded successfully. Media Hash Array:", mediaHashArray);
@@ -3970,7 +3974,7 @@ const removeAdset = (index, adsetid) => {
             console.error("One or more media uploads failed:", error);
             return [];
         }
-    }; 
+    };
 
     const handleBeforeUpload = (file) => {
         return false; // Prevent auto-upload
@@ -3982,7 +3986,7 @@ const removeAdset = (index, adsetid) => {
     const onFinish = (values) => {
         // console.log("Form Values:", values);
         // console.log("Selected Publishers:", formValues);
-        if(values.placements === 'manual'){
+        if (values.placements === 'manual') {
             const selectedPlatforms = selectedPublishers.reduce((acc, publisher) => {
                 acc[publisher + '_positions'] = values.positions.filter(position =>
                     positionOptions[publisher].map(option => option.key).includes(position)
@@ -3993,7 +3997,7 @@ const removeAdset = (index, adsetid) => {
                 publisher_platforms: values.publisher_platforms,
                 ...selectedPlatforms, ...values
             });
-    
+
             setIsModalVisible(true);
             setFormValues({
                 publisher_platforms: values.publisher_platforms,
@@ -4003,12 +4007,12 @@ const removeAdset = (index, adsetid) => {
         }
     };
 
-    const submitDraftData = async() =>{
+    const submitDraftData = async () => {
 
         const campaignData = await MultipleAdsestsFetching(formValues);
 
         try {
-            if(campaignData) {
+            if (campaignData) {
                 // console.log("Campaign Data:", campaignData);
                 //https://www.testapi.adsgoat.in
                 const response = await fetch('https://www.testapi.adsgoat.in/api/newSubmitFormData', {
@@ -4019,7 +4023,7 @@ const removeAdset = (index, adsetid) => {
                     },
                     body: JSON.stringify(campaignData)
                 });
-    
+
                 // if (response.ok) {
                 //     message.success('Campaign created successfully');
                 //     console.log('Form data submitted successfully');
@@ -4055,7 +4059,7 @@ const removeAdset = (index, adsetid) => {
         const campaignData = await MultipleAdsestsFetching(formValues);
 
         try {
-            if(campaignData) {
+            if (campaignData) {
                 // console.log("Campaign Data:", campaignData);
                 //https://www.testapi.adsgoat.in
                 const response = await fetch('https://www.testapi.adsgoat.in/api/submitFormData', {
@@ -4066,7 +4070,7 @@ const removeAdset = (index, adsetid) => {
                     },
                     body: JSON.stringify(campaignData)
                 });
-    
+
                 if (response.ok) {
                     message.success('Campaign created successfully');
                     console.log('Form data submitted successfully');
@@ -4076,7 +4080,7 @@ const removeAdset = (index, adsetid) => {
                     setSelectedFiles({});
                     onClose();
                     setSelectedPositions({});
-                    setAdsets([{ id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName:"Adset 1" }]);
+                    setAdsets([{ id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName: "Adset 1" }]);
                     isManual !== "manual" && setIsManual(false);
                     newSelectedRef.current = null; // Reset the newSelectedRef 
                 } else {
@@ -4128,12 +4132,12 @@ const removeAdset = (index, adsetid) => {
     function extractValuesByPartialLabel(dataArray, labelName) {
         console.log(dataArray, labelName);
         return dataArray
-          .filter(item => item.label.toLowerCase().includes(labelName.toLowerCase()))
-          .map(item => {
-            if (item.key.includes('story_')) return 'story';
-            if (item.key.includes('profile_feed-')) return 'profile_feed';
-            return item.key;
-          });
+            .filter(item => item.label.toLowerCase().includes(labelName.toLowerCase()))
+            .map(item => {
+                if (item.key.includes('story_')) return 'story';
+                if (item.key.includes('profile_feed-')) return 'profile_feed';
+                return item.key;
+            });
     }
 
     const MultipleAdsestsFetching = async (values) => {
@@ -4155,16 +4159,16 @@ const removeAdset = (index, adsetid) => {
             },
         };
         const onSuccess = (status, response) => {
-                    console.log("Upload success:", response);
+            console.log("Upload success:", response);
         };
-    
+
         const onError = (status, error) => {
-                    console.error("Upload error:", error);
+            console.error("Upload error:", error);
         };
-        
-        for(let i=0; i < values.adsets.length; i++){
+
+        for (let i = 0; i < values.adsets.length; i++) {
             let AdsetsData = {};
-            
+
             const imageHashArray = await customRequest(values.adsets[i], i, onSuccess, onError, adsets[i].id);
             const addLevelData = imageHashArray.map((media, index) => {
                 if (media.imag_hash) {
@@ -4180,7 +4184,7 @@ const removeAdset = (index, adsetid) => {
                         Description: values.adsets[i].Description,
                         Caption: values.adsets[i].Caption,
                         Website_URL: values.adsets[i].Website_URL,
-                        
+
                         // urlParameters: values.urlParameters
                     };
                 } else if (media.videoid) {
@@ -4201,7 +4205,7 @@ const removeAdset = (index, adsetid) => {
                     };
                 }
             });
-            AdsetsData[`adsetlevel_${i + 1}`]={
+            AdsetsData[`adsetlevel_${i + 1}`] = {
                 id: uuidv4(),
                 AdsetName: values.adsets[i].AdsetName,
                 Daily_amount: values.adsets[i].DailyAdd_amount ? parseFloat(values.adsets[i].DailyAdd_amount) * 100 : "",
@@ -4228,7 +4232,7 @@ const removeAdset = (index, adsetid) => {
                     device_platforms: values.adsets[i].device_platforms,
                 }),
                 buying_type: "AUCTION",
-                addlevel:addLevelData
+                addlevel: addLevelData
             }
             AllAdsetsData = { ...AllAdsetsData, ...AdsetsData };
         };
@@ -4257,42 +4261,42 @@ const removeAdset = (index, adsetid) => {
         const onSuccess = (status, response) => {
             console.log("Upload success:", response);
         };
-    
+
         const onError = (status, error) => {
             console.error("Upload error:", error);
         };
 
         console.log("Adsets:", values);
-        
-        for(let i=0; i < values.adsets.length; i++){
+
+        for (let i = 0; i < values.adsets.length; i++) {
             let AdsetsData = {};
-            
+
             const imageHashArray = await customRequest(values.adsets[i], i, onSuccess, onError, adsets[i].id);
             console.log("Image Hash Array:", imageHashArray);
-            const addLevelData = imageHashArray && imageHashArray.length > 0 ?  
-            {
-                AddName: `${values.adsets[i].AddName}` || "",
-                // filename: media.filename,
-                // imag_hash: media.imag_hash,
-                Ads: imageHashArray.map(media => media.filename),
-                page_id: values.page_id,
-                message: values.adsets[i].message,
-                headline: values.adsets[i].headline,
-                Description: values.adsets[i].Description,
-                Caption: values.adsets[i].Caption,
-                Website_URL: values.adsets[i].Website_URL,
-            } : {
-                AddName: `${values.adsets[i].AddName}` || "",
-                Ads: [],
-                page_id: values.page_id || "",
-                message: values.adsets[i].message || "",
-                headline: values.adsets[i].headline || "",
-                Description: values.adsets[i].Description || "",
-                Caption: values.adsets[i].Caption || "",
-                Website_URL: values.adsets[i].Website_URL || "",
-            };
+            const addLevelData = imageHashArray && imageHashArray.length > 0 ?
+                {
+                    AddName: `${values.adsets[i].AddName}` || "",
+                    // filename: media.filename,
+                    // imag_hash: media.imag_hash,
+                    Ads: imageHashArray.map(media => media.filename),
+                    page_id: values.page_id,
+                    message: values.adsets[i].message,
+                    headline: values.adsets[i].headline,
+                    Description: values.adsets[i].Description,
+                    Caption: values.adsets[i].Caption,
+                    Website_URL: values.adsets[i].Website_URL,
+                } : {
+                    AddName: `${values.adsets[i].AddName}` || "",
+                    Ads: [],
+                    page_id: values.page_id || "",
+                    message: values.adsets[i].message || "",
+                    headline: values.adsets[i].headline || "",
+                    Description: values.adsets[i].Description || "",
+                    Caption: values.adsets[i].Caption || "",
+                    Website_URL: values.adsets[i].Website_URL || "",
+                };
             console.log("Add Level Data:", addLevelData);
-            AdsetsData[`adsetlevel_${i + 1}`]={
+            AdsetsData[`adsetlevel_${i + 1}`] = {
                 id: uuidv4(),
                 AdsetName: values.adsets[i].AdsetName || "",
                 Daily_amount: values.adsets[i].DailyAdd_amount ? parseFloat(values.adsets[i].DailyAdd_amount) * 100 : "",
@@ -4319,7 +4323,7 @@ const removeAdset = (index, adsetid) => {
                     device_platforms: values.adsets[i].device_platforms,
                 }),
                 buying_type: "AUCTION",
-                addlevel:addLevelData || []
+                addlevel: addLevelData || []
             }
             AllAdsetsData = { ...AllAdsetsData, ...AdsetsData };
         };
@@ -4346,7 +4350,7 @@ const removeAdset = (index, adsetid) => {
                         Description: values.Description,
                         Caption: values.Caption,
                         Website_URL: values.Website_URL,
-                        
+
                         // urlParameters: values.urlParameters
                     };
                 } else if (media.videoid) {
@@ -4370,7 +4374,7 @@ const removeAdset = (index, adsetid) => {
 
             let AdsetsData = {};
 
-            
+
 
             // console.log("Add Level Data:", moment(values.DatePicker.$d).utc().format("YYYY-MM-DDTHH:mm:ssZ"),);
 
@@ -4466,24 +4470,24 @@ const removeAdset = (index, adsetid) => {
 
     const handleChange = (info) => {
         const newFiles = info.fileList.map(file => ({
-          ...file,
-          uid: file.uid || `-${Date.now()}`,
-          source: "media",
+            ...file,
+            uid: file.uid || `-${Date.now()}`,
+            source: "media",
         }));
-      
+
         setSelectedFiles(prev => {
-          const existingUids = new Set(prev.map(f => f.uid));
-          const filteredNewFiles = newFiles.filter(f => !existingUids.has(f.uid));
-          return [...prev, ...filteredNewFiles];
+            const existingUids = new Set(prev.map(f => f.uid));
+            const filteredNewFiles = newFiles.filter(f => !existingUids.has(f.uid));
+            return [...prev, ...filteredNewFiles];
         });
-      
+
         // 👇 Update selectedFilesFromMedia — preserve + append
         setSelectedFilesFromMedia(prev => {
-          const existingUids = new Set(prev.map(f => f.uid));
-          const filteredNewFiles = newFiles.filter(f => !existingUids.has(f.uid));
-          return [...prev, ...filteredNewFiles];
+            const existingUids = new Set(prev.map(f => f.uid));
+            const filteredNewFiles = newFiles.filter(f => !existingUids.has(f.uid));
+            return [...prev, ...filteredNewFiles];
         });
-      };
+    };
 
     const currentDate = dayjs();
     console.log(moment(), "currentDate")
@@ -4533,7 +4537,7 @@ const removeAdset = (index, adsetid) => {
     //     Caption: caption,
     //     pixel_id: imagehash?.pixelID,
     //     page_id: imagehash?.pageID,
-      
+
     //     adsets: [
     //       {
     //         AdsetName: campaignName,
@@ -4559,7 +4563,7 @@ const removeAdset = (index, adsetid) => {
     //       }
     //     ]
     // };
-    
+
 
     // const getDefaultAdset = () => ({
     //     id: uuidv4(), // or use: Date.now() as fallback
@@ -4574,7 +4578,7 @@ const removeAdset = (index, adsetid) => {
     //     Gender: "0",
     //     Language: [6],
     //     placements: "Advance",
-        
+
     //     DailyAdd_amount: 0,
     //     AddName: campaignName,
     //     Description: "Find More",
@@ -4622,10 +4626,10 @@ const removeAdset = (index, adsetid) => {
         setCampaignLevelDailyBudget(0); // Reset campaign level daily budget
         setAdsetLevelDailyBudget(0);
         // setCampaignLevelDailyBudget(0);
-        setAdsets([{ id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName:"Adset 1" }]);
+        setAdsets([{ id: uuidv4(), DailyAdd_amount: 0, AdsetPanelName: "Adset 1" }]);
         onClose(); // Call onClose handler to close the drawer
         setActiveKey(['1']);
-        isManual !== "manual" && setIsManual(false); 
+        isManual !== "manual" && setIsManual(false);
         setSelectedPositions({}); // Clear selected positions
         newSelectedRef.current = null;
         setSelectedFilesFromCreatives({}); // Clear selected files from creatives
@@ -4667,10 +4671,10 @@ const removeAdset = (index, adsetid) => {
     //         })
     //     })]);
     //     setOpenCreativesDrawer(false);
-        
+
     //     if (data.length > 0) {
     //         const currentMediaContent = form.getFieldValue("MediaContent") || [];
-        
+
     //         const newFiles = data.map((file, index) => ({
     //             uid: file.uid || `-${index + 1}`,
     //             name: file?.name,
@@ -4684,9 +4688,9 @@ const removeAdset = (index, adsetid) => {
     //                 : "video/",
     //             url: file?.url,
     //         }));
-        
+
     //         const updatedMediaContent = [...currentMediaContent, ...newFiles];
-        
+
     //         form.setFieldsValue({ MediaContent: updatedMediaContent });
     //         form.validateFields(["MediaContent"]);
     //     }
@@ -4694,7 +4698,7 @@ const removeAdset = (index, adsetid) => {
 
     // const selectedFilesData = (data) => {
     //     // const index = 0; // hardcoded for now as you requested
-      
+
     //     const mappedFiles = data.map((file, i) => ({
     //       uid: file.uid || `-${Date.now()}-${i}`,
     //       name: file?.name,
@@ -4708,26 +4712,26 @@ const removeAdset = (index, adsetid) => {
     //         : "video/",
     //       url: file?.url,
     //     }));
-      
+
     //     // ✅ Update selectedFiles as object by index
     //     setSelectedFiles((prev) => {
     //       const updated = [...(prev[creativeIndex] || []), ...mappedFiles];
     //       return { ...prev, [creativeIndex]: updated };
     //     });
-      
+
     //     // ✅ Update selectedFilesFromCreatives as object by creativeIndex
     //     setSelectedFilesFromCreatives((prev) => {
     //       const updated = [...(prev[creativeIndex] || []), ...mappedFiles];
     //       return { ...prev, [creativeIndex]: updated };
     //     });
-      
+
     //     // ✅ Close creative drawer
     //     setOpenCreativesDrawer(false);
-      
+
     //     // ✅ Update form MediaContent for adset[0]
     //     const currentMediaContent = form.getFieldValue(['adsets', creativeIndex, 'MediaContent']) || [];
     //     const updatedMediaContent = [...currentMediaContent, ...mappedFiles];
-      
+
     //     form.setFieldsValue({
     //       adsets: {
     //         [creativeIndex]: {
@@ -4735,54 +4739,54 @@ const removeAdset = (index, adsetid) => {
     //         }
     //       }
     //     });
-      
+
     //     form.validateFields([['adsets', creativeIndex, 'MediaContent']]);
     // };
-      
+
 
     const selectedFilesData = (data) => {
         const mappedFiles = data.map((file, i) => ({
-          uid: file.uid || `-${Date.now()}-${i}`,
-          name: file?.name,
-          status: 'done',
-          type: file?.url?.endsWith(".jpg")
-            ? "image/jpg"
-            : file?.url?.endsWith(".jpeg")
-            ? "image/jpeg"
-            : file?.url?.endsWith(".png")
-            ? "image/png"
-            : "video/",
-          url: file?.url,
+            uid: file.uid || `-${Date.now()}-${i}`,
+            name: file?.name,
+            status: 'done',
+            type: file?.url?.endsWith(".jpg")
+                ? "image/jpg"
+                : file?.url?.endsWith(".jpeg")
+                    ? "image/jpeg"
+                    : file?.url?.endsWith(".png")
+                        ? "image/png"
+                        : "video/",
+            url: file?.url,
         }));
-      
+
         // ✅ Update selectedFiles
         setSelectedFiles((prev) => {
-          const updated = [...(prev[creativeIndex] || []), ...mappedFiles];
-          updateAdMediaData(creativeIndex, updated); // ✅ Call here too
-          return { ...prev, [creativeIndex]: updated };
+            const updated = [...(prev[creativeIndex] || []), ...mappedFiles];
+            updateAdMediaData(creativeIndex, updated); // ✅ Call here too
+            return { ...prev, [creativeIndex]: updated };
         });
-      
+
         // ✅ Update selectedFilesFromCreatives
         setSelectedFilesFromCreatives((prev) => {
-          const updated = [...(prev[creativeIndex] || []), ...mappedFiles];
-          return { ...prev, [creativeIndex]: updated };
+            const updated = [...(prev[creativeIndex] || []), ...mappedFiles];
+            return { ...prev, [creativeIndex]: updated };
         });
-      
+
         // ✅ Close drawer
         setOpenCreativesDrawer(false);
-      
+
         // ✅ Update Form MediaContent
         const currentMediaContent = form.getFieldValue(['adsets', creativeIndex, 'MediaContent']) || [];
         const updatedMediaContent = [...currentMediaContent, ...mappedFiles];
-      
+
         form.setFieldsValue({
-          adsets: {
-            [creativeIndex]: {
-              MediaContent: updatedMediaContent
+            adsets: {
+                [creativeIndex]: {
+                    MediaContent: updatedMediaContent
+                }
             }
-          }
         });
-      
+
         form.validateFields([['adsets', creativeIndex, 'MediaContent']]);
     };
 
@@ -4800,7 +4804,7 @@ const removeAdset = (index, adsetid) => {
     const handleRemove = (fileToRemove) => {
         setSelectedFilesFromMedia(prev => prev.filter(file => file.uid !== fileToRemove.uid));
         setSelectedFiles(prev =>
-          prev.filter(file => file.uid !== fileToRemove.uid)
+            prev.filter(file => file.uid !== fileToRemove.uid)
         );
     };
 
@@ -4869,7 +4873,7 @@ const removeAdset = (index, adsetid) => {
     //         );
     //         setIsFormComplete(isComplete);
     //     };
-        
+
     //     setSubmitErrors([]); // Reset submit errors when loading a draft
 
 
@@ -4879,7 +4883,7 @@ const removeAdset = (index, adsetid) => {
 
     // const setFormValuesFromDraft = (draft) => {
     //     if (!draft) return;
-      
+
     //     const draftValues = {
     //       AdsetName: draft?.adsetlevel?.AdsetName,
     //       DailyAdd_amount: draft?.adsetlevel?.Daily_amount ? draft?.adsetlevel?.Daily_amount / 100 : 0,
@@ -4908,16 +4912,16 @@ const removeAdset = (index, adsetid) => {
     //     };
 
     //     console.log("Draft Values:", draftValues);
-      
+
     //     // Update each adset form item with draft values
     //     const currentAdsetsForm = form.getFieldValue('adsets') || [];
-      
+
     //     const updatedFormAdsets = currentAdsetsForm.map(adset => ({
     //       ...adset,
     //       ...draftValues, // apply draft values to each adset
     //       DailyAdd_amount: draftValues.DailyAdd_amount,
     //     }));
-      
+
     //     // Update form fields
     //     form.setFieldsValue({
     //       adsets: updatedFormAdsets,
@@ -4928,13 +4932,13 @@ const removeAdset = (index, adsetid) => {
     //       Daily_amount: draft?.camapaignlevel?.Daily_amount / 100,
     //       Status: draft?.camapaignlevel?.Status,
     //     });
-      
+
     //     // Update states for each adset
     //     const updatedSelectedFiles = {};
     //     const updatedSelectedCreatives = {};
     //     const updatedSelectedPositions = {};
     //     const updatedSelectedPublishers = {};
-      
+
     //     adsets.forEach(adset => {
     //       updatedSelectedFiles[adset.id] = draft?.addlevel?.ads || [];
     //       updatedSelectedCreatives[adset.id] = draft?.addlevel?.ads || [];
@@ -4948,21 +4952,21 @@ const removeAdset = (index, adsetid) => {
     //     });
 
     //     console.log("Updated Selected Files:", updatedSelectedPositions);
-      
+
     //     setSelectedFiles(updatedSelectedFiles);
     //     setSelectedFilesFromCreatives(updatedSelectedCreatives);
     //     setSelectedPositions((updatedSelectedPositions));
     //     setSelectedPublishers(updatedSelectedPublishers);
-        
-      
+
+
     //     setIsManual(draft?.adsetlevel?.placements === "manual" ? "manual" : false);
     //     setAddName(draft?.addlevel?.AddName);
     //     setSelectedOption(draft?.addlevel?.ads?.length > 0 ? "creative" : "upload");
-      
+
     //     if (draft?.adsetlevel?.Daily_amount) {
     //       setAdsetLevelDailyBudget(draft?.adsetlevel?.Daily_amount / 100);
     //     }
-      
+
     //     setShowBidAmount(draft?.camapaignlevel?.Bid_strategy !== "LOWEST_COST_WITHOUT_CAP");
 
     //     setAdsets((prevAdsets) =>
@@ -4975,10 +4979,10 @@ const removeAdset = (index, adsetid) => {
     //           }),
     //         }))
     //     );
-          
-      
+
+
     //     setSubmitErrors([]);
-      
+
     //     const checkFormCompletion = () => {
     //       const allValues = form.getFieldsValue(true);
     //       const isComplete = Object.keys(allValues).every(
@@ -4986,144 +4990,144 @@ const removeAdset = (index, adsetid) => {
     //       );
     //       setIsFormComplete(isComplete);
     //     };
-      
+
     //     checkFormCompletion();
     // };
 
     const setFormValuesFromDraft = (draft) => {
-    if (!draft) return;
+        if (!draft) return;
 
-    // 1. Extract adsetlevel_* blocks
-    const adsetKeys = Object.keys(draft).filter((key) => key.startsWith("adsetlevel_"));
-    const adsetObjects = adsetKeys.map((key) => draft[key]);
+        // 1. Extract adsetlevel_* blocks
+        const adsetKeys = Object.keys(draft).filter((key) => key.startsWith("adsetlevel_"));
+        const adsetObjects = adsetKeys.map((key) => draft[key]);
 
-    // 2. Update adsets state based on adsetlevel_* count
-    setAdsets(
-        adsetObjects.map((adsetObj, index) => ({
-        id: adsetObj.id ?? uuidv4(),
-        AdsetPanelName: `Adset ${index + 1}`,
-        DailyAdd_amount: adsetObj.Daily_amount ? adsetObj.Daily_amount / 100 : 0,
-        }))
-    );
-
-    // 3. Map adset form values
-    const updatedFormAdsets = adsetObjects.map((adsetObj, index) => ({
-        id: adsetObj.id ?? uuidv4(),
-        AdsetPanelName: `Adset ${index + 1}`,
-        AdsetName: adsetObj.AdsetName,
-        DailyAdd_amount: adsetObj.Daily_amount ? adsetObj.Daily_amount / 100 : 0,
-        optimization_goal: adsetObj.optimization_goal,
-        billing_event: adsetObj.billing_event,
-        action_source: adsetObj.action_source,
-        custom_event_type: adsetObj.custom_event_type,
-        bid_amount: adsetObj.bid_amount / 100,
-        countries: adsetObj.countries,
-        Min_Age: adsetObj.Min_Age,
-        Max_Age: adsetObj.Max_Age,
-        Gender: adsetObj.Gender,
-        platforms: adsetObj.publisher_platforms || [],
-        device_platforms: adsetObj.device_platforms || [],
-        Language: adsetObj.locales,
-        placements: adsetObj.placements,
-        position: adsetObj.position || [],
-        AddName: adsetObj.addlevel?.AddName,
-        filename: adsetObj.addlevel?.filename,
-        message: adsetObj.addlevel?.message,
-        headline: adsetObj.addlevel?.headline,
-        Description: adsetObj.addlevel?.Description || "Find More",
-        Caption: adsetObj.addlevel?.Caption,
-        Website_URL: adsetObj.addlevel?.Website_URL,
-        MediaContent: adsetObj.addlevel?.Ads || [],
-    }));
-
-    // 4. Update the form fields
-    form.setFieldsValue({
-        adsets: updatedFormAdsets,
-        Name: draft?.camapaignlevel?.Name,
-        Objectives: draft?.camapaignlevel?.Objectives,
-        Special_categories: draft?.camapaignlevel?.Special_categories,
-        Bid_strategy: draft?.camapaignlevel?.Bid_strategy,
-        Daily_amount: draft?.camapaignlevel?.Daily_amount / 100,
-        Status: draft?.camapaignlevel?.Status,
-    });
-
-    // 5. Update per-adset supporting states
-    const updatedSelectedFiles = {};
-    const updatedSelectedCreatives = {};
-    const updatedSelectedPositions = {};
-    const updatedSelectedPublishers = {};
-
-    // const mapped = (data) => ({
-    //    const i = {uid: file.uid || `-${Date.now()}-${i}`,
-    //     name: file?.name,
-    //     status: 'done',
-    //     type: file?.url?.endsWith(".jpg") ? "image/jpg" :
-    //           file?.url?.endsWith(".jpeg") ? "image/jpeg" :
-    //           file?.url?.endsWith(".png") ? "image/png" : "video/",
-    //     url: file?.url,}
-    //     return "";
-    // });
-    const mapped = (data) =>
-        data.map((file, i) => ({
-          uid: `-${Date.now()}-${i}`,
-          name: file,
-          status: 'done',
-          type: file?.endsWith('.jpg')
-            ? 'image/jpg'
-            : file?.endsWith('.jpeg')
-            ? 'image/jpeg'
-            : file?.endsWith('.png')
-            ? 'image/png'
-            : 'video/',
-          url: file,
-    }));
-
-    adsetObjects.forEach((adsetObj) => {
-        const uuid = adsetObj.id ?? uuidv4();
-
-        updatedSelectedFiles[uuid] = adsetObj.addlevel?.Ads ? mapped(adsetObj.addlevel?.Ads) : [];
-        updatedSelectedCreatives[uuid] = adsetObj.addlevel?.Ads ? mapped(adsetObj.addlevel?.Ads) : [];
-        updatedSelectedPositions[uuid] = getPositionsByKeys(adsetObj.position || []);
-        updatedSelectedPublishers[uuid] = adsetObj.publisher_platforms || [];
-    });
-
-    setSelectedFiles(updatedSelectedFiles);
-    setSelectedFilesFromCreatives(updatedSelectedCreatives);
-    setSelectedPositions(updatedSelectedPositions);
-    setSelectedPublishers(updatedSelectedPublishers);
-
-    setIsManual(draft?.adsetObjects?.[0]?.placements === "manual" ? "manual" : false);
-    setAddName(adsetObjects[0]?.addlevel?.AddName || "");
-    setSelectedOption(adsetObjects[0]?.addlevel?.Ads?.length > 0 ? "creative" : "upload");
-
-    if (draft?.adsetObjects?.[0]?.Daily_amount) {
-        setAdsetLevelDailyBudget(draft.adsetObjects[0].Daily_amount / 100);
-    }
-
-    setShowBidAmount(draft?.camapaignlevel?.Bid_strategy !== "LOWEST_COST_WITHOUT_CAP");
-    setSubmitErrors([]);
-
-    // 6. Final form completeness check
-    const checkFormCompletion = () => {
-        const allValues = form.getFieldsValue(true);
-        const isComplete = Object.keys(allValues).every(
-        key => allValues[key] !== undefined && allValues[key] !== ''
+        // 2. Update adsets state based on adsetlevel_* count
+        setAdsets(
+            adsetObjects.map((adsetObj, index) => ({
+                id: adsetObj.id ?? uuidv4(),
+                AdsetPanelName: `Adset ${index + 1}`,
+                DailyAdd_amount: adsetObj.Daily_amount ? adsetObj.Daily_amount / 100 : 0,
+            }))
         );
-        setIsFormComplete(isComplete);
+
+        // 3. Map adset form values
+        const updatedFormAdsets = adsetObjects.map((adsetObj, index) => ({
+            id: adsetObj.id ?? uuidv4(),
+            AdsetPanelName: `Adset ${index + 1}`,
+            AdsetName: adsetObj.AdsetName,
+            DailyAdd_amount: adsetObj.Daily_amount ? adsetObj.Daily_amount / 100 : 0,
+            optimization_goal: adsetObj.optimization_goal,
+            billing_event: adsetObj.billing_event,
+            action_source: adsetObj.action_source,
+            custom_event_type: adsetObj.custom_event_type,
+            bid_amount: adsetObj.bid_amount / 100,
+            countries: adsetObj.countries,
+            Min_Age: adsetObj.Min_Age,
+            Max_Age: adsetObj.Max_Age,
+            Gender: adsetObj.Gender,
+            platforms: adsetObj.publisher_platforms || [],
+            device_platforms: adsetObj.device_platforms || [],
+            Language: adsetObj.locales,
+            placements: adsetObj.placements,
+            position: adsetObj.position || [],
+            AddName: adsetObj.addlevel?.AddName,
+            filename: adsetObj.addlevel?.filename,
+            message: adsetObj.addlevel?.message,
+            headline: adsetObj.addlevel?.headline,
+            Description: adsetObj.addlevel?.Description || "Find More",
+            Caption: adsetObj.addlevel?.Caption,
+            Website_URL: adsetObj.addlevel?.Website_URL,
+            MediaContent: adsetObj.addlevel?.Ads || [],
+        }));
+
+        // 4. Update the form fields
+        form.setFieldsValue({
+            adsets: updatedFormAdsets,
+            Name: draft?.camapaignlevel?.Name,
+            Objectives: draft?.camapaignlevel?.Objectives,
+            Special_categories: draft?.camapaignlevel?.Special_categories,
+            Bid_strategy: draft?.camapaignlevel?.Bid_strategy,
+            Daily_amount: draft?.camapaignlevel?.Daily_amount / 100,
+            Status: draft?.camapaignlevel?.Status,
+        });
+
+        // 5. Update per-adset supporting states
+        const updatedSelectedFiles = {};
+        const updatedSelectedCreatives = {};
+        const updatedSelectedPositions = {};
+        const updatedSelectedPublishers = {};
+
+        // const mapped = (data) => ({
+        //    const i = {uid: file.uid || `-${Date.now()}-${i}`,
+        //     name: file?.name,
+        //     status: 'done',
+        //     type: file?.url?.endsWith(".jpg") ? "image/jpg" :
+        //           file?.url?.endsWith(".jpeg") ? "image/jpeg" :
+        //           file?.url?.endsWith(".png") ? "image/png" : "video/",
+        //     url: file?.url,}
+        //     return "";
+        // });
+        const mapped = (data) =>
+            data.map((file, i) => ({
+                uid: `-${Date.now()}-${i}`,
+                name: file,
+                status: 'done',
+                type: file?.endsWith('.jpg')
+                    ? 'image/jpg'
+                    : file?.endsWith('.jpeg')
+                        ? 'image/jpeg'
+                        : file?.endsWith('.png')
+                            ? 'image/png'
+                            : 'video/',
+                url: file,
+            }));
+
+        adsetObjects.forEach((adsetObj) => {
+            const uuid = adsetObj.id ?? uuidv4();
+
+            updatedSelectedFiles[uuid] = adsetObj.addlevel?.Ads ? mapped(adsetObj.addlevel?.Ads) : [];
+            updatedSelectedCreatives[uuid] = adsetObj.addlevel?.Ads ? mapped(adsetObj.addlevel?.Ads) : [];
+            updatedSelectedPositions[uuid] = getPositionsByKeys(adsetObj.position || []);
+            updatedSelectedPublishers[uuid] = adsetObj.publisher_platforms || [];
+        });
+
+        setSelectedFiles(updatedSelectedFiles);
+        setSelectedFilesFromCreatives(updatedSelectedCreatives);
+        setSelectedPositions(updatedSelectedPositions);
+        setSelectedPublishers(updatedSelectedPublishers);
+
+        setIsManual(draft?.adsetObjects?.[0]?.placements === "manual" ? "manual" : false);
+        setAddName(adsetObjects[0]?.addlevel?.AddName || "");
+        setSelectedOption(adsetObjects[0]?.addlevel?.Ads?.length > 0 ? "creative" : "upload");
+
+        if (draft?.adsetObjects?.[0]?.Daily_amount) {
+            setAdsetLevelDailyBudget(draft.adsetObjects[0].Daily_amount / 100);
+        }
+
+        setShowBidAmount(draft?.camapaignlevel?.Bid_strategy !== "LOWEST_COST_WITHOUT_CAP");
+        setSubmitErrors([]);
+
+        // 6. Final form completeness check
+        const checkFormCompletion = () => {
+            const allValues = form.getFieldsValue(true);
+            const isComplete = Object.keys(allValues).every(
+                key => allValues[key] !== undefined && allValues[key] !== ''
+            );
+            setIsFormComplete(isComplete);
+        };
+
+        checkFormCompletion();
     };
 
-    checkFormCompletion();
-    };
 
-      
-      
+
 
     const onChangeDraft = (value) => {
         const draft = draftsData.find(draft => draft.id === value);
         console.log("Selected Draft:", value);
         console.log("Drafts Data:", draftsData.find(draft => draft.id === value));
         setFormValuesFromDraft(draftsData.find(draft => draft.id === value));
-        selectedRef.current = {Draft_Name: draft?.Draft_Name, Draft_Id: draft?.id};
+        selectedRef.current = { Draft_Name: draft?.Draft_Name, Draft_Id: draft?.id };
         newSelectedRef.current = draft?.Draft_Name;
         setWebsiteURL("");
         setCaption("");
@@ -5132,28 +5136,8 @@ const removeAdset = (index, adsetid) => {
     return (
         <Drawer
             title={
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '5px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', }}>
                     <span>Create a new campaign</span>
-                    <Select value={newSelectedRef.current} placeholder="Select Draft"  
-                        style={{
-                            width: 160,
-                            border: '1.5px solid #4CAF50',
-                            borderRadius: '8px',
-                        }} onChange={onChangeDraft}
-                                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                            className={theme === 'dark' ? 'dark-theme' : 'light-theme'}>
-                        {/* {draftsData.map((draft) => (
-                            <Select.Option value={draft.id}>{draft.Draft_Name}</Select.Option>
-                        ))} */}
-                        {Array.isArray(draftsData) && draftsData.map((draft) => (
-                        <Select.Option key={draft.id} value={draft.id}>
-                            {draft.Draft_Name}
-                        </Select.Option>
-                        ))}
-
-                        {/* <Select.Option value="creative">Creative</Select.Option>
-                        <Select.Option value="video">Video</Select.Option> */}
-                    </Select>
                 </div>
             }
             width="95%"
@@ -5162,12 +5146,34 @@ const removeAdset = (index, adsetid) => {
             style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
         >
 
+            <Select value={newSelectedRef.current} placeholder="Select draft"
+                style={{
+                    width: 160,
+                    border: '1.5px solid #4caf50',
+                    borderRadius: '8px',
+                    marginBottom:'7px'
+                }} onChange={onChangeDraft}
+                dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}>
+                {/* {draftsData.map((draft) => (
+                            <Select.Option value={draft.id}>{draft.Draft_Name}</Select.Option>
+                        ))} */}
+                {Array.isArray(draftsData) && draftsData.map((draft) => (
+                    <Select.Option key={draft.id} value={draft.id}>
+                        {draft.Draft_Name}
+                    </Select.Option>
+                ))}
+
+                {/* <Select.Option value="creative">Creative</Select.Option>
+                        <Select.Option value="video">Video</Select.Option> */}
+            </Select>
+
             <Spin spinning={loading}>
                 <Form layout="vertical" form={form} onFinish={onFinish} onValuesChange={handleFormChange} initialValues={initialValues} className={theme === 'dark' ? 'form-dark' : 'form-light'}>
                     <Collapse accordion activeKey={activeKey} // Bind active key state
-                        onChange={(key) => setActiveKey([key])}  className={theme === 'dark' ? 'custom-collapse-dark' : 'custom-collapse-light'} >
+                        onChange={(key) => setActiveKey([key])} className={theme === 'dark' ? 'custom-collapse-dark' : 'custom-collapse-light'} >
                         <Panel header="CAMPAIGN LEVEL" key="1" style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}>
-                            <div style={{ display: "flex", backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000'}}>
+                            <div style={{ display: "flex", backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}>
                                 <Form.Item
                                     name="Account_Number"
                                     label={<span style={{ color: "#B4B4B4" }}>Account Number</span>}
@@ -5180,7 +5186,7 @@ const removeAdset = (index, adsetid) => {
                                     // style={{ width: 200, }}
                                     style={{ flex: 0.25, }}
                                 >
-                                    <Input value={accountNumber} onChange={Accountchange}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
+                                    <Input value={accountNumber} onChange={Accountchange} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                                 </Form.Item>
                                 <Form.Item
                                     name="Name"
@@ -5195,7 +5201,7 @@ const removeAdset = (index, adsetid) => {
                                     style={{ flex: 0.25, marginLeft: "1%" }}
                                 >
                                     <Input onChange={handleNameChange}
-                                        style={{ width: "100%", }}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                        style={{ width: "100%", }} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -5208,18 +5214,18 @@ const removeAdset = (index, adsetid) => {
                                         },
                                     ]}
                                     style={{ flex: 0.15, marginLeft: "1%" }}
-                                    // style={{ width: 170, marginLeft: "1%" }}
+                                // style={{ width: 170, marginLeft: "1%" }}
                                 >
                                     <Select
                                         // onChange={getpixelandpageid}
                                         variant="filled"
                                         options={[
-                                            { value: "OUTCOME_LEADS", label: "Leads" },
-                                            { value: "OUTCOME_SALES", label: "Sales" },
-                                            { value: "OUTCOME_ENGAGEMENT", label: "Engagement" },
-                                            { value: "OUTCOME_AWARENESS", label: "Awareness" },
-                                            { value: "OUTCOME_TRAFFIC", label: "Traffic" },
-                                            { value: "OUTCOME_APP_PROMOTION", label: "App promotion" }
+                                            { value: "OUTCOME_LEADS", label: "Leads",title:"" },
+                                            { value: "OUTCOME_SALES", label: "Sales",title:"" },
+                                            { value: "OUTCOME_ENGAGEMENT", label: "Engagement",title:"" },
+                                            { value: "OUTCOME_AWARENESS", label: "Awareness",title:"" },
+                                            { value: "OUTCOME_TRAFFIC", label: "Traffic",title:"" },
+                                            { value: "OUTCOME_APP_PROMOTION", label: "App promotion",title:"" }
 
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
@@ -5236,7 +5242,7 @@ const removeAdset = (index, adsetid) => {
                                         },
                                     ]}
                                     style={{ flex: 0.12, marginLeft: "1%" }}
-                                    // style={{ width: 160, marginLeft: "1%" }}
+                                // style={{ width: 160, marginLeft: "1%" }}
                                 >
                                     <Select
 
@@ -5244,11 +5250,11 @@ const removeAdset = (index, adsetid) => {
                                         mode="multiple"
                                         allowClear
                                         options={[
-                                            { value: "HOUSING", label: "Housing" },
-                                            { value: "FINANCIAL_PRODUCTS_SERVICES", label: "Credit" },
-                                            { value: "EMPLOYMENT", label: "Employment" },
-                                            { value: "ISSUES_ELECTIONS_POLITICS", label: "Politics" },
-                                            { value: "NONE", label: "None" }
+                                            { value: "HOUSING", label: "Housing",title:"" },
+                                            { value: "FINANCIAL_PRODUCTS_SERVICES", label: "Credit",title:"" },
+                                            { value: "EMPLOYMENT", label: "Employment",title:"" },
+                                            { value: "ISSUES_ELECTIONS_POLITICS", label: "Politics",title:"" },
+                                            { value: "NONE", label: "None",title:"" }
 
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
@@ -5265,15 +5271,15 @@ const removeAdset = (index, adsetid) => {
                                         },
                                     ]}
                                     style={{ flex: 0.2, marginLeft: "1%" }}
-                                    // style={{ width: 170, marginLeft: "1%" }}
+                                // style={{ width: 170, marginLeft: "1%" }}
                                 >
                                     <Select
                                         variant="filled"
                                         options={[
-                                            { value: "LOWEST_COST_WITHOUT_CAP", label: "Highest Volume" },
-                                            { value: "LOWEST_COST_WITH_BID_CAP", label: "Bid Cap" },
-                                            { value: "COST_CAP", label: "Cost per Result Goal" },
-                                            { value: "LOWEST_COST_WITH_MIN_ROAS", label: "ROAS Goal" }
+                                            { value: "LOWEST_COST_WITHOUT_CAP", label: "Highest Volume",title:"" },
+                                            { value: "LOWEST_COST_WITH_BID_CAP", label: "Bid Cap",title:"" },
+                                            { value: "COST_CAP", label: "Cost per Result Goal",title:"" },
+                                            { value: "LOWEST_COST_WITH_MIN_ROAS", label: "ROAS Goal",title:"" }
                                         ]}
                                         onChange={handleBidStrategyChange}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
@@ -5420,33 +5426,33 @@ const removeAdset = (index, adsetid) => {
           />
         </Form.Item>
       </Tooltip> */}
-      <Tooltip title={isAnyAdsetBudgetSet ? 'You have enabled daily budget in the Adset Level' : ''}>
-                    <Form.Item
-                        name="Daily_amount"
-                        label="Daily Budget"
-                        rules={[
-                            {
-                                required: !(isAnyAdsetBudgetSet || campaignLevelDailyBudget > 0),
-                                message: "Please enter a valid daily budget for the Campaign"
-                            }
-                        ]}
-                        style={{ marginLeft: "1%" }}
-                    >
-                        <InputNumber
-                            min={0}
-                            step={0.01}
-                            placeholder="$"
-                            value={campaignLevelDailyBudget}
-                            onChange={value => {
-                                setCampaignLevelDailyBudget(value);
-                                setIsCampaignBudgetActive(value > 0);
-                            }}
-                            readOnly={isAnyAdsetBudgetSet} // Make campaign budget read-only if any adset has a budget
-                            style={{ flex: 0.2, }}
-                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                        />
-                    </Form.Item>
-                </Tooltip>
+                                <Tooltip title={isAnyAdsetBudgetSet ? 'You have enabled daily budget in the Adset Level' : ''}>
+                                    <Form.Item
+                                        name="Daily_amount"
+                                        label="Daily budget"
+                                        rules={[
+                                            {
+                                                required: !(isAnyAdsetBudgetSet || campaignLevelDailyBudget > 0),
+                                                message: "Please enter a valid daily budget for the Campaign"
+                                            }
+                                        ]}
+                                        style={{ marginLeft: "1%" }}
+                                    >
+                                        <InputNumber
+                                            min={0}
+                                            step={0.01}
+                                            placeholder="$"
+                                            value={campaignLevelDailyBudget}
+                                            onChange={value => {
+                                                setCampaignLevelDailyBudget(value);
+                                                setIsCampaignBudgetActive(value > 0);
+                                            }}
+                                            readOnly={isAnyAdsetBudgetSet} // Make campaign budget read-only if any adset has a budget
+                                            style={{ flex: 0.2, color: theme === 'dark' ? '#fff' : '#000' }}
+                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                        />
+                                    </Form.Item>
+                                </Tooltip>
                                 <Form.Item
                                     name="Status"
                                     label={<span style={{ color: "#B4B4B4" }}>Status</span>}
@@ -5457,13 +5463,13 @@ const removeAdset = (index, adsetid) => {
                                         },
                                     ]}
                                     style={{ flex: 0.1, marginLeft: "1%" }}
-                                    // style={{ width: 160, marginLeft: "1%" }}
+                                // style={{ width: 160, marginLeft: "1%" }}
                                 >
                                     <Select
                                         variant="filled"
                                         options={[
-                                            { value: "ACTIVE", label: "ACTIVE" },
-                                            { value: "PAUSED", label: "PAUSED" },
+                                            { value: "ACTIVE", label: "ACTIVE" ,title:""},
+                                            { value: "PAUSED", label: "PAUSED",title:"" },
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                                         className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
@@ -5505,13 +5511,13 @@ const removeAdset = (index, adsetid) => {
                             
                         })} */}
                         {adsets.map((adset, index) => {
-                            return(<AdsetComponent setSelectedPublishers={setSelectedPublishers} selectedPublishers={selectedPublishers} selectedPositions={selectedPositions} setSelectedPositions={setSelectedPositions} form={form} selectedFiles={selectedFiles} setSelectedFiles={setSelectedFiles} selectedFilesFromMedia={selectedFilesFromMedia} selectedFilesFromCreatives={selectedFilesFromCreatives} setSelectedFilesFromMedia={setSelectedFilesFromMedia} setSelectedFilesFromCreatives={setSelectedFilesFromCreatives} isCampaignBudgetActive={isCampaignBudgetActive} handleAdsetChange={handleAdsetChange} showBidAmount={showBidAmount} index={index} adset={adset} localesdata={localesdata} addAdset={addAdset} cloneAdset={cloneAdset} removeAdset={removeAdset} handleFieldChange={handleFieldChange} network={network} accountis={accountis} />)
+                            return (<AdsetComponent theme={theme} setSelectedPublishers={setSelectedPublishers} selectedPublishers={selectedPublishers} selectedPositions={selectedPositions} setSelectedPositions={setSelectedPositions} form={form} selectedFiles={selectedFiles} setSelectedFiles={setSelectedFiles} selectedFilesFromMedia={selectedFilesFromMedia} selectedFilesFromCreatives={selectedFilesFromCreatives} setSelectedFilesFromMedia={setSelectedFilesFromMedia} setSelectedFilesFromCreatives={setSelectedFilesFromCreatives} isCampaignBudgetActive={isCampaignBudgetActive} handleAdsetChange={handleAdsetChange} showBidAmount={showBidAmount} index={index} adset={adset} localesdata={localesdata} addAdset={addAdset} cloneAdset={cloneAdset} removeAdset={removeAdset} handleFieldChange={handleFieldChange} network={network} accountis={accountis} />)
                             // <ffff/>
-                            
-                        })}
-                        
 
-                        
+                        })}
+
+
+
                     </Collapse>
                     {/* <Form.Item label=" ">
                         {isFormComplete && (
@@ -5522,8 +5528,8 @@ const removeAdset = (index, adsetid) => {
                     </Form.Item> */}
                     <Form.Item label=" ">
                         {/* {(isFormComplete || newSelectedRef.current) && ( */}
-                            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-                                <div>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+                            <div>
                                 {/* <Button
   type="primary"
   style={{ background: '#21c55d', minWidth: '200px', borderWidth: '0px' }}
@@ -5572,118 +5578,118 @@ const removeAdset = (index, adsetid) => {
 >
   Submit
 </Button> */}
-<Button
-  type="primary"
-  style={{ background: '#91c25f', minWidth: '200px', borderWidth: '0px' }}
-  onClick={async () => {
-    try {
-      const values = await form.validateFields(); // Validates all form fields
+                                <Button
+                                    type="primary"
+                                    style={{ background: '#91c25f', minWidth: '200px', borderWidth: '0px' }}
+                                    onClick={async () => {
+                                        try {
+                                            const values = await form.validateFields(); // Validates all form fields
 
-      // Check if campaign-level and adset-level budgets are both zero
-      const campaignLevelDailyBudget = values.Daily_amount;
-      const isCampaignBudgetActive = parseFloat(campaignLevelDailyBudget) > 0;
+                                            // Check if campaign-level and adset-level budgets are both zero
+                                            const campaignLevelDailyBudget = values.Daily_amount;
+                                            const isCampaignBudgetActive = parseFloat(campaignLevelDailyBudget) > 0;
 
-      // Check if any adset has a budget
-      const isAnyAdsetBudgetSet = values.adsets.some(adset => parseFloat(adset.DailyAdd_amount) > 0);
-      
-      // If Campaign Budget is not set, check Adsets
-      if (!isCampaignBudgetActive) {
-        const isAllAdsetsFilled = values.adsets.every(adset => parseFloat(adset.DailyAdd_amount) > 0);
-        
-        if (!isAllAdsetsFilled) {
-          throw {
-            errorFields: [
-              {
-                name: ['Daily_amount'], // The field where error occurs
-                errors: ['Daily budget cannot be zero on both Adset and Campaign levels'], // The error message
-              },
-            ],
-          };
-        }
-      }
+                                            // Check if any adset has a budget
+                                            const isAnyAdsetBudgetSet = values.adsets.some(adset => parseFloat(adset.DailyAdd_amount) > 0);
 
-      // Clear any previous errors
-      setSubmitErrors([]);
-      console.log("Form values:", values); // Log form values to verify
+                                            // If Campaign Budget is not set, check Adsets
+                                            if (!isCampaignBudgetActive) {
+                                                const isAllAdsetsFilled = values.adsets.every(adset => parseFloat(adset.DailyAdd_amount) > 0);
 
-      // Call the onFinish logic, passing in the values
-      onFinish(values); // Trigger the existing logic for form submission
+                                                if (!isAllAdsetsFilled) {
+                                                    throw {
+                                                        errorFields: [
+                                                            {
+                                                                name: ['Daily_amount'], // The field where error occurs
+                                                                errors: ['Daily budget cannot be zero on both Adset and Campaign levels'], // The error message
+                                                            },
+                                                        ],
+                                                    };
+                                                }
+                                            }
 
-      // Optionally trigger confirmation modal (as per your logic)
-      setIsModalVisible(true);
+                                            // Clear any previous errors
+                                            setSubmitErrors([]);
+                                            console.log("Form values:", values); // Log form values to verify
 
-      // Save values if needed
-      setFormValues(values);
-      setIsCreateCampaignorDraft("createcampaign");
+                                            // Call the onFinish logic, passing in the values
+                                            onFinish(values); // Trigger the existing logic for form submission
 
-    } catch (err) {
-      // Catch any validation errors thrown by form.validateFields
-      const allErrors = err?.errorFields?.map((field) => ({
-        name: field.name?.[0],       // field name
-        message: field.errors?.[0],  // validation message
-      }));
-      setSubmitErrors(allErrors); // Capture and show validation errors
-    }
-  }}
->
-  Submit
-</Button>
+                                            // Optionally trigger confirmation modal (as per your logic)
+                                            setIsModalVisible(true);
 
-<Popconfirm
-      title="Enter required fields"
-      description={
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <div>
-            <Input
-              placeholder="Title"
-              value={popupInputs.input1}
-              onChange={(e) =>
-                setPopupInputs((prev) => ({
-                  ...prev,
-                  input1: e.target.value,
-                }))
-              }
-              status={errors.input1 ? 'error' : ''}
-            />
-            {errors.input1 && (
-              <div style={{ color: 'red', fontSize: '12px' }}>
-                {errors.input1}
-              </div>
-            )}
-          </div>
+                                            // Save values if needed
+                                            setFormValues(values);
+                                            setIsCreateCampaignorDraft("createcampaign");
 
-          <div>
-            <Input
-              placeholder="Draft Name"
-              value={popupInputs.input2}
-              onChange={(e) =>
-                setPopupInputs((prev) => ({
-                  ...prev,
-                  input2: e.target.value,
-                }))
-              }
-              status={errors.input2 ? 'error' : ''}
-            />
-            {errors.input2 && (
-              <div style={{ color: 'red', fontSize: '12px' }}>
-                {errors.input2}
-              </div>
-            )}
-          </div>
-        </div>
-      }
-      open={open}
-      onOpenChange={setOpen}
-      onConfirm={handleConfirm}
-      onCancel={handleCancelPop}
-      okButtonProps={{ loading: confirmLoading }}
-    >
-      <Button type="primary" style={{ background: '#91c25f', minWidth: '100px', borderWidth: '0px', marginLeft: '10px' }} onClick={() => setOpen(true)}>
-        Draft
-      </Button>
-    </Popconfirm>
+                                        } catch (err) {
+                                            // Catch any validation errors thrown by form.validateFields
+                                            const allErrors = err?.errorFields?.map((field) => ({
+                                                name: field.name?.[0],       // field name
+                                                message: field.errors?.[0],  // validation message
+                                            }));
+                                            setSubmitErrors(allErrors); // Capture and show validation errors
+                                        }
+                                    }}
+                                >
+                                    Submit
+                                </Button>
 
-{/* <Button
+                                <Popconfirm
+                                    title="Enter required fields"
+                                    description={
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                            <div>
+                                                <Input
+                                                    placeholder="Title"
+                                                    value={popupInputs.input1}
+                                                    onChange={(e) =>
+                                                        setPopupInputs((prev) => ({
+                                                            ...prev,
+                                                            input1: e.target.value,
+                                                        }))
+                                                    }
+                                                    status={errors.input1 ? 'error' : ''}
+                                                />
+                                                {errors.input1 && (
+                                                    <div style={{ color: 'red', fontSize: '12px' }}>
+                                                        {errors.input1}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div>
+                                                <Input
+                                                    placeholder="Draft Name"
+                                                    value={popupInputs.input2}
+                                                    onChange={(e) =>
+                                                        setPopupInputs((prev) => ({
+                                                            ...prev,
+                                                            input2: e.target.value,
+                                                        }))
+                                                    }
+                                                    status={errors.input2 ? 'error' : ''}
+                                                />
+                                                {errors.input2 && (
+                                                    <div style={{ color: 'red', fontSize: '12px' }}>
+                                                        {errors.input2}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    }
+                                    open={open}
+                                    onOpenChange={setOpen}
+                                    onConfirm={handleConfirm}
+                                    onCancel={handleCancelPop}
+                                    okButtonProps={{ loading: confirmLoading }}
+                                >
+                                    <Button type="primary" style={{ background: '#91c25f', minWidth: '100px', borderWidth: '0px', marginLeft: '10px' }} onClick={() => setOpen(true)}>
+                                        Draft
+                                    </Button>
+                                </Popconfirm>
+
+                                {/* <Button
   type="primary"
   style={{ background: '#11dd44', minWidth: '100px', borderWidth: '0px', marginLeft: '10px' }}
   onClick={async () => {
@@ -5740,33 +5746,29 @@ const removeAdset = (index, adsetid) => {
 >
   Draft
 </Button> */}
-
-
-
-                                    
-                                </div>
+                      </div>
 
                             {/* Show validation messages beside button */}
                             {submitErrors.length > 0 && (
                                 <div style={{ color: "red", marginTop: 8 }}>
-                                {submitErrors.map((err, index) => (
-                                    <div key={index}>
-                                    <strong>{err.name}:</strong> {err.message}
-                                    </div>
-                                ))}
+                                    {submitErrors.map((err, index) => (
+                                        <div key={index}>
+                                            <strong>{err.name}:</strong> {err.message}
+                                        </div>
+                                    ))}
                                 </div>
                             )}
-                            </div>
+                        </div>
                         {/* )} */}
                     </Form.Item>
 
                     {isImgEditorShown && currentFile && (
-                            <FabricCanvas
-                                fileId={currentFile.name} // Pass a unique identifier
-                                initialImage={currentFile?.originFileObj ? URL.createObjectURL(currentFile.originFileObj) : currentFile?.url}
-                                closeCanvasModal={closeCanvasModal}
-                                onSaveEditedImage={handleSaveEditedImage}
-                            />
+                        <FabricCanvas
+                            fileId={currentFile.name} // Pass a unique identifier
+                            initialImage={currentFile?.originFileObj ? URL.createObjectURL(currentFile.originFileObj) : currentFile?.url}
+                            closeCanvasModal={closeCanvasModal}
+                            onSaveEditedImage={handleSaveEditedImage}
+                        />
                     )}
 
                     {/* {isImgEditorShown && currentFile && (

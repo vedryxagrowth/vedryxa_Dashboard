@@ -1263,7 +1263,7 @@ body.dark-mode .black-icon-comment.anticon svg {
   outline: none !important;  
 } */
 .custom-input-light .ant-input:focus {
-  border-color: #91C25F !important;
+  border-color:  #4caf50!important;
   box-shadow: none !important;
   outline: none !important;
 }
@@ -2936,19 +2936,19 @@ body.dark-mode .black-icon-comment.anticon svg {
 
 .dark-icon-button {
   background-color: transparent !important;
-  border-color: #91C25F !important;
+  border-color: #4caf50 !important;
   /* border: none; */
 }
 
 /* On hover — change only border and icon color */
 .dark-icon-button:hover {
-  border-color: #91C25F !important; /* green border */
+  border-color: #4caf50 !important; /* green border */
   color: #91C25F !important;        /* icon color */
 }
 
 /* Optional: focus state for accessibility */
 .dark-icon-button:focus {
-  border-color: #91C25F !important;
+  border-color: #4caf50 !important;
   color: #91C25F !important;
 }
 
@@ -3201,6 +3201,13 @@ body.dark .upload-form-wrapper {
   border-color: #4caf50 !important;
   box-shadow: 0 0 0 2px rgba(145, 194, 95, 0.2);
 }
+.custom-datepicker-dark .ant-picker-input > input[disabled] {
+  color: #fff !important;
+}
+
+.custom-datepicker-light .ant-picker-input > input[disabled] {
+  color: #333 !important;
+}
 
 .ant-modal .ant-btn-primary {
   background-color: #91C25F !important;
@@ -3306,12 +3313,12 @@ body.dark .upload-form-wrapper {
 
 /* Prevent blue color on hover/focus for Input */
 .custom-input-dark, .custom-input-light {
-  border-color: #91C25F !important; /* Retain your custom border color */
+  border: 1px solid #4caf50 !important; /* Retain your custom border color */
 }
 
 .custom-input-dark:focus, .custom-input-light:focus,
 .custom-input-dark:hover, .custom-input-light:hover {
-  border-color: #91C25F !important; /* Retain your custom border color */
+  border-color: #4caf50 !important; /* Retain your custom border color */
   outline: none !important; /* Remove the default blue outline */
   box-shadow: none !important; /* Remove any box shadow caused by focus */
 }

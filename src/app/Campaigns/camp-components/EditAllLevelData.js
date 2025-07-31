@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect } from 'react';
 import { Drawer, Button, DatePicker, Space, Form, Input, Select, Collapse, Upload, Steps, Modal, message, Spin, Badge, Tooltip, InputNumber } from 'antd';
-import { PlusOutlined, UploadOutlined, ShareAltOutlined, CommentOutlined, LikeOutlined, MoreOutlined, CloseOutlined, GlobalOutlined, EditOutlined, QuestionCircleOutlined,PaperClipOutlined,DeleteOutlined  } from '@ant-design/icons';
+import { PlusOutlined, UploadOutlined, ShareAltOutlined, CommentOutlined, LikeOutlined, MoreOutlined, CloseOutlined, GlobalOutlined, EditOutlined, QuestionCircleOutlined, PaperClipOutlined, DeleteOutlined } from '@ant-design/icons';
 import moment from 'moment-timezone';
 import { useState, useRef } from 'react';
 import TextArea from 'antd/es/input/TextArea';
@@ -25,45 +25,45 @@ const { Panel } = Collapse;
 const { Option } = Select;
 const { Step } = Steps;
 const publisherOptions = [
-    { label: 'Facebook', value: 'facebook' },
-    { label: 'Instagram', value: 'instagram' },
-    { label: 'Messenger', value: 'messenger' },
-    { label: 'Audience Network', value: 'audience_network' }
+    { label: 'Facebook', value: 'facebook', title: "" },
+    { label: 'Instagram', value: 'instagram', title: "" },
+    { label: 'Messenger', value: 'messenger', title: "" },
+    { label: 'Audience Network', value: 'audience_network', title: "" }
 ];
 const positionOptions = {
     facebook: [
-        { key: "feed", label: "Facebook Feed" },
-        { key: "marketplace", label: "Facebook Marketplace" },
-        { key: "video_feeds", label: "Facebook Video Feeds" },
-        { key: "instream_video", label: "Facebook In-Stream Videos" },
-        { key: "facebook_reels", label: "Facebook Reels" },
-        { key: "profile_feed", label: "Facebook Profile Feed" },
-        { key: "search", label: "Facebook Search" },
-        { key: "story", label: "Facebook Stories" },
-        { key: "right_hand_column", label: "Facebook Right Column" },
-        { key: "instant_article", label: "Facebook Instant Articles" },
-        { key: "biz_disco_feed", label: "Facebook Business Explore" } // Added Business Explore
+        { key: "feed", label: "Facebook Feed", title: "" },
+        { key: "marketplace", label: "Facebook Marketplace", title: "" },
+        { key: "video_feeds", label: "Facebook Video Feeds", title: "" },
+        { key: "instream_video", label: "Facebook In-Stream Videos", title: "" },
+        { key: "facebook_reels", label: "Facebook Reels", title: "" },
+        { key: "profile_feed", label: "Facebook Profile Feed", title: "" },
+        { key: "search", label: "Facebook Search", title: "" },
+        { key: "story", label: "Facebook Stories", title: "" },
+        { key: "right_hand_column", label: "Facebook Right Column", title: "" },
+        { key: "instant_article", label: "Facebook Instant Articles", title: "" },
+        { key: "biz_disco_feed", label: "Facebook Business Explore", title: "" } // Added Business Explore
     ],
     instagram: [
-        { key: "stream", label: "Instagram Stream" },
-        { key: "story", label: "Instagram Stories" },
-        { key: "explore", label: "Instagram Explore" },
-        { key: "explore_home", label: "Instagram Explore Home" },
-        { key: "reels", label: "Instagram Reels" },
-        { key: "profile_feed", label: "Instagram Profile Feed" },
-        { key: "ig_search", label: "Instagram Search" },
-        { key: "profile_reels", label: "Instagram Profile Reels" }
+        { key: "stream", label: "Instagram Stream", title: "" },
+        { key: "story", label: "Instagram Stories", title: "" },
+        { key: "explore", label: "Instagram Explore", title: "" },
+        { key: "explore_home", label: "Instagram Explore Home", title: "" },
+        { key: "reels", label: "Instagram Reels", title: "" },
+        { key: "profile_feed", label: "Instagram Profile Feed", title: "" },
+        { key: "ig_search", label: "Instagram Search", title: "" },
+        { key: "profile_reels", label: "Instagram Profile Reels", title: "" }
     ],
     messenger: [
-        { key: "messenger_home", label: "Messenger Home" },
-        { key: "story", label: "Messenger Stories" },
-        { key: "sponsored_messages", label: "Messenger Sponsored Messages" },
+        { key: "messenger_home", label: "Messenger Home", title: "" },
+        { key: "story", label: "Messenger Stories", title: "" },
+        { key: "sponsored_messages", label: "Messenger Sponsored Messages", title: "" },
         // { key: "messenger_inbox", label: "Messenger Inbox" }
     ],
     audience_network: [
-        { key: "classic", label: "Audience Network Classic" },
-        { key: "rewarded_video", label: "Audience Network Rewarded Video" },
-        { key: "instream_video", label: "Audience Network In-Stream Video" }
+        { key: "classic", label: "Audience Network Classic", title: "" },
+        { key: "rewarded_video", label: "Audience Network Rewarded Video", title: "" },
+        { key: "instream_video", label: "Audience Network In-Stream Video", title: "" }
     ]
 };
 
@@ -474,7 +474,7 @@ const localesdata = [
     }
 ]
 
-const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, network, selectedRow}) => {
+const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, network, selectedRow }) => {
     // const [selectedFile, setSelectedFile] = useState(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isModalVisibleForURLBuilder, setIsModalVisibleForURLBuilder] = useState(false);
@@ -540,29 +540,29 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                     setDuplicatedampaignData(response?.data[0]);
                     const enrichedPanels = (response?.data[0]?.addlevel || []).map((item, index) => {
                         const selectedOption = item.selectedOption || "creative";
-                      
+
                         const defaultFile = item.filename
-                          ? [
-                              {
-                                uid: `file-${index}`,
-                                name: item.filename.split("/").pop(),
-                                url: item.filename,
-                                type: item.filename.endsWith(".mp4") ? "video/mp4" : "image/jpeg",
-                                source: selectedOption === "upload" ? "media" : "creative",
-                              },
+                            ? [
+                                {
+                                    uid: `file-${index}`,
+                                    name: item.filename.split("/").pop(),
+                                    url: item.filename,
+                                    type: item.filename.endsWith(".mp4") ? "video/mp4" : "image/jpeg",
+                                    source: selectedOption === "upload" ? "media" : "creative",
+                                },
                             ]
-                          : [];
-                      
+                            : [];
+
                         return {
-                          ...item,
-                          key: `panel-${index}`,
-                          selectedOption,
-                          selectedFilesFromMedia: [], // selectedOption === "upload" ? defaultFile : []
-                          selectedFilesFromCreatives: selectedOption === "creative" ? defaultFile : [],
-                          selectedFiles: defaultFile,
+                            ...item,
+                            key: `panel-${index}`,
+                            selectedOption,
+                            selectedFilesFromMedia: [], // selectedOption === "upload" ? defaultFile : []
+                            selectedFilesFromCreatives: selectedOption === "creative" ? defaultFile : [],
+                            selectedFiles: defaultFile,
                         };
-                      });
-                      
+                    });
+
                     setPanels(enrichedPanels);
                 }
             } catch (error) {
@@ -575,9 +575,9 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
 
     const updatePanel = (key, field, value) => {
         setPanels((prevPanels) =>
-          prevPanels.map((panel) =>
-            panel.key === key ? { ...panel, [field]: value } : panel
-          )
+            prevPanels.map((panel) =>
+                panel.key === key ? { ...panel, [field]: value } : panel
+            )
         );
     };
 
@@ -611,18 +611,18 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
             setDefaultURLBuilder(DuplicatedampaignData?.addlevel[0]?.Website_URL);
             setSelectedOption("creative");
             (DuplicatedampaignData?.camapaignlevel?.Bid_strategy === "COST_CAP") && setShowBidAmount("COST_CAP");
-            setSelectedFilesFromCreatives(DuplicatedampaignData?.addlevel?.map((file, index)=>{
-                return({
-                    uid: `-${index+1}`,
+            setSelectedFilesFromCreatives(DuplicatedampaignData?.addlevel?.map((file, index) => {
+                return ({
+                    uid: `-${index + 1}`,
                     name: file?.filename,
                     status: 'done',
                     type: `${file?.filename?.endsWith(".jpg") || file?.filename?.endsWith(".png") ? file?.filename?.endsWith(".jpg") ? "image/jpg" : "image/png" : "video/"}`,
                     url: file?.filename,
                 })
             }));
-            setSelectedFiles(DuplicatedampaignData?.addlevel?.map((file, index)=>{
-                return({
-                    uid: `-${index+1}`,
+            setSelectedFiles(DuplicatedampaignData?.addlevel?.map((file, index) => {
+                return ({
+                    uid: `-${index + 1}`,
                     name: file?.filename,
                     status: 'done',
                     type: `${file?.filename?.endsWith(".jpg") || file?.filename?.endsWith(".png") ? file?.filename?.endsWith(".jpg") ? "image/jpg" : "image/png" : "video/"}`,
@@ -633,14 +633,14 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
             // form.setFieldsValue({
             //     MediaContent: fileList, // Ensure the selected files are added to the form value
             //   });
-            
+
             // setCaption(DuplicatedampaignData?.addlevel[0]?.Caption);
             // setPrimaryText(DuplicatedampaignData?.addlevel[0]?.message);
             // setDescription(DuplicatedampaignData?.addlevel[0]?.Description);
             // setHeadline(DuplicatedampaignData?.addlevel[0]?.headline);
             console.log(DuplicatedampaignData?.adsetlevel?.placements);
             form.setFieldsValue({
-                Campaign:{
+                Campaign: {
                     Account_Number: DuplicatedampaignData?.Account_Number,
                     // createdby:DuplicatedampaignData?.camapaignlevel?.createdby,
                     Name: DuplicatedampaignData?.camapaignlevel?.Name,
@@ -650,7 +650,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                     Daily_amount: (DuplicatedampaignData?.camapaignlevel?.Daily_amount) / 100,
                     Status: DuplicatedampaignData?.camapaignlevel?.Status,
                 },
-                Adset:{
+                Adset: {
                     AdsetName: DuplicatedampaignData?.adsetlevel?.AdsetName,
                     positions: DuplicatedampaignData?.adsetlevel?.position || ["feed"],
                     DailyAdd_amount: DuplicatedampaignData?.adsetlevel?.Daily_amount ? (DuplicatedampaignData?.adsetlevel?.Daily_amount) / 100 : 0,
@@ -675,7 +675,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                 // AddName: DuplicatedampaignData?.adsetlevel?.AdsetName,
                 filename: DuplicatedampaignData?.addlevel[0]?.filename,
                 // page_id: DuplicatedampaignData?.addlevel[0]?.page_id,
-                Ad:{
+                Ad: {
                     message: DuplicatedampaignData?.addlevel[0]?.message,
                     headline: DuplicatedampaignData?.addlevel[0]?.headline,
                     Description: DuplicatedampaignData?.addlevel[0]?.Description,
@@ -721,31 +721,31 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
 
     const onReturnUrl = (text) => {
         setIsModalVisibleForURLBuilder(false);
-        
+
         setWebsiteURL(text);
         if (network === "FB_Mnet" || network === "FB_DomainActive") {
             setCaption(text.split('//')[1].split("/")[0]);
             form.setFieldsValue({
                 Ad: {
-                  Website_URL: text, // merge or update the changed fields
-                  Caption: text.split('//')[1].split("/")[0],
+                    Website_URL: text, // merge or update the changed fields
+                    Caption: text.split('//')[1].split("/")[0],
                 },
             });
             setLevelWiseChanges((prev) => {
                 const existingAd = prev?.Ad || {};
                 const existingAds = existingAd?.Ads || [];
-              
+
                 return {
-                  ...prev,
-                  Ad: {
-                    ...existingAd, // ✅ Preserve all existing keys (like Ads)
-                    Ads: existingAds, // ✅ Explicitly reassign Ads to be safe
-                    Website_URL: text,
-                    Caption: text.split('//')[1].split("/")[0],
-                  },
+                    ...prev,
+                    Ad: {
+                        ...existingAd, // ✅ Preserve all existing keys (like Ads)
+                        Ads: existingAds, // ✅ Explicitly reassign Ads to be safe
+                        Website_URL: text,
+                        Caption: text.split('//')[1].split("/")[0],
+                    },
                 };
             });
-              
+
             // setChangedFields((prev) => ({
             //     ...prev,
             //     Website_URL: text, // merge or update the changed fields
@@ -756,25 +756,25 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
             setCaption(text.split('/')[0]);
             form.setFieldsValue({
                 Ad: {
-                  Website_URL: text, // merge or update the changed fields
-                  Caption: text.split('/')[0],
+                    Website_URL: text, // merge or update the changed fields
+                    Caption: text.split('/')[0],
                 },
             });
             setLevelWiseChanges((prev) => {
                 const existingAd = prev?.Ad || {};
                 const existingAds = existingAd?.Ads || [];
-              
+
                 return {
-                  ...prev,
-                  Ad: {
-                    ...existingAd, // ✅ Preserve all existing keys (like Ads)
-                    Ads: existingAds, // ✅ Explicitly reassign Ads to be safe
-                    Website_URL: text,
-                    Caption: text.split('/')[0],
-                  },
+                    ...prev,
+                    Ad: {
+                        ...existingAd, // ✅ Preserve all existing keys (like Ads)
+                        Ads: existingAds, // ✅ Explicitly reassign Ads to be safe
+                        Website_URL: text,
+                        Caption: text.split('/')[0],
+                    },
                 };
             });
-               // Update the levelWiseChanges state
+            // Update the levelWiseChanges state
             // setChangedFields((prev) => ({
             //     ...prev,
             //     Website_URL: text, // merge or update the changed fields
@@ -1003,14 +1003,14 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
 
         setLevelWiseChanges((prev) => {
             const updated = { ...prev };
-        
+
             for (const [level, fields] of Object.entries(changedValues)) {
-              updated[level] = {
-                ...(prev[level] || {}),
-                ...fields,
-              };
+                updated[level] = {
+                    ...(prev[level] || {}),
+                    ...fields,
+                };
             }
-        
+
             console.log("📦 Current level-wise changes:", updated);
             return updated;
         });
@@ -1021,7 +1021,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
         //       { ...fields },
         //     ])
         // );
-      
+
         // console.log(levelWise);
 
         // const groupedByPanel = {};
@@ -1055,7 +1055,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
 
         const uploadFilesSequentially = async (selectedFiles) => {
             const mediaHashArray = [];
-        
+
             for (const file of selectedFiles) {
                 try {
                     const fileType = file.type;
@@ -1063,7 +1063,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                         onError("Unsupported file type");
                         continue;
                     }
-        
+
                     if (file?.url) {
                         if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") || file?.url?.endsWith('.mp4')) {
                             const formData = new FormData();
@@ -1074,29 +1074,29 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     Authorization: localStorage.getItem("token"),
                                 },
                             });
-        
+
                             const uploadFile = await response.blob();
                             if (!(uploadFile instanceof Blob)) {
                                 console.error("The fetched file is not a Blob:", uploadFile);
                                 continue;
                             }
-        
+
                             formData.append("file", uploadFile, file.name);
                             // console.log(formData);
-        
+
                             let fbResponse;
-                            if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") ) {
+                            if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg")) {
                                 formData.append('file', uploadFile, file.name);
                                 formData.append('access_token', token);
                                 const fileName = file.name.split('/').pop();
-        
+
                                 fbResponse = await axios.post(
                                     `https://graph.facebook.com/v20.0/act_${account}/adimages`,
                                     formData,
                                     { headers: { 'Content-Type': 'multipart/form-data' } }
                                 );
-                                
-        
+
+
                                 if (fbResponse.status === 200) {
                                     onSuccess("ok", response);
                                     mediaHashArray.push({
@@ -1114,11 +1114,11 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     formData,
                                     { headers: { 'Content-Type': 'multipart/form-data' } }
                                 );
-        
+
                                 if (fbResponse.status === 200) {
                                     const videoid = fbResponse?.data?.id;
                                     await new Promise(resolve => setTimeout(resolve, 10000));
-        
+
                                     const thumbnailResponse = await axios.get(
                                         `https://graph.facebook.com/v20.0/${videoid}`,
                                         {
@@ -1129,12 +1129,12 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             }
                                         }
                                     );
-        
+
                                     const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
                                     const uri = preferredThumbnail ? preferredThumbnail.uri : "";
                                     // console.log(videoid);
                                     // console.log(uri);
-        
+
                                     onSuccess("ok", fbResponse);
                                     mediaHashArray.push({
                                         filename: file?.url,
@@ -1154,18 +1154,18 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                             const fileId = `${uniqueId}_${file.name}`;
                             const editedImage = editedImages[fileId];
                             const uploadFile = editedImage ? await fetch(editedImage).then(res => res.blob()) : null;
-        
+
                             console.log(file.originFileObj.name);
-        
+
                             if (uploadFile) {
                                 formData.append("file", uploadFile, `blob/${uniqueId}_${file.name}`);
                             } else {
                                 formData.append("file", file.originFileObj, `blob/${uniqueId}_${file.originFileObj.name}`);
                             }
-        
+
                             // console.log(formData);
                             let response, fbResponse;
-        
+
                             if (file.type.startsWith('image/')) {
                                 response = await axios.post(
                                     'https://www.testapi.adsgoat.in/upload',
@@ -1177,16 +1177,16 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                         },
                                     }
                                 );
-        
+
                                 if (!response.data.imageUrl) {
                                     onError("Error: Image URL not returned from custom API");
                                     console.error("Image upload to custom API failed, imageUrl missing");
                                     continue;
                                 }
-        
+
                                 // console.log("Custom API response imageUrl:", response);
                                 formData.append('access_token', token);
-        
+
                                 fbResponse = await axios.post(
                                     `https://graph.facebook.com/v20.0/act_${account}/adimages`,
                                     formData,
@@ -1194,7 +1194,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 );
 
                                 // console.log("Facebook API response:", fbResponse.data);
-        
+
                                 if (response.status === 200 && fbResponse.status === 200) {
                                     onSuccess("ok", response);
                                     mediaHashArray.push({
@@ -1216,25 +1216,25 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                         },
                                     }
                                 );
-        
+
                                 if (response.status !== 200) {
                                     onError("error", response);
                                     console.error("Video upload to custom API failed");
                                     continue;
                                 }
-        
+
                                 formData.append('access_token', token);
-        
+
                                 fbResponse = await axios.post(
                                     `https://graph.facebook.com/v20.0/act_${account}/advideos`,
                                     formData,
                                     { headers: { 'Content-Type': 'multipart/form-data' } }
                                 );
-        
+
                                 if (fbResponse.status === 200) {
                                     const videoid = fbResponse?.data?.id;
                                     await new Promise(resolve => setTimeout(resolve, 10000));
-        
+
                                     const thumbnailResponse = await axios.get(
                                         `https://graph.facebook.com/v20.0/${videoid}`,
                                         {
@@ -1245,10 +1245,10 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             }
                                         }
                                     );
-        
+
                                     const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
                                     const uri = preferredThumbnail ? preferredThumbnail.uri : "";
-        
+
                                     onSuccess("ok", fbResponse);
                                     mediaHashArray.push({
                                         filename: response.data.imageUrl,
@@ -1267,7 +1267,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                     onError("error", error);
                 }
             }
-        
+
             // console.log("All media files uploaded successfully:", mediaHashArray);
             return mediaHashArray;
         };
@@ -1447,18 +1447,18 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                             console.log(fileId, "fileId on Submit");
                             const editedImage = "";
                             const uploadFile = editedImage ? await fetch(editedImage).then(res => res.blob()) : null;
-        
+
                             // console.log(file.originFileObj.name);
-        
+
                             if (uploadFile) {
                                 formData.append("file", uploadFile, `blob/${uniqueId}_${file?.filename.name}`);
                             } else {
                                 formData.append("file", file?.filename.originFileObj, `blob/${uniqueId}_${file?.filename.originFileObj.name}`);
                             }
-        
+
                             // console.log(formData);
                             let response, fbResponse;
-        
+
                             if (file?.filename.type.startsWith('image/')) {
                                 response = await axios.post(
                                     'https://www.testapi.adsgoat.in/upload',
@@ -1470,16 +1470,16 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                         },
                                     }
                                 );
-        
+
                                 if (!response.data.imageUrl) {
                                     // onError("Error: Image URL not returned from custom API");
                                     console.error("Image upload to custom API failed, imageUrl missing");
                                     // continue;
                                 }
-        
+
                                 // console.log("Custom API response imageUrl:", response);
                                 formData.append('access_token', token);
-        
+
                                 fbResponse = await axios.post(
                                     `https://graph.facebook.com/v20.0/act_${accountNumber}/adimages`,
                                     formData,
@@ -1487,10 +1487,10 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 );
 
                                 // console.log("Facebook API response:", fbResponse.data);
-        
+
                                 if (response.status === 200 && fbResponse.status === 200) {
                                     // onSuccess("ok", response);
-                                    return({
+                                    return ({
                                         id: file.id,
                                         AddName: file.AddName,
                                         filename: response.data.imageUrl,
@@ -1511,25 +1511,25 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                         },
                                     }
                                 );
-        
+
                                 if (response.status !== 200) {
                                     // onError("error", response);
                                     console.error("Video upload to custom API failed");
                                     // continue;
                                 }
-        
+
                                 formData.append('access_token', token);
-        
+
                                 fbResponse = await axios.post(
                                     `https://graph.facebook.com/v20.0/act_${accountNumber}/advideos`,
                                     formData,
                                     { headers: { 'Content-Type': 'multipart/form-data' } }
                                 );
-        
+
                                 if (fbResponse.status === 200) {
                                     const videoid = fbResponse?.data?.id;
                                     await new Promise(resolve => setTimeout(resolve, 10000));
-        
+
                                     const thumbnailResponse = await axios.get(
                                         `https://graph.facebook.com/v20.0/${videoid}`,
                                         {
@@ -1540,12 +1540,12 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             }
                                         }
                                     );
-        
+
                                     const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
                                     const uri = preferredThumbnail ? preferredThumbnail.uri : "";
-        
+
                                     // onSuccess("ok", fbResponse);
-                                    return({
+                                    return ({
                                         id: file.id,
                                         AddName: file.AddName,
                                         filename: response.data.imageUrl,
@@ -1558,7 +1558,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 }
                             }
                         }
-                    }else if (file?.filename?.url){
+                    } else if (file?.filename?.url) {
                         if (file?.filename?.url?.endsWith('.png') || file?.filename?.url?.endsWith('.jpg') || file?.filename?.url?.endsWith(".jpeg") || file?.filename?.url?.endsWith('.mp4')) {
                             const formData = new FormData();
                             const response = await fetch(`https://prodapis.adsgoat.in/s3?s3Url=${file?.filename?.url}`, {
@@ -1568,32 +1568,32 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     Authorization: localStorage.getItem("token"),
                                 },
                             });
-        
+
                             const uploadFile = await response.blob();
                             if (!(uploadFile instanceof Blob)) {
                                 console.error("The fetched file is not a Blob:", uploadFile);
                                 // continue;
                             }
-        
+
                             formData.append("file", uploadFile, file?.filename.name);
                             // console.log(formData);
-        
+
                             let fbResponse;
-                            if (file?.filename?.url?.endsWith('.png') || file?.filename?.url?.endsWith('.jpg') || file?.filename?.url?.endsWith(".jpeg") ) {
+                            if (file?.filename?.url?.endsWith('.png') || file?.filename?.url?.endsWith('.jpg') || file?.filename?.url?.endsWith(".jpeg")) {
                                 formData.append('file', uploadFile, file?.filename.name);
                                 formData.append('access_token', token);
                                 const fileName = file?.filename.name.split('/').pop();
-        
+
                                 fbResponse = await axios.post(
                                     `https://graph.facebook.com/v20.0/act_${accountNumber}/adimages`,
                                     formData,
                                     { headers: { 'Content-Type': 'multipart/form-data' } }
                                 );
-                                
-        
+
+
                                 if (fbResponse.status === 200) {
                                     // onSuccess("ok", response);
-                                    return({
+                                    return ({
                                         id: file.id,
                                         AddName: file.AddName,
                                         filename: file?.filename?.url,
@@ -1613,11 +1613,11 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 );
 
                                 console.log("Facebook API response:", fbResponse.data);
-        
+
                                 if (fbResponse.status === 200) {
                                     const videoid = fbResponse?.data?.id;
                                     await new Promise(resolve => setTimeout(resolve, 10000));
-        
+
                                     const thumbnailResponse = await axios.get(
                                         `https://graph.facebook.com/v20.0/${videoid}`,
                                         {
@@ -1628,14 +1628,14 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             }
                                         }
                                     );
-        
+
                                     const preferredThumbnail = thumbnailResponse.data.thumbnails.data.find(thumbnail => thumbnail.is_preferred === true);
                                     const uri = preferredThumbnail ? preferredThumbnail.uri : "";
                                     // console.log(videoid);
                                     // console.log(uri);
-        
+
                                     // onSuccess("ok", fbResponse);
-                                    return({
+                                    return ({
                                         id: file.id,
                                         AddName: file.AddName,
                                         filename: file?.filename?.url,
@@ -1650,24 +1650,24 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                         }
                     }
                     else {
-                        return({
+                        return ({
                             id: file.id,
                             AddName: file.AddName,
                         });
                     }
-                  
-                    
+
+
                 }));
 
                 console.log("Ads Data:", adsData);
-                
+
                 const allLevelData = {
                     id: DuplicatedampaignData?.identifier,
                     Campaign: levelWiseChanges?.Campaign || {},
                     Adset: levelWiseChanges?.Adset || {},
                     Ad: {
-                      ...(levelWiseChanges?.Ad || {}),
-                      Ads: adsData || []
+                        ...(levelWiseChanges?.Ad || {}),
+                        Ads: adsData || []
                     }
                 };
                 console.log("All Level Values:", allLevelData);
@@ -1681,10 +1681,10 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                 const headers = {
                     'Content-Type': 'application/json',
                     Authorization: localStorage.getItem("token"),
-                  };
+                };
                 const updateData = await axios.post('https://www.testapi.adsgoat.in/api/updateCampaignData', payload, { headers });
                 //https://www.testapi.adsgoat.in
-                if(updateData.status === 200){
+                if (updateData.status === 200) {
                     message.success("Campaign updated successfully");
                     changeRRefrst();
                     setLevelWiseChanges({});
@@ -1712,7 +1712,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                 console.error("Error:", error);
                 message.error("An error occurred during the campaign creation process.");
             } finally {
-                setLoading(false); 
+                setLoading(false);
             }
 
         }
@@ -1738,7 +1738,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                         Description: values.Description,
                         Caption: values.Caption,
                         Website_URL: values.Website_URL,
-                        
+
                         // urlParameters: values.urlParameters
                     };
                 } else if (media.videoid) {
@@ -1840,24 +1840,24 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
 
     const handleChange = (info) => {
         const newFiles = info.fileList.map(file => ({
-          ...file,
-          uid: file.uid || `-${Date.now()}`,
-          source: "media",
+            ...file,
+            uid: file.uid || `-${Date.now()}`,
+            source: "media",
         }));
-      
+
         setSelectedFiles(prev => {
-          const existingUids = new Set(prev.map(f => f.uid));
-          const filteredNewFiles = newFiles.filter(f => !existingUids.has(f.uid));
-          return [...prev, ...filteredNewFiles];
+            const existingUids = new Set(prev.map(f => f.uid));
+            const filteredNewFiles = newFiles.filter(f => !existingUids.has(f.uid));
+            return [...prev, ...filteredNewFiles];
         });
-      
+
         // 👇 Update selectedFilesFromMedia — preserve + append
         setSelectedFilesFromMedia(prev => {
-          const existingUids = new Set(prev.map(f => f.uid));
-          const filteredNewFiles = newFiles.filter(f => !existingUids.has(f.uid));
-          return [...prev, ...filteredNewFiles];
+            const existingUids = new Set(prev.map(f => f.uid));
+            const filteredNewFiles = newFiles.filter(f => !existingUids.has(f.uid));
+            return [...prev, ...filteredNewFiles];
         });
-      };
+    };
 
     const currentDate = dayjs();
     console.log(moment(), "currentDate")
@@ -1942,18 +1942,18 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
 
     const selectedFilesData = (data) => {
         console.log("Selected Files Data:", data);
-        setSelectedFiles(prev => [...prev, ...data.map((file, index)=>{
-            return({
-                uid: file.uid || `-${index+1}`,
+        setSelectedFiles(prev => [...prev, ...data.map((file, index) => {
+            return ({
+                uid: file.uid || `-${index + 1}`,
                 name: file?.name,
                 status: 'done',
                 type: `${file?.url?.endsWith(".jpg") || file?.url?.endsWith(".png") || file?.url?.endsWith(".jpeg") ? file?.url?.endsWith(".jpg") ? "image/jpg" : file?.url?.endsWith(".jpeg") ? "image/jpeg" : "image/png" : "video/"}`,
                 url: file?.url,
             })
         })]);
-        setSelectedFilesFromCreatives(prev => [...prev, ...data.map((file, index)=>{
-            return({
-                uid: file.uid || `-${index+1}`,
+        setSelectedFilesFromCreatives(prev => [...prev, ...data.map((file, index) => {
+            return ({
+                uid: file.uid || `-${index + 1}`,
                 name: file?.name,
                 status: 'done',
                 type: `${file?.url?.endsWith(".jpg") || file?.url?.endsWith(".png") || file?.url?.endsWith(".jpeg") ? file?.url?.endsWith(".jpg") ? "image/jpg" : file?.url?.endsWith(".jpeg") ? "image/jpeg" : "image/png" : "video/"}`,
@@ -1961,10 +1961,10 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
             })
         })]);
         setOpenCreativesDrawer(false);
-        
+
         if (data.length > 0) {
             const currentMediaContent = form.getFieldValue("MediaContent") || [];
-        
+
             const newFiles = data.map((file, index) => ({
                 uid: file.uid || `-${index + 1}`,
                 name: file?.name,
@@ -1972,25 +1972,25 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                 type: file?.url?.endsWith(".jpg")
                     ? "image/jpg"
                     : file?.url?.endsWith(".jpeg")
-                    ? "image/jpeg"
-                    : file?.url?.endsWith(".png")
-                    ? "image/png"
-                    : "video/",
+                        ? "image/jpeg"
+                        : file?.url?.endsWith(".png")
+                            ? "image/png"
+                            : "video/",
                 url: file?.url,
             }));
-        
+
             const updatedMediaContent = [...currentMediaContent, ...newFiles];
-        
+
             form.setFieldsValue({ MediaContent: updatedMediaContent });
             form.validateFields(["MediaContent"]);
         }
         if (!activePanelKey || !data || data.length === 0) return;
 
-    // Only take the first file
+        // Only take the first file
         const file = data[0];
 
         const enrichedFile = {
-            uid: file.uid || `-${index+1}`,
+            uid: file.uid || `-${index + 1}`,
             name: file?.name,
             thumbUrl: file.thumbUrl || file.url,
             status: 'done',
@@ -2001,19 +2001,19 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
         const enrichedFiles = [enrichedFile]; // wrap in array
 
         setPanels((prev) =>
-        prev.map((panel) =>
-            panel.key === activePanelKey
-            ? {
-                ...panel,
-                selectedFiles: enrichedFiles,
-                selectedFilesFromCreatives: enrichedFiles,
-                selectedFilesFromMedia: [],
-                }
-            : panel
-        )
+            prev.map((panel) =>
+                panel.key === activePanelKey
+                    ? {
+                        ...panel,
+                        selectedFiles: enrichedFiles,
+                        selectedFilesFromCreatives: enrichedFiles,
+                        selectedFilesFromMedia: [],
+                    }
+                    : panel
+            )
         );
 
-        
+
 
         // ✅ Update form only for this panel
         form.setFieldsValue({ [`MediaContent_${activePanelKey}`]: enrichedFiles });
@@ -2021,9 +2021,9 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
 
         // ✅ Update setLevelWiseChanges
         const currentPanel = panels.find(p => p.key === activePanelKey);
-            const fileData = enrichedFile; // or data[0], your enriched object
+        const fileData = enrichedFile; // or data[0], your enriched object
 
-            setLevelWiseChanges(prev => {
+        setLevelWiseChanges(prev => {
             const newEntry = {
                 id: currentPanel.id,
                 filename: fileData,
@@ -2041,14 +2041,14 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
             return {
                 ...prev,
                 Ad: {
-                ...existingAd,       // ✅ Preserve other keys inside Ad
-                Ads: updatedAds,     // ✅ Update only Ads array
+                    ...existingAd,       // ✅ Preserve other keys inside Ad
+                    Ads: updatedAds,     // ✅ Update only Ads array
                 },
             };
         });
 
-        
-        
+
+
     }
 
     console.log("Selected Files:", selectedFiles);
@@ -2065,7 +2065,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
     const handleRemove = (fileToRemove) => {
         setSelectedFilesFromMedia(prev => prev.filter(file => file.uid !== fileToRemove.uid));
         setSelectedFiles(prev =>
-          prev.filter(file => file.uid !== fileToRemove.uid)
+            prev.filter(file => file.uid !== fileToRemove.uid)
         );
     };
 
@@ -2075,20 +2075,20 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
     return (
         <Drawer
             title={`${DuplicatedampaignData ? DuplicatedampaignData.campaign_name : "Edit Campaign"}`}
-            width="100%"
+            width="95%"
             open={visible}
             onClose={handleDrawerClose}
             style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
         >
-             {loading ? (
+            {loading ? (
                 <div
-                style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    height: '300px',
-                }}
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        height: '300px',
+                    }}
                 >
                     <Spin size="large" />
                     <div style={{ marginTop: 10, fontSize: 16, color: theme === 'dark' ? '#fff' : '#555' }}>Loading...</div>
@@ -2109,7 +2109,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                         },
                                     ]}
                                     style={{ flex: 0.25 }}>
-                                    <Input value={accountNumber} onChange={Accountchange}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
+                                    <Input value={accountNumber} onChange={Accountchange} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                                 </Form.Item>
                                 <Form.Item
                                     name={["Campaign", "Name"]}
@@ -2120,9 +2120,9 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             message: "Please select an option!",
                                         },
                                     ]}
-                                    style={{ flex: 0.25,marginLeft: '1%' }}>
+                                    style={{ flex: 0.25, marginLeft: '1%' }}>
                                     <Input onChange={handleNameChange}
-                                        style={{ width: "100%",}}
+                                        style={{ width: "100%", }}
                                         className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                     />
                                 </Form.Item>
@@ -2140,17 +2140,17 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                         // onChange={getpixelandpageid}
                                         variant="filled"
                                         options={[
-                                            { value: "OUTCOME_LEADS", label: "Leads" },
-                                            { value: "OUTCOME_SALES", label: "Sales" },
-                                            { value: "OUTCOME_ENGAGEMENT", label: "Engagement" },
-                                            { value: "OUTCOME_AWARENESS", label: "Awareness" },
-                                            { value: "OUTCOME_TRAFFIC", label: "Traffic" },
-                                            { value: "OUTCOME_APP_PROMOTION", label: "App promotion" }
+                                            { value: "OUTCOME_LEADS", label: "Leads", title: "" },
+                                            { value: "OUTCOME_SALES", label: "Sales", title: "" },
+                                            { value: "OUTCOME_ENGAGEMENT", label: "Engagement", title: "" },
+                                            { value: "OUTCOME_AWARENESS", label: "Awareness", title: "" },
+                                            { value: "OUTCOME_TRAFFIC", label: "Traffic", title: "" },
+                                            { value: "OUTCOME_APP_PROMOTION", label: "App promotion", title: "" }
 
                                         ]}
                                         disabled={true} // Disable the select field
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2169,15 +2169,15 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                         mode="multiple"
                                         allowClear
                                         options={[
-                                            { value: "HOUSING", label: "Housing" },
-                                            { value: "FINANCIAL_PRODUCTS_SERVICES", label: "Credit" },
-                                            { value: "EMPLOYMENT", label: "Employment" },
-                                            { value: "ISSUES_ELECTIONS_POLITICS", label: "Politics" },
-                                            { value: "NONE", label: "None" }
+                                            { value: "HOUSING", label: "Housing", title: "" },
+                                            { value: "FINANCIAL_PRODUCTS_SERVICES", label: "Credit", title: "" },
+                                            { value: "EMPLOYMENT", label: "Employment", title: "" },
+                                            { value: "ISSUES_ELECTIONS_POLITICS", label: "Politics", title: "" },
+                                            { value: "NONE", label: "None", title: "" }
 
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        className={theme === 'dark' ? 'dark-theme-category' : 'light-theme'}
+                                        className={`${theme === 'dark' ? 'dark-theme-category' : 'light-theme'} green-border-select`}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2193,15 +2193,15 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     <Select
                                         variant="filled"
                                         options={[
-                                            { value: "LOWEST_COST_WITHOUT_CAP", label: "Highest Volume" },
-                                            { value: "LOWEST_COST_WITH_BID_CAP", label: "Bid Cap" },
-                                            { value: "COST_CAP", label: "Cost per Result Goal" },
-                                            { value: "LOWEST_COST_WITH_MIN_ROAS", label: "ROAS Goal" }
+                                            { value: "LOWEST_COST_WITHOUT_CAP", label: "Highest Volume", title: "" },
+                                            { value: "LOWEST_COST_WITH_BID_CAP", label: "Bid Cap", title: "" },
+                                            { value: "COST_CAP", label: "Cost per Result Goal", title: "" },
+                                            { value: "LOWEST_COST_WITH_MIN_ROAS", label: "ROAS Goal", title: "" }
                                         ]}
                                         onChange={handleBidStrategyChange}
                                         disabled={true}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2223,7 +2223,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                 borderRadius: '6px',
                                                 borderColor: adsetLevelDailyBudget !== 0 ? 'transparent' : undefined,
                                                 fontSize: '14px',
-                                                color: '#333',
+                                                color: theme === 'dark' ? '#fff' : '#000',
                                                 // width: '110px',
                                                 flex: 0.2,
                                                 boxSizing: 'border-box'
@@ -2245,11 +2245,11 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     <Select
                                         variant="filled"
                                         options={[
-                                            { value: "ACTIVE", label: "ACTIVE" },
-                                            { value: "PAUSED", label: "PAUSE" },
+                                            { value: "ACTIVE", label: "ACTIVE", title: "" },
+                                            { value: "PAUSED", label: "PAUSE", title: "" },
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                     />
                                 </Form.Item>
                             </div>
@@ -2269,7 +2269,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     ]}
                                     style={{ flex: '1 1 200px' }}
                                 >
-                                    <Input   className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
+                                    <Input className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                                 </Form.Item>
                                 <Form.Item
                                     name={["Adset", "optimization_goal"]}
@@ -2284,14 +2284,14 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 >
                                     <Select
                                         options={[
-                                            { value: "OFFSITE_CONVERSIONS", label: "Conversions" },
-                                            { value: "LINK_CLICKS", label: "Clicks" },
-                                            { value: "REACH", label: "Reach" },
-                                            { value: "VALUE", label: "Value" }
+                                            { value: "OFFSITE_CONVERSIONS", label: "Conversions", title: "" },
+                                            { value: "LINK_CLICKS", label: "Clicks", title: "" },
+                                            { value: "REACH", label: "Reach", title: "" },
+                                            { value: "VALUE", label: "Value", title: "" }
                                         ]}
-                                        disabled={true} 
+                                        disabled={true}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2307,12 +2307,12 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 >
                                     <Select
                                         options={[
-                                            { value: "IMPRESSIONS", label: "Impressions" },
-                                            { value: "VALUE", label: "Value" }
+                                            { value: "IMPRESSIONS", label: "Impressions", title: "" },
+                                            { value: "VALUE", label: "Value", title: "" }
                                         ]}
-                                        disabled={true} 
+                                        disabled={true}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2324,16 +2324,18 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             message: 'Please input!',
                                         },
                                     ]}
-                                    style={{ flex: '1 1 150px' }}
+                                    style={{ flex: '1 1 150px', color: theme === 'dark' ? '#fff' : '#000', }}
                                     initialValue={currentDate}
                                 >
-                                    <DatePicker showTime 
-                                    disabled={true}  dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}
-    //                                 onChange={(value, dateString) => {
-    //     console.log("Local Time:", dateString)
-    //     console.log("UTC ISO:", moment(value).utc().format("YYYY-MM-DDTHH:mm:ssZ"))
-    //   }}
-                                    style={{ width: '100%' }} />
+                                    <DatePicker
+                                         className={`green-border-picker ${theme === 'dark' ? 'custom-datepicker-dark' : 'custom-datepicker-light'}`}
+                                        showTime
+                                        disabled={true} dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : ''}
+                                        //                                 onChange={(value, dateString) => {
+                                        //     console.log("Local Time:", dateString)
+                                        //     console.log("UTC ISO:", moment(value).utc().format("YYYY-MM-DDTHH:mm:ssZ"))
+                                        //   }}
+                                        style={{ width: '100%' }} />
                                 </Form.Item>
                                 <Form.Item
                                     name={["Adset", "action_source"]}
@@ -2348,13 +2350,13 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 >
                                     <Select
                                         options={[
-                                            { value: "website", label: "Website" },
-                                            { value: "email", label: "Email" },
-                                            { value: "app", label: "App" },
-                                            { value: "phone_call", label: "Phone Call" }
+                                            { value: "website", label: "Website", title: "" },
+                                            { value: "email", label: "Email", title: "" },
+                                            { value: "app", label: "App", title: "" },
+                                            { value: "phone_call", label: "Phone Call", title: "" }
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2370,14 +2372,14 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 >
                                     <Select
                                         options={[
-                                            { value: "LEAD", label: "Lead" },
-                                            { value: "PURCHASE", label: "Purchase" },
-                                            { value: "SEARCH", label: "Search" },
-                                            { value: "CONTACT", label: "Contact" },
+                                            { value: "LEAD", label: "Lead", title: "" },
+                                            { value: "PURCHASE", label: "Purchase", title: "" },
+                                            { value: "SEARCH", label: "Search", title: "" },
+                                            { value: "CONTACT", label: "Contact", title: "" },
                                         ]}
-                                        disabled={true} 
+                                        disabled={true}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2392,9 +2394,9 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     ]}
                                     style={{ flex: '1 1 150px' }}
                                 >
-                                    <Input 
-                                    disabled={true}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
-                                    
+                                    <Input
+                                        disabled={true} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
+
                                 </Form.Item>
                                 {/*pk*/}
                                 <Form.Item
@@ -2415,7 +2417,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                 borderRadius: '6px',
                                                 borderColor: campaignLevelDailyBudget !== 0 ? 'transparent' : undefined,
                                                 fontSize: '14px',
-                                                color: '#333',
+                                                color: theme === 'dark' ? '#fff' : '#000',
                                                 width: '200px',
                                                 boxSizing: 'border-box'
                                             }}
@@ -2441,7 +2443,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                         ]}
                                         style={{ flex: '1 1 150px' }}
                                     >
-                                        <Input
+                                        <InputNumber
                                             type="number"
                                             placeholder="$"
                                             onKeyPress={(event) => {
@@ -2452,6 +2454,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                     event.preventDefault();
                                                 }
                                             }}
+                                            style={{color: theme === "dark" ? "#fff" : "#000"}}
                                             className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
                                         />
                                     </Form.Item>
@@ -2472,27 +2475,27 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 >
                                     <Select
                                         options={[
-                                            { value: "US", label: "United States" },
-                                            { value: "GB", label: "United Kingdom" },
-                                            { value: "AU", label: "Australia" },
-                                            { value: "IN", label: "India" },
-                                            { value: "AE", label: "United Arab Emirates" },
-                                            { value: "CA", label: "Canada" },
-                                            { value: "DE", label: "Germany" },
-                                            { value: "FR", label: "France" },
-                                            { value: "JP", label: "Japan" },
-                                            { value: "CN", label: "China" },
-                                            { value: "BR", label: "Brazil" },
-                                            { value: "ZA", label: "South Africa" },
-                                            { value: "RU", label: "Russia" },
-                                            { value: "IT", label: "Italy" },
-                                            { value: "ES", label: "Spain" },
-                                            { value: "SG", label: "Singapore" },
-                                            { value: "NZ", label: "New Zealand" },
-                                            { value: "MX", label: "Mexico" }
+                                            { value: "US", label: "United States", title: "" },
+                                            { value: "GB", label: "United Kingdom", title: "" },
+                                            { value: "AU", label: "Australia", title: "" },
+                                            { value: "IN", label: "India", title: "" },
+                                            { value: "AE", label: "United Arab Emirates", title: "" },
+                                            { value: "CA", label: "Canada", title: "" },
+                                            { value: "DE", label: "Germany", title: "" },
+                                            { value: "FR", label: "France", title: "" },
+                                            { value: "JP", label: "Japan", title: "" },
+                                            { value: "CN", label: "China", title: "" },
+                                            { value: "BR", label: "Brazil", title: "" },
+                                            { value: "ZA", label: "South Africa", title: "" },
+                                            { value: "RU", label: "Russia", title: "" },
+                                            { value: "IT", label: "Italy", title: "" },
+                                            { value: "ES", label: "Spain", title: "" },
+                                            { value: "SG", label: "Singapore", title: "" },
+                                            { value: "NZ", label: "New Zealand", title: "" },
+                                            { value: "MX", label: "Mexico", title: "" }
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2508,13 +2511,13 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 >
                                     <Select
                                         options={[
-                                            { value: "18", label: "18" },
-                                            { value: "25", label: "25" },
-                                            { value: "35", label: "35" },
-                                            { value: "40", label: "40", disabled: true },
+                                            { value: "18", label: "18", title: "" },
+                                            { value: "25", label: "25", title: "" },
+                                            { value: "35", label: "35", title: "" },
+                                            { value: "40", label: "40", disabled: true, title: "" },
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2530,13 +2533,13 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 >
                                     <Select
                                         options={[
-                                            { value: "20", label: "20" },
-                                            { value: "30", label: "30" },
-                                            { value: "65", label: "65+" },
-                                            { value: "80", label: "80", disabled: true },
+                                            { value: "20", label: "20", title: "" },
+                                            { value: "30", label: "30", title: "" },
+                                            { value: "65", label: "65+", title: "" },
+                                            { value: "80", label: "80", disabled: true, title: "" },
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2552,12 +2555,12 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 >
                                     <Select
                                         options={[
-                                            { value: "0", label: "All" },
-                                            { value: "1", label: "Male" },
-                                            { value: "2", label: "Female" },
+                                            { value: "0", label: "All", title: "" },
+                                            { value: "1", label: "Male", title: "" },
+                                            { value: "2", label: "Female", title: "" },
                                         ]}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                     />
                                 </Form.Item>
                                 <Form.Item
@@ -2575,10 +2578,10 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                             option.children.toLowerCase().includes(input.toLowerCase())
                                         }
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                     >
                                         {localesdata.map(option => (
-                                            <Option key={option.key} value={option.key}>
+                                            <Option key={option.key} value={option.key} title={null}>
                                                 {option.name}
                                             </Option>
                                         ))}
@@ -2588,12 +2591,12 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     label={<span style={{ color: "#B4B4B4" }}>Placements</span>}
                                     name={["Adset", "placements"]}
                                     rules={[{ required: true, message: 'Please select a mode!' }]}
-                                   
+
                                 >
-                                    <Select placeholder="Select a mode" onChange={handleModeChange}  disabled={true} 
+                                    <Select placeholder="Select a mode" onChange={handleModeChange} disabled={true}
                                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}>
-                                        <Option value="Advance">Advance</Option>
+                                        className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}>
+                                        <Option value="Advance" >Advance</Option>
                                         <Option value="manual">Manual</Option>
 
                                     </Select>
@@ -2611,9 +2614,9 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                 placeholder="Select Platforms"
                                                 onChange={handlePublisherChange}
                                                 value={selectedPublishers}
-                                                disabled={true} 
+                                                disabled={true}
                                                 dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                                className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                             >
                                                 {publisherOptions.map(option => (
                                                     <Option key={option.value} value={option.value}>
@@ -2633,9 +2636,9 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                 placeholder="Select Positions"
                                                 value={selectedPositions}
                                                 onChange={handlePositionChange}
-                                                disabled={true} 
+                                                disabled={true}
                                                 dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                                className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                             >
                                                 {selectedPublishers.length > 0 && getPositionOptions()?.map(position => (
                                                     <Option key={`${position.key}_${position.label}`} value={position.key}>
@@ -2660,12 +2663,12 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                 allowClear
                                                 placeholder="Please select"
                                                 options={[
-                                                    { value: "mobile", label: "Mobile" },
-                                                    { value: "desktop", label: "Desktop" }
+                                                    { value: "mobile", label: "Mobile", title: "" },
+                                                    { value: "desktop", label: "Desktop", title: "" }
                                                 ]}
-                                                disabled={true} 
+                                                disabled={true}
                                                 dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                                                className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
                                             />
                                         </Form.Item>
                                     </>
@@ -2678,340 +2681,340 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                 <div style={{ flex: "70%", marginRight: "5%" }}>
                                     <div style={{ display: 'flex', gap: '16px' }}>
 
-                                    <Collapse style={{ width: '100%' }}>
-                                        {panels.map((panel) => (
-                                            <Panel header={panel.AddName || "Untitled"} key={panel.key} style={{ width: '100%' }}>
-                                            <div style={{display:'flex'}}>
-                                                <div style={{ display: 'flex', flexDirection: 'column', width:"100%" }}>
-                                                    {/* Ad Name Input */}
-                                                    <Form.Item
-                                                    label={<span style={{ color: "#B4B4B4" }}>Ad name</span>}
-                                                    name={`AddName_${panel.key}`}
-                                                    rules={[{ required: true, message: 'Please enter Ad Name' }]}
-                                                    initialValue={panel.AddName || ""}
-                                                    >
-                                                        <Input
-                                                            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                                                            value={panel.AddName}
-                                                            onChange={(e) => {
-                                                                const newAddName = e.target.value;
-
-                                                                // ✅ Update local panel state
-                                                                updatePanel(panel.key, "AddName", newAddName);
-
-                                                                // ✅ Sync AddName in setLevelWiseChanges
-                                                                setLevelWiseChanges((prev) => {
-                                                                    const existingAd = prev.Ad || {};
-                                                                    const existingAds = existingAd.Ads || [];
-
-                                                                    const adIndex = existingAds.findIndex(ad => ad.id === panel.id);
-                                                                    let updatedAds;
-
-                                                                    if (adIndex >= 0) {
-                                                                        // If ad exists, update it
-                                                                        updatedAds = existingAds.map((ad) =>
-                                                                            ad.id === panel.id ? { ...ad, AddName: newAddName } : ad
-                                                                        );
-                                                                    } else {
-                                                                        // If ad doesn't exist, add it
-                                                                        updatedAds = [...existingAds, { id: panel.id, AddName: newAddName }];
-                                                                    }
-
-                                                                    return {
-                                                                        ...prev,
-                                                                        Ad: {
-                                                                            ...existingAd,
-                                                                            Ads: updatedAds,
-                                                                        },
-                                                                    };
-                                                                });
-                                                            }}
-                                                            placeholder="Enter Ad Name"
-                                                            style={{ width: "30%" }}
-                                                        />
-
-                                                    </Form.Item>
-
-                                                    {/* Select Source Dropdown */}
-                                                    <Form.Item label={<span style={{ color: "#B4B4B4" }}>Select source</span>}>
-                                                    <Select
-                                                        value={panel.selectedOption}
-                                                        onChange={(value) => {
-                                                        updatePanel(panel.key, "selectedOption", value);
-                                                        form.validateFields([`MediaContent_${panel.key}`]);
-                                                        }}
-                                                        style={{ marginBottom: 16, width: "30%" }}
-                                                        disabled={!(panel.selectedFiles.length === 0 && panel.selectedFilesFromCreatives.length === 0 && panel.selectedFilesFromMedia.length === 0)}
-                                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
-                                                        className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
-                                                    >
-                                                        <Option value="upload">Upload</Option>
-                                                        <Option value="creative">Creative library</Option>
-                                                    </Select>
-                                                    </Form.Item>
-
-                                                    {/* File Selection Section with Validation */}
-                                                    <Form.Item
-                                                    name={`MediaContent_${panel.key}`}
-                                                    rules={[
-                                                        {
-                                                        validator: async () => {
-                                                            const current = panels.find(p => p.key === panel.key);
-                                                            if (
-                                                            (current.selectedOption === "upload" && current.selectedFilesFromMedia.length === 0) ||
-                                                            (current.selectedOption === "creative" && current.selectedFilesFromCreatives.length === 0)
-                                                            ) {
-                                                            throw new Error("Please select Upload!");
-                                                            }
-                                                            return Promise.resolve();
-                                                        },
-                                                        },
-                                                    ]}
-                                                    >
-                                                    <div className="custom-dark-mode"  >
-                                                        {/* Upload Section */}
-                                                        {panel.selectedOption === "upload" && (
-                                                            <Upload
-                                                                key={`${panel.key}-${panel.selectedFilesFromMedia.map(f => f.uid).join(",")}`} // force re-render
-                                                                beforeUpload={() => false}
-                                                                multiple
-                                                                maxCount={1} // ensures only one file is accepted at UI level
-                                                                listType="picture"
-                                                                accept="image/*,video/*"
-                                                                fileList={panel.selectedFilesFromMedia}
-                                                                onChange={(info) => {
-                                                                const firstFileRaw = info.fileList[0]; // only take the first file
-                                                                if (!firstFileRaw) return;
-
-                                                                const enrichedFile = {
-                                                                    ...firstFileRaw,
-                                                                    uid: firstFileRaw.uid || `media-${Date.now()}`,
-                                                                    source: "media",
-                                                                    thumbUrl:
-                                                                    firstFileRaw.thumbUrl ||
-                                                                    (firstFileRaw.originFileObj
-                                                                        ? URL.createObjectURL(firstFileRaw.originFileObj)
-                                                                        : undefined),
-                                                                };
-
-                                                                const newFiles = [enrichedFile]; // only the first file in array form
-
-                                                                // ✅ Update state
-                                                                updatePanel(panel.key, "selectedFilesFromMedia", newFiles);
-                                                                updatePanel(panel.key, "selectedFilesFromCreatives", []);
-                                                                updatePanel(panel.key, "selectedFiles", newFiles);
-                                                                // ✅ Update setLevelWiseChanges
-                                                                const fileData = enrichedFile; // based on local upload
-
-                                                                setLevelWiseChanges(prev => {
-                                                                    const newEntry = {
-                                                                    id: panel.id,
-                                                                    filename: enrichedFile,
-                                                                    AddName: panel.AddName,
-                                                                    };
-                                                            
-                                                                    const existingAd = prev.Ad || {};
-                                                                    const existingAds = existingAd.Ads || [];
-                                                            
-                                                                    const updatedAds = [
-                                                                    ...existingAds.filter(item => item.id !== panel.id),
-                                                                    newEntry,
-                                                                    ];
-                                                            
-                                                                    return {
-                                                                    ...prev,
-                                                                    Ad: {
-                                                                        ...existingAd,
-                                                                        Ads: updatedAds,
-                                                                    },
-                                                                    };
-                                                                });
-                                            // }}
-
-                                                                form.setFieldsValue({ [`MediaContent_${panel.key}`]: newFiles });
-                                                                form.validateFields([`MediaContent_${panel.key}`]);
-                                                                }}
-                                                                
-                                                                onRemove={(fileToRemove) => {
-                                                                const filtered = panel.selectedFilesFromMedia.filter(
-                                                                    (f) => f.uid !== fileToRemove.uid
-                                                                );
-
-                                                                updatePanel(panel.key, "selectedFilesFromMedia", filtered);
-                                                                updatePanel(panel.key, "selectedFiles", filtered);
-
-                                                                form.setFieldsValue({ [`MediaContent_${panel.key}`]: filtered });
-                                                                form.validateFields([`MediaContent_${panel.key}`]);
-
-                                                                // ❌ Optionally remove from setLevelWiseChanges if no file remains
-                                                                if (filtered.length === 0) {
-                                                                    setLevelWiseChanges(prev => {
-                                                                    const remaining = (prev?.Ad?.Ads || []).filter(item => item.id !== panel.id);
-                                                                    return {
-                                                                        ...prev,
-                                                                        Ad: {
-                                                                        Ads: remaining,
-                                                                        },
-                                                                    };
-                                                                    });
-                                                                }
-
-                                                                return true;
-                                                                }}
+                                        <Collapse style={{ width: '100%' }}>
+                                            {panels.map((panel) => (
+                                                <Panel header={panel.AddName || "Untitled"} key={panel.key} style={{ width: '100%' }}>
+                                                    <div style={{ display: 'flex' }}>
+                                                        <div style={{ display: 'flex', flexDirection: 'column', width: "100%" }}>
+                                                            {/* Ad Name Input */}
+                                                            <Form.Item
+                                                                label={<span style={{ color: "#B4B4B4" }}>Ad name</span>}
+                                                                name={`AddName_${panel.key}`}
+                                                                rules={[{ required: true, message: 'Please enter Ad Name' }]}
+                                                                initialValue={panel.AddName || ""}
                                                             >
-                                                                <Button
-                                                                icon={<UploadOutlined />}
-                                                                disabled={
-                                                                    !(
-                                                                    panel.selectedFiles.length === 0 &&
-                                                                    panel.selectedFilesFromCreatives.length === 0 &&
-                                                                    panel.selectedFilesFromMedia.length === 0
-                                                                    )
-                                                                }
-                                                                className="dark-icon-button"  style={{color: theme === "dark" ? "white" : "#000"}}
-                                                                >
-                                                                Select files
-                                                                </Button>
-                                                            </Upload>
-                                                        )}
+                                                                <Input
+                                                                    className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+                                                                    value={panel.AddName}
+                                                                    onChange={(e) => {
+                                                                        const newAddName = e.target.value;
 
+                                                                        // ✅ Update local panel state
+                                                                        updatePanel(panel.key, "AddName", newAddName);
 
-                                                        {/* Creative Library Section */}
-                                                        {panel.selectedOption === "creative" && (
-                                                            <div>
-                                                                <Button
-                                                                disabled={
-                                                                    !(
-                                                                    panel.selectedFiles.length === 0 &&
-                                                                    panel.selectedFilesFromCreatives.length === 0 &&
-                                                                    panel.selectedFilesFromMedia.length === 0
-                                                                    )
-                                                                }
-                                                                icon={<UploadOutlined />}
-                                                                onClick={() =>
-                                                                    onClickCreativesDrawer(panel.key)
-                                                                }
-                                                                className="dark-icon-button"  style={{color: theme === "dark" ? "white" : "#000"}}
-                                                                >
-                                                                Select files
-                                                                </Button>
+                                                                        // ✅ Sync AddName in setLevelWiseChanges
+                                                                        setLevelWiseChanges((prev) => {
+                                                                            const existingAd = prev.Ad || {};
+                                                                            const existingAds = existingAd.Ads || [];
 
-                                                                {panel.selectedFilesFromCreatives?.length > 0 && (
-                                                                <div style={{ marginTop: "10px" }}>
-                                                                    {panel.selectedFilesFromCreatives.map((file) => (
-                                                                    <div
-                                                                        key={file.uid}
-                                                                        style={{
-                                                                        display: "flex",
-                                                                        alignItems: "center",
-                                                                        marginBottom: 8,
-                                                                        }}
-                                                                    >
-                                                                        {file.type?.startsWith("image/") && (
-                                                                        <img
-                                                                            src={
-                                                                            file.originFileObj
-                                                                                ? URL.createObjectURL(file.originFileObj)
-                                                                                : file.url
+                                                                            const adIndex = existingAds.findIndex(ad => ad.id === panel.id);
+                                                                            let updatedAds;
+
+                                                                            if (adIndex >= 0) {
+                                                                                // If ad exists, update it
+                                                                                updatedAds = existingAds.map((ad) =>
+                                                                                    ad.id === panel.id ? { ...ad, AddName: newAddName } : ad
+                                                                                );
+                                                                            } else {
+                                                                                // If ad doesn't exist, add it
+                                                                                updatedAds = [...existingAds, { id: panel.id, AddName: newAddName }];
                                                                             }
-                                                                            alt="preview"
-                                                                            style={{
-                                                                            width: 40,
-                                                                            height: 40,
-                                                                            objectFit: "cover",
-                                                                            borderRadius: 4,
-                                                                            marginLeft: 8,
+
+                                                                            return {
+                                                                                ...prev,
+                                                                                Ad: {
+                                                                                    ...existingAd,
+                                                                                    Ads: updatedAds,
+                                                                                },
+                                                                            };
+                                                                        });
+                                                                    }}
+                                                                    placeholder="Enter Ad Name"
+                                                                    style={{ width: "30%" }}
+                                                                />
+
+                                                            </Form.Item>
+
+                                                            {/* Select Source Dropdown */}
+                                                            <Form.Item label={<span style={{ color: "#B4B4B4" }}>Select source</span>}>
+                                                                <Select
+                                                                    value={panel.selectedOption}
+                                                                    onChange={(value) => {
+                                                                        updatePanel(panel.key, "selectedOption", value);
+                                                                        form.validateFields([`MediaContent_${panel.key}`]);
+                                                                    }}
+                                                                    style={{ marginBottom: 16, width: "30%" }}
+                                                                    disabled={!(panel.selectedFiles.length === 0 && panel.selectedFilesFromCreatives.length === 0 && panel.selectedFilesFromMedia.length === 0)}
+                                                                    dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                                                    className={`${theme === 'dark' ? 'dark-theme' : 'light-theme'} green-border-select`}
+                                                                >
+                                                                    <Option value="upload">Upload</Option>
+                                                                    <Option value="creative">Creative library</Option>
+                                                                </Select>
+                                                            </Form.Item>
+
+                                                            {/* File Selection Section with Validation */}
+                                                            <Form.Item
+                                                                name={`MediaContent_${panel.key}`}
+                                                                rules={[
+                                                                    {
+                                                                        validator: async () => {
+                                                                            const current = panels.find(p => p.key === panel.key);
+                                                                            if (
+                                                                                (current.selectedOption === "upload" && current.selectedFilesFromMedia.length === 0) ||
+                                                                                (current.selectedOption === "creative" && current.selectedFilesFromCreatives.length === 0)
+                                                                            ) {
+                                                                                throw new Error("Please select Upload!");
+                                                                            }
+                                                                            return Promise.resolve();
+                                                                        },
+                                                                    },
+                                                                ]}
+                                                            >
+                                                                <div className="custom-dark-mode"  >
+                                                                    {/* Upload Section */}
+                                                                    {panel.selectedOption === "upload" && (
+                                                                        <Upload
+                                                                            key={`${panel.key}-${panel.selectedFilesFromMedia.map(f => f.uid).join(",")}`} // force re-render
+                                                                            beforeUpload={() => false}
+                                                                            multiple
+                                                                            maxCount={1} // ensures only one file is accepted at UI level
+                                                                            listType="picture"
+                                                                            accept="image/*,video/*"
+                                                                            fileList={panel.selectedFilesFromMedia}
+                                                                            onChange={(info) => {
+                                                                                const firstFileRaw = info.fileList[0]; // only take the first file
+                                                                                if (!firstFileRaw) return;
+
+                                                                                const enrichedFile = {
+                                                                                    ...firstFileRaw,
+                                                                                    uid: firstFileRaw.uid || `media-${Date.now()}`,
+                                                                                    source: "media",
+                                                                                    thumbUrl:
+                                                                                        firstFileRaw.thumbUrl ||
+                                                                                        (firstFileRaw.originFileObj
+                                                                                            ? URL.createObjectURL(firstFileRaw.originFileObj)
+                                                                                            : undefined),
+                                                                                };
+
+                                                                                const newFiles = [enrichedFile]; // only the first file in array form
+
+                                                                                // ✅ Update state
+                                                                                updatePanel(panel.key, "selectedFilesFromMedia", newFiles);
+                                                                                updatePanel(panel.key, "selectedFilesFromCreatives", []);
+                                                                                updatePanel(panel.key, "selectedFiles", newFiles);
+                                                                                // ✅ Update setLevelWiseChanges
+                                                                                const fileData = enrichedFile; // based on local upload
+
+                                                                                setLevelWiseChanges(prev => {
+                                                                                    const newEntry = {
+                                                                                        id: panel.id,
+                                                                                        filename: enrichedFile,
+                                                                                        AddName: panel.AddName,
+                                                                                    };
+
+                                                                                    const existingAd = prev.Ad || {};
+                                                                                    const existingAds = existingAd.Ads || [];
+
+                                                                                    const updatedAds = [
+                                                                                        ...existingAds.filter(item => item.id !== panel.id),
+                                                                                        newEntry,
+                                                                                    ];
+
+                                                                                    return {
+                                                                                        ...prev,
+                                                                                        Ad: {
+                                                                                            ...existingAd,
+                                                                                            Ads: updatedAds,
+                                                                                        },
+                                                                                    };
+                                                                                });
+                                                                                // }}
+
+                                                                                form.setFieldsValue({ [`MediaContent_${panel.key}`]: newFiles });
+                                                                                form.validateFields([`MediaContent_${panel.key}`]);
                                                                             }}
-                                                                        />
-                                                                        )}
-                                                                        
-                                                                        <span
-                                                                        style={{
-                                                                            maxWidth: 160,
-                                                                            overflow: "hidden",
-                                                                            textOverflow: "ellipsis",
-                                                                            whiteSpace: "nowrap",
-                                                                            paddingLeft: 8,
-                                                                            color: theme === 'dark' ? '#fff' : '#000',
-                                                                        }}
+
+                                                                            onRemove={(fileToRemove) => {
+                                                                                const filtered = panel.selectedFilesFromMedia.filter(
+                                                                                    (f) => f.uid !== fileToRemove.uid
+                                                                                );
+
+                                                                                updatePanel(panel.key, "selectedFilesFromMedia", filtered);
+                                                                                updatePanel(panel.key, "selectedFiles", filtered);
+
+                                                                                form.setFieldsValue({ [`MediaContent_${panel.key}`]: filtered });
+                                                                                form.validateFields([`MediaContent_${panel.key}`]);
+
+                                                                                // ❌ Optionally remove from setLevelWiseChanges if no file remains
+                                                                                if (filtered.length === 0) {
+                                                                                    setLevelWiseChanges(prev => {
+                                                                                        const remaining = (prev?.Ad?.Ads || []).filter(item => item.id !== panel.id);
+                                                                                        return {
+                                                                                            ...prev,
+                                                                                            Ad: {
+                                                                                                Ads: remaining,
+                                                                                            },
+                                                                                        };
+                                                                                    });
+                                                                                }
+
+                                                                                return true;
+                                                                            }}
                                                                         >
-                                                                        {file.name}
-                                                                        </span>
-                                                                        <DeleteOutlined
-                                                                        onClick={() => {
-                                                                            const current = panels.find((p) => p.key === panel.key);
-                                                                            const updated = current.selectedFilesFromCreatives.filter(
-                                                                            (f) => f.uid !== file.uid
-                                                                            );
+                                                                            <Button
+                                                                                icon={<UploadOutlined />}
+                                                                                disabled={
+                                                                                    !(
+                                                                                        panel.selectedFiles.length === 0 &&
+                                                                                        panel.selectedFilesFromCreatives.length === 0 &&
+                                                                                        panel.selectedFilesFromMedia.length === 0
+                                                                                    )
+                                                                                }
+                                                                                className="dark-icon-button" style={{ color: theme === "dark" ? "white" : "#000" }}
+                                                                            >
+                                                                                Select files
+                                                                            </Button>
+                                                                        </Upload>
+                                                                    )}
 
-                                                                            updatePanel(panel.key, "selectedFilesFromCreatives", updated);
-                                                                            updatePanel(panel.key, "selectedFiles", updated);
 
-                                                                            form.setFieldsValue({
-                                                                            [`MediaContent_${panel.key}`]: updated,
-                                                                            });
-                                                                            form.validateFields([`MediaContent_${panel.key}`]);
-                                                                        }}
-                                                                        style={{ color: "red", marginLeft: 12, cursor: "pointer" }}
-                                                                        />
-                                                                    </div>
-                                                                    ))}
+                                                                    {/* Creative Library Section */}
+                                                                    {panel.selectedOption === "creative" && (
+                                                                        <div>
+                                                                            <Button
+                                                                                disabled={
+                                                                                    !(
+                                                                                        panel.selectedFiles.length === 0 &&
+                                                                                        panel.selectedFilesFromCreatives.length === 0 &&
+                                                                                        panel.selectedFilesFromMedia.length === 0
+                                                                                    )
+                                                                                }
+                                                                                icon={<UploadOutlined />}
+                                                                                onClick={() =>
+                                                                                    onClickCreativesDrawer(panel.key)
+                                                                                }
+                                                                                className="dark-icon-button" style={{ color: theme === "dark" ? "white" : "#000" }}
+                                                                            >
+                                                                                Select files
+                                                                            </Button>
+
+                                                                            {panel.selectedFilesFromCreatives?.length > 0 && (
+                                                                                <div style={{ marginTop: "10px" }}>
+                                                                                    {panel.selectedFilesFromCreatives.map((file) => (
+                                                                                        <div
+                                                                                            key={file.uid}
+                                                                                            style={{
+                                                                                                display: "flex",
+                                                                                                alignItems: "center",
+                                                                                                marginBottom: 8,
+                                                                                            }}
+                                                                                        >
+                                                                                            {file.type?.startsWith("image/") && (
+                                                                                                <img
+                                                                                                    src={
+                                                                                                        file.originFileObj
+                                                                                                            ? URL.createObjectURL(file.originFileObj)
+                                                                                                            : file.url
+                                                                                                    }
+                                                                                                    alt="preview"
+                                                                                                    style={{
+                                                                                                        width: 40,
+                                                                                                        height: 40,
+                                                                                                        objectFit: "cover",
+                                                                                                        borderRadius: 4,
+                                                                                                        marginLeft: 8,
+                                                                                                    }}
+                                                                                                />
+                                                                                            )}
+
+                                                                                            <span
+                                                                                                style={{
+                                                                                                    maxWidth: 160,
+                                                                                                    overflow: "hidden",
+                                                                                                    textOverflow: "ellipsis",
+                                                                                                    whiteSpace: "nowrap",
+                                                                                                    paddingLeft: 8,
+                                                                                                    color: theme === 'dark' ? '#fff' : '#000',
+                                                                                                }}
+                                                                                            >
+                                                                                                {file.name}
+                                                                                            </span>
+                                                                                            <DeleteOutlined
+                                                                                                onClick={() => {
+                                                                                                    const current = panels.find((p) => p.key === panel.key);
+                                                                                                    const updated = current.selectedFilesFromCreatives.filter(
+                                                                                                        (f) => f.uid !== file.uid
+                                                                                                    );
+
+                                                                                                    updatePanel(panel.key, "selectedFilesFromCreatives", updated);
+                                                                                                    updatePanel(panel.key, "selectedFiles", updated);
+
+                                                                                                    form.setFieldsValue({
+                                                                                                        [`MediaContent_${panel.key}`]: updated,
+                                                                                                    });
+                                                                                                    form.validateFields([`MediaContent_${panel.key}`]);
+                                                                                                }}
+                                                                                                style={{ color: "red", marginLeft: 12, cursor: "pointer" }}
+                                                                                            />
+                                                                                        </div>
+                                                                                    ))}
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    )}
+
                                                                 </div>
-                                                                )}
-                                                            </div>
-                                                        )}
-
-                                                    </div>
-                                                    </Form.Item>
-                                                </div>
-                                                <div>
-                                                    {panel.selectedFiles.map((file) => (
+                                                            </Form.Item>
+                                                        </div>
+                                                        <div>
+                                                            {panel.selectedFiles.map((file) => (
                                                                 <div
                                                                     key={file.uid}
                                                                     style={{
-                                                                    display: "flex",
-                                                                    alignItems: "center",
-                                                                    marginBottom: 8,
+                                                                        display: "flex",
+                                                                        alignItems: "center",
+                                                                        marginBottom: 8,
                                                                     }}
                                                                 >
                                                                     {file.type?.startsWith("image/") && (
-                                                                    <img
-                                                                    // style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                                                                        src={
-                                                                        file.originFileObj
-                                                                            ? URL.createObjectURL(file.originFileObj)
-                                                                            : file.url
-                                                                        }
-                                                                        alt="preview"
-                                                                        style={{
-                                                                        maxWidth: '100%', maxHeight: '100%', 
-                                                                        width: 300,
-                                                                        height: 300,
-                                                                        objectFit: "contain",
-                                                                        borderRadius: 4,
-                                                                        marginLeft: 8,
-                                                                        
-                                                                        }}
-                                                                        
-                                                                    />
+                                                                        <img
+                                                                            // style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                                                                            src={
+                                                                                file.originFileObj
+                                                                                    ? URL.createObjectURL(file.originFileObj)
+                                                                                    : file.url
+                                                                            }
+                                                                            alt="preview"
+                                                                            style={{
+                                                                                maxWidth: '100%', maxHeight: '100%',
+                                                                                width: 300,
+                                                                                height: 300,
+                                                                                objectFit: "contain",
+                                                                                borderRadius: 4,
+                                                                                marginLeft: 8,
+
+                                                                            }}
+
+                                                                        />
                                                                     )}
-                                                                    {file.type?.startsWith("video/") && 
-                                                                    (
-                                                                        <video
-                                                                            controls
-                                                                            // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
-                                                                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                                                                        >
-                                                                            <source src={file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url} />
-                                                                            Your browser does not support the video tag.
-                                                                        </video>
-                                                                    )
+                                                                    {file.type?.startsWith("video/") &&
+                                                                        (
+                                                                            <video
+                                                                                controls
+                                                                                // style={{ width: '350px', height: '200px', objectFit: 'cover' }}
+                                                                                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                                                                            >
+                                                                                <source src={file?.originFileObj ? URL.createObjectURL(file.originFileObj) : file?.url} />
+                                                                                Your browser does not support the video tag.
+                                                                            </video>
+                                                                        )
                                                                     }
-                                                                    
-                                                    </div>))}
-                                                </div>
-                                            </div>
-      {/* <div key={index} className="container-ad-preview">
+
+                                                                </div>))}
+                                                        </div>
+                                                    </div>
+                                                    {/* <div key={index} className="container-ad-preview">
                                                         <div className="ad-preview" style={{ width: "350px" }}>
                                                             <div className="ad-heading">
                                                                 <div className="img">
@@ -3145,14 +3148,14 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                                             </div>
                                                         </div>
                                                     </div> */}
-    </Panel>
-  ))}
-                                    </Collapse>
+                                                </Panel>
+                                            ))}
+                                        </Collapse>
 
 
 
 
-                                    {/* <div style={{display:'flex', flexDirection:'column'}}>
+                                        {/* <div style={{display:'flex', flexDirection:'column'}}>
                                         <Form.Item
                                             label={<span style={{ color: "#B4B4B4" }}>Select Source</span>}
                                             style={{ flex: 1 }}
@@ -3319,22 +3322,22 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                         </Form.Item>
                                     </div> */}
 
-                                        
+
                                     </div>
                                     <Form.Item
-                                            name={["Ad", "page_id"]}
-                                            initialValue={imagehash?.pageID}
-                                            label={<span style={{ color: "#B4B4B4" }}>Page id</span>}
-                                            rules={[
-                                                {
-                                                    required: true,
-                                                    message: "Please select an option!",
-                                                },
-                                            ]}
-                                            style={{ flex: 3, marginTop: "1%" }}
-                                             // Disable the input field
+                                        name={["Ad", "page_id"]}
+                                        initialValue={imagehash?.pageID}
+                                        label={<span style={{ color: "#B4B4B4" }}>Page id</span>}
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Please select an option!",
+                                            },
+                                        ]}
+                                        style={{ flex: 3, marginTop: "1%" }}
+                                    // Disable the input field
                                     >
-                                            <Input style={{ width: "15%" }} disabled={true}  className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}/>
+                                        <Input style={{ width: "15%" }} disabled={true} className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                                     </Form.Item>
                                     {/* <Form.Item
                                         name="AddName"
@@ -3746,46 +3749,46 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                     </Form.Item> */}
                     <Form.Item label=" ">
                         {/* {isFormComplete && ( */}
-                            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
                             <Button
                                 type="primary"
-                                style={{ background: '#21c55d', minWidth: '200px', borderWidth: '0px' }}
+                                style={{ background: '#91C25F', minWidth: '200px', borderWidth: '0px', border: '1px solid #4caf50' }}
                                 onClick={async () => {
-                                try {
-                                    const values = await form.validateFields(); // Validates all form fields
+                                    try {
+                                        const values = await form.validateFields(); // Validates all form fields
 
-                                    // Clear existing validation errors
-                                    console.log("hi");
-                                    
-                                    if (((adsetLevelDailyBudget === 0 && campaignLevelDailyBudget === 0) ||
-                                    isNaN(adsetLevelDailyBudget) || isNaN(campaignLevelDailyBudget))) {
-                                        // Throw a validation error manually in the same format as AntD expects
-                                        throw {
-                                          errorFields: [
-                                            {
-                                              name: ['Daily_amount'], 
-                                              errors: ['Daily budget cannot be zero on both Adset and Campaign levels'],
-                                            },
-                                          ],
-                                        };
+                                        // Clear existing validation errors
+                                        console.log("hi");
+
+                                        if (((adsetLevelDailyBudget === 0 && campaignLevelDailyBudget === 0) ||
+                                            isNaN(adsetLevelDailyBudget) || isNaN(campaignLevelDailyBudget))) {
+                                            // Throw a validation error manually in the same format as AntD expects
+                                            throw {
+                                                errorFields: [
+                                                    {
+                                                        name: ['Daily_amount'],
+                                                        errors: ['Daily budget cannot be zero on both Adset and Campaign levels'],
+                                                    },
+                                                ],
+                                            };
+                                        }
+                                        setSubmitErrors([]);
+                                        // Optionally trigger your existing logic
+                                        // onFinish(values); // If you want to reuse your existing logic
+
+                                        // Show confirmation modal
+
+                                        setIsModalVisible(true);
+                                        // Save values if needed
+                                        setFormValues(values);
+                                    } catch (err) {
+                                        const allErrors = err?.errorFields?.map((field) => ({
+                                            name: field.name?.[0],       // field name
+                                            message: field.errors?.[0],  // validation message
+                                        }));
+                                        console.log("Errors:", allErrors);
+                                        setSubmitErrors(allErrors);
                                     }
-                                    setSubmitErrors([]);
-                                    // Optionally trigger your existing logic
-                                    // onFinish(values); // If you want to reuse your existing logic
-
-                                    // Show confirmation modal
-                                    
-                                    setIsModalVisible(true);
-                                    // Save values if needed
-                                    setFormValues(values);
-                                } catch (err) {
-                                    const allErrors = err?.errorFields?.map((field) => ({
-                                    name: field.name?.[0],       // field name
-                                    message: field.errors?.[0],  // validation message
-                                    }));
-                                    console.log("Errors:", allErrors);
-                                    setSubmitErrors(allErrors);
-                                }
                                 }}
                             >
                                 Submit
@@ -3794,24 +3797,24 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                             {/* Show validation messages beside button */}
                             {(submitErrors?.length) > 0 && (
                                 <div style={{ color: "red", marginTop: 8 }}>
-                                {submitErrors.map((err, index) => (
-                                    <div key={index}>
-                                    <strong>{err.name}:</strong> {err.message}
-                                    </div>
-                                ))}
+                                    {submitErrors.map((err, index) => (
+                                        <div key={index}>
+                                            <strong>{err.name}:</strong> {err.message}
+                                        </div>
+                                    ))}
                                 </div>
                             )}
-                            </div>
+                        </div>
                         {/* )} */}
                     </Form.Item>
 
                     {isImgEditorShown && currentFile && (
-                            <FabricCanvas
-                                fileId={currentFile.name} // Pass a unique identifier
-                                initialImage={currentFile?.originFileObj ? URL.createObjectURL(currentFile.originFileObj) : currentFile?.url}
-                                closeCanvasModal={closeCanvasModal}
-                                onSaveEditedImage={handleSaveEditedImage}
-                            />
+                        <FabricCanvas
+                            fileId={currentFile.name} // Pass a unique identifier
+                            initialImage={currentFile?.originFileObj ? URL.createObjectURL(currentFile.originFileObj) : currentFile?.url}
+                            closeCanvasModal={closeCanvasModal}
+                            onSaveEditedImage={handleSaveEditedImage}
+                        />
                     )}
 
                     {/* {isImgEditorShown && currentFile && (
@@ -3833,7 +3836,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                 </Form>
             )}
 
-          
+
             {openCreativesDrawer && (
                 <Drawer
                     title="Select creatives"
