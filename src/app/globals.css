@@ -3443,4 +3443,5 @@ input:focus, select:focus, .custom-input-dark:focus, .custom-input-light:focus, 
   height: 50px !important;
   line-height: 20px !important;
   font-size: 13px; /* optional: match row font */
+  color: #fff !important; /* Change text color  */
 }

@@ -339,7 +339,7 @@ import { useTokenContext } from "../../components/parent";
 
 const { TextArea } = Input;
 
-const Editads = ({ viewCampaignData, changeRRefrst, editdata, onClose }) => {
+const Editads = ({ doubleAdset, viewCampaignData, changeRRefrst, editdata, onClose }) => {
   const [form] = Form.useForm();
   const [selectedFile, setSelectedFile] = useState(null);
   const [addName, setAddName] = useState(editdata?.AddName || '');
@@ -605,8 +605,8 @@ const Editads = ({ viewCampaignData, changeRRefrst, editdata, onClose }) => {
       };
 
       // Send the POST request to your API endpoint
-      const response = await axios.post(
-        'https://www.testapi.adsgoat.in/api/updatededitedadd',
+      const response = await axios.post( //https://www.testapi.adsgoat.in
+        `https://www.testapi.adsgoat.in/api/${doubleAdset ? "newupdatededitedadd" : "updatededitedadd"}`,
         payload, // This is the data (payload) that is being sent in the body
         {
           headers: {
