@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { Table, Tag, Button, Col, Card, Drawer, Dropdown, Flex, Input, Row, Select, Spin, Menu, Space, Modal, message, Switch, Tooltip, ConfigProvider, Skeleton } from 'antd';
+import { Table, Tag, Button, Col, Card, Drawer, Dropdown, Flex, Input, Row, Select, Spin, Menu, Space, Modal, message, Switch, Tooltip, ConfigProvider, Skeleton, Tabs } from 'antd';
 import { EditOutlined, EyeOutlined, SearchOutlined, CloseOutlined, SwapRightOutlined, PlusOutlined, CopyOutlined, CheckCircleFilled, CloseCircleFilled, ExclamationCircleFilled, ReloadOutlined, LinkOutlined, InfoCircleOutlined, DeleteOutlined, DownOutlined, DollarOutlined } from "@ant-design/icons";
 import CreateCampaignDrawer from './camp-components/create_camapaign';
 import CreateDraft from './camp-components/CreateDraft';
@@ -17,9 +17,11 @@ import Editcam from './camp-components/EditCampaign';
 import DuplicateCampaignDrawer from './camp-components/Dupcampaign';
 import { redirect } from 'next/navigation';
 import ExpandedRowContent from './camp-components/expandcreatives';
+import ExpandedAdsetsContent from './camp-components/expandcreativesformultipleadsets';
 import moment from 'moment-timezone';
 import dayjs from 'dayjs';
 import { DatePicker } from 'antd';
+import StickyBox from 'react-sticky-box';
 const { RangePicker } = DatePicker;
 // import { redirect } from 'next/navigation';
 
@@ -82,6 +84,8 @@ const App = () => {
   const [deleteDraftId, setDeleteDraftId] = useState("");
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [selectedDraftToEdit, setSelecetedDraftToEdit] = useState({});
+  const [multipleAdsetCampaignData, setMultipleAdsetCampaignData] = useState([]);
+  const [activeTab, setActiveTab] = useState('1'); 
 
   const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
   console.log(selectedKey, "selectedKeyselectedKeyselectedKey")
@@ -144,6 +148,12 @@ const App = () => {
     return current && current > dayjs().endOf('day');
   };
 
+  
+  const handleTabChange = (key) => {
+    // console.log("Switched to Tab:", key); // Debugging log
+    setActiveTab(key);
+  };
+
 
 
   // Function to handle click on campaign name
@@ -192,6 +202,48 @@ const App = () => {
   //     setselectedEditCampaign(record);
   //     setEditcamapaignDrawerVisible(true);
   // }
+  const items = [
+    { key: '1', label: 'Single', content: 'Content for Live data' },
+    { key: '2', label: 'Multiple', content: 'Content for Daily data' }];
+
+  const handleCarouselChange = (index) => {
+      setActiveTab(index);
+  };
+
+  const renderCarouselNav = () => (
+    <StickyBox offsetTop={64} offsetBottom={20} style={{ zIndex: 1, padding: '0px', marginLeft: '10px', paddingLeft: '12px',
+        borderRadius: 12,
+        backgroundColor: theme === 'dark' ? '#1E1E1E' : '#e6e6e6',
+        padding: 1,
+        boxShadow:
+          theme === 'dark'
+            ? '0 1px 3px rgba(0,0,0,0.6)'
+            : '0 1px 6px rgba(0,0,0,0.08)',}}>
+        
+        <Tabs
+            activeKey={activeTab}
+            onChange={handleCarouselChange}
+            items={items.map((item) => ({
+                key: item.key,
+                label: item.label,
+            }))}
+            className={`custom-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`}
+            style={{
+                backgroundColor:  'transparent',
+                padding: '0',
+                marginBottom: '0',
+            }}
+            tabBarStyle={{
+                fontSize: '12px',
+                padding: '0',
+                height: '30px',
+                lineHeight: '30px',
+                marginBottom: '-1px',
+                borderBottom: 'none',
+            }}
+        />
+    </StickyBox>
+  );
 
 
   const showDrawer = () => {
@@ -283,6 +335,7 @@ const App = () => {
       // Construct URL with optional startDate and endDate
       //https://www.testapi.adsgoat.in
       let url = `https://www.testapi.adsgoat.in/api/getFormData?accountNumber=${accountNumber}&network=${selectedKey}`;
+      
       if (start && end) {
         url += `&startDate=${start}&endDate=${end}`;
       }
@@ -313,6 +366,45 @@ const App = () => {
       setLoading(false);
     }
   };
+
+  const fetchMultipleAdsetCampaigns = async (accountNumber = null, start = startDate, end = endDate, search = "") => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Construct URL with optional startDate and endDate
+      //https://www.testapi.adsgoat.in
+      // let url = `https://www.testapi.adsgoat.in/api/getFormData?accountNumber=${accountNumber}&network=${selectedKey}`;
+      let url = `https://www.testapi.adsgoat.in/api/newGetFormData?accountNumber=${accountNumber}&network=${selectedKey}`;
+      if (start && end) {
+        url += `&startDate=${start}&endDate=${end}`;
+      }
+      if (search) {
+        url += `&searchInput=${search}`; // Append search input if provided
+      }
+      console.log("Fetching data from URL:", url);
+
+      const response = await axios.get(url, {
+        headers: {
+          'Authorization': localStorage.getItem("token"),
+        }
+      });
+      const allCampaigns = response?.data;
+
+      // Filter campaigns based on selected value && accountNumber !== 'All'
+      const filteredCampaignData = accountNumber
+        ? allCampaigns.filter(campaign => campaign.Account_Number === accountNumber)
+        : allCampaigns.filter(campaign => userdetails?.adAccounts[selectedKey]?.includes(campaign.Account_Number));
+
+      setcreatecamselectedacc(accountNumber)
+
+      setMultipleAdsetCampaignData(filteredCampaignData);
+    } catch (error) {
+      console.error("Error fetching campaign data:", error);
+      setError("Failed to fetch campaign data.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const fetchDrafts = async () => {
 
@@ -351,6 +443,7 @@ const App = () => {
 
       if (selectedValue) {
         fetchData(selectedValue, formattedStart, formattedEnd);
+        fetchMultipleAdsetCampaigns(selectedValue, formattedStart, formattedEnd);
       }
     }
   };
@@ -365,6 +458,7 @@ const App = () => {
   const handleValueChange = (value) => {
     setSelectedValue(value);
     fetchData(value); // Fetch data based on selected value
+    fetchMultipleAdsetCampaigns(value); // Fetch multiple adset campaigns based on selected value
   };
 
   useEffect(() => {
@@ -372,6 +466,13 @@ const App = () => {
       fetchData(selectedValue);
     }
   }, [refrst, selectedValue]);
+
+  useEffect(() => {
+    if (selectedValue) {
+      fetchMultipleAdsetCampaigns(selectedValue);
+    }
+  }, [refrst, selectedValue]);
+
   useEffect(() => {
     if (draftsLoading) {
       fetchDrafts();
@@ -380,6 +481,7 @@ const App = () => {
   const handleRefresh = () => {
     if (selectedValue) {
       fetchData(selectedValue);
+      fetchMultipleAdsetCampaigns(selectedValue);
     } // This will re-fetch the data or update the component
   };
   useEffect(() => {
@@ -411,6 +513,7 @@ const App = () => {
     if (!searchValue) {
       setSendInputToApi("");
       fetchData(selectedValue, startDate, endDate, searchValue)
+      fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate, searchValue);
       console.log("Search Input is empty, resetting filtered data");
     }
     // const filtered = campaignData.filter((item) =>
@@ -423,6 +526,7 @@ const App = () => {
   const handleSearchSubmit = () => {
     setSendInputToApi(searchInput);
     fetchData(selectedValue, startDate, endDate, searchInput); // Fetch data with search input
+    fetchMultipleAdsetCampaigns(selectedValue, startDate, endDate, searchInput); // Fetch multiple adset campaigns with search input
     console.log("Search Input:", searchInput);
     console.log("Selected Input:", searchInput.length);
   }
@@ -430,10 +534,52 @@ const App = () => {
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [useaproval, setuseraproval] = useState(null)
+  const [isModalVisibleForAdsets, setIsModalVisibleForAdsets] = useState(false);
+  const [useaprovalForAdsets, setuseraprovalForAdsets] = useState(null)
 
   const handleUpdateApproval = async (id, newApprovalValue) => {
     try {
       const response = await fetch(`https://www.testapi.adsgoat.in/api/updateApproval/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': localStorage.getItem("token"),
+        },
+        body: JSON.stringify({
+          Approval: newApprovalValue,   // New approval value
+          Approved: userdetails?.userName,  // Username of the person who approved it
+          datetime: moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm [IST]') // Current datetime in IST
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+        setCampaignData(prevData =>
+          prevData.map(record =>
+            record.identifier === id ? { ...record, Approval: newApprovalValue } : record
+          )
+        );
+
+        message.success("Approval confirmed");
+        setIsModalVisible(false); // Close modal after updating
+        changeRRefrst();
+        // setTimeout(() => {
+        //     window.location.reload();
+        // }, 2000);
+      } else {
+        console.error('Failed to update approval');
+        // Handle failure
+      }
+    } catch (error) {
+      console.error('Error updating approval:', error);
+      // Handle error
+    }
+  };
+
+  const handleUpdateApprovalForAdsets = async (id, newApprovalValue) => {
+    try {//https://www.testapi.adsgoat.in
+      const response = await fetch(`https://www.testapi.adsgoat.in/api/newupdateApproval/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -477,6 +623,12 @@ const App = () => {
     setIsModalVisible(true);
   };
 
+  const handleApprovalforAdsets = (record) => {
+    console.log(record, "record")
+    setuseraprovalForAdsets(record)
+    setIsModalVisibleForAdsets(true);
+  };
+
   const handleOk = async () => {
 
     try {
@@ -486,6 +638,21 @@ const App = () => {
       console.log('Approval confirmed');
       // Close the modal
       setIsModalVisible(false);
+    } catch (error) {
+      console.error('Error updating approval:', error);
+      // Handle error
+    }
+  };
+
+  const handleOkForAdsets = async () => {
+
+    try {
+      // Call the handleUpdateApproval function with the appropriate parameters
+      await handleUpdateApprovalForAdsets(useaprovalForAdsets.identifier, "Approved");
+      // Log the message to the console
+      console.log('Approval confirmed');
+      // Close the modal
+      setIsModalVisibleForAdsets(false);
     } catch (error) {
       console.error('Error updating approval:', error);
       // Handle error
@@ -606,6 +773,213 @@ const App = () => {
       message.error("Error updating status");
     }
   };
+
+  const onToggleStatusForMultipleAdsets = async (record, checked) => {
+    try {
+      const token = localStorage.getItem("token");
+      console.log('Token:', token);
+
+      // Update status on your backend https://www.testapi.adsgoat.in
+      const backendResponse = await fetch(`https://www.testapi.adsgoat.in/api/newstatus/${record?.identifier}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token,
+        },
+        body: JSON.stringify({ Status: checked ? 'ACTIVE' : 'PAUSED' }),
+      });
+
+      const responseData = await backendResponse.json();
+      setMultipleAdsetCampaignData(prevCampaigns =>
+        prevCampaigns.map(campaign =>
+          campaign.identifier === record.identifier
+            ? { ...campaign, Status: checked ? 'ACTIVE' : 'PAUSED' }
+            : campaign
+        )
+      );
+      console.log('Backend response status:', backendResponse.status);
+      console.log('Backend response data:', responseData);
+
+      if (backendResponse.ok) {
+        // If campaignId is available, update the Facebook campaign status
+        if (record.campaignid) {
+
+          try {
+            const fbResponse = await axios.post(
+              `https://graph.facebook.com/v22.0/${record.campaignid}`,
+              null,
+              {
+                params: {
+                  status: checked ? 'ACTIVE' : 'PAUSED',
+                  access_token: record.access_token,
+                },
+                headers: {
+                  'Content-Type': 'application/json',
+                }
+              }
+            );
+
+            console.log('Facebook API response:', fbResponse.data);
+
+            if (fbResponse.status === 200) {
+              if (fbResponse.data?.success === true) {
+                var mains = "Launched"
+              } else {
+                var mains = "PAUSE"
+              }
+              message.success(`Campaign ${checked ? 'Launched' : 'Paused'} Successfully`);
+
+              // Update the state to reflect the change in UI
+              setCampaignData(prevCampaigns =>
+                prevCampaigns.map(campaign =>
+                  campaign.identifier === record.identifier
+                    ? { ...campaign, Status: checked ? 'ACTIVE' : 'PAUSED' }
+                    : campaign
+                )
+              );
+            } else {
+              console.error('Failed to update facebook status:', fbResponse.data);
+              message.error(`Failed to update facebook status: ${fbResponse.data.error.message}`);
+            }
+          } catch (fbError) {
+            console.error('Error updating facebook status:', fbError);
+            message.error(`Error updating facebook status: ${fbError.response?.data?.error?.message || fbError.message}`);
+          }
+        } else {
+          // If no campaignId is available, only update the backend
+          message.success("Campaign launched successfully");
+
+          // Update the state to reflect the change in UI
+          setCampaignData(prevCampaigns =>
+            prevCampaigns.map(campaign =>
+              campaign.identifier === record.identifier
+                ? { ...campaign, Status: checked ? 'ACTIVE' : 'PAUSED' }
+                : campaign
+            )
+          );
+        }
+      } else {
+        console.error('Failed to update backend status:', responseData);
+        message.error(`Failed to update status: ${responseData.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error updating status:', error);
+      message.error("Error updating status");
+    }
+  };
+  const EditableFieldForMultpleAdsets = ({ value, record, dataIndex, updateTableRow, changeRRefrst }) => {
+    const [editing, setEditing] = useState(false);
+    const [inputValue, setInputValue] = useState(value);
+
+    const handleInputChange = (e) => {
+      setInputValue(e.target.value);
+    };
+
+    const handleEdit = () => {
+      setEditing(true);
+    };
+
+    const handleSave = async () => {
+      if (record && inputValue) {
+        try {
+          const budgets = inputValue * 100; // Convert input value to the required format (cents)
+
+          // Step 1: Update the daily budget in your backend https://www.testapi.adsgoat.in
+          const response = await fetch(`https://www.testapi.adsgoat.in/api/newdailyBudget/${record?.identifier}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': localStorage.getItem("token"),
+            },
+            body: JSON.stringify({ Daily_amount: budgets }),
+          });
+
+          if (response.ok) {
+            console.log("Daily amount updated successfully in backend");
+
+            // Step 2: If campaignId is available, update the budget on Facebook
+            if (record.campaignid) {
+              try {
+                const fbResponse = await axios.post(
+                  `https://graph.facebook.com/v22.0/${record.campaignid}`,
+                  null,
+                  {
+                    params: {
+                      daily_budget: budgets,
+                      access_token: record.access_token,
+                    },
+                    headers: {
+                      'Content-Type': 'application/json',
+                    }
+                  }
+                );
+
+                if (fbResponse.status === 200) {
+                  console.log("Daily budget updated successfully on Facebook");
+                  message.success("Daily amount updated successfully on both backend and Facebook");
+
+                  // Update the table row data with the new daily amount
+                  updateTableRow({ ...record, Daily_amount: budgets });
+
+                  // Trigger a refresh or any other necessary updates
+                  changeRRefrst();
+                } else {
+                  console.error("Failed to update daily amount on Facebook");
+                  // message.error(`Failed to update daily amount on Facebook: ${fbResponse.data.error.message}`);
+                }
+              } catch (fbError) {
+                console.error("Error updating daily amount on Facebook:", fbError);
+                // message.error(`Error updating daily amount on Facebook: ${fbError.response?.data?.error?.message || fbError.message}`);
+              }
+            } else {
+              // If no campaignId, just update the backend
+              message.success("Daily amount updated successfully");
+
+              // Update the table row data with the new daily amount
+              updateTableRow({ ...record, Daily_amount: budgets });
+
+              // Trigger a refresh or any other necessary updates
+              changeRRefrst();
+            }
+          } else {
+            console.error("Failed to update daily amount in backend");
+            message.error("Failed to update daily amount in backend");
+          }
+        } catch (error) {
+          console.error("Error updating daily amount:", error);
+          message.error("Error updating daily amount");
+        }
+      }
+
+      setEditing(false);
+    };
+
+    return (
+      <div>
+        {editing ? (
+          <Input
+            value={inputValue}
+            onChange={handleInputChange}
+            onPressEnter={handleSave}
+            onBlur={handleSave}
+            autoFocus
+            className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
+          />
+        ) : (
+          value !== 0 && value !== '' && (
+            <div onClick={handleEdit} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <DollarOutlined className="custom-dollar-icon" />
+              <span style={{ color: '#1890ff' }}>{value}</span>
+              <span style={{ marginLeft: "5px" }}>Daily</span>
+              {/* <EditOutlined style={{ marginLeft: "5px", cursor: "pointer" }} /> */}
+            </div>
+          )
+        )}
+      </div>
+
+    );
+  };
+  
   const EditableField = ({ value, record, dataIndex, updateTableRow, changeRRefrst }) => {
     const [editing, setEditing] = useState(false);
     const [inputValue, setInputValue] = useState(value);
@@ -721,6 +1095,16 @@ const App = () => {
 
   const updateTablebudget = (updatedRecord) => {
     setCampaignData(prevCampaigns =>
+      prevCampaigns.map(campaign =>
+        campaign.identifier === updatedRecord.identifier
+          ? { ...campaign, Daily_amount: updatedRecord.Daily_amount }
+          : campaign
+      )
+    );
+  };
+
+  const updateTablebudgetforAdsests = (updatedRecord) => {
+    setMultipleAdsetCampaignData(prevCampaigns =>
       prevCampaigns.map(campaign =>
         campaign.identifier === updatedRecord.identifier
           ? { ...campaign, Daily_amount: updatedRecord.Daily_amount }
@@ -913,6 +1297,192 @@ const App = () => {
                   open={isModalVisible}
                   onOk={handleOk}
                   onCancel={() => setIsModalVisible(false)}
+                  className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
+                >
+                  <p>Are you sure you want to approve?</p>
+                </Modal>
+              )}
+            </>
+          )}
+        </>
+      )
+    }
+
+
+
+  ];
+
+  const columnsformultipleadsets = [
+    {
+      title: 'Status',
+      dataIndex: 'fbstatus',
+      key: 'fbstatus',
+      width: 120,
+      align: 'center',
+      render: (text, record) => (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+          {record.fbstatus === 'Live' ? (
+            <CheckCircleFilled style={{ color: 'green', fontSize: 16 }} />
+          ) : (
+            <CloseCircleFilled style={{ color: 'red', fontSize: 16 }} />
+          )}
+          <Tooltip title="Number of adsets">
+            <div style={{backgroundColor:"#e6f7ff", color:'#1d39c4', borderRadius:"50%", width:"20px", height:'20px'}}>{record.adsetCount}</div>
+          </Tooltip>
+          <Switch
+            checked={record.Status === 'ACTIVE'}
+            onChange={(checked) => onToggleStatusForMultipleAdsets(record, checked)}
+            checkedChildren="✓"
+            unCheckedChildren="✗"
+            size="default"
+            style={{ backgroundColor: record.Status === 'ACTIVE' ? '#91C25F' : undefined, minWidth: 40, height: 22 }}
+          />
+        </div>
+      ),
+    },
+    {
+      title: 'Campaign name',
+      dataIndex: 'campaign_name',
+      key: 'campaign_name',
+      width: 320,
+      align: 'center',
+      // render: (text, record) => (
+      //   <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+      //     <span>{text}({record.adsetCount})</span>
+      //   </div>
+      // )
+      // render: (text, record) => (
+      //   <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+      //     <span onClick={() => handleCampaignNameClick(record)}>{text}</span>
+      //     {record.reports && (
+      //       <span style={{ width: 24, height: 24, borderRadius: '50%', backgroundColor: theme === 'dark' ? '#333' : 'white', marginLeft: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      //         <Tooltip title="View Report">
+      //           <LinkOutlined
+      //             style={{ color: 'blue', fontSize: 14 }}
+      //             onClick={(e) => {
+      //               e.stopPropagation();
+      //               window.open(`/LiveHistory/LiveCampaignHistory/${record?.campaign_name}-${record?.Account_Number}-UTC-${newtworkCollections[selectedKey]}`, '_blank', 'noopener,noreferrer');
+      //             }}
+      //           />
+      //         </Tooltip>
+      //       </span>
+      //     )}
+      //   </div>
+      // ),
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      width: 180,
+      align: 'center',
+      render: (text, record) => (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+          <Tooltip title="View details">
+            <Button icon={<EyeOutlined />} onClick={() => handleViewClick(record)} style={{ border: `1px solid ${theme === 'dark' ? '#555' : '#d9d9d9'}`, borderRadius: '6px', padding: '4px 8px', backgroundColor: theme === 'dark' ? '#1e1e1e' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }} />
+          </Tooltip>
+          <Tooltip title="Edit campaign">
+            <Button icon={<EditOutlined />} onClick={() => handleEditClickAllLevelData(record)} style={{ border: `1px solid ${theme === 'dark' ? '#555' : '#d9d9d9'}`, borderRadius: '6px', padding: '4px 8px', backgroundColor: theme === 'dark' ? '#1e1e1e' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }} />
+          </Tooltip>
+          {!restrictedEmails.includes(userdetails.email) && (
+            <Tooltip title="Clone campaign">
+              <Button icon={<CopyOutlined style={{ color: 'red' }} />} onClick={() => duplicatenewcampaign(record)} style={{ border: `1px solid ${theme === 'dark' ? '#555' : '#d9d9d9'}`, borderRadius: '6px', padding: '4px 8px', backgroundColor: theme === 'dark' ? '#1e1e1e' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }} />
+            </Tooltip>
+          )}
+        </div>
+      ),
+    },
+    {
+      title: 'Budget',
+      dataIndex: 'Daily_amount',
+      key: 'Daily_amount',
+      width: 100,
+      align: 'center',
+      render: (Daily_amount, record) => loading ? <Spin /> : record?.Daily_amount !== undefined && (<EditableFieldForMultpleAdsets value={record.Daily_amount / 100} record={record} dataIndex="Daily_amount" updateTableRow={updateTablebudgetforAdsests} />),
+    },
+    {
+      title: 'Account number',
+      dataIndex: 'Account_Number',
+      key: 'Account_Number',
+      width: 160,
+      align: 'center',
+      render: (text, record) => (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div>{record.Account_Number}</div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 2 }}>
+            <Tooltip title="Approved"><span style={{ color: '#4caf50', fontWeight: 'bold', marginRight: 10 }}>{record.approvedCount}</span></Tooltip>
+            <Tooltip title="Rejected"><span style={{ color: 'red', fontWeight: 'bold', marginRight: 10 }}>{record.rejectedCount}</span></Tooltip>
+            <Tooltip title="Pending"><span className="blinking" style={{ color: 'orange', fontWeight: 'bold' }}>{record.pendingCount}</span></Tooltip>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: 'Date',
+      dataIndex: 'createdDate',
+      key: 'createdDate',
+      width: 100,
+      align: 'center',
+    },
+    {
+      title: 'Created by',
+      dataIndex: 'createdby',
+      key: 'createdby',
+      width: 100,
+      align: 'center',
+    },
+    {
+      title: 'Approved',
+      dataIndex: 'Approval',
+      key: 'Approval',
+      width: 100,
+      align: 'center',
+      render: (text, record) => {
+        let color = 'black';
+        let displayText = text;
+        if (text === 'PENDING_APPROVAL') {
+          color = 'red';
+          displayText = 'Pending';
+        } else if (text === 'Approved') {
+          color = 'green';
+        }
+        const approvedBy = record?.Approvedby || 'N/A';
+        return (
+          <div>
+            <span style={{ color }}>{displayText}</span>
+            {text === 'Approved' && <><br /><small style={{ color: 'gray' }}>{approvedBy}</small></>}
+          </div>
+        );
+      },
+    },
+    {
+      title: 'Permission',
+      dataIndex: 'Approval',
+      key: 'permission',
+      width: 120,
+      align: 'center',
+      render: (text, record) => (
+        <>
+          {record.Approval === 'PENDING_APPROVAL' && (
+            <>
+              <Button
+                style={{
+                  backgroundColor: '#91C25F',
+                  color: "#000",
+                  borderColor: '#91C25F',
+                  borderWidth: "0px"
+                }}
+                onClick={() => handleApprovalforAdsets(record)} // This sets useaproval and opens modal
+              >
+                Approve
+              </Button>
+
+              {/* Show Modal only for selected record */}
+              {useaprovalForAdsets?.identifier === record.identifier && (
+                <Modal
+                  title="Confirm approval"
+                  open={isModalVisibleForAdsets}
+                  onOk={handleOkForAdsets}
+                  onCancel={() => setIsModalVisibleForAdsets(false)}
                   className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                 >
                   <p>Are you sure you want to approve?</p>
@@ -1590,6 +2160,10 @@ const App = () => {
         </Row>
       </Card>
 
+      <div>
+      {renderCarouselNav()}
+      </div>
+
 
       {loading ? (
         <Skeleton active paragraph={{ rows: 12 }} style={{ marginTop: '10px' }} />
@@ -1624,6 +2198,16 @@ const App = () => {
         //     }}
 
         // />
+        // <div>
+        //   <div>
+          
+        //   </div>
+          <div>
+          <Tabs activeKey={activeTab} onChange={handleTabChange} 
+        renderTabBar={() => <></>}
+        >
+        <Tabs.TabPane key="1">
+        
         <Table
           style={{
             width: '100%',
@@ -1681,6 +2265,72 @@ const App = () => {
             },
           }}
         />
+        </Tabs.TabPane>
+        <Tabs.TabPane key="2">
+        
+        <Table
+          style={{
+            width: '100%',
+            height: 'calc(100vh - 300px)',
+            // minHeight: '100%',
+            tableLayout: 'fixed',
+
+
+          }}
+          className={`custom-dark-table ${theme === 'dark' ? 'dark-mode-pagination' : 'light-mode-pagination'}`}
+          columns={columnsformultipleadsets}
+          dataSource={multipleAdsetCampaignData.map((item, index) => ({
+            ...item,
+            key: index,
+          })).reverse()}
+          pagination={{ pageSize: paginationSize }}
+          scroll={{
+            x: 'auto',
+            y: 'calc(63vh)',
+          }}
+          expandable={{
+            expandedRowRender: (record) => (
+              <ExpandedAdsetsContent
+                record={record}
+                changeRRefrst={changeRRefrst}
+                network={selectedKey}
+              />
+            ),
+            rowExpandable: (record) => !!record,
+          }}
+          rowClassName={() => 'custom-row'}
+          rowKey="key"
+          components={{
+            body: {
+              row: (props) => (
+                <tr
+                  {...props}
+                  style={{
+                    ...props.style,
+                    height: '32px',
+                  }}
+                />
+              ),
+              cell: (props) => (
+                <td
+                  {...props}
+                  style={{
+                    ...props.style,
+                    paddingTop: '6px',
+                    paddingBottom: '6px',
+                    fontSize: '13px',
+                  }}
+                />
+              ),
+            },
+          }}
+        />
+        </Tabs.TabPane>
+        </Tabs>
+          </div>
+        // </div>
+        
+        
 
 
       )}
