@@ -8,8 +8,15 @@ import Editads from './EditAds';
 import moment from 'moment-timezone';
 import Createnewads from './Createads';
 
-const AdsetCard = ({ adset, index, imagehash, restrictedEmails, userdetails }) => {
+const AdsetCard = ({ adset, index, imagehash, restrictedEmails, userdetails, changeRRefrst, viewCampaignData }) => {
     const [expanded, setExpanded] = useState(false);
+    const [isRejectModalVisible, setIsRejectModalVisible] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [currentItem, setCurrentItem] = useState(null);
+    const [rejectionReason, setRejectionReason] = useState("");
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [isDrawerVisible, setIsDrawerVisible] = useState(false);
+    const token = localStorage.getItem("token");
 
     const isVideo = (filename) => {
         const videoExtensions = ['.mp4', '.mov', '.avi', '.webm'];
@@ -22,6 +29,82 @@ const AdsetCard = ({ adset, index, imagehash, restrictedEmails, userdetails }) =
     };
 
     const isMediaBuyer = userdetails.role === 'MEDIA_BUYER' || userdetails.role === "Special_User";
+
+    const handleEditClick = (item) => {
+        setSelectedItem(item); // Set the item to be edited
+        setIsDrawerVisible(true); // Open the drawer
+    };
+
+    const handleApprove = async (item) => {
+        console.log("item in handle approve", item, "userdetails", userdetails)
+        setLoading(true);
+        try {//https://www.testapi.adsgoat.in
+            const response = await axios.post(
+                'https://www.testapi.adsgoat.in/api/newapproveAds',
+                {
+                    id: item.id,
+                    Approved: userdetails.userName, // Assuming userdetails has a name property
+                    datetime: moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm [IST]')
+                },
+                {
+                    headers: {
+                        Authorization: token,
+                    },
+                }
+            );
+            if (response.status === 200) {
+                console.log('Approved');
+                changeRRefrst && changeRRefrst();
+            }
+        } catch (error) {
+            console.error("Error approving ad:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
+    const handleRejectClick = (item) => {
+        setCurrentItem(item);
+        setIsRejectModalVisible(true);
+    };
+
+    const handleCancelReject = () => {
+        setIsRejectModalVisible(false);
+        setRejectionReason("");
+    };
+
+    const handleConfirmReject = async () => {
+        setLoading(true);
+        try {//https://www.testapi.adsgoat.in
+            const response = await axios.post(
+                'https://www.testapi.adsgoat.in/api/newrejectAds',
+                {
+                    id: currentItem.id,
+                    reason: rejectionReason,
+                },
+                {
+                    headers: {
+                        Authorization: token,
+                    },
+                }
+            );
+            if (response.status === 200) {
+                console.log('Rejected:', currentItem.id);
+                changeRRefrst && changeRRefrst();
+            }
+        } catch (error) {
+            console.error("Error rejecting ad:", error);
+        } finally {
+            setLoading(false);
+            setIsRejectModalVisible(false); // Close the modal
+            setRejectionReason(""); // Reset the rejection reason input
+        }
+    };
+
+    const approvedCount = adset.addlevel.filter((item) => item.status === "Approved").length;
+    const rejectedCount = adset.addlevel.filter((item) => item.status === "Rejected").length;
+    const pendingCount = adset.addlevel.filter((item) => !item.status).length;
   
     return (
       <Card
@@ -41,7 +124,12 @@ const AdsetCard = ({ adset, index, imagehash, restrictedEmails, userdetails }) =
             <div onClick={() => setExpanded(!expanded)} style={{ fontSize: 12 }}>
                     {expanded ? <MinusSquareOutlined /> : <PlusSquareOutlined />}
             </div>
-            <div style={{marginLeft:'5px'}}>{adset.AdsetName || `Adset ${index + 1}`}</div>
+            <div style={{marginLeft:'5px'}}>{adset.AdsetName || `Adset ${index + 1}`} </div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginLeft: "10px" }}>
+            <Tooltip title="Approved"><span style={{ color: '#4caf50', fontWeight: 'bold', marginRight: 10 }}>{approvedCount}</span></Tooltip>
+            <Tooltip title="Rejected"><span style={{ color: 'red', fontWeight: 'bold', marginRight: 10 }}>{rejectedCount}</span></Tooltip>
+            <Tooltip title="Pending"><span className="blinking" style={{ color: 'orange', fontWeight: 'bold' }}>{pendingCount}</span></Tooltip>
+          </div>
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
             <Tooltip title="View">
@@ -80,7 +168,7 @@ const AdsetCard = ({ adset, index, imagehash, restrictedEmails, userdetails }) =
   
         {/* Conditional Detail Section */}
         {expanded && adset.addlevel && (
-            <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+            <Row gutter={[16, 16]} style={{ marginTop: 16, display:'flex', flexWrap:"nowrap", overflow:"auto" }}>
                 {adset.addlevel.map((item, index) => (
                         // <div key={index} style={{display:'flex', width:"100%", marginTop:'10px', flexWrap:"wrap"}}>
                         <Col span={12}>
@@ -276,6 +364,37 @@ const AdsetCard = ({ adset, index, imagehash, restrictedEmails, userdetails }) =
                 ))}
             </Row>
         )}
+        <Modal
+                title="Reject ad"
+                visible={isRejectModalVisible}
+                onOk={handleConfirmReject}
+                onCancel={handleCancelReject}
+                okButtonProps={{ danger: true }}
+                confirmLoading={loading}
+            >
+                <Input.TextArea
+                    placeholder="Enter rejection reason"
+                    value={rejectionReason}
+                    onChange={(e) => setRejectionReason(e.target.value)}
+                    rows={4}
+                />
+            </Modal>
+            <Drawer
+                title="Edit ad"
+                width={"100%"}
+                onClose={() => {
+                    setIsDrawerVisible(false);   // Close the drawer
+                    setSelectedItem(null);       // Reset the selected item to avoid showing old data
+                }}
+                visible={isDrawerVisible}
+                bodyStyle={{ paddingBottom: 80 }}
+                style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}
+            >
+                {selectedItem && <Editads doubleAdset={true} editdata={selectedItem} viewCampaignData={viewCampaignData} changeRRefrst={changeRRefrst} onClose={() => {
+                    setIsDrawerVisible(false);   // Close the drawer
+                    setSelectedItem(null);       // Reset the selected item to avoid showing old data
+                }} />} {/* Pass selected item data to the Editads component */}
+            </Drawer>
       </Card>
     );
   };
@@ -343,7 +462,7 @@ const ExpandedAdsetsContent = ({ record, changeRRefrst, network}) => {
             try {
                 if (record) { //https://www.testapi.adsgoat.in
                     const response = await axios.get(
-                        `http://localhost:4500/api/newviecampaigndata/${record.identifier}`,
+                        `https://www.testapi.adsgoat.in/api/newviecampaigndata/${record.identifier}`,
                         {
                             headers: {
                                 Authorization: token,
@@ -463,7 +582,7 @@ const ExpandedAdsetsContent = ({ record, changeRRefrst, network}) => {
       .filter(([key]) => key.startsWith('adsetlevel_'))
       .map(([key, adset], index) => (
         <Col key={key} span={12}>
-          <AdsetCard adset={adset} index={index} imagehash={imagehash} restrictedEmails={restrictedEmails} userdetails={userdetails} />
+          <AdsetCard adset={adset} index={index} imagehash={imagehash} restrictedEmails={restrictedEmails} userdetails={userdetails} changeRRefrst={changeRRefrst} viewCampaignData={viewCampaignData} />
         </Col>
       ))}
                 {/* {!restrictedEmails.includes(userdetails.email) && (

@@ -4056,7 +4056,7 @@ const removeAdset = (index, adsetid) => {
             if(campaignData) {
                 // console.log("Campaign Data:", campaignData);
                 //https://www.testapi.adsgoat.in
-                const response = await fetch('https://www.testapi.adsgoat.in/api/submitFormData', {
+                const response = await fetch('https://www.testapi.adsgoat.in/api/newsubmitFormData', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -5149,7 +5149,7 @@ const removeAdset = (index, adsetid) => {
                     </Select>
                 </div>
             }
-            width="95%"
+            width="100%"
             open={visible}
             onClose={handleDrawerClose}
             style={{ backgroundColor: theme === 'dark' ? '#333' : '#fff', color: theme === 'dark' ? '#fff' : '#000' }}

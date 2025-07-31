@@ -374,7 +374,7 @@ const App = () => {
       // Construct URL with optional startDate and endDate
       //https://www.testapi.adsgoat.in
       // let url = `https://www.testapi.adsgoat.in/api/getFormData?accountNumber=${accountNumber}&network=${selectedKey}`;
-      let url = `http://localhost:4500/api/newGetFormData?accountNumber=${accountNumber}&network=${selectedKey}`;
+      let url = `https://www.testapi.adsgoat.in/api/newGetFormData?accountNumber=${accountNumber}&network=${selectedKey}`;
       if (start && end) {
         url += `&startDate=${start}&endDate=${end}`;
       }
@@ -579,7 +579,7 @@ const App = () => {
 
   const handleUpdateApprovalForAdsets = async (id, newApprovalValue) => {
     try {//https://www.testapi.adsgoat.in
-      const response = await fetch(`http://localhost:4500/api/newupdateApproval/${id}`, {
+      const response = await fetch(`https://www.testapi.adsgoat.in/api/newupdateApproval/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -780,7 +780,7 @@ const App = () => {
       console.log('Token:', token);
 
       // Update status on your backend https://www.testapi.adsgoat.in
-      const backendResponse = await fetch(`http://localhost:4500/api/newstatus/${record?.identifier}`, {
+      const backendResponse = await fetch(`https://www.testapi.adsgoat.in/api/newstatus/${record?.identifier}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -885,7 +885,7 @@ const App = () => {
           const budgets = inputValue * 100; // Convert input value to the required format (cents)
 
           // Step 1: Update the daily budget in your backend https://www.testapi.adsgoat.in
-          const response = await fetch(`http://localhost:4500/api/newdailyBudget/${record?.identifier}`, {
+          const response = await fetch(`https://www.testapi.adsgoat.in/api/newdailyBudget/${record?.identifier}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -1326,6 +1326,9 @@ const App = () => {
           ) : (
             <CloseCircleFilled style={{ color: 'red', fontSize: 16 }} />
           )}
+          <Tooltip title="Number of adsets">
+            <div style={{backgroundColor:"#e6f7ff", color:'#1d39c4', borderRadius:"50%", width:"20px", height:'20px'}}>{record.adsetCount}</div>
+          </Tooltip>
           <Switch
             checked={record.Status === 'ACTIVE'}
             onChange={(checked) => onToggleStatusForMultipleAdsets(record, checked)}
@@ -1343,6 +1346,11 @@ const App = () => {
       key: 'campaign_name',
       width: 320,
       align: 'center',
+      // render: (text, record) => (
+      //   <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+      //     <span>{text}({record.adsetCount})</span>
+      //   </div>
+      // )
       // render: (text, record) => (
       //   <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
       //     <span onClick={() => handleCampaignNameClick(record)}>{text}</span>
