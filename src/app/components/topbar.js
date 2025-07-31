@@ -260,42 +260,49 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                 }}
               >
                 {label}
-                <Badge count={count} style={{ backgroundColor: color, color: darkMode ? '#000' : '#fff',border:'#EC7117' }} />
+                <Badge count={count} style={{ backgroundColor: color, color: darkMode ? '#000' : '#fff', border: '#EC7117' }} />
               </div>
 
+              {/* {expandedIndex === index &&
+                notifications[label]?.map((item, subIdx) => ( */}
               {expandedIndex === index &&
-                notifications[label]?.map((item, subIdx) => (
-                  <div
-                    key={`sub-${index}-${subIdx}`}
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      padding: '12px 16px',
-                      marginBottom: '10px',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                      color: darkMode ? '#fff' : '#444',
-                      minHeight: '80px',
-                    }}
-                  >
+                [...notifications[label]]
+                  .sort((a, b) =>
+                    moment(b.date, 'DD-MM-YYYY hh:mm A').valueOf() -
+                    moment(a.date, 'DD-MM-YYYY hh:mm A').valueOf()
+                  )
+                  .map((item, subIdx) => (
+                    <div
+                      key={`sub-${index}-${subIdx}`}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        padding: '12px 16px',
+                        marginBottom: '10px',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        color: darkMode ? '#fff' : '#444',
+                        minHeight: '80px',
+                      }}
+                    >
 
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', fontSize: '12px', }}>
-                      <span style={{ fontSize: '12px' }}>{item.date}</span>
-                      <CloseOutlined
-                        style={{ marginLeft: 8, cursor: 'pointer', color: '#999', fontSize: '12px' }}
-                        onClick={(e) => {
-                          onClickNotificationView(item, label, userdetails?.email);
-                          e.stopPropagation();
-                          const updated = { ...notifications };
-                          updated[label] = updated[label].filter((_, i) => i !== subIdx);
-                          setNotifications(updated);
-                        }}
-                      />
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', fontSize: '12px', }}>
+                        <span style={{ fontSize: '12px' }}>{item.date}</span>
+                        <CloseOutlined
+                          style={{ marginLeft: 8, cursor: 'pointer', color: '#999', fontSize: '12px' }}
+                          onClick={(e) => {
+                            onClickNotificationView(item, label, userdetails?.email);
+                            e.stopPropagation();
+                            const updated = { ...notifications };
+                            updated[label] = updated[label].filter((_, i) => i !== subIdx);
+                            setNotifications(updated);
+                          }}
+                        />
 
-                    </div>
+                      </div>
 
-                    {/* <span>{item.message}</span> */}
-                    {/* <Popconfirm
+                      {/* <span>{item.message}</span> */}
+                      {/* <Popconfirm
             title="Delete Notification"
             description="Are you sure to delete this task?"
             onConfirm={confirm}
@@ -305,19 +312,20 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
           >
             <Eye style={{ fontSize: 12, color: darkMode ? '#fff' : '#888' }} onClick={()=> {console.log(item, label)}} />
           </Popconfirm> */}
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                      }}
-                    >
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                        }}
+                      >
 
-                      <div style={{ fontSize: '12px', flex: 1, marginRight: '10px' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                          <div style={{ fontWeight: 'bold', fontSize: '16px', color: darkMode ? '#fff' : '#333' }}>{item.title}</div>
-                          <div style={{ fontSize: '14px', color: darkMode ? '#fff' : '#333' }}>{item.message}</div>
-                          {/* {item.imageUrl?.includes('.mp4') ? (
+                        <div style={{ fontSize: '12px', flex: 1, marginRight: '10px' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <div style={{ fontWeight: 'bold', fontSize: '16px', color: darkMode ? '#fff' : '#333' }}>{item.title}</div>
+
+                            <div style={{ fontSize: '14px', color: darkMode ? '#fff' : '#333' }}>{item.message}</div>
+                            {/* {item.imageUrl?.includes('.mp4') ? (
                             <video
                               controls
                               src={item.imageUrl}
@@ -330,41 +338,41 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                               style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: '8px' }}
                             />
                           )} */}
-                          {item.imageUrl && ( // check if imageUrl exists before rendering
-                            item.imageUrl.includes('.mp4') ? (
-                              <video
-                                controls
-                                src={item.imageUrl}
-                                style={{
-                                  width: '100%',
-                                  height: '200px',
-                                  objectFit: 'cover',
-                                  borderRadius: '8px',
-                                }}
-                              />
-                            ) : (
-                              <img
-                                src={item.imageUrl}
-                                alt="Notification"
-                                style={{
-                                  width: '100%',
-                                  height: '200px',
-                                  objectFit: 'cover',
-                                  borderRadius: '8px',
-                                }}
-                              />
-                            )
-                          )}
-                        </div>
+                            {item.imageUrl && ( // check if imageUrl exists before rendering
+                              item.imageUrl.includes('.mp4') ? (
+                                <video
+                                  controls
+                                  src={item.imageUrl}
+                                  style={{
+                                    width: '100%',
+                                    height: '200px',
+                                    objectFit: 'cover',
+                                    borderRadius: '8px',
+                                  }}
+                                />
+                              ) : (
+                                <img
+                                  src={item.imageUrl}
+                                  alt="Notification"
+                                  style={{
+                                    width: '100%',
+                                    height: '200px',
+                                    objectFit: 'cover',
+                                    borderRadius: '8px',
+                                  }}
+                                />
+                              )
+                            )}
+                          </div>
 
-                        <Divider
-                          style={{
-                            margin: '3px 0',
-                            borderColor: darkMode ? '#808080' : '#ccc',
-                          }}
-                        />
-                      </div>
-                      {/* <Eye
+                          <Divider
+                            style={{
+                              margin: '3px 0',
+                              borderColor: darkMode ? '#808080' : '#ccc',
+                            }}
+                          />
+                        </div>
+                        {/* <Eye
                         style={{
                           fontSize: '14px',
                           cursor: 'pointer',
@@ -375,15 +383,15 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                           onClickNotificationView(item, label, userdetails?.email);
                         }}
                       /> */}
+                      </div>
                     </div>
-                  </div>
 
-                  /* <span>{item.date}</span>
-                  <Eye style={{ fontSize: 12, color: darkMode ? '#fff' : '#888' }} onClick={() => { onClickNotificationView(item, label, userdetails?.email) }} />
-                </div> */
+                    /* <span>{item.date}</span>
+                    <Eye style={{ fontSize: 12, color: darkMode ? '#fff' : '#888' }} onClick={() => { onClickNotificationView(item, label, userdetails?.email) }} />
+                  </div> */
 
 
-                ))}
+                  ))}
             </div>
           ))}
         </div>
@@ -2062,7 +2070,7 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
                 </Form.Item>
 
                 <div style={{ textAlign: 'right', marginBottom: '15px' }}>
-                  <a style={{ color: '#4CAF50', fontSize: '12px',cursor: 'text', }}>
+                  <a style={{ color: '#4CAF50', fontSize: '12px', cursor: 'text', }}>
                     Forgot password?
                   </a>
                 </div>
@@ -2076,12 +2084,12 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
                       borderColor: '#4CAF50',
                       height: '36px',
                       fontWeight: 'bold',
-                    //  cursor: 'not-allowed',
-                      transition: 'none', 
-                      pointerEvents: 'none', 
-                      
+                      //  cursor: 'not-allowed',
+                      transition: 'none',
+                      pointerEvents: 'none',
+
                     }}
-                   
+
                   >
                     Sign In
                   </Button>

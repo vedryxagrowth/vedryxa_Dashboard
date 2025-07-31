@@ -13,6 +13,7 @@ import { BellFilled, EyeOutlined, GoogleOutlined, LockOutlined, PlusOutlined, Us
 import { Bell, Edit3Icon, Moon, Sun } from 'lucide-react';
 import { getSession } from 'next-auth/react';
 import debounce from 'lodash.debounce';
+import { PiSignIn } from "react-icons/pi";
 
 
 const TopBar1 = () => {
@@ -173,9 +174,9 @@ const TopBar1 = () => {
       <div style={{height:'100vh'}}>
         <div
             style={{
-            backgroundColor: darkMode ? '#333' : '#fff',
+            backgroundColor: darkMode ? '#333' : '#edfaf3',
             paddingRight: '20px',
-            margin: '10px',
+            // margin: '5px',
             display: 'flex',
             justifyContent: "space-between",
             alignItems: 'center',
@@ -184,12 +185,12 @@ const TopBar1 = () => {
         {/* Show logo only if the user is NOT authenticated */}
             <div>
                 <Image
-                src={darkMode ? "/4.png" : "/RR1.png"}
-                width={150}
-                height={60}
+                src={darkMode ? "/4.png" : "/logolight.png"}
+                width={180}
+                height={70}
                 priority={true}
                 alt="Logo"
-                style={{ margin: "0px 20px", objectFit: "cover" }}
+                style={{ margin: "5px 20px", objectFit: "cover" }}
                 />
             </div>
     
@@ -321,11 +322,13 @@ const TopBar1 = () => {
                 <Avatar
                     size="large"
                     style={{
-                    background: darkMode ? '#333' : '#ebebeb',
+                    background: darkMode ? '#333' : '#e2dfdfff',
                     fontSize: '1.8em',
                     transition: 'background 0.3s ease',
                     }}
-                />
+                >
+                  {/* <PiSignIn style={{fontSize:'20px',color:'#000'}}/> */}
+                </Avatar>
                 </Dropdown>
             )}
     
@@ -365,18 +368,19 @@ const TopBar1 = () => {
             </Modal>
             
         </div>
-        <div style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'hidden' }}>
+        <div style={{ position: 'relative', width: '100%', height: '84vh', overflow: 'hidden',backgroundColor:'#edfaf3'}}>
           <img
             style={{
-              width: '100%',
-              height: 'auto',
-              maxHeight: '90vh',
+              width: '60%',
+              height: '100%',
+              maxHeight: '85vh',
+              marginLeft:'50px'
             }}
-            src="/hope.png"
+            src="/robot.png"
             alt="img"
           />
-          <div style={{ position: 'absolute', top: 10, right: 4, zIndex: 2, border: "2px dotted green", padding: "1%" }}>
-            <h3>You are not Authorized {session.user.email}`</h3>
+          <div style={{ position: 'absolute', top: -30, right: 5, zIndex: 2, padding: "1%" }}>
+            <h3 style={{fontSize:'14px',color:'red'}}>You are not Authorized {session.user.email}</h3>
             <ContactForm />
           </div>
         </div>

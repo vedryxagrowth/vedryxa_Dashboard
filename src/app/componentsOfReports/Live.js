@@ -4,8 +4,8 @@ import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
 import React from 'react';
 import moment from 'moment-timezone';
-import {  Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Tabs, Dropdown, Menu } from 'antd';
-import {  InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, CloseOutlined, FolderOutlined, AppstoreOutlined, FileSearchOutlined, SettingOutlined, FileTextOutlined, FilterOutlined, DownOutlined, OpenAIOutlined, RobotOutlined } from '@ant-design/icons';
+import { Input, Button, Row, Col, Typography, Result, Modal, message, Switch, Tabs, Dropdown, Menu } from 'antd';
+import { InfoCircleOutlined, DownloadOutlined, SmileOutlined, CopyOutlined, EditOutlined, MessageOutlined, PauseCircleOutlined, CheckCircleOutlined, QuestionCircleOutlined, CloseOutlined, FolderOutlined, AppstoreOutlined, FileSearchOutlined, SettingOutlined, FileTextOutlined, FilterOutlined, DownOutlined, OpenAIOutlined, RobotOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import { Space } from 'antd';
 import StickyBox from 'react-sticky-box';
@@ -65,11 +65,11 @@ const selectTimezone = {
     CEST: 'CESTDate'
 };
 
-const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCallForCommnets, context, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle }) => {
+const LiveReports = ({ handleChangeInput, handleBlur, onClickRefresh, functionCallForCommnets, context, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle }) => {
     console.log(columnDefs, "columnDefs");
     console.log("hello world");
-    const {theme} = useTokenContext();
-    const {apiClient} = useTokenContext();
+    const { theme } = useTokenContext();
+    const { apiClient } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
     const getRowStyleTheme = theme === 'dark' ? { backgroundColor: '#1e1e1f', color: '#ffffff' } : { backgroundColor: '#ffffff', color: '#000000' };
     const [rowData, setRowData] = useState([]);
@@ -79,7 +79,7 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
     const [isLoading, setLoading] = useState(true);
 
     const [apiStatus, setApiStatus] = useState(false);
-    
+
     // const [inputValue, setInputValue] = useState('');
 
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -108,7 +108,7 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
     const newRowData = useRef();
 
     const oneTimeFetch = useRef(true);
-    
+
     const [selectedCampaigns, setSelectedCampaigns] = useState([]);
 
     const [selectedAdsets, setSelectedAdsets] = useState([]);
@@ -118,7 +118,29 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
     const [removeSelectedCampaigns, setRemoveSelectedCampaigns] = useState("");
 
     const [removeSelectedAdsets, setRemoveSelectedAdsets] = useState("");
+    //Active pause
+    const [campaignStatusFilter, setCampaignStatusFilter] = useState('ALL');
 
+    const handleStatusFilterChange = (key) => {
+        if (key === 'active') {
+            setCampaignStatusFilter('ACTIVE');
+        } else if (key === 'pause') {
+            setCampaignStatusFilter('PAUSED');
+        } else if (key === 'all') {
+            setCampaignStatusFilter('ALL');
+        }
+    };
+
+    const campaignStatusLabels = React.useMemo(() => {
+        switch ((campaignStatusFilter || 'ALL').toUpperCase()) {
+            case 'ACTIVE':
+                return 'Active';
+            case 'PAUSED':
+                return 'Paused';
+            default:
+                return 'All';
+        }
+    }, [campaignStatusFilter]);
     const memorizedColumnDef = useMemo(() => columnDefs, [columnDefs]);
     const memorizedColumnDef1 = useMemo(() => columnDefs1, [columnDefs2]);
     const memorizedColumnDef2 = useMemo(() => columnDefs1, [columnDefs2]);
@@ -133,7 +155,7 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
     }
     ) : [], [rowData, inputValue, theme]);
 
-    useEffect(()=>{
+    useEffect(() => {
         setLiveFixedFooter([
             {
                 campaignName: 'Total',
@@ -157,12 +179,12 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
                 ctr: parseFloat((memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
             }
         ])
-    },[memorizedRowData]);
+    }, [memorizedRowData]);
 
     const onBtExport1 = () => {
-        console.log(gridRef.current.api,"in")
+        console.log(gridRef.current.api, "in")
         const Details = {
-            network : newRevenuePratner,
+            network: newRevenuePratner,
             account: newaccount,
             dateRange: `From ${startDate} to ${endDate}`,
             type: "Live",
@@ -181,7 +203,7 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
                 return params.node.group;
             },
         });
-        const updateDetails = async()=>{
+        const updateDetails = async () => {
             await apiClient.post('/UserExportActivities/', { Details });
         }
         updateDetails();
@@ -194,7 +216,7 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
         console.log(data, "CampaignLeveldata");
     }
 
-    
+
 
     const showAdsetLevel = (data) => {
         setSelectedAdsets(data);
@@ -208,7 +230,7 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
         setTimeout(() => {
             setRemoveSelectedCampaigns("Remove");
         }
-        , 100);
+            , 100);
     }
 
     const onClickRemoveSelectedAdsets = () => {
@@ -218,7 +240,7 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
         setTimeout(() => {
             setRemoveSelectedAdsets("Remove");
         }
-        , 100);
+            , 100);
     }
 
     const onClickRemoveSelectedAds = () => {
@@ -280,7 +302,7 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
 
                 if (params.node.group && Array.isArray(params.node.childrenAfterGroup) && params.node.childrenAfterGroup.length > 0) {
                     const firstChild = params.node.childrenAfterGroup[0]?.data;  // Safe access with optional chaining
-                
+
                     if (firstChild) {  // Ensure firstChild is not undefined before accessing properties
                         campaignid = firstChild.campaignid ?? null;  // Use null-safe access
                         adsetid = firstChild.adsetid ?? null;
@@ -371,23 +393,23 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
                             campaignid: campaignid,
                         };
                         // console.log(payload);
-                
+
                         // Call the backend API to delete the comment
                         const response = await apiClient.post('/Comments/delete', payload);
-                
-                        if (response.status === 200  || response.status === 201) {
+
+                        if (response.status === 200 || response.status === 201) {
                             // Remove the comment from the local state
                             // const updatedComments = campaignComments.filter(
                             //     (comment) => comment.campaignname !== firstColumnValue
                             // );
                             refreshComments(newaccount);
-                
+
                             // // Update the state with the updated comments
                             // setCampaignComments(updatedComments);
-                
+
                             // // Refresh the table or any other UI component
                             // // changeRRefrst();
-                
+
                             message.success('Comment deleted successfully!');
                             setIsModalVisibles(false); // Close the popup
                         } else {
@@ -398,7 +420,7 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
                         message.error('Failed to delete the comment. Please try again.');
                     }
                 };
-                
+
 
                 const sendEditedCommentToAPI = async (logData) => {
                     try {
@@ -477,7 +499,7 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
                                 userPin: userdetails?.email,
                                 comment: comment || ''
                             });
-                            if(response.status ===200 || response.status === 201){
+                            if (response.status === 200 || response.status === 201) {
                                 refreshComments(newaccount);
                             }
 
@@ -489,7 +511,7 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
                                 campaignid: campaignid,
                                 adsetid: adsetid
                             });
-                            if(response.status ===200 || response.status === 201){
+                            if (response.status === 200 || response.status === 201) {
                                 refreshComments(newaccount);
                             }
 
@@ -570,7 +592,7 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
                                     if (status === 'PAUSED') {
                                         return (
                                             <Tooltip title={tooltipContent}>
-                                                <PauseCircleOutlined style={{ color: 'orange', fontSize: '18px' }}  className='black-icon-pause' />
+                                                <PauseCircleOutlined style={{ color: 'orange', fontSize: '18px' }} className='black-icon-pause' />
                                             </Tooltip>
                                         );
                                     } else if (status === 'ACTIVE') {
@@ -644,7 +666,7 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
                             </span>
                         </Tooltip>
                         <Modal
-                             title={
+                            title={
                                 firstColumnValue
                             }
                             className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
@@ -653,30 +675,30 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
                             onCancel={handleCancels} // Default Cancel button functionality
                             footer={[
                                 <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
-                                    <div style={{display:'flex', flexDirection:"column"}}>
-                                        <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                    <div style={{ display: 'flex', flexDirection: "column" }}>
+                                        <span key="info" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight: "bold" }}>
                                             Last Edited Time:
                                         </span>
-                                        <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight:"bold" }}>
+                                        <span key="info1" style={{ marginRight: "auto", fontSize: "14px", color: theme === "dark" ? "white" : "black", fontWeight: "bold" }}>
                                             {editUserANdTime ? moment(editUserANdTime?.editedTime, "YYYY-MM-DD hh:mm:ss A").format("DD-MM-YYYY hh:mm:ss A") : ""}
                                         </span>
 
                                     </div>
                                     <div>
-                                    <Button
-                                        key="delete"
-                                        type="danger"
-                                        onClick={handleDelete}
-                                        style={{ marginRight: 'auto', border: "1px solid black" }} // Push Delete button to the far left
-                                    >
-                                        Delete
-                                    </Button>
-                                    <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
-                                        Cancel
-                                    </Button>
-                                    <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#91C25F"}}>
-                                        Ok
-                                    </Button>
+                                        <Button
+                                            key="delete"
+                                            type="danger"
+                                            onClick={handleDelete}
+                                            style={{ marginRight: 'auto', border: "1px solid black" }} // Push Delete button to the far left
+                                        >
+                                            Delete
+                                        </Button>
+                                        <Button key="cancel" onClick={handleCancels} style={{ marginLeft: "4px" }}>
+                                            Cancel
+                                        </Button>
+                                        <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#91C25F" }}>
+                                            Ok
+                                        </Button>
                                     </div>
                                 </div>
                             ]}
@@ -685,7 +707,7 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
                                 placeholder="Enter your comments here"
                                 value={comment}
                                 onChange={(e) => setComment(e.target.value)}
-                                style={{color: theme === "dark" ? "white" : "black"}}
+                                style={{ color: theme === "dark" ? "white" : "black" }}
                             />
                         </Modal>
                     </div>
@@ -695,12 +717,12 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
         processCellForClipboard: (params) => {
             if (params.node.group) {
                 console.log("Processing group column for copy..."); // Debugging log
-    
+
                 // ✅ Fix: Ensure `params.node.parent` exists before accessing its properties
                 if (!params.node.parent || !params.node.parent.childrenAfterGroup) {
                     return params.node.key;
                 }
-    
+
                 // ✅ Only copy group name for the first row in the group
                 return params.node.rowIndex === params.node.parent.childrenAfterGroup[0]?.rowIndex
                     ? params.node.key
@@ -728,13 +750,13 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
         return hours.length > 0 ? Math.max(...hours) : null;
     }
     const functionCall1 = async () => {
-       try{
-        // console.log(newRevenuePratner);
+        try {
+            // console.log(newRevenuePratner);
             setLoading(true);
             const collectionName = newRevenuePratner === "FB_DomainActive" ? "Facebook_DActive_Names" : newtworkCollections[newRevenuePratner];
             const fetchData = await apiClient.get(`/Live?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${collectionName}`);
             const mainData1 = fetchData.data;
-            const mainData =  mainData1.filter(obj => !("ad_clicks" in obj));
+            const mainData = mainData1.filter(obj => !("ad_clicks" in obj));
             const specifiedTimeZone = selectTimezone[newtime];
             const filteredData = mainData && mainData.length > 0 ?
                 mainData.map((eachData) => {
@@ -772,7 +794,7 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
                     const relatedComment = campaignComments.find(comment => comment.campaignname === eachData.campaign_name);
                     const fbLClicks = parseInt(eachData.fbLinkClicks, 10);
                     const spend = parseFloat(eachData.spend);
-                    const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0 ? 0 : Math.round((spend / fbLClicks)*100)/100;
+                    const cpcLinkClicks = isNaN(fbLClicks) || fbLClicks === 0 ? 0 : Math.round((spend / fbLClicks) * 100) / 100;
                     return (
 
                         {
@@ -813,7 +835,7 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
 
             const getFbValue = mainData.filter(item => item.fbCron !== null && item.fbCron !== 'Failed');
             const getRevenueValue = mainData.filter(item => item.revenueCron !== null && item.revenueCron !== 'Failed');
-            
+
 
             if (mainData.length > 1) {
                 timezone.current = mainData[0].accountTimezone;
@@ -851,16 +873,16 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
             ]);
             setRowData(filteredData);
             newRowData.current = filteredData;
-            fetchData.status === 200 && console.log("Success") ;
-            fetchData.status === 200 && setApiStatus(false) ;
+            fetchData.status === 200 && console.log("Success");
+            fetchData.status === 200 && setApiStatus(false);
             // setInitialRowData(filteredData);
             // setTrue(false);
             setLoading(false);
-       }
-       catch(error){
+        }
+        catch (error) {
             setApiStatus(true);
             setLoading(false);
-       }
+        }
     };
     const defaultColDef = {
         comparator: (valueA, valueB) => {
@@ -891,32 +913,32 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
     };
     // const onGridReady = (params, gridId) => {
     //     gridRef.current = params;
-    
+
     //     params.api.applyColumnState({ 
     //         state: columnDefs || [], 
     //         applyOrder: true 
     //     });
     // };
-    
+
     // // Use useEffect to track changes in toggleStatus
     // useEffect(() => {
     //     if (!gridRef.current) return; // Ensure gridRef exists
-    
+
     //     const gridApi = gridRef.current.api;
-    
+
     //     const handleDragStopped = (e) => debouncedHandleColumnMove(e, 'grid1');
-    
+
     //     if (toggleStatus) {
     //         gridApi.addEventListener('dragStopped', handleDragStopped);
     //     } else {
     //         gridApi.removeEventListener('dragStopped', handleDragStopped);
     //     }
-    
+
     //     return () => {
     //         gridApi.removeEventListener('dragStopped', handleDragStopped);
     //     };
     // }, [toggleStatus]);
-    
+
     const onGridReady = (params, gridId, gridRef) => {
         gridRef.current = params;
         params.api.applyColumnState({ state: columnDefs, applyOrder: true });
@@ -1077,7 +1099,7 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
     const gridOptions = useMemo(() => ({
         onColumnMoved: (params) => {
             // if (toggleStatus) {
-                debouncedHandleColumnMove(params, 'grid1');
+            debouncedHandleColumnMove(params, 'grid1');
             // }
         },
         defaultColDef: {
@@ -1090,7 +1112,7 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
     document.addEventListener("DOMContentLoaded", function () {
         const gridDiv = document.getElementById("myGrid");
         new agGrid.Grid(gridDiv, gridOptions);
-      
+
         // Set column definitions separately after grid initialization
         gridOptions.api.setColumnDefs(columnDefs);
     });
@@ -1129,16 +1151,16 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
     // const onRangeSelectionChanged = (params) => {
     //     const selected = [];
     //     const rangeSelections = params.api.getCellRanges();
-    
+
     //     if (rangeSelections) {
     //         rangeSelections.forEach((range) => {
     //             const startRow = Math.min(range.startRow.rowIndex, range.endRow.rowIndex);
     //             const endRow = Math.max(range.startRow.rowIndex, range.endRow.rowIndex);
     //             const columns = range.columns.map((col) => col.getColId());
-    
+
     //             for (let rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
     //                 const node = params.api.getDisplayedRowAtIndex(rowIndex);
-    
+
     //                 if (!node.group && node.data) { // ✅ Ensures only data rows are selected
     //                     if (!firstSelectedCell) {
     //                         setFirstSelectedCell({ rowIndex, colId: columns[0] }); // ✅ Ensure first cell is recorded
@@ -1148,22 +1170,22 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
     //             }
     //         });
     //     }
-    
+
     //     setSelectedCells(selected);
     // };
 
-    
+
     const onCellKeyDown = (params) => {
         if (params.event.ctrlKey && params.event.key === "c") {
             params.event.preventDefault(); // Prevent default copy behavior
-    
+
             // ✅ Prepare data to copy: Rows separated by \n, Columns by \t
             const copiedText = selectedCells
                 .map(({ rowIndex, columns }) =>
                     columns.map((colId) => params.api.getValue(colId, params.api.getDisplayedRowAtIndex(rowIndex))).join("\t")
                 )
                 .join("\n"); // Each row on a new line
-    
+
             navigator.clipboard.writeText(copiedText);
             params.api.copySelectedRangeToClipboard(); // ✅ Restore AG Grid blinking effect
         }
@@ -1186,7 +1208,7 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
         // console.log(parseInt(index)-1);
         // carouselRef.current.goTo(parseInt(index))
         localStorage.setItem("LiveActiveTab", index);
-        
+
     };
 
     // const carouselItems = useMemo(() => {
@@ -1256,115 +1278,115 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
     // ]);
     const carouselItems = useMemo(() => {
         const baseTabStyle = {
-          display: 'flex',
-          alignItems: 'center',
-          gap: 4,
-          padding: '6px 12px',
-          fontWeight: 600,
-          fontSize: 13,
-          borderRadius: '6px 6px 0 0',
-          cursor: 'pointer',
-          transition: 'all 0.2s ease-in-out',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4,
+            padding: '6px 12px',
+            fontWeight: 600,
+            fontSize: 13,
+            borderRadius: '6px 6px 0 0',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease-in-out',
         };
-      
+
         const getTabStyle = (isActive) => ({
-          ...baseTabStyle,
-          backgroundColor: isActive ? (theme === 'dark' ? '#1e1e1e' : '#fff') : (theme === 'dark' ? '#2a2a2a' : '#f0f2f5'),
-          color: isActive ? (theme === 'dark' ? '#fff' : '#000') : (theme === 'dark' ? '#aaa' : '#6b7280'),
-          boxShadow: isActive ? '0 0 0 1px #91C25F inset' : 'none',
-          fontWeight: isActive ? 'normal' : 'bold', 
+            ...baseTabStyle,
+            backgroundColor: isActive ? (theme === 'dark' ? '#1e1e1e' : '#fff') : (theme === 'dark' ? '#2a2a2a' : '#f0f2f5'),
+            color: isActive ? (theme === 'dark' ? '#fff' : '#000') : (theme === 'dark' ? '#aaa' : '#6b7280'),
+            boxShadow: isActive ? '0 0 0 1px #91C25F inset' : 'none',
+            fontWeight: isActive ? 'normal' : 'bold',
         });
-      
+
         return [
-          {
-            key: '1',
-            label: (
-              <div style={getTabStyle(activeTab === '1')}>
-                <FolderOutlined />
-                <span style={{ marginLeft: 4 }}>Campaigns</span>
-                {selectedCampaigns.length > 0 && (
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onClickRemoveSelectedCampaigns();
-                    }}
-                    icon={<CloseOutlined style={{ fontSize: 10 }} />}
-                    size="small"
-                    type="text"
-                    style={{
-                      marginLeft: 6,
-                      fontSize: 11,
-                      height: 5,
-                      color: theme === 'dark' ? '#fff' : '#000',
-                    }}
-                  >
-                    {selectedCampaigns.length}
-                  </Button>
-                )}
-              </div>
-            ),
-            content: <div>{`Content for Campaign data (${selectedCampaigns.length} selected)`}</div>,
-          },
-          {
-            key: '2',
-            label: (
-              <div style={getTabStyle(activeTab === '2')}>
-                <AppstoreOutlined />
-                <span style={{ marginLeft: 4 }}>Ad sets</span>
-                {selectedAdsets.length > 0 && (
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onClickRemoveSelectedAdsets();
-                    }}
-                    icon={<CloseOutlined style={{ fontSize: 10 }} />}
-                    size="small"
-                    type="text"
-                    style={{
-                      marginLeft: 6,
-                      fontSize: 11,
-                      height: 5,
-                      color: theme === 'dark' ? '#fff' : '#000',
-                    }}
-                  >
-                    {selectedAdsets.length}
-                  </Button>
-                )}
-              </div>
-            ),
-            content: <div>{`Content for Adset data (${selectedAdsets.length} selected)`}</div>,
-          },
-          {
-            key: '3',
-            label: (
-              <div style={getTabStyle(activeTab === '3')}>
-                <FileSearchOutlined />
-                <span style={{ marginLeft: 4 }}>Ads</span>
-                {selectedAds.length > 0 && (
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onClickRemoveSelectedAds();
-                    }}
-                    icon={<CloseOutlined style={{ fontSize: 10 }} />}
-                    size="small"
-                    type="text"
-                    style={{
-                      marginLeft: 6,
-                      fontSize: 11,
-                      height: 5,
-                      color: theme === 'dark' ? '#fff' : '#000',
-                    }}
-                  >
-                    {selectedAds.length}
-                  </Button>
-                )}
-              </div>
-            ),
-            content: <div>{`Content for Ad data (${selectedAds.length} selected)`}</div>,
-          },
+            {
+                key: '1',
+                label: (
+                    <div style={getTabStyle(activeTab === '1')}>
+                        <FolderOutlined />
+                        <span style={{ marginLeft: 4 }}>Campaigns</span>
+                        {selectedCampaigns.length > 0 && (
+                            <Button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onClickRemoveSelectedCampaigns();
+                                }}
+                                icon={<CloseOutlined style={{ fontSize: 10 }} />}
+                                size="small"
+                                type="text"
+                                style={{
+                                    marginLeft: 6,
+                                    fontSize: 11,
+                                    height: 5,
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                }}
+                            >
+                                {selectedCampaigns.length}
+                            </Button>
+                        )}
+                    </div>
+                ),
+                content: <div>{`Content for Campaign data (${selectedCampaigns.length} selected)`}</div>,
+            },
+            {
+                key: '2',
+                label: (
+                    <div style={getTabStyle(activeTab === '2')}>
+                        <AppstoreOutlined />
+                        <span style={{ marginLeft: 4 }}>Ad sets</span>
+                        {selectedAdsets.length > 0 && (
+                            <Button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onClickRemoveSelectedAdsets();
+                                }}
+                                icon={<CloseOutlined style={{ fontSize: 10 }} />}
+                                size="small"
+                                type="text"
+                                style={{
+                                    marginLeft: 6,
+                                    fontSize: 11,
+                                    height: 5,
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                }}
+                            >
+                                {selectedAdsets.length}
+                            </Button>
+                        )}
+                    </div>
+                ),
+                content: <div>{`Content for Adset data (${selectedAdsets.length} selected)`}</div>,
+            },
+            {
+                key: '3',
+                label: (
+                    <div style={getTabStyle(activeTab === '3')}>
+                        <FileSearchOutlined />
+                        <span style={{ marginLeft: 4 }}>Ads</span>
+                        {selectedAds.length > 0 && (
+                            <Button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onClickRemoveSelectedAds();
+                                }}
+                                icon={<CloseOutlined style={{ fontSize: 10 }} />}
+                                size="small"
+                                type="text"
+                                style={{
+                                    marginLeft: 6,
+                                    fontSize: 11,
+                                    height: 5,
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                }}
+                            >
+                                {selectedAds.length}
+                            </Button>
+                        )}
+                    </div>
+                ),
+                content: <div>{`Content for Ad data (${selectedAds.length} selected)`}</div>,
+            },
         ];
-      }, [
+    }, [
         activeTab,
         selectedCampaigns,
         selectedAdsets,
@@ -1373,41 +1395,43 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
         onClickRemoveSelectedAdsets,
         onClickRemoveSelectedAds,
         theme,
-      ]);
-      
-      
-      const renderCarouselNav = () => (
-        <StickyBox offsetTop={64} offsetBottom={20} style={{  padding: '4px 5px' }}>
-          <Row align="middle" justify="space-between" wrap={false}>
-          <Col flex="auto">
-              <Tabs
-                activeKey={activeTab}
-                onChange={(key) => {
-                  setActiveTab(key);
-                  localStorage.setItem('LiveActiveTab', key);
-                }}
-                items={carouselItems}
-                tabBarStyle={{
-                  display: 'flex',
-                  gap: '1px',
-                  borderBottom: 'none',
-                  marginBottom: 0,
-                  padding: 0,
-                }}
-                
-                size="small"
-              />
-              
-            </Col>
-      
-            <Col>
-                <SearchFilters
-                    theme={theme}
-                    handleChangeInput={handleChangeInput}
-                    handleBlur={handleBlur}
-                    onClickRefresh={onClickRefresh}
-                />
-              {/* <Space size={2}>
+    ]);
+
+
+    const renderCarouselNav = () => (
+        <StickyBox offsetTop={64} offsetBottom={20} style={{ padding: '4px 5px' }}>
+            <Row align="middle" justify="space-between" wrap={false}>
+                <Col flex="auto">
+                    <Tabs
+                        activeKey={activeTab}
+                        onChange={(key) => {
+                            setActiveTab(key);
+                            localStorage.setItem('LiveActiveTab', key);
+                        }}
+                        items={carouselItems}
+                        tabBarStyle={{
+                            display: 'flex',
+                            gap: '1px',
+                            borderBottom: 'none',
+                            marginBottom: 0,
+                            padding: 0,
+                        }}
+
+                        size="small"
+                    />
+
+                </Col>
+
+                <Col>
+                    <SearchFilters
+                        theme={theme}
+                        handleChangeInput={handleChangeInput}
+                        handleBlur={handleBlur}
+                        onClickRefresh={onClickRefresh}
+                        onStatusFilterChange={handleStatusFilterChange}
+                        campaignStatusLabel={campaignStatusLabels}
+                    />
+                    {/* <Space size={2}>
                 <Input
                   placeholder="Search campaigns..."
                   prefix={<SearchOutlined />}
@@ -1487,16 +1511,10 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
                 </Button>
                 </Tooltip>
               </Space> */}
-            </Col> 
-          </Row>
+                </Col>
+            </Row>
         </StickyBox>
-      );
-      
-      
-      
-
-
-    
+    );
     // return(
     //                 <div style={{ height: "100%", marginBottom: '20px',overflow: "visible" }}>
     //                     <div style={contentStyle}>
@@ -1598,7 +1616,7 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
     //                                     paginationPageSizeSelector={[20, 40, 60, 80, 100]}
     //                                     suppressAggFuncInHeader={true}
     //                                     getMainMenuItems={getMainMenuItems}
-    
+
     //                                     // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
     //                                     // onCellKeyDown={onCellKeyDown}
     //                                     // domLayout="normal"
@@ -1622,7 +1640,7 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
     //                                     suppressCellSelection={true}
     //                                     getRowStyle={(params) => {
     //                                         if (params.node.rowPinned) {
-                                                
+
     //                                             return {
     //                                                 fontWeight: "bold",
     //                                                 backgroundColor: theme === "dark" ? "#1a1918" : "#fff", // Dark mode or light mode
@@ -1635,12 +1653,12 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
     //                                         const isSelected = selectedCells.some(
     //                                             (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
     //                                         );
-                                    
+
     //                                         // ✅ Ensure first cell inside a group is highlighted
     //                                         const isFirstSelected = firstSelectedCell &&
     //                                             firstSelectedCell.rowIndex === params.node.rowIndex &&
     //                                             firstSelectedCell.colId === params.column.getId();
-                                    
+
     //                                         return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
     //                                     }}
     //                                     onFilterChanged={(params) => {
@@ -1656,7 +1674,7 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
     //                                         api.forEachNodeAfterFilterAndSort((node) => {
     //                                             if (node.data && node.data.campaignname) {
     //                                                 const normalizedCampaign = node.data.campaignname.trim().toLowerCase();
-                                        
+
     //                                                 // Apply search and filter conditions
     //                                                 if (
     //                                                     normalizedCampaign.startsWith(normalizedInput) ||
@@ -1722,104 +1740,107 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
     // );
 
     return (
-            <div>
-                    <div className={`top-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`} style={{marginBottom:'0px'}}>
-                        {renderCarouselNav()}
-                    </div>
-                    <Tabs activeKey={activeTab} onChange={handleTabChange} renderTabBar={() => <></>}>
-                        <Tabs.TabPane key="1">
-                            <CampaignLevelReports
-                                startDate={startDate} 
-                                endDate={endDate} 
-                                newaccount={newaccount} 
-                                newtime={newtime} 
-                                newRevenuePratner={newRevenuePratner} 
-                                inputValue={inputValue} 
-                                newAccountName={newAccountName} 
-                                columnDefs={columnDefs} 
-                                campaignComments={campaignComments} 
-                                Camapignlevelstatus={Camapignlevelstatus} 
-                                changeRRefrst={changeRRefrst} 
-                                debouncedHandleColumnMove={debouncedHandleColumnMove} 
-                                userdetails={userdetails} 
-                                refreshComments={refreshComments}
-                                refreshpage={`${refreshpage}${activeTab}`}
-                                getMainMenuItems={getMainMenuItems}
-                                toggleStatus={toggleStatus}
-                                handleChangeToggle={handleChangeToggle}
-                                theme={theme}
-                                tabStatus={"Live"}
-                                showCampaignLevel={showCampaignLevel}
-                                removeSelectedCampaigns={removeSelectedCampaigns}
-                                moveToNextTab={moveToNextTab}
-                                // refreshTab = {refreshTab}
-                                functionCallForCommnets={functionCallForCommnets}
-                                functionCallForCampaigns={functionCallForCampaigns}
-                                context={context}
-                            />
-                        </Tabs.TabPane>
-                        <Tabs.TabPane key="2">
-                            <AdsetLevelReports
-                                startDate={startDate} 
-                                endDate={endDate} 
-                                newaccount={newaccount} 
-                                newtime={newtime} 
-                                newRevenuePratner={newRevenuePratner} 
-                                inputValue={inputValue} 
-                                newAccountName={newAccountName} 
-                                columnDefs={columnDefs1} 
-                                campaignComments={campaignComments} 
-                                Camapignlevelstatus={Camapignlevelstatus} 
-                                changeRRefrst={changeRRefrst} 
-                                debouncedHandleColumnMove={debouncedHandleColumnMove} 
-                                userdetails={userdetails} 
-                                refreshComments={refreshComments}
-                                refreshpage={`${refreshpage}${activeTab}`}
-                                getMainMenuItems={getMainMenuItems}
-                                toggleStatus={toggleStatus}
-                                handleChangeToggle={handleChangeToggle}
-                                theme={theme}
-                                tabStatus={"Live"}
-                                showAdsetLevel={showAdsetLevel}
-                                removeSelectedAdsets={removeSelectedAdsets}
-                                selectedCampaigns={selectedCampaigns}
-                                selectedAdsets={selectedAdsets}
-                                moveToNextTab={moveToNextTab}
-                                functionCallForCommnets={functionCallForCommnets}
-                                functionCallForCampaigns={functionCallForCampaigns}
-                                context={context}
-                            />
-                        </Tabs.TabPane>
-                        <Tabs.TabPane key="3">
-                            <AdLevelReports
-                                startDate={startDate} 
-                                endDate={endDate} 
-                                newaccount={newaccount} 
-                                newtime={newtime} 
-                                newRevenuePratner={newRevenuePratner} 
-                                inputValue={inputValue} 
-                                newAccountName={newAccountName} 
-                                columnDefs={columnDefs2} 
-                                campaignComments={campaignComments} 
-                                Camapignlevelstatus={Camapignlevelstatus} 
-                                changeRRefrst={changeRRefrst} 
-                                debouncedHandleColumnMove={debouncedHandleColumnMove} 
-                                userdetails={userdetails} 
-                                refreshComments={refreshComments}
-                                refreshpage={`${refreshpage}${activeTab}`}
-                                getMainMenuItems={getMainMenuItems}
-                                toggleStatus={toggleStatus}
-                                handleChangeToggle={handleChangeToggle}
-                                theme={theme}
-                                tabStatus={"Live"}
-                                selectedCampaigns={selectedCampaigns}
-                                selectedAdsets={selectedAdsets}
-                                functionCallForCommnets={functionCallForCommnets}
-                                functionCallForCampaigns={functionCallForCampaigns}
-                            />
-                        </Tabs.TabPane>
-                    </Tabs>
-                </div>
+        <div>
+            <div className={`top-tabs ${theme === 'dark' ? 'dark-mode-tabs' : 'light-mode-tabs'}`} style={{ marginBottom: '0px' }}>
+                {renderCarouselNav()}
+            </div>
+            <Tabs activeKey={activeTab} onChange={handleTabChange} renderTabBar={() => <></>}>
+                <Tabs.TabPane key="1">
+                    <CampaignLevelReports
+                        campaignStatusFilter={campaignStatusFilter}
+                        startDate={startDate}
+                        endDate={endDate}
+                        newaccount={newaccount}
+                        newtime={newtime}
+                        newRevenuePratner={newRevenuePratner}
+                        inputValue={inputValue}
+                        newAccountName={newAccountName}
+                        columnDefs={columnDefs}
+                        campaignComments={campaignComments}
+                        Camapignlevelstatus={Camapignlevelstatus}
+                        changeRRefrst={changeRRefrst}
+                        debouncedHandleColumnMove={debouncedHandleColumnMove}
+                        userdetails={userdetails}
+                        refreshComments={refreshComments}
+                        refreshpage={`${refreshpage}${activeTab}`}
+                        getMainMenuItems={getMainMenuItems}
+                        toggleStatus={toggleStatus}
+                        handleChangeToggle={handleChangeToggle}
+                        theme={theme}
+                        tabStatus={"Live"}
+                        showCampaignLevel={showCampaignLevel}
+                        removeSelectedCampaigns={removeSelectedCampaigns}
+                        moveToNextTab={moveToNextTab}
+                        // refreshTab = {refreshTab}
+                        functionCallForCommnets={functionCallForCommnets}
+                        functionCallForCampaigns={functionCallForCampaigns}
+                        context={context}
+                    />
+                </Tabs.TabPane>
+                <Tabs.TabPane key="2">
+                    <AdsetLevelReports
+                        campaignStatusFilter={campaignStatusFilter}
+                        startDate={startDate}
+                        endDate={endDate}
+                        newaccount={newaccount}
+                        newtime={newtime}
+                        newRevenuePratner={newRevenuePratner}
+                        inputValue={inputValue}
+                        newAccountName={newAccountName}
+                        columnDefs={columnDefs1}
+                        campaignComments={campaignComments}
+                        Camapignlevelstatus={Camapignlevelstatus}
+                        changeRRefrst={changeRRefrst}
+                        debouncedHandleColumnMove={debouncedHandleColumnMove}
+                        userdetails={userdetails}
+                        refreshComments={refreshComments}
+                        refreshpage={`${refreshpage}${activeTab}`}
+                        getMainMenuItems={getMainMenuItems}
+                        toggleStatus={toggleStatus}
+                        handleChangeToggle={handleChangeToggle}
+                        theme={theme}
+                        tabStatus={"Live"}
+                        showAdsetLevel={showAdsetLevel}
+                        removeSelectedAdsets={removeSelectedAdsets}
+                        selectedCampaigns={selectedCampaigns}
+                        selectedAdsets={selectedAdsets}
+                        moveToNextTab={moveToNextTab}
+                        functionCallForCommnets={functionCallForCommnets}
+                        functionCallForCampaigns={functionCallForCampaigns}
+                        context={context}
+                    />
+                </Tabs.TabPane>
+                <Tabs.TabPane key="3">
+                    <AdLevelReports
+                        campaignStatusFilter={campaignStatusFilter}
+                        startDate={startDate}
+                        endDate={endDate}
+                        newaccount={newaccount}
+                        newtime={newtime}
+                        newRevenuePratner={newRevenuePratner}
+                        inputValue={inputValue}
+                        newAccountName={newAccountName}
+                        columnDefs={columnDefs2}
+                        campaignComments={campaignComments}
+                        Camapignlevelstatus={Camapignlevelstatus}
+                        changeRRefrst={changeRRefrst}
+                        debouncedHandleColumnMove={debouncedHandleColumnMove}
+                        userdetails={userdetails}
+                        refreshComments={refreshComments}
+                        refreshpage={`${refreshpage}${activeTab}`}
+                        getMainMenuItems={getMainMenuItems}
+                        toggleStatus={toggleStatus}
+                        handleChangeToggle={handleChangeToggle}
+                        theme={theme}
+                        tabStatus={"Live"}
+                        selectedCampaigns={selectedCampaigns}
+                        selectedAdsets={selectedAdsets}
+                        functionCallForCommnets={functionCallForCommnets}
+                        functionCallForCampaigns={functionCallForCampaigns}
+                    />
+                </Tabs.TabPane>
+            </Tabs>
+        </div>
         // <div>
         //     {newRevenuePratner === "FB_Mnet" ? (
         //         <div>
@@ -2037,7 +2058,7 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
         //                             suppressCellSelection={true}
         //                             getRowStyle={(params) => {
         //                                 if (params.node.rowPinned) {
-                                            
+
         //                                     return {
         //                                         fontWeight: "bold",
         //                                         backgroundColor: theme === "dark" ? "#1a1918" : "#fff", // Dark mode or light mode
@@ -2050,12 +2071,12 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
         //                                 const isSelected = selectedCells.some(
         //                                     (cell) => cell.rowIndex === params.node.rowIndex && cell.columns.includes(params.column.getId())
         //                                 );
-                                
+
         //                                 // ✅ Ensure first cell inside a group is highlighted
         //                                 const isFirstSelected = firstSelectedCell &&
         //                                     firstSelectedCell.rowIndex === params.node.rowIndex &&
         //                                     firstSelectedCell.colId === params.column.getId();
-                                
+
         //                                 return isSelected || isFirstSelected ? { backgroundColor: "#007bff", color: "#fff" } : {};
         //                             }}
         //                             onFilterChanged={(params) => {
@@ -2071,7 +2092,7 @@ const LiveReports = ({handleChangeInput, handleBlur, onClickRefresh, functionCal
         //                                 api.forEachNodeAfterFilterAndSort((node) => {
         //                                     if (node.data && node.data.campaignname) {
         //                                         const normalizedCampaign = node.data.campaignname.trim().toLowerCase();
-                                    
+
         //                                         // Apply search and filter conditions
         //                                         if (
         //                                             normalizedCampaign.startsWith(normalizedInput) ||
